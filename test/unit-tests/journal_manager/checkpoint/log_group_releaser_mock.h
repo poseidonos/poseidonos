@@ -15,7 +15,7 @@ public:
     MOCK_METHOD(void, Init, (JournalConfiguration* config, LogBufferWriteDoneNotifier* notified, IJournalLogBuffer* logBuffer, CheckpointManager* cpManager, IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler), (override));
     MOCK_METHOD(void, AddToFullLogGroup, (int groupId, uint32_t sequenceNumber), (override));
     MOCK_METHOD(int, GetFlushingLogGroupId, (), (override));
-    MOCK_METHOD((std::list<LogGroupInfo>), GetFullLogGroups, (), (override));
+    MOCK_METHOD((std::list<int>), GetFullLogGroups, (), (override));
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));
     MOCK_METHOD(void, LogGroupResetCompleted, (int logGroupId), (override));
     MOCK_METHOD(void, _FlushNextLogGroup, (), (override));

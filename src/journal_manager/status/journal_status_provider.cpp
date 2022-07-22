@@ -138,7 +138,7 @@ JournalStatusProvider::_CreateCheckpointStatusElement(void)
     for (auto it: checkpointStatus->GetFullLogGroups())
     {
         JsonElement logInfo("");
-        logInfo.SetAttribute(JsonAttribute("ID", std::to_string(it.logGroupId)));
+        logInfo.SetAttribute(JsonAttribute("ID", std::to_string(it)));
         fullGroupElement.AddElement(logInfo);
     }
     checkpointElement.SetArray(fullGroupElement);

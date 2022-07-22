@@ -52,7 +52,7 @@ LogGroupReleaser::LogGroupReleaser(void)
   releaseNotifier(nullptr),
   logBuffer(nullptr),
   flushingLogGroupId(-1),
-  flushingSequenceNumber(-1),
+  flushingSequenceNumber(0),
   checkpointTriggerInProgress(false),
   checkpointManager(nullptr),
   contextManager(nullptr),
@@ -213,10 +213,15 @@ LogGroupReleaser::GetFlushingLogGroupId(void)
     return flushingLogGroupId;
 }
 
-std::list<LogGroupInfo>
+std::list<int>
 LogGroupReleaser::GetFullLogGroups(void)
 {
-    return fullLogGroup;
+    std::list<int> result;
+    for (auto it: fullLogGroup)
+    {
+        result.push_back(it.logGroupId);
+    }
+    return result;
 }
 
 CheckpointStatus

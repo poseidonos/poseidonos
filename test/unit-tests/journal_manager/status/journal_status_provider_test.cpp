@@ -38,9 +38,9 @@ TEST(JournalStatusProvider, GetJournalStatus_testIfGetConfigElementSuccess)
     int logBufferSize = 1024;
     int sequenceNumber = 0;
     int flushingLogGroupId = -1;
-    std::list<LogGroupInfo> fullLogGroups;
-    fullLogGroups.push_back({0, 0});
-    fullLogGroups.push_back({1, 1});
+    std::list<int> fullLogGroups;
+    fullLogGroups.push_back(0);
+    fullLogGroups.push_back(1);
 
     ON_CALL(config, GetLogBufferSize).WillByDefault(Return(logBufferSize));
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroup));

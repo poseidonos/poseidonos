@@ -83,7 +83,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
     bool validMarkFound = false;
     uint64_t searchOffset = 0;
     uint64_t foundOffset = 0;
-    uint64_t lastSeqNum = UINT64_MAX;
+    std::list<uint32_t> foundedSeqNum;
 
     while ((validMarkFound = finder.GetNextValidMarkOffset(searchOffset, foundOffset)) == true)
     {
@@ -103,13 +103,30 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             logs.AddLog(log);
             _LogFound(log->GetType());
 
-            lastSeqNum = log->GetSeqNum();
+            auto it = std::find(foundedSeqNum.begin(), foundedSeqNum.end(), log->GetSeqNum());
+            if (it == foundedSeqNum.end()) {
+                foundedSeqNum.push_front(log->GetSeqNum());
+            }
             searchOffset = foundOffset + log->GetSize();
         }
         else if (validMark == LOG_GROUP_FOOTER_VALID_MARK)
         {
             LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
-            logs.SetLogGroupFooter(lastSeqNum, footer);
+            if (footer.isReseted)
+            {
+                foundedSeqNum.remove(footer.resetedSequenceNumber);
+                logs.EraseReplayLogGroup(footer.resetedSequenceNumber);
+            }
+            else
+            {
+                if(foundedSeqNum.size() != 1)
+                {
+                    int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                    POS_TRACE_ERROR(event, "Several sequence numbers are found in single log group");
+                    return event * -1;
+                }
+                logs.SetLogGroupFooter(foundedSeqNum.front(), footer);
+            }
 
             searchOffset = foundOffset + sizeof(LogGroupFooter);
         }
