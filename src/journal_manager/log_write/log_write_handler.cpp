@@ -41,6 +41,7 @@
 #include "src/journal_manager/replay/replay_stripe.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/metadata/block_map_update.h"
 
 namespace pos
 {
@@ -109,6 +110,13 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 
         context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
         context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
+
+        EventSmartPtr metaUpdateEvent = context->GetClientCallback();
+        MetaUpdateCallback* metaUpdateCb = dynamic_cast<MetaUpdateCallback*>(metaUpdateEvent.get());
+        if (nullptr != metaUpdateCb)
+        {
+            metaUpdateCb->UpdateLogGroupId(groupId);
+        }
 
         context->stopwatch.StoreTimestamp(LogStage::Issue);
         result = logBuffer->WriteLog(context);

@@ -139,7 +139,8 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
     ContextReplayer ctxReplayer(allocCtx, segCtx, &addrInfo);
 
     // given
-    EXPECT_CALL(*segCtx, UpdateOccupiedStripeCount(10));
+    int targetLogGroupId = 0;
+    EXPECT_CALL(*segCtx, UpdateOccupiedStripeCount(10, targetLogGroupId));
     // when
     ctxReplayer.ReplayStripeFlushed(10);
 

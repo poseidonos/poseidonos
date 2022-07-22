@@ -45,9 +45,9 @@ public:
     SegmentContextUpdater(ISegmentCtx* context_, IVersionedSegmentContext* versionedContext_, const PartitionLogicalSize* addrInfo_);
     virtual ~SegmentContextUpdater(void) = default;
 
-    virtual void ValidateBlks(VirtualBlks blks) override;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
+    virtual void ValidateBlks(VirtualBlks blks, int groupId) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced, int groupId) override;
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid, int groupId) override;
 
 private:
     const PartitionLogicalSize* addrInfo;

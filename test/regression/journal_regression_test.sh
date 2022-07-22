@@ -11,7 +11,7 @@ logfile="${output_dir}/regression_test.log"
 journal_manager_root=${ibof_root}/src/journal_manager
 spor_test_root=${ibof_root}/test/system/spor
 #---------------------------------------------------
-target_fabric_ip="10.100.11.23"
+target_fabric_ip="10.1.11.41"
 trtype=tcp
 port="1158"
 #---------------------------------------------------

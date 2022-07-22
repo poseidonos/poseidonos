@@ -74,11 +74,12 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should be invalidated
+    int targetLogGroupId = 0;
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).WillOnce(ReturnRef(oldVsas));
-    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas, false));
+    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas, false, targetLogGroupId));
 
     // Then 4. New map should be validated
-    EXPECT_CALL(segmentCtx, ValidateBlks(newVsas));
+    EXPECT_CALL(segmentCtx, ValidateBlks(newVsas, targetLogGroupId));
 
     BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
         &wbStripeAllocator, vsaRangeMaker);
@@ -125,12 +126,12 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should not be invalidated
-
+    int targetLogGroupId = 0;
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).Times(0);
     EXPECT_CALL(segmentCtx, InvalidateBlks).Times(0);
 
     // Then 4. New map should be validated
-    EXPECT_CALL(segmentCtx, ValidateBlks(newVsas));
+    EXPECT_CALL(segmentCtx, ValidateBlks(newVsas, targetLogGroupId));
 
     BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
         &wbStripeAllocator, vsaRangeMaker);
@@ -190,12 +191,13 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should not be invalidated
+    int targetLogGroupId = 0;
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).Times(numOldVsaRange).WillOnce(ReturnRef(oldVsas[0])).WillOnce(ReturnRef(oldVsas[1]));
-    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[0], false)).Times(1);
-    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[1], false)).Times(1);
+    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[0], false, targetLogGroupId)).Times(1);
+    EXPECT_CALL(segmentCtx, InvalidateBlks(oldVsas[1], false, targetLogGroupId)).Times(1);
 
     // Then 4. New map should be validated
-    EXPECT_CALL(segmentCtx, ValidateBlks(newVsas));
+    EXPECT_CALL(segmentCtx, ValidateBlks(newVsas, targetLogGroupId));
 
     BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
         &wbStripeAllocator, vsaRangeMaker);

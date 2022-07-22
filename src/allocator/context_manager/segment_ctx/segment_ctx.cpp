@@ -202,7 +202,7 @@ SegmentCtx::MoveToFreeState(SegmentId segId)
 }
 
 void
-SegmentCtx::ValidateBlks(VirtualBlks blks)
+SegmentCtx::ValidateBlks(VirtualBlks blks, int groupId)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
     _IncreaseValidBlockCount(segId, blks.numBlks);
@@ -221,7 +221,7 @@ SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 }
 
 bool
-SegmentCtx::InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
+SegmentCtx::InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease, int groupId)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
     return _DecreaseValidBlockCount(segId, blks.numBlks, allowVictimSegRelease);
@@ -254,7 +254,7 @@ SegmentCtx::GetValidBlockCount(SegmentId segId)
 }
 
 bool
-SegmentCtx::UpdateOccupiedStripeCount(StripeId lsid)
+SegmentCtx::UpdateOccupiedStripeCount(StripeId lsid, int groupId)
 {
     SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
     return _IncreaseOccupiedStripeCount(segId);

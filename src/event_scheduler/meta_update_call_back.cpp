@@ -30,18 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "callback.h"
 
-#include "src/include/address_type.h"
+#include "Air.h"
+#include "callback.h"
+#include "meta_update_call_back.h"
 
 namespace pos
 {
-class ISegmentCtx
-{
-public:
-    virtual void ValidateBlks(VirtualBlks blks, int groupId = UINT32_MAX) = 0;
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced, int groupId = UINT32_MAX) = 0;
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid, int groupId = UINT32_MAX) = 0;
-};
 
+MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, CallbackType type, uint32_t weight,
+    SystemTimeoutChecker* timeoutCheckerArg, EventScheduler* eventSchedulerArg)
+: Callback(isFrontEnd, type, weight, timeoutCheckerArg, eventSchedulerArg),
+  logGroupId(UINT32_MAX)
+{
+}
+
+// LCOV_EXCL_START
+MetaUpdateCallback::~MetaUpdateCallback(void)
+{
+}
+// LCOV_EXCL_STOP
+
+void
+MetaUpdateCallback::UpdateLogGroupId(int groupId)
+{
+    logGroupId = groupId;
+}
 } // namespace pos
