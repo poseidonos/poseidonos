@@ -59,6 +59,7 @@ protected:
     const int NUM_LOG_GROUPS = 2;
     const uint64_t LOG_BUFFER_SIZE = 128 * 1024;
     const uint64_t LOG_GROUP_SIZE = LOG_BUFFER_SIZE / NUM_LOG_GROUPS;
+    const std::string rocksdbPath = "/etc/pos/POSRaid";
 
     const int TEST_VOLUME_ID = 1;
 
