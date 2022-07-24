@@ -134,7 +134,8 @@ StripeBasedRaceRebuild::Read(void)
         }
         else
         {
-             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Busy lock successfully reset, rebuild_result:{}", ctx->GetResult());
+            resetLockRetryCnt = 0;
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Busy lock successfully reset, rebuild_result:{}", ctx->GetResult());
         }
         if (ctx->GetResult() == RebuildState::CANCELLED)
         {
