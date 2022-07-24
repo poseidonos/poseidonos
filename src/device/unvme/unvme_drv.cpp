@@ -247,6 +247,12 @@ UnvmeDrv::GetDaemon(void)
     return nvmeSsd;
 }
 
+void
+UnvmeDrv::SpdkDetach(struct spdk_nvme_ns* ns)
+{
+    nvmeSsd->SpdkDetach(ns);
+}
+
 int
 UnvmeDrv::DeviceDetached(std::string sn)
 {

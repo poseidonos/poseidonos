@@ -403,16 +403,12 @@ Nvme::_RemoveCallback(void* cbCtx, struct spdk_nvme_ctrlr* ctrlr)
         cdata = spdk_nvme_ctrlr_get_data(ctrlr);
         char sn[128];
         snprintf(sn, sizeof(cdata->sn) + 1, "%s", cdata->sn);
-        struct spdk_nvme_ns* ns = spdk_nvme_ctrlr_get_ns(ctrlr, 1);
-
         paused = true;
         auto f = async(launch::async, detachCb, string(sn));
         while (paused)
         {
             usleep(1);
         }
-
-        SpdkDetach(ns);
     }
     else
     {

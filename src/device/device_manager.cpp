@@ -290,6 +290,8 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
     devices.erase(iter);
     if (type == DeviceType::SSD && ssd != nullptr)
     {
+        POS_TRACE_WARN(EID(DEVICEMGR_REMOVE_DEV), "SSD {}({}) is hot-removed", dev->GetName(), dev->GetSN());
+        ssd->SetHotDetached();
         UnvmeDrvSingleton::Instance()->GetDaemon()->Resume();
     }
 

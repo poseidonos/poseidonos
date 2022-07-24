@@ -57,7 +57,7 @@ private:
 
     StripeId baseStripe = 0;
     IIOLocker* locker = nullptr;
-    static const int TRY_LOCK_MAX_RETRY = 10000;
+    static const int TRY_LOCK_MAX_RETRY = 50000;
     int tryLockRetryCnt = 0;
     int resetLockRetryCnt = 0;
 };
