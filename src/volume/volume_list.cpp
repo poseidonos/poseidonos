@@ -41,10 +41,6 @@
 namespace pos
 {
 
-    
-const std::string pendingIoMetricList[VolumeIoType::MaxVolumeIoTypeCnt] = {"UserWritePendingCnt",
-                            "UserReadPendingCnt", "InternalIoPendingCnt"};
-
 VolumeList::VolumeList()
 {
     volCnt = 0;
