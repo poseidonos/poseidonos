@@ -67,6 +67,7 @@
 #include "src/volume/volume_service.h"
 #include "src/resource_manager/memory_manager.h"
 #include "src/resource_checker/resource_checker.h"
+#include "src/event_scheduler/io_timeout_checker.h"
 
 namespace pos
 {
@@ -106,7 +107,8 @@ DebugInfo::DebugInfo(void)
   telemetryConfig(nullptr),
   memoryManager(nullptr),
   posReplicatorManager(nullptr),
-  resourceChecker(nullptr)
+  resourceChecker(nullptr),
+  ioTimeoutChecker(nullptr)
 {
 }
 
@@ -150,6 +152,7 @@ DebugInfo::Update(void)
     signalHandler = SignalHandlerSingleton::Instance();
     posReplicatorManager = PosReplicatorManagerSingleton::Instance();
     resourceChecker = ResourceCheckerSingleton::Instance();
+    ioTimeoutChecker = IoTimeoutCheckerSingleton::Instance();
 }
 // LCOV_EXCL_STOP
 } // namespace pos

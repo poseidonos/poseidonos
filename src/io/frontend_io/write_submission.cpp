@@ -126,7 +126,6 @@ WriteSubmission::Execute(void)
             return false;
         }
         bool done = _ProcessOwnedWrite();
-
         if (unlikely(!done))
         {
             rbaStateManager->BulkReleaseOwnership(volumeId, startRba,

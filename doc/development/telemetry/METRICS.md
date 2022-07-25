@@ -142,6 +142,7 @@
   - [_**count_of_user_read_pending_cnt**_](#count_of_user_read_pending_cnt)
   - [_**count_of_user_write_pending_cnt**_](#count_of_user_write_pending_cnt)
   - [_**count_of_internal_io_pending_cnt**_](#count_of_internal_io_pending_cnt)
+  - [_**count_of_timeout_io_cnt**_](#count_of_timeout_io_cnt)
   
 ---
 ## **Common**
@@ -2140,6 +2141,22 @@ The accumulated completion count of io worker
 ### _**count_of_internal_io_pending_cnt**_
 
 **ID**: 140011
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_timeout_io_cnt**_
+
+**ID**: 140012
 
 **Type**: Count
 
