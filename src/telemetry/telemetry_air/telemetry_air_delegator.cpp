@@ -331,7 +331,8 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                                           "RequestedUserAdminIo", "CompleteUserRead",
                                           "CompleteUserWrite", "CompleteUserAdminIo",
                                           "UserFlushProcess", "PartialWriteProcess",
-                                          "UserFailIo"};
+                                          "UserFailIo", "UserReadPendingCnt",
+                                          "UserWritePendingCnt", "InternalIoPendingCnt"};
                 std::string telemetryStrings[] = {TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS, TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS,
                                                   TEL130003_COUNT_OF_UBIO_CONSTRUCTORS, TEL130004_COUNT_OF_UBIO_DESTRUCTORS,
                                                   TEL130005_SUBMISSION_COUNT_OF_SSD_IOS, TEL130006_COMPLETION_COUNT_OF_SSD_IOS,
@@ -344,7 +345,8 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                                                   TEL140003_COUNT_OF_REQUSTED_USER_ADMINIO, TEL140004_COUNT_OF_COMPLETE_USER_READ,
                                                   TEL140005_COUNT_OF_COMPLETE_USER_WRITE, TEL140006_COUNT_OF_COMPLETE_USER_ADMINIO,
                                                   TEL140007_COUNT_OF_USER_FLUSH_PROCESS, TEL140008_COUNT_OF_PARTIAL_WRITE_PROCESS,
-                                                  TEL140009_COUNT_OF_USER_FAIL_IO};
+                                                  TEL140009_COUNT_OF_USER_FAIL_IO, TEL140010_COUNT_OF_USER_READ_PENDING_CNT,
+                                                  TEL140011_COUNT_OF_USER_WRITE_PENDING_CNT, TEL140012_COUNT_OF_INTERNAL_IO_PENDING_CNT};
                 int telemetryIndex = 0;
                 for (auto& elemString : ioRawCountNodeStrings)
                 {
@@ -673,7 +675,11 @@ TelemetryAirDelegator::RegisterAirEvent(void)
             "PERF_SSD_Write", "UTIL_REACTOR", "CNT_PendingIO", "VolumeIo_Constructor", "VolumeIo_Destructor",
             "Ubio_Constructor", "Ubio_Destructor", "SSD_Submit", "SSD_Complete", "EventQueue_Push",
             "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop", "Callback_Constructor", "Callback_Destructor",
-            "Event_Constructor", "Event_Destructor", "IOWorker_Submit", "IOWorker_Complete"},
+            "Event_Constructor", "Event_Destructor", "IOWorker_Submit", "IOWorker_Complete",
+            "RequestedUserRead", "RequestedUserWrite", "RequestedUserAdminIo",
+            "CompleteUserRead", "CompleteUserWrite", "CompleteUserAdminIo",
+            "UserFlushProcess", "PartialWriteProcess", "UserFailIo",
+            "UserWritePendingCnt", "UserReadPendingCnt", "InternalIoPendingCnt"},
         std::move(dataHandler));
 }
 

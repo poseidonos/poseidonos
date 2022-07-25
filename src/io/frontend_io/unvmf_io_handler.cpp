@@ -131,6 +131,9 @@ UNVMfSubmitHandler(struct pos_io* io)
             return POS_IO_STATUS_SUCCESS;
         }
 
+        airlog("UserWritePendingCnt", "AIR_UserIo", io->volume_id, 1);
+        airlog("UserReadPendingCnt", "AIR_UserIo", io->volume_id, 1);
+
         if (true == qosManager->IsFeQosEnabled())
         {
             AioSubmissionAdapter aioSubmission;

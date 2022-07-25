@@ -211,5 +211,8 @@ static const std::string TEL140006_COUNT_OF_COMPLETE_USER_ADMINIO = "count_of_co
 static const std::string TEL140007_COUNT_OF_USER_FLUSH_PROCESS = "count_of_user_flush_process";
 static const std::string TEL140008_COUNT_OF_PARTIAL_WRITE_PROCESS = "count_of_partial_write_process";
 static const std::string TEL140009_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_io";
+static const std::string TEL140010_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
+static const std::string TEL140011_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
+static const std::string TEL140012_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
 
 } // namespace pos

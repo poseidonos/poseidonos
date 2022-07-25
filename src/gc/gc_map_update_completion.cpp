@@ -110,6 +110,7 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
     rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
 
     volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo);
+    airlog("InternalIoPendingCnt", "AIR_UserIo", volId, -1);
 
     gcStripeManager->SetFinished();
 
