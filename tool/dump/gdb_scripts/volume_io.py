@@ -54,10 +54,12 @@ def pending_volume_io():
         print("     Array Name : %s     " % array_name[index])
         print("===================================")
         for vol in range(0, 256):
-            pending_unmounted_io = \
+            pending_read = \
                 gdb.parse_and_eval("((ArrayComponents *)%s)->volMgr->volumes->pendingIOCount[%d][0]._M_i" % (array_component, vol))
-            pending_mounted_io = \
+            pending_write = \
                 gdb.parse_and_eval("((ArrayComponents *)%s)->volMgr->volumes->pendingIOCount[%d][1]._M_i" % (array_component, vol))
+            pending_internal_io = \
+                gdb.parse_and_eval("((ArrayComponents *)%s)->volMgr->volumes->pendingIOCount[%d][2]._M_i" % (array_component, vol))
 
-            print("volume %d pendingGc : %s pendingHostIo : %s" % (vol, pending_unmounted_io, pending_mounted_io))
+            print("volume %d read : %s write : %s internal : %s" % (vol, pending_read, pending_write, pending_internal_io))
         index = index + 1
