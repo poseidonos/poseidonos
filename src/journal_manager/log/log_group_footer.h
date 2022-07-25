@@ -46,7 +46,7 @@ struct LogGroupFooter
     uint32_t resetedSequenceNumber;
 
     inline bool
-    operator==(LogGroupFooter input) const
+    operator==(const LogGroupFooter& input) const
     {
         return (input.MARK == MARK && input.lastCheckpointedSeginfoVersion == lastCheckpointedSeginfoVersion && input.isReseted == isReseted && input.resetedSequenceNumber == resetedSequenceNumber);
     }

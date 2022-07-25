@@ -32,6 +32,8 @@
 
 #include "log_buffer_parser.h"
 
+#include <unordered_set>
+
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
@@ -83,7 +85,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
     bool validMarkFound = false;
     uint64_t searchOffset = 0;
     uint64_t foundOffset = 0;
-    std::list<uint32_t> foundedSeqNum;
+    std::unordered_set<uint32_t> seqNumSeen;
 
     while ((validMarkFound = finder.GetNextValidMarkOffset(searchOffset, foundOffset)) == true)
     {
@@ -103,10 +105,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             logs.AddLog(log);
             _LogFound(log->GetType());
 
-            auto it = std::find(foundedSeqNum.begin(), foundedSeqNum.end(), log->GetSeqNum());
-            if (it == foundedSeqNum.end()) {
-                foundedSeqNum.push_front(log->GetSeqNum());
-            }
+            seqNumSeen.insert(log->GetSeqNum());
             searchOffset = foundOffset + log->GetSize();
         }
         else if (validMark == LOG_GROUP_FOOTER_VALID_MARK)
@@ -114,20 +113,25 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
             if (footer.isReseted)
             {
-                foundedSeqNum.remove(footer.resetedSequenceNumber);
+                seqNumSeen.erase(footer.resetedSequenceNumber);
                 logs.EraseReplayLogGroup(footer.resetedSequenceNumber);
             }
             else
             {
-                if(foundedSeqNum.size() != 1)
-                {
-                    int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
-                    POS_TRACE_ERROR(event, "Several sequence numbers are found in single log group");
-                    return event * -1;
-                }
-                logs.SetLogGroupFooter(foundedSeqNum.front(), footer);
+                logs.SetLogGroupFooter(*seqNumSeen.begin(), footer);
             }
 
+            if (seqNumSeen.size() != 1)
+            {
+                int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                std::string seqNumList = "";
+                for (uint32_t seqNum : seqNumSeen)
+                {
+                    seqNumList += (std::to_string(seqNum) + ", ");
+                }
+                POS_TRACE_ERROR(event, "Several sequence numbers are found in single log group, seqNumSeen List: {}", seqNumList);
+                return event * -1;
+            }
             searchOffset = foundOffset + sizeof(LogGroupFooter);
         }
     }

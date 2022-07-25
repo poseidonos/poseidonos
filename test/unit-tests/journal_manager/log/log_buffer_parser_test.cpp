@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "test/unit-tests/journal_manager/log/log_list_mock.h"
 
@@ -255,6 +256,57 @@ TEST(LogBufferParser, GetLogs_testIfLogsAndLogBufferFooterAreParsed)
     LogBufferParser parser;
     parser.GetLogs(logBuffer, logBufferSize, logList);
 
+    free(logBuffer);
+}
+
+TEST(LogBufferParser, GetLogs_testIfSeveralSequenceNumberSeen)
+{
+    // Given
+    uint64_t logBufferSize = sizeof(BlockWriteDoneLog) * 10 + sizeof(LogGroupFooter);
+    void* logBuffer = malloc(logBufferSize);
+
+    NiceMock<MockLogList> logList;
+
+    uint64_t currentOffset = 0;
+    for (int count = 0; count < 5; count++)
+    {
+        BlockWriteDoneLog log;
+        log.type = LogType::BLOCK_WRITE_DONE;
+        log.seqNum = count;
+        log.volId = 1;
+        log.startRba = currentOffset;
+        log.numBlks = 0;
+        log.startVsa = {
+            .stripeId = 0,
+            .offset = 0};
+        log.wbIndex = 0;
+        log.writeBufferStripeAddress = {
+            .stripeLoc = IN_WRITE_BUFFER_AREA,
+            .stripeId = 0};
+
+        char* targetBuffer = (char*)logBuffer + currentOffset;
+        memcpy(targetBuffer, &log, sizeof(log));
+
+        EXPECT_CALL(logList, AddLog(EqLog(targetBuffer)));
+
+        currentOffset += sizeof(BlockWriteDoneLog);
+    }
+
+    LogGroupFooter footer;
+    footer.lastCheckpointedSeginfoVersion = 13;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 0;
+
+    char* targetBuffer = (char*)logBuffer + currentOffset;
+    memcpy(targetBuffer, &footer, sizeof(LogGroupFooter));
+
+    // When
+    LogBufferParser parser;
+    int result = parser.GetLogs(logBuffer, logBufferSize, logList);
+
+    // Then: LogBufferParser will return the error code
+    int expect = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND) * -1;
+    EXPECT_EQ(result, expect);
     free(logBuffer);
 }
 } // namespace pos

@@ -85,17 +85,17 @@ LogGroupReleaser::Reset(void)
 }
 
 void
-LogGroupReleaser::AddToFullLogGroup(int groupId, uint32_t sequenceNumber)
+LogGroupReleaser::AddToFullLogGroup(struct LogGroupInfo logGroupInfo)
 {
-    _AddToFullLogGroupList(groupId, sequenceNumber);
+    _AddToFullLogGroupList(logGroupInfo);
     _FlushNextLogGroup();
 }
 
 void
-LogGroupReleaser::_AddToFullLogGroupList(int groupId, uint32_t sequenceNumber)
+LogGroupReleaser::_AddToFullLogGroupList(struct LogGroupInfo logGroupInfo)
 {
     std::unique_lock<std::mutex> lock(fullLogGroupLock);
-    fullLogGroup.push_back({groupId, sequenceNumber});
+    fullLogGroup.push_back(logGroupInfo);
 }
 
 void
@@ -186,7 +186,7 @@ LogGroupReleaser::_PopFullLogGroup(void)
 
     assert(fullLogGroup.size() != 0);
     int retLogGroup = fullLogGroup.front().logGroupId;
-    int retSequenceNumber = fullLogGroup.front().sequenceNumber;
+    uint32_t retSequenceNumber = fullLogGroup.front().sequenceNumber;
     fullLogGroup.pop_front();
 
     return {retLogGroup, retSequenceNumber};
