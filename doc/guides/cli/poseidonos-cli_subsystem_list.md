@@ -13,7 +13,7 @@ Syntax:
 Example 1 (listing all subsystems):
 	poseidonos-cli subsystem list
 
-Example 2 (listing a specific array):
+Example 2 (listing a specific subsystem):
 	poseidonos-cli subsystem list --subnqn nqn.2019-04.pos:subsystem
     
 
