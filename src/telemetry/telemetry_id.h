@@ -119,6 +119,9 @@ static const std::string TEL50002_READ_AVG_LAT_VOLUME = "read_avg_lat_volume";
 static const std::string TEL50010_WRITE_IOPS_VOLUME = "write_iops_volume";
 static const std::string TEL50011_WRITE_BPS_VOLUME = "write_bps_volume";
 static const std::string TEL50012_WRITE_AVG_LAT_VOLUME = "write_avg_lat_volume";
+static const std::string TEL50020_VOL_VOLUME_STATE = "volume_satate";
+static const std::string TEL50021_VOL_VOLUME_TOTAL_CAPACITY= "volume_total_capacity";
+static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capacity";
 
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
@@ -130,13 +133,6 @@ static const std::string TEL70010_WRITE_IOPS_NETWORK = "write_iops_network";
 static const std::string TEL70011_WRITE_BPS_NETWORK = "write_bps_network";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
-
-static const std::string TEL90000_VOL_CREATE_VOLUME_ID = "create_volume_id";
-static const std::string TEL90001_VOL_DELETE_VOLUME_ID = "delete_volume_id";
-static const std::string TEL90002_VOL_MOUNT_VOLUME_ID = "mount_volume_id";
-static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
-static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
-static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 
