@@ -79,7 +79,7 @@ VolumeDetacher::DoAll(void)
         {
             if (nvmfTarget->CheckVolumeAttached(vol->ID, arrayName) == true)
             {
-                volumeList.WaitUntilIdleInternalIo(vol->ID);
+                volumeList.WaitUntilIdleUserIo(vol->ID);
                 mountedVols.push_back(vol->ID);
             }
         }
