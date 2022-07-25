@@ -331,8 +331,8 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                                           "RequestedUserAdminIo", "CompleteUserRead",
                                           "CompleteUserWrite", "CompleteUserAdminIo",
                                           "UserFlushProcess", "PartialWriteProcess",
-                                          "UserFailIo", "UserWritePendingCnt",
-                                          "UserReadPendingCnt", "InternalIoPendingCnt"};
+                                          "UserFailIo", "UserReadPendingCnt",
+                                          "UserWritePendingCnt", "InternalIoPendingCnt"};
                 std::string telemetryStrings[] = {TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS, TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS,
                                                   TEL130003_COUNT_OF_UBIO_CONSTRUCTORS, TEL130004_COUNT_OF_UBIO_DESTRUCTORS,
                                                   TEL130005_SUBMISSION_COUNT_OF_SSD_IOS, TEL130006_COMPLETION_COUNT_OF_SSD_IOS,
