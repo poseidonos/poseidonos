@@ -74,6 +74,7 @@ class TelemetryConfig;
 class MemoryManager;
 class PosReplicatorManager;
 class ResourceChecker;
+class IoTimeoutChecker;
 
 extern DebugInfo* debugInfo;
 
@@ -120,6 +121,7 @@ private:
     MemoryManager* memoryManager;
     PosReplicatorManager* posReplicatorManager;
     ResourceChecker* resourceChecker;
+    IoTimeoutChecker* ioTimeoutChecker;
 };
 
 } // namespace pos

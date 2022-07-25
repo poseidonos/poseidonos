@@ -6044,6 +6044,20 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 5240
+    Name: PENDING_IO_TIMEOUT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 5241
+    Name: INVALID_RANGE_OF_PENDING_IO_CHECKING
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # IOPath Backend: 5300 - 5499
   -

@@ -37,6 +37,8 @@
 #include <memory>
 
 #include "event.h"
+#include "src/event_scheduler/callback_type.h"
+#include "src/event_scheduler/io_timeout_checker.h"
 #include "src/include/io_error_type.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/dump/dump_shared_ptr.h"
@@ -47,43 +49,6 @@ namespace pos
 {
 class SystemTimeoutChecker;
 class EventScheduler;
-enum CallbackType
-{
-    CallbackType_Unknown = 0,
-    CallbackType_AdminCommandCompleteHandler,
-    CallbackType_DiskSmartCompleteHandler,
-    CallbackType_SmartLogUpdateRequest,
-    CallbackType_UramRestoreCompletion,
-    CallbackType_CopierReadCompletion,
-    CallbackType_GcFlushCompletion,
-    CallbackType_ReverseMapLoadCompletion,
-    CallbackType_StripeCopySubmission,
-    CallbackType_FlushReadCompletion,
-    CallbackType_StripeMapUpdateRequest = 10,
-    CallbackType_RebuildReadCompleteHandler,
-    CallbackType_RebuildReadIntermediateCompleteHandler,
-    CallbackType_AioCompletion,
-    CallbackType_AdminCompletion,
-    CallbackType_BlockMapUpdateRequest,
-    CallbackType_ReadCompletionForPartialWrite,
-    CallbackType_ReadCompletion,
-    CallbackType_WriteCompletion,
-    CallbackType_ArrayUnlocking,
-    CallbackType_AbortCompletionHandler = 20,
-    CallbackType_InternalReadCompletion,
-    CallbackType_InternalWriteCompletion,
-    CallbackType_SyncIoCompletion,
-    CallbackType_MssIoCompletion,
-    CallbackType_NvramIoCompletion,
-    CallbackType_UpdateDataCompleteHandler,
-    CallbackType_UpdateDataHandler,
-    CallbackType_BlockMapUpdateRequestCompletion,
-    CallbackType_StripeMapUpdateCompletion,
-    CallbackType_FlushCompletion = 30,
-    CallbackType_WriteThroughStripeLoad,
-    CallbackType_PosReplicatorIOCompletion,
-    Total_CallbackType_Cnt
-};
 
 class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(DumpSharedPtrType::CALLBACK)>
 {
@@ -127,5 +92,8 @@ private:
     static const uint64_t DEFAULT_TIMEOUT_NS;
     static const uint64_t MAX_TIMEOUT_SEC;
     EventScheduler *eventScheduler;
+    IoTimeoutChecker *ioTimeoutChecker;
+    
+    uint64_t createdTime;
 };
 } // namespace pos

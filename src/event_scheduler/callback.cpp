@@ -90,6 +90,12 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
     {
         eventScheduler = EventSchedulerSingleton::Instance();
     }
+
+    ioTimeoutChecker = IoTimeoutCheckerSingleton::Instance();
+
+    createdTime = ioTimeoutChecker->GetCurrentRoughTime();
+    ioTimeoutChecker->IncreasePendingCnt(type, createdTime);
+    
 }
 
 // LCOV_EXCL_START
@@ -143,6 +149,8 @@ Callback::~Callback(void)
         delete timeoutChecker;
         timeoutChecker = nullptr;
     }
+
+    ioTimeoutChecker->DecreasePendingCnt(type, createdTime);
 }
 // LCOV_EXCL_STOP
 
