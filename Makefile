@@ -2,6 +2,7 @@ POS_ROOT_DIR := $(abspath $(CURDIR))
 SPDK_ROOT_DIR := $(abspath $(CURDIR)/lib/spdk)
 SPDLOG_SOURCE := spdlog-1.4.2
 SPDLOG_ROOT_DIR := $(abspath $(CURDIR)/lib/$(SPDLOG_SOURCE))
+OTEL_ROOT_DIR := $(abspath $(POS_ROOT_DIR)/lib/opentelemetry-cpp)
 
 TOP = $(POS_ROOT_DIR)
 PROTO_DIR = $(TOP)/proto
@@ -123,6 +124,9 @@ DEFINE += -DAIR_CFG=$(TOP)/config/air.cfg
 
 INCLUDE += -I$(SPDLOG_ROOT_DIR)/include -I$(SPDLOG_ROOT_DIR)/include/spdlog
 LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
+
+INCLUDE += -I$(OTEL_ROOT_DIR)/include
+LDFLAGS += -L$(OTEL_ROOT_DIR)/lib
 
 CXXFLAGS += $(INCLUDE)
 
