@@ -95,7 +95,7 @@ MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize, MetaFileType fil
     {
         if (file == nullptr)
         {
-            file = new MockFileIntf(fileName, addrInfo->GetArrayId());
+            file = new MockFileIntf(fileName, addrInfo->GetArrayId(), fileType);
         }
     }
 

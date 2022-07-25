@@ -46,8 +46,7 @@ class MetaFileIntf
 public:
     MetaFileIntf(void);
     explicit MetaFileIntf(const std::string fileName, const int arrayId,
-        const MetaFileType fileType = MetaFileType::General,
-        const MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        const MetaFileType fileType, const MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual ~MetaFileIntf(void);
 
     virtual int Create(uint64_t size) = 0;

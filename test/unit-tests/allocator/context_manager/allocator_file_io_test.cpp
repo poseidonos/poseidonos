@@ -23,7 +23,7 @@ TEST(AllocatorFileIo, AllocatorFileIo_testConstructor)
     }
 
     {
-        NiceMock<MockMetaFileIntf> file("aa", "bb");
+        NiceMock<MockMetaFileIntf> file("aa", "bb", MetaFileType::Map);
         AllocatorFileIo fileManager(ALLOCATOR_CTX, &client, &addrInfo, &file);
     }
 }
@@ -33,7 +33,7 @@ TEST(AllocatorFileIo, Init_TestInitAndClose)
     // given
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     char* buffer[NUM_SEGMENT_CTX_SECTION];
@@ -72,7 +72,7 @@ TEST(AllocatorFileIo, Init_TestInitAndCloseAndFileNotOpened)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     char* buffer[NUM_SEGMENT_CTX_SECTION];
@@ -101,7 +101,7 @@ TEST(AllocatorFileIo, LoadContext_testFileNotExist)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf> file("aa", "bb");
+    NiceMock<MockMetaFileIntf> file("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, &file);
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(false));
@@ -116,7 +116,7 @@ TEST(AllocatorFileIo, LoadContext_testFileCreationFail)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf> file("aa", "bb");
+    NiceMock<MockMetaFileIntf> file("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, &file);
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(false));
@@ -130,7 +130,7 @@ TEST(AllocatorFileIo, LoadContext_testFileLoad)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf> file("aa", "bb");
+    NiceMock<MockMetaFileIntf> file("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, &file);
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(true));
@@ -145,7 +145,7 @@ TEST(AllocatorFileIo, LoadContext_testFileLoadFail)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf> file("aa", "bb");
+    NiceMock<MockMetaFileIntf> file("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, &file);
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(true));
@@ -159,7 +159,7 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     // Prepare loaded buffer for test
@@ -230,7 +230,7 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(ALLOCATOR_CTX, &client, &addrInfo, file);
 
     // Prepare buffer to flush
@@ -296,7 +296,7 @@ TEST(AllocatorFileIo, Flush_testFlushFail)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     char* buffer[NUM_SEGMENT_CTX_SECTION];
@@ -330,7 +330,7 @@ TEST(AllocatorFileIo, GetStoredVersion_TestSimpleGetter)
 {
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     EXPECT_CALL(client, GetStoredVersion).WillOnce(Return(20));
@@ -346,7 +346,7 @@ TEST(AllocatorFileIo, GetSectionAddr_TestSimpleGetter)
     // given
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     char* buffer[NUM_SEGMENT_CTX_SECTION];
@@ -378,7 +378,7 @@ TEST(AllocatorFileIo, GetSectionSize_TestSimpleGetter)
     // given
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
     EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));

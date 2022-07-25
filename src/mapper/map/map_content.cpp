@@ -165,7 +165,7 @@ MapContent::DoesFileExist(void)
 int
 MapContent::Dump(std::string fname)
 {
-    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
+    MetaFileIntf* linuxFileToStore = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
     int ret = linuxFileToStore->Create(0);
     linuxFileToStore->Open();
 
@@ -182,7 +182,7 @@ MapContent::Dump(std::string fname)
 int
 MapContent::DumpLoad(std::string fname)
 {
-    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
+    MetaFileIntf* linuxFileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
     int ret = linuxFileFromLoad->Open();
 
     if (ret == 0)

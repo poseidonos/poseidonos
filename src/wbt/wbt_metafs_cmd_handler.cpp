@@ -107,8 +107,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     std::string arrayName = argv["array"].get<std::string>();
     uint32_t fileSizeBytes = stoi(argv["size"].get<std::string>());
     int integrityType = stoi(argv["integrity"].get<std::string>());
-    int ioAccPatternType = stoi(argv["access"].get<std::string>());
-    int ioOpType = stoi(argv["operation"].get<std::string>());
+    int fileType = stoi(argv["filetype"].get<std::string>());
     int type = stoi(argv["volume"].get<std::string>());
 
     MetaVolumeType volumeType = (MetaVolumeType)type;
@@ -116,14 +115,13 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
         return RESULT_FAILURE;
 
     fileProperty.integrity = static_cast<MetaFileIntegrityType>(integrityType);
-    fileProperty.ioAccPattern = static_cast<MetaFileAccessPattern>(ioAccPatternType);
-    fileProperty.ioOpType = static_cast<MetaFileDominant>(ioOpType);
+    fileProperty.type = static_cast<MetaFileType>(fileType);
 
     MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, MetaFileType::General, volumeType);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, volumeType);
     if (rc != POS_EVENT_ID::SUCCESS)
         return RESULT_FAILURE;
 
@@ -494,7 +492,6 @@ WbtMetafsCmdHandler::_DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElemen
     metaInode.SetAttribute(JsonAttribute("fileByteSize", std::to_string(static_cast<uint32_t>(data->inodeInfo.data.field.fileByteSize))));
     metaInode.SetAttribute(JsonAttribute("dataChunkSize", std::to_string(static_cast<uint32_t>(data->inodeInfo.data.field.dataChunkSize))));
     metaInode.SetAttribute(JsonAttribute("dataLocation", std::to_string(static_cast<int>(data->inodeInfo.data.field.dataLocation))));
-    metaInode.SetAttribute(JsonAttribute("fileType", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileType))));
 
     // Set pageMap
     fileExtentMap.SetAttribute(JsonAttribute("baseMetaLpn", std::to_string(static_cast<uint64_t>(data->inodeInfo.data.field.extentMap[0].GetStartLpn()))));
@@ -502,8 +499,7 @@ WbtMetafsCmdHandler::_DumpInodeInfoToJson(MetaFileInodeDumpCxt *data, JsonElemen
 
     // Set propertry
     fileProperty.SetAttribute(JsonAttribute("integrity", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileProperty.integrity))));
-    fileProperty.SetAttribute(JsonAttribute("ioAccPattern", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileProperty.ioAccPattern))));
-    fileProperty.SetAttribute(JsonAttribute("ioOpType", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileProperty.ioOpType))));
+    fileProperty.SetAttribute(JsonAttribute("fileType", std::to_string(static_cast<int>(data->inodeInfo.data.field.fileProperty.type))));
 
     metaInode.SetElement(fileProperty);
     metaInode.SetElement(fileExtentMap);

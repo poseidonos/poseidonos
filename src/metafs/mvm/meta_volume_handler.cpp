@@ -92,7 +92,7 @@ MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileCon
     } while (0);
 
     _PublishMetricConditionally(TEL40014_METAFS_FILE_OPEN_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileType, (POS_EVENT_ID::SUCCESS == rc));
+        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (POS_EVENT_ID::SUCCESS == rc));
 
     return rc;
 }
@@ -140,7 +140,7 @@ MetaVolumeHandler::HandleCloseFileReq(const MetaVolumeType volType, MetaFsFileCo
     }
 
     _PublishMetricConditionally(TEL40015_METAFS_FILE_CLOSE_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileType, (POS_EVENT_ID::SUCCESS == rc));
+        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (POS_EVENT_ID::SUCCESS == rc));
 
     return rc;
 }
@@ -175,7 +175,7 @@ MetaVolumeHandler::HandleCreateFileReq(const MetaVolumeType volType, MetaFsFileC
     } while (0);
 
     _PublishMetricConditionally(TEL40013_METAFS_FILE_CREATE_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileType, (POS_EVENT_ID::SUCCESS == rc));
+        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (POS_EVENT_ID::SUCCESS == rc));
 
     return rc;
 }
@@ -221,7 +221,7 @@ MetaVolumeHandler::HandleDeleteFileReq(const MetaVolumeType volType, MetaFsFileC
     } while (0);
 
     _PublishMetricConditionally(TEL40016_METAFS_FILE_DELETE_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileType, (POS_EVENT_ID::SUCCESS == rc));
+        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (POS_EVENT_ID::SUCCESS == rc));
 
     return rc;
 }

@@ -88,12 +88,11 @@ MetaFileInode::BuildNewEntry(MetaFileInodeCreateReq& req, FileSizeType dataChunk
     data.basic.field.ageCopy = 0;
     data.basic.field.version = MetaFsConfig::CURRENT_INODE_VERSION;
     data.basic.field.versionSignature = MetaFsConfig::SIGNATURE_INODE_VERSION;
-    data.basic.field.fileType = req.fileType;
     data.basic.field.inUse = true;
 
     POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
         "New Inode, fd: {}, fileName: {}, fileByteSize: {}, pagemapCnt: {}, fileType: {}",
-        req.fd, *req.fileName, req.fileByteSize, data.basic.field.pagemapCnt, (int)req.fileType);
+        req.fd, *req.fileName, req.fileByteSize, data.basic.field.pagemapCnt, (int)req.ioAttribute.type);
 
         for (int i = 0; i < (int)req.extentList->size(); ++i)
     {
@@ -138,7 +137,6 @@ MetaFileInode::SetMetaFileInfo(MetaStorageType mediaType, MetaFileInodeInfo& ino
     memcpy(inodeInfo.data.field.fileName, data.basic.field.fileName.ToString().c_str(), data.basic.field.fileName.ToString().length());
     inodeInfo.data.field.fileByteSize = data.basic.field.fileByteSize;
     inodeInfo.data.field.dataChunkSize = data.basic.field.dataChunkSize;
-    inodeInfo.data.field.fileType = data.basic.field.fileType;
     inodeInfo.data.field.dataLocation = mediaType;
     inodeInfo.data.field.fileProperty = data.basic.field.ioAttribute.ioSpecfic;
     inodeInfo.data.field.extentCnt = data.basic.field.pagemapCnt;

@@ -310,10 +310,7 @@ JournalConfiguration::_IsRocksdbEnabled(void)
 void
 JournalConfiguration::_ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl)
 {
-    MetaFilePropertySet prop;
-    prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-    prop.ioOpType = MetaFileDominant::WriteDominant;
-    prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
+    MetaFilePropertySet prop(MetaFileType::Journal);
 
     metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, metaVolumeToUse);
     maxPartitionSize = metaFsCtrl->GetAvailableSpace(prop, metaVolumeToUse);

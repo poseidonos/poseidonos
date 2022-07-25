@@ -26,7 +26,7 @@ TEST(MapIoHandler, MapIoHandler_)
 TEST(MapIoHandler, OpenFile_TestFailCase)
 {
     NiceMock<MockMapperAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1);
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1, MetaFileType::Map);
     MapIoHandler mio(file, nullptr, nullptr, 0, &addrInfo, nullptr);
     EXPECT_CALL(addrInfo, IsUT).WillOnce(Return(true));
     EXPECT_CALL(addrInfo, GetArrayId).WillOnce(Return(0));
@@ -39,7 +39,7 @@ TEST(MapIoHandler, DeleteFile_TestFail)
 {
     MapperAddressInfo addrInfo;
     addrInfo.SetIsUT(true);
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1);
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1, MetaFileType::Map);
     MapIoHandler mio(file, nullptr, nullptr, 0, &addrInfo, nullptr);
     EXPECT_CALL(*file, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(*file, IsOpened).WillOnce(Return(false)).WillOnce(Return(true));
@@ -52,7 +52,7 @@ TEST(MapIoHandler, DoesFileExist_TestFail)
 {
     MapperAddressInfo addrInfo;
     addrInfo.SetIsUT(true);
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1);
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1, MetaFileType::Map);
     MapIoHandler mio(file, nullptr, nullptr, 0, &addrInfo, nullptr);
     bool ret = mio.DoesFileExist();
     EXPECT_EQ(false, ret);
@@ -62,7 +62,7 @@ TEST(MapIoHandler, Load_TestFail0)
 {
     MapperAddressInfo addrInfo;
     addrInfo.SetIsUT(true);
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1);
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1, MetaFileType::Map);
     MapIoHandler mio(file, nullptr, nullptr, 0, &addrInfo, nullptr);
     EXPECT_CALL(*file, DoesFileExist).WillOnce(Return(false));
     AsyncLoadCallBack cb;
@@ -74,7 +74,7 @@ TEST(MapIoHandler, Load_TestFail1)
 {
     MapperAddressInfo addrInfo;
     addrInfo.SetIsUT(true);
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1);
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("s", 1, MetaFileType::Map);
     NiceMock<MockMapHeader>* header = new NiceMock<MockMapHeader>(0);
     MapIoHandler mio(file, nullptr, header, 0, &addrInfo, nullptr);
     EXPECT_CALL(*file, DoesFileExist).WillOnce(Return(true));

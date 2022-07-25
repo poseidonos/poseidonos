@@ -80,12 +80,12 @@ public:
             MetaFileName fileName;              // 128    24...151
             FileSizeType fileByteSize;          // 8      152..159
             FileSizeType dataChunkSize;         // 8      160..167
-            MetaStorageIoProperty ioAttribute;  // 16     168..183
+            MetaStorageIoProperty ioAttribute;  // 12     168..179
+            uint8_t reserved0[4];               // 4      180..183
             uint32_t indexInInodeTable;         // 4      184..187
             uint16_t versionSignature;          // 2      188..189
             uint16_t version;                   // 2      190..191
-            MetaFileType fileType;              // 4      192..195
-            uint8_t reserved1[802];             // 802    196..997
+            uint8_t reserved1[806];             // 806    192..997
             uint16_t pagemapCnt;                // 2      998..999
             MetaFileExtent pagemap[MetaFsConfig::MAX_PAGE_MAP_CNT];
                                                 // 16*384 1000.7143

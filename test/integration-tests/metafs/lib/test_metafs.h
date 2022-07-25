@@ -93,10 +93,10 @@ public:
         {
             files[arrayId].insert({MetaVolumeType::SsdVolume,
                 {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0,
-                    {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+                    {MetaFileIntegrityType::Default, MetaFileType::General}}});
             files[arrayId].insert({MetaVolumeType::NvRamVolume,
                 {"TestFileNvm", BYTE_4K * COUNT_OF_META_LPN_FOR_NVM, 0,
-                    {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+                    {MetaFileIntegrityType::Default, MetaFileType::General}}});
         }
 
         writeBuf = new char[BYTE_4K];
@@ -123,7 +123,7 @@ public:
             for (auto& info : files[arrayId])
             {
                 rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                    info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                    info.second.fileSize, info.second.prop, info.first);
                 ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
                 ASSERT_EQ(GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
             }
