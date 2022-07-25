@@ -322,8 +322,8 @@ ExternalProject_Add(opentelemetry-cpp
     LOG_BUILD ON
     LOG_INSTALL ON
     CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL}
-		BUILD_COMMAND make all
-		INSTALL_COMMAND make install
+    BUILD_COMMAND make -j4 all
+    INSTALL_COMMAND make install
 )
 
 add_custom_target(
