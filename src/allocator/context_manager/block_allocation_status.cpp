@@ -120,10 +120,6 @@ BlockAllocationStatus::Lock(void)
         {
             POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}, result:{}", volumeId, result);
         }
-        else
-        {
-            POS_TRACE_INFO(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}", volumeId);
-        }
     }
 }
 
@@ -136,10 +132,6 @@ BlockAllocationStatus::Unlock(void)
         if (result)
         {
             POS_TRACE_ERROR(EID(BLOCK_ALLOCATION_LOCK), "volumeId:{}, result:{}", volumeId, result);
-        }
-        else
-        {
-            POS_TRACE_INFO(EID(BLOCK_ALLOCATION_UNLOCK), "volumeId:{}", volumeId);
         }
     }
 }
