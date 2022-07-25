@@ -113,6 +113,8 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
             if (footer.isReseted)
             {
+                int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                POS_TRACE_INFO(event, "Reseted footer is found. Found logs whith SeqNumber ({}) will be reseted ", footer.resetedSequenceNumber);
                 seqNumSeen.erase(footer.resetedSequenceNumber);
                 logs.EraseReplayLogGroup(footer.resetedSequenceNumber);
             }
@@ -121,7 +123,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
                 logs.SetLogGroupFooter(*seqNumSeen.begin(), footer);
             }
 
-            if (seqNumSeen.size() != 1)
+            if (seqNumSeen.size() > 1)
             {
                 int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
                 std::string seqNumList = "";
