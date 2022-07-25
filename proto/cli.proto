@@ -180,6 +180,12 @@ service PosCli {
       		post: "/v1/listsubsystem"
     	};
 	}
+
+	rpc SubsystemInfo (SubsystemInfoRequest) returns (SubsystemInfoResponse) {
+		option (google.api.http) = {
+      		post: "/v1/subsysteminfo"
+    	};
+	}
 }
 
 message Status {
@@ -1031,6 +1037,30 @@ message ListSubsystemRequest {
 }
 
 message ListSubsystemResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message SubsystemList {
+			repeated Subsystem subsystemList = 1;
+		}
+		SubsystemList data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SubsystemInfoRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+	}
+	Param param = 4;
+}
+
+message SubsystemInfoResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
