@@ -294,8 +294,12 @@ VolumeList::WaitUntilIdleUserIo(int volId)
 {
     possibleIncreaseIOCount[volId][VolumeIoType::UserRead] = false;
     possibleIncreaseIOCount[volId][VolumeIoType::UserWrite] = false;
-    while ((false == CheckIdleAndSetZero(volId, VolumeIoType::UserRead))
-        || (false == CheckIdleAndSetZero(volId, VolumeIoType::UserWrite)))
+    while (false == CheckIdleAndSetZero(volId, VolumeIoType::UserRead))
+    {
+        usleep(1);
+    }
+
+     while (false == CheckIdleAndSetZero(volId, VolumeIoType::UserWrite))
     {
         usleep(1);
     }
