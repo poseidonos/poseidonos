@@ -95,7 +95,7 @@ WbtMetafsCmdHandler::DumpFilesList(Args argv)
 int
 WbtMetafsCmdHandler::CreateFile(Args argv)
 {
-    if (argv.size() < 7)
+    if (argv.size() < 6)
     {
         std::cout << "mfs_create_file Command. Too Few Arguments." << std::endl;
         return RESULT_FAILURE;
