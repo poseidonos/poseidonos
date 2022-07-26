@@ -40,13 +40,13 @@ type LoggerParam struct {
 }
 
 type ArrayParam struct {
-	FtType      int      `json:"fttype,omitempty"`
-	Name        string   `json:"name,omitempty"`
-	RaidType    string   `json:"raidtype,omitempty"`
-	Buffer      []Device `json:"buffer,omitempty"`
-	Data        []Device `json:"data,omitempty"`
-	Spare       []Device `json:"spare,omitempty"`
-	Array       string   `json:"array,omitempty"`
+	FtType   int      `json:"fttype,omitempty"`
+	Name     string   `json:"name,omitempty"`
+	RaidType string   `json:"raidtype,omitempty"`
+	Buffer   []Device `json:"buffer,omitempty"`
+	Data     []Device `json:"data,omitempty"`
+	Spare    []Device `json:"spare,omitempty"`
+	Array    string   `json:"array,omitempty"`
 }
 
 type MAgentParam struct {
@@ -55,12 +55,12 @@ type MAgentParam struct {
 }
 
 type DeviceParam struct {
-	Name        string `json:"name,omitempty"`
-	Spare       string `json:"spare,omitempty"`
-	Array       string `json:"array,omitempty"`
-	DevType		string `json:"dev_type,omitempty"`
-	NumBlocks	uint `json:"num_blocks,omitempty"`
-	BlockSize	uint `json:"block_size,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Spare     string `json:"spare,omitempty"`
+	Array     string `json:"array,omitempty"`
+	DevType   string `json:"dev_type,omitempty"`
+	NumBlocks uint   `json:"num_blocks,omitempty"`
+	BlockSize uint   `json:"block_size,omitempty"`
 }
 type VolumeParam struct {
 	Name        string `json:"name,omitempty"`
@@ -103,8 +103,7 @@ type WBTArgv struct {
 	Input     string `json:"input,omitempty"`
 	Output    string `json:"output,omitempty"`
 	Integrity string `json:"integrity,omitempty"`
-	Access    string `json:"access,omitempty"`
-	Operation string `json:"operation,omitempty"`
+	Filetype  string `json:"filetype,omitempty"`
 	Rba       string `json:"rba,omitempty"`
 	Lba       string `json:"lba,omitempty"`
 	Vsid      string `json:"vsid,omitempty"`
@@ -142,16 +141,16 @@ type BuildInfo struct {
 }
 
 type QosParam struct {
-    Vol    []Volume `json:"vol,omitempty"`
-    Array   string `json:"array,omitempty"`
-    Minbw   uint64   `json:"minbw,omitempty"`
-    Maxbw   uint64   `json:"maxbw,omitempty"`
-    Miniops uint64   `json:"miniops,omitempty"`
-    Maxiops uint64   `json:"maxiops,omitempty"`
+	Vol     []Volume `json:"vol,omitempty"`
+	Array   string   `json:"array,omitempty"`
+	Minbw   uint64   `json:"minbw,omitempty"`
+	Maxbw   uint64   `json:"maxbw,omitempty"`
+	Miniops uint64   `json:"miniops,omitempty"`
+	Maxiops uint64   `json:"maxiops,omitempty"`
 }
 
 type Volume struct {
-    VolumeName string `json:"volumeName"`
+	VolumeName string `json:"volumeName"`
 }
 
 //type SMART struct {
