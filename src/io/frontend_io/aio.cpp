@@ -180,6 +180,8 @@ AioCompletion::_SendUserCompletion(void)
         if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
         {
             volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId(), static_cast<VolumeIoType>(dir));
+            airlog("UserWritePendingCnt", "AIR_UserIo", volumeIo->GetVolumeId(), -1);
+            airlog("UserReadPendingCnt", "AIR_UserIo", volumeIo->GetVolumeId(), -1);
         }
     }
     volumeIo = nullptr;

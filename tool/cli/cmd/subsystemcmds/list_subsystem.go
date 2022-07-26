@@ -26,7 +26,7 @@ Syntax:
 Example 1 (listing all subsystems):
 	poseidonos-cli subsystem list
 
-Example 2 (listing a specific array):
+Example 2 (listing a specific subsystem):
 	poseidonos-cli subsystem list --subnqn nqn.2019-04.pos:subsystem
     `,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -45,7 +45,8 @@ Example 2 (listing a specific array):
 
 func executeListSubsystemCmd(command string) {
 	uuid := globals.GenerateUUID()
-	req := &pb.ListSubsystemRequest{Command: command, Rid: uuid, Requestor: "cli"}
+	param := &pb.SubsystemInfoRequest_Param{Subnqn: list_subsystem_subnqn}
+	req := &pb.SubsystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
 	reqJSON, err := protojson.Marshal(req)
 	if err != nil {
@@ -60,7 +61,7 @@ func executeListSubsystemCmd(command string) {
 		if globals.EnableGrpc == false {
 			resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
 		} else {
-			res, err := grpcmgr.SendListSubsystem(req)
+			res, err := grpcmgr.SendSubsystemInfo(req)
 			if err != nil {
 				globals.PrintErrMsg(err)
 				return

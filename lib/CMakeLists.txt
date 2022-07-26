@@ -303,6 +303,28 @@ else()
     )
 endif()
 
+# Set opentelemetry-cpp build options
+set(POS_DEP_OTEL "opentelemetry-cpp")
+if (${USE_LOCAL_REPO} STREQUAL "y")
+    set(REPO_OTEL "${LOCAL_REPO}/opentelemetry-cpp.git")
+else()
+    set(REPO_OTEL "https://github.com/open-telemetry/opentelemetry-cpp.git")
+endif()
+
+# Build and install opentelemetry-cpp
+ExternalProject_Add(opentelemetry-cpp
+    GIT_REPOSITORY ${REPO_OTEL}
+    GIT_TAG "v1.4.1"
+    SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_OTEL}
+    BUILD_IN_SOURCE 1
+    LOG_DOWNLOAD ON
+    LOG_CONFIGURE ON
+    LOG_BUILD ON
+    LOG_INSTALL ON
+    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL}
+    BUILD_COMMAND make -j ${NUM_BUILD_CORE} all
+    INSTALL_COMMAND make install
+)
 
 add_custom_target(
     clean_air
@@ -351,6 +373,14 @@ add_custom_target(
     COMMAND rm -rf ${GTEST_TARGET_LIB_DIR}/libgmock_main.a
 )
 
+add_custom_target(
+    clean_opentelemetry-cpp
+    WORKING_DIRECTORY ${PROJ_ROOT}/lib/${POS_DEP_OTEL}
+    COMMAND make clean
+    COMMAND rm -rf include 
+    COMMAND rm -rf lib
+)
+
 if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build)
     list(APPEND CLEAN_ALL_TARGETS clean_air)
 endif()
@@ -377,6 +407,10 @@ endif()
 
 if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_GTEST}/libgtest.a)
     list(APPEND CLEAN_ALL_TARGETS clean_gtest)
+endif()
+
+if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_OTEL}/Makefile)
+    list(APPEND CLEAN_ALL_TARGETS clean_opentelemetry-cpp)
 endif()
 
 add_custom_target(

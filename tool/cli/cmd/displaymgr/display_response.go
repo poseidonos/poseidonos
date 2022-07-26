@@ -487,49 +487,49 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		w.Flush()
 
 	case "SUBSYSTEMINFO":
-		res := messages.ListSubsystemResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.SubsystemInfoResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
-		if len(res.RESULT.DATA.SUBSYSTEMLIST) != 0 {
-			subsystem := res.RESULT.DATA.SUBSYSTEMLIST[0]
+		if len(res.GetResult().GetData().GetSubsystemList()) != 0 {
+			subsystem := res.GetResult().GetData().GetSubsystemList()[0]
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-			fmt.Fprintln(w, "nqn\t: "+subsystem.NQN)
-			fmt.Fprintln(w, "subtype\t: "+subsystem.SUBTYPE)
+			fmt.Fprintln(w, "nqn\t: "+subsystem.GetSubnqn())
+			fmt.Fprintln(w, "subtype\t: "+subsystem.GetSubtype())
 			fmt.Fprint(w, "listen_addresses\t: ")
-			for _, address := range subsystem.LISTENADDRESSES {
+			for _, address := range subsystem.GetListenAddresses() {
 				fmt.Fprintln(w, "")
 				fmt.Fprintln(w, "\t  {")
-				fmt.Fprintln(w, "\t    trtype : "+address.TRANSPORTTYPE)
-				fmt.Fprintln(w, "\t    adrfam : "+address.ADDRESSFAMILY)
-				fmt.Fprintln(w, "\t    traddr : "+address.TARGETADDRESS)
-				fmt.Fprintln(w, "\t    trsvcid : "+address.TRANSPORTSERVICEID)
+				fmt.Fprintln(w, "\t    trtype : "+address.GetTransportType())
+				fmt.Fprintln(w, "\t    adrfam : "+address.GetAddressFamily())
+				fmt.Fprintln(w, "\t    traddr : "+address.GetTargetAddress())
+				fmt.Fprintln(w, "\t    trsvcid : "+address.GetTransportServiceId())
 				fmt.Fprint(w, "\t  }")
 			}
 			fmt.Fprintln(w, "")
-			fmt.Fprintln(w, "allow_any_host\t:", subsystem.ALLOWANYHOST != 0)
+			fmt.Fprintln(w, "allow_any_host\t:", subsystem.GetAllowAnyHost() != 0)
 			fmt.Fprintln(w, "hosts\t: ")
-			for _, host := range subsystem.HOSTS {
-				fmt.Fprintln(w, "\t  { nqn : "+host.NQN+" }")
+			for _, host := range subsystem.GetHosts() {
+				fmt.Fprintln(w, "\t  { nqn : "+host.GetNqn()+" }")
 			}
-			if "NVMe" == subsystem.SUBTYPE {
-				fmt.Fprintln(w, "serial_number\t: "+subsystem.SERIAL)
-				fmt.Fprintln(w, "model_number\t: "+subsystem.MODEL)
-				fmt.Fprintln(w, "max_namespaces\t:", subsystem.MAXNAMESPACES)
+			if "NVMe" == subsystem.GetSubtype() {
+				fmt.Fprintln(w, "serial_number\t: "+subsystem.GetSerialNumber())
+				fmt.Fprintln(w, "model_number\t: "+subsystem.GetModelNumber())
+				fmt.Fprintln(w, "max_namespaces\t:", subsystem.GetMaxNamespaces())
 				fmt.Fprint(w, "namespaces\t: ")
-				for _, namespace := range subsystem.NAMESPACES {
+				for _, namespace := range subsystem.GetNamespaces() {
 					fmt.Fprintln(w, "")
 					fmt.Fprintln(w, "\t  {")
-					fmt.Fprintln(w, "\t    nsid :", namespace.NSID)
-					fmt.Fprintln(w, "\t    bdev_name : "+namespace.BDEVNAME)
-					fmt.Fprintln(w, "\t    uuid : "+namespace.UUID)
+					fmt.Fprintln(w, "\t    nsid :", namespace.GetNsid())
+					fmt.Fprintln(w, "\t    bdev_name : "+namespace.GetBdevName())
+					fmt.Fprintln(w, "\t    uuid : "+namespace.GetUuid())
 					fmt.Fprint(w, "\t  }")
 				}
 				fmt.Fprintln(w, "")
