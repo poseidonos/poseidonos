@@ -263,7 +263,7 @@ Allocator::SetUrgentThreshold(uint32_t inputThreshold)
 int
 Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* file)
 {
-    MetaFileIntf* dumpFile = new MockFileIntf(fname, iArrayInfo->GetIndex(), MetaFileType::SpecialPurposeMap);
+    MetaFileIntf* dumpFile = new MockFileIntf(fname, iArrayInfo->GetIndex(), MetaFileType::Map);
     if (file != nullptr)
     {
         delete dumpFile;
