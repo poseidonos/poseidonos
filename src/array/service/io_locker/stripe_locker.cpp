@@ -91,7 +91,10 @@ StripeLocker::ResetBusyLock(bool force)
     {
         return false;
     }
-
+    if (force == true)
+    {
+        busyLocker->Clear();
+    }
     POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
         "Reset Busylock, force_reset:{}", force);
     delete busyRange;
@@ -140,7 +143,10 @@ StripeLocker::Unlock(StripeId id)
 void
 StripeLocker::WriteBusyLog(void)
 {
+    POS_TRACE_WARN(EID(BUSY_LOCKER_WARN), "StripeLocker, isBusyRangeChanging:{}",
+        isBusyRangeChanging);
     busyLocker->WriteLog();
+    normalLocker->WriteLog();
 }
 
 } // namespace pos

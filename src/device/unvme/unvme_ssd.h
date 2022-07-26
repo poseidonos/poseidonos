@@ -57,10 +57,9 @@ public:
         SpdkNvmeCaller* spdkNvmeCaller = new SpdkNvmeCaller(),
         SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
     virtual ~UnvmeSsd() override;
-
     struct spdk_nvme_ns* GetNs(void);
-
     void DecreaseOutstandingAdminCount(void);
+    void SetHotDetached(void) { isHotDetached = true; }
 
 private:
     DeviceContext* _AllocateDeviceContext(void) override;
@@ -70,9 +69,11 @@ private:
     std::string _GetMN();
     int _GetNuma();
 
+    UnvmeDrv* driver;
     spdk_nvme_ns* ns;
     SpdkNvmeCaller* spdkNvmeCaller;
     SpdkEnvCaller* spdkEnvCaller;
+    bool isHotDetached = false;
 };
 } // namespace pos
 

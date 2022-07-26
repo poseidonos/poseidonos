@@ -50,6 +50,7 @@ public:
     void Unlock(StripeId val) override;
     bool Exists(StripeId val) override;
     uint32_t Count(void) override;
+    void Clear(void);
     void WriteLog(void);
 
 private:
