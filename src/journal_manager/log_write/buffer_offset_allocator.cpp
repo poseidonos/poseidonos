@@ -162,7 +162,7 @@ BufferOffsetAllocator::_GetNewActiveGroup(void)
     if (statusList[currentLogGroupId]->GetStatus() != LogGroupStatus::INIT)
     {
         POS_TRACE_WARN((int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE,
-            "No log buffer available for journal");
+            "No log buffer available for journal (new log group id: {}", currentLogGroupId);
         return (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE;
     }
     else
