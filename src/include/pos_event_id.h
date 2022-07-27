@@ -227,6 +227,7 @@ enum class POS_EVENT_ID
     DELETE_SUBSYSTEM_FAILURE_SPDK_FAILURE,
     ADD_LISTENER_FAILURE_NO_SUBNQN,
     ADD_LISTENER_FAILURE_SPDK_FAILURE,
+    ADD_TRANSPORT_FAILURE_SPDK_FAILURE,
 
     // --------------Mbr (2300)-----------------------
     MBR_START = 2300,
@@ -1874,6 +1875,9 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
         {(int)POS_EVENT_ID::ADD_LISTENER_FAILURE_SPDK_FAILURE,
             new PosEventInfoEntry("ADD_LISTENER_FAILURE_SPDK_FAILURE",
                 "Failed to add a listener.", "An error occurred during RPC to SPDK.", "")},
+        {(int)POS_EVENT_ID::ADD_TRANSPORT_FAILURE_SPDK_FAILURE,
+            new PosEventInfoEntry("ADD_TRANSPORT_FAILURE_SPDK_FAILURE",
+                "Failed to add a transport.", "An error occurred during RPC to SPDK.", "")},
 
         {(int)POS_EVENT_ID::TELEMETRY_START_FAILURE,
             new PosEventInfoEntry("TELEMETRY_START_FAILURE",
