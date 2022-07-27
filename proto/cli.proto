@@ -186,6 +186,12 @@ service PosCli {
       		post: "/v1/subsysteminfo"
     	};
 	}
+
+	rpc CreateTransport (CreateTransportRequest) returns (CreateTransportResponse) {
+		option (google.api.http) = {
+      		post: "/v1/createtransport"
+    	};
+	}
 }
 
 message Status {
@@ -1069,6 +1075,28 @@ message SubsystemInfoResponse {
 			repeated Subsystem subsystemList = 1;
 		}
 		SubsystemList data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message CreateTransportRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string transportType = 1;
+		int32 bufCacheSize = 2;
+		int32 numSharedBuf = 3;
+	}
+	Param param = 4;
+}
+
+message CreateTransportResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
 	}
 	Result result = 3;
 	PosInfo info = 4;

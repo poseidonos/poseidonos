@@ -47,7 +47,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[154]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[158]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -155,6 +155,18 @@ extern CreateSubsystemResponseDefaultTypeInternal _CreateSubsystemResponse_defau
 class CreateSubsystemResponse_Result;
 struct CreateSubsystemResponse_ResultDefaultTypeInternal;
 extern CreateSubsystemResponse_ResultDefaultTypeInternal _CreateSubsystemResponse_Result_default_instance_;
+class CreateTransportRequest;
+struct CreateTransportRequestDefaultTypeInternal;
+extern CreateTransportRequestDefaultTypeInternal _CreateTransportRequest_default_instance_;
+class CreateTransportRequest_Param;
+struct CreateTransportRequest_ParamDefaultTypeInternal;
+extern CreateTransportRequest_ParamDefaultTypeInternal _CreateTransportRequest_Param_default_instance_;
+class CreateTransportResponse;
+struct CreateTransportResponseDefaultTypeInternal;
+extern CreateTransportResponseDefaultTypeInternal _CreateTransportResponse_default_instance_;
+class CreateTransportResponse_Result;
+struct CreateTransportResponse_ResultDefaultTypeInternal;
+extern CreateTransportResponse_ResultDefaultTypeInternal _CreateTransportResponse_Result_default_instance_;
 class DeleteArrayRequest;
 struct DeleteArrayRequestDefaultTypeInternal;
 extern DeleteArrayRequestDefaultTypeInternal _DeleteArrayRequest_default_instance_;
@@ -553,6 +565,10 @@ template<> ::grpc_cli::CreateSubsystemRequest* Arena::CreateMaybeMessage<::grpc_
 template<> ::grpc_cli::CreateSubsystemRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::CreateSubsystemRequest_Param>(Arena*);
 template<> ::grpc_cli::CreateSubsystemResponse* Arena::CreateMaybeMessage<::grpc_cli::CreateSubsystemResponse>(Arena*);
 template<> ::grpc_cli::CreateSubsystemResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::CreateSubsystemResponse_Result>(Arena*);
+template<> ::grpc_cli::CreateTransportRequest* Arena::CreateMaybeMessage<::grpc_cli::CreateTransportRequest>(Arena*);
+template<> ::grpc_cli::CreateTransportRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::CreateTransportRequest_Param>(Arena*);
+template<> ::grpc_cli::CreateTransportResponse* Arena::CreateMaybeMessage<::grpc_cli::CreateTransportResponse>(Arena*);
+template<> ::grpc_cli::CreateTransportResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::CreateTransportResponse_Result>(Arena*);
 template<> ::grpc_cli::DeleteArrayRequest* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayRequest>(Arena*);
 template<> ::grpc_cli::DeleteArrayRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayRequest_Param>(Arena*);
 template<> ::grpc_cli::DeleteArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::DeleteArrayResponse>(Arena*);
@@ -29323,6 +29339,724 @@ class SubsystemInfoResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
   ::grpc_cli::SubsystemInfoResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CreateTransportRequest_Param PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.CreateTransportRequest.Param) */ {
+ public:
+  inline CreateTransportRequest_Param() : CreateTransportRequest_Param(nullptr) {}
+  virtual ~CreateTransportRequest_Param();
+  explicit constexpr CreateTransportRequest_Param(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CreateTransportRequest_Param(const CreateTransportRequest_Param& from);
+  CreateTransportRequest_Param(CreateTransportRequest_Param&& from) noexcept
+    : CreateTransportRequest_Param() {
+    *this = ::std::move(from);
+  }
+
+  inline CreateTransportRequest_Param& operator=(const CreateTransportRequest_Param& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CreateTransportRequest_Param& operator=(CreateTransportRequest_Param&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const CreateTransportRequest_Param& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CreateTransportRequest_Param* internal_default_instance() {
+    return reinterpret_cast<const CreateTransportRequest_Param*>(
+               &_CreateTransportRequest_Param_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    154;
+
+  friend void swap(CreateTransportRequest_Param& a, CreateTransportRequest_Param& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CreateTransportRequest_Param* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CreateTransportRequest_Param* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline CreateTransportRequest_Param* New() const final {
+    return CreateMaybeMessage<CreateTransportRequest_Param>(nullptr);
+  }
+
+  CreateTransportRequest_Param* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<CreateTransportRequest_Param>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const CreateTransportRequest_Param& from);
+  void MergeFrom(const CreateTransportRequest_Param& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CreateTransportRequest_Param* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.CreateTransportRequest.Param";
+  }
+  protected:
+  explicit CreateTransportRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTransportTypeFieldNumber = 1,
+    kBufCacheSizeFieldNumber = 2,
+    kNumSharedBufFieldNumber = 3,
+  };
+  // string transportType = 1;
+  void clear_transporttype();
+  const std::string& transporttype() const;
+  void set_transporttype(const std::string& value);
+  void set_transporttype(std::string&& value);
+  void set_transporttype(const char* value);
+  void set_transporttype(const char* value, size_t size);
+  std::string* mutable_transporttype();
+  std::string* release_transporttype();
+  void set_allocated_transporttype(std::string* transporttype);
+  private:
+  const std::string& _internal_transporttype() const;
+  void _internal_set_transporttype(const std::string& value);
+  std::string* _internal_mutable_transporttype();
+  public:
+
+  // int32 bufCacheSize = 2;
+  void clear_bufcachesize();
+  ::PROTOBUF_NAMESPACE_ID::int32 bufcachesize() const;
+  void set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_bufcachesize() const;
+  void _internal_set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 numSharedBuf = 3;
+  void clear_numsharedbuf();
+  ::PROTOBUF_NAMESPACE_ID::int32 numsharedbuf() const;
+  void set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_numsharedbuf() const;
+  void _internal_set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.CreateTransportRequest.Param)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr transporttype_;
+  ::PROTOBUF_NAMESPACE_ID::int32 bufcachesize_;
+  ::PROTOBUF_NAMESPACE_ID::int32 numsharedbuf_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CreateTransportRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.CreateTransportRequest) */ {
+ public:
+  inline CreateTransportRequest() : CreateTransportRequest(nullptr) {}
+  virtual ~CreateTransportRequest();
+  explicit constexpr CreateTransportRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CreateTransportRequest(const CreateTransportRequest& from);
+  CreateTransportRequest(CreateTransportRequest&& from) noexcept
+    : CreateTransportRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline CreateTransportRequest& operator=(const CreateTransportRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CreateTransportRequest& operator=(CreateTransportRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const CreateTransportRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CreateTransportRequest* internal_default_instance() {
+    return reinterpret_cast<const CreateTransportRequest*>(
+               &_CreateTransportRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    155;
+
+  friend void swap(CreateTransportRequest& a, CreateTransportRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CreateTransportRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CreateTransportRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline CreateTransportRequest* New() const final {
+    return CreateMaybeMessage<CreateTransportRequest>(nullptr);
+  }
+
+  CreateTransportRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<CreateTransportRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const CreateTransportRequest& from);
+  void MergeFrom(const CreateTransportRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CreateTransportRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.CreateTransportRequest";
+  }
+  protected:
+  explicit CreateTransportRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef CreateTransportRequest_Param Param;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+    kParamFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // .grpc_cli.CreateTransportRequest.Param param = 4;
+  bool has_param() const;
+  private:
+  bool _internal_has_param() const;
+  public:
+  void clear_param();
+  const ::grpc_cli::CreateTransportRequest_Param& param() const;
+  ::grpc_cli::CreateTransportRequest_Param* release_param();
+  ::grpc_cli::CreateTransportRequest_Param* mutable_param();
+  void set_allocated_param(::grpc_cli::CreateTransportRequest_Param* param);
+  private:
+  const ::grpc_cli::CreateTransportRequest_Param& _internal_param() const;
+  ::grpc_cli::CreateTransportRequest_Param* _internal_mutable_param();
+  public:
+  void unsafe_arena_set_allocated_param(
+      ::grpc_cli::CreateTransportRequest_Param* param);
+  ::grpc_cli::CreateTransportRequest_Param* unsafe_arena_release_param();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.CreateTransportRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  ::grpc_cli::CreateTransportRequest_Param* param_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CreateTransportResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.CreateTransportResponse.Result) */ {
+ public:
+  inline CreateTransportResponse_Result() : CreateTransportResponse_Result(nullptr) {}
+  virtual ~CreateTransportResponse_Result();
+  explicit constexpr CreateTransportResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CreateTransportResponse_Result(const CreateTransportResponse_Result& from);
+  CreateTransportResponse_Result(CreateTransportResponse_Result&& from) noexcept
+    : CreateTransportResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline CreateTransportResponse_Result& operator=(const CreateTransportResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CreateTransportResponse_Result& operator=(CreateTransportResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const CreateTransportResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CreateTransportResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const CreateTransportResponse_Result*>(
+               &_CreateTransportResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    156;
+
+  friend void swap(CreateTransportResponse_Result& a, CreateTransportResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CreateTransportResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CreateTransportResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline CreateTransportResponse_Result* New() const final {
+    return CreateMaybeMessage<CreateTransportResponse_Result>(nullptr);
+  }
+
+  CreateTransportResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<CreateTransportResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const CreateTransportResponse_Result& from);
+  void MergeFrom(const CreateTransportResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CreateTransportResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.CreateTransportResponse.Result";
+  }
+  protected:
+  explicit CreateTransportResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.CreateTransportResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CreateTransportResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.CreateTransportResponse) */ {
+ public:
+  inline CreateTransportResponse() : CreateTransportResponse(nullptr) {}
+  virtual ~CreateTransportResponse();
+  explicit constexpr CreateTransportResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CreateTransportResponse(const CreateTransportResponse& from);
+  CreateTransportResponse(CreateTransportResponse&& from) noexcept
+    : CreateTransportResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline CreateTransportResponse& operator=(const CreateTransportResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CreateTransportResponse& operator=(CreateTransportResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const CreateTransportResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CreateTransportResponse* internal_default_instance() {
+    return reinterpret_cast<const CreateTransportResponse*>(
+               &_CreateTransportResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    157;
+
+  friend void swap(CreateTransportResponse& a, CreateTransportResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CreateTransportResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CreateTransportResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline CreateTransportResponse* New() const final {
+    return CreateMaybeMessage<CreateTransportResponse>(nullptr);
+  }
+
+  CreateTransportResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<CreateTransportResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const CreateTransportResponse& from);
+  void MergeFrom(const CreateTransportResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CreateTransportResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.CreateTransportResponse";
+  }
+  protected:
+  explicit CreateTransportResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef CreateTransportResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.CreateTransportResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::CreateTransportResponse_Result& result() const;
+  ::grpc_cli::CreateTransportResponse_Result* release_result();
+  ::grpc_cli::CreateTransportResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::CreateTransportResponse_Result* result);
+  private:
+  const ::grpc_cli::CreateTransportResponse_Result& _internal_result() const;
+  ::grpc_cli::CreateTransportResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::CreateTransportResponse_Result* result);
+  ::grpc_cli::CreateTransportResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.CreateTransportResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::CreateTransportResponse_Result* result_;
   ::grpc_cli::PosInfo* info_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
@@ -61903,9 +62637,771 @@ inline void SubsystemInfoResponse::set_allocated_info(::grpc_cli::PosInfo* info)
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.SubsystemInfoResponse.info)
 }
 
+// -------------------------------------------------------------------
+
+// CreateTransportRequest_Param
+
+// string transportType = 1;
+inline void CreateTransportRequest_Param::clear_transporttype() {
+  transporttype_.ClearToEmpty();
+}
+inline const std::string& CreateTransportRequest_Param::transporttype() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.Param.transportType)
+  return _internal_transporttype();
+}
+inline void CreateTransportRequest_Param::set_transporttype(const std::string& value) {
+  _internal_set_transporttype(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportRequest.Param.transportType)
+}
+inline std::string* CreateTransportRequest_Param::mutable_transporttype() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportRequest.Param.transportType)
+  return _internal_mutable_transporttype();
+}
+inline const std::string& CreateTransportRequest_Param::_internal_transporttype() const {
+  return transporttype_.Get();
+}
+inline void CreateTransportRequest_Param::_internal_set_transporttype(const std::string& value) {
+  
+  transporttype_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CreateTransportRequest_Param::set_transporttype(std::string&& value) {
+  
+  transporttype_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateTransportRequest.Param.transportType)
+}
+inline void CreateTransportRequest_Param::set_transporttype(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  transporttype_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateTransportRequest.Param.transportType)
+}
+inline void CreateTransportRequest_Param::set_transporttype(const char* value,
+    size_t size) {
+  
+  transporttype_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateTransportRequest.Param.transportType)
+}
+inline std::string* CreateTransportRequest_Param::_internal_mutable_transporttype() {
+  
+  return transporttype_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CreateTransportRequest_Param::release_transporttype() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportRequest.Param.transportType)
+  return transporttype_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CreateTransportRequest_Param::set_allocated_transporttype(std::string* transporttype) {
+  if (transporttype != nullptr) {
+    
+  } else {
+    
+  }
+  transporttype_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), transporttype,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportRequest.Param.transportType)
+}
+
+// int32 bufCacheSize = 2;
+inline void CreateTransportRequest_Param::clear_bufcachesize() {
+  bufcachesize_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateTransportRequest_Param::_internal_bufcachesize() const {
+  return bufcachesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateTransportRequest_Param::bufcachesize() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.Param.bufCacheSize)
+  return _internal_bufcachesize();
+}
+inline void CreateTransportRequest_Param::_internal_set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  bufcachesize_ = value;
+}
+inline void CreateTransportRequest_Param::set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_bufcachesize(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportRequest.Param.bufCacheSize)
+}
+
+// int32 numSharedBuf = 3;
+inline void CreateTransportRequest_Param::clear_numsharedbuf() {
+  numsharedbuf_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateTransportRequest_Param::_internal_numsharedbuf() const {
+  return numsharedbuf_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateTransportRequest_Param::numsharedbuf() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.Param.numSharedBuf)
+  return _internal_numsharedbuf();
+}
+inline void CreateTransportRequest_Param::_internal_set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  numsharedbuf_ = value;
+}
+inline void CreateTransportRequest_Param::set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_numsharedbuf(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportRequest.Param.numSharedBuf)
+}
+
+// -------------------------------------------------------------------
+
+// CreateTransportRequest
+
+// string command = 1;
+inline void CreateTransportRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& CreateTransportRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.command)
+  return _internal_command();
+}
+inline void CreateTransportRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportRequest.command)
+}
+inline std::string* CreateTransportRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& CreateTransportRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void CreateTransportRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CreateTransportRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateTransportRequest.command)
+}
+inline void CreateTransportRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateTransportRequest.command)
+}
+inline void CreateTransportRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateTransportRequest.command)
+}
+inline std::string* CreateTransportRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CreateTransportRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CreateTransportRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportRequest.command)
+}
+
+// string rid = 2;
+inline void CreateTransportRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& CreateTransportRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.rid)
+  return _internal_rid();
+}
+inline void CreateTransportRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportRequest.rid)
+}
+inline std::string* CreateTransportRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& CreateTransportRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void CreateTransportRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CreateTransportRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateTransportRequest.rid)
+}
+inline void CreateTransportRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateTransportRequest.rid)
+}
+inline void CreateTransportRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateTransportRequest.rid)
+}
+inline std::string* CreateTransportRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CreateTransportRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CreateTransportRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportRequest.rid)
+}
+
+// string requestor = 3;
+inline void CreateTransportRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& CreateTransportRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.requestor)
+  return _internal_requestor();
+}
+inline void CreateTransportRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportRequest.requestor)
+}
+inline std::string* CreateTransportRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& CreateTransportRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void CreateTransportRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CreateTransportRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateTransportRequest.requestor)
+}
+inline void CreateTransportRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateTransportRequest.requestor)
+}
+inline void CreateTransportRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateTransportRequest.requestor)
+}
+inline std::string* CreateTransportRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CreateTransportRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CreateTransportRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportRequest.requestor)
+}
+
+// .grpc_cli.CreateTransportRequest.Param param = 4;
+inline bool CreateTransportRequest::_internal_has_param() const {
+  return this != internal_default_instance() && param_ != nullptr;
+}
+inline bool CreateTransportRequest::has_param() const {
+  return _internal_has_param();
+}
+inline void CreateTransportRequest::clear_param() {
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+}
+inline const ::grpc_cli::CreateTransportRequest_Param& CreateTransportRequest::_internal_param() const {
+  const ::grpc_cli::CreateTransportRequest_Param* p = param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::CreateTransportRequest_Param&>(
+      ::grpc_cli::_CreateTransportRequest_Param_default_instance_);
+}
+inline const ::grpc_cli::CreateTransportRequest_Param& CreateTransportRequest::param() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportRequest.param)
+  return _internal_param();
+}
+inline void CreateTransportRequest::unsafe_arena_set_allocated_param(
+    ::grpc_cli::CreateTransportRequest_Param* param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(param_);
+  }
+  param_ = param;
+  if (param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.CreateTransportRequest.param)
+}
+inline ::grpc_cli::CreateTransportRequest_Param* CreateTransportRequest::release_param() {
+  
+  ::grpc_cli::CreateTransportRequest_Param* temp = param_;
+  param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::CreateTransportRequest_Param* CreateTransportRequest::unsafe_arena_release_param() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportRequest.param)
+  
+  ::grpc_cli::CreateTransportRequest_Param* temp = param_;
+  param_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::CreateTransportRequest_Param* CreateTransportRequest::_internal_mutable_param() {
+  
+  if (param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::CreateTransportRequest_Param>(GetArena());
+    param_ = p;
+  }
+  return param_;
+}
+inline ::grpc_cli::CreateTransportRequest_Param* CreateTransportRequest::mutable_param() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportRequest.param)
+  return _internal_mutable_param();
+}
+inline void CreateTransportRequest::set_allocated_param(::grpc_cli::CreateTransportRequest_Param* param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete param_;
+  }
+  if (param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(param);
+    if (message_arena != submessage_arena) {
+      param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  param_ = param;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportRequest.param)
+}
+
+// -------------------------------------------------------------------
+
+// CreateTransportResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool CreateTransportResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool CreateTransportResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void CreateTransportResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& CreateTransportResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& CreateTransportResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportResponse.Result.status)
+  return _internal_status();
+}
+inline void CreateTransportResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.CreateTransportResponse.Result.status)
+}
+inline ::grpc_cli::Status* CreateTransportResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* CreateTransportResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* CreateTransportResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* CreateTransportResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void CreateTransportResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// CreateTransportResponse
+
+// string command = 1;
+inline void CreateTransportResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& CreateTransportResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportResponse.command)
+  return _internal_command();
+}
+inline void CreateTransportResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportResponse.command)
+}
+inline std::string* CreateTransportResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& CreateTransportResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void CreateTransportResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CreateTransportResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateTransportResponse.command)
+}
+inline void CreateTransportResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateTransportResponse.command)
+}
+inline void CreateTransportResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateTransportResponse.command)
+}
+inline std::string* CreateTransportResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CreateTransportResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CreateTransportResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportResponse.command)
+}
+
+// string rid = 2;
+inline void CreateTransportResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& CreateTransportResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportResponse.rid)
+  return _internal_rid();
+}
+inline void CreateTransportResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateTransportResponse.rid)
+}
+inline std::string* CreateTransportResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& CreateTransportResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void CreateTransportResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void CreateTransportResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateTransportResponse.rid)
+}
+inline void CreateTransportResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateTransportResponse.rid)
+}
+inline void CreateTransportResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateTransportResponse.rid)
+}
+inline std::string* CreateTransportResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* CreateTransportResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void CreateTransportResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportResponse.rid)
+}
+
+// .grpc_cli.CreateTransportResponse.Result result = 3;
+inline bool CreateTransportResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool CreateTransportResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void CreateTransportResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::CreateTransportResponse_Result& CreateTransportResponse::_internal_result() const {
+  const ::grpc_cli::CreateTransportResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::CreateTransportResponse_Result&>(
+      ::grpc_cli::_CreateTransportResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::CreateTransportResponse_Result& CreateTransportResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportResponse.result)
+  return _internal_result();
+}
+inline void CreateTransportResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::CreateTransportResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.CreateTransportResponse.result)
+}
+inline ::grpc_cli::CreateTransportResponse_Result* CreateTransportResponse::release_result() {
+  
+  ::grpc_cli::CreateTransportResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::CreateTransportResponse_Result* CreateTransportResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportResponse.result)
+  
+  ::grpc_cli::CreateTransportResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::CreateTransportResponse_Result* CreateTransportResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::CreateTransportResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::CreateTransportResponse_Result* CreateTransportResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportResponse.result)
+  return _internal_mutable_result();
+}
+inline void CreateTransportResponse::set_allocated_result(::grpc_cli::CreateTransportResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool CreateTransportResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool CreateTransportResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void CreateTransportResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& CreateTransportResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& CreateTransportResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateTransportResponse.info)
+  return _internal_info();
+}
+inline void CreateTransportResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.CreateTransportResponse.info)
+}
+inline ::grpc_cli::PosInfo* CreateTransportResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* CreateTransportResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.CreateTransportResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* CreateTransportResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* CreateTransportResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateTransportResponse.info)
+  return _internal_mutable_info();
+}
+inline void CreateTransportResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateTransportResponse.info)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
