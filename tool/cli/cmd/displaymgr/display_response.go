@@ -476,14 +476,13 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		// Data
 		for _, subsystem := range res.GetResult().GetData().GetSubsystemList() {
 			fmt.Fprintln(w,
-				subsystem.Subnqn+"\t"+
-					globals.FieldSeparator+subsystem.Subtype+"\t"+
+				subsystem.GetSubnqn()+"\t"+
+					globals.FieldSeparator+subsystem.GetSubtype()+"\t"+
 					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetListenAddresses()))+"\t"+
-					globals.FieldSeparator+subsystem.SerialNumber+"\t"+
-					globals.FieldSeparator+subsystem.ModelNumber+"\t"+
+					globals.FieldSeparator+subsystem.GetSerialNumber()+"\t"+
+					globals.FieldSeparator+subsystem.GetModelNumber()+"\t"+
 					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetNamespaces())))
 		}
-
 		w.Flush()
 
 	case "SUBSYSTEMINFO":
