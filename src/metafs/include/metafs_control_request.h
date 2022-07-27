@@ -125,9 +125,9 @@ public:
       fileName(nullptr),
       arrayId(0),
       fileByteSize(MetaFsCommonConst::INVALID_BYTE_SIZE),
-      fileType(MetaFileType::General),
       volType(MetaVolumeType::Max),
-      lock(MetaFileLockType::Default)
+      lock(MetaFileLockType::Default),
+      fileProperty()
     {
     }
 
@@ -152,7 +152,6 @@ public:
     std::string* fileName;
     int arrayId;
     FileSizeType fileByteSize;
-    MetaFileType fileType;
     MetaVolumeType volType;
     MetaFileLockType lock;
 

@@ -731,10 +731,7 @@ Mapper::_GetMpageSize(void)
     int mpageSize = 4096;
     if (metaFs != nullptr)
     {
-        MetaFilePropertySet prop;
-        prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-        prop.ioOpType = MetaFileDominant::WriteDominant;
-        prop.integrity = MetaFileIntegrityType::Lvl0_Disable;
+        MetaFilePropertySet prop(MetaFileType::Map);
         mpageSize = metaFs->EstimateAlignedFileIOSize(prop);
     }
     return mpageSize;

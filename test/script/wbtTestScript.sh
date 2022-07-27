@@ -358,7 +358,7 @@ echo ------------[MetaFs WBT CMDs]------------------------------------------
 echo --------------------------------------------------------------------
 
 echo -[MetaFs : mfs_create_file]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt mfs_create_file --name $fileName1 --size $fileSize1 --integrity 0 --access 2 --operation 2 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_create_file --name $fileName1 --size $fileSize1 --integrity 0 --filetype 2 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_open_file]------------------------------------------
@@ -368,7 +368,7 @@ fileDesc1=$(<result.txt)
 check_result
 
 echo -[MetaFs : mfs_create_file]------------------------------------------
-${BIN_DIR}/poseidonos-cli wbt mfs_create_file --name $fileName2 --size $fileSize2 --integrity 0 --access 2 --operation 2 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
+${BIN_DIR}/poseidonos-cli wbt mfs_create_file --name $fileName2 --size $fileSize2 --integrity 0 --filetype 2 --volume 0 --array $ARRAYNAME --json-res > ${cliOutput}
 check_result
 
 echo -[MetaFs : mfs_open_file]------------------------------------------

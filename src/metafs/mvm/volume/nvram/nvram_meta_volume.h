@@ -53,7 +53,6 @@ public:
 
 private:
     bool _IsByteStoreUnderUtilized(void);
-    bool _IsNVRAMStoreStronglyPreferred(MetaFilePropertySet& prop);
 
     static const MetaLpnType NVRAM_VOLUME_BASE_LPN = 0;
 };

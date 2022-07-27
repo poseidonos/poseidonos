@@ -101,17 +101,17 @@ TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
     uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
 
     // then
-    // prop is not suitable
+    prop.type = MetaFileType::Map;
     // the maximum size
-    EXPECT_FALSE(volume->IsOkayToStore(6135 * chunkSize, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
     // expected count of the free lpn: 6136
-    EXPECT_FALSE(volume->IsOkayToStore(6136 * chunkSize, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
     // more than possible
     // size is smaller than available but the number is not a multiple 8
     EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 
     // prop is suitable
-    prop.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
+    prop.type = MetaFileType::General;
     EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
     // expected count of the free lpn: 6136
     EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
@@ -119,32 +119,13 @@ TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
     // size is smaller than available but the number is not a multiple 8
     EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
 
-    prop.ioAccPattern = MetaFileAccessPattern::SmallSizeBlockIO;
+    prop.type = MetaFileType::Journal;
     EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
     // expected count of the free lpn: 6136
     EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
     // more than possible
     // size is smaller than available but the number is not a multiple 8
     EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
-
-    prop.ioOpType = MetaFileDominant::WriteDominant;
-    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
-    // expected count of the free lpn: 6136
-    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
-    // more than possible
-    // size is smaller than available but the number is not a multiple 8
-    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
-}
-
-TEST_F(NvRamMetaVolumeTestFixture, IsNVRAMStore_WriteDominant)
-{
-    uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-
-    // expected count of the free lpn: 6136
-    prop.ioAccPattern = MetaFileAccessPattern::NoSpecific;
-    prop.ioOpType = MetaFileDominant::WriteDominant;
-
-    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
 }
 
 TEST_F(NvRamMetaVolumeTestFixture, IsOkayToStore_FileSizeZero)
