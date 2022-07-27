@@ -71,7 +71,6 @@ public:
 
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
         MetaFilePropertySet prop = MetaFilePropertySet(),
-        MetaFileType fileType = MetaFileType::General,
         MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual POS_EVENT_ID Delete(std::string& fileName,
         MetaVolumeType volumeType = MetaVolumeType::SsdVolume);

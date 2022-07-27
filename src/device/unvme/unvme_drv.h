@@ -74,6 +74,7 @@ public:
     int DeviceAttached(struct spdk_nvme_ns* ns, int num_devs,
         const spdk_nvme_transport_id* trid);
     int DeviceDetached(std::string sn);
+    void SpdkDetach(struct spdk_nvme_ns* ns);
 
 private:
     int _RequestIO(UnvmeDeviceContext* deviceContext,

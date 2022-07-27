@@ -38,28 +38,6 @@ namespace pos
 {
 // definitions below indicate io characteristics of the corresponding meta file access
 // meta filesystem stores metadata and service io efficiently according to the setting given by user
-enum class MetaFileAccessPattern
-{
-    ByteIntensive,
-    SmallSizeBlockIO,
-    NoSpecific,
-
-    Max,
-
-    Default = NoSpecific
-};
-
-enum class MetaFileDominant
-{
-    ReadDominant = 0,
-    WriteDominant = 1,
-    NoSpecific = 2,
-
-    Max,
-
-    Default = NoSpecific
-};
-
 enum class MetaFileType
 {
     SpecialPurposeMap,
@@ -73,17 +51,21 @@ class MetaFilePropertySet
 {
 public:
     MetaFilePropertySet(void)
-    : MetaFilePropertySet(MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default)
+    : MetaFilePropertySet(MetaFileIntegrityType::Default, MetaFileType::General)
     {
     }
-    MetaFilePropertySet(MetaFileAccessPattern pattern, MetaFileDominant dominant, MetaFileIntegrityType integrity)
-    : ioAccPattern(pattern),
-      ioOpType(dominant),
-      integrity(integrity)
+    MetaFilePropertySet(MetaFileType type)
+    : MetaFilePropertySet(MetaFileIntegrityType::Default, type)
     {
     }
-    MetaFileAccessPattern ioAccPattern;
-    MetaFileDominant ioOpType;
+    MetaFilePropertySet(MetaFileIntegrityType integrity, MetaFileType type)
+    : integrity(integrity),
+      type(type)
+    {
+    }
+    ~MetaFilePropertySet(void) = default;
+
     MetaFileIntegrityType integrity;
+    MetaFileType type;
 };
 } // namespace pos

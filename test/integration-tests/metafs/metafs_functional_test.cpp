@@ -50,13 +50,13 @@ public:
         {
             files[arrayId].insert({MetaVolumeType::SsdVolume,
                 {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0,
-                    {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+                    {MetaFileIntegrityType::Default, MetaFileType::General}}});
             files[arrayId].insert({MetaVolumeType::NvRamVolume,
                 {"TestFileNvm", BYTE_4K * COUNT_OF_META_LPN_FOR_NVM, 0,
-                    {MetaFileAccessPattern::ByteIntensive, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+                    {MetaFileIntegrityType::Default, MetaFileType::Journal}}});
             files[arrayId].insert({MetaVolumeType::JournalVolume,
                 {"TestFileJournalSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_JOURNAL_SSD, 0,
-                    {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+                    {MetaFileIntegrityType::Default, MetaFileType::Journal}}});
         }
 
         writeBuf = new char[BYTE_4K];
@@ -101,7 +101,7 @@ TEST(MetaFsFunctionalTest, testIfMetaFsCanRepeatMountAndUnmount)
             for (auto& info : metaFs.files[arrayId])
             {
                 rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                    info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                    info.second.fileSize, info.second.prop, info.first);
                 ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
                 ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
                 ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
@@ -129,7 +129,7 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesCanBeCreated)
         for (auto& info : metaFs.files[arrayId])
         {
             rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
             ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
             ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
@@ -155,10 +155,10 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesCannotBeCreatedDueToDuplicatedFileName
         for (auto& info : metaFs.files[arrayId])
         {
             rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
             rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                info.second.fileSize, info.second.prop, info.first);
             // then
             EXPECT_NE(rc_mgmt, POS_EVENT_ID::SUCCESS);
             ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
@@ -185,7 +185,7 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesWillNotOpenTwice)
         for (auto& info : metaFs.files[arrayId])
         {
             rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
             ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
             // then
@@ -213,7 +213,7 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesWillNotCloseTwice)
         for (auto& info : metaFs.files[arrayId])
         {
             rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
-                info.second.fileSize, info.second.prop, MetaFileType::General, info.first);
+                info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
             ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
             ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), POS_EVENT_ID::SUCCESS);
@@ -240,7 +240,7 @@ TEST(MetaFsFunctionalTest, testIfMetaFsDeliversTheChunkSize)
     // when
     ASSERT_EQ(0, metaFs.GetMetaFs(arrayId)->Init());
     rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(metaFs.files[arrayId][volumeType].fileName,
-                metaFs.files[arrayId][volumeType].fileSize, metaFs.files[arrayId][volumeType].prop, MetaFileType::General, volumeType);
+                metaFs.files[arrayId][volumeType].fileSize, metaFs.files[arrayId][volumeType].prop, volumeType);
     ASSERT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
 
     // then

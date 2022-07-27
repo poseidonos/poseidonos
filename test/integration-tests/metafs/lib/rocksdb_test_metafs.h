@@ -95,7 +95,7 @@ public:
         {
             files[arrayId].insert({MetaVolumeType::SsdVolume,
                 {"TestFileSsd", BYTE_4K * COUNT_OF_META_LPN_FOR_SSD, 0,
-                    {MetaFileAccessPattern::Default, MetaFileDominant::Default, MetaFileIntegrityType::Default}}});
+                    {MetaFileIntegrityType::Default, MetaFileType::Journal}}});
         }
 
         writeBuf = new char[BYTE_4K];

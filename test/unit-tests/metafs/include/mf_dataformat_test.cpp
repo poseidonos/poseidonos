@@ -23,9 +23,8 @@ TEST(MetaFileInodeInfo, Operator)
     info.data.field.fileByteSize = 3;
     info.data.field.dataChunkSize = 4;
     info.data.field.dataLocation = MetaStorageType::NVRAM;
-    info.data.field.fileProperty.ioAccPattern = MetaFileAccessPattern::Default;
-    info.data.field.fileProperty.ioOpType = MetaFileDominant::Default;
     info.data.field.fileProperty.integrity = MetaFileIntegrityType::Default;
+    info.data.field.fileProperty.type = MetaFileType::General;
     info.data.field.extentCnt = 2;
     info.data.field.extentMap[0] = MetaFileExtent(0, 3);
     info.data.field.extentMap[1] = MetaFileExtent(3, 0);
@@ -40,9 +39,8 @@ TEST(MetaFileInodeInfo, Operator)
     EXPECT_EQ(copy.data.field.fileByteSize, 3);
     EXPECT_EQ(copy.data.field.dataChunkSize, 4);
     EXPECT_EQ(copy.data.field.dataLocation, MetaStorageType::NVRAM);
-    EXPECT_EQ(copy.data.field.fileProperty.ioAccPattern, MetaFileAccessPattern::Default);
-    EXPECT_EQ(copy.data.field.fileProperty.ioOpType, MetaFileDominant::Default);
     EXPECT_EQ(copy.data.field.fileProperty.integrity, MetaFileIntegrityType::Default);
+    EXPECT_EQ(copy.data.field.fileProperty.type, MetaFileType::General);
     EXPECT_EQ(copy.data.field.extentCnt, 2);
     EXPECT_EQ(copy.data.field.extentMap[0].GetStartLpn(), 0);
     EXPECT_EQ(copy.data.field.extentMap[0].GetCount(), 3);

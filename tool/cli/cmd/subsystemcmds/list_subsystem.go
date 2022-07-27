@@ -5,9 +5,7 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/messages"
 	"cli/cmd/socketmgr"
-	"encoding/json"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
@@ -43,7 +41,7 @@ Example 2 (listing a specific subsystem):
 	},
 }
 
-func executeListSubsystemCmd(command string) {
+func executeSubsystemInfoCmd(command string) {
 	uuid := globals.GenerateUUID()
 	param := &pb.SubsystemInfoRequest_Param{Subnqn: list_subsystem_subnqn}
 	req := &pb.SubsystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
@@ -77,25 +75,35 @@ func executeListSubsystemCmd(command string) {
 	}
 }
 
-func executeSubsystemInfoCmd(command string) {
-	param := messages.ListSubsystemParam{
-		SUBNQN: list_subsystem_subnqn,
-	}
-
+func executeListSubsystemCmd(command string) {
 	uuid := globals.GenerateUUID()
+	req := &pb.ListSubsystemRequest{Command: command, Rid: uuid, Requestor: "cli"}
 
-	ListSubsystemReq := messages.BuildReqWithParam(command, uuid, param)
-
-	reqJSON, err := json.Marshal(ListSubsystemReq)
+	reqJSON, err := protojson.Marshal(req)
 	if err != nil {
-		log.Error("error:", err)
+		log.Fatalf("failed to marshal the protobuf request: %v", err)
 	}
 
 	displaymgr.PrintRequest(string(reqJSON))
 
-	// Do not send request to server and print response when testing request build.
 	if !(globals.IsTestingReqBld) {
-		resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+		var resJSON string
+
+		if globals.EnableGrpc == false {
+			resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+		} else {
+			res, err := grpcmgr.SendListSubsystem(req)
+			if err != nil {
+				globals.PrintErrMsg(err)
+				return
+			}
+			resByte, err := protojson.Marshal(res)
+			if err != nil {
+				log.Fatalf("failed to marshal the protobuf response: %v", err)
+			}
+			resJSON = string(resByte)
+		}
+
 		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 	}
 }
