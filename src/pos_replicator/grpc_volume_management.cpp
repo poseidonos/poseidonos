@@ -120,6 +120,12 @@ GrpcVolumeManagement::UpdateVoluemMeta(::grpc::ServerContext* context,
     IVolumeEventManager* volEventManger =
             VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
+    if (nullptr == volEventManger)
+    {
+        const string errorMsg = "Approached ArrayName, not in use.";
+        return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, errorMsg);
+    }
+
     int ret = volEventManger->SaveVolumeMeta();
 
     if (ret != EID(SUCCESS))
