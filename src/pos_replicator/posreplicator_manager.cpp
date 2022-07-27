@@ -61,6 +61,8 @@ PosReplicatorManager::Init(void)
     // grpc server or client start
     grpcPublisher = new GrpcPublisher(nullptr);
     grpcSubscriber = new GrpcSubscriber();
+    grpcVolumeManagement = new GrpcVolumeManagement();
+    
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been initialized");
 }
 
@@ -75,6 +77,10 @@ PosReplicatorManager::Dispose(void)
     if (grpcSubscriber != nullptr)
     {
         delete grpcSubscriber;
+    }
+    if (grpcVolumeManagement != nullptr)
+    {
+        delete grpcVolumeManagement;
     }
 
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been disposed");

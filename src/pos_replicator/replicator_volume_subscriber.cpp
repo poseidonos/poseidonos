@@ -45,7 +45,6 @@ ReplicatorVolumeSubscriber::ReplicatorVolumeSubscriber(IArrayInfo* info)
 arrayInfo(info)
 {
     volumeManager = nullptr;
-    grpcVolumeManagement = nullptr;
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "ReplicatorVolumeSubscriber has been constructed");
 }
 
@@ -59,7 +58,6 @@ ReplicatorVolumeSubscriber::Init(void)
 {
     int ret = PosReplicatorManagerSingleton::Instance()->Register(arrayId, this);
     volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
-    grpcVolumeManagement = new GrpcVolumeManagement(nullptr, volumeManager);
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
     return ret;
 }
@@ -69,7 +67,6 @@ ReplicatorVolumeSubscriber::Dispose(void)
 {
     PosReplicatorManagerSingleton::Instance()->Unregister(arrayId);
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
-    delete grpcVolumeManagement;
 }
 
 void

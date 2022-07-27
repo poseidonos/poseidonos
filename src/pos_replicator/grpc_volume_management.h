@@ -52,7 +52,7 @@ namespace pos
 class GrpcVolumeManagement final : public pos_rpc::PosManagement::Service
 {
 public:
-    GrpcVolumeManagement(std::shared_ptr<grpc::Channel> channel_, IVolumeEventManager* volMgr);
+    GrpcVolumeManagement(void);
     ~GrpcVolumeManagement(void);
 
     void RunServer(std::string address);
@@ -96,6 +96,5 @@ public:
         ::pos_rpc::VolumeListResponse* response) override;
 private:
     std::unique_ptr<::grpc::Server> posMgrGrpcServer;
-    IVolumeEventManager* volEventManger;
 };
 }

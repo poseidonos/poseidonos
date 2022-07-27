@@ -35,6 +35,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/pos_replicator/posreplicator_manager.h"
+#include "src/volume/volume_service.h"
 
 namespace std
 {
@@ -44,15 +45,13 @@ class thread;
 namespace pos
 {
 
-GrpcVolumeManagement::GrpcVolumeManagement(std::shared_ptr<grpc::Channel> channel_, IVolumeEventManager* volMgr)
+GrpcVolumeManagement::GrpcVolumeManagement(void)
 {
     // new grpc server setting
     string address(GRPC_HA_VOL_SERVER_SOCKET_ADDRESS);
 
     new std::thread(&GrpcVolumeManagement::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcSubscriber has been initialized. Server address : {}", address);
-
-    volEventManger = volMgr;
 }
 
 GrpcVolumeManagement::~GrpcVolumeManagement(void)
@@ -118,6 +117,8 @@ GrpcVolumeManagement::UpdateVoluemMeta(::grpc::ServerContext* context,
         const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response)
 {
     string arrayName = request->array_name();
+    IVolumeEventManager* volEventManger =
+            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
     int ret = volEventManger->SaveVolumeMeta();
 

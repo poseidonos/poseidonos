@@ -66,7 +66,6 @@ public:
 private:
     IArrayInfo* arrayInfo;
     IVolumeEventManager* volumeManager;
-    GrpcVolumeManagement* grpcVolumeManagement;
 };
 
 } // namespace pos
