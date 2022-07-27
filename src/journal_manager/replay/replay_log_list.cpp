@@ -98,6 +98,11 @@ ReplayLogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
 void
 ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
 {
+    ReplayLogGroup replayLogGroup = logGroups[seqNum];
+    for (ReplayLog replayLog : replayLogGroup.logs)
+    {
+        delete replayLog.log;
+    }
     logGroups.erase(seqNum);
 }
 
