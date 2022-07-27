@@ -53,10 +53,10 @@ class ArrayRebuild
 {
 public:
     ArrayRebuild(void) {}
-    ArrayRebuild(string arrayName, uint32_t arrayId, ArrayDevice* dev,
+    ArrayRebuild(string arrayName, uint32_t arrayId, ArrayDevice* dst, ArrayDevice* src,
         RebuildComplete cb, list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-        RebuildTypeEnum rebuildType, bool isWT = false);
-    virtual void Init(string array, ArrayDevice* dev, RebuildComplete cb,
+        RebuildTypeEnum rebuildType);
+    virtual void Init(string array, ArrayDevice* dst, ArrayDevice* src, RebuildComplete cb,
         list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* logger);
     virtual ~ArrayRebuild(void);
     virtual void Start(void);
@@ -70,7 +70,8 @@ private:
     void _RebuildDone(RebuildResult res);
     void _RebuildCompleted(RebuildResult res);
     string arrayName = "";
-    ArrayDevice* targetDev = nullptr;
+    ArrayDevice* dst = nullptr;
+    ArrayDevice* src = nullptr;
     RebuildState state = RebuildState::READY;
     RebuildComplete rebuildComplete;
     list<PartitionRebuild*> tasks;

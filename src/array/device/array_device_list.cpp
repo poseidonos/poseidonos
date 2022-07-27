@@ -38,6 +38,7 @@
 #include "src/device/base/ublock_device.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/helper/enumerable/query.h"
 
 namespace pos
 {
@@ -175,11 +176,15 @@ ArrayDeviceList::RemoveSpare(ArrayDevice* target)
     auto it = FindSpare(target);
     if (it == devSet_.spares.end())
     {
-        int eventId = EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
+        int eventId = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
         POS_TRACE_WARN(eventId, "");
         return eventId;
     }
-    (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
+    if ((*it)->GetUblock() != nullptr)
+    {
+        (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
+    }
+    delete *it;
     devSet_.spares.erase(it);
     return 0;
 }
@@ -289,32 +294,35 @@ ArrayDeviceList::Exists(string devName)
 }
 
 int
-ArrayDeviceList::SpareToData(ArrayDevice* target)
+ArrayDeviceList::SpareToData(ArrayDevice* target, ArrayDevice*& swapOut)
 {
     unique_lock<mutex> lock(*mtx);
     int noSpareToReplace = EID(NO_SPARE_SSD_TO_REPLACE);
-    if (devSet_.spares.size() == 0)
+    if (devSet_.spares.size() > 0)
     {
-        POS_TRACE_WARN(noSpareToReplace, "No remaining spare device");
-        return noSpareToReplace;
+        ArrayDevice* spare = Enumerable::First(devSet_.spares,
+            [](auto d) { return d->GetState() == ArrayDeviceState::NORMAL; });
+        if (spare != nullptr)
+        {
+            UblockSharedPtr newUblock = spare->GetUblock();
+            if (newUblock != nullptr)
+            {
+                UblockSharedPtr oldUblock = target->GetUblock();
+                spare->SetUblock(oldUblock);
+                swapOut = spare;
+                auto it = FindSpare(spare);
+                devSet_.spares.erase(it);
+                target->SetUblock(newUblock);
+                POS_TRACE_INFO(EID(ARRAY_EVENT_SSD_REPLACED),
+                    "{} is replaced to the spare {}({}), swapout:{}({})",
+                    target->PrevUblockInfo(), target->GetName(), target->GetSerial(),
+                    swapOut->GetName(), swapOut->GetSerial());
+                return 0;
+            }
+        }
     }
-
-    ArrayDevice* spare = devSet_.spares.back();
-    UblockSharedPtr ublock = spare->GetUblock();
-    if (ublock != nullptr)
-    {
-        POS_TRACE_INFO(EID(ARRAY_EVENT_SSD_REPLACED),
-            "{} is replaced to the spare {}({})",
-            target->PrevUblockInfo(), ublock->GetName(), ublock->GetSN());
-        target->SetUblock(ublock);
-        devSet_.spares.pop_back();
-        return 0;
-    }
-    else
-    {
-        POS_TRACE_WARN(noSpareToReplace, "There is a spare device, but the ublock is invalid");
-        return noSpareToReplace;
-    }
+    POS_TRACE_WARN(noSpareToReplace, "There is no spare device available.");
+    return noSpareToReplace;
 }
 
 } // namespace pos

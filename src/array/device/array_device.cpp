@@ -82,6 +82,16 @@ ArrayDevice::GetName(void)
     return uBlock->GetName();
 }
 
+string
+ArrayDevice::GetSerial(void)
+{
+    if (uBlock == nullptr)
+    {
+        return "null";
+    }
+    return uBlock->GetSN();
+}
+
 ArrayDeviceState
 ArrayDevice::GetState(void)
 {

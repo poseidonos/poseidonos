@@ -33,6 +33,8 @@
 #pragma once
 
 #include "recovery_base.h"
+#include "src/include/recover_func.h"
+#include "src/array/device/array_device.h"
 
 using namespace std;
 
@@ -41,7 +43,12 @@ namespace pos
 class QuickRecovery : public RecoveryBase
 {
 public:
-    explicit QuickRecovery(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
+    explicit QuickRecovery(ArrayDevice* srcDev, uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
     int Recover(UbioSmartPtr ubio) override;
+
+private:
+    void _Copy(void* dst, void* src, uint32_t size);
+    ArrayDevice* src;
+    RecoverFunc recoverFunc = nullptr;
 };
 } // namespace pos

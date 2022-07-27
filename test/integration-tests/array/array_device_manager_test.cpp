@@ -804,29 +804,6 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
     ASSERT_EQ(0, actual);
 }
 
-TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
-{
-    // Given
-    MockDeviceManager mockSysDevMgr(nullptr);
-    string mockArrayName = "mockArray";
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
-
-    auto spare1 = MockUblockDevice("spare1");
-    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
-    DeviceSet<ArrayDevice*> deviceSet;
-    deviceSet.spares.push_back(&spare1Dev);
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
-
-    EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
-
-    // When
-    int actual = arrDevMgr.RemoveSpare(&spare1Dev);
-
-    // Then
-    ASSERT_EQ(0, actual);
-}
-
 TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
 {
     // Given

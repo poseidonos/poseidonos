@@ -134,8 +134,20 @@ ArrayState::CanRemoveSpare(void)
     int eventId = 0;
     if (!IsMounted())
     {
-        eventId = EID(REMOVE_SPARE_CAN_ONLY_BE_WHILE_ONLINE);
-        POS_TRACE_WARN(eventId, "curr_state: {}", state.ToString());
+        eventId = EID(REMOVE_DEV_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "curr_state:{}", state.ToString());
+    }
+    return eventId;
+}
+
+int
+ArrayState::CanRemoveData(void)
+{
+    int eventId = 0;
+    if (state != ArrayStateEnum::NORMAL)
+    {
+        eventId = EID(REMOVE_DATA_DEV_CAN_ONLY_BE_IN_NORMAL_STATE);
+        POS_TRACE_WARN(eventId, "curr_state:{}", state.ToString());
     }
     return eventId;
 }

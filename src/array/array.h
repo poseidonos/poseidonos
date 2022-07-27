@@ -82,7 +82,7 @@ public:
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
-    virtual int RemoveSpare(string devName);
+    virtual int RemoveDevice(string devName);
     virtual int DetachDevice(UblockSharedPtr uBlock);
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
@@ -105,6 +105,7 @@ public:
     bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
+    virtual void DoRebuildAsync(ArrayDevice* dst, ArrayDevice* src, RebuildTypeEnum rt);
     virtual bool ResumeRebuild(ArrayDevice* target);
     virtual void SetPreferences(bool isWT);
 

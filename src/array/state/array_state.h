@@ -65,6 +65,7 @@ public:
 
     virtual int CanAddSpare(void);
     virtual int CanRemoveSpare(void);
+    virtual int CanRemoveData(void);
     virtual int IsMountable(void);
     virtual int IsUnmountable(void);
     virtual int IsDeletable(void);

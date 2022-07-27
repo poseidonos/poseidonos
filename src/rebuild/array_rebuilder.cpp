@@ -44,11 +44,11 @@ ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti)
 }
 
 void
-ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* targetDev,
-                        RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildTypeEnum rebuildType, bool isWT)
+ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dst, ArrayDevice* src,
+                        RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildTypeEnum rebuildType)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Rebuild of {} requested, target_size: {}, isWT:{}", array, tgt.size(), isWT);
+        "Rebuild of {} requested, target_size:{}, rebuild_type:{}", array, tgt.size(), rebuildType);
 
     if (_Find(array) != nullptr)
     {
@@ -87,7 +87,7 @@ ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* targetDev,
         }
     }
     RebuildBehaviorFactory factory(AllocatorServiceSingleton::Instance()->GetIContextManager(array));
-    ArrayRebuild* job = new ArrayRebuild(array, arrayId, targetDev, cb, tgt, &factory, rebuildType, isWT);
+    ArrayRebuild* job = new ArrayRebuild(array, arrayId, dst, src, cb, tgt, &factory, rebuildType);
     jobsInProgress.emplace(array, job);
     mtxStart.unlock();
 
