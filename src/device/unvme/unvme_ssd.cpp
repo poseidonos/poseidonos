@@ -52,6 +52,7 @@ UnvmeSsd::UnvmeSsd(
     SpdkNvmeCaller* spdkNvmeCaller,
     SpdkEnvCaller* spdkEnvCaller)
 : UBlockDevice(name, size, driverToUse),
+  driver(driverToUse),
   ns(namespaceToUse),
   spdkNvmeCaller(spdkNvmeCaller),
   spdkEnvCaller(spdkEnvCaller)
@@ -67,6 +68,11 @@ UnvmeSsd::UnvmeSsd(
 // LCOV_EXCL_START
 UnvmeSsd::~UnvmeSsd(void)
 {
+    if (isHotDetached == true)
+    {
+        POS_TRACE_WARN(EID(DEVICEMGR_REMOVE_DEV), "Free SSD ctrlr {}({})", GetName(), GetSN());
+        driver->SpdkDetach(ns);
+    }
     if (spdkNvmeCaller != nullptr)
     {
         delete spdkNvmeCaller;
