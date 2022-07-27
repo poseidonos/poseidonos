@@ -1,15 +1,15 @@
 package subsystemcmds
 
 import (
-	"encoding/json"
-
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var CreateTransportCmd = &cobra.Command{
@@ -27,27 +27,41 @@ Example:
 	Run: func(cmd *cobra.Command, args []string) {
 
 		var command = "CREATETRANSPORT"
-
-		param := messages.CreateTransportParam{
-			TRANSPORTTYPE: transport_create_trtype,
-			BUFCACHESIZE:  transport_create_bufcachesize,
-			NUMSHAREDBUF:  transport_create_numsharedbuf,
-		}
-
 		uuid := globals.GenerateUUID()
 
-		req := messages.BuildReqWithParam(command, uuid, param)
+		param := &pb.CreateTransportRequest_Param{
+			TransportType: transport_create_trtype,
+			BufCacheSize:  transport_create_bufcachesize,
+			NumSharedBuf:  transport_create_numsharedbuf,
+		}
 
-		reqJSON, err := json.Marshal(req)
+		req := &pb.CreateTransportRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
 
-		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			var resJSON string
+
+			if globals.EnableGrpc == false {
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			} else {
+				res, err := grpcmgr.SendCreateTransport(req)
+				if err != nil {
+					globals.PrintErrMsg(err)
+					return
+				}
+				resByte, err := protojson.Marshal(res)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf response: %v", err)
+				}
+				resJSON = string(resByte)
+			}
+
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
@@ -56,9 +70,11 @@ Example:
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var transport_create_trtype = ""
-var transport_create_bufcachesize = 0
-var transport_create_numsharedbuf = 0
+var (
+	transport_create_trtype             = ""
+	transport_create_bufcachesize int32 = 0
+	transport_create_numsharedbuf int32 = 0
+)
 
 func init() {
 	CreateTransportCmd.Flags().StringVarP(&transport_create_trtype,
@@ -66,10 +82,10 @@ func init() {
 		"Transport type (ex. TCP).")
 	CreateTransportCmd.MarkFlagRequired("trtype")
 
-	CreateTransportCmd.Flags().IntVarP(&transport_create_bufcachesize,
+	CreateTransportCmd.Flags().Int32VarP(&transport_create_bufcachesize,
 		"buf-cache-size", "c", 0,
 		"The number of shared buffers to reserve for each poll group (default : 64).")
-	CreateTransportCmd.Flags().IntVarP(&transport_create_numsharedbuf,
+	CreateTransportCmd.Flags().Int32VarP(&transport_create_numsharedbuf,
 		"num-shared-buf", "", 0,
 		"The number of pooled data buffers available to the transport.")
 }
