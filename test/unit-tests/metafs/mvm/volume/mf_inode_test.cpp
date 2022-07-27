@@ -174,8 +174,7 @@ TEST(MetaFileInode, NewEntry)
     EXPECT_EQ(inode.data.basic.field.dataChunkSize, chunkSize);
     EXPECT_EQ(inode.data.basic.field.ioAttribute.media, req.media);
     EXPECT_EQ(inode.data.basic.field.ioAttribute.ioSpecfic.integrity, req.ioAttribute.integrity);
-    EXPECT_EQ(inode.data.basic.field.ioAttribute.ioSpecfic.ioAccPattern, req.ioAttribute.ioAccPattern);
-    EXPECT_EQ(inode.data.basic.field.ioAttribute.ioSpecfic.ioOpType, req.ioAttribute.ioOpType);
+    EXPECT_EQ(inode.data.basic.field.ioAttribute.ioSpecfic.type, req.ioAttribute.type);
     EXPECT_EQ(inode.data.basic.field.pagemapCnt, extent.size());
     for (int i = 0; i < extent.size(); ++i)
         EXPECT_EQ(inode.data.basic.field.pagemap[i], req.extentList->at(i));
@@ -215,8 +214,7 @@ TEST(MetaFileInode, MetaFileInfo)
     inode.data.basic.field.fileByteSize = 1;
     inode.data.basic.field.dataChunkSize = 1;
     inode.data.basic.field.ioAttribute.ioSpecfic.integrity = MetaFileIntegrityType::Default;
-    inode.data.basic.field.ioAttribute.ioSpecfic.ioAccPattern = MetaFileAccessPattern::Default;
-    inode.data.basic.field.ioAttribute.ioSpecfic.ioOpType = MetaFileDominant::Default;
+    inode.data.basic.field.ioAttribute.ioSpecfic.type = MetaFileType::General;
     inode.data.basic.field.pagemapCnt = 1;
     inode.data.basic.field.pagemap[0].SetStartLpn(1);
     inode.data.basic.field.pagemap[0].SetCount(1);
@@ -233,8 +231,7 @@ TEST(MetaFileInode, MetaFileInfo)
     EXPECT_EQ(inodeInfo.data.field.dataChunkSize, inode.data.basic.field.dataChunkSize);
     EXPECT_EQ(inodeInfo.data.field.dataLocation, type);
     EXPECT_EQ(inodeInfo.data.field.fileProperty.integrity, inode.data.basic.field.ioAttribute.ioSpecfic.integrity);
-    EXPECT_EQ(inodeInfo.data.field.fileProperty.ioAccPattern, inode.data.basic.field.ioAttribute.ioSpecfic.ioAccPattern);
-    EXPECT_EQ(inodeInfo.data.field.fileProperty.ioOpType, inode.data.basic.field.ioAttribute.ioSpecfic.ioOpType);
+    EXPECT_EQ(inodeInfo.data.field.fileProperty.type, inode.data.basic.field.ioAttribute.ioSpecfic.type);
     EXPECT_EQ(inodeInfo.data.field.extentCnt, inode.data.basic.field.pagemapCnt);
     EXPECT_EQ(inodeInfo.data.field.extentMap[0], inode.data.basic.field.pagemap[0]);
 }

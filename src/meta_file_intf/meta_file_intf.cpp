@@ -55,7 +55,7 @@ MetaFileIntf::MetaFileIntf(const std::string fileName, const int arrayId,
   fd(-1),
   fileType(fileType),
   volumeType(volumeType),
-  fileProperty(MetaFilePropertySet())
+  fileProperty(fileType)
 {
 }
 

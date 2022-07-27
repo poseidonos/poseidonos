@@ -84,34 +84,9 @@ NvRamMetaVolume::IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& p
 
     if (true == IsFreeSpaceEnough(fileByteSize))
     {
-        if (_IsNVRAMStoreStronglyPreferred(prop))
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    return false;
-}
-
-bool
-NvRamMetaVolume::_IsNVRAMStoreStronglyPreferred(MetaFilePropertySet& prop)
-{
-    if (prop.ioAccPattern == MetaFileAccessPattern::ByteIntensive ||
-        prop.ioAccPattern == MetaFileAccessPattern::SmallSizeBlockIO)
-    {
-        return true;
-    }
-
-    if (prop.ioOpType == MetaFileDominant::WriteDominant)
-    {
         return true;
     }
 
     return false;
 }
-
 } // namespace pos

@@ -158,7 +158,7 @@ MapperWbt::ReadReverseMap(StripeId vsid, std::string fname)
     }
 
     // Store ReverseMap of vsid to Linux file(fname)
-    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
+    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
     fileToStore->Create(fileSize);
     fileToStore->Open();
     ret = fileToStore->IssueIO(MetaFsIoOpcode::Write, 0, fileSize, buf);
@@ -178,7 +178,7 @@ MapperWbt::WriteReverseMap(StripeId vsid, std::string fname)
     uint32_t fileSize = reverseMapManager->GetReverseMapPerStripeFileSize();
     uint32_t offset = fileSize * vsid;
     char* buf = new char[fileSize];
-    MetaFileIntf* fileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
+    MetaFileIntf* fileFromLoad = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
     fileFromLoad->Open();
     int ret = fileFromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buf);
     if (ret < 0)
@@ -211,7 +211,7 @@ MapperWbt::ReadWholeReverseMap(std::string fname)
     }
 
     // Store Whole ReverseMap to Linux file(fname)
-    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId());
+    MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
     POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_FILE_SIZE, "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
                     reverseMapManager->GetReverseMapPerStripeFileSize(), addrInfo->GetMaxVSID(), fileSize);
     fileToStore->Create(fileSize);
@@ -236,7 +236,7 @@ MapperWbt::WriteWholeReverseMap(std::string fname)
     char* buf = new char[fileSize]();
 
     // Load Whole ReverseMap from Linux file(fname)
-    MetaFileIntf* filefromLoad = new MockFileIntf(fname, addrInfo->GetArrayId());
+    MetaFileIntf* filefromLoad = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
     filefromLoad->Open();
     int ret = filefromLoad->IssueIO(MetaFsIoOpcode::Read, 0, fileSize, buf);
     filefromLoad->Close();

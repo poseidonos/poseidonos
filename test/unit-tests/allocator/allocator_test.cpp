@@ -161,7 +161,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, nullptr, segCtx, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0);
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
 
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
@@ -185,7 +185,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_STORE), ret);
 
     // given 3. success to Write file
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
     EXPECT_CALL(*segCtx, CopySegmentInfoToBufferforWBT);
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
@@ -198,7 +198,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ(0, ret);
 
     // given 4. wrong WBT Type
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, Close);
@@ -208,7 +208,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_STORE), ret);
 
     // given 5. failed to appendIo
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
@@ -219,7 +219,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_STORE), ret);
 
     // given 6. success to appendIo
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
@@ -242,7 +242,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, allocCtx, segCtx, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0);
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
 
     // given 1. fail to appendIo file
@@ -255,7 +255,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
     // given 2. success to appendIo file
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
@@ -266,7 +266,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ(0, ret);
 
     // given 3. failed to append Io
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
     EXPECT_CALL(*file, Close);
@@ -277,7 +277,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
     // given 4. success to append Io
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
@@ -289,7 +289,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ(0, ret);
 
     // given 5. failed to appendIo
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
     EXPECT_CALL(*file, Close);
@@ -299,7 +299,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
     // given 6. success to appendIo
-    file = new NiceMock<MockMetaFileIntf>("aa", "bb");
+    file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);

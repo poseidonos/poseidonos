@@ -53,7 +53,6 @@ MetaFsFileIntf::MetaFsFileIntf(const std::string fileName, const int arrayId,
   baseLpn(UINT64_MAX),
   BYTE_ACCESS_ENABLED(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsDirectAccessEnabled())
 {
-    _SetFileProperty(volumeType);
 }
 
 // only for test
@@ -66,7 +65,6 @@ MetaFsFileIntf::MetaFsFileIntf(std::string fileName, int arrayId, MetaFs* metaFs
   baseLpn(UINT64_MAX),
   BYTE_ACCESS_ENABLED(configManager->IsDirectAccessEnabled())
 {
-    _SetFileProperty(volumeType);
 }
 
 MetaFsFileIntf::~MetaFsFileIntf(void)
@@ -205,7 +203,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 int
 MetaFsFileIntf::Create(uint64_t fileSize)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, fileType, volumeType);
+    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, volumeType);
     if (POS_EVENT_ID::SUCCESS != rc)
     {
         return -(int)rc;
@@ -268,20 +266,4 @@ MetaFsFileIntf::GetFileSize(void)
 {
     return metaFs->ctrl->GetFileSize(fd, volumeType);
 }
-
-void
-MetaFsFileIntf::_SetFileProperty(MetaVolumeType volumeType)
-{
-    if (MetaVolumeType::NvRamVolume == volumeType)
-    {
-        fileProperty.ioAccPattern = MetaFileAccessPattern::ByteIntensive;
-        fileProperty.ioOpType = MetaFileDominant::WriteDominant;
-        fileProperty.integrity = MetaFileIntegrityType::Lvl0_Disable;
-    }
-    else
-    {
-        // Use default
-    }
-}
-
 } // namespace pos

@@ -58,7 +58,7 @@ class MetaFsFileIntfTester : public MetaFsFileIntf
 {
 public:
     MetaFsFileIntfTester(string fname, int arrayId, MetaFs* metaFs, MetaFsConfigManager* configManager)
-    : MetaFsFileIntf(fname, arrayId, metaFs, configManager)
+    : MetaFsFileIntf(fname, arrayId, metaFs, configManager, MetaFileType::Map)
     {
     }
 
@@ -70,11 +70,6 @@ public:
     int Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
     {
         return _Write(fd, fileOffset, length, buffer);
-    }
-
-    void SetFileProperty(MetaVolumeType volumeType)
-    {
-        _SetFileProperty(volumeType);
     }
 
     MetaFilePropertySet& GetFileProperty(void)
@@ -94,8 +89,7 @@ public:
     {
     }
 
-    virtual void
-    SetUp(void)
+    virtual void SetUp(void)
     {
         arrayInfo = new NiceMock<MockIArrayInfo>;
         mgmt = new NiceMock<MockMetaFsManagementApi>;
@@ -110,8 +104,7 @@ public:
         metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs, config);
     }
 
-    virtual void
-    TearDown(void)
+    virtual void TearDown(void)
     {
         delete metaFs;
         delete arrayInfo;
@@ -205,14 +198,7 @@ TEST_F(MetaFsFileIntfFixture, CheckFileProperty)
     MetaFilePropertySet& property = metaFile->GetFileProperty();
 
     EXPECT_EQ(property.integrity, MetaFileIntegrityType::Default);
-    EXPECT_EQ(property.ioAccPattern, MetaFileAccessPattern::Default);
-    EXPECT_EQ(property.ioOpType, MetaFileDominant::Default);
-
-    metaFile->SetFileProperty(type);
-
-    EXPECT_EQ(property.integrity, MetaFileIntegrityType::Lvl0_Disable);
-    EXPECT_EQ(property.ioAccPattern, MetaFileAccessPattern::ByteIntensive);
-    EXPECT_EQ(property.ioOpType, MetaFileDominant::WriteDominant);
+    EXPECT_EQ(property.type, MetaFileType::Map);
 }
 
 TEST_F(MetaFsFileIntfFixture, ReadMetaFile)
