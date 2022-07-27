@@ -59,6 +59,8 @@ ReplicatorVolumeSubscriber::Init(void)
     int ret = PosReplicatorManagerSingleton::Instance()->Register(arrayId, this);
     volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayName, arrayId);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "ReplicatorVolumeSubscriber has been initialized (arrayId = {}, arrayName = {})",
+        arrayId, arrayName);
     return ret;
 }
 
@@ -67,6 +69,8 @@ ReplicatorVolumeSubscriber::Dispose(void)
 {
     PosReplicatorManagerSingleton::Instance()->Unregister(arrayId);
     VolumeEventPublisherSingleton::Instance()->RemoveSubscriber(this, arrayName, arrayId);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "ReplicatorVolumeSubscriber has been disposed (arrayId = {}, arrayName = {})",
+        arrayId, arrayName);
 }
 
 void
