@@ -21,10 +21,10 @@ poseidonos-cli subsystem create-transport [flags]
 ### Options
 
 ```
-  -c, --buf-cache-size int   The number of shared buffers to reserve for each poll group (default : 64).
-  -h, --help                 help for create-transport
-      --num-shared-buf int   The number of pooled data buffers available to the transport.
-  -t, --trtype string        Transport type (ex. TCP).
+  -c, --buf-cache-size int32   The number of shared buffers to reserve for each poll group (default : 64).
+  -h, --help                   help for create-transport
+      --num-shared-buf int32   The number of pooled data buffers available to the transport.
+  -t, --trtype string          Transport type (ex. TCP).
 ```
 
 ### Options inherited from parent commands
