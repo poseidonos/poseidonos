@@ -63,15 +63,20 @@ TEST(LogGroupReleaser, GetFullLogGroups_testIfExecutedSuccessfully)
 {
     // Given
     LogGroupReleaserSpy releaser;
-    std::list<int> logGroups;
-    logGroups.push_back(0);
+    std::list<LogGroupInfo> logGroups;
+    logGroups.push_back({0, 2});
     releaser.SetFullLogGroups(logGroups);
 
     // When
-    std::list<int> actual = releaser.GetFullLogGroups();
+    auto actual = releaser.GetFullLogGroups();
+    std::list<int> expect;
+    for (auto it: logGroups)
+    {
+        expect.push_back(it.logGroupId);
+    }
 
     // Then
-    EXPECT_EQ(actual, logGroups);
+    EXPECT_EQ(actual, expect);
 }
 
 TEST(LogGroupReleaser, GetStatus_testIfExecutedSuccessfully)
@@ -106,7 +111,9 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointStartedWhenThereIsNoFl
     // When: There is only one full log group in the full list,
     // no flushing log group exist, and checkpoint is not in progress
     int targetLogGroup = 0;
-    std::list<int> logGroups = {0, 1};
+    std::list<LogGroupInfo> logGroups;
+    logGroups.push_back({0, 0});
+    logGroups.push_back({1, 1});
     releaser.SetFullLogGroups(logGroups);
 
     releaser.SetFlushingLogGroupId(-1);
@@ -139,7 +146,9 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedCheckpointIs
     // When: There is only one full log group in the full list,
     // no flushing log group exist, and checkpoint is in progress
     int fullLogGroup = 0;
-    std::list<int> logGroups = {fullLogGroup};
+
+    std::list<LogGroupInfo> logGroups;
+    logGroups.push_back({fullLogGroup, 0});
     releaser.SetFullLogGroups(logGroups);
 
     releaser.SetFlushingLogGroupId(-1);
@@ -167,7 +176,9 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsF
     releaser.SetFlushingLogGroupId(flushingLogGroup);
 
     int fullLogGroup = 1;
-    std::list<int> logGroups = {fullLogGroup};
+    std::list<LogGroupInfo> logGroups;
+    logGroups.push_back({fullLogGroup, (uint32_t)fullLogGroup});
+    
     releaser.SetFullLogGroups(logGroups);
 
     // Then: Checkpoint event should not be inserted
@@ -190,7 +201,7 @@ TEST(LogGroupReleaser, _FlushNextLogGroup_testIfCheckpointNotStartedWhenThereIsN
     // When: There is no full log group in the full list, and flushing log group
     releaser.SetFlushingLogGroupId(-1);
 
-    std::list<int> logGroups;
+    std::list<LogGroupInfo> logGroups;
     releaser.SetFullLogGroups(logGroups);
 
     // Then: Checkpoint event should not be inserted
@@ -215,7 +226,8 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointStarted)
 
     // When: Log group 0 is flushed and log group 1 is in the full log group list
     int flushedlogGroupId = 0;
-    std::list<int> fullLogGroup = {1};
+    std::list<LogGroupInfo> fullLogGroup;
+    fullLogGroup.push_back({1, 1});
     releaser.SetFullLogGroups(fullLogGroup);
     releaser.SetCheckpointTriggerInProgress(false);
 
@@ -239,7 +251,7 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointIsNotStartedWh
 
     // When: Log group 0 is flushed and full log group list is empty
     int flushedlogGroupId = 0;
-    std::list<int> fullLogGroup;
+    std::list<LogGroupInfo> fullLogGroup;
     releaser.SetFullLogGroups(fullLogGroup);
     releaser.SetCheckpointTriggerInProgress(false);
 

@@ -50,15 +50,16 @@ public:
 
     virtual void AddLog(LogHandlerInterface* log) override;
     virtual bool IsEmpty(void) override;
-    virtual void SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer) override;
+    virtual void SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer) override;
 
+    virtual void EraseReplayLogGroup(uint32_t seqNum);
     virtual ReplayLogGroup PopReplayLogGroup(void);
     std::vector<ReplayLog>& GetDeletingLogs(void);
 
 private:
     uint64_t _GetTime(void);
 
-    std::map<uint64_t, ReplayLogGroup> logGroups; // key = sequence number
+    std::map<uint32_t, ReplayLogGroup> logGroups; // key = sequence number
     std::vector<ReplayLog> deletingLogs;
 
     uint64_t time;
