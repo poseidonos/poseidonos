@@ -53,7 +53,6 @@ private:
     int logGroupId;
     LogGroupFooter footer;
     uint64_t footerOffset;
-    uint64_t sequenceNumber;
     EventSmartPtr callback;
 };
 } // namespace pos

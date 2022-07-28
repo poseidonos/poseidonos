@@ -158,7 +158,7 @@ LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t
 
     footer.lastCheckpointedSeginfoVersion = version;
     footer.isReseted = false;
-    footer.resetedSequenceNumber = (uint32_t)-1;
+    footer.resetedSequenceNumber = UINT32_MAX;
     footerOffset = layout.footerStartOffset;
 }
 
