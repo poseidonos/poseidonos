@@ -45,14 +45,12 @@ Eample 2 (creating an array with RAID6):
 			return buildErr
 		}
 
-		if globals.IsJSONReq {
-			reqJson, err := protojson.Marshal(req)
-			if err != nil {
-				fmt.Printf("failed to marshal the protobuf request: %v", err)
-				return err
-			}
-			displaymgr.PrintRequest(string(reqJson))
+		reqJson, err := protojson.Marshal(req)
+		if err != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
 		}
+		displaymgr.PrintRequest(string(reqJson))
 
 		res, gRpcErr := grpcmgr.SendCreateArray(req)
 		if gRpcErr != nil {
@@ -62,7 +60,7 @@ Eample 2 (creating an array with RAID6):
 
 		printErr := displaymgr.PrintProtoResponse(command, res)
 		if printErr != nil {
-			fmt.Printf("failed to marshal the protobuf request: %v", printErr)
+			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
 		}
 
