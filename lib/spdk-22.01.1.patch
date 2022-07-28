@@ -3584,7 +3584,7 @@ index 4e6541e96..cab4aa177 100644
  
  struct spdk_nvmf_tgt_conf {
 diff --git module/event/subsystems/nvmf/nvmf_tgt.c module/event/subsystems/nvmf/nvmf_tgt.c
-index b6573a237..49c1ba5d4 100644
+index b6573a237..e82103dba 100644
 --- module/event/subsystems/nvmf/nvmf_tgt.c
 +++ module/event/subsystems/nvmf/nvmf_tgt.c
 @@ -36,6 +36,7 @@
@@ -3614,12 +3614,19 @@ index b6573a237..49c1ba5d4 100644
  	spdk_thread_exit(spdk_get_thread());
  }
  
-@@ -224,7 +226,7 @@ nvmf_tgt_create_poll_groups(void)
+@@ -202,6 +204,7 @@ nvmf_tgt_create_poll_group(void *ctx)
+ 
+ 	pg->thread = spdk_get_thread();
+ 	pg->group = spdk_nvmf_poll_group_create(g_spdk_nvmf_tgt);
++	set_tls_thread_to_reactor(spdk_env_get_current_core(), spdk_get_thread());
+ 
+ 	spdk_thread_send_msg(g_tgt_init_thread, nvmf_tgt_create_poll_group_done, pg);
+ }
+@@ -224,7 +227,6 @@ nvmf_tgt_create_poll_groups(void)
  
  		thread = spdk_thread_create(thread_name, g_poll_groups_mask);
  		assert(thread != NULL);
 -
-+		set_tls_thread_to_reactor(i, thread);
  		spdk_thread_send_msg(thread, nvmf_tgt_create_poll_group, NULL);
  	}
  }
