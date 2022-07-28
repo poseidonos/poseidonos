@@ -10,9 +10,7 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/socketmgr"
 
-	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -41,41 +39,31 @@ Eample 2 (creating an array with RAID6):
 
 		var command = "CREATEARRAY"
 
-		req, err := buildCreateArrayReq(command)
-		if err != nil {
-			fmt.Println("error: " + err.Error())
-			return err
+		req, buildErr := buildCreateArrayReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
 		}
 
-		reqJSON, err := protojson.Marshal(req)
-		if err != nil {
-			log.Fatalf("failed to marshal the protobuf request: %v", err)
-			return err
-		}
-
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			var resJSON string
-
-			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			} else {
-				res, err := grpcmgr.SendCreateArray(req)
-				if err != nil {
-					globals.PrintErrMsg(err)
-					return err
-				}
-				resByte, err := protojson.Marshal(res)
-				if err != nil {
-					log.Fatalf("failed to marshal the protobuf response: %v", err)
-					return err
-				}
-				resJSON = string(resByte)
+		if globals.IsJSONReq {
+			reqJson, err := protojson.Marshal(req)
+			if err != nil {
+				fmt.Printf("failed to marshal the protobuf request: %v", err)
+				return err
 			}
+			displaymgr.PrintRequest(string(reqJson))
+		}
 
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		res, gRpcErr := grpcmgr.SendCreateArray(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
+		}
+
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", printErr)
+			return printErr
 		}
 
 		return nil
@@ -124,7 +112,6 @@ func buildCreateArrayReq(command string) (*pb.CreateArrayRequest, error) {
 	}
 
 	uuid := globals.GenerateUUID()
-
 	req := &pb.CreateArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
 	return req, nil

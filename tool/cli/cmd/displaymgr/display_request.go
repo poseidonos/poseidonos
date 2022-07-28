@@ -1,12 +1,12 @@
 package displaymgr
 
 import (
-	"cli/cmd/globals"
 	"fmt"
 )
 
-func PrintRequest(reqJSON string) {
-	if globals.IsJSONReq {
-		fmt.Println("{\"Request\":", reqJSON, "}")
-	}
+func PrintRequest(reqJson string) {
+	reqHeader := `{\"Request\":`
+	reqFooter := `}`
+
+	fmt.Println(reqHeader + reqJson + reqFooter)
 }
