@@ -196,9 +196,9 @@ MetaFs::Init(void)
         return -(int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
     if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
     {
-        rc = _CreateRocksDBMetaFs();
-        if (POS_EVENT_ID::SUCCESS != rc)
-            return -(int)rc;
+		rc = _CreateRocksDBMetaFs();
+		if (POS_EVENT_ID::SUCCESS != rc)
+			return -(int)rc;
     }
 
     isNormal_ = true;
@@ -480,6 +480,10 @@ MetaFs::_CreateRocksDBMetaFs(void)
         {
             MFS_TRACE_WARN((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_FAILED, "RocksDB metafs create directory failed : {}", metaRocksDir);
         }
+    }
+    else
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs omitted to create directory : {}, because it's already exists", metaRocksDir);
     }
     std::string pathName = metaRocksDir + "/" + arrayInfo_->GetName() + "_RocksMeta";
     rocksdb::Status status = rocksdb::DB::Open(options, pathName, &rocksMeta);

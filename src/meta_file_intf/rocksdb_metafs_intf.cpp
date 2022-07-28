@@ -292,10 +292,10 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
 {
     rocksdb::WriteBatch writeBatch;
     uint64_t writeSize = ctx->GetLength();
-    uint64_t metaSize = 4032;
-    for (uint64_t writtenSize = 0; writtenSize < writeSize; writtenSize += metaSize)
+    uint64_t pageSize = 4096;
+    for (uint64_t writtenSize = 0; writtenSize < writeSize; writtenSize += pageSize)
     {
-        uint64_t fragmentSize = (writeSize - writtenSize < 4032) ? writeSize - writtenSize : metaSize;
+        uint64_t fragmentSize = (writeSize - writtenSize < 4096) ? writeSize - writtenSize : pageSize;
         std::string fragmentKey = _MakeRocksDbKey(ctx->fd, ctx->fileOffset + writtenSize); // fileoffset + writtenSize == startOffset of fragment
         std::string fragmentValue(&ctx->buffer[writtenSize], &ctx->buffer[writtenSize + fragmentSize]);
         writeBatch.Put(fragmentKey, fragmentValue);
@@ -304,7 +304,7 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
     rocksdb::Status status = rocksMeta->Write(rocksdb::WriteOptions(), &writeBatch);
     if (status.ok())
     {
-        POS_TRACE_INFO(EID(ROCKSDB_MFS_ASYNCIO_WRITE_SUCCEED), "RocksDBMetaFsIntf AsyncIO write succeed, fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
+        POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_WRITE_SUCCEED), "RocksDBMetaFsIntf AsyncIO write succeed, fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
         MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx, arrayId);
         aioCb->SetCallbackCount(1);
         aioCb->InvokeCallback();
@@ -336,11 +336,13 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
             uint64_t currOffset = _GetOffsetFromKey(it->key().ToString());
             if (currOffset != prevOffset && currOffset != offset)
             {
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE), "RocksDBMetaFsIntf AsyncIO read failed current offset is not equal with expected offset, fd : {}, current offset : {}, expected offset : {}", ctx->fd, currOffset, offset);
                 assert(false);
             }
             if (offset + valueSize > size)
             {
-                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size");
+                uint64_t bufferOverflowSize = offset + valueSize;
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size, fd : {}, current write size : {}, max write size : {} ", fd, bufferOverflowSize, size);
                 return -1;
             }
             memcpy((void*)(ctx->buffer + offset), itValue.c_str(), valueSize);
@@ -379,11 +381,13 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
             uint64_t currOffset = _GetOffsetFromKey(it->key().ToString());
             if (currOffset != prevOffset && currOffset != offset)
             {
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE), "RocksDBMetaFsIntf AsyncIO read failed current offset is not equal to expected offset, fd : {}, current offset : {}, expected offset : {}", ctx->fd, currOffset, offset);
                 assert(false);
             }
             if (offset + valueSize > size)
             {
-                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size");
+                uint64_t bufferOverflowSize = offset + valueSize;
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size, fd : {}, current write size : {}, max write size : {} ", fd, bufferOverflowSize, size);
                 return -1;
             }
             memcpy((void*)(ctx->buffer + offset), itValue.c_str(), valueSize);
@@ -391,6 +395,10 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
             prevOffset = currOffset;
         }
 
+        if (offset != readSize)
+        {
+            POS_TRACE_ERROR(EID(ROCKSDB_MFS_READ_SIZE_IS_NOT_EQUAL_TO_EXPECTED_READ_SIZE), "RocksDBMetaFsIntf::AsyncIO partial io read failed, expected read size is different with actual read size, fd : {}, current read size : {}, expected read size : {}", ctx->fd, offset, readSize);
+        }
         assert(offset == readSize);
         if (it->status().ok())
         {

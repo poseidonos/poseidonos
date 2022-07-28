@@ -51,12 +51,12 @@ echo "${dev1} and ${dev2} devices will construct RAID 1 ${raidDev} "
 
 # mount raid device to raidDev
 read -p "Enter Rocksdb path in pos.conf (ex. /etc/pos/POSRaid ) : " rocksdbPath
-mkdir {rocksdbPath}
-mount ${raidDev} {rocksdbPath}
+mkdir ${rocksdbPath}
+mount ${raidDev} ${rocksdbPath}
 
 # check raid device is mounted
 echo "ls RocksDB path command result"
-ls {rocksdbPath}
+ls ${rocksdbPath}
 
 # check raid device 
 mdadm --detail ${raidDev}
