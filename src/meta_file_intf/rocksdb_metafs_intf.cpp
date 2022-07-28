@@ -292,10 +292,10 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
 {
     rocksdb::WriteBatch writeBatch;
     uint64_t writeSize = ctx->GetLength();
-    uint64_t pageSize = 4096;
+    uint64_t pageSize = 4032;
     for (uint64_t writtenSize = 0; writtenSize < writeSize; writtenSize += pageSize)
     {
-        uint64_t fragmentSize = (writeSize - writtenSize < 4096) ? writeSize - writtenSize : pageSize;
+        uint64_t fragmentSize = (writeSize - writtenSize < 4032) ? writeSize - writtenSize : pageSize;
         std::string fragmentKey = _MakeRocksDbKey(ctx->fd, ctx->fileOffset + writtenSize); // fileoffset + writtenSize == startOffset of fragment
         std::string fragmentValue(&ctx->buffer[writtenSize], &ctx->buffer[writtenSize + fragmentSize]);
         writeBatch.Put(fragmentKey, fragmentValue);

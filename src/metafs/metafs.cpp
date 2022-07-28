@@ -196,9 +196,9 @@ MetaFs::Init(void)
         return -(int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
     if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
     {
-		rc = _CreateRocksDBMetaFs();
-		if (POS_EVENT_ID::SUCCESS != rc)
-			return -(int)rc;
+        rc = _CreateRocksDBMetaFs();
+        if (POS_EVENT_ID::SUCCESS != rc)
+            return -(int)rc;
     }
 
     isNormal_ = true;
