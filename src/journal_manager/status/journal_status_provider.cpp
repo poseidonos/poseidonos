@@ -39,7 +39,6 @@
 #include "i_checkpoint_status.h"
 #include "i_log_buffer_status.h"
 #include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
 
 namespace pos
 {
@@ -135,7 +134,7 @@ JournalStatusProvider::_CreateCheckpointStatusElement(void)
     JsonElement checkpointElement("checkpointStatus");
     checkpointElement.SetAttribute(JsonAttribute("flushingLogGroupId", std::to_string(checkpointStatus->GetFlushingLogGroupId())));
     JsonArray fullGroupElement("fullLogGroups");
-    for (auto it: checkpointStatus->GetFullLogGroups())
+    for (auto it : checkpointStatus->GetFullLogGroups())
     {
         JsonElement logInfo("");
         logInfo.SetAttribute(JsonAttribute("ID", std::to_string(it)));
