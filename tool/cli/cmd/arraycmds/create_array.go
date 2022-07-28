@@ -37,19 +37,20 @@ Eample 2 (creating an array with RAID6):
 	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID6
 `,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "CREATEARRAY"
 
 		req, err := buildCreateArrayReq(command)
 		if err != nil {
 			fmt.Println("error: " + err.Error())
-			return
+			return err
 		}
 
 		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
+			return err
 		}
 
 		displaymgr.PrintRequest(string(reqJSON))
@@ -64,17 +65,20 @@ Eample 2 (creating an array with RAID6):
 				res, err := grpcmgr.SendCreateArray(req)
 				if err != nil {
 					globals.PrintErrMsg(err)
-					return
+					return err
 				}
 				resByte, err := protojson.Marshal(res)
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
+					return err
 				}
 				resJSON = string(resByte)
 			}
 
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
+
+		return nil
 	},
 }
 
