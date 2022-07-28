@@ -52,6 +52,7 @@ LogGroupReleaser::LogGroupReleaser(void)
   releaseNotifier(nullptr),
   logBuffer(nullptr),
   flushingLogGroupId(-1),
+  flushingSequenceNumber(0),
   checkpointTriggerInProgress(false),
   checkpointManager(nullptr),
   contextManager(nullptr),
@@ -84,17 +85,17 @@ LogGroupReleaser::Reset(void)
 }
 
 void
-LogGroupReleaser::AddToFullLogGroup(int groupId)
+LogGroupReleaser::AddToFullLogGroup(struct LogGroupInfo logGroupInfo)
 {
-    _AddToFullLogGroupList(groupId);
+    _AddToFullLogGroupList(logGroupInfo);
     _FlushNextLogGroup();
 }
 
 void
-LogGroupReleaser::_AddToFullLogGroupList(int groupId)
+LogGroupReleaser::_AddToFullLogGroupList(struct LogGroupInfo logGroupInfo)
 {
     std::unique_lock<std::mutex> lock(fullLogGroupLock);
-    fullLogGroup.push_back(groupId);
+    fullLogGroup.push_back(logGroupInfo);
 }
 
 void
@@ -136,9 +137,14 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
     // Checkpoint will be in this sequence:
     // LogGroupFooterWriteEvent -> CheckpointSubmission -> ResetLogGroup -> LogGroupResetCompletion
     // TODO (huijeong.kim) to use Callback class instead of Event
+    LogGroupFooter footer;
+    uint64_t footerOffset;
+    _CreateFlushingLogGroupFooter(footer, footerOffset);
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = flushingSequenceNumber;
 
     EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
-    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, flushingLogGroupId, resetLogGroupCompletion));
+    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, flushingLogGroupId, footer, footerOffset, resetLogGroupCompletion));
     EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, flushingLogGroupId));
 
     return checkpointSubmission;
@@ -151,6 +157,8 @@ LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t
     uint64_t version = contextManager->GetStoredContextVersion(SEGMENT_CTX);
 
     footer.lastCheckpointedSeginfoVersion = version;
+    footer.isReseted = false;
+    footer.resetedSequenceNumber = UINT32_MAX;
     footerOffset = layout.footerStartOffset;
 }
 
@@ -164,21 +172,24 @@ LogGroupReleaser::_HasFullLogGroup(void)
 void
 LogGroupReleaser::_UpdateFlushingLogGroup(void)
 {
-    flushingLogGroupId = _PopFullLogGroup();
+    struct LogGroupInfo result = _PopFullLogGroup();
+    flushingLogGroupId = result.logGroupId;
+    flushingSequenceNumber = result.sequenceNumber;
     POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_FLUSH_LOG_GROUP,
-        "Flush next log group {}", flushingLogGroupId);
+        "Flush next log group {}, seq number {}", flushingLogGroupId, flushingSequenceNumber);
 }
 
-int
+struct LogGroupInfo
 LogGroupReleaser::_PopFullLogGroup(void)
 {
     std::unique_lock<std::mutex> lock(fullLogGroupLock);
 
     assert(fullLogGroup.size() != 0);
-    int retLogGroup = fullLogGroup.front();
+    int retLogGroup = fullLogGroup.front().logGroupId;
+    uint32_t retSequenceNumber = fullLogGroup.front().sequenceNumber;
     fullLogGroup.pop_front();
 
-    return retLogGroup;
+    return {retLogGroup, retSequenceNumber};
 }
 
 void
@@ -205,7 +216,12 @@ LogGroupReleaser::GetFlushingLogGroupId(void)
 std::list<int>
 LogGroupReleaser::GetFullLogGroups(void)
 {
-    return fullLogGroup;
+    std::list<int> result;
+    for (auto it: fullLogGroup)
+    {
+        result.push_back(it.logGroupId);
+    }
+    return result;
 }
 
 CheckpointStatus

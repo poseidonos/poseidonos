@@ -48,6 +48,11 @@ public:
 
     void SetIoRequest(uint64_t offset, LogGroupFooter footer);
 
+    bool operator==(const LogGroupFooterWriteContext& input) const
+    {
+        return (this->logGroupId == input.logGroupId && *(this->data) == *(input.data)); // Modify this depending on the equality criteria
+    }
+
 private:
     LogGroupFooter* data;
 };

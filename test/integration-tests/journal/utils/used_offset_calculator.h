@@ -11,6 +11,8 @@ public:
     bool CanBeWritten(uint32_t logSize);
 
 private:
+    uint64_t _GetNextOffset(uint32_t logSize);
+
     JournalManagerSpy* journal;
 
     uint64_t sizeToFill;
