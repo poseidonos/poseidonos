@@ -6,13 +6,9 @@ import (
 	"testing"
 )
 
-// This testing tests if the request is created well in JSON form from the command line.
 func TestCreateArray(t *testing.T) {
-
-	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// Execute the command to test with argument
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
 		"device1,device2,device3", "--spare", "devspare", "--array-name", "Array0", "--raid", "RAID5")
 
@@ -22,11 +18,8 @@ func TestCreateArray(t *testing.T) {
 }
 
 func TestCreateArrayWithoutSpare(t *testing.T) {
-
-	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// Execute the command to test with argument
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
 		"device1,device2,device3", "--array-name", "Array0", "--raid", "RAID5")
 
@@ -36,11 +29,8 @@ func TestCreateArrayWithoutSpare(t *testing.T) {
 }
 
 func TestCreateArrayWithSpareBufferList(t *testing.T) {
-
-	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// Execute the command to test with argument
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
 		"device1,device2,device3", "--array-name", "Array0", "--spare", "spare1,spare2,spare3,spare4", "--raid", "RAID5")
 
@@ -51,40 +41,40 @@ func TestCreateArrayWithSpareBufferList(t *testing.T) {
 
 func TestCreateArrayWithNoBufferFlag(t *testing.T) {
 
-	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// Execute the command to test with argument
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "create", "--no-buffer", "--data-devs",
 		"device1,device2,device3", "--array-name", "Array0", "--spare", "spare1,spare2,spare3,spare4", "--raid", "RAID5")
 
+	expected := `unknown flag: --no-buffer`
+
 	if err != nil {
-		t.Errorf("Expected: nil Output: %q", err.Error())
+		if err.Error() != expected {
+			t.Errorf("Expected: %q Output: %q", expected, err.Error())
+		}
 	}
 }
 
 func TestCreateArrayWithNoBufferError(t *testing.T) {
 
-	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// Execute the command to test with argument
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "create", "--data-devs",
 		"device1,device2,device3", "--array-name", "Array0", "--spare", "spare1,spare2,spare3,spare4", "--raid", "RAID5")
 
 	expected := `required flag(s) "buffer" not set`
 
-	if err.Error() != expected {
-		t.Errorf("Expected: nil Output: %q", err.Error())
+	if err != nil {
+		if err.Error() != expected {
+			t.Errorf("Expected: %q Output: %q", expected, err.Error())
+		}
 	}
 }
 
 func TestCreateArrayRAID10WithOddDataDevs(t *testing.T) {
 
-	// Command creation
 	rootCmd := cmd.RootCmd
 
-	// Execute the command to test with argument
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "create", "--buffer", "uram0", "--data-devs",
 		"device1,device2,device3", "--spare", "devspare", "--array-name", "Array0", "--raid", "RAID10")
 
