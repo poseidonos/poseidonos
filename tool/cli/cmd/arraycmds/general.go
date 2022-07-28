@@ -1,7 +1,6 @@
 package arraycmds
 
 import (
-	"cli/cmd/messages"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -38,25 +37,6 @@ func init() {
 	ArrayCmd.AddCommand(AddSpareCmd)
 	ArrayCmd.AddCommand(RemoveSpareCmd)
 	ArrayCmd.AddCommand(AutocreateArrayCmd)
-}
-
-// Parse comma-separated device list string and return the device list
-func parseDevList(devsList string) []messages.DeviceNameList {
-
-	if devsList == "" {
-		return nil
-	}
-
-	devsListSlice := strings.Split(devsList, ",")
-
-	var devs []messages.DeviceNameList
-	for _, str := range devsListSlice {
-		var devNameList messages.DeviceNameList // Single device name that is splitted
-		devNameList.DEVICENAME = str
-		devs = append(devs, devNameList)
-	}
-
-	return devs
 }
 
 func isRAIDConstMet(numOfDataDevs int, raid string) bool {
