@@ -59,6 +59,8 @@ public:
     virtual int PublishToServer(MetricLabelMap* defaultLabelList, POSMetricVector* metricList);
 
 private:
+    const uint publishFailureLogThreshold = 100;
+    uint publishFailureCount; 
     int _SendMessage(MetricPublishRequest* request, uint32_t numMetrics);
 
     std::unique_ptr<MetricManager::Stub> stub;
