@@ -490,7 +490,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		// Data
 		for _, subsystem := range res.GetResult().GetData().GetSubsystemList() {
 			fmt.Fprintln(w,
-				subsystem.GetSubnqn()+"\t"+
+				subsystem.GetNqn()+"\t"+
 					globals.FieldSeparator+subsystem.GetSubtype()+"\t"+
 					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetListenAddresses()))+"\t"+
 					globals.FieldSeparator+subsystem.GetSerialNumber()+"\t"+
@@ -514,7 +514,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-			fmt.Fprintln(w, "nqn\t: "+subsystem.GetSubnqn())
+			fmt.Fprintln(w, "nqn\t: "+subsystem.GetNqn())
 			fmt.Fprintln(w, "subtype\t: "+subsystem.GetSubtype())
 			fmt.Fprint(w, "listen_addresses\t: ")
 			for _, address := range subsystem.GetListenAddresses() {

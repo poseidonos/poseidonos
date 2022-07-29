@@ -27619,7 +27619,7 @@ class Subsystem PROTOBUF_FINAL :
     kListenAddressesFieldNumber = 3,
     kHostsFieldNumber = 5,
     kNamespacesFieldNumber = 9,
-    kSubnqnFieldNumber = 1,
+    kNqnFieldNumber = 1,
     kSubtypeFieldNumber = 2,
     kSerialNumberFieldNumber = 6,
     kModelNumberFieldNumber = 7,
@@ -27680,20 +27680,20 @@ class Subsystem PROTOBUF_FINAL :
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace >&
       namespaces() const;
 
-  // string subnqn = 1;
-  void clear_subnqn();
-  const std::string& subnqn() const;
-  void set_subnqn(const std::string& value);
-  void set_subnqn(std::string&& value);
-  void set_subnqn(const char* value);
-  void set_subnqn(const char* value, size_t size);
-  std::string* mutable_subnqn();
-  std::string* release_subnqn();
-  void set_allocated_subnqn(std::string* subnqn);
+  // string nqn = 1;
+  void clear_nqn();
+  const std::string& nqn() const;
+  void set_nqn(const std::string& value);
+  void set_nqn(std::string&& value);
+  void set_nqn(const char* value);
+  void set_nqn(const char* value, size_t size);
+  std::string* mutable_nqn();
+  std::string* release_nqn();
+  void set_allocated_nqn(std::string* nqn);
   private:
-  const std::string& _internal_subnqn() const;
-  void _internal_set_subnqn(const std::string& value);
-  std::string* _internal_mutable_subnqn();
+  const std::string& _internal_nqn() const;
+  void _internal_set_nqn(const std::string& value);
+  std::string* _internal_mutable_nqn();
   public:
 
   // string subtype = 2;
@@ -27772,7 +27772,7 @@ class Subsystem PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_AddressInfo > listenaddresses_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Host > hosts_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Subsystem_Namespace > namespaces_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subnqn_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr nqn_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subtype_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr serialnumber_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr modelnumber_;
@@ -60704,65 +60704,65 @@ inline void Subsystem_Namespace::set_allocated_uuid(std::string* uuid) {
 
 // Subsystem
 
-// string subnqn = 1;
-inline void Subsystem::clear_subnqn() {
-  subnqn_.ClearToEmpty();
+// string nqn = 1;
+inline void Subsystem::clear_nqn() {
+  nqn_.ClearToEmpty();
 }
-inline const std::string& Subsystem::subnqn() const {
-  // @@protoc_insertion_point(field_get:grpc_cli.Subsystem.subnqn)
-  return _internal_subnqn();
+inline const std::string& Subsystem::nqn() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Subsystem.nqn)
+  return _internal_nqn();
 }
-inline void Subsystem::set_subnqn(const std::string& value) {
-  _internal_set_subnqn(value);
-  // @@protoc_insertion_point(field_set:grpc_cli.Subsystem.subnqn)
+inline void Subsystem::set_nqn(const std::string& value) {
+  _internal_set_nqn(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Subsystem.nqn)
 }
-inline std::string* Subsystem::mutable_subnqn() {
-  // @@protoc_insertion_point(field_mutable:grpc_cli.Subsystem.subnqn)
-  return _internal_mutable_subnqn();
+inline std::string* Subsystem::mutable_nqn() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Subsystem.nqn)
+  return _internal_mutable_nqn();
 }
-inline const std::string& Subsystem::_internal_subnqn() const {
-  return subnqn_.Get();
+inline const std::string& Subsystem::_internal_nqn() const {
+  return nqn_.Get();
 }
-inline void Subsystem::_internal_set_subnqn(const std::string& value) {
+inline void Subsystem::_internal_set_nqn(const std::string& value) {
   
-  subnqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+  nqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void Subsystem::set_subnqn(std::string&& value) {
+inline void Subsystem::set_nqn(std::string&& value) {
   
-  subnqn_.Set(
+  nqn_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Subsystem.subnqn)
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Subsystem.nqn)
 }
-inline void Subsystem::set_subnqn(const char* value) {
+inline void Subsystem::set_nqn(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   
-  subnqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:grpc_cli.Subsystem.subnqn)
+  nqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Subsystem.nqn)
 }
-inline void Subsystem::set_subnqn(const char* value,
+inline void Subsystem::set_nqn(const char* value,
     size_t size) {
   
-  subnqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+  nqn_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Subsystem.subnqn)
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Subsystem.nqn)
 }
-inline std::string* Subsystem::_internal_mutable_subnqn() {
+inline std::string* Subsystem::_internal_mutable_nqn() {
   
-  return subnqn_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+  return nqn_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* Subsystem::release_subnqn() {
-  // @@protoc_insertion_point(field_release:grpc_cli.Subsystem.subnqn)
-  return subnqn_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+inline std::string* Subsystem::release_nqn() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Subsystem.nqn)
+  return nqn_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void Subsystem::set_allocated_subnqn(std::string* subnqn) {
-  if (subnqn != nullptr) {
+inline void Subsystem::set_allocated_nqn(std::string* nqn) {
+  if (nqn != nullptr) {
     
   } else {
     
   }
-  subnqn_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), subnqn,
+  nqn_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), nqn,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Subsystem.subnqn)
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Subsystem.nqn)
 }
 
 // string subtype = 2;

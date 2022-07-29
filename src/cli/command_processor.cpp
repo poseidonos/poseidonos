@@ -1336,7 +1336,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
     {
         grpc_cli::Subsystem* subsystemListItem =
             reply->mutable_result()->mutable_data()->add_subsystemlist();
-        subsystemListItem->set_subnqn(subsystem["nqn"].asString());
+        subsystemListItem->set_nqn(subsystem["nqn"].asString());
         subsystemListItem->set_subtype(subsystem["subtype"].asString());
         subsystemListItem->set_allowanyhost(subsystem["allow_any_host"].asInt());
 
@@ -1398,7 +1398,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
         {
             grpc_cli::Subsystem* subsystemListItem =
                 reply->mutable_result()->mutable_data()->add_subsystemlist();
-            subsystemListItem->set_subnqn(subsystem["nqn"].asString());
+            subsystemListItem->set_nqn(subsystem["nqn"].asString());
             subsystemListItem->set_subtype(subsystem["subtype"].asString());
             subsystemListItem->set_allowanyhost(subsystem["allow_any_host"].asInt());
 
