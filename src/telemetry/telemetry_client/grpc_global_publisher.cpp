@@ -45,6 +45,7 @@ GrpcGlobalPublisher::GrpcGlobalPublisher(std::shared_ptr<grpc::Channel> channel_
         channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
     }
     stub = ::MetricManager::NewStub(channel);
+    publishFailureCount = 0;
 }
 
 GrpcGlobalPublisher::~GrpcGlobalPublisher(void)
@@ -133,8 +134,14 @@ GrpcGlobalPublisher::_SendMessage(MetricPublishRequest* request, uint32_t numMet
     grpc::Status status = stub->MetricPublish(&cliContext, *request, &response);
     if (status.ok() != true)
     {
-        POS_TRACE_INFO(EID(TELEMETRY_CLIENT_PUBLISHREQUEST_SEND_FAILURE), "grpc_status_errorcode:{}, grpc_status_errormsg:{}", status.error_code(), status.error_message());
-        return -1;
+        if (publishFailureCount > publishFailureLogThreshold)
+        {
+            POS_TRACE_INFO(EID(TELEMETRY_CLIENT_PUBLISHREQUEST_SEND_FAILURE),
+                "publish_failure_count:{}, grpc_status_errorcode:{}, grpc_status_errormsg:{}", publishFailureCount, status.error_code(), status.error_message());
+            publishFailureCount = 0;
+            return -1;
+        }
+        publishFailureCount++;
     }
     else
     {
