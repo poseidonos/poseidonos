@@ -1011,7 +1011,7 @@ message AddListenerResponse {
 }
 
 message Subsystem {
-	string subnqn = 1;
+	string nqn = 1;
 	string subtype = 2;
 	message AddressInfo {
 		string transportType = 1;
