@@ -110,6 +110,7 @@ private:
     std::string arrayName;
 
     TelemetryPublisher* telemetryPublisher;
+    std::string basePathName;
 };
 
 } // namespace pos

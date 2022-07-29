@@ -29,6 +29,7 @@ void
 RocksDBLogWriteIntegrationTest::SetUp(void)
 {
     builder.SetRocksDBEnable(true);
+    builder.SetRocksDBBasePath(rocksdbPath);
 
     // remove rocksdb log files by removing temporary directory if exist
     std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";

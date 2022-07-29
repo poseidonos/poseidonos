@@ -57,7 +57,8 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
   logFactory(nullptr),
   rocksJournal(nullptr),
   logBufferSize(0),
-  telemetryPublisher(nullptr)
+  telemetryPublisher(nullptr),
+  basePathName("")
 {
 }
 
@@ -85,7 +86,8 @@ RocksDBLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
     config = journalConfiguration;
     logFactory = logWriteContextFactory;
     telemetryPublisher = tp;
-    pathName = config->GetRocksdbPath() + "/" + this->arrayName + "_RocksJournal";
+    basePathName = config->GetRocksdbPath();
+    pathName = basePathName + "/" + this->arrayName + "_RocksJournal";
     POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_INITIALIZED), "RocksDB initialized(path : {})", pathName);
     return 0;
 }
@@ -399,9 +401,9 @@ RocksDBLogBuffer::IsOpened(void)
 int
 RocksDBLogBuffer::_CreateDirectory(void)
 {
-    if (!std::experimental::filesystem::exists("/etc/pos/POSRaid"))
+    if (!std::experimental::filesystem::exists(basePathName))
     {
-        bool ret = std::experimental::filesystem::create_directory("/etc/pos/POSRaid");
+        bool ret = std::experimental::filesystem::create_directory(basePathName);
         if (ret != true)
         {
             POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DIR_CREATION_FAILED), "RocksDB directory creation failed (path :{}) ", pathName);

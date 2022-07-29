@@ -33,6 +33,7 @@ RocksDBCheckpointIntegrationTest::SetUp(void)
     std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(targetDirName);
     builder.SetRocksDBEnable(true);
+    builder.SetRocksDBBasePath(rocksdbPath);
 }
 
 void

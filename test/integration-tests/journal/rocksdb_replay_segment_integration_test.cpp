@@ -32,6 +32,7 @@ RocksDBReplaySegmentIntegrationTest::SetUp(void)
     testInfo->numStripesPerSegment = testInfo->numStripesPerSegment / 8;
 
     builder.SetRocksDBEnable(true);
+    builder.SetRocksDBBasePath(rocksdbPath);
     // remove rocksdb log files by removing temporary directory if exist
     std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::remove_all(targetDirName);
