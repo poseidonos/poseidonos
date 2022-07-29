@@ -16,7 +16,7 @@ bool
 UsedOffsetCalculator::CanBeWritten(uint32_t logSize)
 {
     uint64_t previousOffset = currentOffset;
-    currentOffset = journal->GetNextOffset();
+    currentOffset = _GetNextOffset(logSize);
 
     if (previousOffset <= currentOffset)
     {
@@ -28,5 +28,22 @@ UsedOffsetCalculator::CanBeWritten(uint32_t logSize)
     }
 
     return (sizeUsed + logSize <= sizeToFill);
+}
+
+uint64_t
+UsedOffsetCalculator::_GetNextOffset(uint32_t logSize)
+{
+    uint64_t nextOffset = journal->GetNextOffset();
+
+    uint64_t metaPageSize = journal->GetMetaPageSize();
+    uint64_t currentMetaPage = nextOffset / metaPageSize;
+    uint64_t endMetaPage = (nextOffset + logSize - 1) / metaPageSize;
+
+    if (currentMetaPage != endMetaPage)
+    {
+        nextOffset = endMetaPage * metaPageSize;
+    }
+
+    return nextOffset;
 }
 } // namespace pos

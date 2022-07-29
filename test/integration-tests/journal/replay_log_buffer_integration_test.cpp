@@ -85,7 +85,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
     SetTriggerCheckpoint(false);
 
     // Write dummy logs to the first log group (to be cleared by checkpoint later)
-    writeTester->WriteLogsWithSize(logGroupSize);
+    writeTester->WriteLogsWithSize(logGroupSize - sizeof(LogGroupFooter));
 
     // Write logs to fill log buffer, and start checkpoint to clear the first log group
     StripeId currentVsid = 0;

@@ -141,6 +141,12 @@ JournalManagerSpy::GetNumLogGroups(void)
     return config->GetNumLogGroups();
 }
 
+uint64_t
+JournalManagerSpy::GetMetaPageSize(void)
+{
+    return config->GetMetaPageSize();
+}
+
 bool
 JournalManagerSpy::IsCheckpointCompleted(void)
 {

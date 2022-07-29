@@ -34,6 +34,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 
 using ::testing::_;
@@ -41,18 +42,31 @@ using ::testing::NiceMock;
 
 namespace pos
 {
+MATCHER_P(EqLogGroupFooterWriteContext, expected, "")
+{
+    return (*((LogGroupFooterWriteContext*)arg) == *((LogGroupFooterWriteContext*)expected));
+}
+
 TEST(ResetLogGroup, Execute_testIfLogBufferReseted)
 {
     // Given
     int logGroupId = 0;
     NiceMock<MockJournalLogBuffer> logBuffer;
-    ResetLogGroup event(&logBuffer, logGroupId, nullptr);
+    LogGroupFooter footer;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 1;
+    uint64_t footerOffset = 0;
 
-    // Then
-    EXPECT_CALL(logBuffer, AsyncReset(logGroupId, _));
+    ResetLogGroup event(&logBuffer, logGroupId, footer, footerOffset, nullptr);
 
     // When
-    event.Execute();
+    LogGroupFooterWriteContext context(logGroupId, nullptr);
+    context.SetIoRequest(footerOffset, footer);
+    EXPECT_CALL(logBuffer, InternalIo(EqLogGroupFooterWriteContext(&context)));
+    bool result = event.Execute();
+
+    // Then
+    EXPECT_EQ(result, true);
 }
 
 } // namespace pos
