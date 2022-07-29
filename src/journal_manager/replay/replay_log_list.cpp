@@ -34,6 +34,7 @@
 
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -89,10 +90,23 @@ ReplayLogList::IsEmpty(void)
 }
 
 void
-ReplayLogList::SetLogGroupFooter(uint64_t seqNum, LogGroupFooter footer)
+ReplayLogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
 {
     logGroups[seqNum].footer = footer;
     logGroups[seqNum].isFooterValid = true;
+}
+
+void
+ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
+{
+    ReplayLogGroup replayLogGroup = logGroups[seqNum];
+    int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+    POS_TRACE_INFO(event, "Erasing Replay Log Group for SeqNum {} with {} entries", seqNum, replayLogGroup.logs.size());
+    for (ReplayLog replayLog : replayLogGroup.logs)
+    {
+        delete replayLog.log;
+    }
+    logGroups.erase(seqNum);
 }
 
 ReplayLogGroup

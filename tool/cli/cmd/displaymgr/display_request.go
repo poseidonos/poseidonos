@@ -5,8 +5,11 @@ import (
 	"fmt"
 )
 
-func PrintRequest(reqJSON string) {
+func PrintRequest(reqJson string) {
 	if globals.IsJSONReq {
-		fmt.Println("{\"Request\":", reqJSON, "}")
+		reqHeader := `{"Request":`
+		reqFooter := `}`
+
+		fmt.Println(reqHeader + reqJson + reqFooter)
 	}
 }

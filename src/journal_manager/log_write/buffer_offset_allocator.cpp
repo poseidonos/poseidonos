@@ -162,7 +162,7 @@ BufferOffsetAllocator::_GetNewActiveGroup(void)
     if (statusList[currentLogGroupId]->GetStatus() != LogGroupStatus::INIT)
     {
         POS_TRACE_WARN((int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE,
-            "No log buffer available for journal");
+            "No log buffer available for journal (new log group id: {})", currentLogGroupId);
         return (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE;
     }
     else
@@ -186,7 +186,8 @@ BufferOffsetAllocator::_TryToSetFull(int id)
     bool changedToFullStatus = statusList[id]->TryToSetFull();
     if (changedToFullStatus == true)
     {
-        releaser->AddToFullLogGroup(id);
+        uint32_t sequenceNumber = statusList[id]->GetSeqNum();
+        releaser->AddToFullLogGroup({id, sequenceNumber});
 
         POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL,
             "Log group id {} is added to full log group", id);

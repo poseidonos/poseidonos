@@ -42,11 +42,13 @@ struct LogGroupFooter
 {
     uint64_t MARK = LOG_GROUP_FOOTER_VALID_MARK;
     uint64_t lastCheckpointedSeginfoVersion;
+    bool isReseted;
+    uint32_t resetedSequenceNumber;
 
     inline bool
-    operator==(LogGroupFooter input) const
+    operator==(const LogGroupFooter& input) const
     {
-        return (input.MARK == MARK && input.lastCheckpointedSeginfoVersion == lastCheckpointedSeginfoVersion);
+        return (input.MARK == MARK && input.lastCheckpointedSeginfoVersion == lastCheckpointedSeginfoVersion && input.isReseted == isReseted && input.resetedSequenceNumber == resetedSequenceNumber);
     }
 };
 } // namespace pos

@@ -39,6 +39,7 @@ public:
     uint64_t GetLogBufferSize(void);
     uint64_t GetLogGroupSize(void);
     int GetNumLogGroups(void);
+    uint64_t GetMetaPageSize(void);
 
     bool IsCheckpointCompleted(void);
     int GetNumDirtyMap(int logGroupId);
