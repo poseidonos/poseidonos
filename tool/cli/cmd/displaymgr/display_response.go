@@ -13,6 +13,7 @@ import (
 
 	"code.cloudfoundry.org/bytefmt"
 	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func toByte(displayUnit bool, size uint64) string {
@@ -21,6 +22,19 @@ func toByte(displayUnit bool, size uint64) string {
 	}
 
 	return strconv.FormatUint(size, 10)
+}
+
+func PrintProtoResponse(command string, res protoreflect.ProtoMessage) error {
+	resByte, err := protojson.Marshal(res)
+	if err != nil {
+		fmt.Println("failed to marshal the protobuf response: %v", err)
+		return err
+	}
+
+	resJson := string(resByte)
+	PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+
+	return nil
 }
 
 func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool, displayUnit bool) {
