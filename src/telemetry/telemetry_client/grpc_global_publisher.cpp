@@ -141,7 +141,7 @@ GrpcGlobalPublisher::_SendMessage(MetricPublishRequest* request, uint32_t numMet
         uint32_t numReceived = response.totalreceivedmetrics();
         if (numReceived != numMetrics)
         {
-            POS_TRACE_INFO(EID(TELEMETRY_CLIENT_PUBLISHRESPONSE_COUNT_NOT_MATCH), "expected:{}, received:{}", numMetrics, numReceived);
+            POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISHRESPONSE_COUNT_NOT_MATCH), "expected:{}, received:{}", numMetrics, numReceived);
             return -1;
         }
     }
