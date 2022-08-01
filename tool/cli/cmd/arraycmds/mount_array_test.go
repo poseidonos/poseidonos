@@ -7,7 +7,7 @@ import (
 )
 
 // This testing tests if the request is created well in JSON form from the command line.
-func TestMountArrayCommandReq(t *testing.T) {
+func TestMountArray(t *testing.T) {
 
 	rootCmd := cmd.RootCmd
 
