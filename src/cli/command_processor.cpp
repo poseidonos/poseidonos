@@ -1166,7 +1166,7 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
             return grpc::Status::OK;
         }
 
-        subnqn = (request->param()).subnqn();
+        subnqn = (request->param()).nqn();
         serialNumber = (request->param()).serialnumber();
         modelNumber = (request->param()).modelnumber();
         maxNamespaces = (request->param()).maxnamespaces();

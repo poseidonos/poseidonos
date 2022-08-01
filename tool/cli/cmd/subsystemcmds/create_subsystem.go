@@ -30,7 +30,7 @@ Example:
 		var command = "CREATESUBSYSTEM"
 		uuid := globals.GenerateUUID()
 		param := &pb.CreateSubsystemRequest_Param{
-			Subnqn:        subsystem_create_subnqn,
+			Nqn:           subsystem_create_subnqn,
 			SerialNumber:  subsystem_create_serial,
 			ModelNumber:   subsystem_create_model,
 			MaxNamespaces: subsystem_create_maxnamespace,
