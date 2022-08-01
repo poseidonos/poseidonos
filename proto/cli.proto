@@ -947,7 +947,7 @@ message CreateSubsystemRequest {
 	string rid = 2;
 	string requestor = 3;
 	message Param {
-		string subnqn = 1;
+		string nqn = 1;
 		string serialNumber = 2;
 		string modelNumber = 3;
 		uint32 maxNamespaces = 4;
