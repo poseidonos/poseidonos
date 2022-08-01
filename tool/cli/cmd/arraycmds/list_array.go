@@ -5,10 +5,8 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/socketmgr"
 	"fmt"
 
-	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -33,85 +31,97 @@ Example 1 (listing all arrays):
 Example 2 (listing a specific array):
 	poseidonos-cli array list --array-name Array0
           `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var command string
+		var (
+			command string
+			err     error
+		)
 
 		if list_array_arrayName != "" {
 			command = "ARRAYINFO"
-			executeArrayInfoCmd(command)
+			err = executeArrayInfoCmd(command)
 		} else {
 			command = "LISTARRAY"
-			executeListArrayCmd(command)
+			err = executeListArrayCmd(command)
 		}
+
+		return err
 	},
 }
 
-func executeArrayInfoCmd(command string) {
+func executeArrayInfoCmd(command string) error {
+
+	req, buildErr := buildArrayInfoReq(command)
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	reqJson, err := protojson.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+
+	res, gRpcErr := grpcmgr.SendArrayInfo(req)
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func executeListArrayCmd(command string) error {
+	req, buildErr := buildListArrayReq(command)
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	reqJson, err := protojson.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+
+	res, gRpcErr := grpcmgr.SendListArray(req)
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func buildListArrayReq(command string) (*pb.ListArrayRequest, error) {
+	uuid := globals.GenerateUUID()
+	req := &pb.ListArrayRequest{Command: command, Rid: uuid, Requestor: "cli"}
+
+	return req, nil
+}
+
+func buildArrayInfoReq(command string) (*pb.ArrayInfoRequest, error) {
 	uuid := globals.GenerateUUID()
 	param := &pb.ArrayInfoRequest_Param{Name: list_array_arrayName}
 	req := &pb.ArrayInfoRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	reqJSON, err := protojson.Marshal(req)
-	if err != nil {
-		log.Fatalf("failed to marshal the protobuf request: %v", err)
-	}
-
-	displaymgr.PrintRequest(string(reqJSON))
-
-	if !(globals.IsTestingReqBld) {
-		var resJSON string
-
-		if globals.EnableGrpc == false {
-			resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-		} else {
-			res, err := grpcmgr.SendArrayInfo(req)
-			if err != nil {
-				globals.PrintErrMsg(err)
-				return
-			}
-			resByte, err := protojson.Marshal(res)
-			if err != nil {
-				log.Fatalf("failed to marshal the protobuf response: %v", err)
-			}
-			resJSON = string(resByte)
-		}
-
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-	}
-}
-
-func executeListArrayCmd(command string) {
-	uuid := globals.GenerateUUID()
-	req := &pb.ListArrayRequest{Command: command, Rid: uuid, Requestor: "cli"}
-
-	reqJSON, err := protojson.Marshal(req)
-	if err != nil {
-		log.Fatalf("failed to marshal the protobuf request: %v", err)
-	}
-
-	displaymgr.PrintRequest(string(reqJSON))
-
-	if !(globals.IsTestingReqBld) {
-		var resJSON string
-
-		if globals.EnableGrpc == false {
-			resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-		} else {
-			res, err := grpcmgr.SendListArray(req)
-			if err != nil {
-				globals.PrintErrMsg(err)
-				return
-			}
-			resByte, err := protojson.Marshal(res)
-			if err != nil {
-				log.Fatalf("failed to marshal the protobuf response: %v", err)
-			}
-			resJSON = string(resByte)
-		}
-
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-	}
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
