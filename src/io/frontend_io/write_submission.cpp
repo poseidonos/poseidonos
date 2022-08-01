@@ -48,6 +48,7 @@
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/flow_control/flow_control_service.h"
 #include "src/include/address_type.h"
+#include "src/include/array_config.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
 #include "src/io/frontend_io/aio.h"
@@ -423,16 +424,24 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
         if (true == isWTEnabled)
         {
             VirtualBlkAddr startVsa = targetVsaRange.startVsa;
-            for (uint32_t index = 0 ; index < targetVsaRange.numBlks; index++)
+            uint32_t remainingBlks = targetVsaRange.numBlks;
+            while (remainingBlks > 0)
             {
                 VirtualBlksInfo info;
                 VirtualBlks vsaInfo;
+                uint32_t numBlks = ArrayConfig::BLOCKS_PER_CHUNK -
+                    (startVsa.offset % ArrayConfig::BLOCKS_PER_CHUNK);
+                if (numBlks > remainingBlks)
+                {
+                    numBlks = remainingBlks;
+                }
                 vsaInfo.startVsa = startVsa;
-                vsaInfo.numBlks = 1;
+                vsaInfo.numBlks = numBlks;
                 info.first = vsaInfo;
                 info.second = result.second;
                 _AddVirtualBlks(info);
-                startVsa.offset += 1;
+                startVsa.offset += numBlks;
+                remainingBlks -= numBlks;
             }
         }
         else
