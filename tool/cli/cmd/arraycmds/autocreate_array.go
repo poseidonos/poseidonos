@@ -5,13 +5,11 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/socketmgr"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -37,44 +35,36 @@ Example 2 (creating an array using RAID6):
 	poseidonos-cli array autocreate --array-name Array0 --buffer uram0 --num-data-devs 3 --num-spare 1 --raid RAID6
           `,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "AUTOCREATEARRAY"
 
-		req, err := buildAutoCreateArrayReq(command)
+		req, buildErr := buildAutoCreateArrayReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
+		}
+
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
-			fmt.Println("error: " + err.Error())
-			return
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendAutocreateArray(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
 
-		reqJSON, err := protojson.Marshal(req)
-		if err != nil {
-			log.Fatalf("failed to marshal the protobuf request: %v", err)
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			var resJSON string
-
-			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			} else {
-				res, err := grpcmgr.SendAutocreateArray(req)
-				if err != nil {
-					globals.PrintErrMsg(err)
-					return
-				}
-				resByte, err := protojson.Marshal(res)
-				if err != nil {
-					log.Fatalf("failed to marshal the protobuf response: %v", err)
-				}
-				resJSON = string(resByte)
-			}
-
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-		}
+		return nil
 	},
 }
 
