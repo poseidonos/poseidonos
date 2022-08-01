@@ -80,7 +80,9 @@ func TestCreateArrayRAID10WithOddDataDevs(t *testing.T) {
 
 	expected := `RAID10 only supports even number of data devices.`
 
-	if err.Error() != expected {
-		t.Errorf("Expected: %q Output: %q", expected, err.Error())
+	if err != nil {
+		if err.Error() != expected {
+			t.Errorf("Expected: %q Output: %q", expected, err.Error())
+		}
 	}
 }
