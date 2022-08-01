@@ -10,7 +10,7 @@ import (
 func TestRemoveSpare(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
-	_, err := testmgr.ExecuteCommand(rootCmd, "array", "rmspare", "--spare", "device0", "--array-name", "Array0", "--json-req")
+	_, err := testmgr.ExecuteCommand(rootCmd, "array", "rmspare", "--spare", "device0", "--array-name", "Array0")
 
 	if err != nil {
 		t.Errorf("Expected: nil Output: %q", err.Error())

@@ -20,7 +20,7 @@ func TestListArrayCommandReqWithoutArrayName(t *testing.T) {
 func TestListArrayCommandReqWithArrayName(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
-	_, err := testmgr.ExecuteCommand(rootCmd, "array", "list", "--array-name", "Array0", "--json-req")
+	_, err := testmgr.ExecuteCommand(rootCmd, "array", "list", "--array-name", "Array0")
 
 	if err != nil {
 		t.Errorf("Expected: nil Output: %q", err.Error())
