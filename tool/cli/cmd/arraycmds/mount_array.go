@@ -5,9 +5,8 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/socketmgr"
+	"fmt"
 
-	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -26,45 +25,47 @@ Example:
 	poseidonos-cli array mount --array-name Array0
 	
          `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "MOUNTARRAY"
 
-		uuid := globals.GenerateUUID()
+		req, buildErr := buildMountArrayReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
+		}
 
-		param := &pb.MountArrayRequest_Param{Name: mount_array_arrayName,
-			EnableWriteThrough: &mount_array_enableWriteThrough}
-		req := &pb.MountArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-		reqJSON, err := protojson.Marshal(req)
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
-			log.Fatalf("failed to marshal the protobuf request: %v", err)
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendMountArray(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			var resJSON string
-
-			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			} else {
-				res, err := grpcmgr.SendMountArray(req)
-				if err != nil {
-					globals.PrintErrMsg(err)
-					return
-				}
-				resByte, err := protojson.Marshal(res)
-				if err != nil {
-					log.Fatalf("failed to marshal the protobuf response: %v", err)
-				}
-				resJSON = string(resByte)
-			}
-
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
 		}
+
+		return nil
 	},
+}
+
+func buildMountArrayReq(command string) (*pb.MountArrayRequest, error) {
+	uuid := globals.GenerateUUID()
+
+	param := &pb.MountArrayRequest_Param{Name: mount_array_arrayName,
+		EnableWriteThrough: &mount_array_enableWriteThrough}
+	req := &pb.MountArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
