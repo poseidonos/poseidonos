@@ -11,7 +11,7 @@ func TestAutocreateArray(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "autocreate", "--buffer", "uram0", "--num-data-devs",
-		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID5", "--json-req")
+		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID5")
 
 	if err != nil {
 		t.Errorf("Expected: nil Output: %q", err.Error())
@@ -22,7 +22,7 @@ func TestAutocreateArrayWithNoBufferFlag(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "autocreate", "--no-buffer", "--num-data-devs",
-		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID5", "--json-req")
+		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID5")
 
 	expected := `unknown flag: --no-buffer`
 
@@ -37,7 +37,7 @@ func TestAutocreateArrayWithNoBufferError(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "autocreate", "--num-data-devs",
-		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID5", "--json-req")
+		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID5")
 
 	expected := `required flag(s) "buffer" not set`
 
@@ -53,7 +53,7 @@ func TestAutocreateArrayWithRAID10AndOddDataDevs(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	_, err := testmgr.ExecuteCommand(rootCmd, "array", "autocreate", "--buffer", "uram0", "--num-data-devs",
-		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID10", "--json-req")
+		"3", "--num-spare", "1", "--array-name", "Array0", "--raid", "RAID10")
 
 	expected := `RAID10 only supports even number of data devices.`
 

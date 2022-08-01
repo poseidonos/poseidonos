@@ -10,7 +10,7 @@ import (
 func TestAddSpare(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
-	_, err := testmgr.ExecuteCommand(rootCmd, "array", "addspare", "--spare", "device0", "--array-name", "Array0", "--json-req")
+	_, err := testmgr.ExecuteCommand(rootCmd, "array", "addspare", "--spare", "device0", "--array-name", "Array0")
 
 	if err != nil {
 		t.Errorf("Expected: nil Output: %q", err.Error())
@@ -20,7 +20,7 @@ func TestAddSpare(t *testing.T) {
 func TestAddSpareCommandReqWihtoutSpare(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
-	_, err := testmgr.ExecuteCommand(rootCmd, "array", "addspare", "--array-name", "Array0", "--json-req")
+	_, err := testmgr.ExecuteCommand(rootCmd, "array", "addspare", "--array-name", "Array0")
 
 	expected := `required flag(s) "spare" not set`
 	if err != nil {
