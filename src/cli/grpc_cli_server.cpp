@@ -26,12 +26,12 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
-  SystemStop(ServerContext* context, const SystemStopRequest* request,
-                  SystemStopResponse* reply) override
+  StopSystem(ServerContext* context, const StopSystemRequest* request,
+                  StopSystemResponse* reply) override
   {
     _LogCliRequest(request);
 
-    grpc::Status status = pc->ExecuteSystemStopCommand(request, reply);
+    grpc::Status status = pc->ExecuteStopSystemCommand(request, reply);
     if (context->IsCancelled()) {
       _LogGrpcTimeout(request, reply);
       return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);

@@ -113,47 +113,47 @@ struct SystemInfoResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SystemInfoResponseDefaultTypeInternal _SystemInfoResponse_default_instance_;
-constexpr SystemStopRequest::SystemStopRequest(
+constexpr StopSystemRequest::StopSystemRequest(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , requestor_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
-struct SystemStopRequestDefaultTypeInternal {
-  constexpr SystemStopRequestDefaultTypeInternal()
+struct StopSystemRequestDefaultTypeInternal {
+  constexpr StopSystemRequestDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~SystemStopRequestDefaultTypeInternal() {}
+  ~StopSystemRequestDefaultTypeInternal() {}
   union {
-    SystemStopRequest _instance;
+    StopSystemRequest _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SystemStopRequestDefaultTypeInternal _SystemStopRequest_default_instance_;
-constexpr SystemStopResponse_Result::SystemStopResponse_Result(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT StopSystemRequestDefaultTypeInternal _StopSystemRequest_default_instance_;
+constexpr StopSystemResponse_Result::StopSystemResponse_Result(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : status_(nullptr){}
-struct SystemStopResponse_ResultDefaultTypeInternal {
-  constexpr SystemStopResponse_ResultDefaultTypeInternal()
+struct StopSystemResponse_ResultDefaultTypeInternal {
+  constexpr StopSystemResponse_ResultDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~SystemStopResponse_ResultDefaultTypeInternal() {}
+  ~StopSystemResponse_ResultDefaultTypeInternal() {}
   union {
-    SystemStopResponse_Result _instance;
+    StopSystemResponse_Result _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SystemStopResponse_ResultDefaultTypeInternal _SystemStopResponse_Result_default_instance_;
-constexpr SystemStopResponse::SystemStopResponse(
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT StopSystemResponse_ResultDefaultTypeInternal _StopSystemResponse_Result_default_instance_;
+constexpr StopSystemResponse::StopSystemResponse(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , result_(nullptr)
   , info_(nullptr){}
-struct SystemStopResponseDefaultTypeInternal {
-  constexpr SystemStopResponseDefaultTypeInternal()
+struct StopSystemResponseDefaultTypeInternal {
+  constexpr StopSystemResponseDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
-  ~SystemStopResponseDefaultTypeInternal() {}
+  ~StopSystemResponseDefaultTypeInternal() {}
   union {
-    SystemStopResponse _instance;
+    StopSystemResponse _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT SystemStopResponseDefaultTypeInternal _SystemStopResponse_default_instance_;
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT StopSystemResponseDefaultTypeInternal _StopSystemResponse_default_instance_;
 constexpr GetSystemPropertyRequest::GetSystemPropertyRequest(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -2337,28 +2337,28 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse, result_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemInfoResponse, info_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopRequest, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemRequest, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopRequest, command_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopRequest, rid_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopRequest, requestor_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemRequest, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemRequest, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemRequest, requestor_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse_Result, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse_Result, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse_Result, status_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse_Result, status_),
   ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse, _internal_metadata_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse, _internal_metadata_),
   ~0u,  // no _extensions_
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse, command_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse, rid_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse, result_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SystemStopResponse, info_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse, result_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::StopSystemResponse, info_),
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::GetSystemPropertyRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -3586,9 +3586,9 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 29, -1, sizeof(::grpc_cli::SystemInfoResponse_Result_Data)},
   { 49, -1, sizeof(::grpc_cli::SystemInfoResponse_Result)},
   { 56, -1, sizeof(::grpc_cli::SystemInfoResponse)},
-  { 65, -1, sizeof(::grpc_cli::SystemStopRequest)},
-  { 73, -1, sizeof(::grpc_cli::SystemStopResponse_Result)},
-  { 79, -1, sizeof(::grpc_cli::SystemStopResponse)},
+  { 65, -1, sizeof(::grpc_cli::StopSystemRequest)},
+  { 73, -1, sizeof(::grpc_cli::StopSystemResponse_Result)},
+  { 79, -1, sizeof(::grpc_cli::StopSystemResponse)},
   { 88, -1, sizeof(::grpc_cli::GetSystemPropertyRequest)},
   { 96, -1, sizeof(::grpc_cli::GetSystemPropertyResponse_Result_Data)},
   { 102, -1, sizeof(::grpc_cli::GetSystemPropertyResponse_Result)},
@@ -3747,9 +3747,9 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_SystemInfoResponse_Result_Data_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_SystemInfoResponse_Result_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_SystemInfoResponse_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_SystemStopRequest_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_SystemStopResponse_Result_default_instance_),
-  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_SystemStopResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_StopSystemRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_StopSystemResponse_Result_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_StopSystemResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_GetSystemPropertyRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_GetSystemPropertyResponse_Result_Data_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_GetSystemPropertyResponse_Result_default_instance_),
@@ -3926,11 +3926,11 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "Number\030\013 \001(\t\022\030\n\020baseboardVersion\030\014 \001(\t\022\035"
   "\n\025processorManufacturer\030\r \001(\t\022\030\n\020process"
   "orVersion\030\016 \001(\t\022\032\n\022processorFrequency\030\017 "
-  "\001(\t\"D\n\021SystemStopRequest\022\017\n\007command\030\001 \001("
-  "\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\264\001\n\022Sy"
-  "stemStopResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
-  "\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.System"
-  "StopResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc"
+  "\001(\t\"D\n\021StopSystemRequest\022\017\n\007command\030\001 \001("
+  "\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor\030\003 \001(\t\"\264\001\n\022St"
+  "opSystemResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid"
+  "\030\002 \001(\t\0223\n\006result\030\003 \001(\0132#.grpc_cli.StopSy"
+  "stemResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc"
   "_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020"
   ".grpc_cli.Status\"K\n\030GetSystemPropertyReq"
   "uest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\tre"
@@ -4314,10 +4314,10 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cli.St"
   "atus2\257\033\n\006PosCli\022_\n\nSystemInfo\022\033.grpc_cli"
   ".SystemInfoRequest\032\034.grpc_cli.SystemInfo"
-  "Response\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nSyst"
-  "emStop\022\033.grpc_cli.SystemStopRequest\032\034.gr"
-  "pc_cli.SystemStopResponse\"\026\202\323\344\223\002\020\022\016/v1/s"
-  "ystemstop\022}\n\021GetSystemProperty\022\".grpc_cl"
+  "Response\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\nStop"
+  "System\022\033.grpc_cli.StopSystemRequest\032\034.gr"
+  "pc_cli.StopSystemResponse\"\026\202\323\344\223\002\020\022\016/v1/s"
+  "topsystem\022}\n\021GetSystemProperty\022\".grpc_cl"
   "i.GetSystemPropertyRequest\032#.grpc_cli.Ge"
   "tSystemPropertyResponse\"\037\202\323\344\223\002\031\022\027/v1/get"
   "_system_property\022\205\001\n\021SetSystemProperty\022\""
@@ -6593,17 +6593,17 @@ void SystemInfoResponse::InternalSwap(SystemInfoResponse* other) {
 
 // ===================================================================
 
-class SystemStopRequest::_Internal {
+class StopSystemRequest::_Internal {
  public:
 };
 
-SystemStopRequest::SystemStopRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+StopSystemRequest::StopSystemRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:grpc_cli.SystemStopRequest)
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.StopSystemRequest)
 }
-SystemStopRequest::SystemStopRequest(const SystemStopRequest& from)
+StopSystemRequest::StopSystemRequest(const StopSystemRequest& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -6621,40 +6621,40 @@ SystemStopRequest::SystemStopRequest(const SystemStopRequest& from)
     requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_requestor(), 
       GetArena());
   }
-  // @@protoc_insertion_point(copy_constructor:grpc_cli.SystemStopRequest)
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.StopSystemRequest)
 }
 
-void SystemStopRequest::SharedCtor() {
+void StopSystemRequest::SharedCtor() {
 command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-SystemStopRequest::~SystemStopRequest() {
-  // @@protoc_insertion_point(destructor:grpc_cli.SystemStopRequest)
+StopSystemRequest::~StopSystemRequest() {
+  // @@protoc_insertion_point(destructor:grpc_cli.StopSystemRequest)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void SystemStopRequest::SharedDtor() {
+void StopSystemRequest::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   requestor_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
-void SystemStopRequest::ArenaDtor(void* object) {
-  SystemStopRequest* _this = reinterpret_cast< SystemStopRequest* >(object);
+void StopSystemRequest::ArenaDtor(void* object) {
+  StopSystemRequest* _this = reinterpret_cast< StopSystemRequest* >(object);
   (void)_this;
 }
-void SystemStopRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void StopSystemRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void SystemStopRequest::SetCachedSize(int size) const {
+void StopSystemRequest::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void SystemStopRequest::Clear() {
-// @@protoc_insertion_point(message_clear_start:grpc_cli.SystemStopRequest)
+void StopSystemRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.StopSystemRequest)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -6665,7 +6665,7 @@ void SystemStopRequest::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* SystemStopRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* StopSystemRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -6677,7 +6677,7 @@ const char* SystemStopRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           auto str = _internal_mutable_command();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemStopRequest.command"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.StopSystemRequest.command"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -6686,7 +6686,7 @@ const char* SystemStopRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           auto str = _internal_mutable_rid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemStopRequest.rid"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.StopSystemRequest.rid"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -6695,7 +6695,7 @@ const char* SystemStopRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESP
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           auto str = _internal_mutable_requestor();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemStopRequest.requestor"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.StopSystemRequest.requestor"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -6721,9 +6721,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* SystemStopRequest::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* StopSystemRequest::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.SystemStopRequest)
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.StopSystemRequest)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -6732,7 +6732,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.SystemStopRequest.command");
+      "grpc_cli.StopSystemRequest.command");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_command(), target);
   }
@@ -6742,7 +6742,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.SystemStopRequest.rid");
+      "grpc_cli.StopSystemRequest.rid");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_rid(), target);
   }
@@ -6752,7 +6752,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_requestor().data(), static_cast<int>(this->_internal_requestor().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.SystemStopRequest.requestor");
+      "grpc_cli.StopSystemRequest.requestor");
     target = stream->WriteStringMaybeAliased(
         3, this->_internal_requestor(), target);
   }
@@ -6761,12 +6761,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.SystemStopRequest)
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.StopSystemRequest)
   return target;
 }
 
-size_t SystemStopRequest::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:grpc_cli.SystemStopRequest)
+size_t StopSystemRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.StopSystemRequest)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -6803,23 +6803,23 @@ size_t SystemStopRequest::ByteSizeLong() const {
   return total_size;
 }
 
-void SystemStopRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.SystemStopRequest)
+void StopSystemRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.StopSystemRequest)
   GOOGLE_DCHECK_NE(&from, this);
-  const SystemStopRequest* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SystemStopRequest>(
+  const StopSystemRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<StopSystemRequest>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.SystemStopRequest)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.StopSystemRequest)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.SystemStopRequest)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.StopSystemRequest)
     MergeFrom(*source);
   }
 }
 
-void SystemStopRequest::MergeFrom(const SystemStopRequest& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.SystemStopRequest)
+void StopSystemRequest::MergeFrom(const StopSystemRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.StopSystemRequest)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -6836,25 +6836,25 @@ void SystemStopRequest::MergeFrom(const SystemStopRequest& from) {
   }
 }
 
-void SystemStopRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.SystemStopRequest)
+void StopSystemRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.StopSystemRequest)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void SystemStopRequest::CopyFrom(const SystemStopRequest& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.SystemStopRequest)
+void StopSystemRequest::CopyFrom(const StopSystemRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.StopSystemRequest)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool SystemStopRequest::IsInitialized() const {
+bool StopSystemRequest::IsInitialized() const {
   return true;
 }
 
-void SystemStopRequest::InternalSwap(SystemStopRequest* other) {
+void StopSystemRequest::InternalSwap(StopSystemRequest* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
@@ -6862,29 +6862,29 @@ void SystemStopRequest::InternalSwap(SystemStopRequest* other) {
   requestor_.Swap(&other->requestor_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata SystemStopRequest::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata StopSystemRequest::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class SystemStopResponse_Result::_Internal {
+class StopSystemResponse_Result::_Internal {
  public:
-  static const ::grpc_cli::Status& status(const SystemStopResponse_Result* msg);
+  static const ::grpc_cli::Status& status(const StopSystemResponse_Result* msg);
 };
 
 const ::grpc_cli::Status&
-SystemStopResponse_Result::_Internal::status(const SystemStopResponse_Result* msg) {
+StopSystemResponse_Result::_Internal::status(const StopSystemResponse_Result* msg) {
   return *msg->status_;
 }
-SystemStopResponse_Result::SystemStopResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+StopSystemResponse_Result::StopSystemResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:grpc_cli.SystemStopResponse.Result)
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.StopSystemResponse.Result)
 }
-SystemStopResponse_Result::SystemStopResponse_Result(const SystemStopResponse_Result& from)
+StopSystemResponse_Result::StopSystemResponse_Result(const StopSystemResponse_Result& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   if (from._internal_has_status()) {
@@ -6892,36 +6892,36 @@ SystemStopResponse_Result::SystemStopResponse_Result(const SystemStopResponse_Re
   } else {
     status_ = nullptr;
   }
-  // @@protoc_insertion_point(copy_constructor:grpc_cli.SystemStopResponse.Result)
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.StopSystemResponse.Result)
 }
 
-void SystemStopResponse_Result::SharedCtor() {
+void StopSystemResponse_Result::SharedCtor() {
 status_ = nullptr;
 }
 
-SystemStopResponse_Result::~SystemStopResponse_Result() {
-  // @@protoc_insertion_point(destructor:grpc_cli.SystemStopResponse.Result)
+StopSystemResponse_Result::~StopSystemResponse_Result() {
+  // @@protoc_insertion_point(destructor:grpc_cli.StopSystemResponse.Result)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void SystemStopResponse_Result::SharedDtor() {
+void StopSystemResponse_Result::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   if (this != internal_default_instance()) delete status_;
 }
 
-void SystemStopResponse_Result::ArenaDtor(void* object) {
-  SystemStopResponse_Result* _this = reinterpret_cast< SystemStopResponse_Result* >(object);
+void StopSystemResponse_Result::ArenaDtor(void* object) {
+  StopSystemResponse_Result* _this = reinterpret_cast< StopSystemResponse_Result* >(object);
   (void)_this;
 }
-void SystemStopResponse_Result::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void StopSystemResponse_Result::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void SystemStopResponse_Result::SetCachedSize(int size) const {
+void StopSystemResponse_Result::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void SystemStopResponse_Result::Clear() {
-// @@protoc_insertion_point(message_clear_start:grpc_cli.SystemStopResponse.Result)
+void StopSystemResponse_Result::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.StopSystemResponse.Result)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -6933,7 +6933,7 @@ void SystemStopResponse_Result::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* SystemStopResponse_Result::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* StopSystemResponse_Result::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -6969,9 +6969,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* SystemStopResponse_Result::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* StopSystemResponse_Result::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.SystemStopResponse.Result)
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.StopSystemResponse.Result)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -6987,12 +6987,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.SystemStopResponse.Result)
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.StopSystemResponse.Result)
   return target;
 }
 
-size_t SystemStopResponse_Result::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:grpc_cli.SystemStopResponse.Result)
+size_t StopSystemResponse_Result::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.StopSystemResponse.Result)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -7015,23 +7015,23 @@ size_t SystemStopResponse_Result::ByteSizeLong() const {
   return total_size;
 }
 
-void SystemStopResponse_Result::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.SystemStopResponse.Result)
+void StopSystemResponse_Result::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.StopSystemResponse.Result)
   GOOGLE_DCHECK_NE(&from, this);
-  const SystemStopResponse_Result* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SystemStopResponse_Result>(
+  const StopSystemResponse_Result* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<StopSystemResponse_Result>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.SystemStopResponse.Result)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.StopSystemResponse.Result)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.SystemStopResponse.Result)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.StopSystemResponse.Result)
     MergeFrom(*source);
   }
 }
 
-void SystemStopResponse_Result::MergeFrom(const SystemStopResponse_Result& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.SystemStopResponse.Result)
+void StopSystemResponse_Result::MergeFrom(const StopSystemResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.StopSystemResponse.Result)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -7042,58 +7042,58 @@ void SystemStopResponse_Result::MergeFrom(const SystemStopResponse_Result& from)
   }
 }
 
-void SystemStopResponse_Result::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.SystemStopResponse.Result)
+void StopSystemResponse_Result::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.StopSystemResponse.Result)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void SystemStopResponse_Result::CopyFrom(const SystemStopResponse_Result& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.SystemStopResponse.Result)
+void StopSystemResponse_Result::CopyFrom(const StopSystemResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.StopSystemResponse.Result)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool SystemStopResponse_Result::IsInitialized() const {
+bool StopSystemResponse_Result::IsInitialized() const {
   return true;
 }
 
-void SystemStopResponse_Result::InternalSwap(SystemStopResponse_Result* other) {
+void StopSystemResponse_Result::InternalSwap(StopSystemResponse_Result* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(status_, other->status_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata SystemStopResponse_Result::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata StopSystemResponse_Result::GetMetadata() const {
   return GetMetadataStatic();
 }
 
 
 // ===================================================================
 
-class SystemStopResponse::_Internal {
+class StopSystemResponse::_Internal {
  public:
-  static const ::grpc_cli::SystemStopResponse_Result& result(const SystemStopResponse* msg);
-  static const ::grpc_cli::PosInfo& info(const SystemStopResponse* msg);
+  static const ::grpc_cli::StopSystemResponse_Result& result(const StopSystemResponse* msg);
+  static const ::grpc_cli::PosInfo& info(const StopSystemResponse* msg);
 };
 
-const ::grpc_cli::SystemStopResponse_Result&
-SystemStopResponse::_Internal::result(const SystemStopResponse* msg) {
+const ::grpc_cli::StopSystemResponse_Result&
+StopSystemResponse::_Internal::result(const StopSystemResponse* msg) {
   return *msg->result_;
 }
 const ::grpc_cli::PosInfo&
-SystemStopResponse::_Internal::info(const SystemStopResponse* msg) {
+StopSystemResponse::_Internal::info(const StopSystemResponse* msg) {
   return *msg->info_;
 }
-SystemStopResponse::SystemStopResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+StopSystemResponse::StopSystemResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
   : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
-  // @@protoc_insertion_point(arena_constructor:grpc_cli.SystemStopResponse)
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.StopSystemResponse)
 }
-SystemStopResponse::SystemStopResponse(const SystemStopResponse& from)
+StopSystemResponse::StopSystemResponse(const StopSystemResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message() {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -7107,7 +7107,7 @@ SystemStopResponse::SystemStopResponse(const SystemStopResponse& from)
       GetArena());
   }
   if (from._internal_has_result()) {
-    result_ = new ::grpc_cli::SystemStopResponse_Result(*from.result_);
+    result_ = new ::grpc_cli::StopSystemResponse_Result(*from.result_);
   } else {
     result_ = nullptr;
   }
@@ -7116,10 +7116,10 @@ SystemStopResponse::SystemStopResponse(const SystemStopResponse& from)
   } else {
     info_ = nullptr;
   }
-  // @@protoc_insertion_point(copy_constructor:grpc_cli.SystemStopResponse)
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.StopSystemResponse)
 }
 
-void SystemStopResponse::SharedCtor() {
+void StopSystemResponse::SharedCtor() {
 command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
@@ -7128,13 +7128,13 @@ rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyI
     reinterpret_cast<char*>(&result_)) + sizeof(info_));
 }
 
-SystemStopResponse::~SystemStopResponse() {
-  // @@protoc_insertion_point(destructor:grpc_cli.SystemStopResponse)
+StopSystemResponse::~StopSystemResponse() {
+  // @@protoc_insertion_point(destructor:grpc_cli.StopSystemResponse)
   SharedDtor();
   _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-void SystemStopResponse::SharedDtor() {
+void StopSystemResponse::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -7142,18 +7142,18 @@ void SystemStopResponse::SharedDtor() {
   if (this != internal_default_instance()) delete info_;
 }
 
-void SystemStopResponse::ArenaDtor(void* object) {
-  SystemStopResponse* _this = reinterpret_cast< SystemStopResponse* >(object);
+void StopSystemResponse::ArenaDtor(void* object) {
+  StopSystemResponse* _this = reinterpret_cast< StopSystemResponse* >(object);
   (void)_this;
 }
-void SystemStopResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+void StopSystemResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
 }
-void SystemStopResponse::SetCachedSize(int size) const {
+void StopSystemResponse::SetCachedSize(int size) const {
   _cached_size_.Set(size);
 }
 
-void SystemStopResponse::Clear() {
-// @@protoc_insertion_point(message_clear_start:grpc_cli.SystemStopResponse)
+void StopSystemResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.StopSystemResponse)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
@@ -7171,7 +7171,7 @@ void SystemStopResponse::Clear() {
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
-const char* SystemStopResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+const char* StopSystemResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
 #define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
   while (!ctx->Done(&ptr)) {
     ::PROTOBUF_NAMESPACE_ID::uint32 tag;
@@ -7183,7 +7183,7 @@ const char* SystemStopResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           auto str = _internal_mutable_command();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemStopResponse.command"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.StopSystemResponse.command"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -7192,11 +7192,11 @@ const char* SystemStopResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
           auto str = _internal_mutable_rid();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.SystemStopResponse.rid"));
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.StopSystemResponse.rid"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // .grpc_cli.SystemStopResponse.Result result = 3;
+      // .grpc_cli.StopSystemResponse.Result result = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           ptr = ctx->ParseMessage(_internal_mutable_result(), ptr);
@@ -7232,9 +7232,9 @@ failure:
 #undef CHK_
 }
 
-::PROTOBUF_NAMESPACE_ID::uint8* SystemStopResponse::_InternalSerialize(
+::PROTOBUF_NAMESPACE_ID::uint8* StopSystemResponse::_InternalSerialize(
     ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.SystemStopResponse)
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.StopSystemResponse)
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
@@ -7243,7 +7243,7 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.SystemStopResponse.command");
+      "grpc_cli.StopSystemResponse.command");
     target = stream->WriteStringMaybeAliased(
         1, this->_internal_command(), target);
   }
@@ -7253,12 +7253,12 @@ failure:
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
       this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.SystemStopResponse.rid");
+      "grpc_cli.StopSystemResponse.rid");
     target = stream->WriteStringMaybeAliased(
         2, this->_internal_rid(), target);
   }
 
-  // .grpc_cli.SystemStopResponse.Result result = 3;
+  // .grpc_cli.StopSystemResponse.Result result = 3;
   if (this->has_result()) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
@@ -7278,12 +7278,12 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.SystemStopResponse)
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.StopSystemResponse)
   return target;
 }
 
-size_t SystemStopResponse::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:grpc_cli.SystemStopResponse)
+size_t StopSystemResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.StopSystemResponse)
   size_t total_size = 0;
 
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -7304,7 +7304,7 @@ size_t SystemStopResponse::ByteSizeLong() const {
         this->_internal_rid());
   }
 
-  // .grpc_cli.SystemStopResponse.Result result = 3;
+  // .grpc_cli.StopSystemResponse.Result result = 3;
   if (this->has_result()) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
@@ -7327,23 +7327,23 @@ size_t SystemStopResponse::ByteSizeLong() const {
   return total_size;
 }
 
-void SystemStopResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.SystemStopResponse)
+void StopSystemResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.StopSystemResponse)
   GOOGLE_DCHECK_NE(&from, this);
-  const SystemStopResponse* source =
-      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<SystemStopResponse>(
+  const StopSystemResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<StopSystemResponse>(
           &from);
   if (source == nullptr) {
-  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.SystemStopResponse)
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.StopSystemResponse)
     ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
   } else {
-  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.SystemStopResponse)
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.StopSystemResponse)
     MergeFrom(*source);
   }
 }
 
-void SystemStopResponse::MergeFrom(const SystemStopResponse& from) {
-// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.SystemStopResponse)
+void StopSystemResponse::MergeFrom(const StopSystemResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.StopSystemResponse)
   GOOGLE_DCHECK_NE(&from, this);
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
@@ -7356,45 +7356,45 @@ void SystemStopResponse::MergeFrom(const SystemStopResponse& from) {
     _internal_set_rid(from._internal_rid());
   }
   if (from.has_result()) {
-    _internal_mutable_result()->::grpc_cli::SystemStopResponse_Result::MergeFrom(from._internal_result());
+    _internal_mutable_result()->::grpc_cli::StopSystemResponse_Result::MergeFrom(from._internal_result());
   }
   if (from.has_info()) {
     _internal_mutable_info()->::grpc_cli::PosInfo::MergeFrom(from._internal_info());
   }
 }
 
-void SystemStopResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
-// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.SystemStopResponse)
+void StopSystemResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.StopSystemResponse)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-void SystemStopResponse::CopyFrom(const SystemStopResponse& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.SystemStopResponse)
+void StopSystemResponse::CopyFrom(const StopSystemResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.StopSystemResponse)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
-bool SystemStopResponse::IsInitialized() const {
+bool StopSystemResponse::IsInitialized() const {
   return true;
 }
 
-void SystemStopResponse::InternalSwap(SystemStopResponse* other) {
+void StopSystemResponse::InternalSwap(StopSystemResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(SystemStopResponse, info_)
-      + sizeof(SystemStopResponse::info_)
-      - PROTOBUF_FIELD_OFFSET(SystemStopResponse, result_)>(
+      PROTOBUF_FIELD_OFFSET(StopSystemResponse, info_)
+      + sizeof(StopSystemResponse::info_)
+      - PROTOBUF_FIELD_OFFSET(StopSystemResponse, result_)>(
           reinterpret_cast<char*>(&result_),
           reinterpret_cast<char*>(&other->result_));
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata SystemStopResponse::GetMetadata() const {
+::PROTOBUF_NAMESPACE_ID::Metadata StopSystemResponse::GetMetadata() const {
   return GetMetadataStatic();
 }
 
@@ -49909,14 +49909,14 @@ template<> PROTOBUF_NOINLINE ::grpc_cli::SystemInfoResponse_Result* Arena::Creat
 template<> PROTOBUF_NOINLINE ::grpc_cli::SystemInfoResponse* Arena::CreateMaybeMessage< ::grpc_cli::SystemInfoResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::SystemInfoResponse >(arena);
 }
-template<> PROTOBUF_NOINLINE ::grpc_cli::SystemStopRequest* Arena::CreateMaybeMessage< ::grpc_cli::SystemStopRequest >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::grpc_cli::SystemStopRequest >(arena);
+template<> PROTOBUF_NOINLINE ::grpc_cli::StopSystemRequest* Arena::CreateMaybeMessage< ::grpc_cli::StopSystemRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::StopSystemRequest >(arena);
 }
-template<> PROTOBUF_NOINLINE ::grpc_cli::SystemStopResponse_Result* Arena::CreateMaybeMessage< ::grpc_cli::SystemStopResponse_Result >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::grpc_cli::SystemStopResponse_Result >(arena);
+template<> PROTOBUF_NOINLINE ::grpc_cli::StopSystemResponse_Result* Arena::CreateMaybeMessage< ::grpc_cli::StopSystemResponse_Result >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::StopSystemResponse_Result >(arena);
 }
-template<> PROTOBUF_NOINLINE ::grpc_cli::SystemStopResponse* Arena::CreateMaybeMessage< ::grpc_cli::SystemStopResponse >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::grpc_cli::SystemStopResponse >(arena);
+template<> PROTOBUF_NOINLINE ::grpc_cli::StopSystemResponse* Arena::CreateMaybeMessage< ::grpc_cli::StopSystemResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::StopSystemResponse >(arena);
 }
 template<> PROTOBUF_NOINLINE ::grpc_cli::GetSystemPropertyRequest* Arena::CreateMaybeMessage< ::grpc_cli::GetSystemPropertyRequest >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::GetSystemPropertyRequest >(arena);

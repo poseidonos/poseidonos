@@ -13,9 +13,9 @@ service PosCli {
     	};
 	}
 
-	rpc SystemStop (SystemStopRequest) returns (SystemStopResponse) {
+	rpc StopSystem (StopSystemRequest) returns (StopSystemResponse) {
 		option (google.api.http) = {
-      		get: "/v1/systemstop"
+      		get: "/v1/stopsystem"
     	};
 	}
 
@@ -240,13 +240,13 @@ message SystemInfoResponse {
 	PosInfo info = 4;
 }
 
-message SystemStopRequest {
+message StopSystemRequest {
 	string command = 1;
 	string rid = 2;
 	string requestor = 3;
 }
 
-message SystemStopResponse {
+message StopSystemResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

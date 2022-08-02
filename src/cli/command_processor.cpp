@@ -72,7 +72,7 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
 }
 
 grpc::Status
-CommandProcessor::ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply)
+CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, StopSystemResponse* reply)
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());

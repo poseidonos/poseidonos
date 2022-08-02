@@ -43,12 +43,12 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemInfoResponse>> PrepareAsyncSystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemInfoResponse>>(PrepareAsyncSystemInfoRaw(context, request, cq));
     }
-    virtual ::grpc::Status SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc_cli::SystemStopResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemStopResponse>> AsyncSystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemStopResponse>>(AsyncSystemStopRaw(context, request, cq));
+    virtual ::grpc::Status StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc_cli::StopSystemResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopSystemResponse>> AsyncStopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopSystemResponse>>(AsyncStopSystemRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemStopResponse>> PrepareAsyncSystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemStopResponse>>(PrepareAsyncSystemStopRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopSystemResponse>> PrepareAsyncStopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopSystemResponse>>(PrepareAsyncStopSystemRaw(context, request, cq));
     }
     virtual ::grpc::Status GetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc_cli::GetSystemPropertyResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetSystemPropertyResponse>> AsyncGetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
@@ -284,11 +284,11 @@ class PosCli final {
       #else
       virtual void SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest* request, ::grpc_cli::SystemInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
-      virtual void SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
-      virtual void SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      virtual void StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
       virtual void GetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest* request, ::grpc_cli::GetSystemPropertyResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -494,8 +494,8 @@ class PosCli final {
   private:
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemInfoResponse>* AsyncSystemInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemInfoResponse>* PrepareAsyncSystemInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemStopResponse>* AsyncSystemStopRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SystemStopResponse>* PrepareAsyncSystemStopRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopSystemResponse>* AsyncStopSystemRaw(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::StopSystemResponse>* PrepareAsyncStopSystemRaw(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetSystemPropertyResponse>* AsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::GetSystemPropertyResponse>* PrepareAsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetSystemPropertyResponse>* AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
@@ -571,12 +571,12 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemInfoResponse>> PrepareAsyncSystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemInfoResponse>>(PrepareAsyncSystemInfoRaw(context, request, cq));
     }
-    ::grpc::Status SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc_cli::SystemStopResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>> AsyncSystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>>(AsyncSystemStopRaw(context, request, cq));
+    ::grpc::Status StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc_cli::StopSystemResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopSystemResponse>> AsyncStopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopSystemResponse>>(AsyncStopSystemRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>> PrepareAsyncSystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>>(PrepareAsyncSystemStopRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopSystemResponse>> PrepareAsyncStopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopSystemResponse>>(PrepareAsyncStopSystemRaw(context, request, cq));
     }
     ::grpc::Status GetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc_cli::GetSystemPropertyResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetSystemPropertyResponse>> AsyncGetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) {
@@ -811,11 +811,11 @@ class PosCli final {
       #else
       void SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest* request, ::grpc_cli::SystemInfoResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
-      void SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, std::function<void(::grpc::Status)>) override;
+      void StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
-      void SystemStop(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      void StopSystem(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
       void GetSystemProperty(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest* request, ::grpc_cli::GetSystemPropertyResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1022,8 +1022,8 @@ class PosCli final {
     class experimental_async async_stub_{this};
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemInfoResponse>* AsyncSystemInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemInfoResponse>* PrepareAsyncSystemInfoRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>* AsyncSystemStopRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::grpc_cli::SystemStopResponse>* PrepareAsyncSystemStopRaw(::grpc::ClientContext* context, const ::grpc_cli::SystemStopRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopSystemResponse>* AsyncStopSystemRaw(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::StopSystemResponse>* PrepareAsyncStopSystemRaw(::grpc::ClientContext* context, const ::grpc_cli::StopSystemRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetSystemPropertyResponse>* AsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::GetSystemPropertyResponse>* PrepareAsyncGetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::GetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetSystemPropertyResponse>* AsyncSetSystemPropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetSystemPropertyRequest& request, ::grpc::CompletionQueue* cq) override;
@@ -1089,7 +1089,7 @@ class PosCli final {
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateTransportResponse>* AsyncCreateTransportRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateTransportRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateTransportResponse>* PrepareAsyncCreateTransportRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateTransportRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SystemInfo_;
-    const ::grpc::internal::RpcMethod rpcmethod_SystemStop_;
+    const ::grpc::internal::RpcMethod rpcmethod_StopSystem_;
     const ::grpc::internal::RpcMethod rpcmethod_GetSystemProperty_;
     const ::grpc::internal::RpcMethod rpcmethod_SetSystemProperty_;
     const ::grpc::internal::RpcMethod rpcmethod_StartTelemetry_;
@@ -1130,7 +1130,7 @@ class PosCli final {
     Service();
     virtual ~Service();
     virtual ::grpc::Status SystemInfo(::grpc::ServerContext* context, const ::grpc_cli::SystemInfoRequest* request, ::grpc_cli::SystemInfoResponse* response);
-    virtual ::grpc::Status SystemStop(::grpc::ServerContext* context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response);
+    virtual ::grpc::Status StopSystem(::grpc::ServerContext* context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response);
     virtual ::grpc::Status GetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::GetSystemPropertyRequest* request, ::grpc_cli::GetSystemPropertyResponse* response);
     virtual ::grpc::Status SetSystemProperty(::grpc::ServerContext* context, const ::grpc_cli::SetSystemPropertyRequest* request, ::grpc_cli::SetSystemPropertyResponse* response);
     virtual ::grpc::Status StartTelemetry(::grpc::ServerContext* context, const ::grpc_cli::StartTelemetryRequest* request, ::grpc_cli::StartTelemetryResponse* response);
@@ -1186,22 +1186,22 @@ class PosCli final {
     }
   };
   template <class BaseClass>
-  class WithAsyncMethod_SystemStop : public BaseClass {
+  class WithAsyncMethod_StopSystem : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithAsyncMethod_SystemStop() {
+    WithAsyncMethod_StopSystem() {
       ::grpc::Service::MarkMethodAsync(1);
     }
-    ~WithAsyncMethod_SystemStop() override {
+    ~WithAsyncMethod_StopSystem() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SystemStop(::grpc::ServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/) override {
+    ::grpc::Status StopSystem(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestSystemStop(::grpc::ServerContext* context, ::grpc_cli::SystemStopRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::SystemStopResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestStopSystem(::grpc::ServerContext* context, ::grpc_cli::StopSystemRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::StopSystemResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
@@ -1845,7 +1845,7 @@ class PosCli final {
       ::grpc::Service::RequestAsyncUnary(33, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_SystemStop<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_CreateArray<WithAsyncMethod_AutocreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<WithAsyncMethod_SetLogPreference<WithAsyncMethod_SetLogLevel<WithAsyncMethod_LoggerInfo<WithAsyncMethod_GetLogLevel<WithAsyncMethod_ApplyLogFilter<WithAsyncMethod_CreateDevice<WithAsyncMethod_ScanDevice<WithAsyncMethod_ListDevice<WithAsyncMethod_GetSmartLog<WithAsyncMethod_CreateSubsystem<WithAsyncMethod_DeleteSubsystem<WithAsyncMethod_AddListener<WithAsyncMethod_ListSubsystem<WithAsyncMethod_SubsystemInfo<WithAsyncMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > AsyncService;
+  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_StopSystem<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_CreateArray<WithAsyncMethod_AutocreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<WithAsyncMethod_SetLogPreference<WithAsyncMethod_SetLogLevel<WithAsyncMethod_LoggerInfo<WithAsyncMethod_GetLogLevel<WithAsyncMethod_ApplyLogFilter<WithAsyncMethod_CreateDevice<WithAsyncMethod_ScanDevice<WithAsyncMethod_ListDevice<WithAsyncMethod_GetSmartLog<WithAsyncMethod_CreateSubsystem<WithAsyncMethod_DeleteSubsystem<WithAsyncMethod_AddListener<WithAsyncMethod_ListSubsystem<WithAsyncMethod_SubsystemInfo<WithAsyncMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SystemInfo : public BaseClass {
    private:
@@ -1894,49 +1894,49 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_SystemStop : public BaseClass {
+  class ExperimentalWithCallbackMethod_StopSystem : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_SystemStop() {
+    ExperimentalWithCallbackMethod_StopSystem() {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::Service::
     #else
       ::grpc::Service::experimental().
     #endif
         MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse>(
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StopSystemRequest, ::grpc_cli::StopSystemResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::grpc_cli::SystemStopRequest* request, ::grpc_cli::SystemStopResponse* response) { return this->SystemStop(context, request, response); }));}
-    void SetMessageAllocatorFor_SystemStop(
-        ::grpc::experimental::MessageAllocator< ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse>* allocator) {
+                     context, const ::grpc_cli::StopSystemRequest* request, ::grpc_cli::StopSystemResponse* response) { return this->StopSystem(context, request, response); }));}
+    void SetMessageAllocatorFor_StopSystem(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::StopSystemRequest, ::grpc_cli::StopSystemResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
     #else
       ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
     #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::StopSystemRequest, ::grpc_cli::StopSystemResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_SystemStop() override {
+    ~ExperimentalWithCallbackMethod_StopSystem() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SystemStop(::grpc::ServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/) override {
+    ::grpc::Status StopSystem(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* SystemStop(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/)
+    virtual ::grpc::ServerUnaryReactor* StopSystem(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/)
     #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SystemStop(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/)
+    virtual ::grpc::experimental::ServerUnaryReactor* StopSystem(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/)
     #endif
       { return nullptr; }
   };
@@ -3445,10 +3445,10 @@ class PosCli final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_StopSystem<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_SystemStop<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_StopSystem<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SystemInfo : public BaseClass {
    private:
@@ -3467,18 +3467,18 @@ class PosCli final {
     }
   };
   template <class BaseClass>
-  class WithGenericMethod_SystemStop : public BaseClass {
+  class WithGenericMethod_StopSystem : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithGenericMethod_SystemStop() {
+    WithGenericMethod_StopSystem() {
       ::grpc::Service::MarkMethodGeneric(1);
     }
-    ~WithGenericMethod_SystemStop() override {
+    ~WithGenericMethod_StopSystem() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SystemStop(::grpc::ServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/) override {
+    ::grpc::Status StopSystem(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -4048,22 +4048,22 @@ class PosCli final {
     }
   };
   template <class BaseClass>
-  class WithRawMethod_SystemStop : public BaseClass {
+  class WithRawMethod_StopSystem : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawMethod_SystemStop() {
+    WithRawMethod_StopSystem() {
       ::grpc::Service::MarkMethodRaw(1);
     }
-    ~WithRawMethod_SystemStop() override {
+    ~WithRawMethod_StopSystem() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SystemStop(::grpc::ServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/) override {
+    ::grpc::Status StopSystem(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestSystemStop(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+    void RequestStopSystem(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
@@ -4746,11 +4746,11 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_SystemStop : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_StopSystem : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_SystemStop() {
+    ExperimentalWithRawCallbackMethod_StopSystem() {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::Service::
     #else
@@ -4764,21 +4764,21 @@ class PosCli final {
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->SystemStop(context, request, response); }));
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->StopSystem(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_SystemStop() override {
+    ~ExperimentalWithRawCallbackMethod_StopSystem() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status SystemStop(::grpc::ServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/) override {
+    ::grpc::Status StopSystem(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* SystemStop(
+    virtual ::grpc::ServerUnaryReactor* StopSystem(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
     #else
-    virtual ::grpc::experimental::ServerUnaryReactor* SystemStop(
+    virtual ::grpc::experimental::ServerUnaryReactor* StopSystem(
       ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
     #endif
       { return nullptr; }
@@ -6027,31 +6027,31 @@ class PosCli final {
     virtual ::grpc::Status StreamedSystemInfo(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SystemInfoRequest,::grpc_cli::SystemInfoResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_SystemStop : public BaseClass {
+  class WithStreamedUnaryMethod_StopSystem : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithStreamedUnaryMethod_SystemStop() {
+    WithStreamedUnaryMethod_StopSystem() {
       ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
-          ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse>(
+          ::grpc_cli::StopSystemRequest, ::grpc_cli::StopSystemResponse>(
             [this](::grpc::ServerContext* context,
                    ::grpc::ServerUnaryStreamer<
-                     ::grpc_cli::SystemStopRequest, ::grpc_cli::SystemStopResponse>* streamer) {
-                       return this->StreamedSystemStop(context,
+                     ::grpc_cli::StopSystemRequest, ::grpc_cli::StopSystemResponse>* streamer) {
+                       return this->StreamedStopSystem(context,
                          streamer);
                   }));
     }
-    ~WithStreamedUnaryMethod_SystemStop() override {
+    ~WithStreamedUnaryMethod_StopSystem() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status SystemStop(::grpc::ServerContext* /*context*/, const ::grpc_cli::SystemStopRequest* /*request*/, ::grpc_cli::SystemStopResponse* /*response*/) override {
+    ::grpc::Status StopSystem(::grpc::ServerContext* /*context*/, const ::grpc_cli::StopSystemRequest* /*request*/, ::grpc_cli::StopSystemResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedSystemStop(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SystemStopRequest,::grpc_cli::SystemStopResponse>* server_unary_streamer) = 0;
+    virtual ::grpc::Status StreamedStopSystem(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::StopSystemRequest,::grpc_cli::StopSystemResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_GetSystemProperty : public BaseClass {
@@ -6917,9 +6917,9 @@ class PosCli final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedCreateTransport(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::CreateTransportRequest,::grpc_cli::CreateTransportResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_StopSystem<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_SystemStop<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_StopSystem<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace grpc_cli

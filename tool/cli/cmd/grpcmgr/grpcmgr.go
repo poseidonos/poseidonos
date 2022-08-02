@@ -38,7 +38,7 @@ func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 	return res, err
 }
 
-func SendSystemStopRpc(req *pb.SystemStopRequest) (*pb.SystemStopResponse, error) {
+func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
 	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Error(err)
@@ -51,7 +51,7 @@ func SendSystemStopRpc(req *pb.SystemStopRequest) (*pb.SystemStopResponse, error
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
 	defer cancel()
 
-	res, err := c.SystemStop(ctx, req)
+	res, err := c.StopSystem(ctx, req)
 
 	if err != nil {
 		log.Error("error: ", err.Error())
@@ -84,7 +84,7 @@ func SendGetSystemPropertyRpc(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPr
 	return res, err
 }
 
-func SendSetSystemPropertyRpc(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPropertyResponse, error) {
+func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPropertyResponse, error) {
 	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Error(err)
