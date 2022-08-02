@@ -74,6 +74,8 @@ using grpc_cli::AddSpareRequest;
 using grpc_cli::AddSpareResponse;
 using grpc_cli::RemoveSpareRequest;
 using grpc_cli::RemoveSpareResponse;
+using grpc_cli::ReplaceArrayDeviceRequest;
+using grpc_cli::ReplaceArrayDeviceResponse;
 using grpc_cli::CreateArrayRequest;
 using grpc_cli::CreateArrayResponse;
 using grpc_cli::AutocreateArrayRequest;
@@ -145,6 +147,7 @@ public:
     // Array Commands
     grpc::Status ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply);
     grpc::Status ExecuteRemoveSpareCommand(const RemoveSpareRequest* request, RemoveSpareResponse* reply);
+    grpc::Status ExecuteReplaceArrayDeviceCommand(const ReplaceArrayDeviceRequest* request, ReplaceArrayDeviceResponse* reply);
     grpc::Status ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply);
     grpc::Status ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* request, AutocreateArrayResponse* reply);
     grpc::Status ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, DeleteArrayResponse* reply);

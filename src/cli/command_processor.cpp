@@ -429,6 +429,19 @@ CommandProcessor::ExecuteRemoveSpareCommand(const RemoveSpareRequest* request, R
 }
 
 grpc::Status
+CommandProcessor::ExecuteReplaceArrayDeviceCommand(const ReplaceArrayDeviceRequest* request, ReplaceArrayDeviceResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    // Fill in the actual logic here
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply)
 {
     grpc_cli::CreateArrayRequest_Param param = request->param();
