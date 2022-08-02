@@ -47,8 +47,8 @@ class EventScheduler;
 class CheckpointHandler
 {
 public:
-    CheckpointHandler(void);
-    CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback);
+    CheckpointHandler(const int arrayId);
+    CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback, const int arrayId);
     virtual ~CheckpointHandler(void) = default;
 
     virtual void Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler);
@@ -82,6 +82,7 @@ private:
 
     std::mutex completionLock;
     EventSmartPtr checkpointCompletionCallback;
+    int arrayId;
 };
 
 } // namespace pos

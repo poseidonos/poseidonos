@@ -42,14 +42,14 @@
 namespace pos
 {
 // Constructor for unit test mocking
-CheckpointHandler::CheckpointHandler(void)
-: CheckpointHandler(0, 0, nullptr)
+CheckpointHandler::CheckpointHandler(const int arrayId)
+: CheckpointHandler(0, 0, nullptr, arrayId)
 {
     _Reset();
 }
 
 // Constructor for injecting private member values in unit test
-CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback)
+CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback, const int arrayId)
 : mapFlush(nullptr),
   contextManager(nullptr),
   scheduler(nullptr),
@@ -58,7 +58,8 @@ CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, Eve
   numMapsFlushed(numMapsFlushed),
   allocatorMetaFlushCompleted(false),
   mapFlushCompleted(false),
-  checkpointCompletionCallback(callback)
+  checkpointCompletionCallback(callback),
+  arrayId(arrayId)
 {
 }
 
@@ -90,7 +91,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     else
     {
         int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED);
-        POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush", numMapsToFlush);
+        POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush, arrayId:{}", numMapsToFlush, arrayId);
 
         for (auto mapId : pendingDirtyMaps)
         {
@@ -102,7 +103,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
                 POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
-                    "Failed to start flushing dirty map pages");
+                    "Failed to start flushing dirty map pages, arrayId:{}", arrayId);
                 return ret;
             }
         }
@@ -114,7 +115,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     if (ret != 0)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
-            "Failed to start flushing allocator meta pages");
+            "Failed to start flushing allocator meta pages, arrayId:{}", arrayId);
     }
 
     std::unique_lock<std::mutex> lock(completionLock);
@@ -142,14 +143,14 @@ CheckpointHandler::FlushCompleted(int metaId)
     if (metaId == ALLOCATOR_META_ID)
     {
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
-            "Allocator meta flush completed");
+            "Allocator meta flush completed, arrayId:{}", arrayId);
         assert(allocatorMetaFlushCompleted == false);
         allocatorMetaFlushCompleted = true;
     }
     else
     {
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
-            "Map {} flush completed", metaId);
+            "Map {} flush completed, arrayId:{}", metaId, arrayId);
         _CheckMapFlushCompleted();
     }
 
@@ -161,8 +162,8 @@ void
 CheckpointHandler::_TryToComplete(void)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
-        "Try to complete CP, mapCompleted {} allocatorCompleted {}",
-        mapFlushCompleted, allocatorMetaFlushCompleted);
+        "Try to complete CP, mapCompleted {} allocatorCompleted {}, arrayId:{}",
+        mapFlushCompleted, allocatorMetaFlushCompleted, arrayId);
 
     std::unique_lock<std::mutex> lock(completionLock);
     if ((mapFlushCompleted == true) && (allocatorMetaFlushCompleted == true)
@@ -175,7 +176,7 @@ CheckpointHandler::_TryToComplete(void)
         assert(status == COMPLETED);
 
         scheduler->EnqueueEvent(checkpointCompletionCallback);
-        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed");
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed, arrayId:{}", arrayId);
 
         _Reset();
     }
@@ -197,7 +198,7 @@ void
 CheckpointHandler::_SetStatus(CheckpointStatus to)
 {
     POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
-        "Checkpoint status changed from {} to {}", status, to);
+        "Checkpoint status changed from {} to {}, arrayId:{}", status, to, arrayId);
 
     status = to;
 }

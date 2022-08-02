@@ -55,7 +55,8 @@ class CheckpointManager
 {
 public:
     CheckpointManager(void);
-    explicit CheckpointManager(CheckpointHandler* cpHandler);
+    CheckpointManager(const int arrayId);
+    explicit CheckpointManager(CheckpointHandler* cpHandler, const int arrayId = 0);
     virtual ~CheckpointManager(void);
 
     virtual void Init(IMapFlush* mapFlush, IContextManager* ctxManager,
@@ -105,6 +106,7 @@ private:
     EventSmartPtr clientCallback;
     std::queue<CheckpointRequest> checkpointRequests;
     TelemetryPublisher* telemetryPublisher;
+    int arrayId;
 };
 
 } // namespace pos

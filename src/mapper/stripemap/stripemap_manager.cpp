@@ -96,14 +96,16 @@ StripeMapManager::Init(void)
         POSMetricValue v;
         v.gauge = numWriteIssuedCount;
         tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Flush Header, array:{}", addrInfo->GetArrayName());
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Flush Header, array:{}, arrayId:{}",
+            addrInfo->GetArrayName(), addrInfo->GetArrayId());
         ret = stripeMap->FlushHeader(eventStripeMap);
         if (ret < 0)
         {
             numWriteIssuedCount--;
             v.gauge = numWriteIssuedCount;
             tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StripeMap] Failed to Initial Store StripeMap File, array:{}", addrInfo->GetArrayName());
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StripeMap] Failed to Initial Store StripeMap File, array:{}, arrayId:{}",
+                addrInfo->GetArrayName(), addrInfo->GetArrayId());
         }
         else
         {
@@ -112,14 +114,16 @@ StripeMapManager::Init(void)
     }
     else if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StripeMap] Failed to create StripeMap File, array:{}", addrInfo->GetArrayName());
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StripeMap] Failed to create StripeMap File, array:{}, arrayId:{}",
+            addrInfo->GetArrayName(), addrInfo->GetArrayId());
     }
     else
     {
         ret = LoadStripeMapFile();
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(MAPPER_START), "[Mapper StripeMap] Failed to load StripeMap File");
+            POS_TRACE_ERROR(EID(MAPPER_START), "[Mapper StripeMap] Failed to load StripeMap File, array{}, arrayId:{}",
+                addrInfo->GetArrayName(), addrInfo->GetArrayId());
         }
     }
     return ret;
@@ -140,7 +144,8 @@ StripeMapManager::LoadStripeMapFile(void)
 {
     AsyncLoadCallBack cb = std::bind(&StripeMapManager::_MapLoadDone, this, std::placeholders::_1);
     numLoadIssuedCount++;
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Load StripeMap, array:{}", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Load StripeMap, array:{}, arrayId:{}",
+        addrInfo->GetArrayName(), addrInfo->GetArrayId());
     int ret = stripeMap->Load(cb);
     if (ret == -EID(MAP_LOAD_COMPLETED))
     {
@@ -150,7 +155,8 @@ StripeMapManager::LoadStripeMapFile(void)
     }
 
     _WaitLoadIoDone();
-    POS_TRACE_INFO(EID(MAPPER_START), "[Mapper StripeMap] StripeMap Loaded, arrayName:{}", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_START), "[Mapper StripeMap] StripeMap Loaded, array:{}, arrayId:{}",
+        addrInfo->GetArrayName(), addrInfo->GetArrayId());
     return ret;
 }
 
@@ -170,7 +176,8 @@ StripeMapManager::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr cb)
     POSMetricValue v;
     v.gauge = numWriteIssuedCount;
     tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushDirtyPagesGiven] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushDirtyPagesGiven] Issue Flush StripeMap, array:{}, arrayId:{}",
+        addrInfo->GetArrayName(), addrInfo->GetArrayId());
     int ret = stripeMap->FlushDirtyPagesGiven(dirtyPages, eventStripeMap);
     if (ret < 0)
     {
@@ -198,7 +205,8 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
     POSMetricValue v;
     v.gauge = numWriteIssuedCount;
     tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushTouchedPages] Issue Flush StripeMap, array:{}", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap FlushTouchedPages] Issue Flush StripeMap, array:{}, arrayId:{}",
+        addrInfo->GetArrayName(), addrInfo->GetArrayId());
     int ret = stripeMap->FlushTouchedPages(eventStripeMap);
     if (ret < 0)
     {
@@ -213,7 +221,8 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
 void
 StripeMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone", numWriteIssuedCount);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone, array:{}, arrayId:{}",
+        numWriteIssuedCount, addrInfo->GetArrayName(), addrInfo->GetArrayId());
     if (callback != nullptr)
     {
         eventScheduler->EnqueueEvent(callback);
@@ -229,7 +238,8 @@ StripeMapManager::MapFlushDone(int mapId)
 void
 StripeMapManager::WaitAllPendingIoDone(void)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] WaitAllPendingIoDone PendingWriteCnt:{}, PendingReadCnt:{}", numWriteIssuedCount, numLoadIssuedCount);
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] WaitAllPendingIoDone PendingWriteCnt:{}, PendingReadCnt:{}, array:{}, arrayId:{}",
+        numWriteIssuedCount, numLoadIssuedCount, addrInfo->GetArrayName(), addrInfo->GetArrayId());
     while ((numWriteIssuedCount + numLoadIssuedCount) != 0)
         ;
 }
@@ -326,7 +336,8 @@ StripeMapManager::DumpLoad(std::string fileName)
 void
 StripeMapManager::_MapLoadDone(int param)
 {
-    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper StripeMap] arrayName:{} load done, so wake up! @_MapLoadDone", addrInfo->GetArrayName());
+    POS_TRACE_INFO(EID(MAP_LOAD_COMPLETED), "[Mapper StripeMap] arrayName:{} load done, so wake up! @_MapLoadDone, arrayId:{}",
+        addrInfo->GetArrayName(), addrInfo->GetArrayId());
     assert(numLoadIssuedCount > 0);
     numLoadIssuedCount--;
 }
