@@ -7,7 +7,7 @@ import (
 )
 
 // This testing tests if the request is created well in JSON form from the command line.
-func TestSetSystemPropertyCommandReq(t *testing.T) {
+func TestSetSystemProperty(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	_, err := testmgr.ExecuteCommand(rootCmd, "system", "set-property", "--rebuild-impact", "lowest")
