@@ -61,7 +61,7 @@ func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
 	return res, err
 }
 
-func SendGetSystemPropertyRpc(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPropertyResponse, error) {
+func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPropertyResponse, error) {
 	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Error(err)

@@ -4,11 +4,10 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/socketmgr"
+	"fmt"
 
 	pb "cli/api"
 
-	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -27,41 +26,44 @@ Syntax:
 Example:
 	poseidonos-cli system get-property
           `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "GETSYSTEMPROPERTY"
-		uuid := globals.GenerateUUID()
 
-		req := &pb.GetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli"}
-		reqJSON, err := protojson.Marshal(req)
+		req, buildErr := buildGetSystemPropertyReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
+		}
+
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
-			log.Fatalf("failed to marshal the protobuf request: %v", err)
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendGetSystemProperty(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			var resJSON string
-
-			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			} else {
-				res, err := grpcmgr.SendGetSystemPropertyRpc(req)
-				if err != nil {
-					globals.PrintErrMsg(err)
-					return
-				}
-				resByte, err := protojson.Marshal(res)
-				if err != nil {
-					log.Fatalf("failed to marshal the protobuf response: %v", err)
-				}
-				resJSON = string(resByte)
-			}
-
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
 		}
+
+		return nil
 	},
+}
+
+func buildGetSystemPropertyReq(command string) (*pb.GetSystemPropertyRequest, error) {
+	uuid := globals.GenerateUUID()
+	req := &pb.GetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli"}
+
+	return req, nil
 }
 
 func init() {
