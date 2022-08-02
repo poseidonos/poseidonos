@@ -4,8 +4,7 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
-	"cli/cmd/socketmgr"
-	"log"
+	"fmt"
 
 	pb "cli/api"
 
@@ -22,41 +21,44 @@ Display the information of PoseidonOS.
 Syntax:
 	poseidonos-cli system info
           `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "SYSTEMINFO"
-		uuid := globals.GenerateUUID()
 
-		req := &pb.SystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli"}
-		reqJSON, err := protojson.Marshal(req)
+		req, buildErr := buildSystemInfoReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
+		}
+
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
-			log.Fatalf("failed to marshal the protobuf request: %v", err)
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendSystemInfo(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			var resJSON string
-
-			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			} else {
-				res, err := grpcmgr.SendSystemInfoRpc(req)
-				if err != nil {
-					globals.PrintErrMsg(err)
-					return
-				}
-				resByte, err := protojson.Marshal(res)
-				if err != nil {
-					log.Fatalf("failed to marshal the protobuf response: %v", err)
-				}
-				resJSON = string(resByte)
-			}
-
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
 		}
+
+		return nil
 	},
+}
+
+func buildSystemInfoReq(command string) (*pb.SystemInfoRequest, error) {
+	uuid := globals.GenerateUUID()
+	req := &pb.SystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli"}
+
+	return req, nil
 }
 
 func init() {
