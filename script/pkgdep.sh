@@ -70,7 +70,12 @@ if [ -f /etc/debian_version ]; then
     apt install -y libgoogle-perftools-dev
     # for rocksdb
     apt install -y librocksdb-dev
-
+    # for jaeger (in opentelemetry)
+    apt install -y --no-install-recommends \
+      libboost-locale-dev \
+      libevent-dev \
+      libssl-dev \
+      ninja-build
 
 else
     echo "pkgdep: unknown system type."
