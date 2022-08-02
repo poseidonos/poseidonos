@@ -52,8 +52,8 @@ using grpc::StatusCode;
 using grpc_cli::PosInfo;
 using grpc_cli::SystemInfoRequest;
 using grpc_cli::SystemInfoResponse;
-using grpc_cli::SystemStopRequest;
-using grpc_cli::SystemStopResponse;
+using grpc_cli::StopSystemRequest;
+using grpc_cli::StopSystemResponse;
 using grpc_cli::GetSystemPropertyRequest;
 using grpc_cli::GetSystemPropertyResponse;
 using grpc_cli::SetSystemPropertyRequest;
@@ -128,7 +128,7 @@ public:
 
     // System Commands
     grpc::Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
-    grpc::Status ExecuteSystemStopCommand(const SystemStopRequest* request, SystemStopResponse* reply);
+    grpc::Status ExecuteStopSystemCommand(const StopSystemRequest* request, StopSystemResponse* reply);
     grpc::Status ExecuteGetSystemPropertyCommand(const GetSystemPropertyRequest* request, GetSystemPropertyResponse* reply);
     grpc::Status ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest* request, SetSystemPropertyResponse* reply);
 
