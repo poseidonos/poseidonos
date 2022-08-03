@@ -434,11 +434,32 @@ CommandProcessor::ExecuteReplaceArrayDeviceCommand(const ReplaceArrayDeviceReque
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    // Fill in the actual logic here
+    string arrayName = (request->param()).array();
+    string devName = (request->param()).device();
 
-    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
-    _SetPosInfo(reply->mutable_info());
-    return grpc::Status::OK;
+    if (devName == "")
+    {
+        int eventId = EID(CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED);
+        POS_TRACE_WARN(eventId, "");
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayMgmt* array = ArrayMgr();
+    int ret = array->ReplaceDevice(arrayName, devName);
+    if (ret == 0)
+    {
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    else
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
 }
 
 grpc::Status

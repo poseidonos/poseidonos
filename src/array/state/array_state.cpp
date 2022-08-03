@@ -141,12 +141,12 @@ ArrayState::CanRemoveSpare(void)
 }
 
 int
-ArrayState::CanRemoveData(void)
+ArrayState::CanReplaceData(void)
 {
     int eventId = 0;
     if (state != ArrayStateEnum::NORMAL)
     {
-        eventId = EID(REMOVE_DATA_DEV_CAN_ONLY_BE_IN_NORMAL_STATE);
+        eventId = EID(REPLACE_DEV_CAN_ONLY_BE_IN_NORMAL_STATE);
         POS_TRACE_WARN(eventId, "curr_state:{}", state.ToString());
     }
     return eventId;

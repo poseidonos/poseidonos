@@ -82,7 +82,8 @@ public:
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
-    virtual int RemoveDevice(string devName);
+    virtual int RemoveSpare(string devName);
+    virtual int ReplaceDevice(string devName);
     virtual int DetachDevice(UblockSharedPtr uBlock);
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
@@ -122,6 +123,7 @@ private:
     int _RegisterService(void);
     void _UnregisterService(void);
     void _CheckRebuildNecessity(void);
+    bool _CanAddSpare(void);
 
     ArrayState* state = nullptr;
     PartitionServices* svc = nullptr;

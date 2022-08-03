@@ -777,7 +777,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
     int actual = arrDevMgr.RemoveSpare("spare-that-doesn't-exist");
 
     // Then
-    ASSERT_EQ(EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND), actual);
+    ASSERT_EQ(EID(REMOVE_DEV_SSD_NAME_NOT_FOUND), actual);
 }
 
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
@@ -804,6 +804,29 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
     ASSERT_EQ(0, actual);
 }
 
+TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
+{
+    // Given
+    MockDeviceManager mockSysDevMgr(nullptr);
+    string mockArrayName = "mockArray";
+    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
+
+    auto spare1 = MockUblockDevice("spare1");
+    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
+    DeviceSet<ArrayDevice*> deviceSet;
+    deviceSet.spares.push_back(&spare1Dev);
+    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
+    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
+
+    EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
+
+    // When
+    int actual = arrDevMgr.RemoveSpare("spare1");
+
+    // Then
+    ASSERT_EQ(0, actual);
+}
+
 TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
 {
     // Given
@@ -816,7 +839,8 @@ TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
     EXPECT_CALL(*mockArrayDeviceList, SpareToData).WillOnce(Return(REPLACE_SUCCESS));
 
     // When
-    int actual = arrDevMgr.ReplaceWithSpare(nullptr);
+    ArrayDevice* out;
+    int actual = arrDevMgr.ReplaceWithSpare(nullptr, out);
 
     // Then
     ASSERT_EQ(REPLACE_SUCCESS, actual);
@@ -951,7 +975,7 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandledWithDeviceSerialNumber)
     EXPECT_CALL(*mockSysDevMgr, GetDev).WillOnce(Return(dataUBlockDev));
 
     // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev("mock-data-sn");
+    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(dataUBlockDev);
 
     // Then
     ASSERT_EQ(&dataDev, arrDev);

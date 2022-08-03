@@ -49,6 +49,7 @@ public:
     virtual int Unmount(string name) = 0;
     virtual int AddDevice(string name, string dev) = 0;
     virtual int RemoveDevice(string name, string dev) = 0;
+    virtual int ReplaceDevice(string name, string dev) = 0;
     virtual ComponentsInfo* GetInfo(string name) = 0;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) = 0;
 };

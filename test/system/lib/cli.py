@@ -98,6 +98,12 @@ def remove_device(spare, array):
     return send_request("array rmspare " + param_str)
 
 
+def replace_device(dev, array):
+    param_str = "--data-device " + dev
+    param_str += " --array-name " + array
+    return send_request("array replace " + param_str)
+
+
 def create_volume(vol_name, size, iops, bw, array):
     param_str = "--volume-name " + vol_name + " --size " + size + "B"
     if iops != "":

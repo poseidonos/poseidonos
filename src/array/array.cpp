@@ -347,8 +347,7 @@ Array::AddSpare(string devName)
     pthread_rwlock_rdlock(&stateLock);
     string raidType = GetDataRaidType();
     int ret = 0;
-    bool needSpare = RaidType(raidType) != RaidTypeEnum::NONE && RaidType(raidType) != RaidTypeEnum::RAID0;
-    if (needSpare == false)
+    if (_CanAddSpare() == false)
     {
         ret = EID(ADD_SPARE_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
         POS_TRACE_WARN(ret, "arrayName:{}, RaidType:{}", name_, raidType);
@@ -410,7 +409,7 @@ Array::AddSpare(string devName)
 }
 
 int
-Array::RemoveDevice(string devName)
+Array::RemoveSpare(string devName)
 {
     pthread_rwlock_rdlock(&stateLock);
     ArrayDeviceType devType = ArrayDeviceType::NONE;
@@ -430,23 +429,45 @@ Array::RemoveDevice(string devName)
             }
         }
     }
-    else if (devType == ArrayDeviceType::DATA)
+    else
     {
-        ret = state->CanRemoveData();
+        ret = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(ret, "devName:{}", devName);
+    }
+    pthread_rwlock_unlock(&stateLock);
+    if (ret == 0)
+    {
+        POS_TRACE_TRACE(EID(REMOVE_DEV_DEBUG_MSG), "device is removed from array successfully. dev_name:{}, array_name:{}", devName, name_);
+    }
+    return ret;
+}
+
+int
+Array::ReplaceDevice(string devName)
+{
+    pthread_rwlock_rdlock(&stateLock);
+    ArrayDeviceType devType = ArrayDeviceType::NONE;
+    ArrayDevice* target = nullptr;
+    tie(target, devType) = devMgr_->GetDevByName(devName);
+    POS_TRACE_INFO(EID(REPLACE_DEV_DEBUG_MSG), "trying to replace device from array, dev_name:{}, dev_type:{} array_name:{}", devName, devType, name_);
+    int ret = 0;
+    if (devType == ArrayDeviceType::DATA)
+    {
+        ret = state->CanReplaceData();
         if (ret == 0)
         {
             if (target != nullptr && target->GetState() == ArrayDeviceState::NORMAL)
             {
-                target->SetState(ArrayDeviceState::REBUILD);
-                RaidState rs = ptnMgr->GetRaidState();
-                if (rs == RaidState::FAILURE)
+                if (_CanAddSpare() == false)
                 {
-                    ret = EID(REMOVE_DATA_DEV_UNSUPPORTED_RAID_TYPE);
+                    ret = EID(REPLACE_DEV_UNSUPPORTED_RAID_TYPE);
                     POS_TRACE_WARN(ret, "meta_raid:{}, data_raid:{}", GetMetaRaidType(), GetDataRaidType());
                     target->SetState(ArrayDeviceState::NORMAL);
                 }
                 else
                 {
+                    target->SetState(ArrayDeviceState::REBUILD);
+                    RaidState rs = ptnMgr->GetRaidState();
                     state->RaidStateUpdated(rs);
                     if (state->SetRebuild() == false)
                     {
@@ -466,27 +487,25 @@ Array::RemoveDevice(string devName)
                     else
                     {
                         _Flush();
+                        POS_TRACE_TRACE(EID(REPLACE_DEV_DEBUG_MSG),
+                            "device {} is replaced to {} successfully, array:{}", devName, swapOut->GetName(), name_);
                         DoRebuildAsync(target, swapOut, RebuildTypeEnum::QUICK);
                     }
                 }
             }
             else
             {
-                ret = EID(REMOVE_DATA_DEV_ONLY_NORMAL_DEV_CAN_BE_REMOVED);
+                ret = EID(REPLACE_DEV_ONLY_NORMAL_DEV_CAN_BE_REMOVED);
                 POS_TRACE_WARN(ret, "dev_status:{} (0-NORMAL, 1-FAULT, 2-REBUILD)", target->GetState());
             }
         }
     }
     else
     {
-        ret = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
+        ret = EID(REPLACE_DEV_SSD_NAME_NOT_FOUND);
         POS_TRACE_WARN(ret, "devName:{}", devName);
     }
     pthread_rwlock_unlock(&stateLock);
-    if (ret == 0)
-    {
-        POS_TRACE_TRACE(EID(REMOVE_DEV_DEBUG_MSG), "device is removed from array successfully. dev_name:{}, array_name:{}", devName, name_);
-    }
     return ret;
 }
 
@@ -869,6 +888,14 @@ Array::_CheckRebuildNecessity(void)
         eventScheduler->EnqueueEvent(event);
     }
 }
+
+bool
+Array::_CanAddSpare(void)
+{
+    RaidType raidType = RaidType(GetDataRaidType());
+    return raidType != RaidTypeEnum::NONE && raidType != RaidTypeEnum::RAID0;
+}
+
 
 void
 Array::_DetachSpare(ArrayDevice* target)

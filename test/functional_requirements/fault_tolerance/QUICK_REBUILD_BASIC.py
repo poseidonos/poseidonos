@@ -16,7 +16,7 @@ import json
 import MOUNT_VOL_BASIC_1
 import fio
 import time
-DETACH_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
+REPLACE_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 
@@ -24,7 +24,7 @@ def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 30)
     fio.wait_fio(fio_proc)
-    cli.remove_device(DETACH_TARGET_DEV, ARRAYNAME)
+    cli.replace_device(REPLACE_TARGET_DEV, ARRAYNAME)
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
         if api.wait_situation(ARRAYNAME, "NORMAL") == True:
              return "pass"
