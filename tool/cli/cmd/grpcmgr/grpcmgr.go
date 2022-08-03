@@ -4,6 +4,7 @@ import (
 	"cli/cmd/globals"
 	"context"
 	"errors"
+	"fmt"
 	"pnconnector/src/log"
 	"time"
 
@@ -16,12 +17,28 @@ const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running
 const dialTimeout = 10
 const reqTimeout = 90
 
+func dialToCliServer() (*grpc.ClientConn, error) {
+	nodeName := globals.NodeName
+	gRpcServerAddress := globals.GrpcServerAddress
+
+	if nodeName != "" {
+		var err error
+		gRpcServerAddress, err = GetIpv4(nodeName)
+		if err != nil {
+			return nil, errors.New("an error occured while getting the ipv4 address of a node: " + err.Error())
+		}
+	}
+
+	conn, err := grpc.Dial(gRpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	return conn, err
+}
+
 func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -39,7 +56,7 @@ func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 }
 
 func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -62,7 +79,7 @@ func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
 }
 
 func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPropertyResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -85,7 +102,7 @@ func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPrope
 }
 
 func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPropertyResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -107,7 +124,7 @@ func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPrope
 }
 
 func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -130,7 +147,7 @@ func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryRes
 }
 
 func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -153,7 +170,7 @@ func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryRespon
 }
 
 func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrrResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -175,7 +192,7 @@ func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrr
 }
 
 func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -197,7 +214,7 @@ func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
 }
 
 func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -219,7 +236,7 @@ func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingRes
 }
 
 func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -241,7 +258,7 @@ func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrRespons
 }
 
 func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -263,7 +280,7 @@ func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
 }
 
 func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -285,7 +302,7 @@ func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error
 }
 
 func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -307,7 +324,7 @@ func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error
 }
 
 func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -329,7 +346,7 @@ func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayRes
 }
 
 func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -351,7 +368,7 @@ func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error
 }
 
 func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -373,7 +390,7 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 }
 
 func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -395,7 +412,7 @@ func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, er
 }
 
 func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -417,7 +434,7 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 }
 
 func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -439,7 +456,7 @@ func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 }
 
 func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreferenceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -461,7 +478,7 @@ func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreference
 }
 
 func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -483,7 +500,7 @@ func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error
 }
 
 func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -505,7 +522,7 @@ func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
 }
 
 func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -527,7 +544,7 @@ func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error
 }
 
 func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -549,7 +566,7 @@ func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterRespon
 }
 
 func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -571,7 +588,7 @@ func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, er
 }
 
 func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -593,7 +610,7 @@ func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
 }
 
 func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -615,7 +632,7 @@ func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
 }
 
 func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -637,7 +654,7 @@ func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error
 }
 
 func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -659,7 +676,7 @@ func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemRes
 }
 
 func SendDeleteSubsystem(req *pb.DeleteSubsystemRequest) (*pb.DeleteSubsystemResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -681,7 +698,7 @@ func SendDeleteSubsystem(req *pb.DeleteSubsystemRequest) (*pb.DeleteSubsystemRes
 }
 
 func SendAddListener(req *pb.AddListenerRequest) (*pb.AddListenerResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -703,7 +720,7 @@ func SendAddListener(req *pb.AddListenerRequest) (*pb.AddListenerResponse, error
 }
 
 func SendListSubsystem(req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -725,7 +742,7 @@ func SendListSubsystem(req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse,
 }
 
 func SendSubsystemInfo(req *pb.SubsystemInfoRequest) (*pb.SubsystemInfoResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
@@ -747,7 +764,7 @@ func SendSubsystemInfo(req *pb.SubsystemInfoRequest) (*pb.SubsystemInfoResponse,
 }
 
 func SendCreateTransport(req *pb.CreateTransportRequest) (*pb.CreateTransportResponse, error) {
-	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)

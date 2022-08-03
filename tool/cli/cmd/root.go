@@ -126,6 +126,8 @@ func regGlobalFlags() {
 	RootCmd.PersistentFlags().BoolVar(&globals.IsJSONRes, "json-res", false, "Print response in JSON form.")
 	RootCmd.PersistentFlags().BoolVar(&globals.DisplayUnit, "unit", false, "Display unit (B, KB, MB, ...) when displaying capacity.")
 	RootCmd.PersistentFlags().StringVar(&globals.FieldSeparator, "fs", "|", "Field separator for the output.")
+	RootCmd.PersistentFlags().StringVar(&globals.NodeName, "node", "",
+		`Name of the node to send this command. When both --ip and this flag are specified, this flag is applied only.`)
 }
 
 func addCmd() {
