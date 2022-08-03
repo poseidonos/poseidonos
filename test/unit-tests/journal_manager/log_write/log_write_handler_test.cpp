@@ -1,4 +1,10 @@
 #include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/event_scheduler/meta_update_call_back.h"
+#include "src/event_scheduler/callback.h"
+#include "src/metadata/meta_event_factory.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/metadata/block_map_update.h"
 
 #include <gtest/gtest.h>
 
@@ -9,10 +15,20 @@
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_statistics_mock.h"
+#include "test/unit-tests/mapper/i_stripemap_mock.h"
+#include "test/unit-tests/mapper/i_vsamap_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
+#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
+#include "test/unit-tests/bio/volume_io_mock.h"
 
 using testing::InSequence;
 using testing::NiceMock;
 using testing::Return;
+using testing::ReturnRef;
 
 namespace pos
 {
@@ -67,6 +83,60 @@ protected:
 
     LogWriteHandler* logWriteHandler;
 };
+
+TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessfully)
+{
+    NiceMock<MockIVSAMap> vsaMap;
+    NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
+    NiceMock<MockIContextManager> contextManager;
+    NiceMock<MockIArrayInfo> arrayInfo;
+
+    NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
+    VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
+    VirtualBlkAddr vsa = {.stripeId = 0, .offset = 0};
+    StripeAddr stripeAddr = { .stripeLoc = IN_USER_AREA, .stripeId = 0};
+
+    ON_CALL(*mockVolumeIo, GetOldLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
+    ON_CALL(*mockVolumeIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
+    ON_CALL(*mockVolumeIo, GetVsa()).WillByDefault(ReturnRef(vsa));
+
+    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCallbackSequenceController> sequencer;
+    LogWriteContextFactory logWriteContextFactory;
+    logWriteContextFactory.Init(config, &notifier, &sequencer);
+
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+
+    int targetLogGroupId = 2;
+    EXPECT_CALL(*bufferAllocator, GetLogGroupId).WillRepeatedly(Return(targetLogGroupId));
+
+    int arrayId = 2;
+    MapperServiceSingleton::Instance()->RegisterMapper("", arrayId, &vsaMap,
+        nullptr, nullptr, nullptr, nullptr);
+    MetaEventFactory metaEventFactory(&vsaMap, &stripeMap, &segmentCtx,
+        &wbStripeAllocator, &contextManager, &arrayInfo);
+
+    ON_CALL(*mockVolumeIo, GetArrayId).WillByDefault(Return(arrayId));
+
+    CallbackSmartPtr blockMapUpdate =
+        metaEventFactory.CreateBlockMapUpdateEvent(mockVolumeIoPtr);
+
+    EXPECT_EQ(typeid(*blockMapUpdate.get()), typeid(BlockMapUpdate));
+
+    LogWriteContext* logWriteContext =
+        logWriteContextFactory.CreateBlockMapLogWriteContext(VolumeIoSmartPtr(mockVolumeIoPtr), blockMapUpdate);
+
+    // When: Log is added
+    EXPECT_TRUE(logWriteHandler->AddLog(logWriteContext) == 0);
+
+    MetaUpdateCallback* metaUpdateCallback = dynamic_cast<MetaUpdateCallback*>(blockMapUpdate.get());
+    int updatedLogGroupId = metaUpdateCallback->GetLogGroupId();
+    EXPECT_EQ(targetLogGroupId, updatedLogGroupId);
+
+    delete logWriteContext;
+}
 
 TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsInitialized)
 {
