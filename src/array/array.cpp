@@ -487,7 +487,7 @@ Array::ReplaceDevice(string devName)
                     {
                         _Flush();
                         POS_TRACE_TRACE(EID(REPLACE_DEV_DEBUG_MSG),
-                            "device {} is replaced to {} successfully, array:{}", devName, swapOut->GetName(), name_);
+                            "device {} is replaced to {} successfully, array:{}", devName, target->GetName(), name_);
                         DoRebuildAsync(target, swapOut, RebuildTypeEnum::QUICK);
                     }
                 }
