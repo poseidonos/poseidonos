@@ -172,7 +172,7 @@ private:
     VolumeMountState volState[MAX_VOLUME_COUNT];
     std::atomic<uint32_t> numMapLoadedVol;
     std::atomic<uint32_t> numMountedVol;
-    std::string arrayName;
+    int arrayId;
 };
 
 } // namespace pos

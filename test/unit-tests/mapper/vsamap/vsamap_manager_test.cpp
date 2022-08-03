@@ -22,7 +22,7 @@ TEST(VSAMapManager, CreateVsaMapContent_TestFail0)
     NiceMock<MockMapperAddressInfo> addrInfo;
     VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, nullptr, &addrInfo);
     EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
-    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(1);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
     EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
     int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
@@ -37,7 +37,7 @@ TEST(VSAMapManager, CreateVsaMapContent_TestFail1)
     NiceMock<MockMapperAddressInfo> addrInfo;
     VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, nullptr, &addrInfo);
     EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
-    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(1);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
     EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
     int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
@@ -52,7 +52,7 @@ TEST(VSAMapManager, CreateVsaMapContent_TestFail2)
     NiceMock<MockMapperAddressInfo> addrInfo;
     VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, nullptr, &addrInfo);
     EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
-    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(1);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(-1));
     int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
     EXPECT_EQ(-1, ret);
@@ -67,7 +67,7 @@ TEST(VSAMapManager, CreateVsaMapContent_TestFail3)
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, nullptr, &addrInfo);
     EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
     EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(EID(NEED_TO_INITIAL_STORE)));
     EXPECT_CALL(*vcon, FlushHeader).WillOnce(Return(-1));
@@ -84,7 +84,7 @@ TEST(VSAMapManager, CreateVsaMapContent_TestFail4)
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, nullptr, &addrInfo);
     EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(10));
-    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(1);
     EXPECT_CALL(*vcon, InMemoryInit).WillOnce(Return(0));
     EXPECT_CALL(*vcon, OpenMapFile).WillOnce(Return(-1));
     int ret = vsaMap->CreateVsaMapContent(vcon, 0, 100, false);
@@ -144,7 +144,7 @@ TEST(VSAMapManager, GetVSAs_TestFailGetVSA)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockVSAMapContent>* vcon = new NiceMock<MockVSAMapContent>();
     VSAMapManager* vsaMap = new VSAMapManager(nullptr, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(1);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(1);
     vsaMap->DisableVsaMapAccess(0);
     VirtualBlkAddr vsa;
     vsa.offset = 0;
@@ -183,7 +183,7 @@ TEST(VSAMapManager, LoadVSAMapFile_TestFail)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, Load).WillOnce(Return(-1));
     int ret = vsaMap->LoadVSAMapFile(0);
     EXPECT_EQ(-1, ret);
@@ -196,7 +196,7 @@ TEST(VSAMapManager, FlushTouchedPages_TestSuccess)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, FlushTouchedPages).WillOnce(Return(0));
     int ret = vsaMap->FlushTouchedPages(0, nullptr);
     EXPECT_EQ(0, ret);
@@ -210,7 +210,7 @@ TEST(VSAMapManager, FlushTouchedPages_TestFail)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, FlushTouchedPages).WillOnce(Return(-1));
     int ret = vsaMap->FlushTouchedPages(0, nullptr);
     EXPECT_EQ(-1, ret);
@@ -224,7 +224,7 @@ TEST(VSAMapManager, FlushDirtyPagesGiven_TestFail1)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, FlushDirtyPagesGiven).WillOnce(Return(0));
     MpageList d;
     vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
@@ -239,7 +239,7 @@ TEST(VSAMapManager, FlushDirtyPagesGiven_TestFail2)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, FlushDirtyPagesGiven).WillOnce(Return(-1));
     MpageList d;
     int ret = vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
@@ -253,7 +253,7 @@ TEST(VSAMapManager, FlushAllMaps_TestFailcase)
     NiceMock<MockMapperAddressInfo> addrInfo;
     NiceMock<MockTelemetryPublisher> tp;
     VSAMapManager* vsaMap = new VSAMapManager(&tp, nullptr, vcon, &addrInfo);
-    EXPECT_CALL(addrInfo, GetArrayName).Times(2);
+    EXPECT_CALL(addrInfo, GetArrayId).Times(2);
     EXPECT_CALL(*vcon, FlushTouchedPages).WillOnce(Return(-1));
     vsaMap->EnableVsaMapInternalAccess(0);
     int ret = vsaMap->FlushAllMaps();

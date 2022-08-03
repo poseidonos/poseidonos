@@ -61,7 +61,7 @@ Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperW
   numMapLoadedVol(0),
   numMountedVol(0)
 {
-    arrayName = iarrayInfo->GetName();
+    arrayId = iarrayInfo->GetIndex();
     if (addrInfo == nullptr)
     {
         addrInfo = new MapperAddressInfo(iarrayInfo);
@@ -69,7 +69,8 @@ Mapper::Mapper(TelemetryClient* tc_, TelemetryPublisher* tp_, MapperWbt* mapperW
     if (tp == nullptr)
     {
         tp = new TelemetryPublisher(("Mapper"));
-        tp->AddDefaultLabel("array_name", arrayName);
+        tp->AddDefaultLabel("array_name", iarrayInfo->GetName());
+        tp->AddDefaultLabel("array_id", std::to_string(arrayId));
     }
     if (vsaMapManager == nullptr)
     {
@@ -99,7 +100,7 @@ Mapper::Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_)
 // LCOV_EXCL_START
 Mapper::~Mapper(void)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Destructor] in Array:{} was Destroyed", arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Destructor] in arrayId:{} was Destroyed", arrayId);
     _Dispose();
     if (mapperWbt != nullptr)
     {
@@ -139,7 +140,7 @@ Mapper::Dispose(void)
 {
     if (isInitialized == true)
     {
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Dispose] MAPPER Disposed, init:{} array:{}", isInitialized, arrayName);
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Dispose] MAPPER Disposed, init:{} arrayId:{}", isInitialized, arrayId);
         StoreAll();
         _Dispose();
     }
@@ -148,7 +149,7 @@ Mapper::Dispose(void)
 void
 Mapper::Shutdown(void)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Shutdown] MAPPER Shutdown, init:{} array:{}", isInitialized, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Shutdown] MAPPER Shutdown, init:{} arrayId:{}", isInitialized, arrayId);
     _Dispose();
 }
 
@@ -158,7 +159,7 @@ Mapper::Init(void)
     int ret = 0;
     if (isInitialized == false)
     {
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] array:{}", arrayName);
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] arrayId:{}", arrayId);
         if (metaFs == nullptr)
         {
             metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(addrInfo->GetArrayId());
@@ -169,25 +170,25 @@ Mapper::Init(void)
         }
         int mpageSize = _GetMpageSize();
         addrInfo->SetupAddressInfo(mpageSize);
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] VsaMap Init, array:{}", arrayName);
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] VsaMap Init, arrayId:{}", arrayId);
         ret = vsaMapManager->Init();
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_NOT_LOADED), "[Mapper Init] Failed to Initialize VSAMapManager, array:{}", arrayName);
+            POS_TRACE_ERROR(EID(VSAMAP_NOT_LOADED), "[Mapper Init] Failed to Initialize VSAMapManager, arrayId:{}", arrayId);
             assert(false);
             return ret;
         }
         vsaMapManager->WaitAllPendingIoDone();
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] StripeMap Init, array:{}", arrayName);
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] StripeMap Init, arrayId:{}", arrayId);
         ret = stripeMapManager->Init();
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_NOT_LOADED), "[Mapper Init] Failed to Initialize StripeMap, array:{}", arrayName);
+            POS_TRACE_ERROR(EID(VSAMAP_NOT_LOADED), "[Mapper Init] Failed to Initialize StripeMap, arrayId:{}", arrayId);
             assert(false);
             return ret;
         }
         stripeMapManager->WaitAllPendingIoDone();
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] ReverseMap Init, array:{}", arrayName);
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] ReverseMap Init, arrayId:{}", arrayId);
         reverseMapManager->Init();
         _RegisterToMapperService();
         isInitialized = true;
@@ -239,20 +240,20 @@ Mapper::FlushDirtyMpagesGiven(int volId, EventSmartPtr event, MpageList dirtyPag
 int
 Mapper::StoreAll(void)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StoreAll] Flush All Synchronously, array:{}", arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StoreAll] Flush All Synchronously, arrayId:{}", arrayId);
     stripeMapManager->WaitAllPendingIoDone();
     vsaMapManager->WaitAllPendingIoDone();
 
     int ret = stripeMapManager->FlushTouchedPages(nullptr);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StoreAll] Failed To Flush All StripeMap, array:{}", arrayName);
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StoreAll] Failed To Flush All StripeMap, arrayId:{}", arrayId);
         return ret;
     }
     ret = vsaMapManager->FlushAllMaps();
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StoreAll] Failed To Flush All VSAMap, array:{}", arrayName);
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper StoreAll] Failed To Flush All VSAMap, arrayId:{}", arrayId);
         return ret;
     }
     stripeMapManager->WaitAllPendingIoDone();
@@ -272,12 +273,12 @@ Mapper::EnableInternalAccess(int volId)
     {
         if (_LoadVolumeMeta(volId) < 0)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper EnableInternalAccess] failed to load VolumeId:{}, state:{} array:{}", volId, volState[volId].GetState(), arrayName);
+            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper EnableInternalAccess] failed to load VolumeId:{}, state:{} arrayId:{}", volId, volState[volId].GetState(), arrayId);
             return -EID(VSAMAP_LOAD_FAILURE);
         }
         else
         {
-            POS_TRACE_INFO(EID(VSAMAP_LOAD_FAILURE), "[Mapper EnableInternalAccess] Load VolumeId:{}, state:{} array:{} Issued (ret:NEED_RETRY)", volId, volState[volId].GetState(), arrayName);
+            POS_TRACE_INFO(EID(VSAMAP_LOAD_FAILURE), "[Mapper EnableInternalAccess] Load VolumeId:{}, state:{} arrayId:{} Issued (ret:NEED_RETRY)", volId, volState[volId].GetState(), arrayId);
             return NEED_RETRY;
         }
     }
@@ -290,7 +291,7 @@ Mapper::EnableInternalAccess(int volId)
             if (state != VolState::FOREGROUND_MOUNTED)
             {
                 volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
-                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper EnableInternalAccess] VolumeId:{} was loaded LOADING >> BG_MOUNTED, arrayName:{} @VolumeMounted", volId, arrayName);
+                POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper EnableInternalAccess] VolumeId:{} was loaded LOADING >> BG_MOUNTED, arrayId:{} @VolumeMounted", volId, arrayId);
             }
         }
         else
@@ -328,7 +329,7 @@ Mapper::SetVSAsInternal(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
     if ((ret < 0) || (ret == NEED_RETRY))
     {
         // there is no NEED_RETY Handling sequence for SetVSAsInternal in caller(GC).
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAInternal] VolumeId:{} array:{} volume is not accessible", volId, arrayName);
+        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAInternal] VolumeId:{} arrayId:{} volume is not accessible", volId, arrayId);
         return -EID(VSAMAP_LOAD_FAILURE);
     }
     return vsaMapManager->SetVSAsWoCond(volId, startRba, virtualBlks);
@@ -340,7 +341,7 @@ Mapper::GetVSAWithSyncOpen(int volId, BlkAddr rba)
     int ret = EnableInternalAccess(volId);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetVSAWithSyncOpen] Failed to Load VolumeId:{} array:{}", volId, arrayName);
+        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetVSAWithSyncOpen] Failed to Load VolumeId:{} arrayId:{}", volId, arrayId);
         return UNMAP_VSA;
     }
     if (ret == NEED_RETRY)
@@ -356,7 +357,7 @@ Mapper::SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlk
     int ret = EnableInternalAccess(volId);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAsWithSyncOpen] Failed to Load VolumeId:{} array:{}", volId, arrayName);
+        POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAsWithSyncOpen] Failed to Load VolumeId:{} arrayId:{}", volId, arrayId);
         return ret;
     }
     if (ret == NEED_RETRY)
@@ -399,7 +400,7 @@ Mapper::GetNumUsedBlks(int volId)
         int ret = EnableInternalAccess(volId);
         if (ret < 0)
         {
-            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetNumUsedBlks] Failed to Load VolumeId:{} array:{}", volId, arrayName);
+            POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper GetNumUsedBlks] Failed to Load VolumeId:{} arrayId:{}", volId, arrayId);
             return -1;
         }
         if (ret == NEED_RETRY)
@@ -418,24 +419,24 @@ Mapper::GetNumUsedBlks(int volId)
 int
 Mapper::VolumeCreated(int volId, uint64_t volSizeByte)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeCreate] CREATE_VOLUME Volume:{}, size:{} array:{}", volId, volSizeByte, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeCreate] CREATE_VOLUME Volume:{}, size:{} arrayId:{}", volId, volSizeByte, arrayId);
     assert(volSizeByte > 0);
     VolState state = volState[volId].GetState();
     if (state != VolState::NOT_EXIST)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] Volume:{} array:{} already exist, state:{}", volId, addrInfo->GetArrayName(), volState[volId].GetState());
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] Volume:{} arrayId:{} already exist, state:{}", volId, addrInfo->GetArrayId(), volState[volId].GetState());
         return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
     if (vsaMapManager->CreateVsaMapContent(nullptr, volId, volSizeByte, false) != 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] failed to create vsaMap VolumeId:{} array:{}", volId, addrInfo->GetArrayName());
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] failed to create vsaMap VolumeId:{} arrayId:{}", volId, addrInfo->GetArrayId());
         return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
     vsaMapManager->WaitVolumePendingIoDone(volId);
     volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
     volState[volId].SetSize(volSizeByte);
     vsaMapManager->EnableVsaMapInternalAccess(volId);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeCreate] VolumeId:{} array:{} JUST_CREATED >> BG_MOUNTED", volId, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeCreate] VolumeId:{} arrayId:{} JUST_CREATED >> BG_MOUNTED", volId, arrayId);
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
@@ -445,13 +446,13 @@ Mapper::VolumeMounted(int volId, uint64_t volSizeByte)
     VolState state = volState[volId].GetState();
     if ((VolState::VOLUME_DELETING == state) || (state == VolState::NOT_EXIST))
     {
-        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] failed to mount VolumeId:{} array:{}, state:{}", volId, arrayName, state);
+        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] failed to mount VolumeId:{} arrayId:{}, state:{}", volId, arrayId, state);
         return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeMount] MOUNT_VOLUME Volume:{}, state:{}, array:{}", volId, state, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeMount] MOUNT_VOLUME Volume:{}, state:{}, arrayId:{}", volId, state, arrayId);
     if (_LoadVolumeMeta(volId) < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] failed to load VolumeId:{} array:{}", volId, arrayName);
+        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] failed to load VolumeId:{} arrayId:{}", volId, arrayId);
         return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
     }
     volState[volId].SetState(VolState::FOREGROUND_MOUNTED);
@@ -461,14 +462,14 @@ Mapper::VolumeMounted(int volId, uint64_t volSizeByte)
     v.gauge = numMountedVol;
     tp->PublishData(TEL33006_MAP_MOUNTED_VOL_CNT, v, MT_GAUGE);
     vsaMapManager->EnableVsaMapAccess(volId);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] VolumeId:{} array:{} was FG_MOUNTED @VolumeMounted", volId, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] VolumeId:{} arrayId:{} was FG_MOUNTED @VolumeMounted", volId, arrayId);
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 int
 Mapper::VolumeLoaded(int volId, uint64_t volSizeByte)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeLoaded] LOAD VOLUME Volume:{} size:{} array:{}", volId, volSizeByte, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeLoaded] LOAD VOLUME Volume:{} size:{} arrayId:{}", volId, volSizeByte, arrayId);
     assert(volSizeByte > 0);
     if (volState[volId].GetState() == VolState::VOLUME_DELETING)
     {
@@ -477,19 +478,19 @@ Mapper::VolumeLoaded(int volId, uint64_t volSizeByte)
     volState[volId].SetState(VolState::EXIST_UNLOADED);
     volState[volId].SetSize(volSizeByte);
     vsaMapManager->EnableVsaMapInternalAccess(volId);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeLoaded] VolumeId:{} array:{} state:EXIST_UNLOADED @VolumeLoaded", volId, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeLoaded] VolumeId:{} arrayId:{} state:EXIST_UNLOADED @VolumeLoaded", volId, arrayId);
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
 int
 Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeUnmounted] UNMOUNT_VOLUME Volume:{} array:{}", volId, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeUnmounted] UNMOUNT_VOLUME Volume:{} arrayId:{}", volId, arrayId);
     vsaMapManager->DisableVsaMapAccess(volId);
     VolState state = volState[volId].GetState();
     if (VolState::FOREGROUND_MOUNTED == state)
     {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeUnmounted] VolumeId:{} array:{} was FG_MOUNTED >> BG_MOUNTED @VolumeUnmounted", volId, arrayName);
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeUnmounted] VolumeId:{} arrayId:{} was FG_MOUNTED >> BG_MOUNTED @VolumeUnmounted", volId, arrayId);
         volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
         --numMountedVol;
         POSMetricValue v;
@@ -502,7 +503,7 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
             int ret = vsaMapManager->FlushTouchedPages(volId, nullptr);
             if (ret < 0)
             {
-                POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "[Mapper VolumeUnmounted] failed to Flush DirtyPages:{} VolumeId:{} array:{} @VolumeUnmounted", ret, volId, arrayName);
+                POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "[Mapper VolumeUnmounted] failed to Flush DirtyPages:{} VolumeId:{} arrayId:{} @VolumeUnmounted", ret, volId, arrayId);
                 return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
             }
             vsaMapManager->WaitVolumePendingIoDone(volId);
@@ -510,7 +511,7 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
     }
     else
     {
-        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeUnmounted] VolumeId:{} array:{} State:{} is not mounted", volId, arrayName, volState[volId].GetState());
+        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeUnmounted] VolumeId:{} arrayId:{} State:{} is not mounted", volId, arrayId, volState[volId].GetState());
     }
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
@@ -518,14 +519,14 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
 int
 Mapper::PrepareVolumeDelete(int volId)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeDeleted] DELETE_VOLUME Volume:{} array:{}", volId, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeDeleted] DELETE_VOLUME Volume:{} arrayId:{}", volId, arrayId);
     VolState state = volState[volId].GetState();
     if ((VolState::VOLUME_DELETING == state) || (VolState::NOT_EXIST == state))
     {
-        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeDeleted] failed to Deleted VolumeId:{} array:{} state:{}", volId, arrayName, state);
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeDeleted] failed to Deleted VolumeId:{} arrayId:{} state:{}", volId, arrayId, state);
         return -EID(MAPPER_FAILED);
     }
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} array:{}", volId, arrayName);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} arrayId:{}", volId, arrayId);
     vsaMapManager->DisableVsaMapInternalAccess(volId);
     vsaMapManager->WaitVolumePendingIoDone(volId);
 
@@ -534,7 +535,7 @@ Mapper::PrepareVolumeDelete(int volId)
     {
         if (_LoadVolumeMeta(volId, true) < 0)
         {
-            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted]VSAMap load failed, volumeID:{} array:{} @VolumeDeleted", volId, arrayName);
+            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted]VSAMap load failed, volumeID:{} arrayId:{} @VolumeDeleted", volId, arrayId);
             return -EID(VSAMAP_LOAD_FAILURE);
         }
         vsaMapManager->WaitVolumePendingIoDone(volId);
@@ -542,13 +543,13 @@ Mapper::PrepareVolumeDelete(int volId)
 
     if (vsaMapManager->NeedToDeleteFile(volId) == false)
     {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} array:{} Volume VSA File does not exist", volId, arrayName);
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} arrayId:{} Volume VSA File does not exist", volId, arrayId);
     }
     else
     {
         if (_ChangeVolumeStateDeleting(volId) == false)
         {
-            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted] Another thread started to delete volumeID:{} array:{} @VolumeDeleted", volId, arrayName);
+            POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted] Another thread started to delete volumeID:{} arrayId:{} @VolumeDeleted", volId, arrayId);
             return -EID(VSAMAP_LOAD_FAILURE);
         }
     }
@@ -567,8 +568,8 @@ Mapper::InvalidateAllBlocksTo(int volId, ISegmentCtx* segmentCtx)
     if (0 != vsaMapManager->InvalidateAllBlocks(volId, segmentCtx))
     {
         POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE),
-            "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} array:{} @VolumeDeleted",
-            volId, arrayName);
+            "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} arrayId:{} @VolumeDeleted",
+            volId, arrayId);
         return -EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE);
     }
     return 0;
@@ -579,7 +580,7 @@ Mapper::DeleteVolumeMap(int volId)
 {
     if (0 != vsaMapManager->DeleteVSAMap(volId))
     {
-        POS_TRACE_WARN(EID(MFS_FILE_DELETE_FAILED), "[Mapper VolumeDeleted] failed to delete VSA Map, volumeID:{} array:{} @VolumeDeleted", volId, arrayName);
+        POS_TRACE_WARN(EID(MFS_FILE_DELETE_FAILED), "[Mapper VolumeDeleted] failed to delete VSA Map, volumeID:{} arrayId:{} @VolumeDeleted", volId, arrayId);
         return -EID(MFS_FILE_DELETE_FAILED);
     }
     volState[volId].SetState(VolState::NOT_EXIST);
@@ -589,7 +590,7 @@ Mapper::DeleteVolumeMap(int volId)
 int
 Mapper::VolumeDetached(vector<int> volList)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeEvent] DETACH_VOLUME array:{}", arrayName);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeEvent] DETACH_VOLUME arrayId:{}", arrayId);
     for (int volId : volList)
     {
         VolState state = volState[volId].GetState();
@@ -607,7 +608,7 @@ Mapper::VolumeDetached(vector<int> volList)
             tp->PublishData(TEL33006_MAP_MOUNTED_VOL_CNT, v, MT_GAUGE);
             v.gauge = volId;
             tp->PublishData(TEL33004_MAP_UNMOUNTED_VOL, v, MT_GAUGE);
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDetached] VolumeId:{} array:{} was FG_MOUNTED >> BG_MOUNTED @VolumeDetached", volId, arrayName);
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDetached] VolumeId:{} arrayId:{} was FG_MOUNTED >> BG_MOUNTED @VolumeDetached", volId, arrayId);
         }
     }
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
@@ -646,10 +647,10 @@ Mapper::_LoadVolumeMeta(int volId, bool delVol)
 {
     assert(volState[volId].GetSize() != 0);
     VolState state = volState[volId].GetState();
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] volume:{} array:{}, state:{}", volId, arrayName, state);
+    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] volume:{} arrayId:{}, state:{}", volId, arrayId, state);
     if ((VolState::VOLUME_DELETING == state) || (VolState::NOT_EXIST == state))
     {
-        POS_TRACE_ERROR(EID(VSAMAP_UNMOUNT_FAILURE), "[Mapper _LoadVolumeMeta] failed to load VolumeId:{}, state:{} arrayName:{} NOT_EXIST", volId, state, arrayName);
+        POS_TRACE_ERROR(EID(VSAMAP_UNMOUNT_FAILURE), "[Mapper _LoadVolumeMeta] failed to load VolumeId:{}, state:{} arrayId:{} NOT_EXIST", volId, state, arrayId);
         return -1;
     }
 
@@ -658,16 +659,16 @@ Mapper::_LoadVolumeMeta(int volId, bool delVol)
     if (volState[volId].GetState() == VolState::EXIST_UNLOADED)
     {
         volState[volId].SetState(VolState::VOLUME_LOADING);
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] Set EXIST_UNLOADED >> VOLUME_LOADING volume:{} array:{}", volId, arrayName);
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] Set EXIST_UNLOADED >> VOLUME_LOADING volume:{} arrayId:{}", volId, arrayId);
         // Unloaded volume case: Load & Mount
         if (vsaMapManager->CreateVsaMapContent(nullptr, volId, volState[volId].GetSize(), delVol) != 0)
         {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] failed to create VsaMapFile VolumeId:{}, arrayName:{} @VolumeMounted", volId, arrayName);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] failed to create VsaMapFile VolumeId:{}, arrayId:{} @VolumeMounted", volId, arrayId);
             return -1;
         }
         if (vsaMapManager->LoadVSAMapFile(volId) != 0)
         {
-            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] failed to Load Trigger VolumeId:{}, arrayName:{} @VolumeMounted", volId, arrayName);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper _LoadVolumeMeta] failed to Load Trigger VolumeId:{}, arrayId:{} @VolumeMounted", volId, arrayId);
             return -1;
         }
         ++numMapLoadedVol;
@@ -679,11 +680,11 @@ Mapper::_LoadVolumeMeta(int volId, bool delVol)
     {
         if (volState[volId].GetState() == VolState::VOLUME_LOADING)
         {
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper _LoadVolumeMeta] AnotherThread already started VolumeId:{} LOADING, arrayName:{} (NEED_RETRY/WAITPENDING)", volId, arrayName);
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper _LoadVolumeMeta] AnotherThread already started VolumeId:{} LOADING, arrayId:{} (NEED_RETRY/WAITPENDING)", volId, arrayId);
         }
         else
         {
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper _LoadVolumeMeta] VolumeId:{} was already BG/FG_MOUNTED:{}, arrayName:{} @VolumeMounted", volId, volState[volId].GetState(), arrayName);
+            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper _LoadVolumeMeta] VolumeId:{} was already BG/FG_MOUNTED:{}, arrayId:{} @VolumeMounted", volId, volState[volId].GetState(), arrayId);
         }
     }
     return 0;
@@ -693,7 +694,7 @@ void
 Mapper::_RegisterToMapperService(void)
 {
     MapperService* mapperService = MapperServiceSingleton::Instance();
-    mapperService->RegisterMapper(arrayName, addrInfo->GetArrayId(),
+    mapperService->RegisterMapper(addrInfo->GetArrayName(), addrInfo->GetArrayId(),
         GetIVSAMap(), GetIStripeMap(), GetIReverseMap(), GetIMapFlush(), GetIMapperWbt());
 }
 
@@ -701,7 +702,7 @@ void
 Mapper::_UnregisterFromMapperService(void)
 {
     MapperService* mapperService = MapperServiceSingleton::Instance();
-    mapperService->UnregisterMapper(arrayName);
+    mapperService->UnregisterMapper(addrInfo->GetArrayName());
 }
 
 void
