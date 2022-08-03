@@ -12,7 +12,7 @@ namespace pos
 TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteSuccessfully)
 {
     // Given: Map flush completed event with mapId
-    NiceMock<MockCheckpointHandler> checkpointHandler;
+    NiceMock<MockCheckpointHandler> checkpointHandler(0);
     int mapId = 0;
     CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId);
 
@@ -32,7 +32,7 @@ TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteSuccessfully)
 TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteFails)
 {
     // Given: Map flush completed event with mapId
-    NiceMock<MockCheckpointHandler> checkpointHandler;
+    NiceMock<MockCheckpointHandler> checkpointHandler(0);
     int mapId = 0;
     CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId);
 

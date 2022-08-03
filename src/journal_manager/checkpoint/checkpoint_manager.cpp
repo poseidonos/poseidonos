@@ -45,11 +45,16 @@
 namespace pos
 {
 CheckpointManager::CheckpointManager(void)
-: CheckpointManager(new CheckpointHandler())
+: CheckpointManager(new CheckpointHandler(INT_MAX), INT_MAX)
 {
 }
 
-CheckpointManager::CheckpointManager(CheckpointHandler* cpHandler)
+CheckpointManager::CheckpointManager(const int arrayId)
+: CheckpointManager(new CheckpointHandler(arrayId), arrayId)
+{
+}
+
+CheckpointManager::CheckpointManager(CheckpointHandler* cpHandler, const int arrayId)
 : eventScheduler(nullptr),
   sequenceController(nullptr),
   dirtyMapManager(nullptr),
@@ -57,7 +62,8 @@ CheckpointManager::CheckpointManager(CheckpointHandler* cpHandler)
   checkpointInProgress(false),
   checkpointBlocked(false),
   clientCallback(nullptr),
-  telemetryPublisher(nullptr)
+  telemetryPublisher(nullptr),
+  arrayId(arrayId)
 {
 }
 
@@ -110,8 +116,8 @@ CheckpointManager::StartCheckpoint(EventSmartPtr cb)
     if (checkpointInProgress == true || checkpointBlocked != true)
     {
         POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_CHECKPOINT_IN_PROGRESS,
-            "Checkpoint cannot start right away, inProgress {} blocked {}",
-            checkpointInProgress, checkpointBlocked);
+            "Checkpoint cannot start right away, inProgress {} blocked {}, arrayId:{}",
+            checkpointInProgress, checkpointBlocked, arrayId);
         return -1 * static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_IN_PROGRESS);
     }
 

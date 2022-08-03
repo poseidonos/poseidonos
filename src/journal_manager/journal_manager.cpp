@@ -168,7 +168,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       nullptr,
       new BufferOffsetAllocator(),
       new LogGroupReleaser(),
-      new CheckpointManager(),
+      new CheckpointManager(info->GetIndex()),
       nullptr,
       new DirtyMapManager(),
       new LogBufferWriteDoneNotifier(),
@@ -177,7 +177,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       info,
       tp)
 {
-    telemetryPublisher->AddDefaultLabel("array_name", arrayInfo->GetName());
+    telemetryPublisher->AddDefaultLabel("array_id", std::to_string(arrayInfo->GetIndex()));
 }
 
 // Constructor for injecting mock module dependencies in product code
