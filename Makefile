@@ -3,7 +3,6 @@ SPDK_ROOT_DIR := $(abspath $(CURDIR)/lib/spdk)
 SPDLOG_SOURCE := spdlog-1.4.2
 SPDLOG_ROOT_DIR := $(abspath $(CURDIR)/lib/$(SPDLOG_SOURCE))
 OTEL_ROOT_DIR := $(abspath $(POS_ROOT_DIR)/lib/opentelemetry-cpp)
-THRIFT_ROOT_DIR := $(abspath $(POS_ROOT_DIR)/lib/thrift)
 
 TOP = $(POS_ROOT_DIR)
 PROTO_DIR = $(TOP)/proto
@@ -126,15 +125,18 @@ DEFINE += -DAIR_CFG=$(TOP)/config/air.cfg
 INCLUDE += -I$(SPDLOG_ROOT_DIR)/include -I$(SPDLOG_ROOT_DIR)/include/spdlog
 LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
 
-INCLUDE += -I$(THRIFT_ROOT_DIR)/include -I$(OTEL_ROOT_DIR)/include
-LDFLAGS += -L$(THRIFT_ROOT_DIR)/lib -L$(OTEL_ROOT_DIR)/lib \
-				-lopentelemetry_common \
-				-lopentelemetry_trace \
-				-lopentelemetry_exporter_jaeger_trace \
-				-lopentelemetry_resources \
-				-lopentelemetry_common \
-				-lopentelemetry_http_client_curl \
-				-lthrift -lpthread -lcurl
+INCLUDE += -I$(OTEL_ROOT_DIR)/include
+LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
+		-lopentelemetry_common \
+		-lopentelemetry_trace \
+		-lopentelemetry_exporter_otlp_http \
+		-lopentelemetry_exporter_otlp_http_client \
+		-lopentelemetry_otlp_recordable \
+		-lopentelemetry_proto \
+		-lopentelemetry_resources \
+		-lopentelemetry_common \
+		-lopentelemetry_http_client_curl \
+		-lpthread -lcurl -lprotobuf
 
 CXXFLAGS += $(INCLUDE)
 

@@ -303,29 +303,6 @@ else()
     )
 endif()
 
-# Set Thrift build options
-set(POS_DEP_THRIFT "thrift")
-if (${USE_LOCAL_REPO} STREQUAL "y")
-    set(REPO_THRIFT "${LOCAL_REPO}/thrift.git")
-else()
-    set(REPO_THRIFT "https://github.com/apache/thrift.git")
-endif()
-
-# Build and install Thrift
-ExternalProject_Add(thrift
-    GIT_REPOSITORY ${REPO_THRIFT}
-    GIT_TAG "v0.14.1"
-    SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_THRIFT}
-    BUILD_IN_SOURCE 1
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
-    CONFIGURE_COMMAND cmake -G Ninja . -DBUILD_COMPILER=OFF -DBUILD_CPP=ON -DBUILD_LIBRARIES=ON -DBUILD_NODEJS=OFF -DBUILD_PYTHON=OFF -DBUILD_JAVASCRIPT=OFF -DBUILD_C_GLIB=OFF -DBUILD_JAVA=OFF -DBUILD_TESTING=OFF -DBUILD_TUTORIALS=OFF -DWITH_STDTHREADS=ON -DWITH_BOOSTTHREADS=OFF -DWITH_BOOST_FUNCTIONAL=OFF -DWITH_BOOST_SMART_PTR=OFF -DCMAKE_INSTALL_PREFIX=${PROJ_ROOT}/lib/${POS_DEP_THRIFT} -DCMAKE_PREFIX_PATH=${PROJ_ROOT}/lib/${POS_DEP_THRIFT} .
-    BUILD_COMMAND ninja -j ${NUM_BUILD_CORE}
-    INSTALL_COMMAND ninja install
-)
-
 # Set opentelemetry-cpp build options
 set(POS_DEP_OTEL "opentelemetry-cpp")
 if (${USE_LOCAL_REPO} STREQUAL "y")
@@ -344,7 +321,7 @@ ExternalProject_Add(opentelemetry-cpp
     LOG_CONFIGURE ON
     LOG_BUILD ON
     LOG_INSTALL ON
-    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DWITH_JAEGER=on
+    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DWITH_OTLP=on
     BUILD_COMMAND make -j ${NUM_BUILD_CORE} all
     INSTALL_COMMAND make install
 )
@@ -397,12 +374,6 @@ add_custom_target(
 )
 
 add_custom_target(
-    clean_thrift
-    WORKING_DIRECTORY ${PROJ_ROOT}/lib/${POS_DEP_THRIFT}
-    COMMAND rm -rf lib/*.a
-)
-
-add_custom_target(
     clean_opentelemetry-cpp
     WORKING_DIRECTORY ${PROJ_ROOT}/lib/${POS_DEP_OTEL}
     COMMAND make clean
@@ -436,10 +407,6 @@ endif()
 
 if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_GTEST}/libgtest.a)
     list(APPEND CLEAN_ALL_TARGETS clean_gtest)
-endif()
-
-if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_THRIFT})
-    list(APPEND CLEAN_ALL_TARGETS clean_thrift)
 endif()
 
 if(EXISTS ${PROJ_ROOT}/lib/${POS_DEP_OTEL}/Makefile)
