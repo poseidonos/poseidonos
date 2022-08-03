@@ -56,14 +56,8 @@ BufCacheSize = Number ;
 NumSharedBuffers = Number ;
 
 RaidType = 
-  [ "RAID5"
-  | "raid5"
-  | "RAID0"
-  | "raid0"
-  | "RAID10"
-  | "raid10"
-  | "RAID6"
-  | "raid6"
+  [ "RAID5"  | "raid5"  | "RAID0" | "raid0"
+  | "RAID10" | "raid10" | "RAID6" | "raid6"
   ] ;
 
 SubsystemNQN = Letter , { Letter | Digit | "-" | "_" } ;
@@ -78,12 +72,35 @@ IOPS = Number ;
 
 Bandwidth = Number , "MB/s" ;
 
+IpFlag = "ip" ;
+
+PortFlag = "port" ;
+
+DebugFlag = "debug" ;
+
+JsonReqFlag = "json-req" ;
+
+JsonResFlag = "json-res" ;
+
+UnitFlag = "unit" ;
+
+FieldSeparatorFlag = "fs" ;
+
+GlobalFlag
+  = IpFlag             | PortFlag
+  | DebugFlag          | JsonReqFlag
+  | JsonResFlag        | UnitFlag
+  | FieldSeparatorFlag
+  ;
+
+GlobalFlagList = GlobalFlag , { GlobalFlag | GlobalFlag } ;
+
 ApplicationName = "poseidonos-cli" ;
 
-Cmd = ApplicationName ,
-  ( ArrayCmd  | VolumeCmd    | DeviceCmd
-  | SystemCmd | LoggerCmd    | SubsystemCmd
-  | QosCmd    | TelemetryCmd | DevelCmd
+Cmd = ApplicationName , GlobalFlagList ,
+  ( ArrayCmd   | VolumeCmd    | DeviceCmd
+  | SystemCmd  | LoggerCmd    | SubsystemCmd
+  | QosCmd     | TelemetryCmd | DevelCmd
   | ClusterCmd
   ) ;
 
@@ -95,7 +112,7 @@ ArrayCmd = "array" ,
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
-  ArrayName [ ("--enable-write-through" | "-w" ) ];
+  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ;
 
 UnmountArrayCmd = "unmount" , ( "--array-name" | "-a" ) ,
   ArrayName , [ "--force" ] ;
@@ -134,7 +151,7 @@ VolumeCmd = "volume" ,
 VolumeCreateCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
-  [ "--maxbw" , Bandwidth ], [ "--iswalvol" ] ;
+  [ "--maxbw" , Bandwidth ] , [ "--iswalvol" ] ;
 
 VolumeDeleteCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
@@ -306,9 +323,16 @@ UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
 ResetEventWrrCmd = "reset-event-wrr" ;
 
 ClusterCmd = "cluster" ,
-  ( ListNodeCmd | ListHaVolumeCmd | ListHaReplicationCmd | StartHaReplicationCmd ) ;
+  ( ListNodeCmd
+  | ListHaVolumeCmd
+  | ListHaReplicationCmd
+  | StartHaReplicationCmd
+  ) ;
 
 ListNodeCmd = "ln" ;
-ListHaVolume = "lv" ;
-ListHaReplication = "lr" ;
+
+ListHaVolumeCmd = "lv" ;
+
+ListHaReplicationCmd = "lr" ;
+
 StartHaReplicationCmd = "start-rep" ;
