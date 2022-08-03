@@ -819,6 +819,8 @@ TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
     EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
 
     // When
     int actual = arrDevMgr.RemoveSpare("spare1");
@@ -971,8 +973,6 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandledWithDeviceSerialNumber)
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
     ArrayDevice* arrDev;
     ArrayDeviceType arrDevType;
-
-    EXPECT_CALL(*mockSysDevMgr, GetDev).WillOnce(Return(dataUBlockDev));
 
     // When
     std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(dataUBlockDev);

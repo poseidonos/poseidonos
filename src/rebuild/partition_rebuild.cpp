@@ -117,7 +117,6 @@ void PartitionRebuild::_Complete(RebuildResult res)
     else
     {
         POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "no rebuild complete callback");
-        assert(false);
     }
 }
 

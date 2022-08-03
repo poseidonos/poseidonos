@@ -412,33 +412,32 @@ int
 Array::RemoveSpare(string devName)
 {
     pthread_rwlock_rdlock(&stateLock);
-    ArrayDeviceType devType = ArrayDeviceType::NONE;
-    ArrayDevice* target = nullptr;
-    tie(target, devType) = devMgr_->GetDevByName(devName);
-    POS_TRACE_INFO(EID(REMOVE_DEV_DEBUG_MSG), "trying to remove device from array, dev_name:{}, dev_type:{} array_name:{}", devName, devType, name_);
-    int ret = 0;
-    if (devType == ArrayDeviceType::SPARE)
+
+    int ret = state->CanRemoveSpare();
+    if (ret != 0)
     {
-        ret = state->CanRemoveSpare();
-        if (ret == 0)
-        {
-            ret = devMgr_->RemoveSpare(devName);
-            if (ret == 0)
-            {
-                _Flush();
-            }
-        }
+        goto error;
     }
-    else
+    ret = devMgr_->RemoveSpare(devName);
+    if (0 != ret)
     {
-        ret = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
-        POS_TRACE_WARN(ret, "devName:{}", devName);
+        goto error;
     }
+    ret = _Flush();
+    if (0 != ret)
+    {
+        goto error;
+    }
+
     pthread_rwlock_unlock(&stateLock);
-    if (ret == 0)
-    {
-        POS_TRACE_TRACE(EID(REMOVE_DEV_DEBUG_MSG), "device is removed from array successfully. dev_name:{}, array_name:{}", devName, name_);
-    }
+
+    POS_TRACE_INFO(EID(REMOVE_DEV_DEBUG_MSG),
+        "The spare device {} removed from array({})", devName, name_);
+    return 0;
+
+error:
+    pthread_rwlock_unlock(&stateLock);
+    POS_TRACE_ERROR(ret, "Unable to remove spare device {} from array({})", devName, name_);
     return ret;
 }
 

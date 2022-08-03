@@ -35,7 +35,7 @@ TEST(ArrayRebuild, ArrayRebuild_testConstructor)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
 
     // Then
 }
@@ -57,7 +57,7 @@ TEST(ArrayRebuild, Start_testIfJobCanStartWhenTaskIsNotEmpty)
 
     // When
     ArrayRebuild* ar = new ArrayRebuild();
-    ar->Init(arrayName, &arrayDev, nullptr, targetPartitions, prog, logger);
+    ar->Init(arrayName, &arrayDev, nullptr, nullptr, targetPartitions, prog, logger);
     ar->Start();
     // Then
 }
@@ -71,7 +71,7 @@ TEST(ArrayRebuild, StartRebuild_testIfJobContainsEmptyTaskWhenArrayRebuildStart)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
     ar->Start();
     // Then
 }
@@ -85,7 +85,7 @@ TEST(ArrayRebuild, DiscardRebuild_testIfNeedToDiscardBecauseThereAreNoTasks)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
     ar->Discard();
     RebuildState state = ar->GetState();
 
@@ -110,7 +110,7 @@ TEST(ArrayRebuild, StopRebuild_testIfNeedToStopRebuild)
 
     // When
     ArrayRebuild* ar = new ArrayRebuild();
-    ar->Init(arrayName, &arrayDev, nullptr, targetPartitions, prog, logger);
+    ar->Init(arrayName, &arrayDev, nullptr, nullptr, targetPartitions, prog, logger);
     ar->Start();
     ar->Stop();
 }
@@ -128,7 +128,7 @@ TEST(ArrayRebuild, GetState_testIfStateIsReadyBeforeRebuildStarts)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
     RebuildState state = ar->GetState();
 
     // Then
@@ -154,7 +154,7 @@ TEST(ArrayRebuild, GetProgress_testIfProgressIsZeroBeforeStartRebuild)
 
     // When
     ArrayRebuild* ar = new ArrayRebuild();
-    ar->Init(arrayName, &arrayDev, nullptr, targetPartitions, prog, logger);
+    ar->Init(arrayName, &arrayDev, nullptr, nullptr, targetPartitions, prog, logger);
 
     // Then
     uint64_t progress = ar->GetProgress();
