@@ -22,7 +22,6 @@ poseidonos-cli wbt [testname] [flags]
 ### Options
 
 ```
-      --access string      set access
       --array string       set array
       --cdw10 string       set cdw10
       --cdw11 string       set cdw11
@@ -34,6 +33,7 @@ poseidonos-cli wbt [testname] [flags]
   -n, --count string       set count
   -d, --dev string         set dev
       --fd string          set fd
+      --filetype string    set filetype
   -h, --help               help for wbt
   -i, --input string       set input
       --integrity string   set integrity
@@ -47,7 +47,6 @@ poseidonos-cli wbt [testname] [flags]
       --nsid string        set nsid
       --offset string      set offset
       --op string          set op
-      --operation string   set operation
   -o, --output string      set output
       --pattern string     set pattern
       --pi string          set pi
