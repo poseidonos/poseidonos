@@ -22,6 +22,7 @@ public:
     MOCK_METHOD(uint64_t, GetMetaPageSize, (), (override));
     MOCK_METHOD(MetaVolumeType, GetMetaVolumeToUse, (), (override));
     MOCK_METHOD(LogGroupLayout, GetLogBufferLayout, (int groupId), (override));
+    MOCK_METHOD(std::string, GetRocksdbPath, (), (override));
 };
 
 } // namespace pos

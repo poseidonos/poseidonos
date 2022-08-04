@@ -8,9 +8,13 @@ read temp
 echo "You must run setup_env_rocksmeta.sh before running this script"
 echo "This script construct RAID 1 with device /dev/nvme0n1 and /dev/nvme1n1 which will be used as RocksDB Meta File System"
 
+read -p "Enter first device to construct RAID 1 (ex. /dev/nvme0n1), device must not have any partition : " dev1
+read -p "Enter second device to construct RAID 1 (ex. /dev/nvme1n1), device must not have any partition : " dev2
+read -p "Enter RAID device name (ex. /dev/md9) : " raidDev
+echo "${dev1} and ${dev2} devices will construct RAID 1 ${raidDev} " 
 
 # /dev/nvme0n1 and /dev/nvme1n1 must not have any partition before. 
-# Make /dev/nvme0n1 to raid type
+# Make dev1 to raid type
 (
     echo n # Add new partition
     echo p # Primary partition
@@ -20,9 +24,9 @@ echo "This script construct RAID 1 with device /dev/nvme0n1 and /dev/nvme1n1 whi
     echo t # Change partition type
     echo fd # Change linux partition type to linux raid auto type
     echo w # Write changes
-) | fdisk /dev/nvme0n1
+) | fdisk ${dev1}
 
-# Make /dev/nvme1n1 to raid type
+# Make dev2 to raid type
 (
     echo n # Add new partition
     echo p # Primary partition
@@ -32,30 +36,32 @@ echo "This script construct RAID 1 with device /dev/nvme0n1 and /dev/nvme1n1 whi
     echo t # Change partition type
     echo fd # Change linux partition type to linux raid auto type
     echo w # Write changes
-) | fdisk /dev/nvme1n1
+) | fdisk ${dev2}
 
-# Construct RAID 1 with /dev/nvme0n1 and /dev/nvme1n1
+# Construct RAID 1 with dev1 and dev2
 
 (
     echo y # create array -> yes
-) | mdadm --create /dev/md9 --level=1 --raid-devices=2 /dev/nvme0n1 /dev/nvme1n1
+) | mdadm --create ${raidDev} --level=1 --raid-devices=2 ${dev1} ${dev2}
 
-# Format RAID device as ext4 file system
+# Format RAID device as xfs file system
 (
     echo y 
-) | mkfs.ext4 /dev/md9
+) | mkfs.xfs ${raidDev}
 
-# mount raid device to /raidDir
-mkdir /etc/pos/POSRaid
-mount /dev/md9 /etc/pos/POSRaid
+# mount raid device to raidDev
+read -p "Enter Rocksdb path in pos.conf (ex. /etc/pos/POSRaid ) : " rocksdbPath
+mkdir ${rocksdbPath}
+mount ${raidDev} ${rocksdbPath}
 
 # check raid device is mounted
-ls /etc/pos/POSRaid
+echo "ls RocksDB path command result"
+ls ${rocksdbPath}
 
 # check raid device 
-mdadm --detail /dev/md9
+mdadm --detail ${raidDev}
 
-echo "Directory /etc/pos/POSRaid is created and constructed RAID 1 with /dev/nvme0n1, /dev/nvme1n1"
+echo "Directory ${rocksdbPath} is created and constructed RAID 1 with ${dev1}, ${dev2}"
 
 # Add raid permanently
 

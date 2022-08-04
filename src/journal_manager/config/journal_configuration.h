@@ -59,6 +59,7 @@ public:
     virtual uint64_t GetIntervalForMetric(void);
     virtual bool AreReplayWbStripesInUserArea(void);
     virtual bool IsRocksdbEnabled(void);
+    virtual std::string GetRocksdbPath(void);
 
     virtual int GetNumLogGroups(void);
     virtual uint64_t GetLogBufferSize(void);
@@ -86,6 +87,7 @@ protected:
     uint64_t maxPartitionSize;
     bool rocksdbEnabled;
     MetaVolumeType metaVolumeToUse;
+    std::string rocksdbPath;
 
 private:
     void _ReadConfiguration(void);
@@ -95,6 +97,7 @@ private:
     uint64_t _ReadLogBufferSize(void);
     uint64_t _ReadNumLogGroup(void);
     bool _IsRocksdbEnabled(void);
+    std::string _GetRocksdbPath(void);
 
     void _ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl);
 

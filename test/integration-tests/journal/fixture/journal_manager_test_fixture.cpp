@@ -106,11 +106,12 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
 {
     JournalConfigurationBuilder configurationBuilder(testInfo);
     configurationBuilder.SetRocksDBEnable(true);
+    configurationBuilder.SetRocksDBBasePath(rocksdbPath);
 
     // To Simulate SPOR, copy rocksdb data to another directory at any time which is similar to closing rocksdb abrubtly before closing db.
     std::string SPORDirName = "SPOR" + GetLogDirName();
-    std::string SPORDirectory = "/etc/pos/POSRaid/" + SPORDirName + "_RocksJournal";
-    std::string targetDirName = "/etc/pos/POSRaid/" + GetLogDirName() + "_RocksJournal";
+    std::string SPORDirectory = rocksdbPath + "/" + SPORDirName + "_RocksJournal";
+    std::string targetDirName = rocksdbPath + "/" + GetLogDirName() + "_RocksJournal";
     std::experimental::filesystem::copy(targetDirName, SPORDirectory);
 
     // Remove Existing Target Directory

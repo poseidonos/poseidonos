@@ -57,14 +57,15 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
   logFactory(nullptr),
   rocksJournal(nullptr),
   logBufferSize(0),
-  telemetryPublisher(nullptr)
+  telemetryPublisher(nullptr),
+  basePathName("")
 {
 }
 
 RocksDBLogBuffer::RocksDBLogBuffer(const std::string arrayName)
 : RocksDBLogBuffer()
 {
-    this->pathName = "/etc/pos/POSRaid/" + arrayName + "_RocksJournal";
+    this->arrayName = arrayName;
 }
 
 // LCOV_EXCL_START
@@ -85,6 +86,9 @@ RocksDBLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteConte
     config = journalConfiguration;
     logFactory = logWriteContextFactory;
     telemetryPublisher = tp;
+    basePathName = config->GetRocksdbPath();
+    pathName = basePathName + "/" + this->arrayName + "_RocksJournal";
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_INITIALIZED), "RocksDB initialized(path : {})", pathName);
     return 0;
 }
 
@@ -217,11 +221,11 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     {
         std::string itValue = it->value().ToString();
         uint64_t size = itValue.size();
-
-        if (offset + size >= this->logBufferSize)
+        // TODO(sang7.park) : must change this later because logGroupSize is proper in this context rather than logBufferSize.
+        if (offset + size > this->logBufferSize)
         {
             POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET),
-                "RocksDB Read LogBuffer failed, size of read buffer is over logbuffersize (offset + size >= logbuffersize) ({} + {} >= {}), logGroupID : {} (path : {})",
+                "RocksDB Read LogBuffer failed, size of read buffer is over logbuffersize (offset + size > logbuffersize) ({} + {} >= {}), logGroupID : {} (path : {})",
                 offset, size, this->logBufferSize, groupId, pathName);
             return -1 * EID(ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET);
         }
@@ -397,9 +401,9 @@ RocksDBLogBuffer::IsOpened(void)
 int
 RocksDBLogBuffer::_CreateDirectory(void)
 {
-    if (!std::experimental::filesystem::exists("/etc/pos/POSRaid"))
+    if (!std::experimental::filesystem::exists(basePathName))
     {
-        bool ret = std::experimental::filesystem::create_directory("/etc/pos/POSRaid");
+        bool ret = std::experimental::filesystem::create_directory(basePathName);
         if (ret != true)
         {
             POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::ROCKSDB_LOG_BUFFER_DIR_CREATION_FAILED), "RocksDB directory creation failed (path :{}) ", pathName);

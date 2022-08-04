@@ -57,7 +57,7 @@ protected:
     uint64_t logBufferSize;
     uint64_t logGroupSize;
     int numLogGroups;
-
+    const std::string rocksdbPath = "/etc/pos/POSRaid";
 private:
     void _GetLogBufferSizeInfo(void);
 };
