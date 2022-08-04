@@ -313,6 +313,7 @@ endif()
 
 # Build and install opentelemetry-cpp
 ExternalProject_Add(opentelemetry-cpp
+    DEPENDS grpc
     GIT_REPOSITORY ${REPO_OTEL}
     GIT_TAG "v1.4.1"
     SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_OTEL}
@@ -321,7 +322,7 @@ ExternalProject_Add(opentelemetry-cpp
     LOG_CONFIGURE ON
     LOG_BUILD ON
     LOG_INSTALL ON
-    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL}
+    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DWITH_OTLP=ON -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL}
     BUILD_COMMAND make -j ${NUM_BUILD_CORE} all
     INSTALL_COMMAND make install
 )
