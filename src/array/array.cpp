@@ -450,12 +450,12 @@ Array::ReplaceDevice(string devName)
     tie(target, devType) = devMgr_->GetDevByName(devName);
     POS_TRACE_INFO(EID(REPLACE_DEV_DEBUG_MSG), "trying to replace device from array, dev_name:{}, dev_type:{} array_name:{}", devName, devType, name_);
     int ret = 0;
-    if (devType == ArrayDeviceType::DATA)
+    if (devType == ArrayDeviceType::DATA && target != nullptr)
     {
         ret = state->CanReplaceData();
         if (ret == 0)
         {
-            if (target != nullptr && target->GetState() == ArrayDeviceState::NORMAL)
+            if (target->GetState() == ArrayDeviceState::NORMAL)
             {
                 if (_CanAddSpare() == false)
                 {
@@ -974,7 +974,7 @@ Array::_RebuildDone(RebuildResult result)
     if (result.src != nullptr && result.src->GetUblock() != nullptr)
     {
         // in case of the quick rebuild completed
-        sysDevMgr->RemoveDevice(result.src->GetUblock());
+        result.src->GetUblock()->SetClass(DeviceClass::SYSTEM);
         result.src->SetUblock(nullptr);
         delete result.src;
     }

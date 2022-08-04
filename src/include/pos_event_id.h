@@ -1723,7 +1723,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "Failed to replace a data device.", "Only normal status devices can be replacement target.", "Please check a target device status and try again.")},
         {(int)POS_EVENT_ID::REPLACE_DEV_SSD_NAME_NOT_FOUND,
             new PosEventInfoEntry("REPLACE_DEV_SSD_NAME_NOT_FOUND",
-                "Failed to replace a data device.", "The SSD of the requested name could not be found", "Please check the ssd name in the device list and try again")},
+                "Failed to replace a data device.", "The SSD of the requested name could not be found in the data device list", "Please check the ssd name you in the device list and try again")},
         {(int)POS_EVENT_ID::REPLACE_DEV_ARRAY_NAME_DOES_NOT_EXIST,
             new PosEventInfoEntry("REPLACE_DEV_ARRAY_NAME_DOES_NOT_EXIST",
                 "Failed to replace a data device.", "The requested array name does not exist.", "Please check array name to remove a device and try again")},
