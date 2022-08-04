@@ -79,6 +79,7 @@ public:
     virtual int Unmount(string name) override;
     virtual int AddDevice(string name, string dev) override;
     virtual int RemoveDevice(string name, string dev) override;
+    virtual int ReplaceDevice(string name, string dev) override;
     virtual ComponentsInfo* GetInfo(string name) override;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) override;
 

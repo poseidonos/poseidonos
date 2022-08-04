@@ -40,9 +40,9 @@
 namespace pos
 {
 ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
-                        ArrayDevice* dev, RebuildComplete cb,
+                        ArrayDevice* dst, ArrayDevice* src, RebuildComplete cb,
                         list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-                        RebuildTypeEnum rebuildType, bool isWT)
+                        RebuildTypeEnum rebuildType)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::ArrayRebuild() array {} with total {} tasks",
@@ -54,14 +54,14 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
 
     for (RebuildTarget* tar : tgt)
     {
-        unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dev);
+        unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dst);
         if (ctx && factory != nullptr)
         {
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "ArrayRebuild rebuildtype:{}", rebuildType);
             ctx->rebuildType = rebuildType;
-            ctx->isWT = isWT;
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;
+            ctx->srcDev = src;
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
                 "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
@@ -82,18 +82,19 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
             }
         }
     }
-    Init(arrayName, dev, cb, partRebuild, prog, rLogger);
+    Init(arrayName, dst, src, cb, partRebuild, prog, rLogger);
 }
 
 void
-ArrayRebuild::Init(string array, ArrayDevice* dev, RebuildComplete cb,
+ArrayRebuild::Init(string array, ArrayDevice* dstDev, ArrayDevice* srcDev, RebuildComplete cb,
     list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* rLogger)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "ArrayRebuild::Init() array {} with total {} tasks", array, tgt.size());
 
     arrayName = array;
-    targetDev = dev;
+    dst = dstDev;
+    src = srcDev;
     rebuildComplete = cb;
     tasks = tgt;
     progress = prog;
@@ -118,7 +119,8 @@ ArrayRebuild::Start(void)
     {
         RebuildResult res;
         res.array = arrayName;
-        res.target = targetDev;
+        res.dst = dst;
+        res.src = src;
         res.result = RebuildState::READY;
         _RebuildCompleted(res);
     }
@@ -135,7 +137,8 @@ ArrayRebuild::Discard(void)
     tasks.clear();
     RebuildResult res;
     res.array = arrayName;
-    res.target = targetDev;
+    res.dst = dst;
+    res.src = src;
     res.result = RebuildState::FAIL;
     _RebuildCompleted(res);
 }

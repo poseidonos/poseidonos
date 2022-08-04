@@ -77,18 +77,18 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
     uint32_t readSize = blockAlignment.GetBlockCount() * blockSize;
     uint32_t sectorCnt = rm.srcAddr.size() * readSize / sectorSize;
     void* mem = nullptr;
-    if (bufferPool == nullptr) // Degraded Or Timeout case
-    {
-        mem = Memory<sectorSize>::Alloc(sectorCnt);
-    }
-    else // Total Rebuild Case
+    if (bufferPool != nullptr)
     {
         mem = bufferPool->TryGetBuffer();
         if (nullptr == mem)
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::RESOURCE_BUFFER_POOL_EMPTY,
+            POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_BUFFER_POOL_EMPTY,
                 "Failed to get buffer during recover read. {} Pool is empty", bufferPool->GetOwner());
         }
+    }
+    if (nullptr == mem)
+    {
+        mem = Memory<sectorSize>::Alloc(sectorCnt);
     }
 
     UbioSmartPtr rebuildUbio(new Ubio(mem, sectorCnt, ubio->GetArrayId()));

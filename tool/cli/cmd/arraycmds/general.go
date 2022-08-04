@@ -36,6 +36,7 @@ func init() {
 	ArrayCmd.AddCommand(CreateArrayCmd)
 	ArrayCmd.AddCommand(AddSpareCmd)
 	ArrayCmd.AddCommand(RemoveSpareCmd)
+	ArrayCmd.AddCommand(ReplaceArrayDeviceCmd)
 	ArrayCmd.AddCommand(AutocreateArrayCmd)
 }
 

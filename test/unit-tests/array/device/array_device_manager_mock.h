@@ -20,10 +20,10 @@ public:
     MOCK_METHOD(void, Clear, (), (override));
     MOCK_METHOD(int, AddSpare, (string devName), (override));
     MOCK_METHOD(int, RemoveSpare, (string devName), (override));
-    MOCK_METHOD(int, RemoveSpare, (ArrayDevice * dev), (override));
-    MOCK_METHOD(int, ReplaceWithSpare, (ArrayDevice * target), (override));
+    MOCK_METHOD(int, ReplaceWithSpare, (ArrayDevice* target, ArrayDevice*& out), (override));
     MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDev, (UblockSharedPtr uBlock), (override));
-    MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDev, (string devSn), (override));
+    MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDevBySn, (string sn), (override));
+    MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDevByName, (string devName), (override));
     MOCK_METHOD(ArrayDevice*, GetFaulty, (), (override));
     MOCK_METHOD(ArrayDevice*, GetRebuilding, (), (override));
     MOCK_METHOD(vector<ArrayDevice*>, GetDataDevices, (), (override));

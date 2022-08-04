@@ -292,7 +292,7 @@ TEST(ArrayState, CanRemoveSpare_testIfWeCannotRemoveSpareWhenArrayIsNotMounted)
         int actual = arrayState.CanRemoveSpare();
 
         // Then
-        ASSERT_EQ(EID(REMOVE_SPARE_CAN_ONLY_BE_WHILE_ONLINE), actual);
+        ASSERT_EQ(EID(REMOVE_DEV_CAN_ONLY_BE_WHILE_ONLINE), actual);
     }
 }
 

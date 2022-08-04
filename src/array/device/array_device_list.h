@@ -64,7 +64,7 @@ public:
     virtual int AddData(ArrayDevice* dev);
     virtual int AddSpare(ArrayDevice* dev);
     virtual int RemoveSpare(ArrayDevice* target);
-    virtual int SpareToData(ArrayDevice* target);
+    virtual int SpareToData(ArrayDevice* target, ArrayDevice*& swapOut);
     virtual void Clear(void);
     virtual DeviceSet<ArrayDevice*>& GetDevs(void);
     virtual DeviceSet<string> ExportNames(void);

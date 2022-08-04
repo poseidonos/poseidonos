@@ -110,13 +110,13 @@ void PartitionRebuild::_Complete(RebuildResult res)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "PartitionRebuild completed, array:{}, result:{}", res.array, REBUILD_STATE_STR[(int)res.result]);
-    if (bhvr != nullptr)
-    {
-        res.target = bhvr->GetContext()->faultDev;
-    }
     if (completeCb != nullptr)
     {
         completeCb(res);
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "no rebuild complete callback");
     }
 }
 

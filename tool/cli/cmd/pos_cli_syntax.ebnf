@@ -109,6 +109,7 @@ ArrayCmd = "array" ,
   | ListArrayCmd   | AddSpareCmd
   | RemoveSpareCmd | DeleteArrayCmd
   | CreateArrayCmd | AutoCreateArrayCmd
+  | ReplaceArrayDeviceCmd
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
@@ -126,6 +127,9 @@ AddSpareCmd = "addspare" , ( "--spare" | "-s" ) ,
 RemoveSpareCmd = "rmspare" , ( "--spare" | "-s" ) ,
   DeviceName , ( "--array-name" | "-a" ) , ArrayName ,
   [ "--force" ] ;
+
+ReplaceArrayDeviceCmd = "replace" , ( "--data-device" | "-d" ) ,
+  DeviceName , ( "--array-name" | "-a" ) , ArrayName ;
 
 DeleteArrayCmd = "delete" , ( "--array-name" | "-a" ) ,
   ArrayName , [ "--force" ] ;

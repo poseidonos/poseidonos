@@ -18,7 +18,6 @@ TEST(RebuildBehaviorFactory, testIfRebuildBehaviorForJournalPartitionIsCreatedIn
         .stripesPerSegment = 20,
         .totalSegments = 100};
 
-    ctx->isWT = true;
     ctx->part = PartitionType::JOURNAL_SSD;
     ctx->size = &physicalSize;
 

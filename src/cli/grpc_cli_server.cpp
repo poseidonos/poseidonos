@@ -213,6 +213,23 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  ReplaceArrayDevice(ServerContext* context, const ReplaceArrayDeviceRequest* request,
+                  ReplaceArrayDeviceResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteReplaceArrayDeviceCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
   CreateArray(ServerContext* context, const CreateArrayRequest* request,
                   CreateArrayResponse* reply) override
   {

@@ -34,6 +34,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/UpdateEventWrr",
   "/grpc_cli.PosCli/AddSpare",
   "/grpc_cli.PosCli/RemoveSpare",
+  "/grpc_cli.PosCli/ReplaceArrayDevice",
   "/grpc_cli.PosCli/CreateArray",
   "/grpc_cli.PosCli/AutocreateArray",
   "/grpc_cli.PosCli/DeleteArray",
@@ -77,28 +78,29 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_UpdateEventWrr_(PosCli_method_names[9], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_AddSpare_(PosCli_method_names[10], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_RemoveSpare_(PosCli_method_names[11], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateArray_(PosCli_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AutocreateArray_(PosCli_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_DeleteArray_(PosCli_method_names[14], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_MountArray_(PosCli_method_names[15], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UnmountArray_(PosCli_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ListArray_(PosCli_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ArrayInfo_(PosCli_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetLogPreference_(PosCli_method_names[19], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetLogLevel_(PosCli_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_LoggerInfo_(PosCli_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetLogLevel_(PosCli_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ApplyLogFilter_(PosCli_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateDevice_(PosCli_method_names[24], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ScanDevice_(PosCli_method_names[25], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ListDevice_(PosCli_method_names[26], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetSmartLog_(PosCli_method_names[27], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateSubsystem_(PosCli_method_names[28], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_DeleteSubsystem_(PosCli_method_names[29], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_AddListener_(PosCli_method_names[30], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ListSubsystem_(PosCli_method_names[31], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SubsystemInfo_(PosCli_method_names[32], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateTransport_(PosCli_method_names[33], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ReplaceArrayDevice_(PosCli_method_names[12], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateArray_(PosCli_method_names[13], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AutocreateArray_(PosCli_method_names[14], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_DeleteArray_(PosCli_method_names[15], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_MountArray_(PosCli_method_names[16], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UnmountArray_(PosCli_method_names[17], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListArray_(PosCli_method_names[18], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ArrayInfo_(PosCli_method_names[19], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetLogPreference_(PosCli_method_names[20], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetLogLevel_(PosCli_method_names[21], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_LoggerInfo_(PosCli_method_names[22], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetLogLevel_(PosCli_method_names[23], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ApplyLogFilter_(PosCli_method_names[24], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateDevice_(PosCli_method_names[25], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ScanDevice_(PosCli_method_names[26], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListDevice_(PosCli_method_names[27], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetSmartLog_(PosCli_method_names[28], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateSubsystem_(PosCli_method_names[29], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_DeleteSubsystem_(PosCli_method_names[30], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_AddListener_(PosCli_method_names[31], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListSubsystem_(PosCli_method_names[32], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SubsystemInfo_(PosCli_method_names[33], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateTransport_(PosCli_method_names[34], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -373,6 +375,29 @@ void PosCli::Stub::experimental_async::RemoveSpare(::grpc::ClientContext* contex
 ::grpc::ClientAsyncResponseReader< ::grpc_cli::RemoveSpareResponse>* PosCli::Stub::AsyncRemoveSpareRaw(::grpc::ClientContext* context, const ::grpc_cli::RemoveSpareRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncRemoveSpareRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::ReplaceArrayDevice(::grpc::ClientContext* context, const ::grpc_cli::ReplaceArrayDeviceRequest& request, ::grpc_cli::ReplaceArrayDeviceResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::ReplaceArrayDeviceRequest, ::grpc_cli::ReplaceArrayDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ReplaceArrayDevice_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::ReplaceArrayDevice(::grpc::ClientContext* context, const ::grpc_cli::ReplaceArrayDeviceRequest* request, ::grpc_cli::ReplaceArrayDeviceResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::ReplaceArrayDeviceRequest, ::grpc_cli::ReplaceArrayDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ReplaceArrayDevice_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::ReplaceArrayDevice(::grpc::ClientContext* context, const ::grpc_cli::ReplaceArrayDeviceRequest* request, ::grpc_cli::ReplaceArrayDeviceResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ReplaceArrayDevice_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ReplaceArrayDeviceResponse>* PosCli::Stub::PrepareAsyncReplaceArrayDeviceRaw(::grpc::ClientContext* context, const ::grpc_cli::ReplaceArrayDeviceRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::ReplaceArrayDeviceResponse, ::grpc_cli::ReplaceArrayDeviceRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ReplaceArrayDevice_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ReplaceArrayDeviceResponse>* PosCli::Stub::AsyncReplaceArrayDeviceRaw(::grpc::ClientContext* context, const ::grpc_cli::ReplaceArrayDeviceRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncReplaceArrayDeviceRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -1007,6 +1032,16 @@ PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[12],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ReplaceArrayDeviceRequest, ::grpc_cli::ReplaceArrayDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::ReplaceArrayDeviceRequest* req,
+             ::grpc_cli::ReplaceArrayDeviceResponse* resp) {
+               return service->ReplaceArrayDevice(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[13],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateArrayRequest, ::grpc_cli::CreateArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
              ::grpc::ServerContext* ctx,
@@ -1015,7 +1050,7 @@ PosCli::Service::Service() {
                return service->CreateArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[13],
+      PosCli_method_names[14],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::AutocreateArrayRequest, ::grpc_cli::AutocreateArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1025,7 +1060,7 @@ PosCli::Service::Service() {
                return service->AutocreateArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[14],
+      PosCli_method_names[15],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::DeleteArrayRequest, ::grpc_cli::DeleteArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1035,7 +1070,7 @@ PosCli::Service::Service() {
                return service->DeleteArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[15],
+      PosCli_method_names[16],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::MountArrayRequest, ::grpc_cli::MountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1045,7 +1080,7 @@ PosCli::Service::Service() {
                return service->MountArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[16],
+      PosCli_method_names[17],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::UnmountArrayRequest, ::grpc_cli::UnmountArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1055,7 +1090,7 @@ PosCli::Service::Service() {
                return service->UnmountArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[17],
+      PosCli_method_names[18],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ListArrayRequest, ::grpc_cli::ListArrayResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1065,7 +1100,7 @@ PosCli::Service::Service() {
                return service->ListArray(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[18],
+      PosCli_method_names[19],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ArrayInfoRequest, ::grpc_cli::ArrayInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1075,7 +1110,7 @@ PosCli::Service::Service() {
                return service->ArrayInfo(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[19],
+      PosCli_method_names[20],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetLogPreferenceRequest, ::grpc_cli::SetLogPreferenceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1085,7 +1120,7 @@ PosCli::Service::Service() {
                return service->SetLogPreference(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[20],
+      PosCli_method_names[21],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetLogLevelRequest, ::grpc_cli::SetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1095,7 +1130,7 @@ PosCli::Service::Service() {
                return service->SetLogLevel(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[21],
+      PosCli_method_names[22],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::LoggerInfoRequest, ::grpc_cli::LoggerInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1105,7 +1140,7 @@ PosCli::Service::Service() {
                return service->LoggerInfo(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[22],
+      PosCli_method_names[23],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::GetLogLevelRequest, ::grpc_cli::GetLogLevelResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1115,7 +1150,7 @@ PosCli::Service::Service() {
                return service->GetLogLevel(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[23],
+      PosCli_method_names[24],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ApplyLogFilterRequest, ::grpc_cli::ApplyLogFilterResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1125,7 +1160,7 @@ PosCli::Service::Service() {
                return service->ApplyLogFilter(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[24],
+      PosCli_method_names[25],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateDeviceRequest, ::grpc_cli::CreateDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1135,7 +1170,7 @@ PosCli::Service::Service() {
                return service->CreateDevice(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[25],
+      PosCli_method_names[26],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ScanDeviceRequest, ::grpc_cli::ScanDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1145,7 +1180,7 @@ PosCli::Service::Service() {
                return service->ScanDevice(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[26],
+      PosCli_method_names[27],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ListDeviceRequest, ::grpc_cli::ListDeviceResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1155,7 +1190,7 @@ PosCli::Service::Service() {
                return service->ListDevice(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[27],
+      PosCli_method_names[28],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::GetSmartLogRequest, ::grpc_cli::GetSmartLogResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1165,7 +1200,7 @@ PosCli::Service::Service() {
                return service->GetSmartLog(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[28],
+      PosCli_method_names[29],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateSubsystemRequest, ::grpc_cli::CreateSubsystemResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1175,7 +1210,7 @@ PosCli::Service::Service() {
                return service->CreateSubsystem(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[29],
+      PosCli_method_names[30],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::DeleteSubsystemRequest, ::grpc_cli::DeleteSubsystemResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1185,7 +1220,7 @@ PosCli::Service::Service() {
                return service->DeleteSubsystem(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[30],
+      PosCli_method_names[31],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::AddListenerRequest, ::grpc_cli::AddListenerResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1195,7 +1230,7 @@ PosCli::Service::Service() {
                return service->AddListener(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[31],
+      PosCli_method_names[32],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ListSubsystemRequest, ::grpc_cli::ListSubsystemResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1205,7 +1240,7 @@ PosCli::Service::Service() {
                return service->ListSubsystem(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[32],
+      PosCli_method_names[33],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SubsystemInfoRequest, ::grpc_cli::SubsystemInfoResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1215,7 +1250,7 @@ PosCli::Service::Service() {
                return service->SubsystemInfo(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[33],
+      PosCli_method_names[34],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::CreateTransportRequest, ::grpc_cli::CreateTransportResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
@@ -1307,6 +1342,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::RemoveSpare(::grpc::ServerContext* context, const ::grpc_cli::RemoveSpareRequest* request, ::grpc_cli::RemoveSpareResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::ReplaceArrayDevice(::grpc::ServerContext* context, const ::grpc_cli::ReplaceArrayDeviceRequest* request, ::grpc_cli::ReplaceArrayDeviceResponse* response) {
   (void) context;
   (void) request;
   (void) response;

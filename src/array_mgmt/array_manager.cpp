@@ -209,7 +209,16 @@ ArrayManager::RemoveDevice(string name, string dev)
     return _ExecuteOrHandleErrors([&dev](ArrayComponents* array)
     {
         return array->GetArray()->RemoveSpare(dev);
-    }, name, EID(ADD_SPARE_ARRAY_NAME_DOES_NOT_EXIST));
+    }, name, EID(REMOVE_DEV_ARRAY_NAME_DOES_NOT_EXIST));
+}
+
+int
+ArrayManager::ReplaceDevice(string name, string dev)
+{
+    return _ExecuteOrHandleErrors([&dev](ArrayComponents* array)
+    {
+        return array->GetArray()->ReplaceDevice(dev);
+    }, name, EID(REPLACE_DEV_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
 int

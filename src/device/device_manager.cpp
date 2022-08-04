@@ -276,18 +276,16 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
         return static_cast<int>(POS_EVENT_ID::DEVICEMGR_REMOVE_DEV);
     }
 
-    UnvmeSsdSharedPtr ssd = nullptr;
+    ioDispatcher->RemoveDeviceForReactor(dev);
+    ioDispatcher->RemoveDeviceForIOWorker(dev);
+    devices.erase(iter);
 
+    UnvmeSsdSharedPtr ssd = nullptr;
     DeviceType type = (*iter)->GetType();
     if (type == DeviceType::SSD)
     {
         ssd = dynamic_pointer_cast<UnvmeSsd>(dev);
     }
-
-    ioDispatcher->RemoveDeviceForReactor(dev);
-    ioDispatcher->RemoveDeviceForIOWorker(dev);
-
-    devices.erase(iter);
     if (type == DeviceType::SSD && ssd != nullptr)
     {
         POS_TRACE_WARN(EID(DEVICEMGR_REMOVE_DEV), "SSD {}({}) is hot-removed", dev->GetName(), dev->GetSN());
