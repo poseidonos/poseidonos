@@ -136,7 +136,7 @@ LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
 				-lopentelemetry_resources \
 				-lopentelemetry_common \
 				-lopentelemetry_http_client_curl \
-				-lpthread -lcurl -lprotobuf
+				-lpthread -lcurl
 
 CXXFLAGS += $(INCLUDE)
 
