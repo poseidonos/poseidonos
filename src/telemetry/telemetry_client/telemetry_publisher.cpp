@@ -44,6 +44,8 @@ TelemetryPublisher::TelemetryPublisher(std::string name_)
     defaultlabelList.emplace(TEL_PUBNAME_LABEL_KEY, name);
     std::string runId = to_string(InstanceIdProviderSingleton::Instance()->GetInstanceId());
     defaultlabelList.emplace(TEL_RUNID_LABEL_KEY, runId);
+    
+    _LoadPublicationList(DEFAULT_PUBLICATION_LIST_FILE_PATH);
 }
 
 TelemetryPublisher::~TelemetryPublisher(void)
@@ -71,7 +73,7 @@ TelemetryPublisher::SetName(std::string name_)
 void
 TelemetryPublisher::StartPublishing(void)
 {
-    turnOn = true;
+    turnOn = true;   
 }
 
 void
@@ -108,10 +110,11 @@ TelemetryPublisher::AllocatePOSMetricVector(void)
 int
 TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricTypes type)
 {
-    if (turnOn == false)
+    if ((turnOn == false) || (_ToPublish(id) == false))
     {
         return -1;
     }
+
     POSMetric metric(id, type);
     if (type == MT_COUNT)
     {
@@ -136,10 +139,11 @@ TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricT
 int
 TelemetryPublisher::PublishMetric(POSMetric metric)
 {
-    if (turnOn == false)
+    if ((turnOn == false) || (_ToPublish(metric.GetName()) == false))
     {
         return -1;
     }
+
     POSMetricVector* metricList = AllocatePOSMetricVector();
     metricList->push_back(metric);
     int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);
@@ -157,6 +161,13 @@ TelemetryPublisher::PublishMetricList(POSMetricVector* metricList)
         delete metricList;
         return -1;
     }
+    _RemoveMetricNotToPublish(metricList);
+
+    if (metricList->size() <= 0)
+    {
+        return -1;
+    }
+
     int ret = globalPublisher->PublishToServer(&defaultlabelList, metricList);
     metricList->clear();
     delete metricList;
@@ -181,6 +192,76 @@ TelemetryPublisher::AddDefaultLabel(std::string key, std::string value)
     }
     defaultlabelList.emplace(key, value);
     return 0;
+}
+
+void
+TelemetryPublisher::LoadPublicationList(std::string filePath)
+{
+    _LoadPublicationList(filePath);
+}
+
+void
+TelemetryPublisher::_LoadPublicationList(std::string filePath)
+{
+    YAML::Node list;
+
+    try
+    {
+        list = YAML::LoadFile(filePath)[PUBLICATION_LIST_ROOT];
+
+        for (auto it = list.begin(); it != list.end(); ++it)
+        {
+            std::string tag = it->first.as<std::string>();
+            std::pair<std::string, bool> metricToPublish (tag, true);            
+            publicationList.insert(metricToPublish);
+        }
+    }
+    catch (YAML::Exception& e)
+    {
+        POS_TRACE_WARN(EID(TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_FAILURE),
+            "filePath:{}, yaml_exception:{}", filePath, e.msg);
+        selectivePublication = false;
+    }
+
+    POS_TRACE_INFO(EID(TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_SUCCESS),
+            "filePath:{}, list_size:{}", filePath, publicationList.size());
+}
+
+void
+TelemetryPublisher::_RemoveMetricNotToPublish(POSMetricVector* metricList)
+{
+    POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
+            "list_size:{}", metricList->size());
+
+    auto it = metricList->begin();
+    while(it != metricList->end())
+    {
+        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
+            "name:{}, _ToPublish():{}", it->GetName(), _ToPublish(it->GetName()));
+
+        if (_ToPublish(it->GetName()) == false)
+        {
+            it = metricList->erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
+            "list_size:{}", metricList->size());   
+}
+
+bool
+TelemetryPublisher::_ToPublish(std::string metricId)
+{
+    if (selectivePublication == false)
+    {
+        return true;
+    }
+
+    return (publicationList.find(metricId) != publicationList.end());
 }
 
 } // namespace pos
