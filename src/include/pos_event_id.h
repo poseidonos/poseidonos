@@ -1969,7 +1969,7 @@ static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo =
                 "Failed to load the file for metric list. Turning off selective publication...", "", "")},
         {(int)POS_EVENT_ID::TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_SUCCESS,
             new PosEventInfoEntry("TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_SUCCESS",
-                "Loaded a publication list for telemetry metrics successfully!", "", "")},
+                "Succeeded to load a publication list for telemetry metrics!", "", "")},
         {(int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
             new PosEventInfoEntry("MBR_DEVICE_NOT_FOUND",
                 "Could not find a device.", "", "")},
