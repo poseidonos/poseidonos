@@ -73,7 +73,7 @@ TelemetryPublisher::SetName(std::string name_)
 void
 TelemetryPublisher::StartPublishing(void)
 {
-    turnOn = true;   
+    turnOn = true;
 }
 
 void
