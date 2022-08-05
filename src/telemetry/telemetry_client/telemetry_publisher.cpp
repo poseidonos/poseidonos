@@ -110,7 +110,7 @@ TelemetryPublisher::AllocatePOSMetricVector(void)
 int
 TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricTypes type)
 {
-    if ((turnOn == false) || (_ToPublish(id) == false))
+    if ((turnOn == false) || (_ShouldPublish(id) == false))
     {
         return -1;
     }
@@ -139,7 +139,7 @@ TelemetryPublisher::PublishData(std::string id, POSMetricValue value, POSMetricT
 int
 TelemetryPublisher::PublishMetric(POSMetric metric)
 {
-    if ((turnOn == false) || (_ToPublish(metric.GetName()) == false))
+    if ((turnOn == false) || (_ShouldPublish(metric.GetName()) == false))
     {
         return -1;
     }
@@ -215,6 +215,9 @@ TelemetryPublisher::_LoadPublicationList(std::string filePath)
             std::pair<std::string, bool> metricToPublish (tag, true);            
             publicationList.insert(metricToPublish);
         }
+
+        POS_TRACE_INFO(EID(TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_SUCCESS),
+            "filePath:{}, list_size:{}", filePath, publicationList.size());
     }
     catch (YAML::Exception& e)
     {
@@ -222,9 +225,6 @@ TelemetryPublisher::_LoadPublicationList(std::string filePath)
             "filePath:{}, yaml_exception:{}", filePath, e.msg);
         selectivePublication = false;
     }
-
-    POS_TRACE_INFO(EID(TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_SUCCESS),
-            "filePath:{}, list_size:{}", filePath, publicationList.size());
 }
 
 void
@@ -237,9 +237,9 @@ TelemetryPublisher::_RemoveMetricNotToPublish(POSMetricVector* metricList)
     while(it != metricList->end())
     {
         POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
-            "name:{}, _ToPublish():{}", it->GetName(), _ToPublish(it->GetName()));
+            "name:{}, _ShouldPublish():{}", it->GetName(), _ShouldPublish(it->GetName()));
 
-        if (_ToPublish(it->GetName()) == false)
+        if (_ShouldPublish(it->GetName()) == false)
         {
             it = metricList->erase(it);
         }
@@ -254,7 +254,7 @@ TelemetryPublisher::_RemoveMetricNotToPublish(POSMetricVector* metricList)
 }
 
 bool
-TelemetryPublisher::_ToPublish(std::string metricId)
+TelemetryPublisher::_ShouldPublish(std::string metricId)
 {
     if (selectivePublication == false)
     {

@@ -78,7 +78,7 @@ private:
     bool useDataPool;
     MetricLabelMap defaultlabelList;
 
-    bool _ToPublish(std::string metricId);
+    bool _ShouldPublish(std::string metricId);
     void _LoadPublicationList(std::string filePath);
     void _RemoveMetricNotToPublish(POSMetricVector* metricList);
     std::unordered_map<std::string, bool> publicationList;
