@@ -32,71 +32,15 @@
 
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <string>
-#include <mutex>
-
-#include "rebuild_result.h"
-#include "rebuild_progress.h"
-#include "rebuild_logger.h"
-#include "src/include/rebuild_state.h"
-#include "src/include/address_type.h"
-#include "src/include/raid_type.h"
-#include "src/include/rebuild_type.h"
-#include "src/include/partition_type.h"
-#include "src/logger/logger.h"
-
-using namespace std;
-
+#include "array_device_type.h"
 namespace pos
 {
-class PartitionPhysicalSize;
+class ArrayDevice;
 
-using F2PTranslator = function<PhysicalBlkAddr(const FtBlkAddr&)>;
-using RebuildComplete = function<void(RebuildResult)>;
-
-class RebuildContext
+class ArrayDeviceInfo
 {
 public:
-    string array;
-    PartitionType part = PartitionType::META_NVM;
-    RaidType raidType;
-    RebuildTypeEnum rebuildType;
-    uint32_t arrayIndex = 0;
-    uint32_t faultIdx = 0;
-    ArrayDevice* faultDev = nullptr;
-    ArrayDevice* srcDev = nullptr;
-    uint64_t stripeCnt = 0;
-    atomic<uint32_t> taskCnt;
-    const PartitionPhysicalSize* size = nullptr;
-    RebuildProgress* prog = nullptr;
-    RebuildLogger* logger = nullptr;
-    F2PTranslator translate;
-    RebuildComplete rebuildComplete;
-    RebuildState GetResult()
-    {
-        unique_lock<mutex> lock(mtx);
-        return result;
-    }
-    void SetResult(RebuildState reqState)
-    {
-        unique_lock<mutex> lock(mtx);
-        if (reqState == RebuildState::REBUILDING)
-        {
-            if (result == RebuildState::READY)
-            {
-                result = RebuildState::REBUILDING;
-            }
-        }
-        else
-        {
-            result = reqState;
-        }
-    }
-
-private:
-    RebuildState result = RebuildState::READY;
-    mutex mtx;
+    ArrayDevice* dev = nullptr;
+    ArrayDeviceType type = ArrayDeviceType::NONE;
 };
 } // namespace pos

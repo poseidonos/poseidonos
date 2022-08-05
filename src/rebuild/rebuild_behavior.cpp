@@ -54,16 +54,16 @@ RebuildBehavior::RebuildBehavior(unique_ptr<RebuildContext> c,
 
     uint32_t bufCnt = ctx->size->stripesPerSegment;
     uint64_t chunkSize = ctx->size->blksPerChunk * ArrayConfig::BLOCK_SIZE_BYTE;
-    uint64_t destCnt = 1;
-    uint64_t srcCnt = destCnt;
-    if (ctx->rebuildType == RebuildTypeEnum::QUICK)
+    if (ctx->rebuildType == RebuildTypeEnum::QUICK && ctx->raidType != RaidTypeEnum::RAID10)
     {
-        uint64_t srcSize = chunkSize * srcCnt;
-        uint64_t destSize = chunkSize * destCnt;
-        recovery = new QuickRecovery(srcSize, destSize, bufCnt);
+        uint64_t srcSize = chunkSize;
+        uint64_t destSize = chunkSize;
+        recovery = new QuickRecovery(ctx->srcDev, srcSize, destSize, bufCnt);
     }
     else
     {
+        uint64_t destCnt = 1;
+        uint64_t srcCnt = destCnt;
         if (ctx->raidType != RaidTypeEnum::RAID10)
         {
             srcCnt = ctx->size->chunksPerStripe - destCnt;

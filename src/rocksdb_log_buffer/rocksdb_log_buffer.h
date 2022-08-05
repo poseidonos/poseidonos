@@ -107,8 +107,10 @@ private:
     LogWriteContextFactory* logFactory;
     rocksdb::DB* rocksJournal;
     uint64_t logBufferSize;
+    std::string arrayName;
 
     TelemetryPublisher* telemetryPublisher;
+    std::string basePathName;
 };
 
 } // namespace pos

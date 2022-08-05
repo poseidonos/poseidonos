@@ -200,7 +200,6 @@ TEST(ArrayDeviceList, RemoveSpare_testWhenArgumentsAreValid)
     // Then
     int SUCCESS = 0;
     EXPECT_EQ(SUCCESS, result);
-    delete mockDev;
 }
 
 TEST(ArrayDeviceList, RemoveSpare_testWhenNoSpare)
@@ -214,9 +213,8 @@ TEST(ArrayDeviceList, RemoveSpare_testWhenNoSpare)
     // When
     int result = arrayDeviceList.RemoveSpare(mockDev);
     // Then
-    int REMOVE_FAIL = EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
+    int REMOVE_FAIL = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
     EXPECT_EQ(REMOVE_FAIL, result);
-    delete mockDev;
 }
 
 TEST(ArrayDeviceList, SpareToData_testReplacingBroken)
@@ -233,7 +231,8 @@ TEST(ArrayDeviceList, SpareToData_testReplacingBroken)
     arrayDeviceList.AddSpare(mockDev);
     arrayDeviceList.AddData(brokenDataDev);
     // When
-    int result = arrayDeviceList.SpareToData(brokenDataDev);
+    ArrayDevice* out;
+    int result = arrayDeviceList.SpareToData(brokenDataDev, out);
     // Then
     int SUCCESS = 0;
     EXPECT_EQ(SUCCESS, result);
@@ -253,7 +252,8 @@ TEST(ArrayDeviceList, SpareToData_testIfThereIsNoSpare)
     EXPECT_CALL(*brokenDataDev, GetUblock).WillRepeatedly(Return(fakeUblockSharedPtr));
     arrayDeviceList.AddData(brokenDataDev);
     // When
-    int result = arrayDeviceList.SpareToData(brokenDataDev);
+    ArrayDevice* out;
+    int result = arrayDeviceList.SpareToData(brokenDataDev, out);
     // Then
     int NOSPARE = EID(NO_SPARE_SSD_TO_REPLACE);
     EXPECT_EQ(NOSPARE, result);

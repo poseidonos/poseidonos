@@ -777,7 +777,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
     int actual = arrDevMgr.RemoveSpare("spare-that-doesn't-exist");
 
     // Then
-    ASSERT_EQ(EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND), actual);
+    ASSERT_EQ(EID(REMOVE_DEV_SSD_NAME_NOT_FOUND), actual);
 }
 
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
@@ -819,9 +819,11 @@ TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
     EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
 
     // When
-    int actual = arrDevMgr.RemoveSpare(&spare1Dev);
+    int actual = arrDevMgr.RemoveSpare("spare1");
 
     // Then
     ASSERT_EQ(0, actual);
@@ -839,7 +841,8 @@ TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
     EXPECT_CALL(*mockArrayDeviceList, SpareToData).WillOnce(Return(REPLACE_SUCCESS));
 
     // When
-    int actual = arrDevMgr.ReplaceWithSpare(nullptr);
+    ArrayDevice* out;
+    int actual = arrDevMgr.ReplaceWithSpare(nullptr, out);
 
     // Then
     ASSERT_EQ(REPLACE_SUCCESS, actual);
@@ -971,10 +974,8 @@ TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandledWithDeviceSerialNumber)
     ArrayDevice* arrDev;
     ArrayDeviceType arrDevType;
 
-    EXPECT_CALL(*mockSysDevMgr, GetDev).WillOnce(Return(dataUBlockDev));
-
     // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev("mock-data-sn");
+    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(dataUBlockDev);
 
     // Then
     ASSERT_EQ(&dataDev, arrDev);

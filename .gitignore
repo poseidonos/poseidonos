@@ -85,6 +85,8 @@ lib/spdk-prefix/
 lib/spdk/
 lib/spdlog-1.4.2/
 lib/spdlog-prefix/
+lib/opentelemetry-cpp
+lib/opentelemetry-cpp-prefix
 tool/cli/vendor
 tool/cli/docs/manpage
 tool/pkg/

@@ -301,6 +301,28 @@ func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error
 	return res, err
 }
 
+func SendReplaceArrayDevice(req *pb.ReplaceArrayDeviceRequest) (*pb.ReplaceArrayDeviceResponse, error) {
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	defer cancel()
+
+	res, err := c.ReplaceArrayDevice(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {

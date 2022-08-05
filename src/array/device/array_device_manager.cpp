@@ -290,23 +290,17 @@ ArrayDeviceManager::RemoveSpare(string devName)
     tie(dev, devType) = this->GetDev(uBlock);
     if (dev == nullptr)
     {
-        int eventId = EID(REMOVE_SPARE_SSD_NAME_NOT_FOUND);
-        POS_TRACE_WARN(eventId, "devName: {}", devName);
+        int eventId = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
+        POS_TRACE_WARN(eventId, "devName:{}", devName);
         return eventId;
     }
     return devs_->RemoveSpare(dev);
 }
 
 int
-ArrayDeviceManager::RemoveSpare(ArrayDevice* dev)
+ArrayDeviceManager::ReplaceWithSpare(ArrayDevice* target, ArrayDevice*& swapOut)
 {
-    return devs_->RemoveSpare(dev);
-}
-
-int
-ArrayDeviceManager::ReplaceWithSpare(ArrayDevice* target)
-{
-    return devs_->SpareToData(target);
+    return devs_->SpareToData(target, swapOut);
 }
 
 ArrayDevice*
@@ -483,10 +477,18 @@ ArrayDeviceManager::GetDev(UblockSharedPtr uBlock)
 }
 
 tuple<ArrayDevice*, ArrayDeviceType>
-ArrayDeviceManager::GetDev(string devSn)
+ArrayDeviceManager::GetDevBySn(string devSn)
 {
     DevUid sn(devSn);
     UblockSharedPtr dev = sysDevMgr_->GetDev(sn);
+    return GetDev(dev);
+}
+
+tuple<ArrayDevice*, ArrayDeviceType>
+ArrayDeviceManager::GetDevByName(string devName)
+{
+    DevName name(devName);
+    UblockSharedPtr dev = sysDevMgr_->GetDev(name);
     return GetDev(dev);
 }
 

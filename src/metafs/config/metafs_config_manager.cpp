@@ -52,7 +52,8 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   wrrCountJournal_(0),
   wrrCountMap_(0),
   wrrCountGeneral_(0),
-  rocksdbEnabled_(false)
+  rocksdbEnabled_(false),
+  rocksDbPath_("")
 {
     _BuildConfigMap();
 }
@@ -75,7 +76,10 @@ MetaFsConfigManager::Init(void)
     wrrCountMap_ = _GetWrrCountMap();
     wrrCountGeneral_ = _GetWrrCountGeneral();
     rocksdbEnabled_ = _IsRocksdbEnabled();
-
+    if (rocksdbEnabled_)
+    {
+        rocksDbPath_ = _GetRocksDbPath();
+    }
     if (!_ValidateConfig())
     {
         POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
@@ -109,8 +113,6 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"wrr_count_map", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::WrrCountGeneral,
         {"wrr_count_general", CONFIG_TYPE_UINT64}});
-    configMap_.insert({MetaFsConfigType::UseRocksdbEnabled,
-        {"use_rocksdb", CONFIG_TYPE_BOOL}});
 }
 
 bool
@@ -262,13 +264,40 @@ bool
 MetaFsConfigManager::_IsRocksdbEnabled(void)
 {
     bool enabled = false;
-    if (_ReadConfiguration<bool>(MetaFsConfigType::UseRocksdbEnabled, &enabled))
-        return false;
+    int ret = configManager_->GetValue("meta_rocksdb", "metafs_use_rocksdb",
+        static_cast<void*>(&enabled), ConfigType::CONFIG_TYPE_BOOL);
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
-        configMap_[MetaFsConfigType::UseRocksdbEnabled].first + (enabled ? " is enabled" : " is disabled"));
+    if (ret == 0)
+    {
+        if (enabled == true)
+        {
+            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+                "RocksDB Metafs is enabled");
+            return true;
+        }
+    }
+    return false;
+}
 
-    return enabled;
+std::string
+MetaFsConfigManager::_GetRocksDbPath(void)
+{
+    std::string path = "";
+    int ret = configManager_->GetValue("meta_rocksdb", "rocksdb_path",
+        static_cast<void*>(&path), ConfigType::CONFIG_TYPE_STRING);
+
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+            "RocksDB Metafs will be saved in {}", path);
+    }
+    else
+    {
+        path = "/etc/pos/POSRaid";
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+            "RocksDB Metafs will be saved in default path {}", path);
+    }
+    return path;
 }
 
 } // namespace pos

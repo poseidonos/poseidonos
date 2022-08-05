@@ -59,6 +59,7 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   maxPartitionSize(UINT64_MAX),
   rocksdbEnabled(false),
   metaVolumeToUse(),
+  rocksdbPath(""),
   areReplayWbStripesInUserArea(false),
   debugEnabled(false),
   intervalForMetric(0),
@@ -134,6 +135,11 @@ JournalConfiguration::IsRocksdbEnabled(void)
     return rocksdbEnabled;
 }
 
+std::string
+JournalConfiguration::GetRocksdbPath(void)
+{
+    return rocksdbPath;
+}
 int
 JournalConfiguration::GetNumLogGroups(void)
 {
@@ -189,6 +195,10 @@ JournalConfiguration::_ReadConfiguration(void)
         rocksdbEnabled = _IsRocksdbEnabled();
         intervalForMetric = _GetIntervalForMetric();
         numLogGroups = _ReadNumLogGroup();
+        if (rocksdbEnabled)
+        {
+            rocksdbPath = _GetRocksdbPath();
+        }
     }
     else
     {
@@ -292,9 +302,8 @@ bool
 JournalConfiguration::_IsRocksdbEnabled(void)
 {
     bool enabled = false;
-    int ret = configManager->GetValue("journal", "use_rocksdb",
-        &enabled, ConfigType::CONFIG_TYPE_BOOL);
-
+    int ret = configManager->GetValue("meta_rocksdb", "journal_use_rocksdb",
+        static_cast<void*>(&enabled), ConfigType::CONFIG_TYPE_BOOL);
     if (ret == 0)
     {
         if (enabled == true)
@@ -303,8 +312,37 @@ JournalConfiguration::_IsRocksdbEnabled(void)
                 "RocksDB Log Buffer is enabled");
             return true;
         }
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "RocksDB Log Buffer is disabled {}", enabled);
+        return false;
     }
-    return false;
+    else
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "RocksDB Log Buffer is disabled");
+        return false;
+    }
+}
+
+std::string
+JournalConfiguration::_GetRocksdbPath(void)
+{
+    std::string path = "";
+    int ret = configManager->GetValue("meta_rocksdb", "rocksdb_path",
+        static_cast<void*>(&path), ConfigType::CONFIG_TYPE_STRING);
+
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "RocksDB Log will be saved in {}", path);
+    }
+    else
+    {
+        path = "/etc/pos/POSRaid";
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "RocksDB Log will be saved in default path {}", path);
+    }
+    return path;
 }
 
 void

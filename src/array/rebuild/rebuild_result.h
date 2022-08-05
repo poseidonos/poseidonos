@@ -46,7 +46,8 @@ struct RebuildResult
 {
 public:
     string array = "";
-    ArrayDevice* target = nullptr;
+    ArrayDevice* dst = nullptr;
+    ArrayDevice* src = nullptr;
     RebuildState result = RebuildState::READY;
 };
 } // namespace pos

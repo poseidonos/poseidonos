@@ -87,38 +87,6 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);
-
-    if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
-    {
-        rocksdb::Options options;
-        options.create_if_missing = true;
-        // TODO(sang7.park) : get rocksdb directory location from config file
-        std::string metaRocksDir = "/etc/pos/POSRaid/";
-        if (!std::experimental::filesystem::exists(metaRocksDir))
-        {
-            bool ret = std::experimental::filesystem::create_directory(metaRocksDir);
-            if (ret)
-            {
-                MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs create directory : {}", metaRocksDir);
-            }
-            else
-            {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_FAILED, "RocksDB metafs create directory failed : {}", metaRocksDir);
-            }
-        }
-        std::string pathName = metaRocksDir + arrayInfo->GetName() + "_RocksMeta";
-        rocksdb::Status status = rocksdb::DB::Open(options, pathName, &rocksMeta);
-        fileDescriptorAllocator = new FileDescriptorAllocator();
-        if (status.ok())
-        {
-            MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_SUCCEED, "RocksDB Open succeed path : {}", pathName);
-        }
-        else
-        {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_FAILED, "RocksDB Open failed path : {}",pathName);
-        }
-        
-    }
 }
 
 MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
@@ -226,6 +194,12 @@ MetaFs::Init(void)
 
     if (!io->AddArray(arrayId_, _MakeLpnMap()))
         return -(int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
+    if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+    {
+        rc = _CreateRocksDBMetaFs();
+        if (POS_EVENT_ID::SUCCESS != rc)
+            return -(int)rc;
+    }
 
     isNormal_ = true;
     mgmt->SetStatus(isNormal_);
@@ -488,6 +462,43 @@ MetaFs::_CloseMetaVolume(void)
     return POS_EVENT_ID::SUCCESS;
 }
 
+POS_EVENT_ID
+MetaFs::_CreateRocksDBMetaFs(void)
+{
+    rocksdb::Options options;
+    options.create_if_missing = true;
+    // TODO(sang7.park) : get rocksdb directory location from config file
+    std::string metaRocksDir = MetaFsServiceSingleton::Instance()->GetConfigManager()->GetRocksDbPath();
+    if (!std::experimental::filesystem::exists(metaRocksDir))
+    {
+        bool ret = std::experimental::filesystem::create_directory(metaRocksDir);
+        if (ret)
+        {
+            MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs create directory : {}", metaRocksDir);
+        }
+        else
+        {
+            MFS_TRACE_WARN((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_FAILED, "RocksDB metafs create directory failed : {}", metaRocksDir);
+        }
+    }
+    else
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs omitted to create directory : {}, because it's already exists", metaRocksDir);
+    }
+    std::string pathName = metaRocksDir + "/" + arrayInfo_->GetName() + "_RocksMeta";
+    rocksdb::Status status = rocksdb::DB::Open(options, pathName, &rocksMeta);
+    fileDescriptorAllocator = new FileDescriptorAllocator();
+    if (status.ok())
+    {
+        MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_SUCCEED, "RocksDB Open succeed path : {}", pathName);
+        return POS_EVENT_ID::SUCCESS;
+    }
+    else
+    {
+        MFS_TRACE_ERROR((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_FAILED, "RocksDB Open failed path : {}", pathName);
+        return POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_FAILED;
+    }
+}
 void
 MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList)
 {

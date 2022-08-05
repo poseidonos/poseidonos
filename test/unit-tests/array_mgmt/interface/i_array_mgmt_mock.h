@@ -18,6 +18,7 @@ public:
     MOCK_METHOD(int, Unmount, (string name), (override));
     MOCK_METHOD(int, AddDevice, (string name, string dev), (override));
     MOCK_METHOD(int, RemoveDevice, (string name, string dev), (override));
+    MOCK_METHOD(int, ReplaceDevice, (string name, string dev), (override));
     MOCK_METHOD(ComponentsInfo*, GetInfo, (string name), (override));
     MOCK_METHOD(ComponentsInfo*, GetInfo, (uint32_t arrayIdx), (override));
 };

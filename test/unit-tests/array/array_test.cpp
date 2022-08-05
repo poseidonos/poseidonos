@@ -1061,7 +1061,7 @@ TEST(Array, FindDevice_testIfArrayDevMgrIsQueriedAgainst)
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
     string mockSerialNumber = "mock-sn";
 
-    EXPECT_CALL(*mockArrDevMgr, GetDev(mockSerialNumber)).WillOnce(Return(make_tuple(nullptr, ArrayDeviceType::DATA)));
+    EXPECT_CALL(*mockArrDevMgr, GetDevBySn(mockSerialNumber)).WillOnce(Return(make_tuple(nullptr, ArrayDeviceType::DATA)));
 
     Array array("mock-array", NULL, NULL, mockArrDevMgr, NULL, NULL, NULL, NULL, NULL, NULL);
 
