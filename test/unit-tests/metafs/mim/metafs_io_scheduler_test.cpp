@@ -104,7 +104,7 @@ public:
         interval = new MockMetaFsTimeInterval(1000);
         ON_CALL(*interval, CheckInterval).WillByDefault(Return(false));
         CPU_SET(0, &mioCoreSet);
-        scheduler = new MetaFsIoScheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr, interval, weight);
+        scheduler = new MetaFsIoScheduler(0, 0, 0, "Test", mioCoreSet, nullptr, nullptr, interval, weight, false);
         scheduler->RegisterMetaIoWorkerForTest(&metaIoWorker);
     }
 

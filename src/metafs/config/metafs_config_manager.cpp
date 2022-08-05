@@ -53,7 +53,8 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   wrrCountMap_(0),
   wrrCountGeneral_(0),
   rocksdbEnabled_(false),
-  rocksDbPath_("")
+  rocksDbPath_(""),
+  supportNumaDedicatedScheduling_(false)
 {
     _BuildConfigMap();
 }
@@ -80,6 +81,8 @@ MetaFsConfigManager::Init(void)
     {
         rocksDbPath_ = _GetRocksDbPath();
     }
+    supportNumaDedicatedScheduling_ = _IsSupportingNumaDedicatedScheduling();
+
     if (!_ValidateConfig())
     {
         POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
@@ -113,6 +116,8 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"wrr_count_map", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::WrrCountGeneral,
         {"wrr_count_general", CONFIG_TYPE_UINT64}});
+    configMap_.insert({MetaFsConfigType::SupportNumaDedicatedScheduling,
+        {"numa_dedicated", CONFIG_TYPE_BOOL}});
 }
 
 bool
@@ -300,4 +305,19 @@ MetaFsConfigManager::_GetRocksDbPath(void)
     return path;
 }
 
+bool
+MetaFsConfigManager::_IsSupportingNumaDedicatedScheduling(void)
+{
+    bool enabled = false;
+    int ret = configManager_->GetValue("performance",
+        "numa_dedicated", &enabled, CONFIG_TYPE_BOOL);
+    if (ret)
+        return false;
+
+    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        configMap_[MetaFsConfigType::SupportNumaDedicatedScheduling].first +
+            (enabled ? " is supported" : " is not supported"));
+
+    return enabled;
+}
 } // namespace pos

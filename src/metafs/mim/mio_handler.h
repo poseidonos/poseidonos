@@ -38,11 +38,13 @@
 #include "metafs_io_handler_base.h"
 #include "mfs_io_range_overlap_chker.h"
 #include "mpio_handler.h"
+#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/metafs/include/meta_storage_specific.h"
 #include "src/metafs/lib/metafs_pool.h"
 #include "src/metafs/lib/metafs_time_interval.h"
-#include "src/metafs/mim/metafs_io_wrr_q.h"
 #include "src/metafs/mim/metafs_io_q.h"
+#include "src/metafs/mim/metafs_io_wrr_q.h"
 #include "src/metafs/mim/mio.h"
 #include "src/metafs/util/metafs_time.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -103,7 +105,6 @@ private:
     MpioHandler* bottomhalfHandler;
     MetaFsPool<Mio*>* mioPool;
     MpioAllocator* mpioAllocator;
-    int cpuStallCnt;
     MioAsyncDoneCb mioCompletionCallback;
     PartialMpioDoneCb partialMpioDoneNotifier;
     MpioDonePollerCb mpioDonePoller;

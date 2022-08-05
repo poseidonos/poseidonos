@@ -32,6 +32,9 @@
 
 #include "metafs_io_scheduler.h"
 
+#include <numa.h>
+#include <sched.h>
+
 #include <string>
 #include <thread>
 
@@ -47,11 +50,13 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
     const int totalCoreCount, const std::string& threadName,
     const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
     TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval,
-    std::vector<int> weight)
+    const std::vector<int> weight, const bool supportNumaDedicatedScheduling)
 : MetaFsIoHandlerBase(threadId, coreId, threadName),
+  SUPPORT_NUMA_DEDICATED_SCHEDULING(supportNumaDedicatedScheduling),
   TOTAL_CORE_COUNT(totalCoreCount),
   MIO_CORE_SET(mioCoreSet),
   mioCoreCount_(CPU_COUNT(&mioCoreSet)),
+  mioCoreCountInTheSameNuma_(),
   config_(config),
   tp_(tp),
   cpuStallCnt_(0),
@@ -91,13 +96,17 @@ MetaFsIoScheduler::~MetaFsIoScheduler(void)
 void
 MetaFsIoScheduler::ExitThread(void)
 {
-    for (auto metaIoWorker : metaIoWorkerList_)
+    for (auto& workerList : metaIoWorkerList_)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "Exit MioHandler, " + metaIoWorker->GetLogString());
+        for (auto metaIoWorker : workerList.second)
+        {
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "Exit MioHandler, " + metaIoWorker->GetLogString());
 
-        metaIoWorker->ExitThread();
-        delete metaIoWorker;
+            metaIoWorker->ExitThread();
+            delete metaIoWorker;
+        }
+        workerList.second.clear();
     }
     metaIoWorkerList_.clear();
 
@@ -233,7 +242,7 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
         byteOffset += cloneReqMsg->byteSize;
         cloneReqMsg->baseMetaLpn = currentLpn_;
 
-        metaIoWorkerList_[currentLpn_ % mioCoreCount_]->EnqueueNewReq(cloneReqMsg);
+        _IssueRequestToMioWorker(cloneReqMsg);
 
         ++currentLpn_;
         --remainCount_;
@@ -247,6 +256,26 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 }
 
 void
+MetaFsIoScheduler::_PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWorker* worker)
+{
+    uint32_t numaId = SUPPORT_NUMA_DEDICATED_SCHEDULING ? (numa_node_of_cpu(coreId)) : 0;
+    if (metaIoWorkerList_.find(numaId) == metaIoWorkerList_.end())
+    {
+        metaIoWorkerList_.insert({numaId, std::vector<ScalableMetaIoWorker*>()});
+    }
+    metaIoWorkerList_[numaId].push_back(worker);
+    mioCoreCountInTheSameNuma_[numaId]++;
+}
+
+void
+MetaFsIoScheduler::_IssueRequestToMioWorker(MetaFsIoRequest* reqMsg)
+{
+    uint32_t numaId = SUPPORT_NUMA_DEDICATED_SCHEDULING ? reqMsg->numaId : 0;
+    uint32_t index = SUPPORT_NUMA_DEDICATED_SCHEDULING ? currentLpn_ % mioCoreCountInTheSameNuma_[numaId] : currentLpn_ % mioCoreCount_;
+    metaIoWorkerList_[numaId][index]->EnqueueNewReq(reqMsg);
+}
+
+void
 MetaFsIoScheduler::EnqueueNewReq(MetaFsIoRequest* reqMsg)
 {
     ioSQ_.Enqueue(reqMsg, reqMsg->GetFileType());
@@ -257,12 +286,15 @@ MetaFsIoScheduler::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaSto
 {
     bool result = true;
 
-    for (auto metaIoWorker : metaIoWorkerList_)
+    for (auto& workerList : metaIoWorkerList_)
     {
-        if (!metaIoWorker->AddArrayInfo(arrayId, map))
+        for (auto metaIoWorker : workerList.second)
         {
-            result = false;
-            break;
+            if (!metaIoWorker->AddArrayInfo(arrayId, map))
+            {
+                result = false;
+                break;
+            }
         }
     }
 
@@ -274,12 +306,15 @@ MetaFsIoScheduler::RemoveArrayInfo(const int arrayId)
 {
     bool result = true;
 
-    for (auto metaIoWorker : metaIoWorkerList_)
+    for (auto& workerList : metaIoWorkerList_)
     {
-        if (!metaIoWorker->RemoveArrayInfo(arrayId))
+        for (auto metaIoWorker : workerList.second)
         {
-            result = false;
-            break;
+            if (!metaIoWorker->RemoveArrayInfo(arrayId))
+            {
+                result = false;
+                break;
+            }
         }
     }
 
@@ -302,7 +337,6 @@ MetaFsIoScheduler::_CreateMioThread(void)
 {
     const std::string fileName = "MioHandler";
     uint32_t handlerId = 0;
-    int availableMioCoreCnt = CPU_COUNT(&MIO_CORE_SET);
     for (uint32_t coreId = 0; coreId < TOTAL_CORE_COUNT; ++coreId)
     {
         if (CPU_ISSET(coreId, &MIO_CORE_SET))
@@ -310,32 +344,20 @@ MetaFsIoScheduler::_CreateMioThread(void)
             ScalableMetaIoWorker* mioHandler =
                 new ScalableMetaIoWorker(handlerId++, coreId, fileName, config_, nullptr);
             mioHandler->StartThread();
-            metaIoWorkerList_.emplace_back(mioHandler);
-            availableMioCoreCnt--;
+            _PushToMioThreadList(coreId, mioHandler);
 
             POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
                 "Create MioHandler, " + mioHandler->GetLogString());
-
-            if (availableMioCoreCnt == 0)
-            {
-                break;
-            }
         }
-    }
-
-    if (availableMioCoreCnt)
-    {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
-            "The Count of created MioHandler: {}, expected count: {}",
-            mioCoreCount_ - availableMioCoreCnt, mioCoreCount_);
     }
 }
 
 void
 MetaFsIoScheduler::RegisterMetaIoWorkerForTest(ScalableMetaIoWorker* metaIoWorker)
 {
-    metaIoWorkerList_.emplace_back(metaIoWorker);
+    metaIoWorkerList_[0].push_back(metaIoWorker);
     mioCoreCount_ = metaIoWorkerList_.size();
+    mioCoreCountInTheSameNuma_[0] = metaIoWorkerList_[0].size();
 }
 
 void

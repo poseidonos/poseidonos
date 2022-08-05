@@ -60,11 +60,12 @@ MetaFs::MetaFs(void)
   metaStorage_(nullptr),
   telemetryPublisher_(nullptr),
   rocksMeta(nullptr),
-  fileDescriptorAllocator(nullptr)
+  fileDescriptorAllocator(nullptr),
+  configMgr_(MetaFsServiceSingleton::Instance()->GetConfigManager())
 {
 }
 
-MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
+MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded)
 : MetaFs()
 {
     arrayInfo_ = arrayInfo;
@@ -79,17 +80,18 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
 
     // TODO(sang7.park) : need to combine with metafs config manager
-    concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
+    concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(configMgr_->GetTimeIntervalInMillisecondsForMetric());
+    bool supportNuma = configMgr_->IsSupportingNumaDedicatedScheduling();
 
     mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
     ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt, telemetryPublisher_);
-    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval);
+    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval, supportNuma);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);
 }
 
-MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
+MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded, MetaFsManagementApi* mgmt,
     MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
     MetaStorageSubsystem* metaStorage_, TelemetryPublisher* tp)
 : mgmt(mgmt),

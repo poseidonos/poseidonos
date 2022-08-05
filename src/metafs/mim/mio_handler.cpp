@@ -54,7 +54,6 @@ MioHandler::MioHandler(const int threadId, const int coreId,
     MetaFsConfigManager* configManager, TelemetryPublisher* tp)
 : ioSQ(nullptr),
   ioCQ(nullptr),
-  cpuStallCnt(0),
   MIO_POOL_SIZE(configManager->GetMioPoolCapacity()),
   MPIO_POOL_SIZE(configManager->GetMpioPoolCapacity()),
   WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
@@ -93,7 +92,6 @@ MioHandler::MioHandler(const int threadId, const int coreId,
   ioCQ(ioCQ),
   mioPool(mioPool),
   mpioAllocator(mpioAllocator),
-  cpuStallCnt(0),
   MIO_POOL_SIZE(configManager->GetMioPoolCapacity()),
   MPIO_POOL_SIZE(configManager->GetMpioPoolCapacity()),
   WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
@@ -187,15 +185,10 @@ MioHandler::_HandleIoSQ(void)
     MetaFsIoRequest* reqMsg = ioSQ->Dequeue();
     if (!reqMsg)
     {
-        if (cpuStallCnt++ > 1000)
-        {
-            usleep(1);
-            cpuStallCnt = 0;
-        }
+        usleep(1);
         return;
     }
     reqMsg->StoreTimestamp(IoRequestStage::Dequeue);
-    cpuStallCnt = 0;
 
     if (_IsRangeOverlapConflicted(reqMsg) || _IsPendedRange(reqMsg))
     {
@@ -615,6 +608,8 @@ MioHandler::_HandleMioCompletion(void* data)
             {
                 aiocb->SetErrorStatus(mio->GetError());
                 _SendAioDoneEvent(aiocb);
+                // EventSmartPtr event = std::make_shared<MetaCallbackEvent>(aiocb);
+                // EventSchedulerSingleton::Instance()->EnqueueEvent(event);
             }
         }
     }
@@ -626,6 +621,8 @@ MioHandler::_HandleMioCompletion(void* data)
         {
             aiocb->SetErrorStatus(mio->GetError());
             _SendAioDoneEvent(aiocb);
+            // EventSmartPtr event = std::make_shared<MetaCallbackEvent>(aiocb);
+            // EventSchedulerSingleton::Instance()->EnqueueEvent(event);
         }
     }
 }

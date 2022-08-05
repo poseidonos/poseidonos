@@ -76,7 +76,8 @@ MetaFsTestFixture::MetaFsTestFixture(void)
         comp->storage = new TestMetaStorageSubsystem(arrayId);
         comp->mgmt = new MetaFsManagementApi(arrayId, comp->storage);
         comp->ctrl = new MetaFsFileControlApi(arrayId, comp->storage, comp->mgmt);
-        comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs, concurrentMetaFsTimeInterval);
+        comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs,
+            concurrentMetaFsTimeInterval, false);
         comp->wbt = new MetaFsWBTApi(arrayId, comp->ctrl);
         comp->metaFs = new MetaFs(comp->arrayInfo, comp->isLoaded, comp->mgmt,
             comp->ctrl, comp->io, comp->wbt, comp->storage, comp->tpForMetafs);
@@ -130,7 +131,7 @@ MetaFsTestFixture::_SetThreadModel(void)
     cpu_set_t schedulerCPUSet = _GetCpuSet(0, 0);
     cpu_set_t workerCPUSet = _GetCpuSet(1, 1);
 
-    MetaFsServiceSingleton::Instance(nullptr, config)
+    MetaFsServiceSingleton::Instance(config)
         ->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
 

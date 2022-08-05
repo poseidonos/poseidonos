@@ -34,6 +34,7 @@
 
 #include <sched.h>
 
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -54,7 +55,7 @@ public:
         const int totalCoreCount, const std::string& threadName,
         const cpu_set_t mioCoreSet, MetaFsConfigManager* config,
         TelemetryPublisher* tp, MetaFsTimeInterval* timeInterval,
-        std::vector<int> weight);
+        const std::vector<int> weight, const bool supportNumaDedicatedScheduling);
     virtual ~MetaFsIoScheduler(void);
 
     void IssueRequestAndDelete(MetaFsIoRequest* reqMsg);
@@ -80,11 +81,16 @@ private:
     void _ClearCurrentContext(void);
     void _UpdateCurrentLpnToNextExtent(void);
     void _UpdateCurrentLpnToNextExtentConditionally(void);
+    void _PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWorker* worker);
+    void _IssueRequestToMioWorker(MetaFsIoRequest* reqMsg);
 
-    std::vector<ScalableMetaIoWorker*> metaIoWorkerList_;
+    static const size_t TOTAL_NUMA_COUNT = 2;
+    const bool SUPPORT_NUMA_DEDICATED_SCHEDULING;
     const size_t TOTAL_CORE_COUNT;
     const cpu_set_t MIO_CORE_SET;
+    std::unordered_map<uint32_t, std::vector<ScalableMetaIoWorker*>> metaIoWorkerList_;
     size_t mioCoreCount_;
+    size_t mioCoreCountInTheSameNuma_[TOTAL_NUMA_COUNT];
     MetaFsConfigManager* config_;
     TelemetryPublisher* tp_;
     size_t cpuStallCnt_;

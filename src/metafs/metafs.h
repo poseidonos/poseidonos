@@ -52,12 +52,14 @@
 namespace pos
 {
 class MetaFsConfigManager;
+
 class MetaFs : public IMountSequence
 {
 public:
     MetaFs(void);
-    MetaFs(IArrayInfo* arrayInfo, bool isLoaded);
-    MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
+    MetaFs(IArrayInfo* arrayInfo, const bool isLoaded);
+    // for test
+    MetaFs(IArrayInfo* arrayInfo, const bool isLoaded, MetaFsManagementApi* mgmt,
         MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
         MetaStorageSubsystem* metaStorage, TelemetryPublisher* tp);
     virtual ~MetaFs(void);
@@ -108,5 +110,6 @@ private:
     TelemetryPublisher* telemetryPublisher_;
     rocksdb::DB* rocksMeta;
     FileDescriptorAllocator* fileDescriptorAllocator;
+    MetaFsConfigManager* configMgr_;
 };
 } // namespace pos
