@@ -117,11 +117,6 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         {
             metaUpdateCb->SetLogGroupId(groupId);
         }
-        else
-        {
-            POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_CALLBACK_FAILED,
-                "meta update callback was not updated correctly");
-        }
 
         context->stopwatch.StoreTimestamp(LogStage::Issue);
         result = logBuffer->WriteLog(context);
