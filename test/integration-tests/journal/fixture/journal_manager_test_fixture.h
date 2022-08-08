@@ -14,6 +14,7 @@
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+
 namespace pos
 {
 class JournalManagerTestFixture

@@ -38,6 +38,7 @@
 #include "src/allocator/include/allocator_const.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
 namespace pos
 {
@@ -58,6 +59,9 @@ public:
 
     virtual SegmentCtx* GetSegmentCtx(void) = 0;
     virtual GcCtx* GetGcCtx(void) = 0;
+    virtual void SyncLogGroup(int logGroupId) = 0;
+    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_) = 0;
+    virtual void ResetFlushedInfo(int logGroupId) = 0;
 };
 
 } // namespace pos
