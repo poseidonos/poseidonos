@@ -113,9 +113,14 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 
         EventSmartPtr metaUpdateEvent = context->GetClientCallback();
         MetaUpdateCallback* metaUpdateCb = dynamic_cast<MetaUpdateCallback*>(metaUpdateEvent.get());
+
         if (nullptr != metaUpdateCb)
         {
             metaUpdateCb->SetLogGroupId(groupId);
+        }
+        else
+        {
+            // log writes that not use MetaUpdateCallback will be skipped intentionally.
         }
 
         context->stopwatch.StoreTimestamp(LogStage::Issue);
