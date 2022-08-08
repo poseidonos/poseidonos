@@ -52,6 +52,7 @@ class IArrayInfo;
 class IStateControl;
 class TelemetryPublisher;
 class ISegmentCtx;
+class IVersionedSegmentContext;
 
 const uint32_t BUFFER_ALLOCATION_SIZE = 2 * 1024 * 1024;
 const uint32_t CHUNK_PER_BUFFER_ALLOCATION = BUFFER_ALLOCATION_SIZE / CHUNK_SIZE;
@@ -87,6 +88,7 @@ public:
     virtual IContextManager* GetIContextManager(void);
     virtual IContextReplayer* GetIContextReplayer(void);
     virtual ISegmentCtx* GetISegmentCtx(void);
+    void PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx);
 
 private:
     void _CreateSubmodules(void);

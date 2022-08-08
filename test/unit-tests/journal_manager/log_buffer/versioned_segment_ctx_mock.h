@@ -47,6 +47,10 @@ public:
     MOCK_METHOD(void, IncreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, DecreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (int logGroupId, SegmentId segId), (override));
+    MOCK_METHOD(SegmentInfo*, GetUpdatedInfoToFlush, (int logGroupId), (override));
+    MOCK_METHOD(int, GetNumSegments, (), (override));
+    MOCK_METHOD(int, GetNumLogGroups, (), (override));
+    MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
 };
 
 class MockVersionedSegmentCtx : public VersionedSegmentCtx
@@ -58,8 +62,10 @@ public:
     MOCK_METHOD(void, IncreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, DecreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (int logGroupId, SegmentId segId), (override));
-    MOCK_METHOD(SegmentInfo*, GetUpdatedVersionedSegmentInfoToFlush, (int logGroupId), (override));
-    MOCK_METHOD(void, ResetFlushedVersionedSegmentInfo, (int logGroupId), (override));
+    MOCK_METHOD(SegmentInfo*, GetUpdatedInfoToFlush, (int logGroupId), (override));
+    MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
+    MOCK_METHOD(int, GetNumSegments, (), (override));
+    MOCK_METHOD(int, GetNumLogGroups, (), (override));
 };
 
 } // namespace pos

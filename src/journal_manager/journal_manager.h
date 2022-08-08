@@ -140,8 +140,8 @@ public:
 protected:
     IVersionedSegmentContext* _CreateVersionedSegmentCtx(void);
 
-    void _InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush,
+    void _InitModules(TelemetryClient* tc, IVSAMap* vsaMap,
+        IStripeMap* stripeMap, IMapFlush* mapFlush,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
         IVolumeInfoManager* volumeManager, EventScheduler* eventScheduler);
