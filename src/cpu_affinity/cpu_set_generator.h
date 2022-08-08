@@ -55,7 +55,8 @@ enum class CoreType
     META_SCHEDULER,
     META_IO,
     AIR,
-    COUNT
+    EVENT_REACTOR,
+    COUNT,
 };
 
 static const uint32_t MAX_NUMA_COUNT = RTE_MAX_NUMA_NODES;
