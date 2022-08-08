@@ -447,7 +447,17 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
 
     const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
-    SegmentInfo* loadedSegmentInfos = contextManager->GetSegmentCtx()->GetSegmentInfos();
+    SegmentInfo* loadedSegmentInfos = nullptr;
+    SegmentCtx* loadedSegmentCtx = nullptr;
+
+    if (nullptr != contextManager)
+    {
+        loadedSegmentCtx = contextManager->GetSegmentCtx();
+        if (nullptr != loadedSegmentCtx)
+        {
+            loadedSegmentCtx->GetSegmentInfos();
+        }
+    }
     versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);

@@ -56,6 +56,8 @@
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -113,8 +115,11 @@ public:
         arrayInfo = new NiceMock<MockIArrayInfo>;
         tp = new NiceMock<MockTelemetryPublisher>;
         tc = new NiceMock<MockTelemetryClient>;
+        contextManager = new NiceMock<MockContextManager>;
+        segmentCtxManager = new NiceMock<MockSegmentCtx>;
 
         EXPECT_CALL(*arrayInfo, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
+        EXPECT_CALL(*contextManager, GetSegmentCtx()).WillRepeatedly(Return(segmentCtxManager));
 
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, journalEventFactory, logWriteHandler,
@@ -130,6 +135,8 @@ public:
         delete journal;
         delete arrayInfo;
         delete tc;
+        delete contextManager;
+        delete segmentCtxManager;
     }
 
 protected:
@@ -155,6 +162,8 @@ protected:
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockTelemetryPublisher>* tp;
     NiceMock<MockTelemetryClient>* tc;
+    NiceMock<MockContextManager>* contextManager;
+    NiceMock<MockSegmentCtx>* segmentCtxManager;
 
     PartitionLogicalSize partitionLogicalSize = {
         .minWriteBlkCnt = 0,
@@ -213,7 +222,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -253,7 +262,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -271,7 +280,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfFailedToOpenLogBuffer)
 
     // Then: JournalManager return the error code
     int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc);
+        nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc);
     EXPECT_EQ(expectReturnCode, actualReturnCode);
 }
 
@@ -288,7 +297,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfJournalEnabledOptionIsChanged)
 
     // Then: Journal manager bypass the process of replay
     int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc);
+        nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc);
     int expectReturnCode = 0;
 
     EXPECT_EQ(expectReturnCode, actualReturnCode);
@@ -320,7 +329,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfReplayFailed)
     EXPECT_CALL(*replayHandler, Start).WillOnce(Return(-1));
 
     int actualReturnCode = journal->Init(nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc);
+        nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc);
 
     // Then: Journal manager should be return the error code to indicate that replay is failed
     int expectedReturnCode = -EID(JOURNAL_REPLAY_FAILED);
@@ -398,7 +407,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferNotExist)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
@@ -418,7 +427,7 @@ TEST_F(JournalManagerTestFixture, Init_testInitWhenLogBufferLoaded)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, tc) == 0);
+                    nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc) == 0);
 
     // Then: Journal manager should be ready
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNALING);
