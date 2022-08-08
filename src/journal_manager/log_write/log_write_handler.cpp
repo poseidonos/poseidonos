@@ -121,6 +121,8 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         else
         {
             // log writes that not use MetaUpdateCallback will be skipped intentionally.
+            // metaUpdateCb is nullable by design since certain callback (e.g. VolumeDeletedLogWriteCallback)
+            // may not want to use VersionedSegmentContext feature (hence, not inheriting MetaUpdateCallback)
         }
 
         context->stopwatch.StoreTimestamp(LogStage::Issue);
