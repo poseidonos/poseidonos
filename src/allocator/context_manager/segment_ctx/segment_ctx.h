@@ -116,6 +116,8 @@ public:
     virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
     virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
 
+    virtual SegmentInfo* GetSegmentInfos(void);
+
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 
 private:

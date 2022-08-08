@@ -445,7 +445,10 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     dirtyMapManager->Init(config);
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager, telemetryPublisher);
 
-    versionedSegCtx->Init(config, nullptr, 0); // TODO (VSC) Temporarly use invalid values TODO (huijeong.kim) fix this
+    const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+
+    SegmentInfo* loadedSegmentInfos = contextManager->GetSegmentCtx()->GetSegmentInfos();
+    versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
     eventFactory->Init(eventScheduler, logWriteHandler);

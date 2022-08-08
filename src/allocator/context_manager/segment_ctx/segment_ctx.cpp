@@ -512,7 +512,7 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
         bool isContained = rebuildList->Contains(victimSegment);
         if (true == isContained)
         {
-            // do nothing. this segment will be return to the victim list when rebuidl is completed
+            // do nothing. this segment will be return to the victim list when rebuild is completed
             POS_TRACE_INFO(EID(ALLOCATE_GC_VICTIM),
                 "[_SetVictimSegment] rebuild list contains? :{}",
                 isContained);
@@ -853,4 +853,9 @@ SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
     return UpdateOccupiedStripeCount(lsid);
 }
 
+SegmentInfo*
+SegmentCtx::GetSegmentInfos(void)
+{
+    return segmentInfos;
+}
 } // namespace pos

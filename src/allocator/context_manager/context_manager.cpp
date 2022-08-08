@@ -222,5 +222,4 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return segmentCtx->GetRebuildTargetSegmentCount();
 }
-
 } // namespace pos
