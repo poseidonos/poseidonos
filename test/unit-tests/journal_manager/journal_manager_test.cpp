@@ -114,6 +114,8 @@ public:
         tp = new NiceMock<MockTelemetryPublisher>;
         tc = new NiceMock<MockTelemetryClient>;
 
+        EXPECT_CALL(*arrayInfo, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
+
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
@@ -153,6 +155,16 @@ protected:
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockTelemetryPublisher>* tp;
     NiceMock<MockTelemetryClient>* tc;
+
+    PartitionLogicalSize partitionLogicalSize = {
+        .minWriteBlkCnt = 0,
+        .blksPerChunk = 4,
+        .blksPerStripe = 16,
+        .chunksPerStripe = 4,
+        .stripesPerSegment = 2,
+        .totalStripes = 300,
+        .totalSegments = 300,
+    };
 };
 
 TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
