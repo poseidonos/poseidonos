@@ -91,8 +91,11 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
         // TODO (VSC) to keep on-disk data only
-        segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
-        segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
+        if (nullptr != loadedSegmentInfo)
+        {
+            segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
+            segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
+        }
     }
 }
 

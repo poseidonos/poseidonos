@@ -8,6 +8,7 @@
 using ::testing::AtLeast;
 using ::testing::NiceMock;
 using ::testing::StrictMock;
+using ::testing::Return;
 
 namespace pos
 {
