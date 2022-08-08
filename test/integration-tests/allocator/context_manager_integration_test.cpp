@@ -219,7 +219,7 @@ TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritte
     std::mutex allocatorLock;
     ON_CALL(*allocatorCtx, GetCtxLock).WillByDefault(ReturnRef(allocatorLock));
 
-    ContextManager contextManager(&telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,
+    ContextManager contextManager(&telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx, nullptr,
         gcCtx, blockAllocStatus, ioManager, contextReplayer, &addrInfo, ARRAY_ID);
     contextManager.Init();
 
