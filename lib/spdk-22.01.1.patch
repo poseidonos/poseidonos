@@ -79,10 +79,18 @@ index e0e2f3998..7c0ad3800 100644
   * This function returns the failed status of a given controller.
   *
 diff --git include/spdk/nvmf_transport.h include/spdk/nvmf_transport.h
-index ea93c14f3..a587826f0 100644
+index ea93c14f3..7e07cd980 100644
 --- include/spdk/nvmf_transport.h
 +++ include/spdk/nvmf_transport.h
-@@ -419,6 +419,8 @@ int spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req);
+@@ -181,6 +181,7 @@ struct spdk_nvmf_poll_group {
+ 	spdk_nvmf_poll_group_destroy_done_fn		destroy_cb_fn;
+ 	void						*destroy_cb_arg;
+ 
++	uint32_t core;
+ 	TAILQ_ENTRY(spdk_nvmf_poll_group)		link;
+ };
+ 
+@@ -419,6 +420,8 @@ int spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req);
   */
  void spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair);
  
@@ -1018,7 +1026,7 @@ index 91d940c20..a78debdbe 100644
  	rc = spdk_bdev_writev_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
  				     nvmf_bdev_ctrlr_complete_cmd, req);
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
-index 28c552f3e..a9fb5138f 100644
+index 28c552f3e..be1b3f3a9 100644
 --- lib/nvmf/nvmf.c
 +++ lib/nvmf/nvmf.c
 @@ -38,6 +38,8 @@
@@ -1030,7 +1038,7 @@ index 28c552f3e..a9fb5138f 100644
  #include "spdk/endian.h"
  #include "spdk/string.h"
  #include "spdk/log.h"
-@@ -843,11 +845,27 @@ _nvmf_poll_group_add(void *_ctx)
+@@ -843,11 +845,23 @@ _nvmf_poll_group_add(void *_ctx)
  
  void
  spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair)
@@ -1049,17 +1057,13 @@ index 28c552f3e..a9fb5138f 100644
  {
  	struct spdk_nvmf_poll_group *group;
  	struct nvmf_new_qpair_ctx *ctx;
--
- 	group = spdk_nvmf_get_optimal_poll_group(qpair);
-+
-+	if (group == NULL) {
-+		group = spdk_nvmf_get_numa_aware_poll_group(tgt, numa);
-+	}
-+
++	group = spdk_nvmf_get_numa_aware_poll_group(tgt, numa);
+ 
+-	group = spdk_nvmf_get_optimal_poll_group(qpair);
  	if (group == NULL) {
  		if (tgt->next_poll_group == NULL) {
  			tgt->next_poll_group = TAILQ_FIRST(&tgt->poll_groups);
-@@ -1106,7 +1124,6 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
+@@ -1106,7 +1120,6 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
  	SPDK_DTRACE_PROBE2(nvmf_qpair_disconnect, qpair, spdk_thread_get_id(group->thread));
  	assert(qpair->state == SPDK_NVMF_QPAIR_ACTIVE);
  	nvmf_qpair_set_state(qpair, SPDK_NVMF_QPAIR_DEACTIVATING);
@@ -1091,10 +1095,10 @@ index e5842b03f..1ad89d7db 100644
  	const struct spdk_nvme_transport_id *trid);
 diff --git lib/nvmf/pos_nvmf.c lib/nvmf/pos_nvmf.c
 new file mode 100644
-index 000000000..9afc35916
+index 000000000..943f4a332
 --- /dev/null
 +++ lib/nvmf/pos_nvmf.c
-@@ -0,0 +1,265 @@
+@@ -0,0 +1,243 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -1264,48 +1268,26 @@ index 000000000..9afc35916
 +static struct spdk_nvmf_poll_group *groups[M_MAX_NUMA][M_MAX_REACTOR]= {{NULL, },};
 +static int groups_count[M_MAX_NUMA]= {0, };
 +static int groups_ptr[M_MAX_NUMA]= {0, };
++static bool numa_dedicated_config = false;
 +
 +void
 +spdk_nvmf_initialize_numa_aware_poll_group(void)
 +{
-+    pthread_mutex_init(&g_poll_group_init_mutex, NULL);
++	pthread_mutex_init(&g_poll_group_init_mutex, NULL);
++	numa_dedicated_config = true;
 +}
 +
 +static bool
 +initialize_poll_group_information(struct spdk_nvmf_tgt *tgt)
 +{
-+    struct spdk_nvmf_poll_group *group = NULL;
-+    for (group = TAILQ_FIRST(&tgt->poll_groups); group != NULL; group = TAILQ_NEXT(group, link))
-+    {
-+        struct spdk_cpuset* cpuset = spdk_thread_get_cpumask(group->thread);
-+        uint32_t numa_count[M_MAX_NUMA] = {0, };
-+        for (uint32_t core_index = 0; core_index < M_MAX_REACTOR; core_index++)
-+        {
-+            if (spdk_cpuset_get_cpu(cpuset, core_index))
-+            {
-+                uint32_t numa = spdk_env_get_socket_id(core_index);
-+                numa_count[numa]++;
-+            }
-+        }
-+        static const uint32_t INVALID_NUMA = 0xFFFF;
-+        uint32_t max = 0, max_numa = INVALID_NUMA;
-+        for (uint32_t numa_index = 0; numa_index < M_MAX_NUMA; numa_index++)
-+        {
-+            if (max < numa_count[numa_index])
-+            {
-+                max = numa_count[numa_index];
-+                max_numa = numa_index;
-+            }
-+        }
-+        if (max_numa == INVALID_NUMA)
-+        {
-+            SPDK_WARNLOG("Initializing core index is wrong.\n");
-+            return false;
-+        }
-+        int tail = groups_count[max_numa];
-+        groups[max_numa][tail] = group;
-+        groups_count[max_numa]++;
-+    }
++	struct spdk_nvmf_poll_group *group = NULL;
++	for (group = TAILQ_FIRST(&tgt->poll_groups); group != NULL; group = TAILQ_NEXT(group, link))
++	{
++		uint32_t numa = spdk_env_get_socket_id(group->core);
++		int tail = groups_count[numa];
++		groups[numa][tail] = group;
++		groups_count[numa]++;
++	}
 +    return true;
 +}
 +
@@ -1314,7 +1296,7 @@ index 000000000..9afc35916
 +{
 +	static int initialized = false;
 +
-+	if (numa < 0)
++	if (numa_dedicated_config == false || numa < 0)
 +	{
 +		SPDK_NOTICELOG("numa aware is not supported\n");
 +		return NULL;
@@ -3584,10 +3566,10 @@ index 4e6541e96..cab4aa177 100644
  
  struct spdk_nvmf_tgt_conf {
 diff --git module/event/subsystems/nvmf/nvmf_tgt.c module/event/subsystems/nvmf/nvmf_tgt.c
-index b6573a237..e82103dba 100644
+index b6573a237..0f1a8e119 100644
 --- module/event/subsystems/nvmf/nvmf_tgt.c
 +++ module/event/subsystems/nvmf/nvmf_tgt.c
-@@ -36,6 +36,7 @@
+@@ -36,9 +36,11 @@
  
  #include "spdk/bdev.h"
  #include "spdk/thread.h"
@@ -3595,7 +3577,11 @@ index b6573a237..e82103dba 100644
  #include "spdk/log.h"
  #include "spdk/nvme.h"
  #include "spdk/nvmf_cmd.h"
-@@ -62,7 +63,8 @@ struct nvmf_tgt_poll_group {
++#include "spdk/nvmf_transport.h"
+ #include "spdk_internal/usdt.h"
+ 
+ enum nvmf_tgt_state {
+@@ -62,7 +64,8 @@ struct nvmf_tgt_poll_group {
  };
  
  struct spdk_nvmf_tgt_conf g_spdk_nvmf_tgt_conf = {
@@ -3605,7 +3591,7 @@ index b6573a237..e82103dba 100644
  };
  
  struct spdk_cpuset *g_poll_groups_mask = NULL;
-@@ -126,7 +128,7 @@ nvmf_tgt_destroy_poll_group_done(void *cb_arg, int status)
+@@ -126,7 +129,7 @@ nvmf_tgt_destroy_poll_group_done(void *cb_arg, int status)
  	free(pg);
  
  	spdk_thread_send_msg(g_tgt_fini_thread, _nvmf_tgt_destroy_poll_group_done, NULL);
@@ -3614,15 +3600,17 @@ index b6573a237..e82103dba 100644
  	spdk_thread_exit(spdk_get_thread());
  }
  
-@@ -202,6 +204,7 @@ nvmf_tgt_create_poll_group(void *ctx)
+@@ -202,6 +205,9 @@ nvmf_tgt_create_poll_group(void *ctx)
  
  	pg->thread = spdk_get_thread();
  	pg->group = spdk_nvmf_poll_group_create(g_spdk_nvmf_tgt);
-+	set_tls_thread_to_reactor(spdk_env_get_current_core(), spdk_get_thread());
++	uint32_t core = spdk_env_get_current_core();
++	pg->group->core = core;
++	set_tls_thread_to_reactor(core, spdk_get_thread());
  
  	spdk_thread_send_msg(g_tgt_init_thread, nvmf_tgt_create_poll_group_done, pg);
  }
-@@ -224,7 +227,6 @@ nvmf_tgt_create_poll_groups(void)
+@@ -224,7 +230,6 @@ nvmf_tgt_create_poll_groups(void)
  
  		thread = spdk_thread_create(thread_name, g_poll_groups_mask);
  		assert(thread != NULL);
@@ -3630,7 +3618,7 @@ index b6573a237..e82103dba 100644
  		spdk_thread_send_msg(thread, nvmf_tgt_create_poll_group, NULL);
  	}
  }
-@@ -384,7 +386,36 @@ fixup_identify_ctrlr(struct spdk_nvmf_request *req)
+@@ -384,7 +389,36 @@ fixup_identify_ctrlr(struct spdk_nvmf_request *req)
  	/* Copy the fixed up data back to the response */
  	memcpy(nvme_cdata, &nvmf_cdata, length);
  }
@@ -3667,7 +3655,7 @@ index b6573a237..e82103dba 100644
  static int
  nvmf_custom_identify_hdlr(struct spdk_nvmf_request *req)
  {
-@@ -448,6 +479,10 @@ nvmf_tgt_advance_state(void)
+@@ -448,6 +482,10 @@ nvmf_tgt_advance_state(void)
  				SPDK_NOTICELOG("Custom identify ctrlr handler enabled\n");
  				spdk_nvmf_set_custom_admin_cmd_hdlr(SPDK_NVME_OPC_IDENTIFY, nvmf_custom_identify_hdlr);
  			}
