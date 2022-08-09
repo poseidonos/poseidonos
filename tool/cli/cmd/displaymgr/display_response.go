@@ -488,7 +488,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"--------------")
 
 		// Data
-		for _, subsystem := range res.GetResult().GetData().GetSubsystemList() {
+		for _, subsystem := range res.GetResult().GetData().GetSubsystemlist() {
 			fmt.Fprintln(w,
 				subsystem.GetNqn()+"\t"+
 					globals.FieldSeparator+subsystem.GetSubtype()+"\t"+
@@ -509,8 +509,8 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 			return
 		}
 
-		if len(res.GetResult().GetData().GetSubsystemList()) != 0 {
-			subsystem := res.GetResult().GetData().GetSubsystemList()[0]
+		if len(res.GetResult().GetData().GetSubsystemlist()) != 0 {
+			subsystem := res.GetResult().GetData().GetSubsystemlist()[0]
 
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
