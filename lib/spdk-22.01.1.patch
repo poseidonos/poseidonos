@@ -216,10 +216,10 @@ index 000000000..35b3df73b
 +#endif /* SPDK_POS_APP_H_ */
 diff --git include/spdk/pos_nvmf.h include/spdk/pos_nvmf.h
 new file mode 100644
-index 000000000..57d5a4b06
+index 000000000..d13e941ba
 --- /dev/null
 +++ include/spdk/pos_nvmf.h
-@@ -0,0 +1,114 @@
+@@ -0,0 +1,117 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -322,6 +322,9 @@ index 000000000..57d5a4b06
 +spdk_nvmf_subsystem_get_ctrlr_hostnqn(struct spdk_nvmf_ctrlr *ctrlr);
 +
 +int spdk_nvmf_subsystem_set_pause_state_directly(struct spdk_nvmf_subsystem *subsystem);
++
++void
++spdk_nvmf_set_use_event_reactor(cpu_set_t event_reactor_set);
 +
 +void spdk_nvmf_initialize_numa_aware_poll_group(void);
 +
@@ -1095,10 +1098,10 @@ index e5842b03f..1ad89d7db 100644
  	const struct spdk_nvme_transport_id *trid);
 diff --git lib/nvmf/pos_nvmf.c lib/nvmf/pos_nvmf.c
 new file mode 100644
-index 000000000..943f4a332
+index 000000000..0244cb8d4
 --- /dev/null
 +++ lib/nvmf/pos_nvmf.c
-@@ -0,0 +1,243 @@
+@@ -0,0 +1,260 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -1269,6 +1272,15 @@ index 000000000..943f4a332
 +static int groups_count[M_MAX_NUMA]= {0, };
 +static int groups_ptr[M_MAX_NUMA]= {0, };
 +static bool numa_dedicated_config = false;
++static bool use_reactor_only = false;
++static cpu_set_t event_reactor_core;
++
++void
++spdk_nvmf_set_use_event_reactor(cpu_set_t event_reactor_set)
++{
++	use_reactor_only = true;
++	event_reactor_core = event_reactor_set;
++}
 +
 +void
 +spdk_nvmf_initialize_numa_aware_poll_group(void)
@@ -1283,6 +1295,14 @@ index 000000000..943f4a332
 +	struct spdk_nvmf_poll_group *group = NULL;
 +	for (group = TAILQ_FIRST(&tgt->poll_groups); group != NULL; group = TAILQ_NEXT(group, link))
 +	{
++		if (use_reactor_only)
++		{
++			if (CPU_ISSET(group->core, &event_reactor_core))
++			{
++				continue;
++			}
++		}
++
 +		uint32_t numa = spdk_env_get_socket_id(group->core);
 +		int tail = groups_count[numa];
 +		groups[numa][tail] = group;

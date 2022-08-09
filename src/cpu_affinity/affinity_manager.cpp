@@ -106,6 +106,12 @@ AffinityManager::AffinityManager(AffinityConfigParser* parser_)
                 cpuSetArray = cpuSetGenerator.GetCpuSetArray();
             }
         }
+
+        if (parser->IsReactorOnly())
+        {
+            SpdkNvmfCaller spdkNvmfCaller;
+            spdkNvmfCaller.SpdkNvmfSetUseReactorOnly(cpuSetArray[(static_cast<uint32_t>(CoreType::EVENT_REACTOR))]);
+        }
     }
     catch (...)
     {
