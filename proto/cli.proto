@@ -1075,7 +1075,7 @@ message ListSubsystemResponse {
 	message Result {
 		Status status = 1;
 		message SubsystemList {
-			repeated Subsystem subsystemList = 1;
+			repeated Subsystem subsystemlist = 1;
 		}
 		SubsystemList data = 2;
 	}
@@ -1099,7 +1099,7 @@ message SubsystemInfoResponse {
 	message Result {
 		Status status = 1;
 		message SubsystemList {
-			repeated Subsystem subsystemList = 1;
+			repeated Subsystem subsystemlist = 1;
 		}
 		SubsystemList data = 2;
 	}
