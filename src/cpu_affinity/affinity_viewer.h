@@ -58,6 +58,7 @@ private:
         META_IO,
         QOS,
         AIR,
+        EVENT_REACTOR,
         ROLE_COUNT,
     };
 
@@ -114,6 +115,7 @@ private:
         void _RegisterMetaSchedulerCpu(void);
         void _RegisterMetaCpu(void);
         void _RegisterAirCpu(void);
+        void _RegisterEventReactorCpu(void);
         void _RegisterCpuRole(int cpuId, Role role);
         void _RegisterCpuSetRole(cpu_set_t cpuSet, Role role);
     };
