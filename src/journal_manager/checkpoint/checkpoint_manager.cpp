@@ -266,6 +266,7 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
     }
 
     sequenceController->GetCheckpointExecutionApproval();
+    checkpointHandler->SyncContext(request.groupId);
     int ret = checkpointHandler->Start(dirtyMaps, completionEvent);
     sequenceController->AllowCallbackExecution();
     if (ret != 0)
