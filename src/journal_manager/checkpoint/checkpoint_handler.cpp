@@ -125,18 +125,6 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
         ALLOCATOR_META_ID));
 
-    // TODO: dh.ihm make this as parameter.
-    int logGroupId = 0;
-
-    if (-1 == logGroupId)
-    {
-        contextManager->SyncAllLogGroups();
-    }
-    else
-    {
-        contextManager->SyncLogGroup(logGroupId);
-    }
-
     ret = contextManager->FlushContexts(allocMetaFlushCallback, false);
     if (ret != 0)
     {
