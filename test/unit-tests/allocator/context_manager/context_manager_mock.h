@@ -3,6 +3,7 @@
 #include <list>
 #include <vector>
 #include "src/allocator/context_manager/context_manager.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
 namespace pos
 {
@@ -35,6 +36,9 @@ public:
     MOCK_METHOD(GcCtx*, GetGcCtx, (), (override));
     MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
     MOCK_METHOD(BlockAllocationStatus*, GetAllocationStatus, (), (override));
+    MOCK_METHOD(void, SyncAllLogGroups, (), (override));
+    MOCK_METHOD(void, SyncLogGroup, (int logGroupId), (override));
+    MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
 };
 
 } // namespace pos

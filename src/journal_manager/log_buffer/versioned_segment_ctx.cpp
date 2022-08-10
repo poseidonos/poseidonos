@@ -164,7 +164,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 }
 
 SegmentInfo*
-VersionedSegmentCtx::GetUpdatedVersionedSegmentInfoToFlush(int logGroupId)
+VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
 {
     assert(logGroupId < config->GetNumLogGroups());
 
@@ -184,7 +184,7 @@ VersionedSegmentCtx::GetUpdatedVersionedSegmentInfoToFlush(int logGroupId)
 }
 
 void
-VersionedSegmentCtx::ResetFlushedVersionedSegmentInfo(int logGroupId)
+VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
 {
     assert(segmentInfosInFlush == logGroupId);
     segmentInfoDiffs[logGroupId]->Reset();
@@ -194,4 +194,15 @@ VersionedSegmentCtx::ResetFlushedVersionedSegmentInfo(int logGroupId)
     POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
+int
+VersionedSegmentCtx::GetNumSegments(void)
+{
+    return numSegments;
+}
+
+int
+VersionedSegmentCtx::GetNumLogGroups(void)
+{
+    return config->GetNumLogGroups();
+}
 } // namespace pos
