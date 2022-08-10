@@ -836,6 +836,19 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
 }
 
 void
+SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments)
+{
+    if (nullptr != vscSegInfo)
+    {
+        for (int segId = 0; segId < numSegments; segId++)
+        {
+            segmentInfos[segId].SetValidBlockCount(vscSegInfo[segId].GetValidBlockCount());
+            segmentInfos[segId].SetOccupiedStripeCount(vscSegInfo[segId].GetOccupiedStripeCount());
+        }
+    }
+}
+
+void
 SegmentCtx::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
     ValidateBlks(blks);

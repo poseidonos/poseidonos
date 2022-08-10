@@ -40,6 +40,7 @@
 #include "src/allocator/context_manager/block_allocation_status.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/i_segment_ctx.h"
@@ -49,9 +50,9 @@
 namespace pos
 {
 class IAllocatorFileIoClient;
-class AllocatorFileIoManager;
 class AllocatorCtx;
 class SegmentCtx;
+class VersionedSegmentCtx;
 class ContextReplayer;
 class TelemetryPublisher;
 class EventScheduler;
@@ -66,9 +67,8 @@ public:
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp,
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
-        ContextIoManager* ioManager,
-        ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_);
+        IVersionedSegmentContext* versionedSegCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+        ContextIoManager* ioManager, ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_);
     virtual ~ContextManager(void);
     virtual void Init(void);
@@ -103,6 +103,10 @@ public:
 
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
 
+    virtual void SyncAllLogGroups(void);
+    virtual void SyncLogGroup(int logGroupId);
+    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
+
 private:
     void _ResetSegmentStates(void);
 
@@ -112,7 +116,7 @@ private:
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
     RebuildCtx* rebuildCtx;
-
+    IVersionedSegmentContext* versionedSegCtx;
     ContextReplayer* contextReplayer;
     GcCtx* gcCtx;
     BlockAllocationStatus* blockAllocStatus;

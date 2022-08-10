@@ -42,6 +42,7 @@
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/logger/logger.h"
@@ -51,9 +52,8 @@
 namespace pos
 {
 ContextManager::ContextManager(TelemetryPublisher* tp,
-    AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-    GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
-    ContextIoManager* ioManager_,
+    AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, IVersionedSegmentContext* versionedSegCtx_,
+    GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_, ContextIoManager* ioManager_,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
   arrayId(arrayId_)
@@ -63,6 +63,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     allocatorCtx = allocCtx_;
     segmentCtx = segCtx_;
     rebuildCtx = rebuildCtx_;
+    versionedSegCtx = versionedSegCtx_;
     gcCtx = gcCtx_;
     blockAllocStatus = blockAllocStatus_;
     contextReplayer = ctxReplayer_;
@@ -70,7 +71,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_)
-: ContextManager(tp, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, info, arrayId_)
+: ContextManager(tp, nullptr, nullptr, nullptr, nullptr,
+    nullptr, nullptr, nullptr, nullptr, info, arrayId_)
 {
     allocatorCtx = new AllocatorCtx(tp, info);
     rebuildCtx = new RebuildCtx(tp, info);
@@ -221,5 +223,28 @@ uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return segmentCtx->GetRebuildTargetSegmentCount();
+}
+
+void
+ContextManager::SyncAllLogGroups(void)
+{
+    for (int logGroupId = 0; logGroupId < versionedSegCtx->GetNumLogGroups(); logGroupId++)
+    {
+        SyncLogGroup(logGroupId);
+    }
+}
+
+void
+ContextManager::SyncLogGroup(int logGroupId)
+{
+    SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
+    int numSegments = versionedSegCtx->GetNumSegments();
+    segmentCtx->CopySegInfoFromVersionedSegInfo(vscSegInfo, numSegments);
+}
+
+void
+ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
+{
+    versionedSegCtx = versionedSegCtx_;
 }
 } // namespace pos
