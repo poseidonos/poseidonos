@@ -71,6 +71,19 @@ CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManage
     scheduler = eventScheduler;
 }
 
+void
+CheckpointHandler::SyncContext(int logGroupId)
+{
+    if (-1 == logGroupId)
+    {
+        contextManager->SyncAllLogGroups();
+    }
+    else
+    {
+        contextManager->SyncLogGroup(logGroupId);
+    }
+}
+
 int
 CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
 {

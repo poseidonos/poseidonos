@@ -57,6 +57,7 @@ public:
     virtual int FlushCompleted(int metaId);
 
     virtual CheckpointStatus GetStatus(void);
+    virtual void SyncContext(int logGroupId);
 
 private:
     void _InitializeExternalModuleReferences(void);
