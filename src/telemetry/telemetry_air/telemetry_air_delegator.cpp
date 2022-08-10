@@ -177,7 +177,7 @@ SetCustomPortNumberLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
     portId[2] = std::to_string((index & 0xFF0000) >> 16);
     portId[3] = std::to_string((index & 0xFF000000) >> 24);
     port = std::to_string(index >> 32);
-    metric->AddLabel("ssd_id", portId[0] + "." + portId[1] + "." + portId[2] + "." + portId[3] + ":" + port);
+    metric->AddLabel("port", portId[0] + "." + portId[1] + "." + portId[2] + "." + portId[3] + ":" + port);
 }
 
 void

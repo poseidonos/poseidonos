@@ -35,8 +35,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/telemetry/telemetry_air/mock_uptime_metric_generator.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -46,13 +46,12 @@ using ::testing::Return;
 
 namespace pos
 {
-
 TEST(TelemetryAirDelegator, TelemetryAirDelegator_Stack)
 {
     // Given: Do nothing
 
     // When: Create TelemetryAirDelegator
-    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator telAirDelegator{nullptr, nullptr};
 
     // Then: Do nothing
 }
@@ -62,7 +61,7 @@ TEST(TelemetryAirDelegator, TelemetryAirDelegator_Heap)
     // Given: Do nothing
 
     // When: Create TelemetryAirDelegator
-    TelemetryAirDelegator* telAirDelegator = new TelemetryAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator* telAirDelegator = new TelemetryAirDelegator{nullptr, nullptr};
     delete telAirDelegator;
 
     // Then: Do nothing
@@ -71,7 +70,7 @@ TEST(TelemetryAirDelegator, TelemetryAirDelegator_Heap)
 TEST(TelemetryAirDelegator, SetState_SimpleCall)
 {
     // Given: TelemetryAirDelegator
-    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator telAirDelegator{nullptr, nullptr};
 
     // When: Call SetState
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);
@@ -82,7 +81,7 @@ TEST(TelemetryAirDelegator, SetState_SimpleCall)
 TEST(TelemetryAirDelegator, RegisterAirEvent_SimpleCall)
 {
     // Given: TelemetryAirDelegator
-    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator telAirDelegator{nullptr, nullptr};
 
     // When: Call RegisterAirEvent
     telAirDelegator.RegisterAirEvent();
@@ -93,7 +92,7 @@ TEST(TelemetryAirDelegator, RegisterAirEvent_SimpleCall)
 TEST(TelemetryAirDelegator, dataHandler_RunState_EmptyData)
 {
     // Given: TelemetryAirDelegator, air_data
-    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator telAirDelegator{nullptr, nullptr};
     auto& air_data = air::json("air_data");
     auto copier = air::json_copy("air_data");
     int actual, expected = 0;
@@ -110,7 +109,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_EmptyData)
 TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 {
     // Given: TelemetryAirDelegator, air_data
-    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator telAirDelegator{nullptr, nullptr};
     auto& air_data = air::json("air_data");
     auto& empty_node = air::json("empty_node");
     air_data["PERF_ARR_VOL"] = {empty_node};
@@ -129,7 +128,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_InvalidData)
 TEST(TelemetryAirDelegator, dataHandler_EndState)
 {
     // Given: TelemetryAirDelegator, air_data
-    TelemetryAirDelegator telAirDelegator {nullptr, nullptr};
+    TelemetryAirDelegator telAirDelegator{nullptr, nullptr};
     auto& air_data = air::json("air_data");
     telAirDelegator.SetState(TelemetryAirDelegator::State::END);
     auto copier = air::json_copy("air_data");
@@ -147,16 +146,13 @@ TEST(TelemetryAirDelegator, dataHandler_EndState)
 TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
 {
     // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    POSMetricVector* posMetricVector {nullptr};
+    POSMetricVector* posMetricVector{nullptr};
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
-        [&] (POSMetricVector* posMetricVectorArg)
-        {
-            posMetricVector = posMetricVectorArg;
-            return 0;
-        }
-    );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub, nullptr};
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault([&](POSMetricVector* posMetricVectorArg) {
+        posMetricVector = posMetricVectorArg;
+        return 0;
+    });
+    TelemetryAirDelegator telAirDelegator{&mockTelPub, nullptr};
     auto& air_data = air::json("air_data");
     air_data["interval"] = {3};
     auto& perf_arr_vol = air::json("perf_arr_vol");
@@ -192,28 +188,28 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50000_READ_IOPS);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 100);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_id"), "7824");
-    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "3");
     EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50001_READ_RATE_BYTES_PER_SECOND);
     EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 409600);
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_id"), "7824");
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "3");
     EXPECT_EQ(posMetricVector->at(2).GetName(), TEL50010_WRITE_IOPS);
     EXPECT_EQ(posMetricVector->at(2).GetGaugeValue(), 10);
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_id"), "7824");
-    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("interval"), "3");
     EXPECT_EQ(posMetricVector->at(3).GetName(), TEL50011_WRITE_RATE_BYTES_PER_SECOND);
     EXPECT_EQ(posMetricVector->at(3).GetGaugeValue(), 1310720);
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_id"), "7824");
-    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("interval"), "3");
@@ -225,16 +221,13 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
 TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
 {
     // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    POSMetricVector* posMetricVector {nullptr};
+    POSMetricVector* posMetricVector{nullptr};
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
-        [&] (POSMetricVector* posMetricVectorArg)
-        {
-            posMetricVector = posMetricVectorArg;
-            return 0;
-        }
-    );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub};
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault([&](POSMetricVector* posMetricVectorArg) {
+        posMetricVector = posMetricVectorArg;
+        return 0;
+    });
+    TelemetryAirDelegator telAirDelegator{&mockTelPub};
     auto& air_data = air::json("air_data");
     air_data["interval"] = {3};
     auto& perf_port = air::json("perf_port");
@@ -269,7 +262,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
     EXPECT_EQ(posMetricVector->at(0).GetName(), TEL120001_READ_IOPS_PER_PORT);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 100);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_id"), "7824");
-    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "\"reactor_0\"");
+    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("port"), "17.1.16.35:1");
 
     delete posMetricVector;
@@ -280,21 +273,21 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
 TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
 {
     // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    POSMetricVector* posMetricVector {nullptr};
+    POSMetricVector* posMetricVector{nullptr};
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
-        [&] (POSMetricVector* posMetricVectorArg)
-        {
-            posMetricVector = posMetricVectorArg;
-            return 0;
-        }
-    );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub, nullptr};
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault([&](POSMetricVector* posMetricVectorArg) {
+        posMetricVector = posMetricVectorArg;
+        return 0;
+    });
+    TelemetryAirDelegator telAirDelegator{&mockTelPub, nullptr};
     auto& air_data = air::json("air_data");
     auto& lat_arr_vol_read = air::json("lat_arr_vol_read");
     auto& obj = air::json("obj");
     auto& obj_period = air::json("obj_period");
     obj["index"] = {0x0306};
+    obj["target_id"] = {0};
+    obj["target_name"] = {""};
+    obj["filter"] = {"AIR_BEGIN~AIR_END"};
     obj_period["mean"] = {234};
     obj_period["max"] = {8472};
     obj_period["sample_cnt"] = {50};
@@ -312,13 +305,11 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
     EXPECT_EQ(posMetricVector->size(), 2);
     EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50002_READ_LATENCY_MEAN_NS);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 234);
-    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("sample_count"), "50");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "0");
     EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50003_READ_LATENCY_MAX_NS);
     EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 8472);
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("sample_count"), "50");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
@@ -330,21 +321,21 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
 TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
 {
     // Given: POSMetricVector, MockTelemetryPublisher, TelemetryAirDelegator, air_data
-    POSMetricVector* posMetricVector {nullptr};
+    POSMetricVector* posMetricVector{nullptr};
     NiceMock<MockTelemetryPublisher> mockTelPub;
-    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault(
-        [&] (POSMetricVector* posMetricVectorArg)
-        {
-            posMetricVector = posMetricVectorArg;
-            return 0;
-        }
-    );
-    TelemetryAirDelegator telAirDelegator {&mockTelPub, nullptr};
+    ON_CALL(mockTelPub, PublishMetricList(_)).WillByDefault([&](POSMetricVector* posMetricVectorArg) {
+        posMetricVector = posMetricVectorArg;
+        return 0;
+    });
+    TelemetryAirDelegator telAirDelegator{&mockTelPub, nullptr};
     auto& air_data = air::json("air_data");
     auto& lat_arr_vol_write = air::json("lat_arr_vol_write");
     auto& obj = air::json("obj");
     auto& obj_period = air::json("obj_period");
     obj["index"] = {0x0306};
+    obj["target_id"] = {0};
+    obj["target_name"] = {""};
+    obj["filter"] = {"AIR_BEGIN~AIR_END"};
     obj_period["mean"] = {36804};
     obj_period["max"] = {7362942};
     obj_period["sample_cnt"] = {50};
@@ -362,13 +353,11 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
     EXPECT_EQ(posMetricVector->size(), 2);
     EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50012_WRITE_LATENCY_MEAN_NS);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 36804);
-    EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("sample_count"), "50");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "0");
     EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50013_WRITE_LATENCY_MAX_NS);
     EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 7362942);
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("sample_count"), "50");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
