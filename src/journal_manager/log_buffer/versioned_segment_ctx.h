@@ -87,6 +87,8 @@ public:
 private:
     void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);
     void _UpdateSegmentContext(int logGroupId);
+    void _CheckLogGroupIdValidity(int logGroupId);
+    void _CheckSegIdValidity(int segId);
 
     const int INVALID_SEGMENT_CONTEXT = -1;
     JournalConfiguration* config;
