@@ -150,4 +150,10 @@ SpdkNvmfCaller::SpdkNvmfInitializeNumaAwarePollGroup(void)
     spdk_nvmf_initialize_numa_aware_poll_group();
 }
 
+void
+SpdkNvmfCaller::SpdkNvmfSetUseEventReactor(cpu_set_t eventReactorSet)
+{
+    spdk_nvmf_set_use_event_reactor(eventReactorSet);
+}
+
 } // namespace pos
