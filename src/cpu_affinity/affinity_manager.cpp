@@ -110,7 +110,7 @@ AffinityManager::AffinityManager(AffinityConfigParser* parser_)
         if (parser->IsReactorOnly())
         {
             SpdkNvmfCaller spdkNvmfCaller;
-            spdkNvmfCaller.SpdkNvmfSetUseReactorOnly(cpuSetArray[(static_cast<uint32_t>(CoreType::EVENT_REACTOR))]);
+            spdkNvmfCaller.SpdkNvmfSetUseEventReactor(cpuSetArray[(static_cast<uint32_t>(CoreType::EVENT_REACTOR))]);
         }
     }
     catch (...)

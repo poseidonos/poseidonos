@@ -151,7 +151,7 @@ SpdkNvmfCaller::SpdkNvmfInitializeNumaAwarePollGroup(void)
 }
 
 void
-SpdkNvmfCaller::SpdkNvmfSetUseReactorOnly(cpu_set_t eventReactorSet)
+SpdkNvmfCaller::SpdkNvmfSetUseEventReactor(cpu_set_t eventReactorSet)
 {
     spdk_nvmf_set_use_event_reactor(eventReactorSet);
 }
