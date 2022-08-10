@@ -122,7 +122,7 @@ CheckpointManager::StartCheckpoint(EventSmartPtr cb)
     }
 
     checkpointInProgress = true;
-    CheckpointRequest request = {.groupId = -1, .callback = cb};
+    CheckpointRequest request = {.groupId = ALL_LOG_GROUP, .callback = cb};
     return _StartCheckpoint(request);
 }
 
@@ -256,7 +256,7 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
     EventSmartPtr completionEvent(new CheckpointCompletion(this));
 
     MapList dirtyMaps;
-    if (request.groupId == -1)
+    if (ALL_LOG_GROUP == request.groupId)
     {
         dirtyMaps = dirtyMapManager->GetTotalDirtyList();
     }

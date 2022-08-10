@@ -90,7 +90,6 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     segmentInfos = new SegmentInfo[numSegments]();
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        // TODO (VSC) to keep on-disk data only
         if (nullptr != loadedSegmentInfo)
         {
             segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
