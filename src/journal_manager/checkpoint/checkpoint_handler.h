@@ -60,8 +60,6 @@ public:
     virtual void SyncContext(int logGroupId);
 
 private:
-    void _InitializeExternalModuleReferences(void);
-
     void _CheckMapFlushCompleted(void);
     void _TryToComplete(void);
     void _Reset(void);

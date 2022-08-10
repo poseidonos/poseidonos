@@ -106,7 +106,7 @@ public:
     virtual void ResetFlushedInfo(int logGroupId);
 
 private:
-    void _ResetSegmentStates(void);
+    void _SyncLogGroup(int logGroupId);
 
     ContextIoManager* ioManager;
 
@@ -123,6 +123,8 @@ private:
     std::mutex ctxLock;
 
     TelemetryPublisher* telPublisher;
+
+    const int ALL_LOG_GROUP = -1;
 };
 
 } // namespace pos

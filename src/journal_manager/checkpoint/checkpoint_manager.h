@@ -107,6 +107,8 @@ private:
     std::queue<CheckpointRequest> checkpointRequests;
     TelemetryPublisher* telemetryPublisher;
     int arrayId;
+
+    const int ALL_LOG_GROUP = -1;
 };
 
 } // namespace pos
