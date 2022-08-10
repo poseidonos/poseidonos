@@ -221,7 +221,7 @@ VersionedSegmentCtx::_CheckLogGroupIdValidity(int logGroupId)
 void
 VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 {
-    if (segId >= numSegments)
+    if (segId >= (int)numSegments)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
             "Failed to check segId validity, segId {} is invalid", segId);
