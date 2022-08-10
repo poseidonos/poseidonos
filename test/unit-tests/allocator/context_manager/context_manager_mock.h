@@ -36,9 +36,9 @@ public:
     MOCK_METHOD(GcCtx*, GetGcCtx, (), (override));
     MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
     MOCK_METHOD(BlockAllocationStatus*, GetAllocationStatus, (), (override));
-    MOCK_METHOD(void, SyncAllLogGroups, (), (override));
     MOCK_METHOD(void, SyncLogGroup, (int logGroupId), (override));
     MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
+    MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
 };
 
 } // namespace pos

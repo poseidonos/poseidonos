@@ -226,25 +226,46 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 }
 
 void
-ContextManager::SyncAllLogGroups(void)
-{
-    for (int logGroupId = 0; logGroupId < versionedSegCtx->GetNumLogGroups(); logGroupId++)
-    {
-        SyncLogGroup(logGroupId);
-    }
-}
-
-void
 ContextManager::SyncLogGroup(int logGroupId)
 {
-    SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
     int numSegments = versionedSegCtx->GetNumSegments();
-    segmentCtx->CopySegInfoFromVersionedSegInfo(vscSegInfo, numSegments);
+    SegmentInfo* vscSegInfo = nullptr;
+
+    if (-1 == logGroupId)
+    {
+        for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
+        {
+            vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(id);
+            segmentCtx->CopySegInfoFromVersionedSegInfo(vscSegInfo, numSegments);
+        }
+    }
+    else
+    {
+        vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
+        segmentCtx->CopySegInfoFromVersionedSegInfo(vscSegInfo, numSegments);
+    }
 }
 
 void
 ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
 {
     versionedSegCtx = versionedSegCtx_;
+}
+
+void
+ContextManager::ResetFlushedInfo(int logGroupId)
+{
+    if (-1 == logGroupId)
+    {
+        for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
+        {
+            versionedSegCtx->ResetFlushedInfo(id);
+
+        }
+    }
+    else
+    {
+        versionedSegCtx->ResetFlushedInfo(logGroupId);
+    }
 }
 } // namespace pos
