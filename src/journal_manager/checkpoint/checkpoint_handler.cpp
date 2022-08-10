@@ -59,7 +59,8 @@ CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, Eve
   allocatorMetaFlushCompleted(false),
   mapFlushCompleted(false),
   checkpointCompletionCallback(callback),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  logGroupIdInProgress(0)
 {
 }
 
@@ -69,19 +70,14 @@ CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManage
     mapFlush = mapFlushToUse;
     contextManager = contextManagerToUse;
     scheduler = eventScheduler;
+    logGroupIdInProgress = 0;
 }
 
 void
 CheckpointHandler::SyncContext(int logGroupId)
 {
-    if (-1 == logGroupId)
-    {
-        contextManager->SyncAllLogGroups();
-    }
-    else
-    {
-        contextManager->SyncLogGroup(logGroupId);
-    }
+    contextManager->SyncLogGroup(logGroupId);
+    logGroupIdInProgress = logGroupId;
 }
 
 int
@@ -148,6 +144,7 @@ CheckpointHandler::_CheckMapFlushCompleted(void)
     if (numMapsToFlush == flushResult)
     {
         mapFlushCompleted = true;
+        contextManager->ResetFlushedInfo(logGroupIdInProgress);
     }
 }
 

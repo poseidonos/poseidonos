@@ -84,6 +84,7 @@ private:
     std::mutex completionLock;
     EventSmartPtr checkpointCompletionCallback;
     int arrayId;
+    int logGroupIdInProgress;
 };
 
 } // namespace pos

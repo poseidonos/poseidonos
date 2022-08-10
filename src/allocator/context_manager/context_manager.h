@@ -100,12 +100,10 @@ public:
     virtual ContextReplayer* GetContextReplayer(void) { return contextReplayer; }
     virtual GcCtx* GetGcCtx(void) { return gcCtx; }
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
-
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
-
-    virtual void SyncAllLogGroups(void);
     virtual void SyncLogGroup(int logGroupId);
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
+    virtual void ResetFlushedInfo(int logGroupId);
 
 private:
     void _ResetSegmentStates(void);
