@@ -116,26 +116,7 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
         POS_TRACE_ERROR(eventId, "Reactor {} is not processable", core);
         return false;
     }
-    struct spdk_thread* thread = spdkThreadCaller->GetNvmfThreadFromReactor(core);
-
-    // If nvmf target module is initialized, we can utilize.
-    if (unlikely(thread == nullptr))
-    {
-        POS_EVENT_ID eventId =
-            POS_EVENT_ID::EVENTFRAMEWORK_FAIL_TO_ALLOCATE_EVENT;
-        POS_TRACE_WARN(eventId, "Spdk Event Not Initialized");
-        return false;
-    }
-
-    int eventCallSuccess = spdkThreadCaller->SpdkThreadSendMsg(thread, func, arg1);
-
-    if (0 != eventCallSuccess)
-    {
-        POS_EVENT_ID eventId =
-            POS_EVENT_ID::EVENTFRAMEWORK_FAIL_TO_ALLOCATE_EVENT;
-        POS_TRACE_WARN(eventId, "Fail to allocate spdk event");
-        _SendEventToSpareQueue(core, func, arg1);
-    }
+    _SendEventToSpareQueue(core, func, arg1);
     return true;
 }
 
@@ -148,16 +129,14 @@ EventFrameworkApi::CompleteEvents(void)
     }
 
     uint32_t core = GetCurrentReactor();
-    std::lock_guard<EventQueueLock> lock(eventQueueLocks[core]);
     EventQueue& eventQueue = eventQueues[core];
     uint32_t processedEvents = 0;
-    while (eventQueue.empty() == false)
+    EventArgument eventArgument;
+    while (eventQueue.try_pop(eventArgument) == true)
     {
-        EventArgument eventArgument = eventQueue.front();
         EventFuncOneParam func = std::get<0>(eventArgument);
         void* arg1 = std::get<1>(eventArgument);
         func(arg1);
-        eventQueue.pop();
         processedEvents++;
         if (processedEvents >= MAX_PROCESSABLE_EVENTS)
         {
@@ -208,7 +187,6 @@ EventFrameworkApi::_SendEventToSpareQueue(uint32_t core, EventFuncOneParam func,
     void* arg1)
 {
     EventArgument eventArgument = std::make_tuple(func, arg1);
-    std::lock_guard<EventQueueLock> lock(eventQueueLocks[core]);
     eventQueues[core].push(eventArgument);
 }
 } // namespace pos

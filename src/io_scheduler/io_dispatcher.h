@@ -70,7 +70,7 @@ public:
     void AddDeviceForIOWorker(UblockSharedPtr dev, cpu_set_t cpuSet) override;
     void RemoveDeviceForIOWorker(UblockSharedPtr dev) override;
 
-    void CompleteForThreadLocalDeviceList(void) override;
+    static void CompleteForThreadLocalDeviceList(void);
     int Submit(UbioSmartPtr ubio, bool sync = false, bool ioRecoveryNeeded = true) override;
     void ProcessQueues(void) override;
 

@@ -69,12 +69,6 @@ SpdkThreadCaller::SpdkThreadSendMsg(const struct spdk_thread* thread, spdk_msg_f
     return spdk_thread_send_msg(thread, fn, ctx);
 }
 
-struct spdk_thread*
-SpdkThreadCaller::GetNvmfThreadFromReactor(uint32_t core)
-{
-    return get_nvmf_thread_from_reactor(core);
-}
-
 void
 SpdkThreadCaller::SetTlsThreadToReactor(int reactor, struct spdk_thread *thread)
 {

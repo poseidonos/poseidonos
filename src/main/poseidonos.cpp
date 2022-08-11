@@ -60,6 +60,7 @@
 #include "src/qos/qos_manager.h"
 #include "src/signal_handler/signal_handler.h"
 #include "src/signal_handler/user_signal_interface.h"
+#include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/spdk.h"
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
@@ -136,6 +137,8 @@ Poseidonos::Terminate(void)
         delete ioRecoveryEventFactory;
     }
     ArrayManagerSingleton::ResetInstance();
+    AccelEngineApi::Finalize();
+    SpdkCallerSingleton::Instance()->SpdkBdevPosUnRegisterPoller(UNVMfCompleteHandler);
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
 
@@ -265,6 +268,7 @@ void
 Poseidonos::_SetupThreadModel(void)
 {
     AffinityManager* affinityManager = pos::AffinityManagerSingleton::Instance();
+    SpdkCallerSingleton::Instance()->SpdkBdevPosRegisterPoller(UNVMfCompleteHandler);
     POS_TRACE_DEBUG(POS_EVENT_ID::DEVICEMGR_SETUPMODEL, "_SetupThreadModel");
     uint32_t coreCount =
         affinityManager->GetCoreCount(CoreType::EVENT_WORKER);

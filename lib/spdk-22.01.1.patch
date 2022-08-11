@@ -216,10 +216,10 @@ index 000000000..35b3df73b
 +#endif /* SPDK_POS_APP_H_ */
 diff --git include/spdk/pos_nvmf.h include/spdk/pos_nvmf.h
 new file mode 100644
-index 000000000..d13e941ba
+index 000000000..2f8b93c50
 --- /dev/null
 +++ include/spdk/pos_nvmf.h
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,120 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -332,6 +332,9 @@ index 000000000..d13e941ba
 +spdk_nvmf_get_numa_aware_poll_group(struct spdk_nvmf_tgt *tgt,
 +				    int numa);
 +
++void spdk_bdev_pos_register_poller(void *arg1);
++void spdk_bdev_pos_unregister_poller(void *arg1);
++
 +#ifdef __cplusplus
 +}
 +#endif
@@ -403,10 +406,10 @@ index 000000000..71e3e0611
 +#endif /* SPDK_POS_THREAD_H_ */
 diff --git include/spdk/pos_volume.h include/spdk/pos_volume.h
 new file mode 100644
-index 000000000..843bc01b2
+index 000000000..1722d6021
 --- /dev/null
 +++ include/spdk/pos_volume.h
-@@ -0,0 +1,123 @@
+@@ -0,0 +1,122 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -482,7 +485,6 @@ index 000000000..843bc01b2
 +
 +void set_pos_volume_info(const char *bdev_name, const char *nqn, int nqn_id);
 +void reset_pos_volume_info(const char *bdev_name);
-+void send_msg_to_all_nvmf_thread(uint32_t current_core, void *fn, void *arg1);
 +const char *get_attached_subsystem_nqn(const char *bdev_name);
 +
 +/* uNVMf to pos volume information */
@@ -2278,10 +2280,10 @@ index 000000000..0045180cb
 +include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
 diff --git module/bdev/pos/bdev_pos.c module/bdev/pos/bdev_pos.c
 new file mode 100644
-index 000000000..9353cf067
+index 000000000..e0dd80911
 --- /dev/null
 +++ module/bdev/pos/bdev_pos.c
-@@ -0,0 +1,1040 @@
+@@ -0,0 +1,1041 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -2368,20 +2370,9 @@ index 000000000..9353cf067
 +
 +__thread __typeof__(struct spdk_poller *) per_lcore_pos_poller;
 +
-+__thread __typeof__(unsigned int) per_lcore_poller_ref_count;
-+/*
-+static struct pos_task *
-+__pos_task_from_copy_task(struct spdk_copy_task *ct)
-+{
-+	return (struct pos_task *)((uintptr_t)ct - sizeof(struct pos_task));
-+}
++uint32_t bdev_pos_registered = 0;
++const uint32_t INVALID_CORE = UINT32_MAX;
 +
-+static struct spdk_copy_task *
-+__copy_task_from_pos_task(struct pos_task *mt)
-+{
-+	return (struct spdk_copy_task *)((uintptr_t)mt + sizeof(struct pos_task));
-+}
-+*/
 +static void
 +pos_done(void *ref, int status)
 +{
@@ -3103,15 +3094,11 @@ index 000000000..9353cf067
 +	pos_disk_count--;
 +}
 +
-+static void bdev_pos_register_poller(void *arg1);
-+
 +static int
 +pos_bdev_create_cb(void *io_device, void *ctx_buf)
 +{
 +	return 0;
 +}
-+
-+static void bdev_pos_unregister_poller(void *arg1);
 +
 +static void
 +pos_bdev_destroy_cb(void *io_device, void *ctx_buf)
@@ -3161,7 +3148,7 @@ index 000000000..9353cf067
 +		       spdk_env_get_current_core());
 +
 +	uint32_t current_core = spdk_env_get_current_core();
-+	if (NULL == per_lcore_pos_poller) {
++	if (NULL == per_lcore_pos_poller && current_core != INVALID_CORE) {
 +		per_lcore_pos_poller = spdk_poller_register(bdev_pos_poll, arg1, 0);
 +		if (spdk_likely(NULL != per_lcore_pos_poller)) {
 +			SPDK_NOTICELOG("Registered unvmf bdev_pos poller to "\
@@ -3172,9 +3159,13 @@ index 000000000..9353cf067
 +		}
 +	}
 +	if (current_core != spdk_env_get_last_core()) {
-+		send_msg_to_all_nvmf_thread(current_core, bdev_pos_register_poller, arg1);
++		send_msg_to_next_nvmf_thread(current_core, bdev_pos_register_poller, arg1);
 +	}
-+	per_lcore_poller_ref_count++;
++}
++
++void spdk_bdev_pos_register_poller(void *arg1)
++{
++	bdev_pos_register_poller(arg1);
 +}
 +
 +void spdk_bdev_pos_register_io_handler(const char *bdev_name,
@@ -3203,35 +3194,40 @@ index 000000000..9353cf067
 +			} else {
 +				disk->volume.unvmf_io.complete = handler.complete;
 +			}
-+			bdev_pos_register_poller(handler.complete);
++			bdev_pos_registered++;
 +		}
 +	} else {
 +		SPDK_ERRLOG("fail to find bdev(%s)\n", bdev_name);
 +	}
 +}
 +
++volatile bool unregistered = false;
 +static void bdev_pos_unregister_poller(void *arg1)
 +{
 +	struct pos_disk *disk = (struct pos_disk *)arg1;
 +	uint32_t current_core = spdk_env_get_current_core();
 +
 +	if (NULL != per_lcore_pos_poller) {
-+		per_lcore_poller_ref_count--;
-+		if (0 == per_lcore_poller_ref_count) {
-+			spdk_poller_unregister(&per_lcore_pos_poller);
-+			SPDK_NOTICELOG("Unregistered unvmf bdev_pos poller from "\
-+				       "frontend io handler(#%u)\n", current_core);
-+		}
++		spdk_poller_unregister(&per_lcore_pos_poller);
++		SPDK_NOTICELOG("Unregistered unvmf bdev_pos poller from "\
++					"frontend io handler(#%u)\n", current_core);
 +	}
-+
 +	if (current_core != spdk_env_get_last_core()) {
-+		send_msg_to_all_nvmf_thread(current_core, bdev_pos_unregister_poller, arg1);
-+	} else if (0 == per_lcore_poller_ref_count) {
-+		if (disk) {
-+			disk->volume.unvmf_io.submit = NULL;
-+			disk->volume.unvmf_io.complete = NULL;
++		send_msg_to_next_nvmf_thread(current_core, bdev_pos_unregister_poller, arg1);
++	}
++	else if (current_core == spdk_env_get_last_core()) {
++		unregistered = true;
++	}
++	if (current_core == INVALID_CORE) {
++		while(unregistered == false) {
++			usleep(1);
 +		}
 +	}
++}
++
++void spdk_bdev_pos_unregister_poller(void *arg1)
++{
++	bdev_pos_unregister_poller(arg1);
 +}
 +
 +void spdk_bdev_pos_unregister_io_handler(const char *bdev_name)
@@ -3239,8 +3235,15 @@ index 000000000..9353cf067
 +	struct spdk_bdev *bdev = spdk_bdev_get_by_name(bdev_name);
 +	if (bdev) {
 +		struct pos_disk *disk = (struct pos_disk *)bdev->ctxt;
-+		if (disk) {
-+			bdev_pos_unregister_poller(disk);
++		if (bdev_pos_registered == 0) {
++			SPDK_ERRLOG("Calling Unregistered register exceeds registered handlers(%s)\n", bdev_name);
++			return;
++		}
++		bdev_pos_registered--;
++		if (disk && bdev_pos_registered == 0) {
++			SPDK_NOTICELOG("Unregister io handler (%s)\n", bdev_name);
++			disk->volume.unvmf_io.submit = NULL;
++			disk->volume.unvmf_io.complete = NULL;
 +		}
 +	}
 +}
@@ -3285,7 +3288,7 @@ index 000000000..9353cf067
 +	return delete_pos_disk(bdev, cb_fn, cb_arg);
 +}
 +
-+void send_msg_to_all_nvmf_thread(uint32_t current_core, void *fn, void *arg1)
++void send_msg_to_next_nvmf_thread(uint32_t current_core, void *fn, void *arg1)
 +{
 +	uint32_t next_core = spdk_env_get_next_core(current_core);
 +	struct spdk_thread *thread = get_nvmf_thread_from_reactor(next_core);
@@ -3324,10 +3327,10 @@ index 000000000..9353cf067
 +SPDK_LOG_REGISTER_COMPONENT(bdev_pos)
 diff --git module/bdev/pos/bdev_pos.h module/bdev/pos/bdev_pos.h
 new file mode 100644
-index 000000000..2fd210824
+index 000000000..745017ad9
 --- /dev/null
 +++ module/bdev/pos/bdev_pos.h
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,52 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -3376,6 +3379,7 @@ index 000000000..2fd210824
 +
 +void delete_pos_disk(struct spdk_bdev *bdev, spdk_delete_pos_complete cb_fn, void *cb_arg);
 +int get_pos_volume_id(struct spdk_bdev *bdev);
++void send_msg_to_next_nvmf_thread(uint32_t current_core, void *fn, void *arg1);
 +struct spdk_thread *get_nvmf_thread_from_reactor(int reactor);
 +
 +#endif /* SPDK_BDEV_POS_H */
