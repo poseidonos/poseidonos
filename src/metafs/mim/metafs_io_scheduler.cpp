@@ -339,6 +339,15 @@ MetaFsIoScheduler::_CreateMioThread(void)
     uint32_t handlerId = 0;
     for (uint32_t coreId = 0; coreId < TOTAL_CORE_COUNT; ++coreId)
     {
+        if (SUPPORT_NUMA_DEDICATED_SCHEDULING)
+        {
+            int myNumaId = numa_node_of_cpu(coreId_);
+            if (myNumaId != numa_node_of_cpu(coreId))
+            {
+                continue;
+            }
+        }
+
         if (CPU_ISSET(coreId, &MIO_CORE_SET))
         {
             ScalableMetaIoWorker* mioHandler =
@@ -350,6 +359,24 @@ MetaFsIoScheduler::_CreateMioThread(void)
                 "Create MioHandler, " + mioHandler->GetLogString());
         }
     }
+
+    if (SUPPORT_NUMA_DEDICATED_SCHEDULING)
+    {
+        if (!_DoesMioWorkerForNumaExist(numa_node_of_cpu(coreId_)))
+        {
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MIO_HANDLER_NOT_EXIST,
+                "Any handler has not been created for numaId: {}", numa_node_of_cpu(coreId_));
+            assert(false);
+        }
+    }
+}
+
+bool
+MetaFsIoScheduler::_DoesMioWorkerForNumaExist(const int numaId)
+{
+    if (!mioCoreCountInTheSameNuma_[numaId])
+        return false;
+    return true;
 }
 
 void

@@ -83,6 +83,7 @@ private:
     void _UpdateCurrentLpnToNextExtentConditionally(void);
     void _PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWorker* worker);
     void _IssueRequestToMioWorker(MetaFsIoRequest* reqMsg);
+    bool _DoesMioWorkerForNumaExist(const int numaId);
 
     static const size_t TOTAL_NUMA_COUNT = 2;
     const bool SUPPORT_NUMA_DEDICATED_SCHEDULING;
