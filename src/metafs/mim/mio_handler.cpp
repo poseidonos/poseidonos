@@ -608,8 +608,6 @@ MioHandler::_HandleMioCompletion(void* data)
             {
                 aiocb->SetErrorStatus(mio->GetError());
                 _SendAioDoneEvent(aiocb);
-                // EventSmartPtr event = std::make_shared<MetaCallbackEvent>(aiocb);
-                // EventSchedulerSingleton::Instance()->EnqueueEvent(event);
             }
         }
     }
@@ -621,8 +619,6 @@ MioHandler::_HandleMioCompletion(void* data)
         {
             aiocb->SetErrorStatus(mio->GetError());
             _SendAioDoneEvent(aiocb);
-            // EventSmartPtr event = std::make_shared<MetaCallbackEvent>(aiocb);
-            // EventSchedulerSingleton::Instance()->EnqueueEvent(event);
         }
     }
 }
