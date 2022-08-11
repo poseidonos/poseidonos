@@ -32,12 +32,14 @@
 
 #pragma once
 
+#include <vector>
 #include "src/include/address_type.h"
 
 namespace pos
 {
 class JournalConfiguration;
 class SegmentInfo;
+class VersionedSegmentInfo;
 
 class IVersionedSegmentContext
 {
@@ -53,6 +55,10 @@ public:
     virtual void ResetFlushedInfo(int logGroupId) = 0;
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
+
+    // For UT
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) = 0;
 };
 
 } // namespace pos
