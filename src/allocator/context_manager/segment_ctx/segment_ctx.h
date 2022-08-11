@@ -108,6 +108,8 @@ public:
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
+    void CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments);
+
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
@@ -115,6 +117,8 @@ public:
     virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
     virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
     virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
+
+    virtual SegmentInfo* GetSegmentInfos(void);
 
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 

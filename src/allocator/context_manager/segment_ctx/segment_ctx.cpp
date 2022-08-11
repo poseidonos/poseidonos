@@ -509,7 +509,7 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
         bool isContained = rebuildList->Contains(victimSegment);
         if (true == isContained)
         {
-            // do nothing. this segment will be return to the victim list when rebuidl is completed
+            // do nothing. this segment will be return to the victim list when rebuild is completed
             POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM),
                 "rebuild_list_contains:{}",
                 isContained);
@@ -548,6 +548,8 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
         if (true == rebuildList->RemoveFromList(segmentId))
         {    
             _FlushRebuildSegmentList();
+            POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
+            "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
         }
     }
     else
@@ -781,7 +783,7 @@ SegmentCtx::LoadRebuildList(void)
         rebuildList->AddToList(segmentId);
     }
 
-    POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILD_CTX_LOAD_SUCCESS),
+    POS_TRACE_INFO(EID(ALLOCATOR_REBUILD_CTX_LOAD_SUCCESS),
         "num_of_segement_in_rebuild_list:{}", rebuildList->GetNumSegments());
     return (rebuildList->GetNumSegments() != 0);
 }
@@ -829,6 +831,19 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
 }
 
 void
+SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments)
+{
+    if (nullptr != vscSegInfo)
+    {
+        for (int segId = 0; segId < numSegments; segId++)
+        {
+            segmentInfos[segId].SetValidBlockCount(vscSegInfo[segId].GetValidBlockCount());
+            segmentInfos[segId].SetOccupiedStripeCount(vscSegInfo[segId].GetOccupiedStripeCount());
+        }
+    }
+}
+
+void
 SegmentCtx::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
     ValidateBlks(blks);
@@ -846,4 +861,9 @@ SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
     return UpdateOccupiedStripeCount(lsid);
 }
 
+SegmentInfo*
+SegmentCtx::GetSegmentInfos(void)
+{
+    return segmentInfos;
+}
 } // namespace pos

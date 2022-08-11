@@ -90,9 +90,11 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     segmentInfos = new SegmentInfo[numSegments]();
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        // TODO (VSC) to keep on-disk data only
-        segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
-        segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
+        if (nullptr != loadedSegmentInfo)
+        {
+            segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
+            segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
+        }
     }
 }
 
@@ -111,8 +113,8 @@ VersionedSegmentCtx::Dispose(void)
 void
 VersionedSegmentCtx::IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt)
 {
-    assert(segId < numSegments);
-    assert(logGroupId < config->GetNumLogGroups());
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
 
     segmentInfoDiffs[logGroupId]->IncreaseValidBlockCount(segId, cnt);
 }
@@ -120,8 +122,8 @@ VersionedSegmentCtx::IncreaseValidBlockCount(int logGroupId, SegmentId segId, ui
 void
 VersionedSegmentCtx::DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt)
 {
-    assert(segId < numSegments);
-    assert(logGroupId < config->GetNumLogGroups());
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
 
     segmentInfoDiffs[logGroupId]->DecreaseValidBlockCount(segId, cnt);
 }
@@ -129,8 +131,8 @@ VersionedSegmentCtx::DecreaseValidBlockCount(int logGroupId, SegmentId segId, ui
 void
 VersionedSegmentCtx::IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId)
 {
-    assert(segId < numSegments);
-    assert(logGroupId < config->GetNumLogGroups());
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
 
     segmentInfoDiffs[logGroupId]->IncreaseOccupiedStripeCount(segId);
 }
@@ -138,7 +140,7 @@ VersionedSegmentCtx::IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId
 void
 VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 {
-    assert(logGroupId < config->GetNumLogGroups());
+    _CheckLogGroupIdValidity(logGroupId);
 
     shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
     std::unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
@@ -161,14 +163,14 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 }
 
 SegmentInfo*
-VersionedSegmentCtx::GetUpdatedVersionedSegmentInfoToFlush(int logGroupId)
+VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
 {
-    assert(logGroupId < config->GetNumLogGroups());
+    _CheckLogGroupIdValidity(logGroupId);
 
     if (segmentInfosInFlush == logGroupId)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
-            "Failed to get buffered segment context, log group {} is already in use", logGroupId);
+            "Failed to get versioned segment context, log group {} is already in use", logGroupId);
         return nullptr;
     }
 
@@ -181,9 +183,10 @@ VersionedSegmentCtx::GetUpdatedVersionedSegmentInfoToFlush(int logGroupId)
 }
 
 void
-VersionedSegmentCtx::ResetFlushedVersionedSegmentInfo(int logGroupId)
+VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
 {
-    assert(segmentInfosInFlush == logGroupId);
+    _CheckLogGroupIdValidity(logGroupId);
+
     segmentInfoDiffs[logGroupId]->Reset();
 
     segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
@@ -191,4 +194,37 @@ VersionedSegmentCtx::ResetFlushedVersionedSegmentInfo(int logGroupId)
     POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
+int
+VersionedSegmentCtx::GetNumSegments(void)
+{
+    return numSegments;
+}
+
+int
+VersionedSegmentCtx::GetNumLogGroups(void)
+{
+    return config->GetNumLogGroups();
+}
+
+void
+VersionedSegmentCtx::_CheckLogGroupIdValidity(int logGroupId)
+{
+    if (logGroupId >= config->GetNumLogGroups())
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
+            "Failed to check logGroupId validity, logGroupId {} is invalid", logGroupId);
+        assert(false);
+    }
+}
+
+void
+VersionedSegmentCtx::_CheckSegIdValidity(int segId)
+{
+    if (segId >= (int)numSegments)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
+            "Failed to check segId validity, segId {} is invalid", segId);
+        assert(false);
+    }
+}
 } // namespace pos

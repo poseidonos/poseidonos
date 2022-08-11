@@ -100,6 +100,12 @@ Allocator::Init(void)
 }
 
 void
+Allocator::PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx)
+{
+    contextManager->PrepareVersionedSegmentCtx(vscSegCtx);
+}
+
+void
 Allocator::Dispose(void)
 {
     POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "[Allocator] Dispose, init:{}", isInitialized);

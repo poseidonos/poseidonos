@@ -56,6 +56,10 @@ public:
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override {}
+    virtual SegmentInfo* GetUpdatedInfoToFlush(int logGroupId) override { return nullptr; }
+    virtual void ResetFlushedInfo(int logGroupId) override {}
+    virtual int GetNumSegments(void) override { return 0; }
+    virtual int GetNumLogGroups(void) override { return 0; };
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
@@ -75,12 +79,16 @@ public:
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override;
 
-    virtual SegmentInfo* GetUpdatedVersionedSegmentInfoToFlush(int logGroupId);
-    virtual void ResetFlushedVersionedSegmentInfo(int logGroupId);
+    virtual SegmentInfo* GetUpdatedInfoToFlush(int logGroupId) override;
+    virtual void ResetFlushedInfo(int logGroupId) override;
+    virtual int GetNumSegments(void) override;
+    virtual int GetNumLogGroups(void) override;
 
 private:
     void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);
     void _UpdateSegmentContext(int logGroupId);
+    void _CheckLogGroupIdValidity(int logGroupId);
+    void _CheckSegIdValidity(int segId);
 
     const int INVALID_SEGMENT_CONTEXT = -1;
     JournalConfiguration* config;
