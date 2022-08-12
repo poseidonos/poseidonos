@@ -45,7 +45,7 @@ WriteMpio::WriteMpio(void* mdPageBuf, const bool directAccessEnabled)
 {
     if (!mdPageBuf)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The buffer is null.");
         assert(false);
     }
@@ -98,7 +98,7 @@ WriteMpio::_MakeReady(MpAioState expNextState)
 
     if (IsPartialIO()) // request I/O size != fildDataChunkSize (ex. 4KB)
     {                  // need Modify copyback @ DoIO (read from file + write for request)
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[Mpio][_MakeReady  ] type={}, req.tagId={}, mpio_id={}, curLpn={}, prevLpn={}, curBufA={}, prevBufA={}",
             io.opcode, io.tagId, io.mpioId, currLpn, prevLpn, currBuf, prevBuf);
 
@@ -181,7 +181,7 @@ bool
 WriteMpio::_MergeMDPage(void* userBuf, FileSizeType userWByteOffset, FileSizeType userWByteSize, void* mdpageBuf)
 {
     // copy-back the portion of user data into mdpage
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Mpio][_MergeData  ] type={}, req.tagId={}, mpio_id={}, fileOffsetinChunk={}, size={}, mpageBufD={}, mpageBufA={}, userbufD={}",
         io.opcode, io.tagId, io.mpioId, userWByteOffset, userWByteSize, *(uint32_t*)mdpageBuf, mdpageBuf, *(uint32_t*)userBuf);
 
@@ -198,7 +198,7 @@ WriteMpio::_HandleError(MpAioState expNextState)
 
     if (rc.first != 0)
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MEDIA_WRITE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_MEDIA_WRITE_FAILED),
             "[Mpio][WrMpioError] WriteMpio Error...req.tagId={}, mpio_id={}",
             io.tagId, io.mpioId);
     }

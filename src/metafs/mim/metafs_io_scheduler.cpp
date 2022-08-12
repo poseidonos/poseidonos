@@ -112,7 +112,7 @@ MetaFsIoScheduler::ExitThread(void)
 
     MetaFsIoHandlerBase::ExitThread();
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Exit MetaIoScheduler, " + GetLogString());
 }
 
@@ -326,7 +326,7 @@ MetaFsIoScheduler::StartThread(void)
 {
     th_ = new std::thread(AsEntryPointNoParam(&MetaFsIoScheduler::Execute, this));
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Start MetaIoScheduler, " + GetLogString());
 
     _CreateMioThread();
@@ -355,7 +355,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
             mioHandler->StartThread();
             _PushToMioThreadList(coreId, mioHandler);
 
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "Create MioHandler, " + mioHandler->GetLogString());
         }
     }

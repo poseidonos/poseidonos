@@ -80,7 +80,7 @@ ClientConfig::Init(YAML::Node& node)
     }
     catch (YAML::BadConversion& e)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::TELEMETRY_DEBUG_MSG,
+        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
             "{}", e.msg);
 
         return false;

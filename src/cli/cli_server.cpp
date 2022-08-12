@@ -217,7 +217,7 @@ ClientThread(void* arg)
 #endif
     if (str_len > 0)
     {
-        int event = (int)POS_EVENT_ID::CLI_MSG_RECEIVED;
+        int event = EID(CLI_MSG_RECEIVED);
         POS_TRACE_TRACE(event, "message:{}", clnt->recv_buff);
 
         if (clnt->work)
@@ -292,7 +292,7 @@ CreateSocket(int& sock)
 
     if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     {
-        int event = (int)POS_EVENT_ID::CLI_SOCK_CREATE_FAILURE;
+        int event = EID(CLI_SOCK_CREATE_FAILURE);
         POS_TRACE_ERROR(event, "sock:{}, domain:{}, type:{}, protocol:{}",
             sock, AF_INET, SOCK_STREAM, IPPROTO_TCP);
         return event;
@@ -307,7 +307,7 @@ CreateSocket(int& sock)
 
     if (bind(sock, (struct sockaddr*)&servaddr, sizeof(struct sockaddr_in)) < 0)
     {
-        int event = (int)POS_EVENT_ID::CLI_SOCK_BIND_FAILURE;
+        int event = EID(CLI_SOCK_BIND_FAILURE);
         POS_TRACE_ERROR(event, "sock:{}, server_ip:{}, server_port:{}, sin_family:{}",
             sock, INADDR_ANY, SERV_PORT, AF_INET);
         return event;
@@ -315,7 +315,7 @@ CreateSocket(int& sock)
 
     if (listen(sock, SOMAXCONN))
     {
-        int event = (int)POS_EVENT_ID::CLI_SOCK_LISTEN_FAILURE;
+        int event = EID(CLI_SOCK_LISTEN_FAILURE);
         POS_TRACE_ERROR(event, "sock:{}, server_ip:{}, server_port:{}, sin_family:{}",
             sock, INADDR_ANY, SERV_PORT, AF_INET);
         return event;

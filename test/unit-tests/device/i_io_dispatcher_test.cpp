@@ -32,10 +32,6 @@ TEST(IIODispatcher, RemoveDeviceForIOWorker_)
 {
 }
 
-TEST(IIODispatcher, CompleteForThreadLocalDeviceList_)
-{
-}
-
 TEST(IIODispatcher, Submit_)
 {
 }

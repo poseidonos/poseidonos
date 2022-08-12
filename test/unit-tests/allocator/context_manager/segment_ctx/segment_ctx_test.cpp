@@ -787,7 +787,7 @@ TEST(SegmentCtx, MakeRebuildTarget_testWhenRebuildTargetListIsEmpty)
     EXPECT_CALL(rebuildSegmentList, GetNumSegments).WillRepeatedly(Return(0));
     int ret = segmentCtx.MakeRebuildTarget();
 
-    EXPECT_EQ(ret, (int)POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
+    EXPECT_EQ(ret, EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY));
 
     delete[] segInfos;
     delete tp;

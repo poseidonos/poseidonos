@@ -69,9 +69,9 @@ TelemetryConfig::TelemetryConfig(const std::string& path, const std::string& fil
     std::shared_ptr<FileConfigReader> fileReader = std::dynamic_pointer_cast<FileConfigReader>(readers[ConfigPriority::Priority_3rd]);
     if ((nullptr != fileReader) && (false == fileReader->Init(fileFullPath)))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
+        POS_TRACE_ERROR(EID(TELEMETRY_CONFIG_BAD_FILE),
             "Poseidon OS will stop by invalid telemetry config.");
-        POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
+        POS_TRACE_ERROR(EID(TELEMETRY_CONFIG_BAD_FILE),
             "Please type \"make install\" before running pos.");
 
         assert(false);

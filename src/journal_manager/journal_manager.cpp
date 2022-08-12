@@ -317,7 +317,7 @@ JournalManager::_DoRecovery(void)
 
     if (journalingStatus.Get() == JOURNAL_INVALID)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_MANAGER_NOT_INITIALIZED,
+        POS_TRACE_ERROR(EID(JOURNAL_MANAGER_NOT_INITIALIZED),
             "Journal manager accessed without initialization");
         return -EID(JOURNAL_REPLAY_FAILED);
     }
@@ -445,7 +445,18 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     dirtyMapManager->Init(config);
     checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager, telemetryPublisher);
 
-    versionedSegCtx->Init(config, nullptr, 0); // TODO (VSC) Temporarly use invalid values TODO (huijeong.kim) fix this
+    const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+
+    SegmentInfo* loadedSegmentInfos = nullptr;
+    if (nullptr != contextManager)
+    {
+        SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();
+        if (nullptr != segmentCtx)
+        {
+            loadedSegmentInfos = segmentCtx->GetSegmentInfos();
+        }
+    }
+    versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
 
     logFactory->Init(config, logFilledNotifier, sequenceController);
     eventFactory->Init(eventScheduler, logWriteHandler);

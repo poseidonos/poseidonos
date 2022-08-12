@@ -125,7 +125,7 @@ JournalLogBuffer::Dispose(void)
         int ret = logFile->Close();
         if (ret != 0)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CLOSE_FAILED,
+            POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_CLOSE_FAILED),
                 "Failed to close journal log buffer");
         }
     }
@@ -150,13 +150,13 @@ JournalLogBuffer::Create(uint64_t logBufferSize)
     {
         POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
             "Log buffer already exists");
-        return -1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED;
+        return -1 * EID(JOURNAL_LOG_BUFFER_CREATE_FAILED);
     }
 
     int ret = logFile->Create(logBufferSize);
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_CREATE_FAILED),
             "Failed to create log buffer");
         return ret;
     }
@@ -164,7 +164,7 @@ JournalLogBuffer::Create(uint64_t logBufferSize)
     ret = logFile->Open();
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_OPEN_FAILED),
             "Failed to open log buffer");
         return ret;
     }
@@ -180,7 +180,7 @@ JournalLogBuffer::Open(uint64_t& logBufferSize)
     {
         POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
             "Log buffer does not exist");
-        return (-1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED);
+        return (-1 * EID(JOURNAL_LOG_BUFFER_OPEN_FAILED));
     }
 
     int ret = logFile->Open();
@@ -224,10 +224,10 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     int ret = logFile->AsyncIO(logBufferReadReq);
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_READ_FAILED),
             "Failed to read log buffer");
         delete logBufferReadReq;
-        return -1 * ((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED);
+        return -1 * (EID(JOURNAL_LOG_BUFFER_READ_FAILED));
     }
 
     while (logBufferReadDone == false)
@@ -254,9 +254,9 @@ JournalLogBuffer::WriteLog(LogWriteContext* context)
 
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED),
             "Failed to write journal log");
-        ret = -1 * (int)POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED;
+        ret = -1 * EID(JOURNAL_LOG_WRITE_FAILED);
     }
 
     return ret;
@@ -275,7 +275,7 @@ JournalLogBuffer::SyncResetAll(void)
         ret = AsyncReset(groupId, callbackEvent);
         if (ret != 0)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
+            POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED),
                 "Failed to reset journal log buffer");
             return ret;
         }
@@ -285,7 +285,7 @@ JournalLogBuffer::SyncResetAll(void)
     {
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET,
+    POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_RESET),
         "Journal log buffer is reset");
 
     return ret;
@@ -319,7 +319,7 @@ JournalLogBuffer::InternalIo(LogBufferIoContext* context)
     int ret = logFile->AsyncIO(context);
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_RESET_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED),
             "Failed to reset log buffer");
     }
     return ret;
@@ -344,7 +344,7 @@ JournalLogBuffer::Delete(void)
     {
         ret = logFile->Delete();
 
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_DEBUG,
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
             "Journal log buffer is deleted");
     }
     return ret;

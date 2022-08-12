@@ -69,7 +69,7 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailWithSizeLargerThanMetaPa
     // Then: Allocation should be failed
     uint64_t allocatedOffset = 0;
 
-    int expectReturnCode =  -1 * (int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED;
+    int expectReturnCode =  -1 * EID(JOURNAL_INVALID_SIZE_LOG_REQUESTED);
     EXPECT_TRUE(status.TryToAllocate(logSize, allocatedOffset) == expectReturnCode);
 }
 
@@ -94,7 +94,7 @@ TEST(LogGroupBufferStatus, TryToAllocate_testIfAllocFailsWhenFull)
     // When: Try to allocate one more log
     // Then: Allocation should be failed
     uint64_t offset = 0;
-    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    int expectReturnCode = EID(JOURNAL_LOG_GROUP_FULL);
     EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 }
 
@@ -148,7 +148,7 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullSuccess)
     }
 
     // When: One more log try to allocate buffer, but fails
-    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    int expectReturnCode = EID(JOURNAL_LOG_GROUP_FULL);
     EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 
     // Then: TryToSetFull should be succeed
@@ -179,7 +179,7 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotFullyFilled)
     }
 
     // When: One more buffer allocation requested, and found there's no more space
-    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    int expectReturnCode = EID(JOURNAL_LOG_GROUP_FULL);
     EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 
     // Then: TryToSetFull should not be succeed
@@ -218,7 +218,7 @@ TEST(LogGroupBufferStatus, TryToSetFull_testIfSetFullFailWhenNotWaitingToBeFille
     EXPECT_EQ(status.TryToSetFull(), false);
 
     // When: One more buffer allocation requested, and found there's no more space
-    int expectReturnCode = (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+    int expectReturnCode = EID(JOURNAL_LOG_GROUP_FULL);
     EXPECT_TRUE(status.TryToAllocate(logSize, offset) == expectReturnCode);
 
     // Then: TryToSetFull should be succeed

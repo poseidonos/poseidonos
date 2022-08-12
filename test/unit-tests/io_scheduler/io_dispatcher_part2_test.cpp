@@ -82,7 +82,7 @@ TEST(IODispatcher, CompleteForThreadLocalDeviceList_SimpleCall)
     ioDispatcher.AddDeviceForReactor(ublock);
 
     // When: Call CompleteForThreadLocalDeviceList
-    ioDispatcher.CompleteForThreadLocalDeviceList();
+    IODispatcher::CompleteForThreadLocalDeviceList();
 
     // Then: Do nothing
 

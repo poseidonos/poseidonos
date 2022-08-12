@@ -74,7 +74,7 @@ MetaVolume::MetaVolume(const int arrayId, const MetaVolumeType metaVolumeType,
     trimBuffer_ = Memory<MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES>::Alloc();
     if (!trimBuffer_)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The trim buffer cannot be allocated by Memory.");
         assert(false);
     }
@@ -205,12 +205,12 @@ MetaVolume::CreateVolume(void)
 bool
 MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Trying to open meta volume(type: {})", (int)volumeType_);
 
     if (false == _LoadVolumeMeta(info, isNPOR))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "Load volume meta failed...");
+        MFS_TRACE_ERROR(EID(MFS_DEBUG_MESSAGE), "Load volume meta failed...");
         return false;
     }
 
@@ -224,7 +224,7 @@ MetaVolume::OpenVolume(MetaLpnType* info, bool isNPOR)
 
     volumeState_ = MetaVolumeState::Open;
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Finished opening meta volume(type: {})", (int)volumeType_);
 
     return true;
@@ -237,7 +237,7 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
     {
         if (!catalogMgr_->LoadVolCatalog())
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+            MFS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
                 "Failed to load volume catalog(volume type: {})", (int)volumeType_);
             volumeState_ = MetaVolumeState::Error;
             return false;
@@ -245,7 +245,7 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
 
         if (!inodeMgr_->LoadContent())
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+            MFS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
                 "Failed to load volume inode contents(volume type: {})", (int)volumeType_);
             volumeState_ = MetaVolumeState::Error;
             return false;
@@ -256,13 +256,13 @@ MetaVolume::_LoadVolumeMeta(MetaLpnType* info, bool isNPOR)
         // The NVRAM volume meta loads from the backuped meta in SSD volume area.
         if (!_RestoreContents(info))
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+            MFS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
                 "Failed to store NVRAM meta volume");
             return false;
         }
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Successfully loaded the contents of meta volume(type: {}). isNPOR: {}",
         (int)volumeType_, isNPOR);
 
@@ -275,7 +275,7 @@ MetaVolume::CloseVolume(MetaLpnType* info, bool& resetContext)
     bool ret = true;
     if (volumeState_ != MetaVolumeState::Open)
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_ALREADY_CLOSED,
+        MFS_TRACE_WARN(EID(MFS_META_VOLUME_ALREADY_CLOSED),
             "Volume state is not 'Open'. Current state is '{}'. Skip volume close procedure...",
             (int)volumeState_);
         return true; // just return true;
@@ -285,7 +285,7 @@ MetaVolume::CloseVolume(MetaLpnType* info, bool& resetContext)
     {
         resetContext = false; // do not clear any mfs context
 
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CLOSE_FAILED),
             "Need to close the {} opened files!!. Then, unmount the meta file mgmt",
             inodeMgr_->GetFileCountInActive());
         return false;
@@ -316,7 +316,7 @@ MetaVolume::CloseVolume(MetaLpnType* info, bool& resetContext)
         }
 
         volumeState_ = MetaVolumeState::Close;
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "CloseVolume Done : volumeType_: {}", (int)volumeType_);
     } while (false);
 
@@ -396,7 +396,7 @@ MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 
     if (fileKey2VolTypeMap_.end() != fileKey2VolTypeMap_.find(fileKey))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The fileKey {} is already existed, fd: {}, fileName: {}",
             fileKey, result.first, *reqMsg.fileName);
         assert(false);
@@ -404,7 +404,7 @@ MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 
     if (fd2VolTypehMap_.end() != fd2VolTypehMap_.find(result.first))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The fd {} is already existed, fileName: {}",
             result.first, *reqMsg.fileName);
         assert(false);
@@ -439,7 +439,7 @@ MetaVolume::TrimData(MetaFsFileControlRequest& reqMsg)
     {
         if (!_TrimData(inodeMgr_->GetFileInode(fd).GetStorageType(), it.GetStartLpn(), it.GetCount()))
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_DEBUG_MESSAGE),
                 "Trim (startLpn: {}, lpnCount: {}) has been failed.",
                 it.GetStartLpn(), it.GetCount());
             return false;
@@ -453,7 +453,7 @@ MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count
 {
     if (!metaStorage_)
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "MetaStorageSubsystem is not ready");
+        MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE), "MetaStorageSubsystem is not ready");
         return false;
     }
 
@@ -473,7 +473,7 @@ MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count
         }
     }
 
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE, "Meta file trim is done");
+    MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE), "Meta file trim is done");
 
     return true;
 }
@@ -481,7 +481,7 @@ MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count
 bool
 MetaVolume::_BackupContents(MetaLpnType* info)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "NVRAM volume meta '{}' backups to SSD volume region '{}'. Start...",
         (int)volumeType_, (int)MetaVolumeType::SsdVolume);
 
@@ -501,7 +501,7 @@ MetaVolume::_BackupContents(MetaLpnType* info)
     if (!inodeMgr_->BackupContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts))
         return false;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "NVRAM volume meta has successfully backuped to SSD volume!");
     return true;
 }
@@ -509,7 +509,7 @@ MetaVolume::_BackupContents(MetaLpnType* info)
 bool
 MetaVolume::_RestoreContents(MetaLpnType* info)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "NVRAM volume meta '{}' is restored from SSD volume region '{}'. Start...",
         (int)volumeType_, (int)MetaVolumeType::SsdVolume);
 
@@ -521,7 +521,7 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
 
     if (!catalogMgr_->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, lpnCnts))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Failed to restore NVRAM catalog from SSD meta volume");
         return false;
     }
@@ -530,12 +530,12 @@ MetaVolume::_RestoreContents(MetaLpnType* info)
 
     if (!inodeMgr_->RestoreContent(MetaVolumeType::SsdVolume, baseLpnInVol, iNodeHdrLpnCnts, iNodeTableLpnCnts))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Failed to restore NVRAM inode contents from SSD meta volume");
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "NVRAM volume meta has successfully been restoreed from SSD volume!");
 
     return true;

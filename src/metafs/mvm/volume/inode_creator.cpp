@@ -58,13 +58,13 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
     MetaLpnType requestLpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
     std::vector<MetaFileExtent> extents = inodeMgr->extentAllocator_->AllocExtents(requestLpnCnt);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "CreateFileInode, extent count: {}",
         extents.size());
 
     for (auto& extent : extents)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "target extent, startLpn: {}, lpnCount: {}",
             extent.GetStartLpn(), extent.GetCount());
     }
@@ -79,13 +79,13 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
     totalLpnCount = 0;
     for (auto& extent : extents)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[Metadata File] Allocate an extent, startLpn={}, count={}",
             extent.GetStartLpn(), extent.GetCount());
         totalLpnCount += extent.GetCount();
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Metadata File] Create volType={}, fd={}, fileName={}, totalLpnCnt={}",
         (int)inodeMgr->mediaType, fd, *reqMsg.fileName, totalLpnCount);
 
@@ -99,7 +99,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
         {
             inodeMgr->extentAllocator_->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
 
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[Metadata File] Release an extent, startLpn={}, count={}",
                 extent.GetStartLpn(), extent.GetCount());
         }

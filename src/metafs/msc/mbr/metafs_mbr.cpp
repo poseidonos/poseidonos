@@ -55,7 +55,7 @@ MetaFsMBR::CreateMBR(void)
 {
     content->mfsEpochSignature = MetaFileUtil::GetEpochSignature();
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Meta filesystem MBR has been created. Epoch timestamp={}",
         content->mfsEpochSignature);
 

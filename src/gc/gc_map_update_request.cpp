@@ -158,7 +158,7 @@ GcMapUpdateRequest::_UpdateMeta(void)
         return false;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_MAP_UPDATE_REQUEST,
+    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_REQUEST),
         "gc map update request, arrayName:{}, stripeUserLsid:{}",
         iArrayInfo->GetName(), mapUpdates.userLsid);
     return true;

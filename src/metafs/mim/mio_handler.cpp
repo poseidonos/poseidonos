@@ -78,7 +78,7 @@ MioHandler::MioHandler(const int threadId, const int coreId,
     mioCompletionCallback = AsEntryPointParam1(&MioHandler::_HandleMioCompletion, this);
 
     this->bottomhalfHandler = nullptr;
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Mio handler constructed. threadId: {}, coreId: {}, mio pool size: {}",
         threadId, coreId, MIO_POOL_SIZE);
 }
@@ -344,7 +344,7 @@ MioHandler::_DiscoverIORangeOverlap(void)
 
                 pendingIoRetryQ.erase(it);
 
-                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                     "[Msg ][EraseRetryQ] type={}, req.tagId={}, fileOffset={}, Lpn={}, numPending={}",
                     pendingIoReq->reqType, pendingIoReq->tagId, pendingIoReq->byteOffsetInFile,
                     pendingIoReq->byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
@@ -440,7 +440,7 @@ MioHandler::_FinalizeMio(Mio* mio)
     if (mio->GetMergedRequestList())
     {
         // metricCountOfStorageType[(int)mio->GetTargetStorage()] -= mio->GetMergedRequestList()->size();
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "merged request count: {}",
             mio->GetMergedRequestList()->size());
     }
@@ -489,7 +489,7 @@ MioHandler::_PushToRetry(MetaFsIoRequest* reqMsg)
     reqMsg->SetRetryFlag();
     pendingIoRetryQ.insert(pair<MetaLpnType, MetaFsIoRequest*>(reqMsg->baseMetaLpn, reqMsg));
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Msg ][_PushToRetry] type={}, req.tagId={}, ByteOffset={}, Lpn={}, numPending={}",
         reqMsg->reqType, reqMsg->tagId, reqMsg->byteOffsetInFile,
         reqMsg->byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
@@ -545,7 +545,7 @@ MioHandler::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& m
 {
     if (!map.size())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "There is no valid meta volume, coreId: {}",
             coreId);
         return false;

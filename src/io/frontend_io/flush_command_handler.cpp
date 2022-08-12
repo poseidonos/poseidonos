@@ -93,7 +93,7 @@ FlushCmdHandler::Execute(void)
                 // Flush handler on volumeId already in progress
                 return false;
             }
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+            POS_TRACE_DEBUG(EID(FLUSH_CMD_ONGOING),
                 "Flush command started on volume {}", volumeId);
 
             // Trigger stripe flush of all active stripes, and get all wb stripes belonging to input volumeId
@@ -110,7 +110,7 @@ FlushCmdHandler::Execute(void)
             {
                 return false;
             }
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+            POS_TRACE_DEBUG(EID(FLUSH_CMD_ONGOING),
                 "All stripes flush completed");
 
             POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
@@ -129,7 +129,7 @@ FlushCmdHandler::Execute(void)
                 }
                 else
                 {
-                    POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
+                    POS_TRACE_ERROR(EID(FLUSH_CMD_MAPPER_FLUSH_FAILED),
                             "Failed to start flushing dirty vsamap pages");
                     if (flushIo->IsInternalFlush() == false)
                     {
@@ -142,7 +142,7 @@ FlushCmdHandler::Execute(void)
                     return true;
                 }
             }
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+            POS_TRACE_DEBUG(EID(FLUSH_CMD_ONGOING),
                 "VSA Map flush requested");
         }
 
@@ -171,7 +171,7 @@ FlushCmdHandler::Execute(void)
                         }
                         else
                         {
-                            POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_MAPPER_FLUSH_FAILED,
+                            POS_TRACE_ERROR(EID(FLUSH_CMD_MAPPER_FLUSH_FAILED),
                                     "Failed to start flushing dirty stripe map pages. Error code {}", ret);
                             if (flushIo->IsInternalFlush() == false)
                             {
@@ -183,7 +183,7 @@ FlushCmdHandler::Execute(void)
                     }
                     stripeMapFlushIssued = true;
 
-                    POS_TRACE_DEBUG((int)POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                    POS_TRACE_DEBUG(EID(FLUSH_CMD_ONGOING),
                             "Stripe Map flush requested");
                 }
 
@@ -194,12 +194,12 @@ FlushCmdHandler::Execute(void)
                     ret = icontextManager->FlushContexts(callbackAllocator, false);
                     if (ret != 0)
                     {
-                        if (ret == (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS)
+                        if (ret == EID(ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS))
                         {
                             return false;
                         }
 
-                        POS_TRACE_ERROR((int)POS_EVENT_ID::FLUSH_CMD_ALLOCATOR_FLUSH_FAILED,
+                        POS_TRACE_ERROR(EID(FLUSH_CMD_ALLOCATOR_FLUSH_FAILED),
                                 "Failed to start flushing allocator meta pages. Error code {}", ret);
                         if (flushIo->IsInternalFlush() == false)
                         {

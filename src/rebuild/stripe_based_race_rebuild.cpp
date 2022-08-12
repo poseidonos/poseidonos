@@ -139,13 +139,13 @@ StripeBasedRaceRebuild::Read(void)
         }
         if (ctx->GetResult() == RebuildState::CANCELLED)
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_STOPPED,
+            POS_TRACE_WARN(EID(REBUILD_STOPPED),
                 "Partition {} ({}) rebuilding stopped",
                 PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
         else if (ctx->GetResult() == RebuildState::FAIL)
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_FAILED,
+            POS_TRACE_WARN(EID(REBUILD_FAILED),
                 "Partition {} ({}) rebuilding failed",
                 PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
@@ -231,7 +231,7 @@ StripeBasedRaceRebuild::Read(void)
         int res = recovery->Recover(ubio);
         if (res != 0)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
+            POS_TRACE_ERROR(EID(REBUILD_FAILED),
                 "Failed to recover stripe {} in Partition {} ({}), maxStripes:{}",
                 stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString(), maxStripeId);
             ctx->SetResult(RebuildState::FAIL);

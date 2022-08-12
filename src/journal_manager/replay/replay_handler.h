@@ -77,7 +77,6 @@ public:
     virtual int Start(void);
 
 private:
-    void _InitializeExternalModuleReferences(void);
     void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,

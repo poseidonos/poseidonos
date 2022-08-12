@@ -118,14 +118,14 @@ MbrManager::LoadMbr(void)
         return ret;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_READ_DONE,
+    POS_TRACE_DEBUG(EID(MBR_READ_DONE),
         "read mbr data done : ");
 
     _LoadIndexMap();
 
     if (systeminfo.arrayNum != arrayIndexMap.size())
     {
-        ret = (int)POS_EVENT_ID::MBR_WRONG_ARRAY_INDEX_MAP;
+        ret = EID(MBR_WRONG_ARRAY_INDEX_MAP);
     }
 
     pthread_rwlock_unlock(&mbrLock);
@@ -146,7 +146,7 @@ MbrManager::SaveMbr(void)
     int result = _WriteToDevices();
     if (result != 0)
     {
-        int eventid = (int)POS_EVENT_ID::MBR_WRITE_ERROR;
+        int eventid = EID(MBR_WRITE_ERROR);
         POS_TRACE_ERROR(eventid, "MBR Write Error");
         result = eventid;
     }
@@ -178,10 +178,10 @@ MbrManager::ResetMbr(void)
     int result = devMgr->IterateDevicesAndDoFunc(diskIoFunc, &diskIoCtxt);
     if (result != 0)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
+        POS_TRACE_WARN(EID(MBR_DEVICE_NOT_FOUND),
             "device not found");
         pthread_rwlock_unlock(&mbrLock);
-        return (int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND;
+        return EID(MBR_DEVICE_NOT_FOUND);
     }
     pthread_rwlock_unlock(&mbrLock);
     return result;
@@ -208,7 +208,7 @@ MbrManager::_AllocMem(void)
 
     if (mbrBuffer == nullptr)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MBR_ALLOCATE_MEMORY,
+        POS_TRACE_INFO(EID(MBR_ALLOCATE_MEMORY),
             "MBR allocate memory done");
         mbrBuffer = pos::Memory<CHUNK_SIZE>::Alloc(MBR_CHUNKS);
     }
@@ -235,11 +235,11 @@ MbrManager::_WriteToDevices(void)
     {
         version--;
         systeminfo.mbrVersion = version;
-        POS_TRACE_WARN((int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND,
+        POS_TRACE_WARN(EID(MBR_DEVICE_NOT_FOUND),
             "device not found");
-        return (int)POS_EVENT_ID::MBR_DEVICE_NOT_FOUND;
+        return EID(MBR_DEVICE_NOT_FOUND);
     }
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_WRITE_DONE,
+    POS_TRACE_DEBUG(EID(MBR_WRITE_DONE),
         "write mbr data");
 
     return result;
@@ -327,9 +327,9 @@ MbrManager::_ReadFromDevices(void)
     }
     else
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MBR_DATA_NOT_FOUND,
+        POS_TRACE_WARN(EID(MBR_DATA_NOT_FOUND),
             "mbr data not found");
-        result = (int)POS_EVENT_ID::MBR_DATA_NOT_FOUND; // no mbr data
+        result = EID(MBR_DATA_NOT_FOUND); // no mbr data
     }
 
     return result;
@@ -379,15 +379,15 @@ MbrManager::_VerifyParity(void* mem)
 
         if (bufParity == mbrParity)
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::MBR_PARITY_CHECK_FAILED,
+            POS_TRACE_WARN(EID(MBR_PARITY_CHECK_FAILED),
                 "mbr parity check fail, mbr is reset");
         }
         else
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::MBR_PARITY_CHECK_FAILED,
+            POS_TRACE_WARN(EID(MBR_PARITY_CHECK_FAILED),
                 "mbr parity check fail");
         }
-        return (int)POS_EVENT_ID::MBR_PARITY_CHECK_FAILED; // e2e data protect error
+        return EID(MBR_PARITY_CHECK_FAILED); // e2e data protect error
     }
 }
 
@@ -399,15 +399,15 @@ MbrManager::_VerifySystemUuid(void* mem)
 
     if (systemUuid == temp->systemUuid)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MBR_SYSTEM_UUID_CHECK,
+        POS_TRACE_INFO(EID(MBR_SYSTEM_UUID_CHECK),
             "mbr system uuid check ");
         ret = EID(SUCCESS);
     }
     else
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MBR_SYSTEM_UUID_CHECK_FAILED,
+        POS_TRACE_WARN(EID(MBR_SYSTEM_UUID_CHECK_FAILED),
             "mbr system uuid check fail");
-        ret = (int)POS_EVENT_ID::MBR_SYSTEM_UUID_CHECK_FAILED;
+        ret = EID(MBR_SYSTEM_UUID_CHECK_FAILED);
     }
     return ret;
 }
@@ -426,9 +426,9 @@ MbrManager::_GetLatestDataList(list<void*> mems, list<void*>* latestMems)
 {
     if (mems.size() == 0)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MBR_DATA_NOT_FOUND,
+        POS_TRACE_WARN(EID(MBR_DATA_NOT_FOUND),
             "mbr data not found");
-        return (int)POS_EVENT_ID::MBR_DATA_NOT_FOUND;
+        return EID(MBR_DATA_NOT_FOUND);
     }
     std::list<void*>::iterator it = mems.begin();
 
@@ -463,7 +463,7 @@ MbrManager::_GetSystemUuid(void)
 
     if (false == inputFile.is_open())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_GET_SYSTEM_UUID_FAILED,
+        POS_TRACE_ERROR(EID(MBR_GET_SYSTEM_UUID_FAILED),
             "mbr get system uuid failed");
         return string("");
     }
@@ -488,14 +488,14 @@ MbrManager::CreateAbr(ArrayMeta& meta)
 
     if (systeminfo.arrayNum > MAX_ARRAY_CNT)
     {
-        return (int)POS_EVENT_ID::MBR_MAX_ARRAY_CNT_EXCEED;
+        return EID(MBR_MAX_ARRAY_CNT_EXCEED);
     }
 
     pthread_rwlock_wrlock(&mbrLock);
     if (arrayIndexMap.find(meta.arrayName) != arrayIndexMap.end())
     {
         pthread_rwlock_unlock(&mbrLock);
-        return (int)POS_EVENT_ID::MBR_ABR_ALREADY_EXIST;
+        return EID(MBR_ABR_ALREADY_EXIST);
     }
 
     ret = mapMgr->CheckAllDevices(meta);
@@ -515,7 +515,7 @@ MbrManager::CreateAbr(ArrayMeta& meta)
             ret = arrayIndexMap.insert(pair<string, unsigned int>(meta.arrayName, tempArrayIndex));
             if (ret.second == false)
             {
-                POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_WRONG_ARRAY_INDEX_MAP,
+                POS_TRACE_ERROR(EID(MBR_WRONG_ARRAY_INDEX_MAP),
                     "Array index map doesn't match with previous condition");
             }
 
@@ -538,21 +538,21 @@ MbrManager::CreateAbr(ArrayMeta& meta)
     }
 
     pthread_rwlock_unlock(&mbrLock);
-    return (int)POS_EVENT_ID::MBR_WRONG_ARRAY_VALID_FLAG;
+    return EID(MBR_WRONG_ARRAY_VALID_FLAG);
 }
 
 int
 MbrManager::DeleteAbr(string arrayName)
 {
     pthread_rwlock_wrlock(&mbrLock);
-    int result = (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
+    int result = EID(MBR_ABR_NOT_FOUND);
     unsigned int arrayIndex;
     arrayIndexMapIter iter;
     iter = arrayIndexMap.find(arrayName);
     if (iter == arrayIndexMap.end())
     {
         pthread_rwlock_unlock(&mbrLock);
-        return (int)POS_EVENT_ID::MBR_ABR_NOT_FOUND;
+        return EID(MBR_ABR_NOT_FOUND);
     }
 
     arrayIndex = iter->second;
@@ -572,7 +572,7 @@ MbrManager::DeleteAbr(string arrayName)
             delete backup;
             systeminfo.arrayValidFlag[arrayIndex] = 1;
             systeminfo.arrayNum++;
-            int eventid = (int)POS_EVENT_ID::MBR_WRITE_ERROR;
+            int eventid = EID(MBR_WRITE_ERROR);
             POS_TRACE_ERROR(eventid, "MBR Write Error");
             result = eventid;
             pthread_rwlock_unlock(&mbrLock);
@@ -582,7 +582,7 @@ MbrManager::DeleteAbr(string arrayName)
     }
     else
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_WRONG_ARRAY_INDEX_MAP,
+        POS_TRACE_ERROR(EID(MBR_WRONG_ARRAY_INDEX_MAP),
             "Array index map doesn't match with MBR");
     }
 
@@ -613,7 +613,7 @@ MbrManager::GetAbr(string targetArrayName, struct ArrayBootRecord** abr, unsigne
         }
         else
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_WRONG_ARRAY_VALID_FLAG,
+            POS_TRACE_ERROR(EID(MBR_WRONG_ARRAY_VALID_FLAG),
                 "Array Valid Flag doesn't match with Index Map");
         }
     }
@@ -644,7 +644,7 @@ MbrManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
 
     if (arrayNum != arrayIndexMap.size())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MBR_WRONG_ARRAY_INDEX_MAP,
+        POS_TRACE_ERROR(EID(MBR_WRONG_ARRAY_INDEX_MAP),
             "Array index map doesn't match with MBR : arrayNum = {}, searched = {}",
             arrayNum, arrayIndexMap.size());
     }

@@ -169,6 +169,8 @@ Metadata::Init(void)
         return result;
     }
 
+    allocator->PrepareVersionedSegmentCtx(journal->GetVersionedSegmentContext());
+
     // MetaUpdater should be registered before journal initialized
     //  as journal might request stripe flush and meta udpate in journal recovery
     // Meta update will be re-tried when journal is not ready

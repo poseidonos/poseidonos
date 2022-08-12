@@ -135,13 +135,13 @@ SegmentBasedRebuild::Read(void)
     {
         if (state == RebuildState::CANCELLED)
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_STOPPED,
+            POS_TRACE_WARN(EID(REBUILD_STOPPED),
                 "Partition {} ({}) rebuilding stopped",
                 PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
         else if (state == RebuildState::FAIL)
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::REBUILD_FAILED,
+            POS_TRACE_WARN(EID(REBUILD_FAILED),
                 "Partition {} ({}) rebuilding failed",
                 PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
         }
@@ -187,7 +187,7 @@ SegmentBasedRebuild::Read(void)
         int res = recovery->Recover(ubio);
         if (res != 0)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::REBUILD_FAILED,
+            POS_TRACE_ERROR(EID(REBUILD_FAILED),
                 "Failed to recover stripe {} in Partition {} ({})",
                 stripeId, PARTITION_TYPE_STR[ctx->part], ctx->raidType.ToString());
             ctx->SetResult(RebuildState::FAIL);

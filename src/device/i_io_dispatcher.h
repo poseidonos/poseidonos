@@ -58,7 +58,6 @@ public:
     virtual void AddDeviceForIOWorker(UblockSharedPtr dev, cpu_set_t cpuSet) = 0;
     virtual void RemoveDeviceForIOWorker(UblockSharedPtr dev) = 0;
 
-    virtual void CompleteForThreadLocalDeviceList(void) = 0;
     virtual int Submit(UbioSmartPtr ubio, bool sync = false, bool ioRecoveryNeeded = true) = 0;
     virtual void ProcessQueues(void) = 0;
 };

@@ -160,7 +160,7 @@ TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointCompleted)
 
     EventSmartPtr checkpointCompletion(new MockEvent());
     checkpointHandler = new CheckpointHandler(numMapsToFlush, numMapsFlushed, checkpointCompletion, 0);
-    checkpointHandler->Init(nullptr, nullptr, &eventScheduler);
+    checkpointHandler->Init(nullptr, contextManager, &eventScheduler);
 
     // Then: Callback event should be executed
     EXPECT_CALL(*(MockEvent*)(checkpointCompletion.get()), Execute);
@@ -178,7 +178,15 @@ TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointFailedWhenMa
     // Given: Map is not flushed yet
     int numMapsToFlush = 2;
     int numMapsFlushed = 0;
+
+    MockEventScheduler eventScheduler;
+    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event)
+    {
+        event->Execute();
+    });
+
     checkpointHandler = new CheckpointHandler(numMapsToFlush, numMapsFlushed, nullptr, 0);
+    checkpointHandler->Init(nullptr, contextManager, &eventScheduler);
 
     // Then: Checkpoint status should not be COMPLETED
     EXPECT_TRUE(checkpointHandler->GetStatus() != COMPLETED);

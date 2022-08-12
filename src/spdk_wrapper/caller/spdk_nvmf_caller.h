@@ -59,5 +59,6 @@ public:
     virtual struct spdk_bdev* SpdkNvmfNsGetBdev(struct spdk_nvmf_ns* ns);
     virtual uint32_t SpdkNvmfNsGetId(const struct spdk_nvmf_ns* ns);
     virtual void SpdkNvmfInitializeNumaAwarePollGroup(void);
+    virtual void SpdkNvmfSetUseEventReactor(cpu_set_t eventReactorSet);
 };
 } // namespace pos

@@ -170,7 +170,7 @@ MetaFsIoRequest::SuspendUntilIoCompletion(void)
         usleep(1);
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[MIO ][WaitForDone] type={}, req.tagId={}, io done={}", reqType, tagId, ioDone);
 
     ioDone = false;
@@ -191,7 +191,7 @@ MetaFsIoRequest::NotifyIoCompletionToClient(void)
         }
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[MIO ][NotifyIO   ] NotifyIOCompletionToClient tagId = {}", tagId);
 }
 

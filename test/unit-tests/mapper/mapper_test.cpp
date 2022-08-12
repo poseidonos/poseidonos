@@ -266,22 +266,22 @@ TEST(Mapper, TestVolumeEvent)
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(0));
     EXPECT_CALL(*vsaMan, LoadVSAMapFile).WillOnce(Return(0));
     int ret = mapper->VolumeMounted(0, 100);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_OK, ret);
+    EXPECT_EQ(EID(VOL_EVENT_OK), ret);
     ret = mapper->EnableInternalAccess(0);
     EXPECT_EQ(0, ret);
     EXPECT_CALL(*vsaMan, FlushTouchedPages).WillOnce(Return(0));
     ret = mapper->VolumeUnmounted(0, true);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_OK, ret);
+    EXPECT_EQ(EID(VOL_EVENT_OK), ret);
     ret = mapper->VolumeUnmounted(0, true);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_OK, ret);
+    EXPECT_EQ(EID(VOL_EVENT_OK), ret);
 
     ret = mapper->VolumeMounted(1, 100);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+    EXPECT_EQ(EID(VOL_EVENT_FAIL), ret);
 
     mapper->VolumeLoaded(1, 100);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
     ret = mapper->VolumeMounted(1, 100);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+    EXPECT_EQ(EID(VOL_EVENT_FAIL), ret);
 
     mapper->VolumeLoaded(2, 100);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(0));
@@ -290,7 +290,7 @@ TEST(Mapper, TestVolumeEvent)
     ret = mapper->VolumeMounted(2, 100);
     volList.push_back(2);
     ret = mapper->VolumeDetached(volList);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_OK, ret);
+    EXPECT_EQ(EID(VOL_EVENT_OK), ret);
 
     delete mapper;
     delete arr;
@@ -452,16 +452,16 @@ TEST(Mapper, TestVolumeCreated_Failed)
 
     mapper->SetVolumeState(0, VolState::BACKGROUND_MOUNTED, 10);
     int ret = mapper->VolumeCreated(0, 100);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+    EXPECT_EQ(EID(VOL_EVENT_FAIL), ret);
 
     mapper->SetVolumeState(0, VolState::NOT_EXIST, 10);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
     ret = mapper->VolumeCreated(0, 100);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+    EXPECT_EQ(EID(VOL_EVENT_FAIL), ret);
 
     mapper->SetVolumeState(1, VolState::VOLUME_DELETING, 10);
     ret = mapper->VolumeLoaded(1, 100);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_FAIL, ret);
+    EXPECT_EQ(EID(VOL_EVENT_FAIL), ret);
     ret = mapper->PrepareVolumeDelete(1);
     EXPECT_EQ(-EID(MAPPER_FAILED), ret);
 
@@ -572,7 +572,7 @@ TEST(Mapper, TestVolumeDetacheds_Failed)
     list.push_back(volId);
     mapper->SetVolumeState(0, VolState::VOLUME_DELETING, 10);
     int ret = mapper->VolumeDetached(list);
-    EXPECT_EQ((int)POS_EVENT_ID::VOL_EVENT_OK, ret);
+    EXPECT_EQ(EID(VOL_EVENT_OK), ret);
 
     delete mapper;
     delete arr;

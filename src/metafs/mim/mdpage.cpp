@@ -67,7 +67,7 @@ MDPage::AttachControlInfo(void)
     if (!ctrlInfo)
     {
         ctrlInfo = reinterpret_cast<MDPageControlInfo*>(dataAll + GetDefaultDataChunkSize());
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[Mpio][ControlInfo] Control info attached");
     }
 }
@@ -89,7 +89,7 @@ MDPage::CheckValid(const int arrayId, const uint64_t signature) const
     // note that it has to have additional logic to detect signature corruption case later on
     if (ctrlInfo->mfsSignature != MDPageControlInfo::MDPAGE_CTRL_INFO_SIG)
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_DEBUG(EID(MFS_INVALID_PARAMETER),
             "The mdpage signature in the control is invalid, sig: {}",
             ctrlInfo->mfsSignature);
 
@@ -98,7 +98,7 @@ MDPage::CheckValid(const int arrayId, const uint64_t signature) const
 
     if (ctrlInfo->epochSignature != signature)
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_DEBUG(EID(MFS_INVALID_PARAMETER),
             "The epoch signature in the control is invalid, ideal sig: {}, sig: {}",
             signature, ctrlInfo->epochSignature);
 
@@ -113,7 +113,7 @@ MDPage::CheckLpnMismatch(const MetaLpnType srcLpn) const
 {
     if (ctrlInfo->metaLpn != srcLpn)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "Lpn mismatch detected: ideal lpn: {}, lpn: {}",
             srcLpn, ctrlInfo->metaLpn);
 
@@ -127,7 +127,7 @@ MDPage::CheckFileMismatch(const FileDescriptorType fd) const
 {
     if (ctrlInfo->fd != fd)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "FD mismatch detected: ideal fd: {}, fd: {}, lpn: {}",
             fd, ctrlInfo->fd, ctrlInfo->metaLpn);
         return false;

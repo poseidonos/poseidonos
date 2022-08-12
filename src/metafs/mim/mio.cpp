@@ -83,7 +83,7 @@ Mio::Setup(MetaFsIoRequest* ioReq, MetaLpnType baseLpn, MetaStorageSubsystem* me
     opCode = ioOpcodeMap[static_cast<uint32_t>(originReq->reqType)];
     startLpn = ioReq->GetStartLpn();
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Mio ][SetupMio   ] type={}, req.tagId={}, fileOffset={}, baseLpn={}, startLpn={}",
         originReq->reqType, originReq->tagId, originReq->byteOffsetInFile, baseLpn, startLpn);
 }
@@ -203,7 +203,7 @@ Mio::_AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO)
     mpio->Setup(mpioIoInfo, partialIO, false /*forceSyncIO*/, metaStorage);
     mpio->SetLocalAioCbCxt(mpioAsyncDoneCallback);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Mpio][Alloc      ] type={}, req.tagId={}, mpio_id={}, fileOffsetinChunk={}, fileOffset={}",
         mpioIoInfo.opcode, mpioIoInfo.tagId, mpioIoInfo.mpioId,
         mpioIoInfo.startByteOffset, originReq->byteOffsetInFile);

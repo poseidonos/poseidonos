@@ -114,7 +114,7 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
 
     gcStripeManager->SetFinished();
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_MAP_UPDATE_COMPLETION,
+    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_COMPLETION),
         "gc map update completion, arrayName:{}, stripeUserLsid:{}",
         arrayName, stripe->GetUserLsid());
 

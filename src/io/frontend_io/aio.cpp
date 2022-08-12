@@ -342,8 +342,9 @@ AIO::CompleteIOs(void)
     uint32_t reactor_id = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     int cnt = ioContext.cnt;
     airlog("CNT_AIO_CompleteIOs", "AIR_BASE", reactor_id, cnt);
-    DeviceManagerSingleton::Instance()->HandleCompletedCommand();
+    IODispatcher::CompleteForThreadLocalDeviceList();
 }
+
 void
 AIO::SubmitAsyncAdmin(pos_io& io, IArrayInfo* arrayInfo)
 {

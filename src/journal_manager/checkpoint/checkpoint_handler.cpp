@@ -59,7 +59,8 @@ CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, Eve
   allocatorMetaFlushCompleted(false),
   mapFlushCompleted(false),
   checkpointCompletionCallback(callback),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  logGroupIdInProgress(INT32_MAX)
 {
 }
 
@@ -69,6 +70,14 @@ CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManage
     mapFlush = mapFlushToUse;
     contextManager = contextManagerToUse;
     scheduler = eventScheduler;
+    logGroupIdInProgress = INT32_MAX;
+}
+
+void
+CheckpointHandler::SyncContext(int logGroupId)
+{
+    contextManager->SyncLogGroup(logGroupId);
+    logGroupIdInProgress = logGroupId;
 }
 
 int
@@ -102,7 +111,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
             if (ret != 0)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
-                POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+                POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
                     "Failed to start flushing dirty map pages, arrayId:{}", arrayId);
                 return ret;
             }
@@ -111,10 +120,11 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
 
     EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
         ALLOCATOR_META_ID));
+
     ret = contextManager->FlushContexts(allocMetaFlushCallback, false);
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
             "Failed to start flushing allocator meta pages, arrayId:{}", arrayId);
     }
 
@@ -145,7 +155,10 @@ CheckpointHandler::FlushCompleted(int metaId)
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
             "Allocator meta flush completed, arrayId:{}", arrayId);
         assert(allocatorMetaFlushCompleted == false);
+
         allocatorMetaFlushCompleted = true;
+        contextManager->ResetFlushedInfo(logGroupIdInProgress);
+        logGroupIdInProgress = INT32_MAX;
     }
     else
     {
@@ -161,7 +174,7 @@ CheckpointHandler::FlushCompleted(int metaId)
 void
 CheckpointHandler::_TryToComplete(void)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
+    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS),
         "Try to complete CP, mapCompleted {} allocatorCompleted {}, arrayId:{}",
         mapFlushCompleted, allocatorMetaFlushCompleted, arrayId);
 
@@ -197,7 +210,7 @@ CheckpointHandler::_Reset(void)
 void
 CheckpointHandler::_SetStatus(CheckpointStatus to)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
+    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS),
         "Checkpoint status changed from {} to {}, arrayId:{}", status, to, arrayId);
 
     status = to;
@@ -208,5 +221,4 @@ CheckpointHandler::GetStatus(void)
 {
     return status;
 }
-
 } // namespace pos

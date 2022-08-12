@@ -43,7 +43,7 @@ TEST(VolumeQosUpdater, Do_)
     NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_REQ_PROCESSED_BUT_ERROR_OCCURED;
+    int expected = EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
 
     // When
     VolumeList volumes;

@@ -16,10 +16,6 @@ TEST(ReplayHandler, Start_)
 {
 }
 
-TEST(ReplayHandler, _InitializeExternalModuleReferences_)
-{
-}
-
 TEST(ReplayHandler, _InitializeTaskList_)
 {
 }

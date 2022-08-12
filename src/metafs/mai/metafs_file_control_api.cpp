@@ -434,12 +434,12 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName,
         index = bitmap->FindFirstZero();
         if (index >= MetaFsConfig::MAX_VOLUME_CNT)
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_NEED_MORE_CONTEXT_SLOT,
+            MFS_TRACE_ERROR(EID(MFS_NEED_MORE_CONTEXT_SLOT),
                 "Metafile count={}", index);
             return;
         }
 
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "FileContext is allocated index={}, arrayId={}", index, arrayId);
 
         bitmap->SetBit(index);
@@ -482,7 +482,7 @@ MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd,
 
         cxtList[index].Reset();
 
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "FileContext is deallocated index={}, arrayId={}", index, arrayId);
     }
 }

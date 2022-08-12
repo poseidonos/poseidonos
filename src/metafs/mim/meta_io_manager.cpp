@@ -173,7 +173,7 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
     // cloneReqMsg: new copy, only for meta scheduler, not meta handler thread
     MetaFsIoRequest* cloneReqMsg = new MetaFsIoRequest(reqMsg);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[MSG ][EnqueueReq ] type={}, req.TagId={}, mediaType={}, io_mode={}, fileOffset={}, Size={}, Lpn={}",
         (int)reqMsg.reqType, (int)reqMsg.tagId, (int)reqMsg.targetMediaType,
         (int)reqMsg.ioMode, reqMsg.byteOffsetInFile, reqMsg.byteSize,
@@ -188,7 +188,7 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
         int error = reqMsg.GetError();
         if (error)
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR,
+            MFS_TRACE_ERROR(EID(MFS_IO_FAILED_DUE_TO_ERROR),
                 "[MSG ] Sync I/O failed. req.tagId={}, fd={}", reqMsg.tagId, reqMsg.fd);
             rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
         }
