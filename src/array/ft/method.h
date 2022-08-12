@@ -34,6 +34,7 @@
 
 #include <list>
 #include <vector>
+#include <utility>
 
 #include "src/include/address_type.h"
 #include "src/include/recover_func.h"
@@ -78,6 +79,10 @@ public:
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) { return list<FtBlkAddr>(); }
     virtual vector<uint32_t> GetParityOffset(StripeId lsid) { return vector<uint32_t>(); }
     virtual bool IsRecoverable(void) { return true; }
+    virtual vector<pair<vector<uint32_t>, vector<uint32_t>>> GetRebuildGroupPairs(vector<uint32_t>& targetIndexs)
+    {
+        return vector<pair<vector<uint32_t>, vector<uint32_t>>>();
+    }
 
 protected:
     FtSizeInfo ftSize_ = {

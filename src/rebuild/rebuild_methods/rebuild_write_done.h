@@ -30,34 +30,27 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "update_data_complete_handler.h"
-#include "src/logger/logger.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/include/backend_event.h"
+#pragma once
+
+#include "src/event_scheduler/callback.h"
+#include "src/array/rebuild/rebuild_method.h"
+#include "src/include/smart_ptr_type.h"
+
+class Method;
 
 namespace pos
 {
-UpdateDataCompleteHandler::UpdateDataCompleteHandler(
-    uint32_t _t, UbioSmartPtr _u, RebuildBehavior* _b)
-: Callback(false, CallbackType_UpdateDataCompleteHandler),
-  targetId(_t),
-  ubio(_u),
-  behavior(_b)
-{
-}
+class Ubio;
 
-bool
-UpdateDataCompleteHandler::_DoSpecificJob()
+class RebuildWriteDone : public Callback
 {
-    if (_GetErrorCount() > 0)
-    {
-        RebuildContext* rebuildCtx = behavior->GetContext();
-        POS_TRACE_ERROR(EID(REBUILD_FAILED),
-                "Failed to update data during rebuild - Array:{}, Partition:{}, ID:{}",
-                rebuildCtx->array , PARTITION_TYPE_STR[rebuildCtx->part], targetId);
-        rebuildCtx->SetResult(RebuildState::FAIL);
-    }
+public:
+    RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback, BufferPool* dstBufferPool);
 
-    return behavior->Complete(targetId, ubio);
-}
+private:
+    bool _DoSpecificJob(void) override;
+    UbioSmartPtr ubio = nullptr;
+    WriteDoneCallback writeDoneCallback = nullptr;
+    BufferPool* bufferPool = nullptr;
+};
 } // namespace pos

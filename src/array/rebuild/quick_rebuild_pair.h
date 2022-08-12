@@ -32,16 +32,14 @@
 
 #pragma once
 
-#include "recovery_base.h"
+#include <functional>
+#include <vector>
+#include <utility>
 
 using namespace std;
 
 namespace pos
 {
-class RebuildRecovery : public RecoveryBase
-{
-public:
-    explicit RebuildRecovery(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
-    int Recover(UbioSmartPtr ubio) override;
-};
+class IArrayDevice;
+using QuickRebuildPair = vector<pair<IArrayDevice*, IArrayDevice*>>;
 } // namespace pos

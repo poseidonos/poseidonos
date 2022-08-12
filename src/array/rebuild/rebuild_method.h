@@ -30,22 +30,42 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "update_data_handler.h"
+#pragma once
+
+#include "src/resource_manager/memory_manager.h"
+#include "src/resource_manager/buffer_pool.h"
+#include "src/bio/ubio.h"
+#include "src/include/array_config.h"
+#include "src/array_models/dto/partition_physical_size.h"
+
+#include <functional>
+#include <vector>
+#include <string>
+
+using namespace std;
 
 namespace pos
 {
-UpdateDataHandler::UpdateDataHandler(uint32_t _t, UbioSmartPtr _u,
-    RebuildBehavior* _b)
-: Callback(false, CallbackType_UpdateDataHandler),
-  targetId(_t),
-  ubio(_u),
-  behavior(_b)
-{
-}
+using ReadDoneCallback = function<void(int result)>;
+using WriteDoneCallback = function<void(int result)>;
+using StripeRebuildDoneCallback = function<void(int result)>;
 
-bool
-UpdateDataHandler::_DoSpecificJob(void)
+class RebuildMethod
 {
-    return behavior->Write(targetId, ubio);
-}
+public:
+    RebuildMethod(uint32_t srcCnt, uint32_t dstCnt, MemoryManager* mm = MemoryManagerSingleton::Instance());
+    virtual ~RebuildMethod(void);
+    bool Init(string owner);
+    virtual int Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback) = 0;
+
+protected:
+    MemoryManager* mm = nullptr;
+    BufferPool* srcBuffer = nullptr;
+    BufferPool* dstBuffer = nullptr;
+    uint64_t srcSize = 0;
+    uint64_t dstSize = 0;
+    uint32_t bufCnt = ArrayConfig::REBUILD_STRIPES_UNIT;
+    uint64_t unitSize = ArrayConfig::REBUILD_CHUNK_SIZE_BYTE;
+    bool isInitialized = false;
+};
 } // namespace pos

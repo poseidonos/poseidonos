@@ -159,6 +159,25 @@ Raid5::CheckNumofDevsToConfigure(uint32_t numofDevs)
     return numofDevs >= minRequiredNumofDevsforRAID5;
 }
 
+vector<pair<vector<uint32_t>, vector<uint32_t>>>
+Raid5::GetRebuildGroupPairs(vector<uint32_t>& targetIndexs)
+{
+    assert(targetIndexs.size() == 1);
+
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> rgPair;
+    uint32_t dst = targetIndexs.front();
+    vector<uint32_t> srcIdx;
+    for (uint32_t i = 0; i < ftSize_.chunksPerStripe; i++)
+    {
+        if (i != dst)
+        {
+            srcIdx.push_back(i);
+        }
+    }
+    rgPair.emplace_back(make_pair(srcIdx, targetIndexs));
+    return rgPair;
+}
+
 BufferEntry
 Raid5::_AllocChunk()
 {

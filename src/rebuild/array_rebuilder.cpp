@@ -44,50 +44,56 @@ ArrayRebuilder::ArrayRebuilder(IRebuildNotification* noti)
 }
 
 void
-ArrayRebuilder::Rebuild(string array, uint32_t arrayId, ArrayDevice* dst, ArrayDevice* src,
-                        RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildTypeEnum rebuildType)
+ArrayRebuilder::Rebuild(string array, uint32_t arrayId, vector<IArrayDevice*> dst,
+    RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Rebuild of {} requested, target_size:{}, rebuild_type:{}", array, tgt.size(), rebuildType);
+        "Rebuild requested, array:{}, dstCnt:{}, targetPartCnt:{}", array, dst.size(), tgt.size());
 
+    mtxStart.lock();
     if (_Find(array) != nullptr)
     {
         POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
-            "The rebuild of the same Array is not completed and a new rebuild is submitted");
+            "The rebuild is already in progress, array:{}", array);
+        mtxStart.unlock();
         return;
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), 
-        "{} is preparing to start rebuild", array);
-
-    mtxStart.lock();
-    bool resume = false;
-    int ret = iRebuildNoti->PrepareRebuild(array, resume);
+    int ret = _PrepareRebuild(array, tgt);
+    RebuildBehaviorFactory factory(AllocatorServiceSingleton::Instance()->GetIContextManager(array));
+    ArrayRebuild* job = new ArrayRebuild(array, arrayId, dst, cb, tgt, &factory);
+    jobsInProgress.emplace(array, job);
+    mtxStart.unlock();
 
     if (ret == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "{} is ready to rebuild. isResume: {}", array, resume);
+        job->Start();
     }
     else
     {
-         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-            "{} is failed to prepare rebuild and will be discarded, isResume: {}, prepare_result: {}",
-            array, resume, ret);
+        job->Discard();
+    }
+}
+
+void
+ArrayRebuilder::QuickRebuild(string array, uint32_t arrayId, QuickRebuildPair rebuildPair,
+    RebuildComplete cb, list<RebuildTarget*>& tgt)
+{
+    // todo quick rebuild implementation
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "QuickRebuild requested, array:{}, pair_cnt:{}, targetPartCnt:{}", array, rebuildPair.size(), tgt.size());
+
+    mtxStart.lock();
+    if (_Find(array) != nullptr)
+    {
+        POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+            "The rebuild is already in progress, array:{}", array);
+        mtxStart.unlock();
+        return;
     }
 
-    if (resume)
-    {
-        for (auto it : tgt)
-        {
-            if (it->GetType() == PartitionType::META_SSD)
-            {
-                tgt.remove(it);
-                break;
-            }
-        }
-    }
+    int ret = _PrepareRebuild(array, tgt);
     RebuildBehaviorFactory factory(AllocatorServiceSingleton::Instance()->GetIContextManager(array));
-    ArrayRebuild* job = new ArrayRebuild(array, arrayId, dst, src, cb, tgt, &factory, rebuildType);
+    ArrayRebuild* job = new ArrayRebuild(array, arrayId, rebuildPair, cb, tgt, &factory);
     jobsInProgress.emplace(array, job);
     mtxStart.unlock();
 
@@ -165,6 +171,37 @@ ArrayRebuilder::GetRebuildProgress(string array)
         return jobInProg->GetProgress();
     }
     return 0;
+}
+
+int
+ArrayRebuilder::_PrepareRebuild(string arrayname, list<RebuildTarget*>& tgt)
+{
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "{} is preparing rebuild", arrayname);
+    bool resume = false;
+    int ret = iRebuildNoti->PrepareRebuild(arrayname, resume);
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "{} is ready to rebuild. isResume: {}", arrayname, resume);
+    }
+    else
+    {
+         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+            "{} is failed to prepare rebuild and will be discarded, isResume: {}, prepare_result: {}",
+            arrayname, resume, ret);
+    }
+    if (resume)
+    {
+        for (auto it : tgt)
+        {
+            if (it->IsResumable() == false)
+            {
+                tgt.remove(it);
+                break;
+            }
+        }
+    }
+    return ret;
 }
 
 ArrayRebuild*

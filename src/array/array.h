@@ -35,6 +35,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 #include "src/array/partition/partition_services.h"
 #include "src/array/device/array_device_manager.h"
@@ -106,7 +107,7 @@ public:
     bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
-    virtual void DoRebuildAsync(ArrayDevice* dst, ArrayDevice* src, RebuildTypeEnum rt);
+    virtual void DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt);
     virtual bool ResumeRebuild(ArrayDevice* target);
     virtual void SetPreferences(bool isWT);
 
@@ -117,7 +118,7 @@ private:
     int _Flush(void);
     int _Flush(ArrayMeta& meta);
     int _CheckRebuildNecessity(ArrayDevice* target);
-    void _RebuildDone(RebuildResult result);
+    void _RebuildDone(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildResult result);
     void _DetachSpare(ArrayDevice* target);
     void _DetachData(ArrayDevice* target);
     int _RegisterService(void);

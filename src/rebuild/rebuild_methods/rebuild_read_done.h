@@ -30,21 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rebuild_recovery.h"
-#include "src/io/backend_io/rebuild_io/rebuild_read.h"
+#pragma once
+
+#include "src/event_scheduler/callback.h"
+#include "src/array/rebuild/rebuild_method.h"
+#include "src/include/smart_ptr_type.h"
+
+class Method;
 
 namespace pos
 {
-RebuildRecovery::RebuildRecovery(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt)
-: RecoveryBase(srcSize, destSize, bufCnt)
-{
-}
+class Ubio;
 
-int
-RebuildRecovery::Recover(UbioSmartPtr ubio)
+class RebuildReadDone : public Callback
 {
-    RebuildRead rebuildRead;
-    return rebuildRead.Recover(ubio, srcBuffer);
-}
+public:
+    RebuildReadDone(UbioSmartPtr ubio, ReadDoneCallback readDoneCallback);
 
+private:
+    bool _DoSpecificJob(void) override;
+    UbioSmartPtr ubio = nullptr;
+    ReadDoneCallback readDoneCallback = nullptr;
+};
 } // namespace pos

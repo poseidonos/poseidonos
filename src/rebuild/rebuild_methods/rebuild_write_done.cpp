@@ -30,32 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/resource_manager/memory_manager.h"
-#include "src/resource_manager/buffer_pool.h"
+#include "rebuild_write_done.h"
 #include "src/bio/ubio.h"
-
-using namespace std;
+#include "src/include/io_error_type.h"
+#include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
-
-class RecoveryBase
+RebuildWriteDone::RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback, BufferPool* dstBufferPool)
+: Callback(false, CallbackType_RebuildReadCompleteHandler),
+  ubio(ubio),
+  writeDoneCallback(writeDoneCallback),
+  bufferPool(dstBufferPool)
 {
-public:
-    RecoveryBase(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
-    virtual ~RecoveryBase(void);
-    virtual bool Init(MemoryManager* mm, string owner);
-    virtual int Recover(UbioSmartPtr ubio) = 0;
-    virtual BufferPool* GetDestBuffer(void);
+}
 
-protected:
-    MemoryManager* mm = nullptr;
-    BufferPool* srcBuffer = nullptr;
-    BufferPool* destBuffer = nullptr;
-    uint64_t srcSize = 0;
-    uint64_t destSize = 0;
-    uint32_t bufCnt = 0;
-};
+bool
+RebuildWriteDone::_DoSpecificJob(void)
+{
+    int ret = 0;
+    if (_GetErrorCount() > 0)
+    {
+        ret = EID(IO_RECOVER_DEBUG_MSG);
+        POS_TRACE_WARN(ret, "rebuild write done with errors");
+    }
+
+    bufferPool->ReturnBuffer(ubio->GetWholeBuffer());
+    writeDoneCallback(ret);
+    ubio = nullptr;
+    return true;
+}
+
 } // namespace pos
+

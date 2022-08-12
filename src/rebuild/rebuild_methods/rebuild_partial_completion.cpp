@@ -30,25 +30,48 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "rebuild_partial_completion.h"
 
-#include "recovery_base.h"
-#include "src/include/recover_func.h"
-#include "src/array/device/array_device.h"
-
-using namespace std;
+#include "src/bio/ubio.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class QuickRecovery : public RecoveryBase
+RebuildPartialCompletion::
+    RebuildPartialCompletion(UbioSmartPtr input)
+: Callback(false, CallbackType_RebuildReadIntermediateCompleteHandler),
+  ubio(input)
 {
-public:
-    explicit QuickRecovery(ArrayDevice* srcDev, uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
-    int Recover(UbioSmartPtr ubio) override;
+}
 
-private:
-    void _Copy(void* dst, void* src, uint32_t size);
-    ArrayDevice* src;
-    RecoverFunc recoverFunc = nullptr;
-};
+RebuildPartialCompletion::
+    ~RebuildPartialCompletion(void)
+{
+}
+
+bool
+RebuildPartialCompletion::_DoSpecificJob(void)
+{
+    if (unlikely(nullptr == ubio))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_INVALID_UBIO;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            "Ubio is null during rebuild partial completion");
+        return true;
+    }
+
+    if (unlikely(_GetErrorCount()))
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_READ_FAIL;
+        POS_TRACE_ERROR(static_cast<int>(eventId),
+            "Uncorrectable data error");
+    }
+
+    ubio = nullptr;
+
+    return true;
+}
+
 } // namespace pos

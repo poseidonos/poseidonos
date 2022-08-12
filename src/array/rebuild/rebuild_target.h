@@ -33,9 +33,12 @@
 #pragma once
 
 #include "rebuild_context.h"
+#include "quick_rebuild_pair.h"
 #include "src/include/partition_type.h"
 
 #include <memory>
+#include <vector>
+#include <utility>
 
 namespace pos
 {
@@ -44,11 +47,12 @@ class ArrayDevice;
 class RebuildTarget
 {
 public:
-    explicit RebuildTarget(PartitionType type) : targetType(type) {}
-    PartitionType GetType(void) { return targetType; }
-    virtual unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) = 0;
+    explicit RebuildTarget(bool supportResumeRebuild) : supportResumeRebuild(supportResumeRebuild) {}
+    bool IsResumable(void) { return supportResumeRebuild; }
+    virtual unique_ptr<RebuildContext> GetRebuildCtx(const vector<IArrayDevice*>& fault) = 0;
+    virtual unique_ptr<RebuildContext> GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair) = 0;
 
 private:
-    PartitionType targetType;
+    bool supportResumeRebuild = false;
 };
 } // namespace pos

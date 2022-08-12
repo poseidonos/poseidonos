@@ -35,6 +35,7 @@
 
 #include <list>
 #include <vector>
+#include <utility>
 
 #include "method.h"
 #include "src/resource_manager/memory_manager.h"
@@ -61,6 +62,7 @@ public:
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
     bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> GetRebuildGroupPairs(vector<uint32_t>& targetIndexs) override;
 
     // This function is for unit testing only
     virtual int GetParityPoolSize();

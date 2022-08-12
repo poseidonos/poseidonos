@@ -58,7 +58,7 @@ TEST(PartitionServices, AddRebuildTarget_testIfRebuildTargetHasBeenAdded)
 {
     // Given
     PartitionServices svc;
-    MockRebuildTarget mockRebuildTarget(PartitionType::USER_DATA);
+    MockRebuildTarget mockRebuildTarget(true);
 
     // When
     svc.AddRebuildTarget(&mockRebuildTarget);

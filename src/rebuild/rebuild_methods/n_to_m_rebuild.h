@@ -32,25 +32,28 @@
 
 #pragma once
 
-#include "rebuild_behavior.h"
-#include "src/bio/ubio.h"
-#include "src/event_scheduler/callback.h"
+#include "src/array/rebuild/rebuild_method.h"
+#include "src/include/recover_func.h"
+#include "src/include/i_array_device.h"
+
+#include <vector>
+
+using namespace std;
 
 namespace pos
 {
-class UpdateDataHandler : public Callback
+class NToMRebuild : public RebuildMethod
 {
 public:
-    UpdateDataHandler(uint32_t _t, UbioSmartPtr _u, RebuildBehavior* _b);
-
-    ~UpdateDataHandler(void) override
-    {
-    }
+    explicit NToMRebuild(vector<IArrayDevice*> src, vector<IArrayDevice*> dst, RecoverFunc recoverFunc);
+    int Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback) override;
 
 private:
-    bool _DoSpecificJob(void) override;
-    uint32_t targetId = 0;
-    UbioSmartPtr ubio = nullptr;
-    RebuildBehavior* behavior = nullptr;
+    void _Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src, int readResult);
+    void _WriteDone(StripeId stripeId, StripeRebuildDoneCallback callback, int writeResult);
+    vector<IArrayDevice*> src;
+    vector<IArrayDevice*> dst;
+    RecoverFunc recoverFunc = nullptr;
+    uint64_t airKey = 0;
 };
 } // namespace pos

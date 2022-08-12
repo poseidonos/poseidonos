@@ -35,6 +35,8 @@
 #include "src/include/array_device_state.h"
 #include "src/include/smart_ptr_type.h"
 
+#include <string>
+
 namespace pos
 {
 
@@ -53,5 +55,8 @@ public:
     virtual UblockSharedPtr GetUblock(void) = 0;
     virtual UBlockDevice* GetUblockPtr(void) = 0;
     virtual void SetUblock(UblockSharedPtr uBlock) = 0;
+    virtual std::string GetName(void) = 0;
+    virtual std::string GetSerial(void) = 0;
+    virtual uint32_t GetDataIndex(void) = 0;
 };
 } // namespace pos

@@ -33,7 +33,7 @@ SUBDIRS = allocator \
         array_components \
         array_mgmt \
         rebuild \
-        rebuild/recovery_methods \
+        rebuild/rebuild_methods \
         volume \
         device \
         spdk_wrapper \

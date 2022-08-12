@@ -42,7 +42,7 @@ Rebuilder::Rebuilder(RebuildBehavior* _b)
 bool
 Rebuilder::Execute(void)
 {
-    return behavior->Init();
+    return behavior->Rebuild();
 }
 
 } // namespace pos
