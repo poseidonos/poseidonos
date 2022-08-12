@@ -122,7 +122,6 @@ Spdk::_InitWorker(int argc, char** argv)
 void
 Spdk::Finalize()
 {
-    AccelEngineApi::Finalize();
     spdk_app_stop(0);
     if (spdkThread)
     {
