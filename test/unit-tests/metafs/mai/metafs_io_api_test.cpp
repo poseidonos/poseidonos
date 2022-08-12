@@ -55,7 +55,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Fully)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(false);
 
@@ -74,7 +74,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Partia
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(false);
 
@@ -93,7 +93,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Fully)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(true);
 
@@ -114,7 +114,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Partiall
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(true);
 
@@ -132,12 +132,12 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
+    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>(false);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false, io);
 
     api.SetStatus(true);
 
@@ -174,12 +174,12 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
+    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>(false);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false, io);
 
     api.SetStatus(true);
 
@@ -219,7 +219,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Fully)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(false);
 
@@ -238,7 +238,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Partial
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(false);
 
@@ -257,7 +257,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Fully)
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(true);
 
@@ -278,7 +278,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Partially
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false);
 
     api.SetStatus(true);
 
@@ -296,12 +296,12 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
+    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>(false);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false, io);
 
     api.SetStatus(true);
 
@@ -338,12 +338,12 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
     MetaStorageType type = MetaStorageType::SSD;
     MetaLpnType lpnSize = 5;
     NiceMock<MockMetaStorageSubsystem>* storage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
-    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>();
+    NiceMock<MockMetaIoManager>* io = new NiceMock<MockMetaIoManager>(false);
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
 
-    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, io);
+    MetaFsIoApi api(arrayId, ctrl, storage, tp, concurrentMetaFsTimeInterval, false, io);
 
     api.SetStatus(true);
 

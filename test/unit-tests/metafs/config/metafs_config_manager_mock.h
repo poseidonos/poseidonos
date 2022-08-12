@@ -56,5 +56,7 @@ public:
     MOCK_METHOD(size_t, GetWrrCountMap, (), (const));
     MOCK_METHOD(size_t, GetWrrCountGeneral, (), (const));
     MOCK_METHOD(std::vector<int>, GetWrrWeight, (), (const));
+    MOCK_METHOD(bool, IsRocksdbEnabled, (), (const));
+    MOCK_METHOD(bool, IsSupportingNumaDedicatedScheduling, (), (const));
 };
 } // namespace pos

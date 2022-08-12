@@ -49,13 +49,16 @@
 
 namespace pos
 {
+class MetaFsAioCbCxt;
+
 class MetaFsIoApi
 {
 public:
     MetaFsIoApi(void);
     MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
         MetaStorageSubsystem* storage, TelemetryPublisher* tp,
-        ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval, MetaIoManager* io = nullptr);
+        ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval,
+        const bool supportNumaDedicated, MetaIoManager* io = nullptr);
     virtual ~MetaFsIoApi(void);
 
     virtual POS_EVENT_ID Read(FileDescriptorType fd, void* buf,

@@ -36,31 +36,39 @@
  * Meta File I/O Manager
 */
 
-#include <string>
-#include "src/metafs/include/metafs_service.h"
-#include "src/metafs/msc/metafs_mbr_mgr.h"
 #include "meta_io_manager.h"
+
+#include <numa.h>
+
+#include <string>
+
+#include "metafs_control_request.h"
 #include "metafs_log.h"
 #include "metafs_mem_lib.h"
-#include "metafs_control_request.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
+#include "src/metafs/include/metafs_service.h"
+#include "src/metafs/mim/metafs_io_scheduler.h"
+#include "src/metafs/msc/metafs_mbr_mgr.h"
+#include "src/metafs/storage/mss.h"
 
 namespace pos
 {
-MetaIoManager::MetaIoManager(MetaStorageSubsystem* storage)
+MetaIoManager::MetaIoManager(const bool supportNumaDedicated, MetaStorageSubsystem* storage)
+: MetaIoManager(supportNumaDedicated, MetaFsServiceSingleton::Instance()->GetScheduler(), storage)
 {
-    _InitReqHandler();
-
-    ioScheduler = MetaFsServiceSingleton::Instance()->GetScheduler();
-    metaStorage = storage;
 }
 
-MetaIoManager::MetaIoManager(MetaFsIoScheduler* ioScheduler, MetaStorageSubsystem* storage)
+MetaIoManager::MetaIoManager(const bool supportNumaDedicated, const SchedulerMap& ioScheduler,
+    MetaStorageSubsystem* storage)
+: IS_SINGLE_SCHEDULER(ioScheduler.size() == 1),
+  SUPPORT_NUMA_DEDICATED_SCHEDULING(supportNumaDedicated),
+  ioScheduler(ioScheduler),
+  totalMetaIoCoreCnt(0),
+  mioHandlerCount(0),
+  finalized(false),
+  metaStorage(storage)
 {
-    this->ioScheduler = ioScheduler;
-    metaStorage = storage;
-
     _InitReqHandler();
 }
 
@@ -118,13 +126,33 @@ MetaIoManager::Finalize(void)
 bool
 MetaIoManager::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map)
 {
-    return ioScheduler->AddArrayInfo(arrayId, map);
+    bool result = true;
+    for (const auto& scheduler : ioScheduler)
+    {
+        if (!scheduler.second->AddArrayInfo(arrayId, map))
+        {
+            result = false;
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED,
+                "Adding array has been failed, arrayId:{}", arrayId);
+        }
+    }
+    return result;
 }
 
 bool
 MetaIoManager::RemoveArrayInfo(int arrayId)
 {
-    return ioScheduler->RemoveArrayInfo(arrayId);
+    bool result = true;
+    for (const auto& scheduler : ioScheduler)
+    {
+        if (!scheduler.second->RemoveArrayInfo(arrayId))
+        {
+            result = false;
+            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_FAILED,
+                "Removing array has been failed, arrayId:{}", arrayId);
+        }
+    }
+    return result;
 }
 
 POS_EVENT_ID
@@ -151,7 +179,7 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
         (int)reqMsg.ioMode, reqMsg.byteOffsetInFile, reqMsg.byteSize,
         reqMsg.byteOffsetInFile / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
 
-    ioScheduler->EnqueueNewReq(cloneReqMsg);
+    _IssueToScheduler(cloneReqMsg);
 
     if (reqMsg.IsSyncIO())
     {
@@ -167,6 +195,20 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
     }
 
     return rc;
+}
+
+void
+MetaIoManager::_IssueToScheduler(MetaFsIoRequest* reqMsg)
+{
+    if (IS_SINGLE_SCHEDULER)
+    {
+        ioScheduler[0]->EnqueueNewReq(reqMsg);
+    }
+    else
+    {
+        uint32_t numaId = SUPPORT_NUMA_DEDICATED_SCHEDULING ? reqMsg->numaId : 0;
+        ioScheduler[numaId]->EnqueueNewReq(reqMsg);
+    }
 }
 
 void

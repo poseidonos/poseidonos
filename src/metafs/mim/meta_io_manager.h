@@ -38,24 +38,28 @@
 #pragma once
 
 #include <string>
-#include "src/metafs/storage/mss.h"
-#include "metafs_manager_base.h"
-#include "metafs_io_scheduler.h"
+#include <unordered_map>
+
 #include "meta_io_manager.h"
-#include "metafs_io_request.h"
 #include "meta_volume_manager.h"
+#include "metafs_io_request.h"
+#include "metafs_manager_base.h"
 
 namespace pos
 {
 class MetaIoManager;
+class MetaStorageSubsystem;
+class MetaFsIoScheduler;
+
 using MetaIoReqHandler = POS_EVENT_ID (MetaIoManager::*)(MetaFsIoRequest& reqMsg);
+using SchedulerMap = std::unordered_map<uint32_t, MetaFsIoScheduler*>;
 
 class MetaIoManager : public MetaFsManagerBase
 {
 public:
     // only for test
-    MetaIoManager(MetaStorageSubsystem* storage = nullptr);
-    MetaIoManager(MetaFsIoScheduler* ioScheduler, MetaStorageSubsystem* storage);
+    MetaIoManager(const bool supportNumaDedicated, MetaStorageSubsystem* storage = nullptr);
+    MetaIoManager(const bool supportNumaDedicated, const SchedulerMap& ioScheduler, MetaStorageSubsystem* storage);
     virtual ~MetaIoManager(void);
 
     bool IsSuccess(POS_EVENT_ID rc);
@@ -75,14 +79,16 @@ private:
     void _SetByteRangeForFullFileIo(MetaFsIoRequest& reqMsg);
     void _SetTargetMediaType(MetaFsIoRequest& reqMsg);
     void _WaitForDone(MetaFsIoRequest& reqMsg);
+    void _IssueToScheduler(MetaFsIoRequest* reqMsg);
 
     static const uint32_t NUM_IO_TYPE = static_cast<uint32_t>(MetaIoRequestType::Max);
+    const bool IS_SINGLE_SCHEDULER;
+    const bool SUPPORT_NUMA_DEDICATED_SCHEDULING;
     MetaIoReqHandler reqHandler[NUM_IO_TYPE];
-    MetaFsIoScheduler* ioScheduler = nullptr;
-
-    uint32_t totalMetaIoCoreCnt = 0;
-    uint32_t mioHandlerCount = 0;
-    bool finalized = false;
-    MetaStorageSubsystem* metaStorage = nullptr;
+    SchedulerMap ioScheduler;
+    uint32_t totalMetaIoCoreCnt;
+    uint32_t mioHandlerCount;
+    bool finalized;
+    MetaStorageSubsystem* metaStorage;
 };
 } // namespace pos

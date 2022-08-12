@@ -44,6 +44,7 @@
 #include "src/metadata/meta_updater.h"
 #include "src/metadata/meta_volume_event_handler.h"
 #include "src/metadata/segment_context_updater.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/volume/volume_service.h"
 
 namespace pos
