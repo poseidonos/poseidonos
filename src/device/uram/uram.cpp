@@ -196,6 +196,12 @@ Uram::GetByteAddress(void)
 void
 Uram::_InitByteAddress(void)
 {
+    static bool initialized = false;
+    if (initialized == true)
+    {
+        return;
+    }
+    initialized = true;
     std::string backupDir = "/tmp/";
     std::string backupFilePostfix = ".uram.info";
     std::string uramName = this->GetName();
@@ -220,6 +226,11 @@ Uram::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
 {
     // Reactor cannot handle Async operation for Uram in current implementation.
     // ioat poll cannot be called in Empty(), so, we restore the contents by IO worker.
+    if (AffinityManagerSingleton::Instance()->UseEventReactor())
+    {
+        _InitByteAddress();
+        return true;
+    }
     if (EventFrameworkApiSingleton::Instance()->IsReactorNow())
     {
         return true;

@@ -76,7 +76,7 @@ const AffinityConfigParser::ConfigKeyAndCoreTypes
 AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
 : selectedDescs(DEFAULT_CORE_DESCRIPTIONS),
   isStringDescripted(DEFAULT_IS_STRING_DESCRIPTED),
-  useReactorOnly(false)
+  useEventReactor(false)
 {
     ConfigManager& configManager = configManager_;
     std::string module("affinity_manager");
@@ -113,7 +113,7 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
     }
     else
     {
-        useReactorOnly = true;
+        useEventReactor = true;
         POS_EVENT_ID eventId = EID(AFTMGR_USE_CONFIG);
         POS_TRACE_INFO(static_cast<uint32_t>(eventId),
             "Use reactors for backend events and IOs.");
@@ -129,8 +129,7 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
             (iter.type == CoreType::EVENT_SCHEDULER) ||
             (iter.type == CoreType::EVENT_WORKER)))
         {
-            // ToDo : After implementing event reactor,
-            // we need apply useAffinity = false;
+            useAffinity = false;
         }
         if (useReactorConfig == false &&
             ((iter.type == CoreType::EVENT_REACTOR)))
@@ -197,9 +196,9 @@ AffinityConfigParser::IsStringDescripted(void)
 }
 
 bool
-AffinityConfigParser::IsReactorOnly(void)
+AffinityConfigParser::UseEventReactor(void)
 {
-    return useReactorOnly;
+    return useEventReactor;
 }
 
 } // namespace pos

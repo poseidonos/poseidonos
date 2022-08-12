@@ -116,6 +116,7 @@ public:
     void SetRetry(bool retry);
     uint32_t GetMemSize(void);
     virtual uint32_t GetOriginCore(void);
+    virtual void SetOriginCore(uint32_t originCore);
     void SetOriginUbio(UbioSmartPtr ubio);
     virtual UbioSmartPtr GetOriginUbio(void);
     virtual uint64_t GetSize(void);
@@ -157,6 +158,7 @@ private:
     IArrayDevice* arrayDev;
     int arrayId;
     std::string arrayName;
+    uint32_t originCore;
 
     bool CheckOriginUbioSet(void);
     void Advance(uint32_t sectors);

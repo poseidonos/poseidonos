@@ -37,6 +37,7 @@
 
 #include "spdk/pos.h"
 #include "src/bio/ubio.h"
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
@@ -59,6 +60,11 @@ UNVMfCompleteHandler(void)
         AIO aio;
         aio.CompleteIOs();
         EventFrameworkApiSingleton::Instance()->CompleteEvents();
+        uint32_t currentReactor = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
+        if (AffinityManagerSingleton::Instance()->IsEventReactor(currentReactor))
+        {
+            EventFrameworkApiSingleton::Instance()->CompleteSingleQueueEvents();
+        }
     }
     catch (...)
     {
