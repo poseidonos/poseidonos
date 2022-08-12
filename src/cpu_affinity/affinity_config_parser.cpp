@@ -55,6 +55,7 @@ const CoreDescriptionArray AffinityConfigParser::DEFAULT_CORE_DESCRIPTIONS =
         CoreDescription{CoreType::META_SCHEDULER, {1, 0}, "8"},
         CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
         CoreDescription{CoreType::AIR, {1, 0}, "11"},
+        CoreDescription{CoreType::EVENT_REACTOR, {3, 0}, "3-5"},
 };
 
 const AffinityConfigParser::ConfigKeyAndCoreTypes
@@ -69,11 +70,13 @@ const AffinityConfigParser::ConfigKeyAndCoreTypes
             ConfigKeyAndCoreType{CoreType::META_SCHEDULER, "meta_scheduler"},
             ConfigKeyAndCoreType{CoreType::META_IO, "meta_io"},
             ConfigKeyAndCoreType{CoreType::AIR, "air"},
+            ConfigKeyAndCoreType{CoreType::EVENT_REACTOR, "event_reactor"},
 };
 
 AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
 : selectedDescs(DEFAULT_CORE_DESCRIPTIONS),
-  isStringDescripted(DEFAULT_IS_STRING_DESCRIPTED)
+  isStringDescripted(DEFAULT_IS_STRING_DESCRIPTED),
+  useReactorOnly(false)
 {
     ConfigManager& configManager = configManager_;
     std::string module("affinity_manager");
@@ -97,23 +100,78 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
         "Use core description from config file");
 
     CoreDescriptionArray parsedDescs{};
-
+    bool useReactorConfig = false;
+    ret = configManager.GetValue(module, "use_reactor_only", &useReactorConfig,
+        CONFIG_TYPE_BOOL);
+    configExist =
+        (ret == EID(SUCCESS));
+    if (configExist == false || useReactorConfig == false)
+    {
+        POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_USE_CONFIG;
+        POS_TRACE_INFO(static_cast<uint32_t>(eventId),
+            "Use EventWorker and IOWorker");
+    }
+    else
+    {
+        useReactorOnly = true;
+        POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_USE_CONFIG;
+        POS_TRACE_INFO(static_cast<uint32_t>(eventId),
+            "Use reactors for backend events and IOs.");
+        POS_TRACE_INFO(static_cast<uint32_t>(eventId),
+            "Event Reactor is not implemented yet, fallback to legacy code");
+    }
+    std::vector<bool> mandatoryAffinityVector;
     for (auto& iter : CONFIG_KEY_AND_CORE_TYPES)
     {
-        std::string key = iter.key;
-        std::string coreRange;
-        int ret = configManager.GetValue(module, key, &coreRange,
-            CONFIG_TYPE_STRING);
-        if (ret != EID(SUCCESS))
+        bool useAffinity = true;
+        if (useReactorConfig == true &&
+            ((iter.type == CoreType::UDD_IO_WORKER) ||
+            (iter.type == CoreType::EVENT_SCHEDULER) ||
+            (iter.type == CoreType::EVENT_WORKER)))
         {
-            POS_TRACE_WARN(ret, "Core description from config is not valid. Use default description.");
-            return;
+            // ToDo : After implementing event reactor,
+            // we need apply useAffinity = false;
         }
-
+        if (useReactorConfig == false &&
+            ((iter.type == CoreType::EVENT_REACTOR)))
+        {
+            useAffinity = false;
+        }
+        mandatoryAffinityVector.push_back(useAffinity);
+    }
+    for (auto& iter : CONFIG_KEY_AND_CORE_TYPES)
+    {
         CoreType type = iter.type;
         CoreDescription& targetDesc = parsedDescs[static_cast<uint32_t>(type)];
-        targetDesc.coreRange = coreRange;
+        std::string key = iter.key;
+        std::string coreRange = "";
         targetDesc.type = type;
+        int ret = configManager.GetValue(module, key, &coreRange,
+            CONFIG_TYPE_STRING);
+        bool mandatory = (mandatoryAffinityVector.at(static_cast<uint32_t>(type)) == true);
+        if (ret != EID(SUCCESS))
+        {
+            if (mandatory == true)
+            {
+                POS_TRACE_WARN(ret,
+                    "Core description from config is not valid. Config \"{}\" is properly not set. Use default description.",
+                    iter.key);
+                return;
+            }
+            coreRange = "";
+        }
+        // If not necessary affinity is set by user in config file,
+        // We print out warning message that affinity is not effective.
+        if (ret == EID(SUCCESS))
+        {
+            if (mandatory == false)
+            {
+                POS_TRACE_WARN(ret, "We will ignore \"{}\" affinity config, use_reactor_only : {}",
+                    iter.key, useReactorConfig);
+                coreRange = "";
+            }
+        }
+        targetDesc.coreRange = coreRange;
     }
 
     isStringDescripted = true;
@@ -136,6 +194,12 @@ bool
 AffinityConfigParser::IsStringDescripted(void)
 {
     return isStringDescripted;
+}
+
+bool
+AffinityConfigParser::IsReactorOnly(void)
+{
+    return useReactorOnly;
 }
 
 } // namespace pos

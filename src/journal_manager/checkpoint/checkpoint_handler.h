@@ -57,10 +57,9 @@ public:
     virtual int FlushCompleted(int metaId);
 
     virtual CheckpointStatus GetStatus(void);
+    virtual void SyncContext(int logGroupId);
 
 private:
-    void _InitializeExternalModuleReferences(void);
-
     void _CheckMapFlushCompleted(void);
     void _TryToComplete(void);
     void _Reset(void);
@@ -83,6 +82,7 @@ private:
     std::mutex completionLock;
     EventSmartPtr checkpointCompletionCallback;
     int arrayId;
+    int logGroupIdInProgress;
 };
 
 } // namespace pos

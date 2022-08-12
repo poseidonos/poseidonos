@@ -4392,7 +4392,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "rpc_cli.PosInfo\032\253\001\n\006Result\022 \n\006status\030\001 \001"
   "(\0132\020.grpc_cli.Status\022B\n\004data\030\002 \001(\01324.grp"
   "c_cli.ListSubsystemResponse.Result.Subsy"
-  "stemList\032;\n\rSubsystemList\022*\n\rsubsystemLi"
+  "stemList\032;\n\rSubsystemList\022*\n\rsubsystemli"
   "st\030\001 \003(\0132\023.grpc_cli.Subsystem\"\225\001\n\024Subsys"
   "temInfoRequest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002"
   " \001(\t\022\021\n\trequestor\030\003 \001(\t\0223\n\005param\030\004 \001(\0132$"
@@ -4404,7 +4404,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "osInfo\032\253\001\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc"
   "_cli.Status\022B\n\004data\030\002 \001(\01324.grpc_cli.Sub"
   "systemInfoResponse.Result.SubsystemList\032"
-  ";\n\rSubsystemList\022*\n\rsubsystemList\030\001 \003(\0132"
+  ";\n\rSubsystemList\022*\n\rsubsystemlist\030\001 \003(\0132"
   "\023.grpc_cli.Subsystem\"\314\001\n\026CreateTransport"
   "Request\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n"
   "\trequestor\030\003 \001(\t\0225\n\005param\030\004 \001(\0132&.grpc_c"
@@ -47964,7 +47964,7 @@ const char* ListSubsystemResponse_Result_SubsystemList::_InternalParse(const cha
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // repeated .grpc_cli.Subsystem subsystemList = 1;
+      // repeated .grpc_cli.Subsystem subsystemlist = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr -= 1;
@@ -48004,7 +48004,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .grpc_cli.Subsystem subsystemList = 1;
+  // repeated .grpc_cli.Subsystem subsystemlist = 1;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_subsystemlist_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -48028,7 +48028,7 @@ size_t ListSubsystemResponse_Result_SubsystemList::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .grpc_cli.Subsystem subsystemList = 1;
+  // repeated .grpc_cli.Subsystem subsystemlist = 1;
   total_size += 1UL * this->_internal_subsystemlist_size();
   for (const auto& msg : this->subsystemlist_) {
     total_size +=
@@ -49256,7 +49256,7 @@ const char* SubsystemInfoResponse_Result_SubsystemList::_InternalParse(const cha
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // repeated .grpc_cli.Subsystem subsystemList = 1;
+      // repeated .grpc_cli.Subsystem subsystemlist = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
           ptr -= 1;
@@ -49296,7 +49296,7 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // repeated .grpc_cli.Subsystem subsystemList = 1;
+  // repeated .grpc_cli.Subsystem subsystemlist = 1;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_subsystemlist_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
@@ -49320,7 +49320,7 @@ size_t SubsystemInfoResponse_Result_SubsystemList::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .grpc_cli.Subsystem subsystemList = 1;
+  // repeated .grpc_cli.Subsystem subsystemlist = 1;
   total_size += 1UL * this->_internal_subsystemlist_size();
   for (const auto& msg : this->subsystemlist_) {
     total_size +=

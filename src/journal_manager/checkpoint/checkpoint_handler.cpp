@@ -59,7 +59,8 @@ CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, Eve
   allocatorMetaFlushCompleted(false),
   mapFlushCompleted(false),
   checkpointCompletionCallback(callback),
-  arrayId(arrayId)
+  arrayId(arrayId),
+  logGroupIdInProgress(INT32_MAX)
 {
 }
 
@@ -69,6 +70,14 @@ CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManage
     mapFlush = mapFlushToUse;
     contextManager = contextManagerToUse;
     scheduler = eventScheduler;
+    logGroupIdInProgress = INT32_MAX;
+}
+
+void
+CheckpointHandler::SyncContext(int logGroupId)
+{
+    contextManager->SyncLogGroup(logGroupId);
+    logGroupIdInProgress = logGroupId;
 }
 
 int
@@ -111,6 +120,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
 
     EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
         ALLOCATOR_META_ID));
+
     ret = contextManager->FlushContexts(allocMetaFlushCallback, false);
     if (ret != 0)
     {
@@ -145,7 +155,10 @@ CheckpointHandler::FlushCompleted(int metaId)
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
             "Allocator meta flush completed, arrayId:{}", arrayId);
         assert(allocatorMetaFlushCompleted == false);
+
         allocatorMetaFlushCompleted = true;
+        contextManager->ResetFlushedInfo(logGroupIdInProgress);
+        logGroupIdInProgress = INT32_MAX;
     }
     else
     {
@@ -208,5 +221,4 @@ CheckpointHandler::GetStatus(void)
 {
     return status;
 }
-
 } // namespace pos

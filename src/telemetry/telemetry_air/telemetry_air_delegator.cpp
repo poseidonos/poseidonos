@@ -45,160 +45,9 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/telemetry/telemetry_id.h"
 #include "src/volume/volume_service.h"
-#include "src/telemetry/telemetry_client/pos_metric.h"
 
 namespace pos
 {
-
-enum class PerformanceMetric
-{
-    GET_SSD_ID,
-    ARR_VOLUME,
-    PORT
-};
-
-void
-AddLabelArrayVolumeInterval(POSMetric& posMetric,
-    const air::JSONdoc& data, const std::string& interval)
-{
-    std::stringstream stream_index;
-    stream_index << data["index"]; // 0x0205 (array id = 2, volume id = 5)
-    uint64_t index{0};
-    stream_index >> index;
-    uint32_t array_id = (index & 0xFF00) >> 8;
-    posMetric.AddLabel("array_id", std::to_string(array_id));
-
-    uint32_t volume_id = (index & 0x00FF);
-    posMetric.AddLabel("volume_id", std::to_string(volume_id));
-
-    posMetric.AddLabel("interval", interval);
-}
-
-void
-AddSSDIdInterval(POSMetric& posMetric,
-    const air::JSONdoc& data, const std::string& interval)
-{
-    std::stringstream stream_index;
-    stream_index << data["index"];
-    uint64_t index{0};
-    stream_index >> index;
-    posMetric.AddLabel("SSD_id", std::to_string(index));
-
-    posMetric.AddLabel("interval", interval);
-}
-
-std::string
-DecodePort(uint64_t index)
-{
-    std::string portId[4], port;
-    portId[0] = std::to_string(index & 0xFF);
-    portId[1] = std::to_string((index & 0xFF00) >> 8);
-    portId[2] = std::to_string((index & 0xFF0000) >> 16);
-    portId[3] = std::to_string((index & 0xFF000000) >> 24);
-    port = std::to_string(index >> 32);
-    return (portId[0] + "." + portId[1] + "." + portId[2] + "." + portId[3] + ":" + port);
-}
-
-void
-AddPortInterval(POSMetric& posMetric,
-    const air::JSONdoc& data, const std::string& interval)
-{
-    std::stringstream stream_index;
-    stream_index << data["index"];
-    uint64_t index{0};
-    stream_index >> index;
-    posMetric.AddLabel("port", DecodePort(index));
-}
-
-void
-AddPerformanceMetric(POSMetricVector* posMetricVector,
-    const std::string& name, const POSMetricTypes type, const uint64_t value,
-    const air::JSONdoc& data, const std::string& interval,
-    PerformanceMetric perfMetric = PerformanceMetric::ARR_VOLUME)
-{
-    POSMetric posMetric{name, type};
-    if (POSMetricTypes::MT_GAUGE == type)
-    {
-        posMetric.SetGaugeValue(value);
-    }
-    if (perfMetric == PerformanceMetric::GET_SSD_ID)
-    {
-        AddSSDIdInterval(posMetric, data, interval);
-    }
-    else if (perfMetric == PerformanceMetric::ARR_VOLUME)
-    {
-        AddLabelArrayVolumeInterval(posMetric, data, interval);
-    }
-    else
-    {
-        AddPortInterval(posMetric, data, interval);
-    }
-    
-    std::stringstream stream_thread_id;
-    stream_thread_id << data["target_id"];
-    posMetric.AddLabel("thread_id", stream_thread_id.str());
-
-    std::stringstream stream_thread_name;
-    stream_thread_name << data["target_name"];
-    posMetric.AddLabel("thread_name", stream_thread_name.str());
-
-    posMetricVector->push_back(posMetric);
-}
-
-void
-AddLatencyMetric(POSMetricVector* posMetricVector,
-    const std::string& name, const POSMetricTypes type, const uint32_t value,
-    const air::JSONdoc& data, const std::string& interval)
-{
-    POSMetric posMetric{name, type};
-    if (POSMetricTypes::MT_GAUGE == type)
-    {
-        posMetric.SetGaugeValue(value);
-    }
-
-    AddLabelArrayVolumeInterval(posMetric, data, interval);
-
-    std::stringstream stream_sample_count;
-    stream_sample_count << data["period"]["sample_cnt"];
-    posMetric.AddLabel("sample_count", stream_sample_count.str());
-
-    posMetricVector->push_back(posMetric);
-}
-
-template<typename T>
-void
-AddCommonMetric(POSMetricVector* posMetricVector,
-    const std::string& name, const POSMetricTypes type, const T value,
-    const air::JSONdoc& data, const std::string& interval)
-{
-    POSMetric posMetric{name, type};
-    if (POSMetricTypes::MT_GAUGE == type)
-    {
-        posMetric.SetGaugeValue(value);
-    }
-    else if (POSMetricTypes::MT_COUNT == type)
-    {
-        posMetric.SetCountValue(value);
-    }
-    std::stringstream stream_thread_id;
-    stream_thread_id << data["target_id"];
-    posMetric.AddLabel("thread_id", stream_thread_id.str());
-
-    std::stringstream stream_thread_name;
-    stream_thread_name << data["target_name"];
-    posMetric.AddLabel("thread_name", stream_thread_name.str());
-
-    std::stringstream stream_filter;
-    stream_filter << data["filter"];
-    posMetric.AddLabel("filter", stream_filter.str());
-
-    std::stringstream stream_index;
-    stream_index << data["index"];
-    posMetric.AddLabel("index", stream_index.str());
-
-    posMetricVector->push_back(posMetric);
-}
-
 void
 AddUsageMetric(POSMetricVector* posMetricVector,
     const std::string& name, const POSMetricTypes type, const uint64_t value,
@@ -238,13 +87,14 @@ TelemetryAirDelegator::PublishTimeTriggeredMetric(POSMetricVector* posMetricVect
                 {
                     uint64_t volUsage = volume->UsedSize();
                     AddUsageMetric(posMetricVector, TEL60003_VOL_USAGE_BLK_CNT,
-                    POSMetricTypes::MT_GAUGE, volUsage, arrayId, volId);
+                        POSMetricTypes::MT_GAUGE, volUsage, arrayId, volId);
                 }
             }
         }
     }
 
-    if (uptimeMetricGenerator != nullptr) {
+    if (uptimeMetricGenerator != nullptr)
+    {
         POSMetric uptimeMetric;
         int ret = uptimeMetricGenerator->Generate(&uptimeMetric);
         if (ret != -1 && posMetricVector != nullptr)
@@ -252,6 +102,136 @@ TelemetryAirDelegator::PublishTimeTriggeredMetric(POSMetricVector* posMetricVect
             posMetricVector->push_back(uptimeMetric);
         }
     }
+}
+
+std::string
+ToString(const air::JSONdoc& data)
+{
+    std::stringstream stream;
+    std::string result;
+    stream << data;
+    stream >> result;
+    if ('"' == result[0])
+    {
+        return result.substr(1, result.size() - 2);
+    }
+    else
+    {
+        return result;
+    }
+}
+
+void
+SetMetricValue(POSMetric* metric, const air::JSONdoc& airNodeObj, const AirMetricInfo& info)
+{
+    std::string data_category{"cumulation"};
+    if (info.airPeriod)
+    {
+        data_category = "period";
+    }
+
+    if (POSMetricTypes::MT_COUNT == info.metricType)
+    {
+        uint64_t count_value{ToPrimitive<uint64_t>(airNodeObj[data_category][info.airValue])};
+        metric->SetCountValue(count_value);
+    }
+    else if (POSMetricTypes::MT_GAUGE == info.metricType)
+    {
+        int64_t gauge_value{ToPrimitive<int64_t>(airNodeObj[data_category][info.airValue])};
+        metric->SetGaugeValue(gauge_value);
+    }
+}
+
+void
+SetCommonLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
+{
+    metric->AddLabel("thread_id", ToString(airNodeObj["target_id"]));
+    metric->AddLabel("thread_name", ToString(airNodeObj["target_name"]));
+    metric->AddLabel("index", ToString(airNodeObj["index"]));
+    metric->AddLabel("filter", ToString(airNodeObj["filter"]));
+}
+
+void
+SetCustomArrayIdVolumeIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
+{
+    uint64_t index{ToPrimitive<uint64_t>(airNodeObj["index"])};
+    uint64_t arrayId{(index & 0xFF00) >> 8};
+    uint64_t volumeId{index & 0x00FF};
+    metric->AddLabel("array_id", std::to_string(arrayId));
+    metric->AddLabel("volume_id", std::to_string(volumeId));
+}
+
+void
+SetCustomSsdIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
+{
+    metric->AddLabel("ssd_id", ToString(airNodeObj["index"]));
+}
+
+void
+SetCustomPortNumberLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
+{
+    uint64_t index{ToPrimitive<uint64_t>(airNodeObj["index"])};
+    std::string portId[4], port;
+    portId[0] = std::to_string(index & 0xFF);
+    portId[1] = std::to_string((index & 0xFF00) >> 8);
+    portId[2] = std::to_string((index & 0xFF0000) >> 16);
+    portId[3] = std::to_string((index & 0xFF000000) >> 24);
+    port = std::to_string(index >> 32);
+    metric->AddLabel("port", portId[0] + "." + portId[1] + "." + portId[2] + "." + portId[3] + ":" + port);
+}
+
+void
+SetCustomLabel(POSMetric* metric, const air::JSONdoc& airNodeObj, const AirMetricInfo& info)
+{
+    switch (info.customLabel)
+    {
+        case (CustomLabel::ArrayIdVolumeId):
+            SetCustomArrayIdVolumeIdLabel(metric, airNodeObj);
+            break;
+        case (CustomLabel::SsdId):
+            SetCustomSsdIdLabel(metric, airNodeObj);
+            break;
+        case (CustomLabel::PortNumber):
+            SetCustomPortNumberLabel(metric, airNodeObj);
+            break;
+        case (CustomLabel::None):
+        default:
+            break;
+    }
+}
+
+void
+PrintMetric(POSMetric& metric)
+{
+    std::cout << metric.GetName() << ", ";
+    if (POSMetricTypes::MT_COUNT == metric.GetType())
+    {
+        std::cout << "count value: " << metric.GetCountValue() << ", ";
+    }
+    else if (POSMetricTypes::MT_GAUGE == metric.GetType())
+    {
+        std::cout << "gauge value: " << metric.GetGaugeValue() << ", [ ";
+    }
+    auto label_list{metric.GetLabelList()};
+    for (auto& label_iter : *label_list)
+    {
+        std::cout << "(" << label_iter.first << ":" << label_iter.second << ") ";
+    }
+    std::cout << "]\n";
+}
+
+POSMetric*
+MakeMetric(const air::JSONdoc& airNodeObj, const AirMetricInfo& info)
+{
+    if (0 == info.airFilter.compare(ToString(airNodeObj["filter"])) || info.airFilter.empty())
+    {
+        POSMetric* posMetric{new POSMetric(info.telemetryID, info.metricType)};
+        SetMetricValue(posMetric, airNodeObj, info);
+        SetCommonLabel(posMetric, airNodeObj);
+        SetCustomLabel(posMetric, airNodeObj, info);
+        return posMetric;
+    }
+    return nullptr;
 }
 
 TelemetryAirDelegator::TelemetryAirDelegator(
@@ -272,355 +252,26 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                 std::string interval{"0"};
                 if (data.HasKey("interval"))
                 {
-                    std::stringstream stream_interval;
-                    stream_interval << data["interval"];
-                    uint32_t num_interval{0};
-                    stream_interval >> num_interval;
-                    interval = std::to_string(num_interval);
+                    interval = ToString(data["interval"]);
                 }
 
-                if (data.HasKey("PERF_ARR_VOL"))
+                for (auto& airMetricInfo : this->airMetricInfoList)
                 {
-                    auto& objs = data["PERF_ARR_VOL"]["objs"];
-                    for (auto& obj_it : objs)
+                    if (data.HasKey(airMetricInfo.airNodeName))
                     {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_filter;
-                        stream_filter << obj["filter"];
-                        std::string str_filter = stream_filter.str();
-
-                        std::stringstream stream_iops;
-                        stream_iops << obj["period"]["iops"];
-                        uint32_t iops{0};
-                        stream_iops >> iops;
-
-                        std::stringstream stream_bw;
-                        stream_bw << obj["period"]["bw"];
-                        uint64_t bw{0};
-                        stream_bw >> bw;
-
-                        std::string iopsMetricId;
-                        std::string bwMetricId;
-
-                        if (0 == str_filter.compare("\"AIR_READ\""))
-                        {
-                            iopsMetricId = TEL50000_READ_IOPS;
-                            bwMetricId = TEL50001_READ_RATE_BYTES_PER_SECOND;
-                        }
-                        else
-                        {
-                            iopsMetricId = TEL50010_WRITE_IOPS;
-                            bwMetricId = TEL50011_WRITE_RATE_BYTES_PER_SECOND;
-                        }
-                        AddPerformanceMetric(posMetricVector, iopsMetricId,
-                            POSMetricTypes::MT_GAUGE, iops, obj, interval);
-                        AddPerformanceMetric(posMetricVector, bwMetricId,
-                            POSMetricTypes::MT_GAUGE, bw, obj, interval);
-                    }
-                }
-                std::string ioRawCountNodeStrings[] = {"VolumeIo_Constructor", "VolumeIo_Destructor",
-                                          "Ubio_Constructor", "Ubio_Destructor",
-                                          "SSD_Submit", "SSD_Complete",
-                                          "EventQueue_Push",
-                                          "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop",
-                                          "Callback_Constructor", "Callback_Destructor",
-                                          "Event_Constructor", "Event_Destructor",
-                                          "IOWorker_Submit", "IOWorker_Complete",
-                                          "RequestedUserRead", "RequestedUserWrite",
-                                          "RequestedUserAdminIo", "CompleteUserRead",
-                                          "CompleteUserWrite", "CompleteUserAdminIo",
-                                          "UserFlushProcess", "PartialWriteProcess",
-                                          "UserFailIo", "UserReadPendingCnt",
-                                          "UserWritePendingCnt", "InternalIoPendingCnt"};
-                std::string telemetryStrings[] = {TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS, TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS,
-                                                  TEL130003_COUNT_OF_UBIO_CONSTRUCTORS, TEL130004_COUNT_OF_UBIO_DESTRUCTORS,
-                                                  TEL130005_SUBMISSION_COUNT_OF_SSD_IOS, TEL130006_COMPLETION_COUNT_OF_SSD_IOS,
-                                                  TEL130007_PUSHING_COUNT_OF_EVENT_QUEUE,
-                                                  TEL130008_PUSHING_COUNT_OF_WORKER_COMMON_QUEUE, TEL130009_POPPING_COUNT_OF_WORKER_COMMON_QUEUE,
-                                                  TEL130010_COUNT_OF_CALLBACK_CONSTRUCTORS, TEL130011_COUNT_OF_CALLBACK_DESTRUCTORS,
-                                                  TEL130012_COUNT_OF_EVENT_CONSTRUCTORS, TEL130013_COUNT_OF_EVENT_DESTRUCTORS,
-                                                  TEL130014_SUBMISSION_COUNT_IN_IO_WORKER, TEL130015_COMPLETION_COUNT_IN_IO_WORKER,
-                                                  TEL140001_COUNT_OF_REQUSTED_USER_READ, TEL140002_COUNT_OF_REQUSTED_USER_WRITE,
-                                                  TEL140003_COUNT_OF_REQUSTED_USER_ADMINIO, TEL140004_COUNT_OF_COMPLETE_USER_READ,
-                                                  TEL140005_COUNT_OF_COMPLETE_USER_WRITE, TEL140006_COUNT_OF_COMPLETE_USER_ADMINIO,
-                                                  TEL140007_COUNT_OF_USER_FLUSH_PROCESS, TEL140008_COUNT_OF_PARTIAL_WRITE_PROCESS,
-                                                  TEL140009_COUNT_OF_USER_FAIL_IO, TEL140010_COUNT_OF_USER_READ_PENDING_CNT,
-                                                  TEL140011_COUNT_OF_USER_WRITE_PENDING_CNT, TEL140012_COUNT_OF_INTERNAL_IO_PENDING_CNT};
-                int telemetryIndex = 0;
-                for (auto& elemString : ioRawCountNodeStrings)
-                {
-                    if (data.HasKey(elemString))
-                    {
-                        auto& objs = data[elemString]["objs"];
+                        auto& objs = data[airMetricInfo.airNodeName]["objs"];
                         for (auto& obj_it : objs)
                         {
                             auto& obj = objs[obj_it.first];
-
-                            std::stringstream stream_count;
-                            stream_count << obj["cumulation"]["count"];
-                            int64_t count{0};
-                            stream_count >> count;
-
-                            AddCommonMetric(posMetricVector, telemetryStrings[telemetryIndex],
-                                POSMetricTypes::MT_COUNT, count, obj, interval);
+                            auto metric{MakeMetric(obj, airMetricInfo)};
+                            if (nullptr != metric)
+                            {
+                                metric->AddLabel("interval", interval);
+                                posMetricVector->push_back(*metric);
+                                delete metric;
+                                metric = nullptr;
+                            }
                         }
-                    }
-                    telemetryIndex++;
-                }
-
-                if (data.HasKey("PERF_PORT"))
-                {
-                    auto& objs = data["PERF_PORT"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_filter;
-                        stream_filter << obj["filter"];
-                        std::string str_filter = stream_filter.str();
-
-                        std::stringstream stream_iops;
-                        stream_iops << obj["period"]["iops"];
-                        uint32_t iops{0};
-                        stream_iops >> iops;
-
-                        std::stringstream stream_bw;
-                        stream_bw << obj["period"]["bw"];
-                        uint64_t bw{0};
-                        stream_bw >> bw;
-
-                        std::string iopsMetricId;
-                        std::string bwMetricId;
-
-                        if (0 == str_filter.compare("\"AIR_READ\""))
-                        {
-                            iopsMetricId = TEL120001_READ_IOPS_PER_PORT;
-                            bwMetricId = TEL120002_READ_RATE_BYTES_PER_SECOND_PER_PORT;
-                        }
-                        else
-                        {
-                            iopsMetricId = TEL120011_WRITE_IOPS_PER_PORT;
-                            bwMetricId = TEL120012_WRITE_RATE_BYTES_PER_SECOND_PER_PORT;
-                        }
-                        AddPerformanceMetric(posMetricVector, iopsMetricId,
-                            POSMetricTypes::MT_GAUGE, iops, obj, interval, PerformanceMetric::PORT);
-                        AddPerformanceMetric(posMetricVector, bwMetricId,
-                            POSMetricTypes::MT_GAUGE, bw, obj, interval, PerformanceMetric::PORT);
-                    }
-                }
-
-                if (data.HasKey("LAT_ARR_VOL_READ"))
-                {
-                    auto& objs = data["LAT_ARR_VOL_READ"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_mean;
-                        stream_mean << obj["period"]["mean"];
-                        uint32_t mean{0};
-                        stream_mean >> mean;
-
-                        std::stringstream stream_max;
-                        stream_max << obj["period"]["max"];
-                        uint32_t max{0};
-                        stream_max >> max;
-
-                        AddLatencyMetric(posMetricVector, TEL50002_READ_LATENCY_MEAN_NS,
-                            POSMetricTypes::MT_GAUGE, mean, obj, interval);
-                        AddLatencyMetric(posMetricVector, TEL50003_READ_LATENCY_MAX_NS,
-                            POSMetricTypes::MT_GAUGE, max, obj, interval);
-                    }
-                }
-
-                if (data.HasKey("LAT_ARR_VOL_WRITE"))
-                {
-                    auto& objs = data["LAT_ARR_VOL_WRITE"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_mean;
-                        stream_mean << obj["period"]["mean"];
-                        uint32_t mean{0};
-                        stream_mean >> mean;
-
-                        std::stringstream stream_max;
-                        stream_max << obj["period"]["max"];
-                        uint32_t max{0};
-                        stream_max >> max;
-
-                        AddLatencyMetric(posMetricVector, TEL50012_WRITE_LATENCY_MEAN_NS,
-                            POSMetricTypes::MT_GAUGE, mean, obj, interval);
-                        AddLatencyMetric(posMetricVector, TEL50013_WRITE_LATENCY_MAX_NS,
-                            POSMetricTypes::MT_GAUGE, max, obj, interval);
-                    }
-                }
-
-                if (data.HasKey("PERF_SSD_Read"))
-                {
-                    auto& objs = data["PERF_SSD_Read"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_filter;
-                        stream_filter << obj["filter"];
-                        std::string str_filter = stream_filter.str();
-
-                        std::stringstream stream_iops;
-                        stream_iops << obj["period"]["iops"];
-                        uint32_t iops{0};
-                        stream_iops >> iops;
-
-                        std::stringstream stream_bw;
-                        stream_bw << obj["period"]["bw"];
-                        uint64_t bw{0};
-                        stream_bw >> bw;
-
-                        std::string iopsMetricId;
-                        std::string bwMetricId;
-
-                        if (0 == str_filter.compare("\"AIR_UNKNOWN\""))
-                        {
-                            iopsMetricId = TEL20000_READ_UNKNOWN_IOPS_PER_SSD;
-                            bwMetricId = TEL20006_READ_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_JOURNAL\""))
-                        {
-                            iopsMetricId = TEL20024_READ_JOURNAL_IOPS_PER_SSD;
-                            bwMetricId = TEL20025_READ_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_META\""))
-                        {
-                            iopsMetricId = TEL20001_READ_META_IOPS_PER_SSD;
-                            bwMetricId = TEL20007_READ_META_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_GC\""))
-                        {
-                            iopsMetricId = TEL20002_READ_GC_IOPS_PER_SSD;
-                            bwMetricId = TEL20008_READ_GC_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_HOST\""))
-                        {
-                            iopsMetricId = TEL20003_READ_HOST_IOPS_PER_SSD;
-                            bwMetricId = TEL20009_READ_HOST_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_FLUSH\""))
-                        {
-                            iopsMetricId = TEL20004_READ_FLUSH_IOPS_PER_SSD;
-                            bwMetricId = TEL20010_READ_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else
-                        {
-                            iopsMetricId = TEL20005_READ_REBUILD_IOPS_PER_SSD;
-                            bwMetricId = TEL20011_READ_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        AddPerformanceMetric(posMetricVector, iopsMetricId,
-                            POSMetricTypes::MT_GAUGE, iops, obj, interval, PerformanceMetric::GET_SSD_ID);
-                        AddPerformanceMetric(posMetricVector, bwMetricId,
-                            POSMetricTypes::MT_GAUGE, bw, obj, interval, PerformanceMetric::GET_SSD_ID);
-                    }
-                }
-
-                if (data.HasKey("PERF_SSD_Write"))
-                {
-                    auto& objs = data["PERF_SSD_Write"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_filter;
-                        stream_filter << obj["filter"];
-                        std::string str_filter = stream_filter.str();
-
-                        std::stringstream stream_iops;
-                        stream_iops << obj["period"]["iops"];
-                        uint32_t iops{0};
-                        stream_iops >> iops;
-
-                        std::stringstream stream_bw;
-                        stream_bw << obj["period"]["bw"];
-                        uint64_t bw{0};
-                        stream_bw >> bw;
-
-                        std::string iopsMetricId;
-                        std::string bwMetricId;
-
-                        if (0 == str_filter.compare("\"AIR_UNKNOWN\""))
-                        {
-                            iopsMetricId = TEL20012_WRITE_UNKNOWN_IOPS_PER_SSD;
-                            bwMetricId = TEL20018_WRITE_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_JOURNAL\""))
-                        {
-                            iopsMetricId = TEL20026_WRITE_JOURNAL_IOPS_PER_SSD;
-                            bwMetricId = TEL20027_WRITE_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_META\""))
-                        {
-                            iopsMetricId = TEL20013_WRITE_META_IOPS_PER_SSD;
-                            bwMetricId = TEL20019_WRITE_META_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_GC\""))
-                        {
-                            iopsMetricId = TEL20014_WRITE_GC_IOPS_PER_SSD;
-                            bwMetricId = TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_HOST\""))
-                        {
-                            iopsMetricId = TEL20015_WRITE_HOST_IOPS_PER_SSD;
-                            bwMetricId = TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else if (0 == str_filter.compare("\"AIR_FLUSH\""))
-                        {
-                            iopsMetricId = TEL20016_WRITE_FLUSH_IOPS_PER_SSD;
-                            bwMetricId = TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        else
-                        {
-                            iopsMetricId = TEL20017_WRITE_REBUILD_IOPS_PER_SSD;
-                            bwMetricId = TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD;
-                        }
-                        AddPerformanceMetric(posMetricVector, iopsMetricId,
-                            POSMetricTypes::MT_GAUGE, iops, obj, interval, PerformanceMetric::GET_SSD_ID);
-                        AddPerformanceMetric(posMetricVector, bwMetricId,
-                            POSMetricTypes::MT_GAUGE, bw, obj, interval, PerformanceMetric::GET_SSD_ID);
-                    }
-                }
-
-                if (data.HasKey("UTIL_REACTOR"))
-                {
-                    auto& objs = data["UTIL_REACTOR"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_usage;
-                        stream_usage << obj["period"]["usage"];
-                        uint64_t usage{0};
-                        stream_usage >> usage;
-
-                        AddCommonMetric(posMetricVector, TEL70000_SPDK_REACTOR_UTILIZATION,
-                            POSMetricTypes::MT_GAUGE, usage, obj, interval);
-                    }
-                }
-
-                if (data.HasKey("CNT_PendingIO"))
-                {
-                    auto& objs = data["CNT_PendingIO"]["objs"];
-                    for (auto& obj_it : objs)
-                    {
-                        auto& obj = objs[obj_it.first];
-
-                        std::stringstream stream_count;
-                        stream_count << obj["period"]["count"];
-                        int64_t count{0};
-                        stream_count >> count;
-
-                        AddCommonMetric(posMetricVector, TEL80000_DEVICE_PENDING_IO_COUNT,
-                            POSMetricTypes::MT_GAUGE, count, obj, interval);
                     }
                 }
 
@@ -628,6 +279,10 @@ TelemetryAirDelegator::TelemetryAirDelegator(
 
                 if (!posMetricVector->empty())
                 {
+                    /*
+                    for (auto& v : *posMetricVector)
+                        PrintMetric(v);
+                    */
                     this->telPub->PublishMetricList(posMetricVector);
                 }
                 else
@@ -679,7 +334,7 @@ TelemetryAirDelegator::RegisterAirEvent(void)
             "RequestedUserRead", "RequestedUserWrite", "RequestedUserAdminIo",
             "CompleteUserRead", "CompleteUserWrite", "CompleteUserAdminIo",
             "UserFlushProcess", "PartialWriteProcess", "UserFailIo",
-            "UserWritePendingCnt", "UserReadPendingCnt", "InternalIoPendingCnt"},
+            "UserReadPendingCnt", "UserWritePendingCnt", "InternalIoPendingCnt"},
         std::move(dataHandler));
 }
 

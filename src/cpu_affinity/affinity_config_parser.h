@@ -47,6 +47,7 @@ public:
 
     virtual const CoreDescriptionArray& GetDescriptions(void);
     virtual bool IsStringDescripted(void);
+    virtual bool IsReactorOnly(void);
 
 private:
     static const bool DEFAULT_IS_STRING_DESCRIPTED;
@@ -64,6 +65,7 @@ private:
 
     CoreDescriptionArray selectedDescs;
     bool isStringDescripted;
+    bool useReactorOnly;
 };
 
 } // namespace pos

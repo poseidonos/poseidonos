@@ -142,7 +142,7 @@ TEST(VersionedSegmentCtx, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountI
     delete[] segmentInfos;
 }
 
-TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfChangedValueIsReturned)
+TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsReturned)
 {
     // Given
     VersionedSegmentCtx versionedSegCtx;
@@ -176,7 +176,7 @@ TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfChangedVal
     changedOccupiedStripeCount.emplace(2, 0);
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
-    SegmentInfo* result = versionedSegCtx.GetUpdatedVersionedSegmentInfoToFlush(targetLogGroup);
+    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
 
     // Then
     EXPECT_EQ(result[0].GetValidBlockCount(), 10);
@@ -190,7 +190,7 @@ TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfChangedVal
     delete[] segmentInfos;
 }
 
-TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfChangedValueIsApplied)
+TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsApplied)
 {
     // Given
     VersionedSegmentCtx versionedSegCtx;
@@ -230,7 +230,7 @@ TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfChangedVal
     changedOccupiedStripeCount.emplace(2, 0);
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
-    SegmentInfo* result = versionedSegCtx.GetUpdatedVersionedSegmentInfoToFlush(targetLogGroup);
+    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
 
     // Then
     EXPECT_EQ(result[0].GetValidBlockCount(), 10 - 5);
@@ -244,7 +244,7 @@ TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfChangedVal
     delete[] segmentInfos;
 }
 
-TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfFailsWhenInvalidLogGroupIdIsProvided)
+TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenInvalidLogGroupIdIsProvided)
 {
     // Given
     VersionedSegmentCtx versionedSegCtx;
@@ -264,12 +264,12 @@ TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfFailsWhenI
     versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
 
     // When
-    ASSERT_DEATH(versionedSegCtx.GetUpdatedVersionedSegmentInfoToFlush(5), "");
+    ASSERT_DEATH(versionedSegCtx.GetUpdatedInfoToFlush(5), "");
 
     delete[] segmentInfos;
 }
 
-TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfFailsWhenRequestedTwice)
+TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenRequestedTwice)
 {
     // Given
     VersionedSegmentCtx versionedSegCtx;
@@ -290,16 +290,16 @@ TEST(VersionedSegmentCtx, GetUpdatedVersionedSegmentInfoToFlush_testIfFailsWhenR
 
     // When
     int targetLogGroupId = 0;
-    SegmentInfo* result = versionedSegCtx.GetUpdatedVersionedSegmentInfoToFlush(targetLogGroupId);
+    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroupId);
     EXPECT_NE(result, nullptr);
 
-    result = versionedSegCtx.GetUpdatedVersionedSegmentInfoToFlush(targetLogGroupId);
+    result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroupId);
     EXPECT_EQ(result, nullptr);
 
     delete[] segmentInfos;
 }
 
-TEST(VersionedSegmentCtx, ResetFlushedVersionedSegmentInfo_testIfInfoIsResetted)
+TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
 {
     // Given
     VersionedSegmentCtx versionedSegCtx;
@@ -325,11 +325,11 @@ TEST(VersionedSegmentCtx, ResetFlushedVersionedSegmentInfo_testIfInfoIsResetted)
     std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
-    SegmentInfo* result = versionedSegCtx.GetUpdatedVersionedSegmentInfoToFlush(targetLogGroup);
+    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
 
     // When
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), Reset).Times(1);
-    versionedSegCtx.ResetFlushedVersionedSegmentInfo(targetLogGroup);
+    versionedSegCtx.ResetFlushedInfo(targetLogGroup);
 
     delete[] segmentInfos;
 }
