@@ -73,9 +73,9 @@ LogGroupBufferStatus::TryToAllocate(uint32_t logSize, uint64_t& offset)
 
     if (logSize > metaPageSize)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED,
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID_SIZE_LOG_REQUESTED),
             "Requested log size is bigger than meta page");
-        return -1 * (int)POS_EVENT_ID::JOURNAL_INVALID_SIZE_LOG_REQUESTED;
+        return -1 * EID(JOURNAL_INVALID_SIZE_LOG_REQUESTED);
     }
 
     uint64_t currentMetaPage = _GetMetaPageNumber(nextOffset);
@@ -107,7 +107,7 @@ LogGroupBufferStatus::_AllocateIfNotFull(uint32_t logSize, uint64_t& offset)
     }
     else
     {
-        return (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+        return EID(JOURNAL_LOG_GROUP_FULL);
     }
 }
 
@@ -121,7 +121,7 @@ LogGroupBufferStatus::TryToSetFull(void)
         waitingToBeFilled = false;
         _SetStatus(LogGroupStatus::FULL);
 
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL,
+        POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_FULL),
             "Log group is fully filled, added {} filled {}",
             numLogsAdded, numLogsFilled);
 

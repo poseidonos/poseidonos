@@ -130,7 +130,7 @@ DeviceManager::IterateDevicesAndDoFunc(DeviceIterFunc func, void* ctx)
         std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
         if (devices.size() == 0)
         {
-            int result = (int)POS_EVENT_ID::DEVICEMGR_DEVICE_NOT_FOUND;
+            int result = EID(DEVICEMGR_DEVICE_NOT_FOUND);
             POS_TRACE_ERROR(result, "There is no device");
             return result;
         }

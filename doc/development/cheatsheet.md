@@ -29,17 +29,17 @@ You can record your custom event log to the PoseidonOS event log file (/var/log/
 
     Next, you should define the information (i.e., name, message, cause, and solution). In the pos_event_id.h file, you can find PosEventInfo. Add the information for your event. You don't have to record the cause and solution fields for non-erroneous events. We recommend to use the same event name as the name of the eventID variable. **We strongly recommend to clearly write those fields in a sentence form (Subject + Verb + Object) as possible as you can.**
     ```
-    {(int)POS_EVENT_ID::CLI_SERVER_INITIALIZED,
+    {EID(CLI_SERVER_INITIALIZED),
             new PosEventInfoEntry("CLI_SERVER_INITIALIZED",
                 "The CLI server has been initialized successfully.", "", "")},
-    {(int)POS_EVENT_ID::CLI_CLIENT_ACCEPTED,
+    {EID(CLI_CLIENT_ACCEPTED),
         new PosEventInfoEntry("CLI_CLIENT_ACCEPTED",
             "A new client has been accepted (connected).", "", "")},
     
     ...
 
     // Clearly write those fields in a sentence form (Subject + Verb + Object) as possible.
-    {(int)POS_EVENT_ID::CLI_YOUR_CUSTOM_EVENT_ID,
+    {EID(CLI_YOUR_CUSTOM_EVENT_ID),
         new PosEventInfoEntry("CLI_YOUR_CUSTOM_EVENT_ID",
             "Your custom message is here.", "Your custom cause is here.", "Your solution message is here.")},
     ```
@@ -58,7 +58,7 @@ You can record your custom event log to the PoseidonOS event log file (/var/log/
     if (ret < 0)
     {
         // you can input the varaibles related to the event.
-        int event = (int)POS_EVENT_ID::CLI_MSG_SENT;
+        int event = EID(CLI_MSG_SENT);
         POS_TRACE_INFO(event, "fd:{}, length:{}, message:{}", client->sockfd, ret, msg);
     }
     ```

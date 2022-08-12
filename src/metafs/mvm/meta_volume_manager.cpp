@@ -143,7 +143,7 @@ MetaVolumeManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 
     if (false == msg->IsValid())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "Given request is incorrect. Please check parameters.");
 
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
@@ -157,7 +157,7 @@ MetaVolumeManager::InitVolume(MetaVolumeType volumeType, int arrayId, MetaLpnTyp
 {
     if (true == volContainer->IsGivenVolumeExist(volumeType))
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_ALREADY_READY,
+        MFS_TRACE_WARN(EID(MFS_MODULE_ALREADY_READY),
             "You attempted to init. volumeMgr duplicately for the given volume type={}",
             (uint32_t)volumeType);
 
@@ -172,13 +172,13 @@ MetaVolumeManager::CreateVolume(MetaVolumeType volumeType)
 {
     if (false == volContainer->CreateVolume(volumeType))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CREATE_FAILED),
             "Meta volume creation has been failed.");
 
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Meta volume has been created (volumeType={})",
         (uint32_t)volumeType);
 
@@ -190,13 +190,13 @@ MetaVolumeManager::OpenVolume(bool isNPOR)
 {
     if (false == volContainer->OpenAllVolumes(isNPOR))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_VOLUME_OPEN_FAILED),
             "Failed to open meta volumes");
 
         return false;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Successfully opened all meta volumes");
 
     return true;
@@ -207,14 +207,14 @@ MetaVolumeManager::CloseVolume(bool& resetCxt)
 {
     if (false == volContainer->CloseAllVolumes(resetCxt /* output */))
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CLOSE_FAILED),
             "Meta volume close has been failed.");
 
         return false;
     }
     else
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "Meta volume has been closed successfully.");
 
         return true;
@@ -232,7 +232,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
         case MetaFsFileControlType::FileCreate:
             if (0 == reqMsg.fileByteSize)
             {
-                POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                     "The file size cannot be zero, fileSize={}", reqMsg.fileByteSize);
                 rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
                 break;
@@ -245,7 +245,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
             if (rc != POS_EVENT_ID::SUCCESS)
             {
-                MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE,
+                MFS_TRACE_INFO(EID(MFS_META_VOLUME_NOT_ENOUGH_SPACE),
                     "There is no NVRAM and SSD free space");
             }
             break;
@@ -258,7 +258,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
             {
                 reqMsg.completionData.openfd = -1;
 
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_NOT_OPENED,
+                MFS_TRACE_ERROR(EID(MFS_FILE_NOT_OPENED),
                     "Cannot find \'{}\' file in array \'{}\'",
                     *reqMsg.fileName, reqMsg.arrayId);
             }
@@ -270,7 +270,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
             if (rc != POS_EVENT_ID::SUCCESS)
             {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_FILE_DELETE_FAILED,
+                MFS_TRACE_ERROR(EID(MFS_FILE_DELETE_FAILED),
                     "Cannot find \'{}\' file", *reqMsg.fileName);
             }
             break;
@@ -288,7 +288,7 @@ MetaVolumeManager::_CheckRequest(MetaFsFileControlRequest& reqMsg)
 
             if (rc != POS_EVENT_ID::SUCCESS)
             {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+                MFS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                     "Cannot find the file, fd={}, request={}",
                     reqMsg.fd, reqMsg.reqType);
             }
@@ -325,7 +325,7 @@ MetaVolumeManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
     {
         if (!_IsValidVolumeType(msg->volType))
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            MFS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                 "The volume type is invalid, fd={}, type={}",
                 msg->fd, msg->volType);
             return POS_EVENT_ID::MFS_INVALID_PARAMETER;

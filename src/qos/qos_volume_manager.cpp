@@ -381,7 +381,7 @@ int
 QosVolumeManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, volArrayInfo->arrayName);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -397,7 +397,7 @@ QosVolumeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* 
     qos_vol_policy volumePolicy;
     volumePolicy.policyChange = true;
     qosArrayManager->UpdateVolumePolicy(volEventBase->volId, volumePolicy);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -430,7 +430,7 @@ QosVolumeManager::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* 
     volumeName[volEventBase->volId] = volEventBase->volName;
 
     delete vInfo;
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -642,7 +642,7 @@ QosVolumeManager::_PrintWarningLogIfNotGuaranteed(uint32_t volId)
                 logPrintedCounter[volId] = 1;
                 if (volumeMap[volId] == true)
                 {
-                    POS_TRACE_WARN((int)POS_EVENT_ID::QOS_NOT_GUARANTEED,
+                    POS_TRACE_WARN(EID(QOS_NOT_GUARANTEED),
                         "Not guaranteed performance for vol {}, Expected {} {}, Actual {} {}",
                         volumeName[volId], expected, errorStringUnit, actual, errorStringUnit);
                 }
@@ -716,7 +716,7 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
 {
     if (false == feQosEnabled)
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        return EID(VOL_EVENT_OK);
     }
     struct pos_volume_info* vInfo = new (struct pos_volume_info);
     _CopyVolumeInfo(vInfo->array_name, (volArrayInfo->arrayName).c_str(), (volArrayInfo->arrayName).size());
@@ -734,7 +734,7 @@ QosVolumeManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo
     }
 
     delete vInfo;
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 /* --------------------------------------------------------------------------*/
 /**
@@ -782,7 +782,7 @@ int
 QosVolumeManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, volArrayInfo->arrayName);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -798,14 +798,14 @@ QosVolumeManager::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* 
     qos_vol_policy volumePolicy = qosArrayManager->GetVolumePolicy(volEventBase->volId);
     if ((volumePolicy.maxBw == volEventPerf->maxbw) && (volumePolicy.maxIops == volEventPerf->maxiops))
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        return EID(VOL_EVENT_OK);
     }
     std::string arrName = GetArrayName();
     if (0 == arrayName.compare(arrName))
     {
         _UpdateVolumeMaxQos(volEventBase->volId, volEventPerf->maxiops, volEventPerf->maxbw, arrayName);
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -837,7 +837,7 @@ QosVolumeManager::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayI
         delete vInfo;
     }
 
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 /* --------------------------------------------------------------------------*/
 /**

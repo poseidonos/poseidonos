@@ -96,7 +96,7 @@ TEST(JournalLogBuffer, Create_testIfLogBufferAlreadyExisted)
     int result = journalLogBuffer.Create(logBufferSize);
 
     // Then: journalLogBuffer will be return error code
-    int retCode = -1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED;
+    int retCode = -1 * EID(JOURNAL_LOG_BUFFER_CREATE_FAILED);
     EXPECT_EQ(retCode, result);
 }
 
@@ -168,7 +168,7 @@ TEST(JournalLogBuffer, Open_testIfLogBufferFileDoesNotExist)
     int result = journalLogBuffer.Open(logBufferSize);
 
     // Then: journalLogBuffer will be return error code
-    int retCode = -1 * (int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED;
+    int retCode = -1 * EID(JOURNAL_LOG_BUFFER_OPEN_FAILED);
     EXPECT_EQ(retCode, result);
 }
 
@@ -230,7 +230,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfReadFail)
     int result = journalLogBuffer.ReadLogBuffer(logGroupId, nullptr);
 
     // Then: journalLogBuffer will be return error code
-    retCode = -1 * ((int)POS_EVENT_ID::JOURNAL_LOG_BUFFER_READ_FAILED);
+    retCode = -1 * (EID(JOURNAL_LOG_BUFFER_READ_FAILED));
     EXPECT_EQ(retCode, result);
 }
 
@@ -269,7 +269,7 @@ TEST(JournalLogBuffer, WriteLog_testIfWriteFailed)
     int result = journalLogBuffer.WriteLog(&context);
 
     // Then
-    retCode = -1 * (int)POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED;
+    retCode = -1 * EID(JOURNAL_LOG_WRITE_FAILED);
     EXPECT_EQ(retCode, result);
 }
 

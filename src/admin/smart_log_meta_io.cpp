@@ -53,13 +53,13 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr)
     if (rocksDbEnabled)
     {
         smartLogFile = new RocksDBMetaFsIntf(fileName, arrayId, MetaFileType::General);
-        POS_TRACE_INFO((int)POS_EVENT_ID::SMART_LOG_META_INITIALIZED,
+        POS_TRACE_INFO(EID(SMART_LOG_META_INITIALIZED),
             "RocksDBMetaFsIntf for smartlogfile has been initialized , fileName : {} , arrayId : {} ", fileName, arrayId);
     }
     else
     {
         smartLogFile = new MetaFsFileIntf(fileName, arrayId, MetaFileType::General);
-        POS_TRACE_INFO((int)POS_EVENT_ID::SMART_LOG_META_INITIALIZED,
+        POS_TRACE_INFO(EID(SMART_LOG_META_INITIALIZED),
             "MetaFsFileIntf for smartlogfile has been initialized , fileName : {} , arrayId : {} ", fileName, arrayId);
     }
 }
@@ -251,7 +251,7 @@ SmartLogMetaIo::_CompleteSmartLogIo(AsyncMetaFileIoCtx* ctx)
     if (reqCtx->error != 0)
     {
         ioError = reqCtx->error;
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ASYNCIO_ERROR,
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
             "MFS AsyncIO error, ioError:{}  mpageNum:{}", ioError, reqCtx->mpageNum);
     }
     delete ctx;

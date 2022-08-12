@@ -488,7 +488,7 @@ TEST(Allocator, PreppareRebuild_testIfPrepareStoppedWhenTheresNoTargetSegmentsTo
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
     EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(0));
-    EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList).WillOnce(Return((int)POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY));
+    EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList).WillOnce(Return(EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY)));
     EXPECT_CALL(*blkManager, TurnOnBlkAllocation).Times(1);
     EXPECT_CALL(*blkManager, Lock).Times(1);
     EXPECT_CALL(*blkManager, Unlock()).Times(1);

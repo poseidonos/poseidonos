@@ -152,7 +152,7 @@ TEST(QosVolumeManager, VolumeUnmounted_Default_Parameters_feQos_false)
     VolumeArrayInfo volumeArrayInfo;
     volumeArrayInfo.arrayId = 0;
     volumeArrayInfo.arrayName = "POSArray1";
-    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK, actual;
+    int expected = EID(VOL_EVENT_OK), actual;
     actual = qosVolumeManager.VolumeUnmounted(&volumeBase, &volumeArrayInfo);
     ASSERT_EQ(expected, actual);
 }

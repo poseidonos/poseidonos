@@ -28,14 +28,14 @@ ReverseMapTest::_PrepareFile(void)
     if (revMapWholefile->DoesFileExist() == false)
     {
         uint64_t fileSize = ReverseMapPack::GetfileSizePerStripe() * MAX_UT_VSID;
-        POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_FILE_SIZE,
+        POS_TRACE_INFO(EID(REVMAP_FILE_SIZE),
             "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
             ReverseMapPack::GetfileSizePerStripe(), MAX_UT_VSID, fileSize);
 
         int ret = revMapWholefile->Create(fileSize);
         if (ret != 0)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::REVMAP_FILE_SIZE,
+            POS_TRACE_ERROR(EID(REVMAP_FILE_SIZE),
                 "RevMapWhole file Create failed, ret:{}", ret);
             assert(false);
         }

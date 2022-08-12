@@ -93,7 +93,7 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
   mirrorCount(mirrorCount),
   mssIntf(nullptr)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "MetaRegion(constructed): media={}, region={}, sizeof={}, baseLpn={}, lpn count={}",
         (int)mediaType, (int)regionType, GetSizeOfContent(),
         baseLpn, GetLpnCntOfContent());
@@ -103,7 +103,7 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
 template<typename MetaRegionT, typename MetaContentT>
 MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "MetaRegion(destructed): media={}, region={}",
         (int)mediaType, (int)regionType);
 }
@@ -175,7 +175,7 @@ void
 MetaRegion<MetaRegionT, MetaContentT>::ResetContent(void)
 {
     memset((void*)content, 0, totalLpnCnt * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Reset all content...");
 }
 // LCOV_EXCL_STOP
@@ -192,7 +192,7 @@ template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Load(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Do meta load <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
 
@@ -207,7 +207,7 @@ template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Do meta load<mediaTyp, startLpn, totalLpn>={}, {}, {},",
         (int)media, baseLPN, pageCNT);
 
@@ -221,7 +221,7 @@ template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Store(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Do meta store <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
     POS_EVENT_ID rc = mssIntf->WritePage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
@@ -234,7 +234,7 @@ template<typename MetaRegionT, typename MetaContentT>
 bool
 MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Do meta store <mediaTyp, startLpn, totalLpn>={}, {}, {},",
         (int)media, baseLPN, pageCNT);
 

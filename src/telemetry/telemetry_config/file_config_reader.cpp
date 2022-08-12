@@ -74,7 +74,7 @@ FileConfigReader::Init(std::string fileName)
             }
             else
             {
-                POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_INVALID_FIELD,
+                POS_TRACE_ERROR(EID(TELEMETRY_CONFIG_INVALID_FIELD),
                     "Invalid config file: {}, invalid tag: {}", fileName, tag);
                 return false;
             }
@@ -82,9 +82,9 @@ FileConfigReader::Init(std::string fileName)
     }
     catch (YAML::Exception& e)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::TELEMETRY_CONFIG_BAD_FILE,
+        POS_TRACE_ERROR(EID(TELEMETRY_CONFIG_BAD_FILE),
             "Invalid config file: {}", fileName);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::TELEMETRY_DEBUG_MSG,
+        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
             "{}", e.msg);
 
         return false;

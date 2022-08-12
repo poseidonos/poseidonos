@@ -222,7 +222,7 @@ TEST_F(GcStripeManagerTestFixture, VolumeEvent_testVolumeDeleteWhenSetBlkInfo)
     VolumeEventPerf volumeMountPerf;
     VolumeArrayInfo volumeArrayInfo;
 
-    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    int expected = EID(VOL_EVENT_OK);
     EXPECT_TRUE(gcStripeManager->VolumeDeleted(&volumeEventBase, &volumeArrayInfo) == expected);
 
     // then delete blk Info list and write buffer
@@ -239,7 +239,7 @@ TEST_F(GcStripeManagerTestFixture, VolumeEvent_Invoke)
     VolumeEventPerf volumeMountPerf;
     VolumeArrayInfo volumeArrayInfo;
 
-    int expected = (int)POS_EVENT_ID::VOL_EVENT_OK;
+    int expected = EID(VOL_EVENT_OK);
 
     EXPECT_TRUE(gcStripeManager->VolumeCreated(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == expected); // trival volume create
     EXPECT_TRUE(gcStripeManager->VolumeMounted(&volumeEventBase, &volumeMountPerf, &volumeArrayInfo) == expected); // trival volume mounted

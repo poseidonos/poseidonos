@@ -125,7 +125,7 @@ private:
     {
         if (nullptr == fileName)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                 "The file name is nullptr");
             return false;
         }
@@ -137,7 +137,7 @@ private:
         if (fileName.length() > MAX_FILE_NAME_LENGTH)
         {
             const size_t MAX_SIZE = MAX_FILE_NAME_LENGTH;
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                 "The file name({}) is too long (len: {}, max_allowed: {})",
                 fileName, fileName.length(), MAX_SIZE);
             return false;

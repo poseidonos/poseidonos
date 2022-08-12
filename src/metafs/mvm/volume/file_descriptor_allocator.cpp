@@ -86,7 +86,7 @@ FileDescriptorAllocator::Alloc(const StringHashType fileKey)
     freeFdMap->erase(fd);
     fileKey2FdLookupMap->insert({fileKey, fd});
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "alloc new fd={} by fileKey={}", fd, fileKey);
 
     return fd;
@@ -98,7 +98,7 @@ FileDescriptorAllocator::Alloc(const std::string& fileName)
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(fileName);
     FileDescriptorType fd = Alloc(fileKey);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "alloc new fd={} by fileName={}", fd, fileName);
 
     return fd;
@@ -111,7 +111,7 @@ FileDescriptorAllocator::Free(const std::string& fileName, const FileDescriptorT
 
     Free(fileKey, fd);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "free fd={} by fileName={}", fd, fileName);
 }
 
@@ -123,12 +123,12 @@ FileDescriptorAllocator::Free(const StringHashType fileKey, const FileDescriptor
         fileKey2FdLookupMap->erase(fileKey);
         freeFdMap->insert(fd);
 
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "free fd={} by fileKey={}", fd, fileKey);
     }
     else
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_FILE_DESCRIPTOR_NOT_EXIST,
+        MFS_TRACE_WARN(EID(MFS_FILE_DESCRIPTOR_NOT_EXIST),
             "fd={}, fileKey={} doesn't exist", fd, fileKey);
     }
 }

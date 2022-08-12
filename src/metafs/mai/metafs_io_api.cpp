@@ -295,7 +295,7 @@ MetaFsIoApi::_ProcessRequest(MetaFsIoRequest& reqMsg)
         size_t byteSize = 0;
         if (reqMsg.ioMode == MetaIoMode::Async)
         {
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[MSG ][SubmitIO   ] " + reqMsg.GetLogString());
             byteSize = reqMsg.byteSize;
         }

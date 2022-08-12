@@ -88,11 +88,11 @@ TEST_F(RocksDbMetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingDat
 
         AsyncMetaFileIoCtx* writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, i * BYTE_4K, BYTE_4K, writeBuf);
         int result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-        ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "write fail code: " << (int)result;
+        ASSERT_EQ(result, EID(SUCCESS)) << "write fail code: " << (int)result;
 
         AsyncMetaFileIoCtx* readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, i * BYTE_4K, BYTE_4K, readBuf);
         result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-        ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "read fail code: " << (int)result;
+        ASSERT_EQ(result, EID(SUCCESS)) << "read fail code: " << (int)result;
 
         ASSERT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
 
@@ -110,7 +110,7 @@ TEST_F(RocksDbMetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingDat
 
         AsyncMetaFileIoCtx* writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, i * BYTE_4K, BYTE_4K, writeBuf);
         int result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-        ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "write fail code: " << (int)result;
+        ASSERT_EQ(result, EID(SUCCESS)) << "write fail code: " << (int)result;
         delete writeReq;
     }
 
@@ -121,7 +121,7 @@ TEST_F(RocksDbMetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingDat
 
         AsyncMetaFileIoCtx* readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, i * BYTE_4K, BYTE_4K, readBuf);
         int result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-        ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "read fail code: " << (int)result;
+        ASSERT_EQ(result, EID(SUCCESS)) << "read fail code: " << (int)result;
         ASSERT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
         delete readReq;
     }
@@ -146,44 +146,44 @@ TEST_F(RocksDbMetaFsIoTest, testIfPartialSyncIoCanBeWork)
 
     AsyncMetaFileIoCtx* writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, 0, 4, writeBuf);
     int result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-    ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    ASSERT_EQ(result, EID(SUCCESS));
     delete writeReq;
 
     writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, 4, 128, writeBuf + 4);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-    ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    ASSERT_EQ(result, EID(SUCCESS));
     delete writeReq;
 
     writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, 132, 8, writeBuf + 132);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-    ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    ASSERT_EQ(result, EID(SUCCESS));
     delete writeReq;
 
     writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, 140, BYTE_4K - 140, writeBuf + 140);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-    ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    ASSERT_EQ(result, EID(SUCCESS));
     delete writeReq;
 
     memset(readBuf, 0, BYTE_4K);
 
     AsyncMetaFileIoCtx* readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, 0, 4, readBuf);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-    EXPECT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result, EID(SUCCESS));
     delete readReq;
 
     readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, 4, 128, readBuf + 4);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-    EXPECT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result, EID(SUCCESS));
     delete readReq;
 
     readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, 132, 8, readBuf + 132);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-    EXPECT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result, EID(SUCCESS));
     delete readReq;
 
     readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, 140, BYTE_4K - 140, readBuf + 140);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-    EXPECT_EQ(result, (int)POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result, EID(SUCCESS));
     delete readReq;
 
     EXPECT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
@@ -199,7 +199,7 @@ TEST_F(RocksDbMetaFsIoTest, testMetaFsPerformance_SyncWrite)
     {
         AsyncMetaFileIoCtx* writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, i * BYTE_4K, BYTE_4K, writeBuf);
         int result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-        ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "iteration: " << i << ", write fail code: " << (int)result;
+        ASSERT_EQ(result, EID(SUCCESS)) << "iteration: " << i << ", write fail code: " << (int)result;
         delete writeReq;
     }
     stopWatch.StoreTimestamp();
@@ -219,7 +219,7 @@ TEST_F(RocksDbMetaFsIoTest, testMetaFsPerformance_SyncRead)
     {
         AsyncMetaFileIoCtx* writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, i * BYTE_4K, BYTE_4K, writeBuf);
         int result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-        ASSERT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "iteration: " << i << ", write fail code: " << (int)result;
+        ASSERT_EQ(result, EID(SUCCESS)) << "iteration: " << i << ", write fail code: " << (int)result;
         delete writeReq;
     }
 
@@ -229,7 +229,7 @@ TEST_F(RocksDbMetaFsIoTest, testMetaFsPerformance_SyncRead)
     {
         AsyncMetaFileIoCtx* readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, i * BYTE_4K, BYTE_4K, readBuf);
         int result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-        EXPECT_EQ(result, (int)POS_EVENT_ID::SUCCESS) << "iteration: " << i << ", read fail code: " << (int)result;
+        EXPECT_EQ(result, EID(SUCCESS)) << "iteration: " << i << ", read fail code: " << (int)result;
         delete readReq;
     }
     stopWatch.StoreTimestamp();

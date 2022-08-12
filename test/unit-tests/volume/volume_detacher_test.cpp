@@ -37,7 +37,7 @@ TEST(VolumeDetacher, DoAll_noVolume)
     uint64_t maxBw = 100;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
+    int expected = EID(VOL_NOT_FOUND);
 
     // When
     VolumeList volumes;

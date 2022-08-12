@@ -93,7 +93,7 @@ MetaFsIoScheduler::ExitThread(void)
 {
     for (auto metaIoWorker : metaIoWorkerList_)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "Exit MioHandler, " + metaIoWorker->GetLogString());
 
         metaIoWorker->ExitThread();
@@ -103,7 +103,7 @@ MetaFsIoScheduler::ExitThread(void)
 
     MetaFsIoHandlerBase::ExitThread();
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Exit MetaIoScheduler, " + GetLogString());
 }
 
@@ -291,7 +291,7 @@ MetaFsIoScheduler::StartThread(void)
 {
     th_ = new std::thread(AsEntryPointNoParam(&MetaFsIoScheduler::Execute, this));
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Start MetaIoScheduler, " + GetLogString());
 
     _CreateMioThread();
@@ -313,7 +313,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
             metaIoWorkerList_.emplace_back(mioHandler);
             availableMioCoreCnt--;
 
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "Create MioHandler, " + mioHandler->GetLogString());
 
             if (availableMioCoreCnt == 0)
@@ -325,7 +325,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
 
     if (availableMioCoreCnt)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The Count of created MioHandler: {}, expected count: {}",
             mioCoreCount_ - availableMioCoreCnt, mioCoreCount_);
     }

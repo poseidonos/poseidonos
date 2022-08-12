@@ -63,7 +63,7 @@ StateList::Add(StateContext* ctx)
     {
         StateContext* prev = contextList.front();
         contextList.push_back(ctx);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
+        POS_TRACE_DEBUG(EID(STATE_CONTEXT_UPDATED),
             "statecontext added - {}", ctx->GetSituation().ToString());
         sort(contextList.begin(), contextList.end(), _Compare);
         StateContext* next = contextList.front();
@@ -73,7 +73,7 @@ StateList::Add(StateContext* ctx)
     else
     {
         listMutex.unlock();
-        POS_TRACE_WARN((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+        POS_TRACE_WARN(EID(STATE_CONTROL_DEBUG),
             "statecontext couldn't be added since it exists already - {}",
             ctx->GetSituation().ToString());
     }
@@ -86,7 +86,7 @@ StateList::Remove(StateContext* ctx)
     auto it = _Find(ctx);
     if (it != contextList.end())
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::STATE_CONTEXT_UPDATED,
+        POS_TRACE_DEBUG(EID(STATE_CONTEXT_UPDATED),
             "statecontext removed - {}", (*it)->GetSituation().ToString());
         StateContext* prev = contextList.front();
         contextList.erase(it);
@@ -97,7 +97,7 @@ StateList::Remove(StateContext* ctx)
     else
     {
         listMutex.unlock();
-        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+        POS_TRACE_INFO(EID(STATE_CONTROL_DEBUG),
             "The requested state(situation: {}) has already been removed",
             (ctx->GetSituation().ToString()));
     }

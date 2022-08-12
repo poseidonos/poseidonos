@@ -44,7 +44,7 @@ TEST(VolumeUnmounter, Do_nullvol)
     uint64_t maxBw = 100;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
+    int expected = EID(VOL_NOT_FOUND);
 
     // When
     VolumeList volumes;
@@ -67,7 +67,7 @@ TEST(VolumeUnmounter, Do_volUnmounted)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::UNMOUNT_VOL_ALREADY_UNMOUNTED;
+    int expected = EID(UNMOUNT_VOL_ALREADY_UNMOUNTED);
 
     NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
     NiceMock<MockNvmfTarget> mockNvmfTarget;
@@ -100,7 +100,7 @@ TEST(VolumeUnmounter, Do_notifyFail)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_REQ_PROCESSED_BUT_ERROR_OCCURED;
+    int expected = EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
 
     NiceMock<MockVolumeEventPublisher> mockVolumeEventPublisher;
     NiceMock<MockNvmfTarget> mockNvmfTarget;

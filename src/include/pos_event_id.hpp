@@ -65,11 +65,11 @@ private:
     };
 
     static PosEventIdEntry RESERVED_EVENT_ENTRY;
-    static PosEventIdEntry SYSTEM_EVENT_ENTRY[(int)POS_EVENT_ID::SYSTEM_COUNT];
-    static PosEventIdEntry QOS_EVENT_ENTRY[(int)POS_EVENT_ID::QOS_COUNT];
-    static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[(int)POS_EVENT_ID::IONVMF_COUNT];
-    static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOFRONTEND_COUNT];
-    static PosEventIdEntry IOPATH_BACKEND_EVENT_ENTRY[(int)POS_EVENT_ID::IOBACKEND_COUNT];
+    static PosEventIdEntry SYSTEM_EVENT_ENTRY[EID(SYSTEM_COUNT)];
+    static PosEventIdEntry QOS_EVENT_ENTRY[EID(QOS_COUNT)];
+    static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[EID(IONVMF_COUNT)];
+    static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[EID(IOFRONTEND_COUNT)];
+    static PosEventIdEntry IOPATH_BACKEND_EVENT_ENTRY[EID(IOBACKEND_COUNT)];
 
     PosEventId(void) = delete;
     ~PosEventId(void);
