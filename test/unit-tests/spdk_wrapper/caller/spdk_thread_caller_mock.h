@@ -40,7 +40,6 @@ class MockSpdkThreadCaller : public SpdkThreadCaller
 public:
     using SpdkThreadCaller::SpdkThreadCaller;
     MOCK_METHOD(int, SpdkThreadSendMsg, (const struct spdk_thread* thread, spdk_msg_fn fn, void* ctx), (override));
-    MOCK_METHOD(struct spdk_thread*, GetNvmfThreadFromReactor, (uint32_t core), (override));
     MOCK_METHOD(void, SetTlsThreadToReactor, (int reactor, struct spdk_thread* thread), (override));
 };
 

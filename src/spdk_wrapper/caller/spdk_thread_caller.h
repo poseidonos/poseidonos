@@ -47,7 +47,6 @@ public:
     void* SpdkPollerRegister(SpdkPollerFunction func, void* arg, uint64_t period_microseconds, char* pollerName);
     void SpdkPollerUnregister(spdk_poller** spdkPoller);
     virtual int SpdkThreadSendMsg(const struct spdk_thread* thread, spdk_msg_fn fn, void* ctx);
-    virtual struct spdk_thread* GetNvmfThreadFromReactor(uint32_t core);
     virtual void SetTlsThreadToReactor(int reactor, struct spdk_thread *thread);
 };
 

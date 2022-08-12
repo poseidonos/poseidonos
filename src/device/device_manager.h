@@ -83,9 +83,6 @@ public:
     virtual int RemoveDevice(UblockSharedPtr dev);
     virtual struct spdk_nvme_ctrlr* GetNvmeCtrlr(std::string& deviceName);
 
-
-    virtual void HandleCompletedCommand(void);
-
     virtual int IterateDevicesAndDoFunc(DeviceIterFunc func, void* ctx);
     virtual void SetDeviceEventCallback(IDeviceEvent* event);
 

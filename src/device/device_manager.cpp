@@ -524,13 +524,4 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
     ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
 }
 
-void
-DeviceManager::HandleCompletedCommand(void)
-{
-    if (unlikely(ioDispatcher != nullptr))
-    {
-        ioDispatcher->CompleteForThreadLocalDeviceList();
-    }
-}
-
 } // namespace pos
