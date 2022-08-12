@@ -15,7 +15,7 @@ import (
 
 const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
 const dialTimeout = 10
-const reqTimeout = 90
+const reqTimeout = 180
 
 func dialToCliServer() (*grpc.ClientConn, error) {
 	nodeName := globals.NodeName
