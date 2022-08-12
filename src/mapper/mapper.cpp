@@ -425,19 +425,19 @@ Mapper::VolumeCreated(int volId, uint64_t volSizeByte)
     if (state != VolState::NOT_EXIST)
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] Volume:{} arrayId:{} already exist, state:{}", volId, addrInfo->GetArrayId(), volState[volId].GetState());
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
     if (vsaMapManager->CreateVsaMapContent(nullptr, volId, volSizeByte, false) != 0)
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] failed to create vsaMap VolumeId:{} arrayId:{}", volId, addrInfo->GetArrayId());
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
     vsaMapManager->WaitVolumePendingIoDone(volId);
     volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
     volState[volId].SetSize(volSizeByte);
     vsaMapManager->EnableVsaMapInternalAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeCreate] VolumeId:{} arrayId:{} JUST_CREATED >> BG_MOUNTED", volId, arrayId);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 int
@@ -447,13 +447,13 @@ Mapper::VolumeMounted(int volId, uint64_t volSizeByte)
     if ((VolState::VOLUME_DELETING == state) || (state == VolState::NOT_EXIST))
     {
         POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] failed to mount VolumeId:{} arrayId:{}, state:{}", volId, arrayId, state);
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VolumeMount] MOUNT_VOLUME Volume:{}, state:{}, arrayId:{}", volId, state, arrayId);
     if (_LoadVolumeMeta(volId) < 0)
     {
         POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] failed to load VolumeId:{} arrayId:{}", volId, arrayId);
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
     volState[volId].SetState(VolState::FOREGROUND_MOUNTED);
     vsaMapManager->WaitVolumePendingIoDone(volId);
@@ -463,7 +463,7 @@ Mapper::VolumeMounted(int volId, uint64_t volSizeByte)
     tp->PublishData(TEL33006_MAP_MOUNTED_VOL_CNT, v, MT_GAUGE);
     vsaMapManager->EnableVsaMapAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] VolumeId:{} arrayId:{} was FG_MOUNTED @VolumeMounted", volId, arrayId);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 int
@@ -473,13 +473,13 @@ Mapper::VolumeLoaded(int volId, uint64_t volSizeByte)
     assert(volSizeByte > 0);
     if (volState[volId].GetState() == VolState::VOLUME_DELETING)
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
     volState[volId].SetState(VolState::EXIST_UNLOADED);
     volState[volId].SetSize(volSizeByte);
     vsaMapManager->EnableVsaMapInternalAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeLoaded] VolumeId:{} arrayId:{} state:EXIST_UNLOADED @VolumeLoaded", volId, arrayId);
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 int
@@ -504,7 +504,7 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
             if (ret < 0)
             {
                 POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "[Mapper VolumeUnmounted] failed to Flush DirtyPages:{} VolumeId:{} arrayId:{} @VolumeUnmounted", ret, volId, arrayId);
-                return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+                return EID(VOL_EVENT_FAIL);
             }
             vsaMapManager->WaitVolumePendingIoDone(volId);
         }
@@ -513,7 +513,7 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
     {
         POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper VolumeUnmounted] VolumeId:{} arrayId:{} State:{} is not mounted", volId, arrayId, volState[volId].GetState());
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 int
@@ -611,7 +611,7 @@ Mapper::VolumeDetached(vector<int> volList)
             POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDetached] VolumeId:{} arrayId:{} was FG_MOUNTED >> BG_MOUNTED @VolumeDetached", volId, arrayId);
         }
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 void

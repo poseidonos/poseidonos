@@ -216,7 +216,7 @@ NvmPartition::_IsValidByteAddress(const LogicalByteAddr& lsa)
                 }
                 else
                 {
-                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ADDRESS_TRANSLATE_DEBUG_MSG,
+                    POS_TRACE_DEBUG(EID(ADDRESS_TRANSLATE_DEBUG_MSG),
                         "Translated Stripe ID is different from original");
                 }
             }
@@ -248,7 +248,7 @@ NvmPartition::_IsValidByteEntry(const LogicalByteWriteEntry& entry)
                 }
                 else
                 {
-                    POS_TRACE_DEBUG((int)POS_EVENT_ID::ADDRESS_TRANSLATE_DEBUG_MSG,
+                    POS_TRACE_DEBUG(EID(ADDRESS_TRANSLATE_DEBUG_MSG),
                         "Translated Stripe ID is different from original");
                 }
             }

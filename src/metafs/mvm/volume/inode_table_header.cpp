@@ -54,7 +54,7 @@ InodeTableHeader::Create(uint32_t totalFileNum)
     InodeTableHeaderContent* content = GetContent();
     content->totalInodeNum = totalFileNum;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Total Inode entry number available={}", totalFileNum);
 }
 

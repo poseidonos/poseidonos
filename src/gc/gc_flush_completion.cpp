@@ -90,7 +90,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     {
         gcStripeManager->ReturnBuffer(dataBuffer);
         dataBuffer = nullptr;
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_COMPLETION,
+        POS_TRACE_DEBUG(EID(GC_STRIPE_FLUSH_COMPLETION),
             "gc flush completion, arrayName:{}, stripeUserLsid:{}",
             arrayName, stripe->GetUserLsid());
     }
@@ -140,7 +140,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     stripe->Flush(event);
 
     
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_ACQUIRE_OWNERSHIP_RBA_LIST,
+    POS_TRACE_DEBUG(EID(GC_ACQUIRE_OWNERSHIP_RBA_LIST),
             "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
             arrayName, userLsid);
     

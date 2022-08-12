@@ -317,7 +317,7 @@ JournalManager::_DoRecovery(void)
 
     if (journalingStatus.Get() == JOURNAL_INVALID)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_MANAGER_NOT_INITIALIZED,
+        POS_TRACE_ERROR(EID(JOURNAL_MANAGER_NOT_INITIALIZED),
             "Journal manager accessed without initialization");
         return -EID(JOURNAL_REPLAY_FAILED);
     }

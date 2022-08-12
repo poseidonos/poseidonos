@@ -129,7 +129,7 @@ public:
     }
     void PrintLog(const std::string& str, const int array, const int lpn) const
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             str + " id: {}, array: {}, lpn: {}", GetId(), array, lpn);
     }
 

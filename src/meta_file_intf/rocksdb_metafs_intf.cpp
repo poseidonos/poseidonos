@@ -82,7 +82,7 @@ RocksDBMetaFsIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buf
 {
     if (rocksMeta == nullptr)
     {
-        return -(int)POS_EVENT_ID::MFS_FILE_READ_FAILED;
+        return -EID(MFS_FILE_READ_FAILED);
     }
 
     std::string key = _MakeRocksDbKey(fd, fileOffset);
@@ -99,7 +99,7 @@ RocksDBMetaFsIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buf
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_INTERNAL_READ_FAILED), "RocksDBMetaFsIntf Internal Read failed fd {} , fileOffset : {} , length : {}", fileName, fd, length);
-        return -(int)POS_EVENT_ID::ROCKSDB_MFS_INTERNAL_READ_FAILED;
+        return -EID(ROCKSDB_MFS_INTERNAL_READ_FAILED);
     }
 }
 
@@ -108,7 +108,7 @@ RocksDBMetaFsIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* bu
 {
     if (rocksMeta == nullptr)
     {
-        return -(int)POS_EVENT_ID::MFS_FILE_WRITE_FAILED;
+        return -EID(MFS_FILE_WRITE_FAILED);
     }
     std::string key = _MakeRocksDbKey(fd, fileOffset);
     std::string value(buffer, length);
@@ -160,7 +160,7 @@ RocksDBMetaFsIntf::ReleaseAsyncIoContext(void* data)
 {
     int error = EID(SUCCESS);
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
-    error = (int)POS_EVENT_ID::SUCCESS;
+    error = EID(SUCCESS);
     delete asyncCtx;
     return error;
 }

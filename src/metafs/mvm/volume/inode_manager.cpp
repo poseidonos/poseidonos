@@ -113,7 +113,7 @@ InodeManager::GetRegionBaseLpn(const MetaRegionType regionType) const
             return inodeTable_->GetBaseLpn();
 
         default:
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                 "The region type is not valid, regionType: {}",
                 (int)regionType);
             assert(false);
@@ -132,7 +132,7 @@ InodeManager::GetRegionSizeInLpn(MetaRegionType regionType) const
             return inodeTable_->GetLpnCntOfRegion();
 
         default:
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                 "The region type is not valid, regionType: {}",
                 (int)regionType);
             assert(false);
@@ -184,12 +184,12 @@ InodeManager::LoadContent(void)
 {
     if (!inodeHdr_->Load())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Load I/O for MFS inode header has failed...");
         return false;
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Total allocated file descriptor count: {}",
         inodeHdr_->GetTotalAllocatedInodeCnt());
 
@@ -197,7 +197,7 @@ InodeManager::LoadContent(void)
 
     if (!_LoadInodeFromMedia(MetaFileUtil::ConvertToMediaType(volumeType), startBaseLpn))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Load I/O for MFS inode content has failed...");
         return false;
     }
@@ -213,7 +213,7 @@ bool
 InodeManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
     MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableCnts)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Restore inode header content] from vol= {}, baseLpn={}, LpnCnts={}...",
         targetVol, baseLpn, iNodeHdrLpnCnts);
 
@@ -221,18 +221,18 @@ InodeManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 
     if (!inodeHdr_->Load(media, baseLpn, 0 /*idx */, iNodeHdrLpnCnts))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Restore I/O for MFS inode header of NVRAM meta vol. has failed...");
         return false;
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "[Restore the valid inode table content] from baseLpn={}, LpnCnts={}...",
         baseLpn + iNodeHdrLpnCnts, iNodeTableCnts);
 
     if (!_LoadInodeFromMedia(media, baseLpn + iNodeHdrLpnCnts))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Restore I/O for MFS inode table of NVRAM meta vol. has failed...");
 
         return false;
@@ -263,12 +263,12 @@ InodeManager::_LoadInodeFromMedia(const MetaStorageType media, const MetaLpnType
 bool
 InodeManager::SaveContent(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Save inode header content...");
 
     if (!inodeHdr_->Store())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Store I/O for MFS inode header has failed...");
 
         return false;
@@ -278,7 +278,7 @@ InodeManager::SaveContent(void)
 
     if (!_StoreInodeToMedia(MetaFileUtil::ConvertToMediaType(volumeType), startBaseLpn))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Store I/O for MFS inode table has failed...");
 
         return false;
@@ -292,7 +292,7 @@ bool
 InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
     MetaLpnType iNodeHdrLpnCnts, MetaLpnType iNodeTableCnts)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Bakcup inode Header Content] to vol= {}, baseLpn={}, LpnCnts={}...",
         targetVol, baseLpn, iNodeHdrLpnCnts);
 
@@ -300,12 +300,12 @@ InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 
     if (!inodeHdr_->Store(media, baseLpn, 0 /*buf idx */, iNodeHdrLpnCnts))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Backup I/O for MFS inode header of NVRAM meta vol. has failed...");
         return false;
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Backup the valid inode Table Content] to Backup vol= {}, baseLpn={}, LpnCnts={}...",
         targetVol, baseLpn + iNodeHdrLpnCnts, iNodeHdrLpnCnts);
 
@@ -313,7 +313,7 @@ InodeManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn,
 
     if (!_StoreInodeToMedia(media, startBaseLpn))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Backup I/O for MFS inode table of NVRAM meta vol. has failed...");
 
         return false;
@@ -374,7 +374,7 @@ InodeManager::CheckFileInActive(const FileDescriptorType fd) const
 {
     if (activeFiles_.find(fd) == activeFiles_.end())
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "File descriptor {} is not found in active fd list", fd);
         return false;
     }
@@ -395,7 +395,7 @@ InodeManager::AddFileInActiveList(const FileDescriptorType fd)
     else
     {
         activeFiles_.insert(fd);
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "File descriptor {} is added in active fd list", fd);
     }
 
@@ -407,13 +407,13 @@ InodeManager::RemoveFileFromActiveList(const FileDescriptorType fd)
 {
     if (activeFiles_.find(fd) == activeFiles_.end())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "File descriptor {} is not active file.", fd);
         assert(false);
     }
 
     activeFiles_.erase(fd);
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "File descriptor {} is removed from active fd list, remained active file count: {}",
         fd, activeFiles_.size());
 }
@@ -472,7 +472,7 @@ InodeManager::GetFileInode(const FileDescriptorType fd) const
     auto item = fd2InodeMap_.find(fd);
     if (item == fd2InodeMap_.end())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "File descriptor {} is not existed.", fd);
         assert(false);
     }
@@ -503,7 +503,7 @@ InodeManager::_UpdateFdAllocator(void)
 
             fdAllocator_->UpdateLookupMap(hashKey, inode.data.basic.field.fd);
 
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "fileName={}, hashKey={}, fd={}",
                 fileName, hashKey, inode.data.basic.field.fd);
         }
@@ -523,7 +523,7 @@ InodeManager::PopulateFDMapWithVolumeType(std::unordered_map<FileDescriptorType,
             FileDescriptorType fd = inodeTable_->GetFileDescriptor(idx);
             dest.insert({fd, volumeType});
 
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[PopulateFDMapWithVolumeType] fd2VolTypehMap] fd={} volumeType={}",
                 fd, (int)volumeType);
         }
@@ -539,7 +539,7 @@ InodeManager::PopulateFileNameWithVolumeType(std::unordered_map<StringHashType, 
         {
             StringHashType hashKey = MetaFileUtil::GetHashKeyFromFileName(inode.data.basic.field.fileName.ToString());
             dest.insert({hashKey, volumeType});
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "fileKey2VolumeType populated: {}, {}", hashKey, (int)volumeType);
         }
     }

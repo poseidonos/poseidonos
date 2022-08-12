@@ -125,7 +125,7 @@ ReplayProgressReporter::_ReportProgress(void)
 
     if (percent != reportedProgress)
     {
-        POS_REPORT_TRACE((int)POS_EVENT_ID::SYSTEM_RECOVERY,
+        POS_REPORT_TRACE(EID(SYSTEM_RECOVERY),
             "progress report: [" + to_string(percent) + "]");
         usleep(100 * 1000); // delay for the m-tool integration
         reportedProgress = percent;

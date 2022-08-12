@@ -111,7 +111,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
             if (ret != 0)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
-                POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+                POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
                     "Failed to start flushing dirty map pages, arrayId:{}", arrayId);
                 return ret;
             }
@@ -124,7 +124,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     ret = contextManager->FlushContexts(allocMetaFlushCallback, false);
     if (ret != 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
             "Failed to start flushing allocator meta pages, arrayId:{}", arrayId);
     }
 
@@ -174,7 +174,7 @@ CheckpointHandler::FlushCompleted(int metaId)
 void
 CheckpointHandler::_TryToComplete(void)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
+    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS),
         "Try to complete CP, mapCompleted {} allocatorCompleted {}, arrayId:{}",
         mapFlushCompleted, allocatorMetaFlushCompleted, arrayId);
 
@@ -210,7 +210,7 @@ CheckpointHandler::_Reset(void)
 void
 CheckpointHandler::_SetStatus(CheckpointStatus to)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STATUS,
+    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS),
         "Checkpoint status changed from {} to {}, arrayId:{}", status, to, arrayId);
 
     status = to;

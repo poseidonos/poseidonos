@@ -50,7 +50,7 @@ MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
 
     if (poolSize == 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "Pool size requested is {}", poolSize);
         assert(false);
     }
@@ -69,7 +69,7 @@ MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
             pool_[idx]->AddToPool(_CreateMpio((MpioType)idx, directAccessEnabled));
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Mpio allocator constructed. mpio pool size: {}, write cache size: {}",
         poolSize, WRITE_CACHE_CAPACITY);
 }
@@ -128,7 +128,7 @@ MpioAllocator::Release(Mpio* mpio)
 {
     if (mpio->IsCached())
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[Mpio][Release    ] cached mpio, not released. type:{}, req.tagId:{}, mpio_id:{}, fileOffset:{}, buffer:{}",
             (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
             mpio->io.startByteOffset, mpio->GetMDPageDataBuf());
@@ -137,7 +137,7 @@ MpioAllocator::Release(Mpio* mpio)
     }
     else
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[Mpio][Release    ] type:{}, req.tagId:{}, mpio_id:{}, fileOffset:{}, buffer:{}",
             (int)mpio->GetType(), mpio->io.tagId, mpio->GetId(),
             mpio->io.startByteOffset, mpio->GetMDPageDataBuf());

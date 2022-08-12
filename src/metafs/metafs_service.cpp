@@ -60,7 +60,7 @@ MetaFsService::~MetaFsService(void)
 {
     if (ioScheduler_)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "MetaScheduler is suspended.");
 
         ioScheduler_->ExitThread();
@@ -79,7 +79,7 @@ MetaFsService::~MetaFsService(void)
 
     if (needToRemoveConfig_)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "Delete MetaFsConfigManager");
 
         delete configManager_;
@@ -111,7 +111,7 @@ MetaFsService::Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSe
 void
 MetaFsService::Register(const std::string& arrayName, const int arrayId, MetaFs* fileSystem)
 {
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "New metafs instance registered. arrayId: {}, arrayName: {}",
         arrayId, arrayName);
 
@@ -124,7 +124,7 @@ MetaFsService::Deregister(const std::string& arrayName)
 {
     const int arrayId = arrayNameToId_[arrayName];
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "A metafs instance deregistered. arrayName: {}",
         arrayName);
 
@@ -161,7 +161,7 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "MetaScheduler is created. count: {}, coreId: {}",
                 CPU_COUNT(&schedSet), coreId);
 

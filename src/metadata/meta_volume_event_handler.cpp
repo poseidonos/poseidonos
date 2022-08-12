@@ -84,7 +84,7 @@ int
 MetaVolumeEventHandler::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     // Do nothing
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 int
@@ -102,7 +102,7 @@ MetaVolumeEventHandler::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArr
     }
     else
     {
-        result = (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        result = EID(VOL_EVENT_FAIL);
     }
     return result;
 }
@@ -116,7 +116,7 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     result = mapper->PrepareVolumeDelete(volEventBase->volId);
     if (result != 0)
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
 
     // Invalidate all blocks in the volume
@@ -135,14 +135,14 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
         result = journal->WriteVolumeDeletedLog(volEventBase->volId);
         if (result != 0)
         {
-            return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+            return EID(VOL_EVENT_FAIL);
         }
 
         // Trigger flushing metadata
         result = journal->TriggerMetadataFlush();
         if (result != 0)
         {
-            return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+            return EID(VOL_EVENT_FAIL);
         }
     }
 
@@ -150,13 +150,13 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     result = mapper->DeleteVolumeMap(volEventBase->volId);
     if (result != 0)
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+        return EID(VOL_EVENT_FAIL);
     }
 
     POS_TRACE_INFO(EID(VOL_EVENT_OK),
         "Mapper has successfully deleted the map of volume {}", volEventBase->volId);
 
-    return (int)POS_EVENT_ID::VOL_EVENT_OK;
+    return EID(VOL_EVENT_OK);
 }
 
 int

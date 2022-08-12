@@ -95,7 +95,7 @@ StripeLocker::ResetBusyLock(bool force)
     {
         busyLocker->Clear();
     }
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::LOCKER_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(LOCKER_DEBUG_MSG),
         "Reset Busylock, force_reset:{}", force);
     delete busyRange;
     busyRange = nullptr;

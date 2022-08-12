@@ -27,7 +27,7 @@ TEST(RenameVolumeCommand, Execute_testWhenNoNewNameGiven)
     // Then
     JsonFormat jFormat;
     string expected = jFormat.MakeResponse(
-            "RENAMEVOLUME", rid, (int)POS_EVENT_ID::INVALID_PARAM,
+            "RENAMEVOLUME", rid, EID(INVALID_PARAM),
             "volume name or newname is not entered", GetPosInfo());
 
     EXPECT_EQ(expected, actual);

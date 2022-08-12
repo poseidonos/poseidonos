@@ -50,7 +50,7 @@ AllocateBuffer(BufferOffsetAllocator* allocator, uint64_t totalSizeToAllocate)
                 MapList dirty; // garbage data
                 allocator->LogFilled(allocator->GetLogGroupId(allocatedOffset), dirty);
             }
-            else if (allocationResult == (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE)
+            else if (allocationResult == EID(JOURNAL_NO_LOG_BUFFER_AVAILABLE))
             {
                 break;
             }

@@ -54,7 +54,7 @@ MbrMapManager::InsertDevices(ArrayMeta& meta, unsigned int arrayIndex)
     for (auto dev : meta.devs.nvm)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+        POS_TRACE_DEBUG(EID(MBR_DEBUG_MSG),
             "Inserted {} to array {}", dev.uid, arrayIndex);
         insertNum++;
     }
@@ -62,7 +62,7 @@ MbrMapManager::InsertDevices(ArrayMeta& meta, unsigned int arrayIndex)
     for (auto dev : meta.devs.data)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+        POS_TRACE_DEBUG(EID(MBR_DEBUG_MSG),
             "Inserted {} to array {}", dev.uid, arrayIndex);
         insertNum++;
     }
@@ -70,12 +70,12 @@ MbrMapManager::InsertDevices(ArrayMeta& meta, unsigned int arrayIndex)
     for (auto dev : meta.devs.spares)
     {
         arrayDeviceIndexMap.insert(pair<string, unsigned int>(dev.uid, arrayIndex));
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+        POS_TRACE_DEBUG(EID(MBR_DEBUG_MSG),
             "Inserted {} to array {}", dev.uid, arrayIndex);
         insertNum++;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(MBR_DEBUG_MSG),
         "Inserted {} devices to arrayDeviceMap", insertNum);
 
     return 0;
@@ -98,7 +98,7 @@ MbrMapManager::DeleteDevices(unsigned int arrayIndex)
     {
         if (devIter->second == arrayIndex)
         {
-            POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+            POS_TRACE_DEBUG(EID(MBR_DEBUG_MSG),
                 "Deleted {} from array {}", devIter->first, devIter->second);
             arrayDeviceIndexMap.erase(devIter++);
             deleteNum++;
@@ -109,7 +109,7 @@ MbrMapManager::DeleteDevices(unsigned int arrayIndex)
         }
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MBR_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(MBR_DEBUG_MSG),
         "Deleted {} devices from arrayDeviceMap", deleteNum);
 
     return 0;

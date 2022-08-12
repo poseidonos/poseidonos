@@ -66,7 +66,7 @@ TEST(VolumeEventPublisher, NotifyVolumeCreated_)
     bool expected, actual;
 
     // When
-    ON_CALL(metaVolumeEventHandler, VolumeCreated(_, _, _)).WillByDefault(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    ON_CALL(metaVolumeEventHandler, VolumeCreated(_, _, _)).WillByDefault(Return(EID(VOL_EVENT_FAIL)));
 
     expected = volumeEventPublisher->NotifyVolumeCreated(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
     actual = false;
@@ -113,7 +113,7 @@ TEST(VolumeEventPublisher, NotifyVolumeUpdated_)
     bool expected, actual;
 
     // When
-    ON_CALL(metaVolumeEventHandler, VolumeUpdated(_, _, _)).WillByDefault(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    ON_CALL(metaVolumeEventHandler, VolumeUpdated(_, _, _)).WillByDefault(Return(EID(VOL_EVENT_FAIL)));
 
     expected = volumeEventPublisher->NotifyVolumeUpdated(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
     actual = false;
@@ -156,7 +156,7 @@ TEST(VolumeEventPublisher, NotifyVolumeDeleted_)
     bool expected, actual;
 
     // When
-    ON_CALL(metaVolumeEventHandler, VolumeDeleted(_,_)).WillByDefault(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    ON_CALL(metaVolumeEventHandler, VolumeDeleted(_,_)).WillByDefault(Return(EID(VOL_EVENT_FAIL)));
 
     expected = volumeEventPublisher->NotifyVolumeDeleted(&volumeEventBase,&volumeArrayInfo);
     actual = false;
@@ -203,7 +203,7 @@ TEST(VolumeEventPublisher, NotifyVolumeMounted_)
     bool expected, actual;
 
     // When
-    ON_CALL(metaVolumeEventHandler, VolumeMounted(_, _, _)).WillByDefault(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    ON_CALL(metaVolumeEventHandler, VolumeMounted(_, _, _)).WillByDefault(Return(EID(VOL_EVENT_FAIL)));
 
     expected = volumeEventPublisher->NotifyVolumeMounted(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
     actual = false;
@@ -246,7 +246,7 @@ TEST(VolumeEventPublisher, NotifyVolumeUnmounted_)
     bool expected, actual;
 
     // When
-    ON_CALL(metaVolumeEventHandler, VolumeUnmounted(_,_)).WillByDefault(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    ON_CALL(metaVolumeEventHandler, VolumeUnmounted(_,_)).WillByDefault(Return(EID(VOL_EVENT_FAIL)));
 
     expected = volumeEventPublisher->NotifyVolumeUnmounted(&volumeEventBase, &volumeArrayInfo);
     actual = false;
@@ -293,7 +293,7 @@ TEST(VolumeEventPublisher, NotifyVolumeLoaded_)
     bool expected, actual;
 
     // When
-    ON_CALL(metaVolumeEventHandler, VolumeLoaded(_, _, _)).WillByDefault(Return((int)POS_EVENT_ID::VOL_EVENT_FAIL));
+    ON_CALL(metaVolumeEventHandler, VolumeLoaded(_, _, _)).WillByDefault(Return(EID(VOL_EVENT_FAIL)));
 
     expected = volumeEventPublisher->NotifyVolumeLoaded(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
     actual = false;

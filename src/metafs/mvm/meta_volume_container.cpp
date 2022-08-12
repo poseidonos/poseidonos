@@ -81,7 +81,7 @@ MetaVolumeContainer::_CreateVolume(const MetaVolumeType volumeType, const int ar
         volume = std::make_shared<SsdMetaVolume>(arrayId, volumeType, maxLpnNum);
     }
 
-    MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "MetaVolume has been instantiated, arrayId: {}, volumeType: {}, maxLpnNum: {}",
         arrayId, (int)volumeType, maxLpnNum);
 
@@ -99,7 +99,7 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
 {
     MetaLpnType* Info = new MetaLpnType[(int)BackupInfo::Max]();
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Try to open {} meta volume(s)", volumeContainer.size());
 
     for (auto& item : volumeContainer)
@@ -118,27 +118,27 @@ MetaVolumeContainer::OpenAllVolumes(bool isNPOR)
             {
                 if (false == volume->CreateVolume())
                 {
-                    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
+                    MFS_TRACE_ERROR(EID(MFS_META_VOLUME_OPEN_FAILED),
                         "Failed to re-create meta volume(type: {})", (int)volumeType);
                     delete[] Info;
                     return false;
                 }
                 else
                 {
-                    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                         "Successfully re-created meta volume(type: {})", (int)volumeType);
                 }
             }
             else
             {
-                MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_OPEN_FAILED,
+                MFS_TRACE_ERROR(EID(MFS_META_VOLUME_OPEN_FAILED),
                     "Failed to open meta volume(type: {})", (int)volumeType);
                 delete[] Info;
                 return false;
             }
         }
 
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "Opened meta volume(type: {})", (int)volumeType);
     }
 
@@ -152,7 +152,7 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
 {
     if (!allVolumesOpened)
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_ALREADY_CLOSED,
+        MFS_TRACE_WARN(EID(MFS_META_VOLUME_ALREADY_CLOSED),
             "All volume already closed. Ignore duplicate volume close");
         return true;
     }
@@ -171,7 +171,7 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
         if (!volume->CloseVolume(Info, resetContext /* output */))
         {
             // due to both array stop state and active files.
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+            MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CLOSE_FAILED),
                 "Meta volume close is failed, cxt={}", resetContext);
 
             if (true == resetContext)
@@ -183,7 +183,7 @@ MetaVolumeContainer::CloseAllVolumes(bool& resetContext)
             return false;
         }
 
-        MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "MetaVolume has been successfully closed, arrayId: {}, volumeType: {}",
             arrayId, (int)volumeType);
     }

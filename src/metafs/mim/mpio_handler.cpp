@@ -57,7 +57,7 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
   doneCountByStorage(),
   doneCountByFileType()
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "threadId={}, coreId={}", threadId, coreId);
 
     if (nullptr == doneQ)
@@ -66,7 +66,7 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
 
 MpioHandler::~MpioHandler(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "MpioHandler is desctructed");
 
     if (nullptr != partialMpioDoneQ)

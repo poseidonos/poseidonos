@@ -219,7 +219,7 @@ Allocator::PrepareRebuild(void)
     ret = contextManager->MakeRebuildTargetSegmentList();
     if (ret != 0)
     {
-        if (ret == (int)POS_EVENT_ID::ALLOCATOR_REBUILD_TARGET_SET_EMPTY)
+        if (ret == EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY))
         {
             // No segments to rebuild, complete rebuild
             POS_TRACE_INFO(EID(ALLOCATOR_MAKE_REBUILD_TARGET), "No segments to rebuild");
