@@ -32,6 +32,8 @@
 
 #include "metafs_service.h"
 
+#include <numa.h>
+
 #include <string>
 #include <unordered_map>
 
@@ -42,14 +44,14 @@
 namespace pos
 {
 MetaFsService::MetaFsService(void)
-: MetaFsService(nullptr, new MetaFsConfigManager(ConfigManagerSingleton::Instance()))
+: configManager_(new MetaFsConfigManager(ConfigManagerSingleton::Instance())),
+  needToRemoveConfig_(true),
+  tp_(nullptr)
 {
-    needToRemoveConfig_ = true;
 }
 
-MetaFsService::MetaFsService(MetaFsIoScheduler* ioScheduler, MetaFsConfigManager* configManager)
-: ioScheduler_(ioScheduler),
-  configManager_(configManager),
+MetaFsService::MetaFsService(MetaFsConfigManager* configManager)
+: configManager_(configManager),
   needToRemoveConfig_(false),
   tp_(nullptr)
 {
@@ -58,16 +60,19 @@ MetaFsService::MetaFsService(MetaFsIoScheduler* ioScheduler, MetaFsConfigManager
 
 MetaFsService::~MetaFsService(void)
 {
-    if (ioScheduler_)
+    int count = 0;
+    for (auto info : ioScheduler_)
     {
-        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-            "MetaScheduler is suspended.");
+        auto scheduler = info.second;
+        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            "MetaScheduler #{} is suspended", count);
 
-        ioScheduler_->ExitThread();
+        scheduler->ExitThread();
 
-        delete ioScheduler_;
-        ioScheduler_ = nullptr;
+        delete scheduler;
+        count++;
     }
+    ioScheduler_.clear();
 
     if (tp_)
     {
@@ -101,7 +106,7 @@ MetaFsService::Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSe
     tp_ = tp;
     if (!tp_)
     {
-        tp_ = new TelemetryPublisher {"meta_scheduler"};
+        tp_ = new TelemetryPublisher{"meta_scheduler"};
         TelemetryClientSingleton::Instance()->RegisterPublisher(tp_);
     }
 
@@ -157,21 +162,47 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
     const cpu_set_t schedSet, const cpu_set_t mioSet)
 {
     const std::string threadName = "MetaScheduler";
+    int numScheduler = 0;
     for (uint32_t coreId = 0; coreId < totalCoreCount; ++coreId)
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
-            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "MetaScheduler is created. count: {}, coreId: {}",
-                CPU_COUNT(&schedSet), coreId);
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+                "MetaScheduler #{} is created, coreId: {}",
+                numScheduler, coreId);
 
-            ioScheduler_ = new MetaFsIoScheduler(0, coreId, totalCoreCount,
+            if (!configManager_->IsSupportingNumaDedicatedScheduling() && numScheduler == 1)
+            {
+                POS_TRACE_WARN((int)POS_EVENT_ID::MFS_UNNECESSARY_SCHEDULER_SET,
+                    "This meta scheduler will not be created, when the numa_dedicated setting is turned on");
+                continue;
+            }
+
+            MetaFsIoScheduler* scheduler = new MetaFsIoScheduler(0, coreId, totalCoreCount,
                 threadName, mioSet, configManager_, tp_,
                 new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()),
-                configManager_->GetWrrWeight());
-            ioScheduler_->StartThread();
-            break;
+                configManager_->GetWrrWeight(), configManager_->IsSupportingNumaDedicatedScheduling());
+
+            int numaId = numa_node_of_cpu(coreId);
+            if (ioScheduler_.find(numaId) == ioScheduler_.end())
+            {
+                ioScheduler_.insert({numaId, scheduler});
+                scheduler->StartThread();
+                numScheduler++;
+            }
+            else
+            {
+                delete scheduler;
+            }
         }
+    }
+
+    if (numScheduler > MAX_SCHEDULER_COUNT)
+    {
+        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MAX_SCHEDULER_EXCEEDED,
+            "It has exceeded the maximum number that can be generated, numScheduler:{}",
+            numScheduler);
+        assert(false);
     }
 }
 } // namespace pos

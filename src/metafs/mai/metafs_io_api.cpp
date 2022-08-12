@@ -54,7 +54,7 @@ MetaFsIoApi::MetaFsIoApi(void)
 
 MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
     MetaStorageSubsystem* storage, TelemetryPublisher* tp, ConcurrentMetaFsTimeInterval* metaFsTimeInterval,
-    MetaIoManager* io)
+    const bool supportNumaDedicated, MetaIoManager* io)
 : arrayId(arrayId),
   isNormal(false),
   ioMgr(io),
@@ -63,7 +63,7 @@ MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
   concurrentMetaFsTimeInterval(metaFsTimeInterval)
 {
     if (!ioMgr)
-        ioMgr = new MetaIoManager(storage);
+        ioMgr = new MetaIoManager(supportNumaDedicated, storage);
 }
 
 MetaFsIoApi::~MetaFsIoApi(void)

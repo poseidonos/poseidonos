@@ -32,6 +32,9 @@
 
 #pragma once
 
+#include <numa.h>
+#include <sched.h>
+
 #include <string>
 
 #include "meta_storage_specific.h"
@@ -97,7 +100,7 @@ enum class IoRequestStage
 class MetaFsIoRequest : public MetaFsRequestBase, public MetaFsStopwatch<IoRequestStage>
 {
 public:
-    MetaFsIoRequest(void);
+    MetaFsIoRequest(const uint32_t numaId = numa_node_of_cpu(sched_getcpu()));
     // copy except retryFlag, ioDone and error
     MetaFsIoRequest(const MetaFsIoRequest& req);
     virtual ~MetaFsIoRequest(void);
@@ -138,6 +141,7 @@ public:
     int requestCount;
     MetaFileContext* fileCtx;
     RequestPriority priority;
+    uint32_t numaId;
 
 private:
     bool retryFlag;
