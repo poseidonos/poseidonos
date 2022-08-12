@@ -85,13 +85,13 @@ EventCpuPolicy::_SetRebuildPolicyWeight(void)
     QosCorrectionDir rebuildCorrection = QosCorrectionDir_PriorityHighest;
     switch (priority)
     {
-        case PRIORITY_HIGHEST:
+        case PRIORITY_HIGH:
             rebuildCorrection = QosCorrectionDir_PriorityHighest;
             break;
         case PRIORITY_MEDIUM:
             rebuildCorrection = QosCorrectionDir_PriorityMedium;
             break;
-        case PRIORITY_LOWEST:
+        case PRIORITY_LOW:
             rebuildCorrection = QosCorrectionDir_PriorityLowest;
             break;
         default:

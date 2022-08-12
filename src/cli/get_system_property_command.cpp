@@ -79,13 +79,13 @@ GetSystemPropertyCommand::_GetRebuildImpactString(uint8_t impact)
 {
     switch (impact)
     {
-        case PRIORITY_HIGHEST:
+        case PRIORITY_HIGH:
             return "highest";
 
         case PRIORITY_MEDIUM:
             return "medium";
 
-        case PRIORITY_LOWEST:
+        case PRIORITY_LOW:
             return "lowest";
 
         default:

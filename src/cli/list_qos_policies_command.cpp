@@ -164,14 +164,14 @@ QosListPoliciesCommand::_GetRebuildImpactString(uint8_t impact)
 {
     switch (impact)
     {
-        case PRIORITY_HIGHEST:
-            return "highest";
+        case PRIORITY_HIGH:
+            return "high";
 
         case PRIORITY_MEDIUM:
             return "medium";
 
-        case PRIORITY_LOWEST:
-            return "lowest";
+        case PRIORITY_LOW:
+            return "low";
 
         default:
             return "unknown";

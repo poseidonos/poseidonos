@@ -32,20 +32,22 @@
 
 #include "io_dispatcher.h"
 
-#include "src/spdk_wrapper/event_framework_api.h"
+#include <unistd.h>
+
+#include "src/device/base/ublock_device.h"
+#include "src/device/device_detach_trigger.h"
+#include "src/event_scheduler/event_factory.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/i_array_device.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/io_scheduler/dispatcher_policy.h"
 #include "src/io_scheduler/io_worker.h"
-#include "src/event_scheduler/io_completer.h"
-#include "src/include/i_array_device.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
-#include "src/device/base/ublock_device.h"
-#include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/event_scheduler/event_factory.h"
-#include "src/device/device_detach_trigger.h"
-#include <unistd.h>
+#include "src/spdk_wrapper/accel_engine_api.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -74,6 +76,19 @@ IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
     }
     eventScheduler->InjectIODispatcher(this);
     dispPolicy = new DispatcherPolicyQos(this, eventScheduler);
+    ioReactorCount = 0;
+    for (uint32_t coreIndex = 0; coreIndex < MAX_CORE; coreIndex++)
+    {
+        ioReactorCore[coreIndex] = 0;
+    }
+    for (uint32_t coreIndex = 0; coreIndex < MAX_CORE; coreIndex++)
+    {
+        if (AffinityManagerSingleton::Instance()->IsIoReactor(coreIndex))
+        {
+            ioReactorCore[ioReactorCount] = coreIndex;
+            ioReactorCount++;
+        }
+    }
 }
 
 IODispatcher::~IODispatcher(void)
@@ -212,13 +227,47 @@ IODispatcher::CompleteForThreadLocalDeviceList(void)
     }
 }
 
+void
+IODispatcher::_SubmitIOInReactor(void* ptr1, void* ptr2)
+{
+    UBlockDevice* ublock = (UBlockDevice*)ptr1;
+    UbioSmartPtr* ubio = (UbioSmartPtr*)ptr2;
+    ublock->SubmitAsyncIO(*ubio);
+    delete ubio;
+}
+
+int
+IODispatcher::SubmitIOInReactor(UBlockDevice* ublock, UbioSmartPtr ubio)
+{
+    static std::atomic<uint32_t> lastReactorIndex;
+    UbioSmartPtr* smartPtr = new UbioSmartPtr(ubio);
+
+    uint32_t targetReactorCore = ioReactorCore[lastReactorIndex];
+
+    if (ubio->GetOriginCore() == INVALID_CORE)
+    {
+        ubio->SetOriginCore(targetReactorCore);
+    }
+    bool ret = true;
+    ret = EventFrameworkApiSingleton::Instance()->SendSpdkEvent(targetReactorCore,
+            _SubmitIOInReactor,
+            ublock, (void*)smartPtr);
+
+    assert(ret);
+
+    lastReactorIndex = (lastReactorIndex + 1) % ioReactorCount;
+    return 0;
+}
+
 int
 IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
 {
     bool isReactor = eventFrameworkApi->IsReactorNow();
-
+    uint32_t currentCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
+    bool isEventReactor = AffinityManagerSingleton::Instance()->IsEventReactor(currentCore);
     // sync io for reactor is not allowed. (reactor should not be stuck in any point.)
-    if (unlikely(isReactor && sync))
+    int ret = 0;
+    if (unlikely(isReactor && (!isEventReactor) && sync))
     {
         POS_EVENT_ID eventId =
             EID(IODISPATCHER_INVALID_PARM);
@@ -261,11 +310,26 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
 
     if (isReactor)
     {
-        return ublock->SubmitAsyncIO(ubio);
+        if (AffinityManagerSingleton::Instance()->UseEventReactor() && (ubio->GetOriginCore() == INVALID_CORE))
+        {
+            ret = SubmitIOInReactor(ublock, ubio);
+        }
+        else
+        {
+            ret = ublock->SubmitAsyncIO(ubio);
+        }
     }
     else
     {
-        IOWorker* ioWorker = ublock->GetDedicatedIOWorker();
+        IOWorker* ioWorker = nullptr;
+        if (AffinityManagerSingleton::Instance()->UseEventReactor())
+        {
+            ret = SubmitIOInReactor(ublock, ubio);
+        }
+        else
+        {
+            ioWorker = ublock->GetDedicatedIOWorker();
+        }
         if (likely(nullptr != ioWorker))
         {
             dispPolicy->Submit(ioWorker, ubio);
@@ -277,7 +341,7 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
         ubio->WaitDone();
     }
 
-    return 0;
+    return ret;
 }
 
 void

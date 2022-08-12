@@ -384,22 +384,21 @@ Poseidonos::_SetPerfImpact(void)
     if (ret == EID(SUCCESS))
     {
         qos_backend_policy newRebuildPolicy;
-        if (impact.compare("highest") == 0)
+        if (impact.compare("high") == 0)
         {
-            newRebuildPolicy.priorityImpact = PRIORITY_HIGHEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_HIGH;
         }
         else if (impact.compare("medium") == 0)
         {
             newRebuildPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
-        else if (impact.compare("lowest") == 0)
+        else if (impact.compare("low") == 0)
         {
-            newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_LOW;
         }
-
         else
         {
-            newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_LOW;
             POS_TRACE_INFO(static_cast<uint32_t>(EID(QOS_SET_EVENT_POLICY)),
                 "Rebuild Perf Impact not supported, Set to default lowest");
         }
