@@ -18,7 +18,6 @@ public:
     MOCK_METHOD(void, RemoveDeviceForReactor, (UblockSharedPtr dev), (override));
     MOCK_METHOD(void, AddDeviceForIOWorker, (UblockSharedPtr dev, cpu_set_t cpuSet), (override));
     MOCK_METHOD(void, RemoveDeviceForIOWorker, (UblockSharedPtr dev), (override));
-    MOCK_METHOD(void, CompleteForThreadLocalDeviceList, (), (override));
     MOCK_METHOD(int, Submit, (UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded), (override));
 };
 

@@ -94,7 +94,7 @@ TEST(IOTranslator, Translate_testIfThereIsNoTranslator)
     unsigned int mockArrayIndex = 0;
     string mockArrayName = "mockArray";
     PartitionType mockPartitionType = PartitionType::USER_DATA;
-    int NO_TRANSLATOR = (int)POS_EVENT_ID::IO_TRANSLATOR_NOT_FOUND;
+    int NO_TRANSLATOR = EID(IO_TRANSLATOR_NOT_FOUND);
 
     // When
     LogicalEntry src;

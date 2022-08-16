@@ -81,7 +81,7 @@ ContextReplayer::ReplaySegmentAllocation(StripeId userLsid)
     if (segmentCtx->GetSegmentState(segId) == SegmentState::FREE)
     {
         segmentCtx->AllocateSegment(segId);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segId);
+        POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS), "SegmentId:{} is allocated", segId);
     }
 }
 
@@ -95,7 +95,7 @@ ContextReplayer::ReplayStripeAllocation(StripeId wbLsid, StripeId userLsid)
     if (segmentCtx->GetSegmentState(segId) == SegmentState::FREE)
     {
         segmentCtx->AllocateSegment(segId);
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_REPLAY_STATUS, "SegmentId:{} is allocated", segId);
+        POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS), "SegmentId:{} is allocated", segId);
     }
 }
 

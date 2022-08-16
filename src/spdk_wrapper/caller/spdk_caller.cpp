@@ -133,4 +133,16 @@ SpdkCaller::SpdkUuidParse(struct spdk_uuid* uuid, const char* uuid_str)
 {
     return spdk_uuid_parse(uuid, uuid_str);
 }
+
+void
+SpdkCaller::SpdkBdevPosRegisterPoller(void (*func)(void))
+{
+    return spdk_bdev_pos_register_poller(reinterpret_cast<void *>(func));
+}
+
+void
+SpdkCaller::SpdkBdevPosUnRegisterPoller(void (*func)(void))
+{
+    return spdk_bdev_pos_unregister_poller(reinterpret_cast<void *>(func));
+}
 } // namespace pos

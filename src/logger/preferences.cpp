@@ -81,7 +81,7 @@ Preferences::SetLogLevel(shared_ptr<spdlog::logger> logger, string value)
     }
     else
     {
-        return (int)POS_EVENT_ID::LOGGER_SET_LEVEL_FAILED;
+        return EID(LOGGER_SET_LEVEL_FAILED);
     }
 }
 

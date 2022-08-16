@@ -100,23 +100,23 @@ ExtentAllocator::AllocExtents(MetaLpnType lpnCnt)
         _SortAndCalcAvailable(false, newLpnCnt);
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "[ExtentAllocator] base: {}, last: {}, available: {}",
         fileRegionBaseLpnInVolume, maxFileRegionLpn, availableLpnCount);
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "[ExtentAllocator] requested lpn count: {}, allocated extent count: {}",
         lpnCnt, result.size());
 
     for (auto& extent : result)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "allocated extent, startLpn: {}, lpnCount: {}",
             extent.GetStartLpn(), extent.GetCount());
     }
 
     if (result.size() > MetaFsConfig::MAX_PAGE_MAP_CNT)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "It has exceeded the maximum extent count that can be allocated.");
         assert(0);
     }

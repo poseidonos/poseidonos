@@ -180,7 +180,7 @@ Mpio::DoE2ECheck(const MpAioState expNextState)
     {
         if (!_CheckDataIntegrity())
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_INFORMATION,
+            POS_TRACE_ERROR(EID(MFS_INVALID_INFORMATION),
                 "[Mpio][DoE2ECheck ] E2E Check fail!, arrayId={}, mediaType={}, lpn={}",
                 io.arrayId, (int)io.targetMediaType, io.metaLpn);
 
@@ -192,7 +192,7 @@ Mpio::DoE2ECheck(const MpAioState expNextState)
     {
         if (!DIRECT_ACCESS_ENABLED || MetaStorageType::NVRAM != io.targetMediaType)
         {
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[Mpio][DoE2ECheck ] Read data will be cleared due to invalid data, arrayId={}, mediaType={}, lpn={}, oldData={}",
                 io.arrayId, (int)io.targetMediaType, io.metaLpn, *(uint64_t*)GetMDPageDataBuf());
 
@@ -217,7 +217,7 @@ Mpio::_ConvertToMssOpcode(const MpAioState mpioState)
             return MssOpcode::Write;
 
         default:
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+            POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
                 "Operation {} is not supported.", (int)mpioState);
             assert(false);
     }

@@ -42,7 +42,7 @@ namespace pos
 RebuildProgress::RebuildProgress(string name)
 {
     arrayName = name;
-    POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[0], {}", arrayName);
+    POS_REPORT_TRACE(EID(REBUILD_PROGRESS), "[0], {}", arrayName);
 }
 
 RebuildProgress::~RebuildProgress(void)
@@ -56,7 +56,7 @@ RebuildProgress::~RebuildProgress(void)
 void
 RebuildProgress::Update(string _id, uint32_t _done, uint32_t _total)
 {
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS_DETAIL,
+    POS_TRACE_DEBUG(EID(REBUILD_PROGRESS_DETAIL),
         "array:{}, id:{}, done:{}, total:{}", arrayName, _id, _done, _total);
 
     auto it = progress.find(_id);
@@ -88,7 +88,7 @@ RebuildProgress::Update(string _id, uint32_t _done, uint32_t _total)
     if (percent != now)
     {
         percent = now;
-        POS_REPORT_TRACE((int)POS_EVENT_ID::REBUILD_PROGRESS, "[{}], {}", percent, arrayName);
+        POS_REPORT_TRACE(EID(REBUILD_PROGRESS), "[{}], {}", percent, arrayName);
     }
 }
 
@@ -104,7 +104,7 @@ uint32_t RebuildProgress::Current(void)
         done += partProg->done;
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::REBUILD_PROGRESS_DETAIL,
+    POS_TRACE_DEBUG(EID(REBUILD_PROGRESS_DETAIL),
         "rebuilding in progress, num_of_tasks:{}, array:{}, done:{}, total:{}", progress.size(), arrayName, done, total);
 
     if (total == 0)

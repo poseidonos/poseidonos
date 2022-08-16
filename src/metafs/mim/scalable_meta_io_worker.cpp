@@ -96,7 +96,7 @@ ScalableMetaIoWorker::StartThread(void)
 {
     th_ = new std::thread(AsEntryPointNoParam(&ScalableMetaIoWorker::Execute, this));
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Start MioHandler, " + GetLogString() + ", thread id: {}",
         std::hash<std::thread::id>{}(th_->get_id()));
 }

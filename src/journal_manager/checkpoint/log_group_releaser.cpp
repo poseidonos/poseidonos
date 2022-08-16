@@ -120,7 +120,7 @@ LogGroupReleaser::_TriggerCheckpoint(void)
     LogGroupFooter footer;
     uint64_t footerOffset;
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED,
+    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STARTED),
         "Submit checkpoint start for log group {}", flushingLogGroupId);
 
     _CreateFlushingLogGroupFooter(footer, footerOffset);
@@ -175,7 +175,7 @@ LogGroupReleaser::_UpdateFlushingLogGroup(void)
     struct LogGroupInfo result = _PopFullLogGroup();
     flushingLogGroupId = result.logGroupId;
     flushingSequenceNumber = result.sequenceNumber;
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_FLUSH_LOG_GROUP,
+    POS_TRACE_DEBUG(EID(JOURNAL_FLUSH_LOG_GROUP),
         "Flush next log group {}, seq number {}", flushingLogGroupId, flushingSequenceNumber);
 }
 

@@ -99,13 +99,13 @@ ReverseMapManager::Init(void)
         if (rocksDbEnabled)
         {
             revMapWholefile = new RocksDBMetaFsIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
-            POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_INITIALIZED,
+            POS_TRACE_INFO(EID(REVMAP_INITIALIZED),
                 "RocksDBMetaFsIntf for reverse map has been initialized , fileName : {} , arrayId : {} ", "RevMapWhole", addrInfo->GetArrayId());
         }
         else
         {
             revMapWholefile = new MetaFsFileIntf("RevMapWhole", addrInfo->GetArrayId(), MetaFileType::SpecialPurposeMap);
-            POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_INITIALIZED,
+            POS_TRACE_INFO(EID(REVMAP_INITIALIZED),
                 "MetaFsFileIntffor reverse map has been initialized , fileName : {} , arrayId : {} ", "RevMapWhole", addrInfo->GetArrayId());
         }
     }

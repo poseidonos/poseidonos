@@ -55,19 +55,19 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
     FileDescriptorType fd = inodeMgr->LookupDescriptorByName(*reqMsg.fileName);
     if (!inodeMgr->GetExtent(fd, extents))
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The extent count of the file is zero, fileName: {}",
             *reqMsg.fileName);
         assert(0);
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "DeleteFileInode, fd: {}, fileName: {}",
         reqMsg.fd, *reqMsg.fileName);
 
     for (auto& extent : extents)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "target extent, startLpn: {}, lpnCount: {}",
             extent.GetStartLpn(), extent.GetCount());
     }
@@ -83,13 +83,13 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
     {
         inodeMgr->extentAllocator_->AddToFreeList(extent.GetStartLpn(), extent.GetCount());
 
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[Metadata File] Release an extent, startLpn={}, count={}",
             extent.GetStartLpn(), extent.GetCount());
         totalLpnCount += extent.GetCount();
     }
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Metadata File] Delete volType={}, fd={}, fileName={}, totalLpnCnt={}",
         (int)inodeMgr->volumeType, fd, *reqMsg.fileName, totalLpnCount);
 

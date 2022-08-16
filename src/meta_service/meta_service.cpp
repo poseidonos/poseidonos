@@ -59,7 +59,7 @@ MetaService::Register(std::string arrayName, int arrayId, IMetaUpdater* mapUpdat
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::META_ALREADY_REGISTERED,
+        POS_TRACE_INFO(EID(META_ALREADY_REGISTERED),
             "Meta service for array {} is already registered", arrayName);
     }
 }
@@ -77,7 +77,7 @@ MetaService::Unregister(std::string arrayName)
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::META_ALREADY_REGISTERED,
+        POS_TRACE_INFO(EID(META_ALREADY_REGISTERED),
             "Meta service for array {} already unregistered", arrayName);
     }
 }

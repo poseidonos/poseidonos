@@ -148,10 +148,10 @@ Nvmf::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         if (true == ret)
         {
             delete vInfo;
-            return (int)POS_EVENT_ID::VOL_EVENT_OK;
+            return EID(VOL_EVENT_OK);
         }
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 int
@@ -167,10 +167,10 @@ Nvmf::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo
         ret = volume->VolumeDeleted(vInfo);
         if (true == ret)
         {
-            return (int)POS_EVENT_ID::VOL_EVENT_OK;
+            return EID(VOL_EVENT_OK);
         }
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 int
@@ -184,9 +184,9 @@ Nvmf::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeMounted(vInfo);
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        return EID(VOL_EVENT_OK);
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 int
@@ -201,10 +201,10 @@ Nvmf::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayIn
         bool ret = volume->VolumeUnmounted(vInfo);
         if (true == ret)
         {
-            return (int)POS_EVENT_ID::VOL_EVENT_OK;
+            return EID(VOL_EVENT_OK);
         }
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 int
@@ -229,9 +229,9 @@ Nvmf::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf,
     }
     if (true == ret)
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        return EID(VOL_EVENT_OK);
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 int
@@ -245,9 +245,9 @@ Nvmf::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf
         _CopyVolumeArrayInfo(vInfo, volArrayInfo);
 
         volume->VolumeUpdated(vInfo);
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        return EID(VOL_EVENT_OK);
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 int
@@ -256,9 +256,9 @@ Nvmf::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
     bool ret = volume->VolumeDetached(volList, volArrayInfo->arrayName);
     if (true == ret)
     {
-        return (int)POS_EVENT_ID::VOL_EVENT_OK;
+        return EID(VOL_EVENT_OK);
     }
-    return (int)POS_EVENT_ID::VOL_EVENT_FAIL;
+    return EID(VOL_EVENT_FAIL);
 }
 
 } // namespace pos

@@ -86,7 +86,7 @@ GcMapUpdate::_DoSpecificJob(void)
     _InvalidateBlock();
     _ValidateBlock(stripeId, validCount);
 
-    POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_MAP_UPDATE_COMPLETION,
+    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_COMPLETION),
         "gc map update, arrayName:{}, stripeUserLsid:{}",
         arrayInfo->GetName(), currentLsid);
 

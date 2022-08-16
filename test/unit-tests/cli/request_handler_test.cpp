@@ -71,7 +71,7 @@ TEST(RequestHandler, TimedOut_test)
 
     // Then
     JsonFormat jFormat;
-    string expected = jFormat.MakeResponse(command, rid, (int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT, "",
+    string expected = jFormat.MakeResponse(command, rid, EID(CLI_SERVER_TIMED_OUT), "",
         GetPosInfo());
 
     EXPECT_EQ(expected, actual);
@@ -95,7 +95,7 @@ TEST(RequestHandler, PosBusy_test)
 
     // Then
     JsonFormat jFormat;
-    string expected = jFormat.MakeResponse(command, rid, (int)POS_EVENT_ID::CLI_SERVER_BUSY, "",
+    string expected = jFormat.MakeResponse(command, rid, EID(CLI_SERVER_BUSY), "",
         GetPosInfo());
 
     EXPECT_EQ(expected, actual);

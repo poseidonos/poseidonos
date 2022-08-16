@@ -120,7 +120,7 @@ ReplayHandler::Start(void)
     int result = _ExecuteReplayTasks();
     if (result < 0)
     {
-        POS_TRACE_CRITICAL((int)POS_EVENT_ID::JOURNAL_REPLAY_FAILED,
+        POS_TRACE_CRITICAL(EID(JOURNAL_REPLAY_FAILED),
             "Journal replay failed");
     }
     replayState.RemoveRecoverState();

@@ -45,6 +45,7 @@
 #include "src/spdk_wrapper/caller/spdk_env_caller.h"
 #include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
 #include "src/spdk_wrapper/caller/spdk_thread_caller.h"
+#include "tbb/concurrent_queue.h"
 namespace pos
 {
 class EventFrameworkApi;
@@ -84,7 +85,7 @@ private:
     static thread_local uint32_t targetReactor;
 
     using EventArgument = std::tuple<EventFuncOneParam, void* >;
-    using EventQueue = std::queue<EventArgument>;
+    using EventQueue = tbb::concurrent_queue<EventArgument>;
     using EventQueueLock = std::recursive_mutex;
 
     static const uint32_t MAX_REACTOR_COUNT = 256;

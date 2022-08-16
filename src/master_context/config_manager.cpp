@@ -59,7 +59,7 @@ ConfigManager::ReadFile(void)
 {
     if (read == true)
     {
-        return (int)POS_EVENT_ID::CONFIG_FILE_READ_DONE;
+        return EID(CONFIG_FILE_READ_DONE);
     }
 
     std::lock_guard<std::recursive_mutex> guard(configManagerMutex);
@@ -93,11 +93,11 @@ ConfigManager::ReadFile(void)
 
     if (!result)
     {
-        return (int)POS_EVENT_ID::CONFIG_FILE_FORMAT_ERROR;
+        return EID(CONFIG_FILE_FORMAT_ERROR);
     }
 
     read = true;
-    return (int)POS_EVENT_ID::CONFIG_FILE_READ_DONE;
+    return EID(CONFIG_FILE_READ_DONE);
 }
 
 int
@@ -107,7 +107,7 @@ ConfigManager::GetValue(string module, string key,
     if (read == false)
     {
         int ret = ReadFile();
-        if ((int)POS_EVENT_ID::CONFIG_FILE_READ_DONE != ret)
+        if (EID(CONFIG_FILE_READ_DONE) != ret)
         {
             return ret;
         }
@@ -115,17 +115,17 @@ ConfigManager::GetValue(string module, string key,
 
     if (!doc.IsObject())
     {
-        return (int)POS_EVENT_ID::CONFIG_JSON_DOC_IS_NOT_OBJECT;
+        return EID(CONFIG_JSON_DOC_IS_NOT_OBJECT);
     }
 
     if (false == doc.HasMember(module.c_str()))
     {
-        return (int)POS_EVENT_ID::CONFIG_REQUEST_MODULE_ERROR;
+        return EID(CONFIG_REQUEST_MODULE_ERROR);
     }
 
     if (false == doc[module.c_str()].HasMember(key.c_str()))
     {
-        return (int)POS_EVENT_ID::CONFIG_REQUEST_KEY_ERROR;
+        return EID(CONFIG_REQUEST_KEY_ERROR);
     }
 
     switch (type)
@@ -136,7 +136,7 @@ ConfigManager::GetValue(string module, string key,
                 *(string*)value = doc[module.c_str()][key.c_str()].GetString();
                 return EID(SUCCESS);
             }
-            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return EID(CONFIG_VALUE_TYPE_ERROR);
 
         case CONFIG_TYPE_INT:
             if (doc[module.c_str()][key.c_str()].IsInt() == true)
@@ -144,7 +144,7 @@ ConfigManager::GetValue(string module, string key,
                 *(int*)value = doc[module.c_str()][key.c_str()].GetInt();
                 return EID(SUCCESS);
             }
-            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return EID(CONFIG_VALUE_TYPE_ERROR);
 
         case CONFIG_TYPE_UINT32:
             if (doc[module.c_str()][key.c_str()].IsUint() == true)
@@ -152,7 +152,7 @@ ConfigManager::GetValue(string module, string key,
                 *(uint32_t*)value = doc[module.c_str()][key.c_str()].GetUint();
                 return EID(SUCCESS);
             }
-            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return EID(CONFIG_VALUE_TYPE_ERROR);
 
         case CONFIG_TYPE_UINT64:
             if (doc[module.c_str()][key.c_str()].IsUint64() == true)
@@ -160,7 +160,7 @@ ConfigManager::GetValue(string module, string key,
                 *(uint64_t*)value = doc[module.c_str()][key.c_str()].GetUint64();
                 return EID(SUCCESS);
             }
-            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return EID(CONFIG_VALUE_TYPE_ERROR);
 
         case CONFIG_TYPE_BOOL:
             if (doc[module.c_str()][key.c_str()].IsBool() == true)
@@ -168,10 +168,10 @@ ConfigManager::GetValue(string module, string key,
                 *(bool*)value = doc[module.c_str()][key.c_str()].GetBool();
                 return EID(SUCCESS);
             }
-            return (int)POS_EVENT_ID::CONFIG_VALUE_TYPE_ERROR;
+            return EID(CONFIG_VALUE_TYPE_ERROR);
 
         default:
-            return (int)POS_EVENT_ID::CONFIG_REQUEST_CONFIG_TYPE_ERROR;
+            return EID(CONFIG_REQUEST_CONFIG_TYPE_ERROR);
             break;
     }
 }

@@ -45,7 +45,7 @@ SsdMetaVolume::SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType ma
 
 SsdMetaVolume::~SsdMetaVolume(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "SSD Meta Vol. destructed...");
 }
 
@@ -63,7 +63,7 @@ SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
         return true;
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetAvailableSpace(), fileByteSize);
     return false;
 }
@@ -73,7 +73,7 @@ SsdMetaVolume::IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& pro
 {
     if (GetUtilizationInPercent() >= META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT)
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_ALMOST_FULL,
+        MFS_TRACE_WARN(EID(MFS_META_VOLUME_ALMOST_FULL),
             "Volume is almost full,");
         return false;
     }

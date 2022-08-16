@@ -112,7 +112,7 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
                 std::string name = DEVICE_NAME_PREFIX;
                 name = name + std::to_string(nsIndex);
 
-                POS_TRACE_INFO((int)POS_EVENT_ID::UNVME_SSD_SCANNED,
+                POS_TRACE_INFO(EID(UNVME_SSD_SCANNED),
                     "uNVMe Device has been scanned: {}, {}",
                     name, nsEntry->trAddr);
 
@@ -145,7 +145,7 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
         }
         else
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_SCAN_FAILED,
+            POS_TRACE_ERROR(EID(UNVME_SSD_SCAN_FAILED),
                 "Failed to Scan uNVMe devices");
         }
     }
@@ -172,7 +172,7 @@ UnvmeMgmt::Open(DeviceContext* deviceContext)
 
                 if (nullptr == qpair)
                 {
-                    POS_TRACE_ERROR((int)POS_EVENT_ID::UNVME_SSD_OPEN_FAILED,
+                    POS_TRACE_ERROR(EID(UNVME_SSD_OPEN_FAILED),
                         "uNVMe Device open failed: namespace #{}",
                         spdkCaller->SpdkNvmeNsGetId(devCtx->ns));
                 }

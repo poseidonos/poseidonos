@@ -212,7 +212,7 @@ MapperWbt::ReadWholeReverseMap(std::string fname)
 
     // Store Whole ReverseMap to Linux file(fname)
     MetaFileIntf* fileToStore = new MockFileIntf(fname, addrInfo->GetArrayId(), MetaFileType::Map);
-    POS_TRACE_INFO((int)POS_EVENT_ID::REVMAP_FILE_SIZE, "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
+    POS_TRACE_INFO(EID(REVMAP_FILE_SIZE), "fileSizePerStripe:{}  maxVsid:{}  fileSize:{} for RevMapWhole",
                     reverseMapManager->GetReverseMapPerStripeFileSize(), addrInfo->GetMaxVSID(), fileSize);
     fileToStore->Create(fileSize);
     fileToStore->Open();

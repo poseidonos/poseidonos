@@ -118,14 +118,14 @@ BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffse
 
     if (statusList[currentLogGroupId]->GetStatus() == LogGroupStatus::FULL)
     {
-        return (int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL;
+        return EID(JOURNAL_LOG_GROUP_FULL);
     }
 
     if (statusList[currentLogGroupId]->GetStatus() == LogGroupStatus::INIT)
     {
         statusList[currentLogGroupId]->SetActive(_GetNextSeqNum());
 
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_DEBUG,
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
             "New log group {} is allocated", currentLogGroupId);
     }
 
@@ -161,14 +161,14 @@ BufferOffsetAllocator::_GetNewActiveGroup(void)
 
     if (statusList[currentLogGroupId]->GetStatus() != LogGroupStatus::INIT)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE,
+        POS_TRACE_WARN(EID(JOURNAL_NO_LOG_BUFFER_AVAILABLE),
             "No log buffer available for journal (new log group id: {})", currentLogGroupId);
-        return (int)POS_EVENT_ID::JOURNAL_NO_LOG_BUFFER_AVAILABLE;
+        return EID(JOURNAL_NO_LOG_BUFFER_AVAILABLE);
     }
     else
     {
         statusList[currentLogGroupId]->SetActive(_GetNextSeqNum());
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_DEBUG,
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
             "New log group {} is allocated", currentLogGroupId);
         return 0;
     }
@@ -189,7 +189,7 @@ BufferOffsetAllocator::_TryToSetFull(int id)
         uint32_t sequenceNumber = statusList[id]->GetSeqNum();
         releaser->AddToFullLogGroup({id, sequenceNumber});
 
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::JOURNAL_LOG_GROUP_FULL,
+        POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_FULL),
             "Log group id {} is added to full log group", id);
     }
 }

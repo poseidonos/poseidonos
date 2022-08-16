@@ -52,12 +52,12 @@ IStateControl* StateManager::CreateStateControl(string array)
     {
         state = new StateControl(array);
         stateMap.emplace(array, state);
-        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_ADDED,
+        POS_TRACE_INFO(EID(STATE_CONTROL_ADDED),
             "statecontrol of array:{} is added", array);
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+        POS_TRACE_INFO(EID(STATE_CONTROL_DEBUG),
             "statecontrol of array:{} exists already. skipping the creation of statecontrol.", array);
     }
     return state;
@@ -75,7 +75,7 @@ void StateManager::RemoveStateControl(string array)
     {
         delete stateMap.begin()->second;
         stateMap.erase(stateMap.begin());
-        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_REMOVED,
+        POS_TRACE_INFO(EID(STATE_CONTROL_REMOVED),
                 "statecontrol of array:'{}' is removed - empty array name", array);
     }
     else
@@ -85,12 +85,12 @@ void StateManager::RemoveStateControl(string array)
         {
             delete it->second;
             stateMap.erase(array);
-            POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_REMOVED,
+            POS_TRACE_INFO(EID(STATE_CONTROL_REMOVED),
                 "statecontrol of array:{} is removed", array);
         }
         else
         {
-            POS_TRACE_WARN((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+            POS_TRACE_WARN(EID(STATE_CONTROL_DEBUG),
                 "couldn't remove statecontrol of array - {} : not existent", array);
         }
     }
@@ -105,7 +105,7 @@ StateControl* StateManager::_Find(string array)
     auto it = stateMap.find(array);
     if (it == stateMap.end())
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::STATE_CONTROL_DEBUG,
+        POS_TRACE_INFO(EID(STATE_CONTROL_DEBUG),
         "statecontrol of array:{} is nullptr", array);
         return nullptr;
     }

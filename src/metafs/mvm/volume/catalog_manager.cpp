@@ -68,7 +68,7 @@ CatalogManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType
     }
     else
     {
-        MFS_TRACE_WARN((int)POS_EVENT_ID::MFS_WARNING_INIT_AGAIN,
+        MFS_TRACE_WARN(EID(MFS_WARNING_INIT_AGAIN),
             "catalog is already initialized.");
     }
 }
@@ -104,7 +104,7 @@ CatalogManager::SetMss(MetaStorageSubsystem* metaStorage)
 bool
 CatalogManager::LoadVolCatalog(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Load volume catalog content...");
 
     if (true == catalog->Load())
@@ -113,7 +113,7 @@ CatalogManager::LoadVolCatalog(void)
     }
     else
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Load I/O for MFS catalog content has failed...");
     }
 
@@ -123,7 +123,7 @@ CatalogManager::LoadVolCatalog(void)
 bool
 CatalogManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn, MetaLpnType lpnCnts)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "[CatalogContent Restore] vol= {}", targetVol);
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE), "[CatalogContent Restore] vol= {}", targetVol);
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
     bool isSuccess = catalog->Load(media, baseLpn, 0 /* idx */, lpnCnts);
@@ -133,7 +133,7 @@ CatalogManager::RestoreContent(MetaVolumeType targetVol, MetaLpnType baseLpn, Me
     }
     else
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Restore I/O for MFS catalog content has failed...");
     }
 
@@ -145,7 +145,7 @@ CatalogManager::CreateCatalog(MetaLpnType maxVolumeLpn, uint32_t maxFileSupportN
 {
     bool isSuccess = true;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Create volume catalog content...");
     catalog->Create(maxVolumeLpn, maxFileSupportNum);
 
@@ -166,12 +166,12 @@ CatalogManager::SaveContent(void)
 {
     assert(true == catalog->CheckValidity());
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Save volume catalog content...");
 
     if (true != catalog->Store())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "Store I/O for MFS catalog content has failed...");
 
         return false;
@@ -183,14 +183,14 @@ CatalogManager::SaveContent(void)
 bool
 CatalogManager::BackupContent(MetaVolumeType targetVol, MetaLpnType baseLpn, MetaLpnType lpnCnts)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE, "[CatalogContent backup] vol= {}, baseLpn={}, LpnCnts={}",
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE), "[CatalogContent backup] vol= {}, baseLpn={}, LpnCnts={}",
         targetVol, baseLpn, lpnCnts);
 
     MetaStorageType media = MetaFileUtil::ConvertToMediaType(targetVol);
     bool isSuccess = catalog->Store(media, baseLpn, 0 /*buf idx*/, lpnCnts);
     if (isSuccess != true)
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_SAVE_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_SAVE_FAILED),
             "NVRAM meta backup has failed...");
     }
 

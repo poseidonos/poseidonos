@@ -54,7 +54,8 @@ enum class MetaFsConfigType
     WrrCountSpecialPurposeMap,
     WrrCountJournal,
     WrrCountMap,
-    WrrCountGeneral
+    WrrCountGeneral,
+    SupportNumaDedicatedScheduling,
 };
 
 class MetaFsConfigManager
@@ -120,6 +121,10 @@ public:
     {
         return rocksDbPath_;
     }
+    virtual bool IsSupportingNumaDedicatedScheduling(void) const
+    {
+        return supportNumaDedicatedScheduling_;
+    }
 
 protected:
     virtual bool _ValidateConfig(void) const;
@@ -150,6 +155,7 @@ private:
     size_t _GetWrrCountGeneral(void);
     bool _IsRocksdbEnabled(void);
     std::string _GetRocksDbPath(void);
+    bool _IsSupportingNumaDedicatedScheduling(void);
 
     std::unordered_map<MetaFsConfigType, std::pair<std::string, int>> configMap_;
     ConfigManager* configManager_;
@@ -165,6 +171,7 @@ private:
     size_t wrrCountGeneral_;
     bool rocksdbEnabled_;
     std::string rocksDbPath_;
+    bool supportNumaDedicatedScheduling_;
 };
 
 } // namespace pos
