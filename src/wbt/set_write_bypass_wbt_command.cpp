@@ -30,39 +30,29 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/wbt/set_write_bypass_wbt_command.h"
+#include "src/array_mgmt/array_manager.h"
 
 #include <string>
 
-#include "src/array_models/dto/device_set.h"
-#include "src/array_models/dto/partition_logical_size.h"
-#include "src/include/array_state_type.h"
-#include "src/include/partition_type.h"
-#include "src/state/state_context.h"
-
-#include "src/array/device/i_array_device_manager.h"
-using namespace std;
-
 namespace pos
 {
-class IArrayInfo
+SetWriteBypassWbtCommand::SetWriteBypassWbtCommand(void)
+:   WbtCommand(SET_WRITE_BYPASS, "set_write_bypass")
 {
-public:
-    virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type) = 0;
-    virtual DeviceSet<string> GetDevNames(void) = 0;
-    virtual string GetName(void) = 0;
-    virtual unsigned int GetIndex(void) = 0;
-    virtual string GetMetaRaidType(void) = 0;
-    virtual string GetDataRaidType(void) = 0;
-    virtual string GetCreateDatetime(void) = 0;
-    virtual string GetUpdateDatetime(void) = 0;
-    virtual id_t GetUniqueId(void) = 0;
-    virtual ArrayStateType GetState(void) = 0;
-    virtual StateContext* GetStateCtx(void) = 0;
-    virtual uint32_t GetRebuildingProgress(void) = 0;
-    virtual IArrayDevMgr* GetArrayManager(void) = 0;
-    virtual bool IsWriteThroughEnabled(void) = 0;
-    virtual void SetNeedWriteBypass(bool value) = 0;
-    virtual bool GetNeedWriteBypass(void) = 0;
-};
+}
+// LCOV_EXCL_START
+SetWriteBypassWbtCommand::~SetWriteBypassWbtCommand(void)
+{
+}
+// LCOV_EXCL_STOP
+int
+SetWriteBypassWbtCommand::Execute(Args &argv, JsonElement &elem)
+{
+    std::string arrayName = argv["array"].get<std::string>();
+    std::string value = argv["value"].get<std::string>();
+    uint32_t numValue = std::stoul(value);
+    ArrayMgr()->GetInfo(arrayName)->arrayInfo->SetNeedWriteBypass(numValue);
+    return 0;
+}
 } // namespace pos

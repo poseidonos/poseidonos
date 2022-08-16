@@ -115,6 +115,14 @@ public:
     virtual void SetPreferences(bool isWT);
     virtual void SetTargetAddress(string targetAddress);
     virtual string GetTargetAddress();
+    void SetNeedWriteBypass(bool value)
+    {
+        needWriteBypass = value;
+    }
+    bool GetNeedWriteBypass()
+    {
+        return needWriteBypass;
+    }
 
 private:
     int _LoadImpl(void);
@@ -147,6 +155,7 @@ private:
     id_t uniqueId = 0;
     bool isWTEnabled = false;
     string targetAddress = "";
+    bool needWriteBypass = false;
 };
 } // namespace pos
 #endif // ARRAY_H_

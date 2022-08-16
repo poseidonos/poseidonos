@@ -116,7 +116,10 @@ enum WbtCommandOpcode
     GET_JOURNAL_STATUS,
 
     // Config
-    UPDATE_CONFIG
+    UPDATE_CONFIG,
+
+    // Write Bypass
+    SET_WRITE_BYPASS
 };
 
 } // namespace pos

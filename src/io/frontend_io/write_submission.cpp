@@ -226,26 +226,34 @@ WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
     bool isWTEnabled = volumeManager->IsWriteThroughEnabled();
+    bool isWriteBypassEnabled = arrayInfo->GetNeedWriteBypass();
 
-    if (false == isWTEnabled)
+    if (isWriteBypassEnabled && isRead == false)
     {
-        // If Read for partial write case, handling device failure is necessary.
-        ioDispatcher->Submit(volumeIo, false, isRead);
+        volumeIo->GetCallback()->Execute();
     }
     else
     {
-        if (false == isRead)
+        if (false == isWTEnabled)
         {
-            WriteForParity writeForParity(volumeIo);
-            bool ret = writeForParity.Execute();
-            if (ret == false)
-            {
-                POS_EVENT_ID eventId = EID(WRITE_FOR_PARITY_FAILED);
-                POS_TRACE_ERROR(static_cast<int>(eventId),
-                    "Failed to copy user data to dram for parity");
-            }
+            // If Read for partial write case, handling device failure is necessary.
+            ioDispatcher->Submit(volumeIo, false, isRead);
         }
-        ioDispatcher->Submit(volumeIo, false, true);
+        else
+        {
+            if (false == isRead)
+            {
+                WriteForParity writeForParity(volumeIo);
+                bool ret = writeForParity.Execute();
+                if (ret == false)
+                {
+                    POS_EVENT_ID eventId = EID(WRITE_FOR_PARITY_FAILED);
+                    POS_TRACE_ERROR(static_cast<int>(eventId),
+                        "Failed to copy user data to dram for parity");
+                }
+            }
+            ioDispatcher->Submit(volumeIo, false, true);
+        }
     }
 }
 
