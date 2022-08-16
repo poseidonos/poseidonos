@@ -70,7 +70,7 @@ TEST(SpdkEventScheduler, SendSpdkEvent_StubEvent)
 {
     // Given: StubEventSES, bool
     auto event = std::make_shared<StubEventSES>(true);
-    bool actual, expected = false;
+    bool actual, expected = true;
 
     // When: Call SendSpdkEvent with StubEventSES
     actual = SpdkEventScheduler::SendSpdkEvent(0, event);

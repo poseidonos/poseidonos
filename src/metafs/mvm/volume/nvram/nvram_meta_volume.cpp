@@ -44,14 +44,14 @@ NvRamMetaVolume::NvRamMetaVolume(const int arrayId, const MetaLpnType maxVolumeP
 
 NvRamMetaVolume::~NvRamMetaVolume(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "NvRAM Meta Vol. destructed...");
 }
 
 bool
 NvRamMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "NVRAM Space. free space={}, request={}", fileByteSize, GetAvailableSpace());
 
     if (fileByteSize == 0) // MetaFsFileControlType::GetFreeFileRegionSize
@@ -77,7 +77,7 @@ NvRamMetaVolume::IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& p
 {
     if (GetUtilizationInPercent() >= META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_META_VOLUME_ALMOST_FULL,
+        POS_TRACE_DEBUG(EID(MFS_META_VOLUME_ALMOST_FULL),
             "NVRAM Volume is almost full");
         return false;
     }

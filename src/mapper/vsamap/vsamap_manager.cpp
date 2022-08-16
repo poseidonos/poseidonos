@@ -588,7 +588,7 @@ VSAMapManager::_UpdateVsaMap(int volumeId, BlkAddr startRba, VirtualBlks& virtua
         ret = vsaMap->SetEntry(targetRba, targetVsa);
         if (ret < 0)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::VSAMAP_SET_FAILURE, "[Mapper VSAMap] failed to update VSAMap Info, volumeId:{}  targetRba:{}  targetVsa.sid:{}  targetVsa.offset:{}",
+            POS_TRACE_ERROR(EID(VSAMAP_SET_FAILURE), "[Mapper VSAMap] failed to update VSAMap Info, volumeId:{}  targetRba:{}  targetVsa.sid:{}  targetVsa.offset:{}",
                 volumeId, targetRba, targetVsa.stripeId, targetVsa.offset);
             break;
         }

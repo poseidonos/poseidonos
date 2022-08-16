@@ -69,7 +69,7 @@ MetaFsSystemManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 
     if (false == msg->IsValid())
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        MFS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "Given request is incorrect. Please check parameters.");
         return POS_EVENT_ID::MFS_INVALID_PARAMETER;
     }
@@ -138,7 +138,7 @@ MetaFsSystemManager::LoadMbr(bool& isNPOR)
     {
         if (false == mbrMgr->IsValidMBRExist())
         {
-            MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_MBR,
+            MFS_TRACE_ERROR(EID(MFS_INVALID_MBR),
                 "Filesystem MBR has been corrupted or Filesystem cannot be found.");
 
             return POS_EVENT_ID::MFS_INVALID_MBR;
@@ -147,13 +147,13 @@ MetaFsSystemManager::LoadMbr(bool& isNPOR)
         isNPOR = mbrMgr->GetPowerStatus();
         if (true == isNPOR)
         {
-            MFS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "This open is NPOR case!!!");
         }
     }
     else
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_LOAD_FAILED,
+        MFS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Error occurred while loading filesystem MBR");
 
         return POS_EVENT_ID::MFS_META_LOAD_FAILED;

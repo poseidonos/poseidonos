@@ -85,12 +85,12 @@ AccelEngineApi::Initialize(void)
     _SetIoat();
     if (IsIoatEnable() == false)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::IOATAPI_DISABLED,
+        POS_TRACE_INFO(EID(IOATAPI_DISABLED),
             "Ioat Copy Engine Offload Disabled");
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::IOATAPI_DISABLED,
+        POS_TRACE_INFO(EID(IOATAPI_DISABLED),
             "Ioat Copy Engine Offload Enabled");
     }
     uint32_t nextCore = EventFrameworkApiSingleton::Instance()->GetFirstReactor();
@@ -98,7 +98,7 @@ AccelEngineApi::Initialize(void)
         _HandleInitialize, nullptr);
     if (success == false)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::IOATAPI_DISABLED,
+        POS_TRACE_INFO(EID(IOATAPI_DISABLED),
             "Ioat Copy Engine Offload Disabled Due To Lack Of Spdk Events");
         return;
     }

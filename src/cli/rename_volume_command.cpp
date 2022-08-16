@@ -109,7 +109,7 @@ RenameVolumeCommand::Execute(json& doc, string rid)
     else
     {
         return jFormat.MakeResponse(
-            "RENAMEVOLUME", rid, (int)POS_EVENT_ID::INVALID_PARAM,
+            "RENAMEVOLUME", rid, EID(INVALID_PARAM),
             "volume name or newname is not entered", GetPosInfo());
     }
 }

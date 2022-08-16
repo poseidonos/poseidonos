@@ -42,7 +42,7 @@ ReadMpio::ReadMpio(void* mdPageBuf, const bool directAccessEnabled)
 {
     if (!mdPageBuf)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "The buffer is null.");
         assert(false);
     }
@@ -89,7 +89,7 @@ ReadMpio::_MakeReady(MpAioState expNextState)
 bool
 ReadMpio::_HandleError(MpAioState expNextState)
 {
-    POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_DATA_CORRUPTED,
+    POS_TRACE_ERROR(EID(MFS_DATA_CORRUPTED),
         "[Mpio][RdMpioError] ReadMpio Error...req.tagId={}, mpio_id={}",
         io.tagId, io.mpioId);
 
@@ -102,7 +102,7 @@ ReadMpio::_CompleteIO(MpAioState expNextState)
 {
     bool contd2NextRun = _CopyToUserBuf();
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Mpio][RdMpioDone ] ReadMpio Complete...req.tagId={}, mpio_id={}",
         io.tagId, io.mpioId);
 
@@ -122,7 +122,7 @@ ReadMpio::_CopyToUserBuf(void)
     const uint32_t byteOffset = io.startByteOffset;
     const uint32_t byteSize = io.byteSize;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[Mpio][CopyDat2Buf] Copy R data to user buf req.tagId={}, mpio_id={}, offsetInChunk={}, size={}",
         io.tagId, io.mpioId, byteOffset, byteSize);
 

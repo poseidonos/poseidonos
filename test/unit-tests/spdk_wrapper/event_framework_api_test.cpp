@@ -46,8 +46,6 @@ TEST(EventFrameworkApi, SendSpdkEvent_WithEventFuncOneParams_FailToSendMsg)
     thread[0] = reinterpret_cast<struct spdk_thread*>(0x1); // to make it non-null
     bool expected = true;
     int eventCallSuccess = -1;
-    EXPECT_CALL(*mockSpdkThreadCaller, GetNvmfThreadFromReactor(_)).WillOnce(Return(thread[0]));
-    EXPECT_CALL(*mockSpdkThreadCaller, SpdkThreadSendMsg(_, _, _)).WillOnce(Return(eventCallSuccess));
     EXPECT_CALL(*mockSpdkEnvCaller, SpdkEnvGetCurrentCore()).WillRepeatedly(Return(core));
 
     // When: Try to send event with one param function

@@ -35,7 +35,7 @@ TEST(VolumeRenamer, Do_nullvol)
     VolumeList volumes;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::RENAME_VOL_NAME_DOES_NOT_EXIST;
+    int expected = EID(RENAME_VOL_NAME_DOES_NOT_EXIST);
 
     // When
     VolumeRenamer volumeRenamer(volumes, arrayName, arrayID);
@@ -56,7 +56,7 @@ TEST(VolumeRenamer, Do_sameName)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::RENAME_VOL_SAME_VOL_NAME_EXISTS;
+    int expected = EID(RENAME_VOL_SAME_VOL_NAME_EXISTS);
 
     // When
     VolumeList volumes;
@@ -83,7 +83,7 @@ TEST(VolumeRenamer, testIfNewVolumeNameisTooShort)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::RENAME_VOL_NAME_TOO_SHORT;
+    int expected = EID(RENAME_VOL_NAME_TOO_SHORT);
 
     // When
     VolumeList volumes;
@@ -110,7 +110,7 @@ TEST(VolumeRenamer, testIfNewVolumeNameisTooShort)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
+    int expected = EID(VOL_NOT_FOUND);
 
     // When
     VolumeList volumes;
@@ -137,7 +137,7 @@ TEST(VolumeRenamer, Do_Pass)
     uint64_t size = 1024;
 
     int actual;
-    int expected = (int)POS_EVENT_ID::VOL_NOT_FOUND;
+    int expected = EID(VOL_NOT_FOUND);
 
     // When
     VolumeList volumes;

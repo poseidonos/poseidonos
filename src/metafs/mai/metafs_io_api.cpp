@@ -54,7 +54,7 @@ MetaFsIoApi::MetaFsIoApi(void)
 
 MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
     MetaStorageSubsystem* storage, TelemetryPublisher* tp, ConcurrentMetaFsTimeInterval* metaFsTimeInterval,
-    MetaIoManager* io)
+    const bool supportNumaDedicated, MetaIoManager* io)
 : arrayId(arrayId),
   isNormal(false),
   ioMgr(io),
@@ -63,7 +63,7 @@ MetaFsIoApi::MetaFsIoApi(int arrayId, MetaFsFileControlApi* ctrl,
   concurrentMetaFsTimeInterval(metaFsTimeInterval)
 {
     if (!ioMgr)
-        ioMgr = new MetaIoManager(storage);
+        ioMgr = new MetaIoManager(supportNumaDedicated, storage);
 }
 
 MetaFsIoApi::~MetaFsIoApi(void)
@@ -295,7 +295,7 @@ MetaFsIoApi::_ProcessRequest(MetaFsIoRequest& reqMsg)
         size_t byteSize = 0;
         if (reqMsg.ioMode == MetaIoMode::Async)
         {
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[MSG ][SubmitIO   ] " + reqMsg.GetLogString());
             byteSize = reqMsg.byteSize;
         }

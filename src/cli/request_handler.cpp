@@ -193,7 +193,7 @@ RequestHandler::TimedOut(const char* msg)
 
     JsonFormat jFormat;
 
-    int event = (int)POS_EVENT_ID::CLI_SERVER_TIMED_OUT;
+    int event = EID(CLI_SERVER_TIMED_OUT);
     POS_TRACE_WARN(event, "");
     return jFormat.MakeResponse(command, rid, event, "", GetPosInfo());
 }
@@ -207,7 +207,7 @@ RequestHandler::PosBusy(const char* msg)
 
     JsonFormat jFormat;
 
-    int event = (int)POS_EVENT_ID::CLI_SERVER_BUSY;
+    int event = EID(CLI_SERVER_BUSY);
     POS_TRACE_WARN(event, "");
     return jFormat.MakeResponse(command, rid, event, "", GetPosInfo());
 }

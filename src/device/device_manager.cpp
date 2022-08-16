@@ -130,7 +130,7 @@ DeviceManager::IterateDevicesAndDoFunc(DeviceIterFunc func, void* ctx)
         std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
         if (devices.size() == 0)
         {
-            int result = (int)POS_EVENT_ID::DEVICEMGR_DEVICE_NOT_FOUND;
+            int result = EID(DEVICEMGR_DEVICE_NOT_FOUND);
             POS_TRACE_ERROR(result, "There is no device");
             return result;
         }
@@ -399,8 +399,6 @@ DeviceManager::ListDevs()
         devs.push_back(devices[i]->GetProperty());
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_LISTDEV,
-        "ListDevs, count: {}", devs.size());
     return devs;
 }
 
@@ -522,15 +520,6 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
     ioDispatcher->AddDeviceForReactor(dev);
     cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
     ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
-}
-
-void
-DeviceManager::HandleCompletedCommand(void)
-{
-    if (unlikely(ioDispatcher != nullptr))
-    {
-        ioDispatcher->CompleteForThreadLocalDeviceList();
-    }
 }
 
 } // namespace pos

@@ -43,7 +43,7 @@ namespace pos
 const FileBufType MetaFsIoRequest::INVALID_BUF = nullptr;
 InstanceTagIdAllocator ioReqTagIdAllocator;
 
-MetaFsIoRequest::MetaFsIoRequest(void)
+MetaFsIoRequest::MetaFsIoRequest(const uint32_t numaId)
 : reqType(MetaIoRequestType::Max),
   ioMode(MetaIoMode::Max),
   isFullFileIo(true),
@@ -62,6 +62,7 @@ MetaFsIoRequest::MetaFsIoRequest(void)
   requestCount(0),
   fileCtx(nullptr),
   priority(RequestPriority::Normal),
+  numaId(numaId),
   retryFlag(false),
   ioDone(false),
   error(0)
@@ -89,6 +90,7 @@ MetaFsIoRequest::MetaFsIoRequest(const MetaFsIoRequest& req)
   requestCount(0),
   fileCtx(req.fileCtx),
   priority(req.priority),
+  numaId(req.numaId),
   retryFlag(false),
   ioDone(false),
   error(0)
@@ -168,7 +170,7 @@ MetaFsIoRequest::SuspendUntilIoCompletion(void)
         usleep(1);
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[MIO ][WaitForDone] type={}, req.tagId={}, io done={}", reqType, tagId, ioDone);
 
     ioDone = false;
@@ -189,7 +191,7 @@ MetaFsIoRequest::NotifyIoCompletionToClient(void)
         }
     }
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[MIO ][NotifyIO   ] NotifyIOCompletionToClient tagId = {}", tagId);
 }
 

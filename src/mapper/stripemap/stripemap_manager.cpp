@@ -305,7 +305,7 @@ StripeMapManager::SetLSA(StripeId vsid, StripeId lsid, StripeLoc loc)
     pthread_rwlock_unlock(&stripeMapLock);
     if (ret < 0)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::STRIPEMAP_SET_FAILURE,
+        POS_TRACE_ERROR(EID(STRIPEMAP_SET_FAILURE),
             "[Mapper StripeMap] StripeMap set failure, vsid:{}  lsid:{}  loc:{}", vsid, lsid, loc);
     }
     else

@@ -79,7 +79,7 @@ public:
     {
         if (map_.find(key) != map_.end())
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+            POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
                 "the key pair is already existed.");
             return nullptr;
         }

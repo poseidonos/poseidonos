@@ -277,7 +277,7 @@ TEST(ContextIoManager, FlushContexts_IfAsyncAlreadyFlushing)
     // when 2
     ret = ioManager.FlushContexts(nullptr, false);
     // then
-    EXPECT_EQ((int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS, ret);
+    EXPECT_EQ(EID(ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS), ret);
 }
 
 TEST(ContextIoManager, FlushContexts_IfAsyncSuccessAllFile)

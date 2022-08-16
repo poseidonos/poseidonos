@@ -50,16 +50,17 @@
 
 namespace pos
 {
-class ScalableMetaIoWorker;
 class MetaFsIoScheduler;
 class MetaFsConfigManager;
 class TelemetryPublisher;
+
+using SchedulerMap = std::unordered_map<uint32_t, MetaFsIoScheduler*>;
 
 class MetaFsService
 {
 public:
     MetaFsService(void);
-    MetaFsService(MetaFsIoScheduler* ioScheduler, MetaFsConfigManager* configManager);
+    MetaFsService(MetaFsConfigManager* configManager);
     virtual ~MetaFsService(void);
     virtual void Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
         const cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
@@ -67,7 +68,7 @@ public:
     virtual void Deregister(const std::string& arrayName);
     virtual MetaFs* GetMetaFs(const std::string& arrayName) const;
     virtual MetaFs* GetMetaFs(int arrayId) const;
-    virtual MetaFsIoScheduler* GetScheduler(void) const
+    virtual SchedulerMap GetScheduler(void) const
     {
         return ioScheduler_;
     }
@@ -80,9 +81,10 @@ private:
     void _CreateScheduler(const uint32_t totalCount, const cpu_set_t schedSet,
         const cpu_set_t workSet);
 
+    const int MAX_SCHEDULER_COUNT = 2;
     std::unordered_map<std::string, int> arrayNameToId_;
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems_;
-    MetaFsIoScheduler* ioScheduler_;
+    SchedulerMap ioScheduler_;
     MetaFsConfigManager* configManager_;
     bool needToRemoveConfig_;
     TelemetryPublisher* tp_;

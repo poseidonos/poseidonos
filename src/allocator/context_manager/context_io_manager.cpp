@@ -128,7 +128,7 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
 {
     if (flushInProgress.exchange(true) == true)
     {
-        return (int)POS_EVENT_ID::ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS;
+        return EID(ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS);
     }
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] sync:{}, start to flush", sync);
 

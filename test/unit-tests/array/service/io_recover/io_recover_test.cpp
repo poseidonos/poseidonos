@@ -32,7 +32,7 @@ TEST(IORecover, GetRecoverMethod_testWhenMethodIsEmpty)
     int actual = ioRecover.GetRecoverMethod(arrayIndex, nullptr, empty);
 
     // Then
-    int NO_METHOD = (int)POS_EVENT_ID::IO_RECOVER_NOT_FOUND;
+    int NO_METHOD = EID(IO_RECOVER_NOT_FOUND);
     ASSERT_EQ(NO_METHOD, actual);
 }
 

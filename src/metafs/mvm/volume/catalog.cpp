@@ -56,7 +56,7 @@ Catalog::Create(MetaLpnType maxVolumeLpn, uint32_t maxFileNumSupport)
 
     content->signature = VOLUME_CATALOG_SIGNATURE;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Volume catalog has been initialized...");
 }
 
@@ -74,7 +74,7 @@ Catalog::RegisterRegionInfo(MetaRegionType regionType, MetaLpnType baseLpn, Meta
 
     content->regionMap[(int)regionType] = regionMap;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Volume information regiesterd: <regionType={}, {}, {}>",
         (int)regionType, baseLpn, maxLpn);
 }
@@ -85,7 +85,7 @@ Catalog::CheckValidity(void)
     if (Catalog::VOLUME_CATALOG_SIGNATURE == content->signature)
         return true;
 
-    MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CATALOG_INVALID,
+    MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CATALOG_INVALID),
         "The signature({}) in the buffer does not match for VOLUME_CATALOG_SIGNATURE.",
         content->signature);
     return false;

@@ -62,6 +62,8 @@ public:
     virtual const struct spdk_uuid* SpdkBdevGetUuid(const struct spdk_bdev* bdev);
     virtual int SpdkUuidFmtLower(char* uuid_str, size_t uuid_str_size, const struct spdk_uuid* uuid);
     virtual int SpdkUuidParse(struct spdk_uuid* uuid, const char* uuid_str);
+    virtual void SpdkBdevPosRegisterPoller(void (*func)(void));
+    virtual void SpdkBdevPosUnRegisterPoller(void (*func)(void));
 };
 
 using SpdkCallerSingleton = Singleton<SpdkCaller>;

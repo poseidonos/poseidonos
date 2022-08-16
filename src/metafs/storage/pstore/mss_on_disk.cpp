@@ -79,19 +79,19 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
 {
     if (capacity % MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_INVALID_PARAMETER,
+        POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "The capacity should be aligned to 4kb, capacity: {}", capacity);
         assert(0);
     }
 
     const int index = static_cast<int>(mediaType);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Mss pstore CreateMetaStore called...");
 
     if (mssDiskPlace[index])
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "You attempt to create meta storage again. mediaType: {}",
             index);
         Open();
@@ -105,7 +105,7 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
     }
     else
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "Invalid Option");
         assert(0);
     }
@@ -114,17 +114,17 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
     totalBlks[index] = metaCapacity[index] / ArrayConfig::BLOCK_SIZE_BYTE;
     maxPageCntLimitPerIO[index] = MAX_DATA_TRANSFER_BYTE_SIZE / ArrayConfig::BLOCK_SIZE_BYTE;
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Media type(ssd=0, nvram=1)={}, Total free blocks={}, Capacity={}",
         (int)mediaType, totalBlks[index], metaCapacity[index]);
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Meta storage mgmt is opened");
 
     if (formatFlag)
     {
         // TODO (munseop.lim): need to implement
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_WARNING_MESSAGE,
+        POS_TRACE_WARN(EID(MFS_WARNING_MESSAGE),
             "formatFlag isn't supported yet");
     }
 
@@ -138,7 +138,7 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
 POS_EVENT_ID
 MssOnDisk::Open(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Meta storage mgmt is ready");
 
     return POS_EVENT_ID::SUCCESS;
@@ -147,7 +147,7 @@ MssOnDisk::Open(void)
 POS_EVENT_ID
 MssOnDisk::Close(void)
 {
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Meta storage mgmt is closed");
 
     _Finalize();
@@ -202,14 +202,14 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
             {
                 // IOSubmitHandlerStatus::FAIL
                 // IOSubmitHandlerStatus::TRYLOCK_FAIL
-                MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+                MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                     "[SyncReq] Retry I/O Submit Hanlder...");
             }
         } while (1);
 
         if (ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
         {
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[MFS IO FAIL] Fail I/O Dut to System Stop State");
 
             return POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
@@ -287,7 +287,7 @@ MssOnDisk::_CheckSanityErr(const MetaLpnType pageNumber, const uint64_t arrayCap
 {
     if (pageNumber >= arrayCapacity)
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        MFS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "Out of boundary: pageNumber={}, totalBlks={}",
             pageNumber, arrayCapacity);
         return true;
@@ -320,7 +320,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     if (requestLpnCount != 1)
     {
         // TODO (munseop.lim): need to support multi-pages IO
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "MetaFs does not support multi-pages IO.");
         assert(false);
     }
@@ -336,7 +336,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     pos::LogicalBlkAddr blkAddr =
         storagelld->CalculateOnDiskAddress(startLpn); // get physical address
 
-    MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "[MssDisk][SendReq ] type={}, req.tagId={}, mpio_id={}, stripe={}, offsetInDisk={}, buf[0]={}",
         (int)direction, aioData->GetTagId(), aioData->GetMpioId(),
         blkAddr.stripeId, blkAddr.offset, *(uint32_t*)buffer);
@@ -358,7 +358,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
         if (ioStatus == IOSubmitHandlerStatus::TRYLOCK_FAIL ||
             ioStatus == IOSubmitHandlerStatus::FAIL)
         {
-            MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[AsyncReq] Retry I/O Submit Hanlder... Cnt={}",
                 retryIoCnt);
             retryIoCnt++;
@@ -367,7 +367,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
 
     if (ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
     {
-        MFS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "[MFS IO FAIL] Fail I/O Dut to System Stop State, type={}, req.tagId={}, mpio_id={}",
             (int)direction, aioData->GetTagId(), aioData->GetMpioId());
 

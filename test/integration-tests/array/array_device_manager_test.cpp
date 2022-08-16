@@ -123,7 +123,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceHasNoUblock)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_NVM_NOT_FOUND;
+    int expected = EID(ARRAY_NVM_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -155,7 +155,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsActuallySSDDevice)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_NVM_NOT_FOUND;
+    int expected = EID(ARRAY_NVM_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -190,7 +190,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceHasNoUblock)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
+    int expected = EID(ARRAY_SSD_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -225,7 +225,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfDataDeviceIsActuallyNVMDevice)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
+    int expected = EID(ARRAY_SSD_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -266,7 +266,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceHasNoUblock)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
+    int expected = EID(ARRAY_SSD_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -307,7 +307,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::ARRAY_SSD_NOT_FOUND;
+    int expected = EID(ARRAY_SSD_NOT_FOUND);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
@@ -348,7 +348,7 @@ TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
     int actual = arrDevMgr.ImportByName(nameSet);
 
     // Then
-    int expected = (int)POS_EVENT_ID::UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN;
+    int expected = EID(UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN);
     ASSERT_EQ(expected, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }

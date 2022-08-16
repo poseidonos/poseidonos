@@ -60,11 +60,12 @@ MetaFs::MetaFs(void)
   metaStorage_(nullptr),
   telemetryPublisher_(nullptr),
   rocksMeta(nullptr),
-  fileDescriptorAllocator(nullptr)
+  fileDescriptorAllocator(nullptr),
+  configMgr_(MetaFsServiceSingleton::Instance()->GetConfigManager())
 {
 }
 
-MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
+MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded)
 : MetaFs()
 {
     arrayInfo_ = arrayInfo;
@@ -79,17 +80,18 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded)
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher_);
 
     // TODO(sang7.park) : need to combine with metafs config manager
-    concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
+    concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(configMgr_->GetTimeIntervalInMillisecondsForMetric());
+    bool supportNuma = configMgr_->IsSupportingNumaDedicatedScheduling();
 
     mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
     ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt, telemetryPublisher_);
-    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval);
+    io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval, supportNuma);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
     MetaFsServiceSingleton::Instance()->Register(arrayName_, arrayId_, this);
 }
 
-MetaFs::MetaFs(IArrayInfo* arrayInfo, bool isLoaded, MetaFsManagementApi* mgmt,
+MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded, MetaFsManagementApi* mgmt,
     MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
     MetaStorageSubsystem* metaStorage_, TelemetryPublisher* tp)
 : mgmt(mgmt),
@@ -173,7 +175,7 @@ MetaFs::Init(void)
     POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
 
     if (!_Initialize())
-        return (int)POS_EVENT_ID::MFS_MODULE_INIT_FAILED;
+        return EID(MFS_MODULE_INIT_FAILED);
 
     rc = _PrepareMetaVolume();
     if (POS_EVENT_ID::SUCCESS != rc)
@@ -193,7 +195,7 @@ MetaFs::Init(void)
         return -(int)rc;
 
     if (!io->AddArray(arrayId_, _MakeLpnMap()))
-        return -(int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
+        return -EID(MFS_ARRAY_ADD_FAILED);
     if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
     {
         rc = _CreateRocksDBMetaFs();
@@ -207,7 +209,7 @@ MetaFs::Init(void)
     ctrl->SetStatus(isNormal_);
     wbt->SetStatus(isNormal_);
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Mount metafs, arrayId: {}", arrayId_);
 
     return EID(SUCCESS);
@@ -236,7 +238,7 @@ MetaFs::Dispose(void)
     POS_EVENT_ID rc = _CloseMetaVolume();
     if (rc != POS_EVENT_ID::SUCCESS)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED,
+        POS_TRACE_WARN(EID(MFS_META_VOLUME_CLOSE_FAILED),
             "It's failed to close meta volume, arrayId: {}", arrayId_);
     }
 
@@ -250,11 +252,11 @@ MetaFs::Dispose(void)
 
     if (!io->RemoveArray(arrayId_))
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_WARN(EID(MFS_INFO_MESSAGE),
             "It's failed to remove array, arrayId: {}", arrayId_);
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Unmount metafs, arrayId: {}", arrayId_);
 }
 
@@ -263,11 +265,11 @@ MetaFs::Shutdown(void)
 {
     if (!io->RemoveArray(arrayId_))
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_WARN(EID(MFS_INFO_MESSAGE),
             "It's failed to remove array, arrayId: {}", arrayId_);
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Shutdown metafs, arrayId: {}", arrayId_);
 }
 
@@ -288,13 +290,13 @@ MetaFs::GetTheLastValidStripeId(void)
 {
     if (!metaStorage_)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_WARN(EID(MFS_INFO_MESSAGE),
             "Meta storage is not valid, arrayId: {}", arrayId_);
         return 0;
     }
     else if (!ctrl)
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_WARN(EID(MFS_INFO_MESSAGE),
             "Meta control api is not valid, arrayId: {}", arrayId_);
         return 0;
     }
@@ -321,14 +323,14 @@ MetaFs::_Initialize(void)
 
     if (infoList.empty())
     {
-        POS_TRACE_WARN((int)POS_EVENT_ID::MFS_MODULE_NO_MEDIA,
+        POS_TRACE_WARN(EID(MFS_MODULE_NO_MEDIA),
             "No registered media info detected.");
 
         return false;
     }
     else
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "{} entries have been registered to MediaInfo", infoList.size());
     }
 
@@ -360,7 +362,7 @@ MetaFs::_PrepareMetaVolume(void)
         rc = metaStorage_->CreateMetaStore(arrayId_, item.mediaType, item.totalCapacity, !isLoaded_);
         if (rc != POS_EVENT_ID::SUCCESS)
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED,
+            POS_TRACE_ERROR(EID(MFS_META_STORAGE_CREATE_FAILED),
                 "Failed to create meta storage subsystem");
             return POS_EVENT_ID::MFS_META_STORAGE_CREATE_FAILED;
         }
@@ -383,7 +385,7 @@ MetaFs::_CreateMetaVolume(void)
 
         if (!ctrl->CreateVolume(volumeType))
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+            POS_TRACE_ERROR(EID(MFS_META_VOLUME_CREATE_FAILED),
                 "Error occurred to create volume (volume id={})",
                 (int)volumeType);
 
@@ -393,7 +395,7 @@ MetaFs::_CreateMetaVolume(void)
 
     if (!mgmt->CreateMbr())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED,
+        POS_TRACE_ERROR(EID(MFS_META_VOLUME_CREATE_FAILED),
             "Error occurred to create MetaFs MBR");
 
         return POS_EVENT_ID::MFS_META_VOLUME_CREATE_FAILED;
@@ -416,7 +418,7 @@ MetaFs::_OpenMetaVolume(void)
     {
         if (mgmt->IsMbrClean())
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "Mbr is clean. This array is mounted for the first time");
 
             if (false == _Initialize())
@@ -456,7 +458,7 @@ MetaFs::_CloseMetaVolume(void)
             return POS_EVENT_ID::MFS_META_VOLUME_CLOSE_FAILED_DUE_TO_ACTIVE_FILE;
     }
 
-    POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Meta filesystem has been unmounted...");
 
     return POS_EVENT_ID::SUCCESS;
@@ -474,28 +476,28 @@ MetaFs::_CreateRocksDBMetaFs(void)
         bool ret = std::experimental::filesystem::create_directory(metaRocksDir);
         if (ret)
         {
-            MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs create directory : {}", metaRocksDir);
+            MFS_TRACE_INFO(EID(ROCKSDB_MFS_DIR_CREATION_SUCCEED), "RocksDB metafs create directory : {}", metaRocksDir);
         }
         else
         {
-            MFS_TRACE_WARN((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_FAILED, "RocksDB metafs create directory failed : {}", metaRocksDir);
+            MFS_TRACE_WARN(EID(ROCKSDB_MFS_DIR_CREATION_FAILED), "RocksDB metafs create directory failed : {}", metaRocksDir);
         }
     }
     else
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DIR_CREATION_SUCCEED, "RocksDB metafs omitted to create directory : {}, because it's already exists", metaRocksDir);
+        MFS_TRACE_INFO(EID(ROCKSDB_MFS_DIR_CREATION_SUCCEED), "RocksDB metafs omitted to create directory : {}, because it's already exists", metaRocksDir);
     }
     std::string pathName = metaRocksDir + "/" + arrayInfo_->GetName() + "_RocksMeta";
     rocksdb::Status status = rocksdb::DB::Open(options, pathName, &rocksMeta);
     fileDescriptorAllocator = new FileDescriptorAllocator();
     if (status.ok())
     {
-        MFS_TRACE_INFO((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_SUCCEED, "RocksDB Open succeed path : {}", pathName);
+        MFS_TRACE_INFO(EID(ROCKSDB_MFS_DB_OPEN_SUCCEED), "RocksDB Open succeed path : {}", pathName);
         return POS_EVENT_ID::SUCCESS;
     }
     else
     {
-        MFS_TRACE_ERROR((int)POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_FAILED, "RocksDB Open failed path : {}", pathName);
+        MFS_TRACE_ERROR(EID(ROCKSDB_MFS_DB_OPEN_FAILED), "RocksDB Open failed path : {}", pathName);
         return POS_EVENT_ID::ROCKSDB_MFS_DB_OPEN_FAILED;
     }
 }
@@ -506,13 +508,13 @@ MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList
 
     if (media->valid)
     {
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "PartitionType {} is available, arrayId: {}",
             (int)ptnType, arrayId_);
     }
     else
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ERROR_MESSAGE,
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
             "PartitionType {} is not available, arrayId: {}",
             (int)ptnType, arrayId_);
     }
@@ -543,7 +545,7 @@ MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 
     if (ptnSize)
     {
-        POS_TRACE_DEBUG((int)POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+        POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "ptnType: {}, totalStripes: {}", (int)ptnType, ptnSize->totalStripes);
         newInfo->valid = true;
         newInfo->mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) *

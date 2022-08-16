@@ -119,7 +119,7 @@ IoCompleter::CompleteUbioWithoutRecovery(IOErrorType errorType, bool executeCall
             {
                 done = callback->Execute();
             }
-            else
+            if (false == done)
             {
                 done = SpdkEventScheduler::SendSpdkEvent(originCore, callback);
             }

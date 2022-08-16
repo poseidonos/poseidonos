@@ -169,7 +169,7 @@ VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
 
     if (segmentInfosInFlush == logGroupId)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
             "Failed to get versioned segment context, log group {} is already in use", logGroupId);
         return nullptr;
     }
@@ -211,7 +211,7 @@ VersionedSegmentCtx::_CheckLogGroupIdValidity(int logGroupId)
 {
     if (logGroupId >= config->GetNumLogGroups())
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
             "Failed to check logGroupId validity, logGroupId {} is invalid", logGroupId);
         assert(false);
     }
@@ -222,7 +222,7 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 {
     if (segId >= (int)numSegments)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::JOURNAL_INVALID,
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
             "Failed to check segId validity, segId {} is invalid", segId);
         assert(false);
     }
