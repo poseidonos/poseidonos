@@ -400,13 +400,13 @@ MbrManager::_VerifySystemUuid(void* mem)
     if (systemUuid == temp->systemUuid)
     {
         POS_TRACE_INFO(EID(MBR_SYSTEM_UUID_CHECK_SUCCESS),
-            "system_uuid:{}, system_uuid_in_mem:{}");
+            "system_uuid:{}, system_uuid_in_mem:{}", systemUuid, temp->systemUuid);
         ret = EID(SUCCESS);
     }
     else
     {
         POS_TRACE_WARN(EID(MBR_SYSTEM_UUID_CHECK_FAILURE),
-            "system_uuid:{}, system_uuid_in_mem:{}");
+            "system_uuid:{}, system_uuid_in_mem:{}", systemUuid, temp->systemUuid);
         ret = EID(MBR_SYSTEM_UUID_CHECK_FAILURE);
     }
     return ret;
