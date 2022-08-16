@@ -32,37 +32,19 @@
 
 #pragma once
 
-#include <string>
-
-#include "src/array_models/dto/device_set.h"
-#include "src/array_models/dto/partition_logical_size.h"
-#include "src/include/array_state_type.h"
-#include "src/include/partition_type.h"
-#include "src/state/state_context.h"
-
-#include "src/array/device/i_array_device_manager.h"
-using namespace std;
+#include "src/wbt/wbt_command.h"
 
 namespace pos
 {
-class IArrayInfo
+
+class SetWriteBypassWbtCommand : public WbtCommand
 {
 public:
-    virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type) = 0;
-    virtual DeviceSet<string> GetDevNames(void) = 0;
-    virtual string GetName(void) = 0;
-    virtual unsigned int GetIndex(void) = 0;
-    virtual string GetMetaRaidType(void) = 0;
-    virtual string GetDataRaidType(void) = 0;
-    virtual string GetCreateDatetime(void) = 0;
-    virtual string GetUpdateDatetime(void) = 0;
-    virtual id_t GetUniqueId(void) = 0;
-    virtual ArrayStateType GetState(void) = 0;
-    virtual StateContext* GetStateCtx(void) = 0;
-    virtual uint32_t GetRebuildingProgress(void) = 0;
-    virtual IArrayDevMgr* GetArrayManager(void) = 0;
-    virtual bool IsWriteThroughEnabled(void) = 0;
-    virtual void SetNeedWriteBypass(bool value) = 0;
-    virtual bool GetNeedWriteBypass(void) = 0;
+    SetWriteBypassWbtCommand(void);
+    virtual ~SetWriteBypassWbtCommand(void);
+
+    int Execute(Args &argv, JsonElement &elem) override;
+private:
 };
+
 } // namespace pos
