@@ -29,7 +29,7 @@ jobs:
       run: |
         sudo apt update
         chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}}
 
     - name: package build
       working-directory: ${{github.workspace}}
