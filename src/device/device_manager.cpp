@@ -399,8 +399,6 @@ DeviceManager::ListDevs()
         devs.push_back(devices[i]->GetProperty());
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::DEVICEMGR_LISTDEV,
-        "ListDevs, count: {}", devs.size());
     return devs;
 }
 
