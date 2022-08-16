@@ -32,9 +32,10 @@
 
 #include "poseidonos.h"
 
+#include <air/Air.h>
+
 #include <string>
 
-#include "Air.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
 #include "src/cli/grpc_cli_server.h"
@@ -58,6 +59,8 @@
 #include "src/network/nvmf_target.h"
 #include "src/network/transport_configuration.h"
 #include "src/qos/qos_manager.h"
+#include "src/resource_checker/resource_checker.h"
+#include "src/resource_checker/smart_collector.h"
 #include "src/signal_handler/signal_handler.h"
 #include "src/signal_handler/user_signal_interface.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
@@ -65,8 +68,6 @@
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/resource_checker/resource_checker.h"
-#include "src/resource_checker/smart_collector.h"
 
 namespace pos
 {

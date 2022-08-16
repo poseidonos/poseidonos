@@ -32,39 +32,40 @@
 
 #include "src/gc/copier_read_completion.h"
 
-#include <vector>
-#include <memory>
+#include <air/Air.h>
 
-#include "Air.h"
-#include "src/include/backend_event.h"
-#include "src/gc/gc_flush_submission.h"
-#include "src/io/frontend_io/write_submission.h"
-#include "src/include/branch_prediction.h"
-#include "src/bio/volume_io.h"
-#include "src/logger/logger.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/io/general_io/translator.h"
-#include "src/io/backend_io/flush_submission.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/allocator/i_wbstripe_allocator.h"
+#include <memory>
+#include <vector>
+
 #include "src/allocator/i_block_allocator.h"
-#include "src/volume/volume_service.h"
+#include "src/allocator/i_wbstripe_allocator.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/gc/gc_flush_submission.h"
+#include "src/include/backend_event.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
+#include "src/io/backend_io/flush_submission.h"
+#include "src/io/frontend_io/write_submission.h"
+#include "src/io/general_io/translator.h"
+#include "src/logger/logger.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
 CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
-                                            void* buffer, CopierMeta* meta, StripeId stripeId)
+    void* buffer, CopierMeta* meta, StripeId stripeId)
 : CopierReadCompletion(victimStripe, listIndex, buffer, meta, stripeId, nullptr,
-                        VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayIndex()),
-                        EventSchedulerSingleton::Instance())
+      VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayIndex()),
+      EventSchedulerSingleton::Instance())
 {
 }
 
 CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t listIndex,
-                                            void* buffer, CopierMeta* meta, StripeId stripeId,
-                                            EventSmartPtr inputFlushEvent, IVolumeIoManager* inputVolumeManager,
-                                            EventScheduler* inputEventScheduler)
+    void* buffer, CopierMeta* meta, StripeId stripeId,
+    EventSmartPtr inputFlushEvent, IVolumeIoManager* inputVolumeManager,
+    EventScheduler* inputEventScheduler)
 : Callback(false, CallbackType_CopierReadCompletion),
   victimStripe(victimStripe),
   listIndex(listIndex),
@@ -123,8 +124,7 @@ CopierReadCompletion::_DoSpecificJob(void)
 
         if (gcStripeManager->DecreaseRemainingAndCheckIsFull(volId, numBlks))
         {
-            if (unlikely(EID(SUCCESS)
-                != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo)))
+            if (unlikely(EID(SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo)))
             {
                 gcStripeManager->SetFlushed(volId);
                 allocatedBlkInfoList->clear();
@@ -135,12 +135,12 @@ CopierReadCompletion::_DoSpecificJob(void)
             }
             else
             {
-                airlog("InternalIoPendingCnt", "AIR_UserIo", volId, 1);
+                airlog("InternalIoPendingCnt", "user", volId, 1);
                 EventSmartPtr flushEvent;
                 if (nullptr == inputFlushEvent)
                 {
                     flushEvent = std::make_shared<GcFlushSubmission>(meta->GetArrayName(),
-                            allocatedBlkInfoList, volId, dataBuffer, gcStripeManager);
+                        allocatedBlkInfoList, volId, dataBuffer, gcStripeManager);
                 }
                 else
                 {
@@ -153,10 +153,10 @@ CopierReadCompletion::_DoSpecificJob(void)
     }
 
     volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo, blkCnt);
-    airlog("InternalIoPendingCnt", "AIR_UserIo", volId, -blkCnt);
+    airlog("InternalIoPendingCnt", "user", volId, -blkCnt);
     meta->ReturnBuffer(stripeId, buffer);
     meta->SetDoneCopyBlks(blkCnt);
-    airlog("PERF_CopierRead", "AIR_READ", 0, BLOCK_SIZE * blkCnt);
+    airlog("PERF_CopierRead", "read", 0, BLOCK_SIZE * blkCnt);
 
     return true;
 }

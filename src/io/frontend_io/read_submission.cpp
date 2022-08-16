@@ -30,25 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <unistd.h>
-
 #include "src/io/frontend_io/read_submission.h"
 
-#include "Air.h"
+#include <air/Air.h>
+#include <unistd.h>
+
 #include "spdk/event.h"
+#include "src/admin/smart_log_mgr.h"
 #include "src/array/array.h"
 #include "src/array/device/array_device.h"
+#include "src/bio/volume_io.h"
 #include "src/device/base/ublock_device.h"
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
-#include "src/include/pos_event_id.hpp"
-#include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
-#include "src/admin/smart_log_mgr.h"
+#include "src/include/pos_event_id.hpp"
 
 namespace pos
 {
-
 ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockAlignment_, Merger* merger_, Translator* translator_)
 : Event(true),
   blockAlignment(blockAlignment_),
@@ -58,17 +57,17 @@ ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockA
 {
     if (nullptr == blockAlignment)
     {
-        blockAlignment = new BlockAlignment {ChangeSectorToByte(volumeIo->GetSectorRba()), volumeIo->GetSize()};
+        blockAlignment = new BlockAlignment{ChangeSectorToByte(volumeIo->GetSectorRba()), volumeIo->GetSize()};
     }
     if (nullptr == merger)
     {
-        merger = new Merger {volumeIo, &readCompletionFactory};
+        merger = new Merger{volumeIo, &readCompletionFactory};
     }
     if (nullptr == translator)
     {
-        translator = new Translator {volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
+        translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
     }
-    airlog("RequestedUserRead", "AIR_UserIo", GetEventType(), 1);    
+    airlog("RequestedUserRead", "user", GetEventType(), 1);
 }
 
 ReadSubmission::~ReadSubmission()

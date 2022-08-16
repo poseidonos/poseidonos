@@ -162,9 +162,10 @@ SetCustomArrayIdVolumeIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
 }
 
 void
-SetCustomSsdIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
+SetCustomSourceDeviceIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
 {
-    metric->AddLabel("ssd_id", ToString(airNodeObj["index"]));
+    metric->AddLabel("device_id", ToString(airNodeObj["index"]));
+    metric->AddLabel("source", ToString(airNodeObj["filter"]));
 }
 
 void
@@ -188,8 +189,8 @@ SetCustomLabel(POSMetric* metric, const air::JSONdoc& airNodeObj, const AirMetri
         case (CustomLabel::ArrayIdVolumeId):
             SetCustomArrayIdVolumeIdLabel(metric, airNodeObj);
             break;
-        case (CustomLabel::SsdId):
-            SetCustomSsdIdLabel(metric, airNodeObj);
+        case (CustomLabel::SourceDeviceId):
+            SetCustomSourceDeviceIdLabel(metric, airNodeObj);
             break;
         case (CustomLabel::PortNumber):
             SetCustomPortNumberLabel(metric, airNodeObj);
@@ -281,7 +282,9 @@ TelemetryAirDelegator::TelemetryAirDelegator(
                 {
                     /*
                     for (auto& v : *posMetricVector)
+                    {
                         PrintMetric(v);
+                    }
                     */
                     this->telPub->PublishMetricList(posMetricVector);
                 }
@@ -327,7 +330,7 @@ TelemetryAirDelegator::RegisterAirEvent(void)
 {
     air_request_data(
         {"PERF_ARR_VOL", "PERF_PORT", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read",
-            "PERF_SSD_Write", "UTIL_REACTOR", "CNT_PendingIO", "VolumeIo_Constructor", "VolumeIo_Destructor",
+            "PERF_SSD_Write", "CNT_PendingIO", "VolumeIo_Constructor", "VolumeIo_Destructor",
             "Ubio_Constructor", "Ubio_Destructor", "SSD_Submit", "SSD_Complete", "EventQueue_Push",
             "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop", "Callback_Constructor", "Callback_Destructor",
             "Event_Constructor", "Event_Destructor", "IOWorker_Submit", "IOWorker_Complete",

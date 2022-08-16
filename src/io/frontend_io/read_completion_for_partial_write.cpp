@@ -32,19 +32,19 @@
 
 #include "src/io/frontend_io/read_completion_for_partial_write.h"
 
-#include "Air.h"
+#include <air/Air.h>
+
 #include "src/allocator_service/allocator_service.h"
+#include "src/array_mgmt/array_manager.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
+#include "src/io/frontend_io/write_for_parity.h"
 #include "src/io/general_io/translator.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-
-#include "src/array_mgmt/array_manager.h"
-#include "src/io/frontend_io/write_for_parity.h"
 namespace pos
 {
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
@@ -62,7 +62,7 @@ ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
         iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(volumeIo->GetArrayId());
     }
 
-    airlog("PartialWriteProcess", "AIR_UserIo", GetEventType(), 1);
+    airlog("PartialWriteProcess", "user", GetEventType(), 1);
 }
 
 ReadCompletionForPartialWrite::~ReadCompletionForPartialWrite(void)
@@ -122,11 +122,11 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
                 volumeIo->SetCallback(splitCallback);
                 if (likely(copyParam->tested == false))
                 {
-                    IArrayInfo *arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
+                    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
                     if (true == arrayInfo->IsWriteThroughEnabled())
                     {
                         WriteForParity writeForParity(volumeIo);
-                        bool ret  = writeForParity.Execute();
+                        bool ret = writeForParity.Execute();
                         if (ret == false)
                         {
                             POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;

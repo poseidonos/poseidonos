@@ -32,21 +32,21 @@
 
 #include "callback.h"
 
-#include "Air.h"
-#include "src/event_scheduler/event_scheduler.h"
+#include <air/Air.h>
+
+#include "src/dump/dump_buffer.h"
+#include "src/dump/dump_module.h"
+#include "src/dump/dump_module.hpp"
 #include "src/dump/dump_shared_ptr.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
-#include "src/dump/dump_buffer.h"
 #include "src/signal_handler/user_signal_interface.h"
 
 namespace pos
 {
-
 const uint32_t Callback::CALLER_FRAME = 0;
 // 30 sec, default timeout
 const uint64_t Callback::DEFAULT_TIMEOUT_NS = 5ULL * 1000 * 1000 * 1000;
@@ -74,8 +74,8 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
   eventScheduler(eventSchedulerArg)
 {
     objectAddress = reinterpret_cast<uint64_t>(this);
-    airlog("LAT_Callback", "AIR_NEW", type, objectAddress);
-    airlog("Callback_Constructor", "AIR_InternalIo", type, 1);
+    airlog("LAT_Callback", "alloc", type, objectAddress);
+    airlog("Callback_Constructor", "internal", type, 1);
     if (DumpSharedModuleInstanceEnable::debugLevelEnable)
     {
         returnAddress = __builtin_return_address(Callback::CALLER_FRAME);
@@ -94,8 +94,8 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
 // LCOV_EXCL_START
 Callback::~Callback(void)
 {
-    airlog("LAT_Callback", "AIR_FREE", type, objectAddress);
-    airlog("Callback_Destructor", "AIR_InternalIo", type, 1);
+    airlog("LAT_Callback", "free", type, objectAddress);
+    airlog("Callback_Destructor", "internal", type, 1);
     if (unlikely(executed == false))
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED;
@@ -135,7 +135,7 @@ Callback::~Callback(void)
                     "Callback Timeout. Caller : {}",
                     returnAddress);
             }
-            catch(...)
+            catch (...)
             {
             }
         }
@@ -161,7 +161,7 @@ Callback::SetTimeout(uint64_t timeoutSec)
 bool
 Callback::Execute(void)
 {
-    airlog("LAT_Callback", "AIR_EXE_BEGIN", type, objectAddress);
+    airlog("LAT_Callback", "exe_begin", type, objectAddress);
     bool done = _DoSpecificJob();
 
     if (done)
@@ -170,7 +170,7 @@ Callback::Execute(void)
         executed = true;
     }
 
-    airlog("LAT_Callback", "AIR_EXE_END", type, objectAddress);
+    airlog("LAT_Callback", "exe_end", type, objectAddress);
     return done;
 }
 
@@ -211,7 +211,7 @@ Callback::_InvokeCallee(void)
     }
 
     bool isOkToCall = callee->_RecordCallerCompletionAndCheckOkToCall(
-            errorCount, errorBitMap, weight);
+        errorCount, errorBitMap, weight);
     if (isOkToCall == true)
     {
         _PreCallExecuteCallee();

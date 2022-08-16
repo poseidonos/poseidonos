@@ -32,6 +32,7 @@
 
 #include "src/io/frontend_io/aio.h"
 
+#include <air/Air.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -39,7 +40,6 @@
 #include <string>
 #include <vector>
 
-#include "Air.h"
 #include "spdk/pos.h"
 #include "src/admin/admin_command_handler.h"
 #include "src/array_mgmt/array_manager.h"
@@ -51,7 +51,6 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
-#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
 #include "src/io/frontend_io/flush_command_handler.h"
@@ -59,6 +58,7 @@
 #include "src/io/frontend_io/write_submission.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/spdk_wrapper/spdk.h"
 #include "src/volume/volume_manager.h"
@@ -180,8 +180,8 @@ AioCompletion::_SendUserCompletion(void)
         if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
         {
             volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId(), static_cast<VolumeIoType>(dir));
-            airlog("UserWritePendingCnt", "AIR_UserIo", volumeIo->GetVolumeId(), -1);
-            airlog("UserReadPendingCnt", "AIR_UserIo", volumeIo->GetVolumeId(), -1);
+            airlog("UserWritePendingCnt", "user", volumeIo->GetVolumeId(), -1);
+            airlog("UserReadPendingCnt", "user", volumeIo->GetVolumeId(), -1);
         }
     }
     volumeIo = nullptr;
@@ -261,7 +261,7 @@ AIO::CreatePosReplicatorVolumeIo(pos_io& posIo, uint64_t lsn)
     if (lsn != REPLICATOR_INVALID_LSN)
     {
         CallbackSmartPtr aioCompletion(new AioCompletion(volumeIo, posIo,
-        ioContext));
+            ioContext));
         volumeIo->SetCallback(aioCompletion);
         _IncreaseIoContextCnt(volumeIo->IsPollingNecessary());
     }
@@ -312,7 +312,7 @@ AIO::SubmitAsyncIO(VolumeIoSmartPtr volumeIo)
     {
         case UbioDir::Write:
         {
-            airlog("PERF_ARR_VOL", "AIR_WRITE", arr_vol_id, volumeIo->GetSize());
+            airlog("PERF_ARR_VOL", "write", arr_vol_id, volumeIo->GetSize());
             SpdkEventScheduler::ExecuteOrScheduleEvent(core,
                 std::make_shared<WriteSubmission>(volumeIo));
         }
@@ -320,7 +320,7 @@ AIO::SubmitAsyncIO(VolumeIoSmartPtr volumeIo)
 
         case UbioDir::Read:
         {
-            airlog("PERF_ARR_VOL", "AIR_READ", arr_vol_id, volumeIo->GetSize());
+            airlog("PERF_ARR_VOL", "read", arr_vol_id, volumeIo->GetSize());
             SpdkEventScheduler::ExecuteOrScheduleEvent(core,
                 std::make_shared<ReadSubmission>(volumeIo));
         }
@@ -341,7 +341,7 @@ AIO::CompleteIOs(void)
 {
     uint32_t reactor_id = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     int cnt = ioContext.cnt;
-    airlog("CNT_AIO_CompleteIOs", "AIR_BASE", reactor_id, cnt);
+    airlog("CNT_AIO_CompleteIOs", "base", reactor_id, cnt);
     IODispatcher::CompleteForThreadLocalDeviceList();
 }
 
@@ -400,7 +400,7 @@ AdminCompletion::_DoSpecificJob(void)
     }
     io->complete_cb(io, POS_IO_STATUS_SUCCESS);
 
-    airlog("CompleteUserAdminIo", "AIR_UserIo", GetEventType(), 1);
+    airlog("CompleteUserAdminIo", "user", GetEventType(), 1);
 
     return true;
 }

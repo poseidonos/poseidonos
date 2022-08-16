@@ -30,9 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Air.h"
 #include "io_worker.h"
 
+#include <air/Air.h>
 #include <unistd.h>
 
 #include <iomanip>
@@ -47,9 +47,9 @@
 #include "src/device/base/ublock_device_submission_adapter.h"
 #include "src/device/device_detach_trigger.h"
 #include "src/device/unvme/unvme_ssd.h"
+#include "src/event_scheduler/backend_policy.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/event_scheduler/backend_policy.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
 #include "src/include/pos_event_id.hpp"
@@ -127,7 +127,7 @@ void
 IOWorker::DecreaseCurrentOutstandingIoCount(int count)
 {
     currentOutstandingIOCount -= count;
-    airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), count);
+    airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), count);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -258,7 +258,7 @@ void
 IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
 {
     currentOutstandingIOCount++;
-    airlog("IOWorker_Submit", "AIR_InternalIo", static_cast<uint64_t>(id), 1);
+    airlog("IOWorker_Submit", "internal", static_cast<uint64_t>(id), 1);
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
     qosManager->HandleEventUbioSubmission(&ublockDeviceSubmission,
@@ -272,7 +272,7 @@ IOWorker::_SubmitPendingIO(void)
     int completeCount =
         qosManager->IOWorkerPoller(id, &ublockDeviceSubmission);
     currentOutstandingIOCount -= completeCount;
-    airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), completeCount);
+    airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), completeCount);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -293,7 +293,7 @@ IOWorker::_CompleteCommand(void)
                     static_cast<uint32_t>(eventCount)))
             {
                 currentOutstandingIOCount -= eventCount;
-                airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), eventCount);
+                airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), eventCount);
             }
             else
             {
@@ -351,7 +351,7 @@ IOWorker::_HandleDeviceOperation(void)
             deviceList.erase(device);
             uint32_t completeCount = device->Close();
             currentOutstandingIOCount -= completeCount;
-            airlog("IOWorker_Complete", "AIR_InternalIo", static_cast<uint64_t>(id), completeCount);
+            airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), completeCount);
             break;
         }
     }

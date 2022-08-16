@@ -158,7 +158,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     auto& perf_arr_vol = air::json("perf_arr_vol");
     auto& obj_read = air::json("obj_read");
     auto& obj_read_period = air::json("obj_read_period");
-    obj_read["filter"] = {"AIR_READ"};
+    obj_read["filter"] = {"read"};
     obj_read_period["iops"] = {100};
     obj_read_period["bw"] = {409600};
     obj_read["period"] = {obj_read_period};
@@ -167,7 +167,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     obj_read["target_name"] = {"reactor_0"};
     auto& obj_write = air::json("obj_write");
     auto& obj_write_period = air::json("obj_write_period");
-    obj_write["filter"] = {"AIR_WRITE"};
+    obj_write["filter"] = {"write"};
     obj_write_period["iops"] = {10};
     obj_write_period["bw"] = {1310720};
     obj_write["period"] = {obj_write_period};
@@ -185,28 +185,28 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_ARR_VOL_Data)
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
     EXPECT_EQ(posMetricVector->size(), 4);
-    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50000_READ_IOPS);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50000_READ_IOPS_VOLUME);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 100);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_id"), "7824");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "3");
-    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50001_READ_RATE_BYTES_PER_SECOND);
+    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50001_READ_BPS_VOLUME);
     EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 409600);
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_id"), "7824");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "3");
-    EXPECT_EQ(posMetricVector->at(2).GetName(), TEL50010_WRITE_IOPS);
+    EXPECT_EQ(posMetricVector->at(2).GetName(), TEL50010_WRITE_IOPS_VOLUME);
     EXPECT_EQ(posMetricVector->at(2).GetGaugeValue(), 10);
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_id"), "7824");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("thread_name"), "reactor_0");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(2).GetLabelList()->at("interval"), "3");
-    EXPECT_EQ(posMetricVector->at(3).GetName(), TEL50011_WRITE_RATE_BYTES_PER_SECOND);
+    EXPECT_EQ(posMetricVector->at(3).GetName(), TEL50011_WRITE_BPS_VOLUME);
     EXPECT_EQ(posMetricVector->at(3).GetGaugeValue(), 1310720);
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_id"), "7824");
     EXPECT_EQ(posMetricVector->at(3).GetLabelList()->at("thread_name"), "reactor_0");
@@ -233,7 +233,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
     auto& perf_port = air::json("perf_port");
     auto& obj_read = air::json("obj_read");
     auto& obj_read_period = air::json("obj_read_period");
-    obj_read["filter"] = {"AIR_READ"};
+    obj_read["filter"] = {"read"};
     obj_read_period["iops"] = {100};
     obj_read_period["bw"] = {409600};
     obj_read["period"] = {obj_read_period};
@@ -242,7 +242,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
     obj_read["target_name"] = {"reactor_0"};
     auto& obj_write = air::json("obj_write");
     auto& obj_write_period = air::json("obj_write_period");
-    obj_write["filter"] = {"AIR_WRITE"};
+    obj_write["filter"] = {"write"};
     obj_write_period["iops"] = {10};
     obj_write_period["bw"] = {1310720};
     obj_write["period"] = {obj_write_period};
@@ -259,7 +259,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_PERF_PORT_Data)
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
-    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL120001_READ_IOPS_PER_PORT);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL70000_READ_IOPS_NETWORK);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 100);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_id"), "7824");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("thread_name"), "reactor_0");
@@ -287,7 +287,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
     obj["index"] = {0x0306};
     obj["target_id"] = {0};
     obj["target_name"] = {""};
-    obj["filter"] = {"AIR_BEGIN~AIR_END"};
+    obj["filter"] = {"begin~end"};
     obj_period["mean"] = {234};
     obj_period["max"] = {8472};
     obj_period["sample_cnt"] = {50};
@@ -302,17 +302,12 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
-    EXPECT_EQ(posMetricVector->size(), 2);
-    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50002_READ_LATENCY_MEAN_NS);
+    EXPECT_EQ(posMetricVector->size(), 1);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50002_READ_AVG_LAT_VOLUME);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 234);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "0");
-    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50003_READ_LATENCY_MAX_NS);
-    EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 8472);
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
     delete posMetricVector;
     air::json_clear();
     delete copier;
@@ -335,7 +330,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
     obj["index"] = {0x0306};
     obj["target_id"] = {0};
     obj["target_name"] = {""};
-    obj["filter"] = {"AIR_BEGIN~AIR_END"};
+    obj["filter"] = {"begin~end"};
     obj_period["mean"] = {36804};
     obj_period["max"] = {7362942};
     obj_period["sample_cnt"] = {50};
@@ -350,17 +345,12 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
-    EXPECT_EQ(posMetricVector->size(), 2);
-    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50012_WRITE_LATENCY_MEAN_NS);
+    EXPECT_EQ(posMetricVector->size(), 1);
+    EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50012_WRITE_AVG_LAT_VOLUME);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 36804);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("volume_id"), "6");
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("interval"), "0");
-    EXPECT_EQ(posMetricVector->at(1).GetName(), TEL50013_WRITE_LATENCY_MAX_NS);
-    EXPECT_EQ(posMetricVector->at(1).GetGaugeValue(), 7362942);
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("array_id"), "3");
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("volume_id"), "6");
-    EXPECT_EQ(posMetricVector->at(1).GetLabelList()->at("interval"), "0");
     delete posMetricVector;
     air::json_clear();
     delete copier;

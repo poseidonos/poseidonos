@@ -30,21 +30,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "callback.h"
-
-#include "Air.h"
-#include "callback.h"
 #include "meta_update_call_back.h"
 
 namespace pos
 {
-
 MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
     CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg,
     EventScheduler* eventSchedulerArg)
 : Callback(isFrontEnd, type, weight, timeoutCheckerArg, eventSchedulerArg),
-    segmentCtx(segmentCtx_),
-    logGroupId(UINT32_MAX)
+  segmentCtx(segmentCtx_),
+  logGroupId(UINT32_MAX)
 {
 }
 

@@ -32,13 +32,13 @@
 
 #include "event_queue.h"
 
+#include <air/Air.h>
 #include <assert.h>
 
-#include "Air.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
@@ -79,7 +79,7 @@ EventQueue::DequeueEvent(void)
     std::unique_lock<std::mutex> uniqueLock(queueLock);
 
     uint32_t q_size = queue.size();
-    airlog("Q_EventQueue", "AIR_BASE", 0, q_size);
+    airlog("Q_EventQueue", "base", 0, q_size);
 
     if (queue.empty())
     {

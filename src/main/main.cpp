@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <execinfo.h>
 #include <signal.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -40,7 +41,6 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
-#include <execinfo.h>
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -50,7 +50,8 @@
 #include "src/spdk_wrapper/spdk.h"
 #endif
 
-#include "Air.h"
+#include <air/Air.h>
+
 #include "mk/ibof_config.h"
 
 #define SEM_KEY (0xC0021B0F)
@@ -62,8 +63,10 @@ union semun {
     unsigned short int* arr;
 };
 
-void PreventDualExecution(int nrProc);
-int CheckPrevileges(void);
+void
+PreventDualExecution(int nrProc);
+int
+CheckPrevileges(void);
 #if IBOF_CONFIG_LIBRARY_BUILD == 1
 
 int argc = 1;

@@ -35,6 +35,8 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+
+#include "callback.h"
 #include "src/metadata/segment_context_updater.h"
 
 namespace pos

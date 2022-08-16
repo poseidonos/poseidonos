@@ -31,33 +31,34 @@
  */
 
 #include "src/gc/victim_stripe.h"
-#include "src/mapper/include/mapper_const.h"
-#include "src/io/general_io/io_submit_handler.h"
-#include "src/event_scheduler/callback.h"
-#include "src/logger/logger.h"
-#include "src/mapper_service/mapper_service.h"
-#include "src/include/meta_const.h"
-#include "src/volume/volume_service.h"
-#include "src/include/branch_prediction.h"
 
-#include "Air.h"
+#include <air/Air.h>
+
+#include "src/event_scheduler/callback.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/meta_const.h"
+#include "src/io/general_io/io_submit_handler.h"
+#include "src/logger/logger.h"
+#include "src/mapper/include/mapper_const.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
 VictimStripe::VictimStripe(IArrayInfo* array)
 : VictimStripe(array,
-            MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName()),
-            MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName()),
-            MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName()),
-            VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetIndex()))
+      MapperServiceSingleton::Instance()->GetIReverseMap(array->GetName()),
+      MapperServiceSingleton::Instance()->GetIVSAMap(array->GetName()),
+      MapperServiceSingleton::Instance()->GetIStripeMap(array->GetName()),
+      VolumeServiceSingleton::Instance()->GetVolumeManager(array->GetIndex()))
 {
 }
 
 VictimStripe::VictimStripe(IArrayInfo* array,
-                        IReverseMap* inputRevMap,
-                        IVSAMap* inputIVSAMap,
-                        IStripeMap* inputIStripeMap,
-                        IVolumeIoManager* inputVolumeManager)
+    IReverseMap* inputRevMap,
+    IVSAMap* inputIVSAMap,
+    IStripeMap* inputIStripeMap,
+    IVolumeIoManager* inputVolumeManager)
 : myLsid(UNMAP_STRIPE),
   dataBlks(0),
   chunkIndex(0),
@@ -91,7 +92,7 @@ void
 VictimStripe::Load(StripeId _lsid, CallbackSmartPtr callback)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(callback.get());
-    airlog("LAT_VictimLoad", "AIR_BEGIN", 0, objAddr);
+    airlog("LAT_VictimLoad", "begin", 0, objAddr);
     _InitValue(_lsid);
     _LoadReverseMap(callback);
 }
@@ -178,13 +179,12 @@ VictimStripe::LoadValidBlock(void)
 
         if ((lsa.stripeId == myLsid) && (blockOffset == blkInfo.vsa.offset))
         {
-            if (unlikely(EID(SUCCESS)
-                != volumeManager->IncreasePendingIOCountIfNotZero(blkInfo.volID, VolumeIoType::InternalIo)))
+            if (unlikely(EID(SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(blkInfo.volID, VolumeIoType::InternalIo)))
             {
                 break;
             }
 
-            airlog("InternalIoPendingCnt", "AIR_UserIo", blkInfo.volID, 1);
+            airlog("InternalIoPendingCnt", "user", blkInfo.volID, 1);
             blkInfoList.push_back(blkInfo);
             validBlockCnt++;
         }

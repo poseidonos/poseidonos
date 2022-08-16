@@ -32,11 +32,12 @@
 
 #include "src/io/frontend_io/read_completion.h"
 
-#include "Air.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/branch_prediction.h"
-#include "src/lib/block_alignment.h"
+#include <air/Air.h>
+
 #include "src/bio/volume_io.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/lib/block_alignment.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -96,7 +97,7 @@ ReadCompletion::_DoSpecificJob(void)
     {
     }
     volumeIo = nullptr;
-    airlog("CompleteUserRead", "AIR_UserIo", GetEventType(), 1);
+    airlog("CompleteUserRead", "user", GetEventType(), 1);
 
     return true;
 }

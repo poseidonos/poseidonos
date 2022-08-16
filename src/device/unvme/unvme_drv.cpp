@@ -32,10 +32,11 @@
 
 #include "unvme_drv.h"
 
+#include <air/Air.h>
+
 #include <memory>
 #include <utility>
 
-#include "Air.h"
 #include "spdk/thread.h"
 #include "src/bio/ubio.h"
 #include "src/device/unvme/unvme_device_context.h"
@@ -87,8 +88,8 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
     if (likely(!ioCtx->IsAsyncIOCompleted()))
     {
         devCtx->DecreasePendingIO();
-        airlog("CNT_PendingIO", "AIR_SSD", ssdId, -1);
-        airlog("SSD_Complete", "AIR_InternalIo", ssdId, 1);
+        airlog("CNT_PendingIO", "ssd", ssdId, -1);
+        airlog("SSD_Complete", "internal", ssdId, 1);
         if (unlikely(ioCtx->IsAdminCommand()))
         {
             devCtx->DecAdminCommandCount();
@@ -129,29 +130,29 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
             uint64_t size = ioCtx->GetByteCount();
             if (UbioDir::Read == dir)
             {
-                airlog("PERF_SSD", "AIR_READ", ssdId, size);
+                airlog("PERF_SSD", "read", ssdId, size);
                 switch (ioCtx->GetEventType())
                 {
                     case BackendEvent::BackendEvent_Unknown:
-                        airlog("PERF_SSD_Read", "AIR_UNKNOWN", ssdId, size);
+                        airlog("PERF_SSD_Read", "unknown", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_JournalIO:
-                        airlog("PERF_SSD_Read", "AIR_JOURNAL", ssdId, size);
+                        airlog("PERF_SSD_Read", "journal", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_MetaIO:
-                        airlog("PERF_SSD_Read", "AIR_META", ssdId, size);
+                        airlog("PERF_SSD_Read", "meta", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_GC:
-                        airlog("PERF_SSD_Read", "AIR_GC", ssdId, size);
+                        airlog("PERF_SSD_Read", "gc", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_FrontendIO:
-                        airlog("PERF_SSD_Read", "AIR_HOST", ssdId, size);
+                        airlog("PERF_SSD_Read", "host", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_Flush:
-                        airlog("PERF_SSD_Read", "AIR_FLUSH", ssdId, size);
+                        airlog("PERF_SSD_Read", "flush", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_UserdataRebuild:
-                        airlog("PERF_SSD_Read", "AIR_REBUILD", ssdId, size);
+                        airlog("PERF_SSD_Read", "rebuild", ssdId, size);
                         break;
                     default:
                         break;
@@ -159,29 +160,29 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
             }
             else if (UbioDir::Write == dir)
             {
-                airlog("PERF_SSD", "AIR_WRITE", ssdId, size);
+                airlog("PERF_SSD", "write", ssdId, size);
                 switch (ioCtx->GetEventType())
                 {
                     case BackendEvent::BackendEvent_Unknown:
-                        airlog("PERF_SSD_Write", "AIR_UNKNOWN", ssdId, size);
+                        airlog("PERF_SSD_Write", "unknown", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_JournalIO:
-                        airlog("PERF_SSD_Write", "AIR_JOURNAL", ssdId, size);
+                        airlog("PERF_SSD_Write", "journal", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_MetaIO:
-                        airlog("PERF_SSD_Write", "AIR_META", ssdId, size);
+                        airlog("PERF_SSD_Write", "meta", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_GC:
-                        airlog("PERF_SSD_Write", "AIR_GC", ssdId, size);
+                        airlog("PERF_SSD_Write", "gc", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_FrontendIO:
-                        airlog("PERF_SSD_Write", "AIR_HOST", ssdId, size);
+                        airlog("PERF_SSD_Write", "host", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_Flush:
-                        airlog("PERF_SSD_Write", "AIR_FLUSH", ssdId, size);
+                        airlog("PERF_SSD_Write", "flush", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_UserdataRebuild:
-                        airlog("PERF_SSD_Write", "AIR_REBUILD", ssdId, size);
+                        airlog("PERF_SSD_Write", "rebuild", ssdId, size);
                         break;
                     default:
                         break;
@@ -321,8 +322,8 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
 
     ioCtx->ClearAsyncIOCompleted();
     deviceContext->IncreasePendingIO();
-    airlog("CNT_PendingIO", "AIR_SSD", ssdId, 1);
-    airlog("SSD_Submit", "AIR_InternalIo", ssdId, 1);
+    airlog("CNT_PendingIO", "ssd", ssdId, 1);
+    airlog("SSD_Submit", "internal", ssdId, 1);
 
     retValue = unvmeCmd->RequestIO(deviceContext, AsyncIOComplete, ioCtx);
     if (unlikely(-ENOMEM == retValue)) // Usually ENOMEM means the submissuion queue is full
