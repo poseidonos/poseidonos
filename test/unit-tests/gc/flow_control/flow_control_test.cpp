@@ -10,7 +10,6 @@
 #include <test/unit-tests/gc/flow_control/token_distributer_mock.h>
 #include <test/unit-tests/gc/flow_control/flow_control_configuration_mock.h>
 #include <test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h>
-#include <test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h>
 
 using ::testing::Test;
 using ::testing::Return;

@@ -3,6 +3,12 @@
 #include <list>
 #include <vector>
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
+#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+
+using testing::NiceMock;
 
 namespace pos
 {
@@ -52,5 +58,4 @@ public:
     MOCK_METHOD(bool, InvalidateBlocksWithGroupId, (VirtualBlks blks, bool isForced, int logGroupId), (override));
     MOCK_METHOD(bool, UpdateStripeCount, (StripeId lsid, int logGroupId), (override));
 };
-
 } // namespace pos

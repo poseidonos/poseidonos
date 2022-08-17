@@ -13,5 +13,4 @@ public:
     MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
     MOCK_METHOD(GcMode, UpdateCurrentGcMode, (int numFreeSegments), (override));
 };
-
 } // namespace pos

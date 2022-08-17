@@ -3,13 +3,9 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/include/allocator_const.h"
-#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
-#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_list_mock.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
-#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
