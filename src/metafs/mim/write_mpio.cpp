@@ -32,8 +32,6 @@
 
 #include "write_mpio.h"
 
-#include "Air.h"
-
 namespace pos
 {
 WriteMpio::WriteMpio(void* mdPageBuf, const bool directAccessEnabled)

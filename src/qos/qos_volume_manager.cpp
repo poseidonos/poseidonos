@@ -30,8 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Air.h"
 #include "src/qos/qos_volume_manager.h"
+
+#include <algorithm>
+#include <iostream>
+#include <unordered_set>
 
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/array_mgmt_policy.h"
@@ -46,15 +49,9 @@
 #include "src/qos/qos_manager.h"
 #include "src/qos/rate_limit.h"
 #include "src/qos/submission_adapter.h"
-#include "src/qos/qos_context.h"
-
-#include <algorithm>
-#include <iostream>
-#include <unordered_set>
 
 namespace pos
 {
-
 std::atomic<int64_t> QosVolumeManager::globalBwThrottling(0x0);
 std::atomic<int64_t> QosVolumeManager::globalIopsThrottling(0x0);
 std::atomic<int64_t> QosVolumeManager::globalRemainingVolumeBw(0x0);
@@ -262,7 +259,6 @@ QosVolumeManager::GetVolumeFromActiveSubsystem(uint32_t nqnId, bool withLock)
     return volumeList;
 }
 
-
 bool
 QosVolumeManager::_MinimumRateLimit(int volId)
 {
@@ -293,8 +289,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     }
     uint32_t volId = volIo->GetVolumeId();
 
-    if (pendingIO[volId] == 0 && _GlobalRateLimit() == false && _RateLimit(volId) == false
-        && _SpecialRateLimit(volId) == false && _MinimumRateLimit(volId) == false)
+    if (pendingIO[volId] == 0 && _GlobalRateLimit() == false && _RateLimit(volId) == false && _SpecialRateLimit(volId) == false && _MinimumRateLimit(volId) == false)
     {
         SubmitVolumeIoToAio(aioSubmission, volId, volIo);
         return;
@@ -679,17 +674,15 @@ QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
     int64_t iopsUnit = basicIopsUnit;
     bwUnit = std::max(bwUnit, static_cast<int64_t>(dynamicBwThrottling[volId] * volumeThrottlingChangingRate));
     iopsUnit = std::max(iopsUnit, static_cast<int64_t>(dynamicIopsThrottling[volId] * volumeThrottlingChangingRate));
-    dynamicBwThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeBw[volId] - minThrottlingBiasedRate
-        * dynamicBwThrottling[volId], minGuaranteedIncreaseCoefficient * bwUnit, bwUnit);
-    dynamicIopsThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeIops[volId] - minThrottlingBiasedRate
-        * dynamicIopsThrottling[volId] , minGuaranteedIncreaseCoefficient * iopsUnit, iopsUnit);
+    dynamicBwThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeBw[volId] - minThrottlingBiasedRate * dynamicBwThrottling[volId], minGuaranteedIncreaseCoefficient * bwUnit, bwUnit);
+    dynamicIopsThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeIops[volId] - minThrottlingBiasedRate * dynamicIopsThrottling[volId], minGuaranteedIncreaseCoefficient * iopsUnit, iopsUnit);
 
     if (minVolumeBw[volId] != 0 && dynamicBwThrottling[volId] > minVolumeBw[volId] * minGuaranteedThrottlingRate)
     {
         dynamicBwThrottling[volId] = minVolumeBw[volId] * minGuaranteedThrottlingRate;
         remainingDynamicVolumeBw[volId] = 0;
     }
-    if (minVolumeIops[volId] != 0 &&  dynamicIopsThrottling[volId] > minVolumeIops[volId] * minGuaranteedThrottlingRate)
+    if (minVolumeIops[volId] != 0 && dynamicIopsThrottling[volId] > minVolumeIops[volId] * minGuaranteedThrottlingRate)
     {
         dynamicIopsThrottling[volId] = minVolumeIops[volId] * minGuaranteedThrottlingRate;
         remainingDynamicVolumeIops[volId] = 0;
@@ -892,7 +885,8 @@ QosVolumeManager::ResetRateLimit(uint32_t reactor, int volId, double offset)
  */
 /* --------------------------------------------------------------------------*/
 
-void QosVolumeManager::SubmitVolumeIoToAio(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId, VolumeIoSmartPtr volumeIo)
+void
+QosVolumeManager::SubmitVolumeIoToAio(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId, VolumeIoSmartPtr volumeIo)
 {
     if (!feQosEnabled)
     {
@@ -919,8 +913,8 @@ void QosVolumeManager::SubmitVolumeIoToAio(IbofIoSubmissionAdapter* aioSubmissio
     }
 }
 
-
-bool QosVolumeManager::_PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId)
+bool
+QosVolumeManager::_PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint32_t volId)
 {
     VolumeIoSmartPtr queuedVolumeIo = nullptr;
     if (pendingIO[volId] == 0)
@@ -1068,7 +1062,6 @@ QosVolumeManager::_GetBdevName(uint32_t volId, string arrayName)
 {
     return BDEV_NAME_PREFIX + to_string(volId) + "_" + arrayName;
 }
-
 
 void
 QosVolumeManager::SetMinimumVolume(uint32_t volId, uint64_t value, bool iops)

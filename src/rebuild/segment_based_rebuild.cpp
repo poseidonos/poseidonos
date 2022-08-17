@@ -32,26 +32,26 @@
 
 #include "segment_based_rebuild.h"
 
+#include <air/Air.h>
+
 #include <typeinfo>
 
-#include "rebuilder.h"
 #include "rebuild_completed.h"
-#include "update_data_handler.h"
-#include "update_data_complete_handler.h"
-#include "src/include/array_config.h"
-#include "src/include/pos_event_id.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/backend_event.h"
+#include "rebuilder.h"
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/bio/ubio.h"
-#include "src/logger/logger.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
-#include "src/io_scheduler/io_dispatcher.h"
+#include "src/include/array_config.h"
+#include "src/include/backend_event.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.h"
 #include "src/io/backend_io/rebuild_io/rebuild_read.h"
+#include "src/io_scheduler/io_dispatcher.h"
+#include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
-
-#include "Air.h"
+#include "update_data_complete_handler.h"
+#include "update_data_handler.h"
 
 namespace pos
 {
@@ -78,8 +78,8 @@ SegmentBasedRebuild::_NextSegment(void)
     SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
 
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "SegmentBasedRebuild::_NextSegment is {}",
-                segId);
+        "SegmentBasedRebuild::_NextSegment is {}",
+        segId);
     if (segId == UINT32_MAX)
     {
         return ctx->size->totalSegments;
@@ -118,12 +118,12 @@ SegmentBasedRebuild::Read(void)
     uint32_t strCnt = ctx->size->stripesPerSegment;
     uint32_t blkCnt = ctx->size->blksPerChunk;
     uint64_t key = (((uint64_t)strCnt) << 32) + blkCnt;
-    airlog("LAT_SegmentBasedRebuildRead", "AIR_BEGIN", 0, key);
+    airlog("LAT_SegmentRebuildRead", "begin", 0, key);
 
     SegmentId segId = _NextSegment();
     if (segId == NEED_TO_RETRY)
     {
-        airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
+        airlog("LAT_SegmentRebuildRead", "end", 0, key);
         return false;
     }
     UpdateProgress(0);
@@ -157,7 +157,7 @@ SegmentBasedRebuild::Read(void)
         complete->SetEventType(BackendEvent_UserdataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
 
-        airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
+        airlog("LAT_SegmentRebuildRead", "end", 0, key);
         return true;
     }
 
@@ -194,14 +194,15 @@ SegmentBasedRebuild::Read(void)
         }
     }
 
-    airlog("LAT_SegmentBasedRebuildRead", "AIR_END", 0, key);
+    airlog("LAT_SegmentRebuildRead", "end", 0, key);
     return true;
 }
 
-bool SegmentBasedRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
+bool
+SegmentBasedRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(ubio.get());
-    airlog("LAT_SegmentBasedRebuildWrite", "AIR_BEGIN", 0, objAddr);
+    airlog("LAT_SegmentRebuildWrite", "begin", 0, objAddr);
 
     CallbackSmartPtr event(
         new UpdateDataCompleteHandler(targetId, ubio, this));
@@ -221,12 +222,13 @@ bool SegmentBasedRebuild::Write(uint32_t targetId, UbioSmartPtr ubio)
         ioCompleter.CompleteUbio(IOErrorType::GENERIC_ERROR, true);
     }
 
-    airlog("LAT_SegmentBasedRebuildWrite", "AIR_END", 0, objAddr);
+    airlog("LAT_SegmentRebuildWrite", "end", 0, objAddr);
     ubio = nullptr;
     return true;
 }
 
-bool SegmentBasedRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
+bool
+SegmentBasedRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
 {
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
 
@@ -243,7 +245,8 @@ bool SegmentBasedRebuild::Complete(uint32_t targetId, UbioSmartPtr ubio)
     return true;
 }
 
-void SegmentBasedRebuild::UpdateProgress(uint32_t val)
+void
+SegmentBasedRebuild::UpdateProgress(uint32_t val)
 {
     uint32_t remainingStripe =
         allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;

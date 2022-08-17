@@ -29,25 +29,25 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "src/volume/volume_manager.h"
-#include "src/event_scheduler/io_completer.h"
-
 #include "src/io/frontend_io/unvmf_io_handler.h"
+
+#include <air/Air.h>
 
 #include <vector>
 
-#include "Air.h"
 #include "spdk/pos.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/branch_prediction.h"
-#include "src/io/frontend_io/aio.h"
 #include "src/bio/ubio.h"
-#include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/qos/qos_manager.h"
+#include "src/event_scheduler/io_completer.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
+#include "src/logger/logger.h"
+#include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/event_framework_api.h"
+#include "src/volume/volume_manager.h"
 using namespace pos;
 using namespace std;
 
@@ -95,7 +95,7 @@ UNVMfSubmitHandler(struct pos_io* io)
                 {
                     POS_EVENT_ID eventId = POS_EVENT_ID::SCHEDAPI_WRONG_BUFFER;
                     POS_TRACE_ERROR(static_cast<int>(eventId),
-                            "Single IO command should have a continuous buffer");
+                        "Single IO command should have a continuous buffer");
                     throw eventId;
                 }
                 break;
@@ -104,7 +104,7 @@ UNVMfSubmitHandler(struct pos_io* io)
             {
                 AIO aio;
                 aio.SubmitFlush(*io);
-                airlog("UserFlushProcess", "AIR_UserIo", io->ioType, 1);
+                airlog("UserFlushProcess", "user", io->ioType, 1);
                 return POS_IO_STATUS_SUCCESS;
             }
             break;
@@ -119,8 +119,7 @@ UNVMfSubmitHandler(struct pos_io* io)
 
         QosManager* qosManager = QosManagerSingleton::Instance();
 
-        IVolumeIoManager* volumeManager
-            = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
+        IVolumeIoManager* volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
 
         AIO aio;
         VolumeIoSmartPtr volumeIo = aio.CreateVolumeIo(*io);
@@ -131,8 +130,8 @@ UNVMfSubmitHandler(struct pos_io* io)
             return POS_IO_STATUS_SUCCESS;
         }
 
-        airlog("UserWritePendingCnt", "AIR_UserIo", io->volume_id, 1);
-        airlog("UserReadPendingCnt", "AIR_UserIo", io->volume_id, 1);
+        airlog("UserWritePendingCnt", "user", io->volume_id, 1);
+        airlog("UserReadPendingCnt", "user", io->volume_id, 1);
 
         if (true == qosManager->IsFeQosEnabled())
         {
@@ -153,7 +152,7 @@ UNVMfSubmitHandler(struct pos_io* io)
         if (nullptr != io && nullptr != io->complete_cb)
         {
             io->complete_cb(io, POS_IO_STATUS_FAIL);
-            airlog("UserFailIo", "AIR_UserIo", io->ioType, 1);
+            airlog("UserFailIo", "user", io->ioType, 1);
         }
     }
 

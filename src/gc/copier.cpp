@@ -32,40 +32,40 @@
 
 #include "src/gc/copier.h"
 
+#include <air/Air.h>
+
 #include <list>
 #include <memory>
 
-#include "Air.h"
-#include "src/allocator_service/allocator_service.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/gc/copier_read_completion.h"
 #include "src/gc/reverse_map_load_completion.h"
 #include "src/gc/stripe_copy_submission.h"
-#include "src/io/general_io/io_submit_handler.h"
 #include "src/include/backend_event.h"
+#include "src/io/general_io/io_submit_handler.h"
 #include "src/logger/logger.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 
 namespace pos
 {
-
 Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array)
 : Copier(victimId, targetId, gcStatus, array,
-    array->GetSizeInfo(PartitionType::USER_DATA), new CopierMeta(array),
-    AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName()),
-    AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName()),
-    nullptr, nullptr)
+      array->GetSizeInfo(PartitionType::USER_DATA), new CopierMeta(array),
+      AllocatorServiceSingleton::Instance()->GetIBlockAllocator(array->GetName()),
+      AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName()),
+      nullptr, nullptr)
 {
 }
 
 Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array,
-                const PartitionLogicalSize* udSize, CopierMeta* inputMeta,
-                IBlockAllocator* inputIBlockAllocator,
-                IContextManager* inputIContextManager,
-                CallbackSmartPtr inputStripeCopySubmissionPtr, CallbackSmartPtr inputReverseMapLoadCompletionPtr)
+    const PartitionLogicalSize* udSize, CopierMeta* inputMeta,
+    IBlockAllocator* inputIBlockAllocator,
+    IContextManager* inputIContextManager,
+    CallbackSmartPtr inputStripeCopySubmissionPtr, CallbackSmartPtr inputReverseMapLoadCompletionPtr)
 : currentStripeOffset(0),
   victimId(victimId),
   targetId(targetId),
@@ -183,9 +183,9 @@ Copier::_CompareThresholdState(void)
 
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
-        airlog("LAT_GetVictimSegment", "AIR_BEGIN", 0, objAddr);
+        airlog("LAT_GetVictimSegment", "begin", 0, objAddr);
         victimId = iContextManager->AllocateGCVictimSegment();
-        airlog("LAT_GetVictimSegment", "AIR_END", 0, objAddr);
+        airlog("LAT_GetVictimSegment", "end", 0, objAddr);
 
         if (UNMAP_SEGMENT != victimId)
         {
@@ -238,7 +238,7 @@ Copier::_CopyPrepareState(void)
     }
 
     POS_TRACE_DEBUG(EID(GC_LOAD_REVERSE_MAP),
-                "load reverse map, victimSegmentId:{}", victimId);
+        "load reverse map, victimSegmentId:{}", victimId);
 
     _ChangeEventState(CopierStateType::COPIER_COPY_COMPLETE_STATE);
 }

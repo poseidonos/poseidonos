@@ -30,9 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Air.h"
 #include "src/bio/ubio.h"
 
+#include <air/Air.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -40,18 +40,18 @@
 #include <string>
 
 #include "mk/ibof_config.h"
-#include "src/include/i_array_device.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/memory.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/meta_const.h"
-#include "src/include/core_const.h"
-#include "src/logger/logger.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/branch_prediction.h"
+#include "src/include/core_const.h"
+#include "src/include/i_array_device.h"
+#include "src/include/memory.h"
+#include "src/include/meta_const.h"
+#include "src/include/pos_event_id.hpp"
+#include "src/logger/logger.h"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -71,7 +71,7 @@ Ubio::Ubio(void* buffer, uint32_t unitCount, int arrayID)
   arrayId(arrayID)
 {
     SetAsyncMode();
-    airlog("Ubio_Constructor", "AIR_InternalIo", GetEventType(), 1);
+    airlog("Ubio_Constructor", "internal", GetEventType(), 1);
 }
 
 Ubio::Ubio(const Ubio& ubio)
@@ -90,12 +90,12 @@ Ubio::Ubio(const Ubio& ubio)
     SetAsyncMode();
     ubioPrivate = ubio.ubioPrivate;
     eventIoType = ubio.eventIoType;
-    airlog("Ubio_Constructor", "AIR_InternalIo", GetEventType(), 1);
+    airlog("Ubio_Constructor", "internal", GetEventType(), 1);
 }
 
 Ubio::~Ubio(void)
 {
-    airlog("Ubio_Destructor", "AIR_InternalIo", GetEventType(), 1);
+    airlog("Ubio_Destructor", "internal", GetEventType(), 1);
 }
 
 bool
@@ -313,7 +313,7 @@ const PhysicalBlkAddr
 Ubio::GetPba(void)
 {
     PhysicalBlkAddr pba = {.lba = this->lba,
-                           .arrayDev = this->arrayDev};
+        .arrayDev = this->arrayDev};
 
     return pba;
 }
@@ -402,8 +402,7 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
     {
         return true;
     }
-    else if (devState == ArrayDeviceState::REBUILD
-        && dir == UbioDir::Read)
+    else if (devState == ArrayDeviceState::REBUILD && dir == UbioDir::Read)
     {
         return true;
     }

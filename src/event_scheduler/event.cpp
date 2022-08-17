@@ -30,8 +30,10 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Air.h"
 #include "src/event_scheduler/event.h"
+
+#include <air/Air.h>
+
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/include/core_const.h"
 
@@ -43,7 +45,7 @@ Event::Event(bool isFrontEndEvent, BackendEvent eventType, AffinityManager* affi
   numa(INVALID_NUMA),
   affinityManager(affinityManagerArg)
 {
-    airlog("Event_Constructor", "AIR_InternalIo", static_cast<uint64_t>(event), 1);
+    airlog("Event_Constructor", "internal", static_cast<uint64_t>(event), 1);
     if (nullptr == affinityManager)
     {
         affinityManager = AffinityManagerSingleton::Instance();
@@ -54,7 +56,7 @@ Event::Event(bool isFrontEndEvent, BackendEvent eventType, AffinityManager* affi
 // LCOV_EXCL_START
 Event::~Event(void)
 {
-    airlog("Event_Destructor", "AIR_InternalIo", static_cast<uint64_t>(event), 1);
+    airlog("Event_Destructor", "internal", static_cast<uint64_t>(event), 1);
 }
 // LCOV_EXCL_STOP
 
@@ -75,7 +77,8 @@ Event::SetFrontEnd(bool state)
     frontEndEvent = state;
 }
 
-uint32_t Event::GetNumaId(void)
+uint32_t
+Event::GetNumaId(void)
 {
     if (numa != INVALID_NUMA)
     {

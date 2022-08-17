@@ -34,32 +34,31 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <fstream>
 #include <numa.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <fstream>
 #include <iostream>
 #include <utility>
 
-#include "Air.h"
 #include "src/array/device/array_device.h"
 #include "src/bio/ubio.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/core_const.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/include/branch_prediction.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "uram_device_context.h"
 #include "uram_drv.h"
 #include "uram_restore_completion.h"
-#include "uram_device_context.h"
 
 namespace pos
 {
@@ -97,7 +96,7 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
 {
     bool restoreSuccessful = true;
 
-    string backupFileName = "/tmp/" + property->name +".uram.data";
+    string backupFileName = "/tmp/" + property->name + ".uram.data";
     const uint32_t bytesPerHugepage = 2 * SZ_1MB;
     int fd = -1;
 
@@ -215,7 +214,7 @@ Uram::_InitByteAddress(void)
         POS_TRACE_ERROR(POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED,
             "Cannot open uram config file");
     }
-    baseByteAddress = reinterpret_cast<void *>(byteAddressInt);
+    baseByteAddress = reinterpret_cast<void*>(byteAddressInt);
 }
 bool
 Uram::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)

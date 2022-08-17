@@ -32,13 +32,13 @@
 
 #include "src/io_scheduler/io_queue.h"
 
+#include <air/Air.h>
 #include <assert.h>
 
-#include "Air.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/include/pos_event_id.hpp"
 #include "src/bio/ubio.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
@@ -56,7 +56,7 @@ IOQueue::DequeueUbio(void)
     std::unique_lock<std::mutex> uniqueLock(queueLock);
     UbioSmartPtr ubio = nullptr;
     uint32_t qSize = queue.size();
-    airlog("Q_IOQueue", "AIR_BASE", 0, qSize);
+    airlog("Q_IOQueue", "base", 0, qSize);
     if (false == queue.empty())
     {
         ubio = queue.front();
