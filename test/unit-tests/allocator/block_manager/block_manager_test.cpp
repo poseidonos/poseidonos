@@ -4,7 +4,6 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/include/address_type.h"
-#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/block_manager/block_manager_spy.h"
 #include "test/unit-tests/allocator/context_manager/block_allocation_status_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
@@ -15,9 +14,7 @@
 #include "test/unit-tests/mapper/reversemap/reverse_map_mock.h"
 #include "test/unit-tests/mapper/reversemap/reversemap_manager_mock.h"
 #include "test/unit-tests/volume/i_volume_manager_mock.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::A;

@@ -4,18 +4,14 @@
 
 #include <mutex>
 
-#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/block_allocation_status_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_io_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_replayer_mock.h"
-#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/i_allocator_file_io_client_mock.h"
-#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_meta_flush_completed_mock.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
 #include "src/journal_manager/journal_manager.h"

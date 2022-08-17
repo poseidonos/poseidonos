@@ -6,6 +6,8 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 
+using ::testing::Return;
+
 namespace pos
 {
 class MockAllocatorAddressInfo : public AllocatorAddressInfo
@@ -22,5 +24,4 @@ public:
     MOCK_METHOD(uint32_t, GetnumUserAreaSegments, (), (override));
     MOCK_METHOD(bool, IsUT, (), (override));
 };
-
 } // namespace pos

@@ -8,14 +8,8 @@
 #include <thread>
 
 using namespace ::testing;
+using ::testing::Test;
 
 namespace pos
 {
-class SegmentCtxIntegrationTest : public ::testing::Test
-{
-protected:
-    virtual void SetUp(void);
-    virtual void TearDown(void);
-};
-
 } // namespace pos
