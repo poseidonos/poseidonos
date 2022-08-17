@@ -34,6 +34,7 @@
 
 #include <cstdint>
 #include <thread>
+#include <string>
 #include "src/debug/debug_info.h"
 
 namespace pos
@@ -51,6 +52,8 @@ public:
     void Terminate(void);
 
 private:
+    void _SetProcName(char *);
+    std::string _GetProcName(void);
     void _InitDebugInfo(void);
     void _InitSignalHandler(void);
     void _InitSpdk(int argc, char** argv);
@@ -67,12 +70,16 @@ private:
     int _LoadConfiguration(void);
     void _RunCLIService(void);
     void _SetupThreadModel(void);
+
+    void _InitTraceExporter(void);
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
 
     IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
     TelemetryAirDelegator* telemetryAirDelegator = nullptr;
     TelemetryPublisher* telemtryPublisherForAir = nullptr;
     SignalHandler* signalHandler = nullptr;
+
+    std::string procName;
 
     std::thread *GrpcCliServerThread;
 };
