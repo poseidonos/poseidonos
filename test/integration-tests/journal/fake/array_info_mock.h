@@ -41,6 +41,7 @@ public:
 
 private:
     PartitionLogicalSize* userSizeInfo;
+    PartitionLogicalSize* wbSizeInfo;
     TestInfo* testInfo;
 };
 } // namespace pos

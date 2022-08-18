@@ -81,4 +81,5 @@ TEST_F(CheckpointIntegrationTest, WriteLogsToTriggerCheckpoint)
     writeTester->WaitForAllLogWriteDone();
     WaitForAllCheckpointDone();
 }
+
 } // namespace pos

@@ -8,17 +8,19 @@ ArrayInfoMock::ArrayInfoMock(TestInfo* _testInfo)
 {
     testInfo = _testInfo;
     userSizeInfo = new PartitionLogicalSize();
+    wbSizeInfo = new PartitionLogicalSize();
 }
 
 ArrayInfoMock::~ArrayInfoMock(void)
 {
+    delete wbSizeInfo;
     delete userSizeInfo;
 }
 
 const PartitionLogicalSize*
 ArrayInfoMock::GetSizeInfo(PartitionType type)
 {
-    if (type == PartitionType::USER_DATA)
+    if (PartitionType::USER_DATA == type)
     {
         userSizeInfo->minWriteBlkCnt = 0;
         userSizeInfo->blksPerChunk = testInfo->numBlksPerChunk;
@@ -29,11 +31,19 @@ ArrayInfoMock::GetSizeInfo(PartitionType type)
         userSizeInfo->totalStripes = testInfo->numUserStripes;
         return userSizeInfo;
     }
-    else
+    else if (PartitionType::WRITE_BUFFER == type)
     {
-        // TODO(huijeong.kim): add wb size info if required
-        return nullptr;
+        userSizeInfo->minWriteBlkCnt = 0;
+        userSizeInfo->blksPerChunk = testInfo->numBlksPerChunk;
+        userSizeInfo->blksPerStripe = testInfo->numBlksPerStripe;
+        userSizeInfo->chunksPerStripe = testInfo->numChunksPerStripe;
+        userSizeInfo->stripesPerSegment = testInfo->numStripesPerSegment;
+        userSizeInfo->totalSegments = 1;
+        userSizeInfo->totalStripes = testInfo->numWbStripes;
+        return wbSizeInfo;
     }
+
+    return nullptr;
 }
 
 DeviceSet<string>

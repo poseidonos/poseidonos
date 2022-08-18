@@ -228,8 +228,7 @@ JournalManager::_CreateVersionedSegmentCtx(void)
 {
     if (config->IsEnabled() == true)
     {
-        // TODO (VSC) return new VersionedSegmentCtx()
-        return new DummyVersionedSegmentCtx();
+        return new VersionedSegmentCtx();
     }
     else
     {

@@ -16,12 +16,18 @@
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_meta_flush_completed_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
+#include "src/journal_manager/journal_manager.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
+#include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
 using testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
+
 namespace pos
 {
 TEST(ContextManager, ContextManager_)
@@ -587,5 +593,4 @@ TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
     // then 1.
     EXPECT_EQ(0, ret);
 }
-
 } // namespace pos
