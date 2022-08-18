@@ -107,7 +107,6 @@ protected:
 
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
-    NiceMock<MockCallbackSequenceController>* callbackSequenceController;
     NiceMock<MockReplayHandler>* replayHandler;
 
     NiceMock<MockTelemetryPublisher>* tp;
@@ -154,7 +153,6 @@ ContextManagerIntegrationTest::SetUp(void)
 
     dirtyMapManager = new NiceMock<MockDirtyMapManager>;
     logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
-    callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
     replayHandler = new NiceMock<MockReplayHandler>;
 
     tp = new NiceMock<MockTelemetryPublisher>;
@@ -176,8 +174,7 @@ ContextManagerIntegrationTest::SetUp(void)
         logWriteContextFactory, journalEventFactory, logWriteHandler,
         volumeEventHandler, journalWriter,
         logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
-        nullptr, dirtyMapManager, logFilledNotifier,
-        callbackSequenceController, replayHandler, arrayInfo, tp);
+        nullptr, dirtyMapManager, logFilledNotifier, replayHandler, arrayInfo, tp);
 
     versionedSegCtx = journal->GetVersionedSegmentContext();
     loadedSegInfos = new SegmentInfo[numOfSegment]();

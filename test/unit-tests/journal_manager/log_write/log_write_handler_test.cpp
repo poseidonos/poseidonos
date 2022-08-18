@@ -103,9 +103,8 @@ TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessf
     ON_CALL(*mockVolumeIo, GetVsa()).WillByDefault(ReturnRef(vsa));
 
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(config, &notifier, &sequencer);
+    logWriteContextFactory.Init(config, &notifier);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
 

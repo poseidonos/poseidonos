@@ -46,7 +46,6 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
@@ -79,7 +78,6 @@ JournalManager::JournalManager(void)
   versionedSegCtx(nullptr),
   dirtyMapManager(nullptr),
   logFilledNotifier(nullptr),
-  sequenceController(nullptr),
   replayHandler(nullptr),
   telemetryPublisher(nullptr),
   telemetryClient(nullptr)
@@ -101,7 +99,6 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     IVersionedSegmentContext* versionedSegCtx_,
     DirtyMapManager* dirtyManager,
     LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
-    CallbackSequenceController* callbackSequenceController,
     ReplayHandler* replay,
     IArrayInfo* info,
     TelemetryPublisher* tp_)
@@ -125,8 +122,6 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     checkpointManager = cpManager;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
-    sequenceController = callbackSequenceController;
-
     replayHandler = replay;
     arrayInfo = info;
 
@@ -172,7 +167,6 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
       nullptr,
       new DirtyMapManager(),
       new LogBufferWriteDoneNotifier(),
-      new CallbackSequenceController(),
       new ReplayHandler(state),
       info,
       tp)
@@ -203,7 +197,6 @@ JournalManager::~JournalManager(void)
     }
     delete replayHandler;
 
-    delete sequenceController;
     delete logFilledNotifier;
     delete dirtyMapManager;
 
@@ -442,7 +435,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
-    checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager, telemetryPublisher);
+    checkpointManager->Init(mapFlush, contextManager, eventScheduler, dirtyMapManager, telemetryPublisher);
 
     const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
@@ -457,7 +450,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     }
     versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
 
-    logFactory->Init(config, logFilledNotifier, sequenceController);
+    logFactory->Init(config, logFilledNotifier);
     eventFactory->Init(eventScheduler, logWriteHandler);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
