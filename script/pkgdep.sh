@@ -70,7 +70,10 @@ if [ -f /etc/debian_version ]; then
     apt install -y libgoogle-perftools-dev
     # for rocksdb
     apt install -y librocksdb-dev
-
+    # for markdownTable
+    pip3 install py-markdown-table
+    # for pyyaml
+    pip3 install pyyaml
 
 else
     echo "pkgdep: unknown system type."
