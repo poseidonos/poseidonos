@@ -1106,7 +1106,7 @@ Array::DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, Rebu
         });
         t.detach();
     }
-    else if (rt == RebuildTypeEnum::QUICK)
+    else
     {
         vector<pair<IArrayDevice*, IArrayDevice*>> quickPair;
         assert(dst.size() == src.size());
