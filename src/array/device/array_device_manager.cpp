@@ -337,13 +337,14 @@ ArrayDeviceManager::GetRebuilding(void)
 vector<ArrayDevice*>
 ArrayDeviceManager::GetDataDevices(void)
 {
-    vector<ArrayDevice*> dataDevs;
-    for (ArrayDevice* dev : devs_->GetDevs().data)
-    {
-        dataDevs.push_back(dev);
-    }
+    return devs_->GetDevs().data;
+}
 
-    return dataDevs;
+vector<ArrayDevice*>
+ArrayDeviceManager::GetAvailableSpareDevices(void)
+{
+    return Enumerable::Where(devs_->GetDevs().spares,
+            [](auto d) { return d->GetState() == ArrayDeviceState::NORMAL; });
 }
 
 int
