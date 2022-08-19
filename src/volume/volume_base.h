@@ -58,12 +58,19 @@ enum VolumeStatus
     MaxVolumeStatus
 };
 
-enum VolumeReplicationMode
+enum VolumeReplicateState
 {
-    VolumeSyncMode,
-    LiveReplicationMode,
-    SingleNodeMode,
-    MaxVolumeReplicatorStatus
+    VolumeSyncState,
+    LiveReplicateState,
+    SingleNodeState,
+    MaxVolumeReplicateState
+};
+
+enum VolumeReplicateNodeProperty
+{
+    PrimaryNode,
+    SecondaryNode,
+    MaxReplicateNodeProperty
 };
 
 enum VolumeIoType
@@ -86,8 +93,8 @@ class VolumeBase
 public:
     VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
         VolumeAttribute volumeAttribute);
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, VolumeAttribute volumeAttribute);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte,
+        uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw, VolumeAttribute volumeAttribute);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);
@@ -134,15 +141,25 @@ public:
     {
         return status;
     }
-    VolumeReplicationMode
-    GetReplicatorMode(void)
+    VolumeReplicateState
+    GetReplicateState(void)
     {
-        return replicationMode;
+        return replicateState;
     }
     void        
-    SetReplicatorStatus(VolumeReplicationMode mode)
+    SetReplicateState(VolumeReplicateState state)
     {
-        replicationMode = mode;
+        replicateState = state;
+    }
+    VolumeReplicateNodeProperty
+    GeteplicateNodeProperty(void)
+    {
+        return replicateNodeProperty;
+    }
+    void        
+    SeteplicateNodeProperty(VolumeReplicateNodeProperty nodeProperty)
+    {
+        replicateNodeProperty = nodeProperty;
     }
 
     bool
@@ -190,7 +207,8 @@ public:
 protected:
     VolumeAttribute attribute;
     VolumeStatus status;
-    VolumeReplicationMode replicationMode;
+    VolumeReplicateState replicateState;
+    VolumeReplicateNodeProperty replicateNodeProperty;
     std::string name;
     std::string uuid;
     std::string array;

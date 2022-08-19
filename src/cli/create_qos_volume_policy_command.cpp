@@ -360,7 +360,7 @@ QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
                 }
                 return retVal;
             }
-            retVal = volMgr->UpdateQoS(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
+            retVal = volMgr->UpdateQoSProperty(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
             if (retVal != SUCCESS)
             {
                 errorMsg = "QoS update in Volume Manager failed";

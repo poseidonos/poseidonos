@@ -46,12 +46,14 @@ class IVolumeManager : public IVolumeEventManager, public IVolumeInfoManager, pu
 {
 public:
     public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume) = 0;
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid = "") = 0;
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;
     virtual int Unmount(int volId) = 0;
-    virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
+    virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
+    virtual int UpdateVolumeReplicateState(std::string name, VolumeReplicateState state) = 0;
+    virtual int UpdateVolumeReplicateNodeProperty(std::string name, VolumeReplicateNodeProperty nodeProperty) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual int SaveVolumeMeta(void) = 0;
 
@@ -61,7 +63,8 @@ public:
     virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
     virtual int GetVolumeStatus(int volId) = 0;
-    virtual int GetVolumeReplicationMode(int volId) = 0;
+    virtual int GetVolumeReplicateState(int volId) = 0;
+    virtual int GetVolumeReplicateNodeProperty(int volId) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;
     virtual uint64_t EntireVolumeSize(void) = 0;
     virtual int GetVolumeSize(int volId, uint64_t& volSize) = 0;

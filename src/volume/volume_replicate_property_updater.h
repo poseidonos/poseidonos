@@ -30,56 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/sys_event/volume_event.h"
+#pragma once
+
+#include <string>
+
+#include "src/volume/volume_base.h"
+#include "src/volume/volume_interface.h"
 
 namespace pos
 {
-VolumeEvent::VolumeEvent(std::string _tag, std::string _arrayName, int _arrayId)
-: arrayName(_arrayName),
-  arrayId(_arrayId),
-  tag(_tag)
+class VolumeReplicatePopertyUpdater : public VolumeInterface
 {
-}
+public:
+    explicit VolumeReplicatePopertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
+    ~VolumeReplicatePopertyUpdater(void) override;
 
-// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
-// LCOV_EXCL_START
-VolumeEvent::~VolumeEvent(void)
-{
-}
-// LCOV_EXCL_STOP
+    int Do(string name, VolumeReplicateState state);
+    int Do(string name, VolumeReplicateNodeProperty nodeProperty);
+};
 
-std::string
-VolumeEvent::Tag(void)
-{
-    return tag;
-}
-
-void
-VolumeEvent::SetVolumeBase(VolumeEventBase* volEventBase, int volId, uint64_t volSizeByte, string volName,
-    string uuid, string subnqn, bool isPrimaryReplicateNode)
-{
-    volEventBase->volId = volId;
-    volEventBase->volName = volName;
-    volEventBase->volSizeByte = volSizeByte;
-    volEventBase->subnqn = subnqn;
-    volEventBase->uuid = uuid;
-    volEventBase->isPrimaryReplicateNode = isPrimaryReplicateNode;
-}
-
-void
-VolumeEvent::SetVolumePerf(VolumeEventPerf* volEventPerf, uint64_t maxiops, uint64_t maxbw)
-{
-    volEventPerf->maxbw = maxbw;
-    volEventPerf->maxiops = maxiops;
-}
-
-void
-VolumeEvent::SetVolumeArrayInfo(VolumeArrayInfo* volArrayInfo, int arrayId, string arrayName)
-{
-    volArrayInfo->arrayId = arrayId;
-    volArrayInfo->arrayName = arrayName;
-}
-
-
-
-} // namespace pos
+}  // namespace pos

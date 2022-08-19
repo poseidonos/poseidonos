@@ -18,7 +18,8 @@ public:
     MOCK_METHOD(int, CheckVolumeValidity, (int volId), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (std::string name), (override));
     MOCK_METHOD(int, GetVolumeStatus, (int volId), (override));
-    MOCK_METHOD(int, GetVolumeReplicationMode, (int volId), (override));
+    MOCK_METHOD(int, GetVolumeReplicateState, (int volId), (override));
+    MOCK_METHOD(int, GetVolumeReplicateNodeProperty, (int volId), (override));
     MOCK_METHOD(uint64_t, EntireVolumeSize, (), (override));
     MOCK_METHOD(int, GetVolumeSize, (int volId, uint64_t& volSize), (override));
     MOCK_METHOD(VolumeList*, GetVolumeList, (), (override));
