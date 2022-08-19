@@ -32,42 +32,43 @@
 
 #include "src/gc/gc_flush_completion.h"
 
-#include <list>
-#include <string>
-#include <memory>
+#include <air/Air.h>
 
-#include "src/logger/logger.h"
-#include "src/include/branch_prediction.h"
-#include "src/include/backend_event.h"
+#include <list>
+#include <memory>
+#include <string>
+
 #include "src/allocator/allocator.h"
 #include "src/allocator/stripe/stripe.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
-#include "src/mapper/mapper.h"
-#include "src/mapper_service/mapper_service.h"
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/gc/copier_meta.h"
+#include "src/gc/gc_map_update_request.h"
+#include "src/gc/gc_stripe_manager.h"
+#include "src/include/backend_event.h"
+#include "src/include/branch_prediction.h"
+#include "src/io/backend_io/flush_completion.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/io/general_io/rba_state_service.h"
-#include "src/io/backend_io/flush_completion.h"
-#include "src/gc/copier_meta.h"
-#include "src/gc/gc_stripe_manager.h"
-#include "src/gc/gc_map_update_request.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "Air.h"
+#include "src/logger/logger.h"
+#include "src/mapper/mapper.h"
+#include "src/mapper_service/mapper_service.h"
 
 namespace pos
 {
 GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer)
 : GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
-                    nullptr,
-                    RBAStateServiceSingleton::Instance()->GetRBAStateManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()),
-                    ArrayMgr()->GetInfo(arrayName)->arrayInfo)
+      nullptr,
+      RBAStateServiceSingleton::Instance()->GetRBAStateManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()),
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo)
 {
 }
 
 GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
-                                    EventSmartPtr inputEvent,
-                                    RBAStateManager* inputRbaStateManager,
-                                    IArrayInfo* inputIArrayInfo)
+    EventSmartPtr inputEvent,
+    RBAStateManager* inputRbaStateManager,
+    IArrayInfo* inputIArrayInfo)
 : Callback(false, CallbackType_GcFlushCompletion),
   stripe(stripe),
   arrayName(arrayName),
@@ -118,13 +119,13 @@ GcFlushCompletion::_DoSpecificJob(void)
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
 
     bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId,
-            rbaList);
+        rbaList);
     if (false == ownershipAcquired)
     {
         return false;
     }
 
-    airlog("PERF_GcFlush", "AIR_WRITE", 0, totalBlksPerUserStripe * BLOCK_SIZE);
+    airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);
 
     EventSmartPtr event;
     if (nullptr == inputEvent)
@@ -139,11 +140,10 @@ GcFlushCompletion::_DoSpecificJob(void)
     StripeId userLsid = stripe->GetUserLsid();
     stripe->Flush(event);
 
-    
     POS_TRACE_DEBUG(EID(GC_ACQUIRE_OWNERSHIP_RBA_LIST),
-            "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
-            arrayName, userLsid);
-    
+        "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
+        arrayName, userLsid);
+
     return true;
 }
 

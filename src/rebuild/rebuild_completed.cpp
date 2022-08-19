@@ -42,8 +42,6 @@ RebuildCompleted::Execute()
     RebuildContext* ctx = behavior->GetContext();
     RebuildResult res;
     res.array = ctx->array;
-    res.dst = ctx->faultDev;
-    res.src = ctx->srcDev;
     res.result = ctx->GetResult();
     ctx->rebuildComplete(res);
 

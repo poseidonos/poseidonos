@@ -33,32 +33,12 @@ TEST(ArrayRebuild, ArrayRebuild_testConstructor)
     EXPECT_CALL(dataPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     targetPartitions.push_back(&dataPart);
     targetPartitions.push_back(&metaPart);
-
+// string arrayName, uint32_t arrayId, vector<IArrayDevice*>& dst,
+//     RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildBehaviorFactory* factor
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    vector<IArrayDevice*> devs;
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, devs, nullptr, targetPartitions, nullptr);
 
-    // Then
-}
-
-TEST(ArrayRebuild, Start_testIfJobCanStartWhenTaskIsNotEmpty)
-{
-    // Given
-    string arrayName = "POSArray";
-    shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
-    MockArrayDevice arrayDev(mockDev);
-    RebuildProgress* prog = new RebuildProgress(arrayName);
-    RebuildLogger* logger = new RebuildLogger(arrayName);
-    MockRebuildBehaviorFactory mockFactory(nullptr);
-    MockRebuildBehavior* mockBehavior = new MockRebuildBehavior(nullptr, nullptr);
-    EXPECT_CALL(mockFactory, CreateRebuildBehavior).WillRepeatedly(Return(mockBehavior));
-    list<PartitionRebuild*> targetPartitions;
-    MockPartitionRebuild mockPartitionRebuild(mockBehavior);
-    targetPartitions.push_back(&mockPartitionRebuild);
-
-    // When
-    ArrayRebuild* ar = new ArrayRebuild();
-    ar->Init(arrayName, &arrayDev, nullptr, nullptr, targetPartitions, prog, logger);
-    ar->Start();
     // Then
 }
 
@@ -71,7 +51,8 @@ TEST(ArrayRebuild, StartRebuild_testIfJobContainsEmptyTaskWhenArrayRebuildStart)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    vector<IArrayDevice*> devs{&arrayDev};
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, devs, nullptr, targetPartitions, nullptr);
     ar->Start();
     // Then
 }
@@ -85,7 +66,8 @@ TEST(ArrayRebuild, DiscardRebuild_testIfNeedToDiscardBecauseThereAreNoTasks)
     list<RebuildTarget*> targetPartitions;
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    vector<IArrayDevice*> devs{&arrayDev};
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, devs, nullptr, targetPartitions, nullptr);
     ar->Discard();
     RebuildState state = ar->GetState();
 
@@ -99,18 +81,16 @@ TEST(ArrayRebuild, StopRebuild_testIfNeedToStopRebuild)
     string arrayName = "POSArray";
     shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     MockArrayDevice arrayDev(mockDev);
-    RebuildProgress* prog = new RebuildProgress(arrayName);
-    RebuildLogger* logger = new RebuildLogger(arrayName);
     MockRebuildBehaviorFactory mockFactory(nullptr);
-    MockRebuildBehavior* mockBehavior = new MockRebuildBehavior(nullptr, nullptr);
+    MockRebuildBehavior* mockBehavior = new MockRebuildBehavior(nullptr);
     EXPECT_CALL(mockFactory, CreateRebuildBehavior).WillRepeatedly(Return(mockBehavior));
-    list<PartitionRebuild*> targetPartitions;
-    MockPartitionRebuild mockPartitionRebuild(mockBehavior);
-    targetPartitions.push_back(&mockPartitionRebuild);
+    list<RebuildTarget*> targetPartitions;
+    MockRebuildTarget mockRebuildTarget(PartitionType::USER_DATA);
+    targetPartitions.push_back(&mockRebuildTarget);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild();
-    ar->Init(arrayName, &arrayDev, nullptr, nullptr, targetPartitions, prog, logger);
+    vector<IArrayDevice*> devs{&arrayDev};
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, devs, nullptr, targetPartitions, &mockFactory);
     ar->Start();
     ar->Stop();
 }
@@ -128,37 +108,35 @@ TEST(ArrayRebuild, GetState_testIfStateIsReadyBeforeRebuildStarts)
     targetPartitions.push_back(&metaPart);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, nullptr, nullptr, nullptr, targetPartitions, nullptr, RebuildTypeEnum::BASIC);
+    vector<IArrayDevice*> devs;
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, devs, nullptr, targetPartitions, nullptr);
     RebuildState state = ar->GetState();
 
     // Then
     ASSERT_EQ(RebuildState::READY, state);
 }
 
-TEST(ArrayRebuild, GetProgress_testIfProgressIsZeroBeforeStartRebuild)
+TEST(ArrayRebuild, GetProgress_testIfProgressIs100BeforeStartRebuildSinceTotalIsZero)
 {
     // Given
     string arrayName = "POSArray";
     shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
-    MockArrayDevice arrayDev(mockDev);
-    RebuildProgress* prog = new RebuildProgress(arrayName);
-    prog->Update("meta", 0, 100);
-    prog->Update("data", 0, 100);
-    RebuildLogger* logger = new RebuildLogger(arrayName);
+    MockArrayDevice arrayDev(mockDev, ArrayDeviceState::NORMAL, 0);
     MockRebuildBehaviorFactory mockFactory(nullptr);
-    MockRebuildBehavior* mockBehavior = new MockRebuildBehavior(nullptr, nullptr);
+    MockRebuildBehavior* mockBehavior = new MockRebuildBehavior(nullptr);
     EXPECT_CALL(mockFactory, CreateRebuildBehavior).WillRepeatedly(Return(mockBehavior));
-    list<PartitionRebuild*> targetPartitions;
-    MockPartitionRebuild mockPartitionRebuild(mockBehavior);
-    targetPartitions.push_back(&mockPartitionRebuild);
+    list<RebuildTarget*> targetPartitions;
+    MockRebuildTarget mockRebuildTarget(PartitionType::USER_DATA);
+    EXPECT_CALL(mockRebuildTarget, GetRebuildCtx).WillRepeatedly(Return(ByMove(unique_ptr<RebuildContext>())));
+    targetPartitions.push_back(&mockRebuildTarget);
 
     // When
-    ArrayRebuild* ar = new ArrayRebuild();
-    ar->Init(arrayName, &arrayDev, nullptr, nullptr, targetPartitions, prog, logger);
+    vector<IArrayDevice*> devs{&arrayDev};
+    ArrayRebuild* ar = new ArrayRebuild(arrayName, 0, devs, nullptr, targetPartitions, &mockFactory);
 
     // Then
     uint64_t progress = ar->GetProgress();
-    ASSERT_EQ(0, progress);
+    ASSERT_EQ(100, progress);
 }
 
 } // namespace pos

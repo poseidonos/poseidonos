@@ -34,6 +34,7 @@
 
 #include <list>
 #include <vector>
+#include <utility>
 
 #include "method.h"
 
@@ -53,6 +54,7 @@ public:
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
     bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> GetRebuildGroupPairs(vector<uint32_t>& targetIndexs) override;
 
 private:
     void _RebuildData(void* dst, void* src, uint32_t size);

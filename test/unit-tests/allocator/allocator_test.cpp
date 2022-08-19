@@ -4,16 +4,16 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/sys_event/volume_event.h"
-#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/block_manager/block_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
-#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
+
 #include "test/unit-tests/allocator/wbstripe_manager/wbstripe_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
+
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;

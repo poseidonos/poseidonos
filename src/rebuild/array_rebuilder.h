@@ -39,7 +39,9 @@
 #include <string>
 #include <map>
 #include <list>
+#include <vector>
 #include <mutex>
+#include <utility>
 #include <condition_variable>
 
 using namespace std;
@@ -51,8 +53,10 @@ class ArrayRebuilder : public IArrayRebuilder
 public:
     ArrayRebuilder(IRebuildNotification* noti);
     virtual ~ArrayRebuilder() {}
-    void Rebuild(string arrayname, uint32_t arrayId, ArrayDevice* dst, ArrayDevice* src,
-                RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildTypeEnum rebuildType) override;
+    void Rebuild(string array, uint32_t arrayId, vector<IArrayDevice*> dst,
+        RebuildComplete cb, list<RebuildTarget*>& tgt) override;
+    void QuickRebuild(string array, uint32_t arrayId, QuickRebuildPair rebuildPair,
+        RebuildComplete cb, list<RebuildTarget*>& tgt) override;
     void StopRebuild(string arrayname) override;
     void RebuildDone(RebuildResult result) override;
     void WaitRebuildDone(string arrayname) override;
@@ -60,6 +64,7 @@ public:
     uint32_t GetRebuildProgress(string arrayname) override;
 
 private:
+    int _PrepareRebuild(string arrayname, list<RebuildTarget*>& tgt);
     ArrayRebuild* _Find(string arrayname);
     map<string, ArrayRebuild*> jobsInProgress;
     IRebuildNotification* iRebuildNoti = nullptr;

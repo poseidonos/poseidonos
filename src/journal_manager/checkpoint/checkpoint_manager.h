@@ -60,8 +60,7 @@ public:
     virtual ~CheckpointManager(void);
 
     virtual void Init(IMapFlush* mapFlush, IContextManager* ctxManager,
-        EventScheduler* scheduler, CallbackSequenceController* seqController,
-        DirtyMapManager* dMapManager, TelemetryPublisher* tp);
+        EventScheduler* scheduler, DirtyMapManager* dMapManager, TelemetryPublisher* tp);
     virtual int RequestCheckpoint(int logGroupId, EventSmartPtr callback);
     virtual int StartCheckpoint(EventSmartPtr callback);
 
@@ -95,8 +94,6 @@ private:
     bool _GetNextRequest(CheckpointRequest& request);
 
     EventScheduler* eventScheduler;
-
-    CallbackSequenceController* sequenceController;
     DirtyMapManager* dirtyMapManager;
     CheckpointHandler* checkpointHandler;
 

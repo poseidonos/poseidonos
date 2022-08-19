@@ -43,9 +43,10 @@
 namespace pos
 {
 ArrayDevice::ArrayDevice(UblockSharedPtr uBlock,
-    ArrayDeviceState state)
+    ArrayDeviceState state, uint32_t dataIndex)
 : uBlock(uBlock),
-  state(state)
+  state(state),
+  dataIndex(dataIndex)
 {
 }
 

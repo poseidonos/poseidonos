@@ -55,7 +55,6 @@
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
-#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
@@ -110,7 +109,6 @@ public:
         versionedSegmentCtx = new NiceMock<MockVersionedSegmentCtx>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
         logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
-        callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
         replayHandler = new NiceMock<MockReplayHandler>;
         arrayInfo = new NiceMock<MockIArrayInfo>;
         tp = new NiceMock<MockTelemetryPublisher>;
@@ -126,7 +124,7 @@ public:
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
             versionedSegmentCtx, dirtyMapManager, logFilledNotifier,
-            callbackSequenceController, replayHandler, arrayInfo, tp);
+            replayHandler, arrayInfo, tp);
     }
 
     virtual void
@@ -157,7 +155,6 @@ protected:
     NiceMock<MockVersionedSegmentCtx>* versionedSegmentCtx;
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
-    NiceMock<MockCallbackSequenceController>* callbackSequenceController;
     NiceMock<MockReplayHandler>* replayHandler;
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockTelemetryPublisher>* tp;
@@ -307,7 +304,9 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
 {
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
-    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization

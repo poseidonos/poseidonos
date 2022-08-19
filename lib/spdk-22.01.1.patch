@@ -57,6 +57,20 @@ index e2a42a7a0..c2201b5ee 100755
  		--)
  			break
  			;;
+diff --git include/spdk/bdev_module.h include/spdk/bdev_module.h
+index 85d94aa7b..a73bc1bca 100644
+--- include/spdk/bdev_module.h
++++ include/spdk/bdev_module.h
+@@ -569,6 +569,9 @@ struct spdk_bdev_io {
+ 	/** The block device that this I/O belongs to. */
+ 	struct spdk_bdev *bdev;
+ 
++	/** Unique ID per thread */
++	uint64_t uid_per_thread;
++
+ 	/** Enumerated value representing the I/O type. */
+ 	uint8_t type;
+ 
 diff --git include/spdk/nvme.h include/spdk/nvme.h
 index e0e2f3998..7c0ad3800 100644
 --- include/spdk/nvme.h
@@ -710,7 +724,7 @@ index 000000000..38ef38560
 +	setrlimit(RLIMIT_NOFILE, &limits);
 +}
 diff --git lib/event/reactor.c lib/event/reactor.c
-index 0e1b1e9a9..2c418f445 100644
+index 0e1b1e9a9..9df0623f2 100644
 --- lib/event/reactor.c
 +++ lib/event/reactor.c
 @@ -44,6 +44,8 @@
@@ -748,13 +762,13 @@ index 0e1b1e9a9..2c418f445 100644
 +		if (reactor->busy_tsc > prev_busy_tsc)
 +		{
 +			uint64_t busy_tsc = reactor->busy_tsc - prev_busy_tsc;
-+			AIRLOG(UTIL_REACTOR, AIR_BUSY, lcore, busy_tsc);
++			AIRLOG(UTIL_REACTOR, eAIR_busy, lcore, busy_tsc);
 +		}
 +		prev_busy_tsc = reactor->busy_tsc;
 +		if (reactor->idle_tsc > prev_idle_tsc)
 +		{
 +			uint64_t idle_tsc = reactor->idle_tsc - prev_idle_tsc;
-+			AIRLOG(UTIL_REACTOR, AIR_IDLE, lcore, idle_tsc);
++			AIRLOG(UTIL_REACTOR, eAIR_idle, lcore, idle_tsc);
 +		}
 +		prev_idle_tsc = reactor->idle_tsc;
 +
@@ -997,7 +1011,7 @@ index 2f23b2f78..9ab349fb7 100644
  			nsid = req->cmd->nvme_cmd.nsid;
  
 diff --git lib/nvmf/ctrlr_bdev.c lib/nvmf/ctrlr_bdev.c
-index 91d940c20..a78debdbe 100644
+index 91d940c20..c8fd49081 100644
 --- lib/nvmf/ctrlr_bdev.c
 +++ lib/nvmf/ctrlr_bdev.c
 @@ -49,6 +49,7 @@
@@ -1014,7 +1028,7 @@ index 91d940c20..a78debdbe 100644
  
 +	struct spdk_nvmf_ctrlr* ctrlr = req->qpair->ctrlr;
 +	if (spdk_likely(ctrlr != NULL && ctrlr->listener != NULL)) {
-+		AIRLOG(PERF_PORT, AIR_READ, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
++		AIRLOG(PERF_PORT, eAIR_read, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
 +	}
  	rc = spdk_bdev_readv_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
  				    nvmf_bdev_ctrlr_complete_cmd, req);
@@ -1025,7 +1039,7 @@ index 91d940c20..a78debdbe 100644
  	assert(!spdk_nvmf_request_using_zcopy(req));
 +	struct spdk_nvmf_ctrlr* ctrlr = req->qpair->ctrlr;
 +	if (spdk_likely(ctrlr != NULL && ctrlr->listener != NULL)) {
-+		AIRLOG(PERF_PORT, AIR_WRITE, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
++		AIRLOG(PERF_PORT, eAIR_write, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
 +	}
  
  	rc = spdk_bdev_writev_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
@@ -2280,10 +2294,10 @@ index 000000000..0045180cb
 +include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
 diff --git module/bdev/pos/bdev_pos.c module/bdev/pos/bdev_pos.c
 new file mode 100644
-index 000000000..e0dd80911
+index 000000000..d3f1de5b0
 --- /dev/null
 +++ module/bdev/pos/bdev_pos.c
-@@ -0,0 +1,1041 @@
+@@ -0,0 +1,1043 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -2656,13 +2670,13 @@ index 000000000..e0dd80911
 +		int ret = (status == POS_IO_STATUS_SUCCESS) ? SPDK_BDEV_IO_STATUS_SUCCESS :
 +			  SPDK_BDEV_IO_STATUS_FAILED;
 +		spdk_bdev_io_complete(bio, ret);
-+	}
 +
-+	uint32_t arr_vol_id = io->volume_id + (io->array_id << 8);
-+	if (READ == io->ioType) {
-+		AIRLOG(LAT_ARR_VOL_READ, AIR_END, arr_vol_id, (uint64_t)io->context);
-+	} else if (WRITE == io->ioType) {
-+		AIRLOG(LAT_ARR_VOL_WRITE, AIR_END, arr_vol_id, (uint64_t)io->context);
++		uint32_t arr_vol_id = io->volume_id + (io->array_id << 8);
++		if (READ == io->ioType) {
++			AIRLOG(LAT_ARR_VOL_READ, eAIR_end, arr_vol_id, bio->uid_per_thread);
++		} else if (WRITE == io->ioType) {
++			AIRLOG(LAT_ARR_VOL_WRITE, eAIR_end, arr_vol_id, bio->uid_per_thread);
++		}
 +	}
 +
 +	free(io);
@@ -2842,6 +2856,7 @@ index 000000000..e0dd80911
 +	}
 +}
 +
++_Thread_local uint64_t uid_gen = 0;
 +static int _bdev_pos_eventq_rw(struct spdk_io_channel *ch, struct spdk_bdev_io *bdev_io)
 +{
 +	uint32_t block_size = bdev_io->bdev->blocklen;
@@ -2850,16 +2865,17 @@ index 000000000..e0dd80911
 +	struct pos_volume_info *volume = &(disk->volume);
 +	uint32_t arr_vol_id = volume->id + (volume->array_id << 8);
 +
++	bdev_io->uid_per_thread = uid_gen++;
 +	switch (bdev_io->type) {
 +	case SPDK_BDEV_IO_TYPE_READ: {
-+		AIRLOG(LAT_ARR_VOL_READ, AIR_BEGIN, arr_vol_id, (uint64_t)bdev_io);
++		AIRLOG(LAT_ARR_VOL_READ, eAIR_begin, arr_vol_id, bdev_io->uid_per_thread);
 +		spdk_bdev_io_get_buf(bdev_io, bdev_pos_get_buf_cb,
 +				     bdev_io->u.bdev.num_blocks * block_size);
 +		return 0;
 +	}
 +
 +	case SPDK_BDEV_IO_TYPE_WRITE: {
-+		AIRLOG(LAT_ARR_VOL_WRITE, AIR_BEGIN, arr_vol_id, (uint64_t)bdev_io);
++		AIRLOG(LAT_ARR_VOL_WRITE, eAIR_begin, arr_vol_id, bdev_io->uid_per_thread);
 +		return bdev_pos_eventq_writev(disk,
 +					      ch,
 +					      bdev_io,

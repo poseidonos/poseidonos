@@ -32,21 +32,22 @@
 
 #include "src/io/frontend_io/write_completion.h"
 
-#include "Air.h"
+#include <air/Air.h>
+
+#include "src/allocator/event/stripe_put_event.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/bio/volume_io.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/io/backend_io/stripe_map_update_request.h"
+#include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/flush_submission.h"
-#include "src/io/general_io/rba_state_service.h"
+#include "src/io/backend_io/stripe_map_update_request.h"
 #include "src/io/frontend_io/write_for_parity.h"
+#include "src/io/general_io/rba_state_service.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/allocator/event/stripe_put_event.h"
-#include "src/io/backend_io/flush_completion.h"
 
 namespace pos
 {
@@ -102,7 +103,7 @@ WriteCompletion::_DoSpecificJob()
 
     volumeIo = nullptr;
 
-    airlog("CompleteUserWrite", "AIR_UserIo", GetEventType(), 1);
+    airlog("CompleteUserWrite", "user", GetEventType(), 1);
 
     return executionSuccessful;
 }

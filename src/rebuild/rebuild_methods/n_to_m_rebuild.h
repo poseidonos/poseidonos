@@ -30,34 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "update_data_complete_handler.h"
-#include "src/logger/logger.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/include/backend_event.h"
+#pragma once
+
+#include "src/array/rebuild/rebuild_method.h"
+#include "src/include/recover_func.h"
+#include "src/include/i_array_device.h"
+
+#include <vector>
+
+using namespace std;
 
 namespace pos
 {
-UpdateDataCompleteHandler::UpdateDataCompleteHandler(
-    uint32_t _t, UbioSmartPtr _u, RebuildBehavior* _b)
-: Callback(false, CallbackType_UpdateDataCompleteHandler),
-  targetId(_t),
-  ubio(_u),
-  behavior(_b)
+class NToMRebuild : public RebuildMethod
 {
-}
+public:
+    explicit NToMRebuild(vector<IArrayDevice*> src, vector<IArrayDevice*> dst, RecoverFunc recoverFunc);
+    int Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback) override;
 
-bool
-UpdateDataCompleteHandler::_DoSpecificJob()
-{
-    if (_GetErrorCount() > 0)
-    {
-        RebuildContext* rebuildCtx = behavior->GetContext();
-        POS_TRACE_ERROR(EID(REBUILD_FAILED),
-                "Failed to update data during rebuild - Array:{}, Partition:{}, ID:{}",
-                rebuildCtx->array , PARTITION_TYPE_STR[rebuildCtx->part], targetId);
-        rebuildCtx->SetResult(RebuildState::FAIL);
-    }
-
-    return behavior->Complete(targetId, ubio);
-}
+private:
+    void _Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src, int readResult);
+    void _WriteDone(StripeId stripeId, StripeRebuildDoneCallback callback, int writeResult);
+    vector<IArrayDevice*> src;
+    vector<IArrayDevice*> dst;
+    RecoverFunc recoverFunc = nullptr;
+    uint64_t airKey = 0;
+};
 } // namespace pos

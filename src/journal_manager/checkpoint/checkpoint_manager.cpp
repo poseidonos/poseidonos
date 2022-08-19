@@ -38,7 +38,6 @@
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/checkpoint/checkpoint_completion.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -56,7 +55,6 @@ CheckpointManager::CheckpointManager(const int arrayId)
 
 CheckpointManager::CheckpointManager(CheckpointHandler* cpHandler, const int arrayId)
 : eventScheduler(nullptr),
-  sequenceController(nullptr),
   dirtyMapManager(nullptr),
   checkpointHandler(cpHandler),
   checkpointInProgress(false),
@@ -77,12 +75,9 @@ CheckpointManager::~CheckpointManager(void)
 
 void
 CheckpointManager::Init(IMapFlush* mapFlush, IContextManager* ctxManager,
-    EventScheduler* scheduler, CallbackSequenceController* seqController,
-    DirtyMapManager* dMapManager, TelemetryPublisher* tp)
+    EventScheduler* scheduler, DirtyMapManager* dMapManager, TelemetryPublisher* tp)
 {
     eventScheduler = scheduler;
-
-    sequenceController = seqController;
     dirtyMapManager = dMapManager;
     telemetryPublisher = tp;
 
@@ -265,10 +260,8 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
         dirtyMaps = dirtyMapManager->GetDirtyList(request.groupId);
     }
 
-    sequenceController->GetCheckpointExecutionApproval();
     checkpointHandler->SyncContext(request.groupId);
     int ret = checkpointHandler->Start(dirtyMaps, completionEvent);
-    sequenceController->AllowCallbackExecution();
     if (ret != 0)
     {
         // TODO(huijeong.kim): Go to the fail mode - not to journal any more

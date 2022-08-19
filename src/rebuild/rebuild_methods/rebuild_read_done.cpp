@@ -30,28 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "rebuild_behavior.h"
+#include "rebuild_read_done.h"
 #include "src/bio/ubio.h"
-#include "src/event_scheduler/callback.h"
+#include "src/include/io_error_type.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class UpdateDataCompleteHandler : public Callback
+RebuildReadDone::RebuildReadDone(UbioSmartPtr ubio, ReadDoneCallback readDoneCallback)
+: Callback(false, CallbackType_RebuildReadCompleteHandler),
+  ubio(ubio),
+  readDoneCallback(readDoneCallback)
 {
-public:
-    UpdateDataCompleteHandler(uint32_t _t, UbioSmartPtr _u,
-        RebuildBehavior* _b);
-    ~UpdateDataCompleteHandler() override
+}
+
+bool
+RebuildReadDone::_DoSpecificJob(void)
+{
+    int ret = 0;
+    if (_GetErrorCount() > 0)
     {
+        ret = EID(IO_RECOVER_DEBUG_MSG);
+        POS_TRACE_WARN(ret, "rebuild read done with errors");
     }
 
-private:
-    bool _DoSpecificJob() override;
+    readDoneCallback(ret);
+    ubio = nullptr;
+    return true;
+}
 
-    uint32_t targetId = 0;
-    UbioSmartPtr ubio = nullptr;
-    RebuildBehavior* behavior = nullptr;
-};
 } // namespace pos
+

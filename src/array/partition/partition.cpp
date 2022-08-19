@@ -52,10 +52,10 @@ Partition::~Partition(void)
 // LCOV_EXCL_STOP
 
 int
-Partition::FindDevice(ArrayDevice* target)
+Partition::FindDevice(IArrayDevice* target)
 {
     int i = 0;
-    for (ArrayDevice* dev : devs)
+    for (IArrayDevice* dev : devs)
     {
         if (dev == target)
         {

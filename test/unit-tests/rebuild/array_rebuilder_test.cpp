@@ -7,6 +7,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include <list>
+#include <vector>
 
 using ::testing::_;
 using testing::NiceMock;
@@ -33,15 +34,15 @@ TEST(ArrayRebuilder, Rebuild_testIfMetaPartitionAndDataPartitionTriggerRebuild)
     shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     MockArrayDevice arrayDev(mockDev);
     list<RebuildTarget*> targetPartitions;
-    MockRebuildTarget metaPart(PartitionType::META_SSD);
-    MockRebuildTarget dataPart(PartitionType::USER_DATA);
+    MockRebuildTarget metaPart(false);
+    MockRebuildTarget dataPart(true);
     EXPECT_CALL(metaPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     EXPECT_CALL(dataPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     targetPartitions.push_back(&dataPart);
     targetPartitions.push_back(&metaPart);
 
     // When
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, RebuildTypeEnum::BASIC);
+    rebuilder->Rebuild(arrayName, 0, vector<IArrayDevice*>{&arrayDev}, nullptr, targetPartitions);
 
     // Then
     bool ret = rebuilder->IsRebuilding(arrayName);
@@ -62,8 +63,8 @@ TEST(ArrayRebuilder, ResumeRebuild_testIfNeedToResumeRebuild)
     ArrayRebuilder* rebuilder = new ArrayRebuilder(&mockRebuildNoti);
     shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     MockArrayDevice arrayDev(mockDev);
-    MockRebuildTarget metaPart(PartitionType::META_SSD);
-    MockRebuildTarget dataPart(PartitionType::USER_DATA);
+    MockRebuildTarget metaPart(false);
+    MockRebuildTarget dataPart(true);
     EXPECT_CALL(metaPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     EXPECT_CALL(dataPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     list<RebuildTarget*> targetPartitions;
@@ -71,7 +72,7 @@ TEST(ArrayRebuilder, ResumeRebuild_testIfNeedToResumeRebuild)
     targetPartitions.push_back(&metaPart);
 
     // When
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, RebuildTypeEnum::BASIC);
+    rebuilder->Rebuild(arrayName, 0, vector<IArrayDevice*>{&arrayDev}, nullptr, targetPartitions);
 
     // Then : note that meta partition is removed from rebuild target
     ASSERT_EQ(1, targetPartitions.size());
@@ -93,8 +94,8 @@ TEST(ArrayRebuilder, Discard_testErrorOccuredDuringPrepareRebuild)
     shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     MockArrayDevice arrayDev(mockDev);
     list<RebuildTarget*> targetPartitions;
-    MockRebuildTarget metaPart(PartitionType::META_SSD);
-    MockRebuildTarget dataPart(PartitionType::USER_DATA);
+    MockRebuildTarget metaPart(false);
+    MockRebuildTarget dataPart(true);
     EXPECT_CALL(metaPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     EXPECT_CALL(dataPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     targetPartitions.push_back(&dataPart);
@@ -102,9 +103,8 @@ TEST(ArrayRebuilder, Discard_testErrorOccuredDuringPrepareRebuild)
 
     // When
     RebuildResult rebResult;
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr,
-        [&rebResult](RebuildResult res) -> void { rebResult = res; },
-        targetPartitions, RebuildTypeEnum::BASIC);
+    rebuilder->Rebuild(arrayName, 0, vector<IArrayDevice*>{&arrayDev},
+        [&rebResult](RebuildResult res) -> void { rebResult = res; }, targetPartitions);
 
     // Then
     ASSERT_EQ(RebuildState::FAIL, rebResult.result);
@@ -126,13 +126,13 @@ TEST(ArrayRebuilder, StopRebuild_testIfJobInProgressInvokesStopMethod)
     shared_ptr<MockUBlockDevice> mockDev = make_shared<MockUBlockDevice>("unvme-ns-0", 0, nullptr);
     MockArrayDevice arrayDev(mockDev);
     list<RebuildTarget*> targetPartitions;
-    MockRebuildTarget metaPart(PartitionType::META_SSD);
-    MockRebuildTarget dataPart(PartitionType::USER_DATA);
+    MockRebuildTarget metaPart(false);
+    MockRebuildTarget dataPart(true);
     EXPECT_CALL(metaPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     EXPECT_CALL(dataPart, GetRebuildCtx).WillRepeatedly(Return(ByMove(nullptr)));
     targetPartitions.push_back(&dataPart);
     targetPartitions.push_back(&metaPart);
-    rebuilder->Rebuild(arrayName, 0, &arrayDev, nullptr, nullptr, targetPartitions, RebuildTypeEnum::BASIC);
+    rebuilder->Rebuild(arrayName, 0, vector<IArrayDevice*>{&arrayDev}, nullptr, targetPartitions);
 
     // When
     rebuilder->StopRebuild(arrayName);

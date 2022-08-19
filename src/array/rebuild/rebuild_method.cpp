@@ -30,18 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "recovery_base.h"
+#include "rebuild_method.h"
 #include "src/resource_manager/memory_manager.h"
+#include "src/cpu_affinity/affinity_manager.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-RecoveryBase::RecoveryBase(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt)
-: srcSize(srcSize), destSize(destSize), bufCnt(bufCnt)
+RebuildMethod::RebuildMethod(uint32_t srcCnt, uint32_t dstCnt, MemoryManager* mm)
+: mm(mm)
 {
+    this->srcSize = (uint64_t)srcCnt * unitSize;
+    this->dstSize = (uint64_t)dstCnt * unitSize;
 }
 
-RecoveryBase::~RecoveryBase(void) 
+RebuildMethod::~RebuildMethod(void)
 {
     if (srcBuffer != nullptr)
     {
@@ -53,51 +56,56 @@ RecoveryBase::~RecoveryBase(void)
         mm->DeleteBufferPool(srcBuffer);
         srcBuffer = nullptr;
     }
-    if (destBuffer != nullptr)
+    if (dstBuffer != nullptr)
     {
-        if (destBuffer->IsFull() == false)
+        if (dstBuffer->IsFull() == false)
         {
             POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
-                "Some buffers in destBuffer were not returned but deleted.");
+                "Some buffers in dstBuffer were not returned but deleted.");
         }
-        mm->DeleteBufferPool(destBuffer);
-        destBuffer = nullptr;
+        mm->DeleteBufferPool(dstBuffer);
+        dstBuffer = nullptr;
     }
 }
 
 bool
-RecoveryBase::Init(MemoryManager* mm, string owner)
+RebuildMethod::Init(string owner)
 {
+    if (isInitialized == true)
+    {
+        return true;
+    }
+
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "Trying initailization, owner:{}, srcSize:{}, dstSize:{}", owner, srcSize, dstSize);
+    uint32_t numa = AffinityManagerSingleton::Instance()->GetNumaIdFromCurrentThread();
     BufferInfo srcInfo = {
         .owner = owner,
         .size = srcSize,
         .count = bufCnt};
-    srcBuffer = mm->CreateBufferPool(srcInfo);
+    srcBuffer = mm->CreateBufferPool(srcInfo, numa);
     if (srcBuffer == nullptr)
     {
         return false;
     }
 
-    BufferInfo destInfo = {
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "srcBuffer initialized successfully, srcSize:{}", srcSize);
+    BufferInfo dstInfo = {
         .owner = owner,
-        .size = destSize,
+        .size = dstSize,
         .count = bufCnt};
-    destBuffer = mm->CreateBufferPool(destInfo);
-    if (destBuffer == nullptr)
+    dstBuffer = mm->CreateBufferPool(dstInfo, numa);
+    if (dstBuffer == nullptr)
     {
         mm->DeleteBufferPool(srcBuffer);
         srcBuffer = nullptr;
         return false;
     }
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "dstBuffer initialized successfully, dstSize:{}", dstSize);
 
-    this->mm = mm;
+    isInitialized = true;
     return true;
 }
-
-BufferPool*
-RecoveryBase::GetDestBuffer(void)
-{
-    return destBuffer;
-}
-
 } // namespace pos

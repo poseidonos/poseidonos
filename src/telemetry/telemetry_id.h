@@ -43,34 +43,10 @@ namespace pos
 
 static const std::string TEL05000_COMMON_PROCESS_UPTIME_SECOND = "common_process_uptime_second";
 
-static const std::string TEL20000_READ_UNKNOWN_IOPS_PER_SSD = "read_unknown_iops_per_ssd";
-static const std::string TEL20001_READ_META_IOPS_PER_SSD = "read_meta_iops_per_ssd";
-static const std::string TEL20002_READ_GC_IOPS_PER_SSD = "read_gc_iops_per_ssd";
-static const std::string TEL20003_READ_HOST_IOPS_PER_SSD = "read_host_iops_per_ssd";
-static const std::string TEL20004_READ_FLUSH_IOPS_PER_SSD = "read_flush_iops_per_ssd";
-static const std::string TEL20005_READ_REBUILD_IOPS_PER_SSD = "read_rebuild_iops_per_ssd";
-static const std::string TEL20006_READ_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD = "read_unknown_rate_bytes_per_second_per_ssd";
-static const std::string TEL20007_READ_META_RATE_BYTES_PER_SECOND_PER_SSD = "read_meta_rate_bytes_per_second_per_ssd";
-static const std::string TEL20008_READ_GC_RATE_BYTES_PER_SECOND_PER_SSD = "read_gc_rate_bytes_per_second_per_ssd";
-static const std::string TEL20009_READ_HOST_RATE_BYTES_PER_SECOND_PER_SSD = "read_host_rate_bytes_per_second_per_ssd";
-static const std::string TEL20010_READ_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD = "read_flush_rate_bytes_per_second_per_ssd";
-static const std::string TEL20011_READ_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD = "read_rebuild_rate_bytes_per_second_per_ssd";
-static const std::string TEL20012_WRITE_UNKNOWN_IOPS_PER_SSD = "write_unknown_iops_per_ssd";
-static const std::string TEL20013_WRITE_META_IOPS_PER_SSD = "write_meta_iops_per_ssd";
-static const std::string TEL20014_WRITE_GC_IOPS_PER_SSD = "write_gc_iops_per_ssd";
-static const std::string TEL20015_WRITE_HOST_IOPS_PER_SSD = "write_host_iops_per_ssd";
-static const std::string TEL20016_WRITE_FLUSH_IOPS_PER_SSD = "write_flush_iops_per_ssd";
-static const std::string TEL20017_WRITE_REBUILD_IOPS_PER_SSD = "write_rebuild_iops_per_ssd";
-static const std::string TEL20018_WRITE_UNKNOWN_RATE_BYTES_PER_SECOND_PER_SSD = "write_unknown_rate_bytes_per_second_per_ssd";
-static const std::string TEL20019_WRITE_META_RATE_BYTES_PER_SECOND_PER_SSD = "write_meta_rate_bytes_per_second_per_ssd";
-static const std::string TEL20020_WRITE_GC_RATE_BYTES_PER_SECOND_PER_SSD = "write_gc_rate_bytes_per_second_per_ssd";
-static const std::string TEL20021_WRITE_HOST_RATE_BYTES_PER_SECOND_PER_SSD = "write_host_rate_bytes_per_second_per_ssd";
-static const std::string TEL20022_WRITE_FLUSH_RATE_BYTES_PER_SECOND_PER_SSD = "write_flush_rate_bytes_per_second_per_ssd";
-static const std::string TEL20023_WRITE_REBUILD_RATE_BYTES_PER_SECOND_PER_SSD = "write_rebuild_rate_bytes_per_second_per_ssd";
-static const std::string TEL20024_READ_JOURNAL_IOPS_PER_SSD = "read_journal_iops_per_ssd";
-static const std::string TEL20025_READ_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD = "read_journal_rate_bytes_per_second_per_ssd";
-static const std::string TEL20026_WRITE_JOURNAL_IOPS_PER_SSD = "write_journal_iops_per_ssd";
-static const std::string TEL20027_WRITE_JOURNAL_RATE_BYTES_PER_SECOND_PER_SSD = "write_journal_rate_bytes_per_second_per_ssd";
+static const std::string TEL20000_READ_IOPS_DEVICE = "read_iops_device";
+static const std::string TEL20001_READ_BPS_DEVICE = "read_bps_device";
+static const std::string TEL20010_WRITE_IOPS_DEVICE = "write_iops_device";
+static const std::string TEL20011_WRITE_BPS_DEVICE = "write_bps_device";
 
 static const std::string TEL30000_ALCT_FREE_SEG_CNT = "alct_free_seg_cnt";
 static const std::string TEL30001_ALCT_ALCTX_PENDINGIO_CNT = "alct_allocctx_pendio_cnt";
@@ -137,21 +113,21 @@ static const std::string TEL40303_METAFS_MPIO_TIME_FROM_WRITE_TO_RELEASE = "samp
 static const std::string TEL40304_METAFS_MPIO_TIME_FROM_PUSH_TO_POP = "sampled_mpio_time_from_push_to_pop";
 static const std::string TEL40305_METAFS_MPIO_SAMPLED_COUNT = "sampled_mpio_count";
 
-static const std::string TEL50000_READ_IOPS = "read_iops";
-static const std::string TEL50001_READ_RATE_BYTES_PER_SECOND = "read_rate_bytes_per_second";
-static const std::string TEL50002_READ_LATENCY_MEAN_NS = "read_latency_mean_ns";
-static const std::string TEL50003_READ_LATENCY_MAX_NS = "read_latency_max_ns";
-
-static const std::string TEL50010_WRITE_IOPS = "write_iops";
-static const std::string TEL50011_WRITE_RATE_BYTES_PER_SECOND = "write_rate_bytes_per_second";
-static const std::string TEL50012_WRITE_LATENCY_MEAN_NS = "write_latency_mean_ns";
-static const std::string TEL50013_WRITE_LATENCY_MAX_NS = "write_latency_max_ns";
+static const std::string TEL50000_READ_IOPS_VOLUME = "read_iops_volume";
+static const std::string TEL50001_READ_BPS_VOLUME = "read_bps_volume";
+static const std::string TEL50002_READ_AVG_LAT_VOLUME = "read_avg_lat_volume";
+static const std::string TEL50010_WRITE_IOPS_VOLUME = "write_iops_volume";
+static const std::string TEL50011_WRITE_BPS_VOLUME = "write_bps_volume";
+static const std::string TEL50012_WRITE_AVG_LAT_VOLUME = "write_avg_lat_volume";
 
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
 static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_cnt";
 
-static const std::string TEL70000_SPDK_REACTOR_UTILIZATION = "spdk_reactor_utilization";
+static const std::string TEL70000_READ_IOPS_NETWORK = "read_iops_network";
+static const std::string TEL70001_READ_BPS_NETWORK = "read_bps_network";
+static const std::string TEL70010_WRITE_IOPS_NETWORK = "write_iops_network";
+static const std::string TEL70011_WRITE_BPS_NETWORK = "write_bps_network";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
 

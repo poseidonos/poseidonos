@@ -56,7 +56,7 @@ StripePartition::StripePartition(
     vector<ArrayDevice*> devs,
     RaidTypeEnum raid)
 : Partition(devs, type),
-  RebuildTarget(type),
+  RebuildTarget(type == PartitionType::USER_DATA),
   raidType(raid)
 {
 }
@@ -454,28 +454,88 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
 }
 
 unique_ptr<RebuildContext>
-StripePartition::GetRebuildCtx(ArrayDevice* fault)
+StripePartition::GetRebuildCtx(const vector<IArrayDevice*>& fault)
 {
-    int index = FindDevice(fault);
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "GetRebuildCtx devIndex:{}, index");
-    if (index >= 0)
+    vector<uint32_t> rebuildTargetIndexs;
+    for (IArrayDevice* dev : fault)
     {
-        unique_ptr<RebuildContext> ctx(new RebuildContext());
-        ctx->raidType = raidType;
-        ctx->part = type;
-        ctx->faultIdx = index;
-        ctx->faultDev = fault;
-        ctx->stripeCnt = logicalSize.totalStripes;
-        ctx->size = GetPhysicalSize();
+        int index = FindDevice(dev);
+        if (index >= 0)
         {
-            using namespace std::placeholders;
-            F2PTranslator trns = std::bind(&StripePartition::_Fba2Pba, this, _1);
-            ctx->translate = trns;
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetRebuildCtx, device {} is included in this partition {}",
+                dev->GetName(), PARTITION_TYPE_STR[type]);
+            rebuildTargetIndexs.push_back((uint32_t)index);
         }
-        return ctx;
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetRebuildCtx return nullptr");
-    return nullptr;
+    if (rebuildTargetIndexs.size() == 0)
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetRebuildCtx returns nullptr");
+        return nullptr;
+    }
+
+    unique_ptr<RebuildContext> ctx(new RebuildContext());
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> rg =
+        method->GetRebuildGroupPairs(rebuildTargetIndexs);
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "GetRebuildGroupPairs, pairCnt:{}, raidType:{}", rg.size(), GetRaidType());
+    for (pair<vector<uint32_t>, vector<uint32_t>> group : rg)
+    {
+        vector<uint32_t> srcs = group.first;
+        vector<uint32_t> dsts = group.second;
+         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            "GetRebuildGroupPairs, srcCnt:{}, dstCnt:{}", srcs.size(), dsts.size());
+
+        vector<IArrayDevice*> srcDevs;
+        vector<IArrayDevice*> dstDevs;
+        for (uint32_t i : srcs)
+        {
+            srcDevs.push_back(devs.at(i));
+        }
+        for (uint32_t i : dsts)
+        {
+            dstDevs.push_back(devs.at(i));
+        }
+        ctx->rgPairs.push_back(make_pair(srcDevs, dstDevs));
+    }
+    ctx->part = type;
+    ctx->stripeCnt = logicalSize.totalStripes;
+    ctx->size = GetPhysicalSize();
+    ctx->recovery = method->GetRecoverFunc();
+    return ctx;
+}
+
+unique_ptr<RebuildContext>
+StripePartition::GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair)
+{
+    unique_ptr<RebuildContext> ctx(new RebuildContext());
+    for (auto rp : rebuildPair)
+    {
+        IArrayDevice* dst = rp.second;
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetQuickRebuildCtx, dev:{}", rp.second->GetName());
+        int index = FindDevice(dst);
+        if (index >= 0)
+        {
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetQuickRebuildCtx, device {} is included in this partition {}",
+                dst->GetName(), PARTITION_TYPE_STR[type]);
+            ctx->rgPairs.emplace_back(make_pair(vector<IArrayDevice*>{rp.first},
+                vector<IArrayDevice*>{rp.second}));
+        }
+    }
+
+    if (ctx->rgPairs.size() == 0)
+    {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetQuickRebuildCtx returns nullptr, part:{}", PARTITION_TYPE_STR[type]);
+        ctx.reset();
+        return nullptr;
+    }
+
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "QuickRebuildGroupPairs, pairCnt:{}", ctx->rgPairs.size());
+    ctx->part = type;
+    ctx->stripeCnt = logicalSize.totalStripes;
+    ctx->size = GetPhysicalSize();
+    ctx->recovery = bind(memcpy, placeholders::_1, placeholders::_2, placeholders::_3);
+    return ctx;
 }
 
 bool

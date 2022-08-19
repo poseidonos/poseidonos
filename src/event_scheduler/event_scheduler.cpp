@@ -33,18 +33,17 @@
 #include "src/event_scheduler/event_scheduler.h"
 
 #include <stdexcept>
-#include "Air.h"
 
 #include "src/cpu_affinity/affinity_manager.h"
+#include "src/device/i_io_dispatcher.h"
+#include "src/event_scheduler/backend_event_minimum_policy.h"
+#include "src/event_scheduler/backend_event_ratio_policy.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/scheduler_queue.h"
-#include "src/event_scheduler/backend_event_minimum_policy.h"
-#include "src/event_scheduler/backend_event_ratio_policy.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/device/i_io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/qos/qos_manager.h"
@@ -153,7 +152,7 @@ EventScheduler::Initialize(uint32_t workerCountInput,
 }
 
 void
-EventScheduler::InjectIODispatcher(IIODispatcher *input)
+EventScheduler::InjectIODispatcher(IIODispatcher* input)
 {
     ioDispatcher = input;
 }
@@ -194,7 +193,7 @@ EventScheduler::CheckAndSetQueueOccupancy(BackendEvent eventId)
 }
 
 EventSmartPtr
-EventScheduler::PickWorkerEvent(EventWorker *worker)
+EventScheduler::PickWorkerEvent(EventWorker* worker)
 {
     return policy->PickWorkerEvent(worker);
 }

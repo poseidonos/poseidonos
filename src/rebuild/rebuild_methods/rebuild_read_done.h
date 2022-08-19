@@ -32,25 +32,24 @@
 
 #pragma once
 
-#include "rebuild_behavior.h"
-#include "src/bio/ubio.h"
 #include "src/event_scheduler/callback.h"
+#include "src/array/rebuild/rebuild_method.h"
+#include "src/include/smart_ptr_type.h"
+
+class Method;
 
 namespace pos
 {
-class UpdateDataHandler : public Callback
+class Ubio;
+
+class RebuildReadDone : public Callback
 {
 public:
-    UpdateDataHandler(uint32_t _t, UbioSmartPtr _u, RebuildBehavior* _b);
-
-    ~UpdateDataHandler(void) override
-    {
-    }
+    RebuildReadDone(UbioSmartPtr ubio, ReadDoneCallback readDoneCallback);
 
 private:
     bool _DoSpecificJob(void) override;
-    uint32_t targetId = 0;
     UbioSmartPtr ubio = nullptr;
-    RebuildBehavior* behavior = nullptr;
+    ReadDoneCallback readDoneCallback = nullptr;
 };
 } // namespace pos

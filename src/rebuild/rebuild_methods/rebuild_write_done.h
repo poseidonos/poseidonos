@@ -32,16 +32,25 @@
 
 #pragma once
 
-#include "recovery_base.h"
+#include "src/event_scheduler/callback.h"
+#include "src/array/rebuild/rebuild_method.h"
+#include "src/include/smart_ptr_type.h"
 
-using namespace std;
+class Method;
 
 namespace pos
 {
-class RebuildRecovery : public RecoveryBase
+class Ubio;
+
+class RebuildWriteDone : public Callback
 {
 public:
-    explicit RebuildRecovery(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
-    int Recover(UbioSmartPtr ubio) override;
+    RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback, BufferPool* dstBufferPool);
+
+private:
+    bool _DoSpecificJob(void) override;
+    UbioSmartPtr ubio = nullptr;
+    WriteDoneCallback writeDoneCallback = nullptr;
+    BufferPool* bufferPool = nullptr;
 };
 } // namespace pos

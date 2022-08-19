@@ -63,6 +63,8 @@ public:
 
     static const uint32_t MIN_WRITE_BLOCK_COUNT = 1;
     static const uint32_t OVER_PROVISIONING_RATIO = 10;
+    static const uint32_t REBUILD_STRIPES_UNIT = STRIPES_PER_SEGMENT;
+    static const uint32_t REBUILD_CHUNK_SIZE_BYTE = BLOCKS_PER_CHUNK * BLOCK_SIZE_BYTE;
 };
 
 } // namespace pos

@@ -32,7 +32,7 @@
 
 #include "src/gc/reverse_map_load_completion.h"
 
-#include "Air.h"
+#include <air/Air.h>
 
 namespace pos
 {
@@ -49,7 +49,7 @@ bool
 ReverseMapLoadCompletion::_DoSpecificJob(void)
 {
     uint64_t objAddr = reinterpret_cast<uint64_t>(this);
-    airlog("LAT_VictimLoad", "AIR_END", 0, objAddr);
+    airlog("LAT_VictimLoad", "end", 0, objAddr);
     return true;
 }
 

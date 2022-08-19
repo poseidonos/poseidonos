@@ -34,6 +34,7 @@
 
 #include <string>
 #include <memory>
+#include <set>
 
 #include "rebuild_behavior.h"
 #include "src/array/service/io_locker/i_io_locker.h"
@@ -45,21 +46,24 @@ class StripeBasedRaceRebuild : public RebuildBehavior
 public:
     explicit StripeBasedRaceRebuild(unique_ptr<RebuildContext> c);
     ~StripeBasedRaceRebuild(void);
-
-    virtual bool Init(void) override;
-    virtual bool Read(void) override;
-    virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
-    virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
+    virtual bool Rebuild(void) override;
     virtual void UpdateProgress(uint32_t val) override;
 
 private:
-    virtual string _GetClassName(void);
+    virtual bool _Init(void);
+    virtual bool _Recover(void);
+    void _RecoverCompleted(uint32_t targetId, int result);
+    bool _Finish(void);
+    int _TryLock(uint32_t from, uint32_t to);
 
     StripeId baseStripe = 0;
     IIOLocker* locker = nullptr;
     static const int TRY_LOCK_MAX_RETRY = 50000;
     int tryLockRetryCnt = 0;
     int resetLockRetryCnt = 0;
+    set<IArrayDevice*> targetDevs;
+    static const int INIT_REBUILD_MAX_RETRY = 1000;
+    int initRetryCnt = 0;
 };
 
 } // namespace pos

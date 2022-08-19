@@ -36,6 +36,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "partition.h"
 #include "src/array/rebuild/rebuild_target.h"
@@ -66,7 +67,8 @@ public:
     bool IsByteAccessSupported(void) override;
     RaidState GetRaidState(void) override;
     int GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out) override;
-    unique_ptr<RebuildContext> GetRebuildCtx(ArrayDevice* fault) override;
+    unique_ptr<RebuildContext> GetRebuildCtx(const vector<IArrayDevice*>& fault) override;
+    unique_ptr<RebuildContext> GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair) override;
     Method* GetMethod(void) { return method; }
     RaidTypeEnum GetRaidType(void) override { return raidType; }
 

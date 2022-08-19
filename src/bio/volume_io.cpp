@@ -30,15 +30,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "Air.h"
 #include "src/bio/volume_io.h"
 
+#include <air/Air.h>
+
 #include "src/array_mgmt/array_manager.h"
-#include "src/spdk_wrapper/event_framework_api.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/core_const.h"
 #include "src/include/branch_prediction.h"
+#include "src/include/core_const.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_list.h"
 
 namespace pos
@@ -52,7 +53,6 @@ const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
 : VolumeIo(buffer, unitCount, arrayId, ArrayMgr())
 {
-    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* arrayMgmt)
@@ -66,13 +66,12 @@ VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* ar
   stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
-    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
+    airlog("VolumeIo_Constructor", "user", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
 : VolumeIo(volumeIo, ArrayMgr())
 {
-    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
@@ -86,12 +85,12 @@ VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
   stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
-    airlog("VolumeIo_Constructor", "AIR_UserIo", GetEventType(), 1);
+    airlog("VolumeIo_Constructor", "user", GetEventType(), 1);
 }
 
 VolumeIo::~VolumeIo(void)
 {
-    airlog("VolumeIo_Destructor", "AIR_UserIo", GetEventType(), 1);
+    airlog("VolumeIo_Destructor", "user", GetEventType(), 1);
 }
 
 VolumeIoSmartPtr
@@ -108,7 +107,6 @@ VolumeIo::Split(uint32_t sectors, bool removalFromTail)
     {
         sectorRba += sectors;
     }
-
 
     return newVolumeIo;
 }

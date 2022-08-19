@@ -60,6 +60,8 @@ public:
     virtual void ResetFlushedInfo(int logGroupId) override {}
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
@@ -72,7 +74,7 @@ public:
     virtual void Dispose(void) override;
 
     // For UT
-    void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo);
 
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;

@@ -36,7 +36,6 @@
 #include <memory>
 
 #include "rebuild_behavior.h"
-#include "src/include/address_type.h"
 #include "src/allocator/i_context_manager.h"
 
 namespace pos
@@ -47,16 +46,17 @@ public:
     SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextManager* allocatorSvc);
     ~SegmentBasedRebuild(void);
 
-    virtual bool Init(void) override;
-    virtual bool Read(void) override;
-    virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) override;
-    virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) override;
+    virtual bool Rebuild(void) override;
     virtual void UpdateProgress(uint32_t val) override;
 
 private:
-    virtual string _GetClassName(void);
-
-    SegmentId _NextSegment(void);
+    virtual bool _Init(void);
+    virtual bool _Recover(void);
+    void _RecoverCompleted(SegmentId segmentId, StripeId stripeId, int result);
+    void _Finish(RebuildState state);
+    SegmentId _GetNextSegment(void);
     IContextManager* allocatorSvc = nullptr;
+    static const int INIT_REBUILD_MAX_RETRY = 1000;
+    int initRetryCnt = 0;
 };
 } // namespace pos

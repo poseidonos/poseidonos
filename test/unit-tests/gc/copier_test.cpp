@@ -19,7 +19,6 @@
 #include <test/unit-tests/mapper/i_reversemap_mock.h>
 #include <test/unit-tests/mapper/reversemap/reverse_map_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
-#include <test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h>
 #include "test/unit-tests/resource_manager/buffer_pool_mock.h"
 #include "test/unit-tests/resource_manager/memory_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"

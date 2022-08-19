@@ -32,12 +32,13 @@
 
 #include "uram_drv.h"
 
+#include <air/Air.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "Air.h"
 #include "spdk/log.h"
 #include "spdk/thread.h"
 #include "src/bio/ubio.h"
@@ -74,7 +75,7 @@ AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     }
 
     devCtx->DecreasePendingIO();
-    airlog("CNT_PendingIO", "AIR_NVRAM", ramId, -1);
+    airlog("CNT_PendingIO", "nvram", ramId, -1);
     ioCtx->CompleteIo(IOErrorType);
 
     delete ioCtx;
@@ -249,7 +250,7 @@ UramDrv::SubmitAsyncIO(DeviceContext* deviceContext, UbioSmartPtr bio)
     uint64_t ramId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
 
     devCtx->IncreasePendingIO();
-    airlog("CNT_PendingIO", "AIR_NVRAM", ramId, 1);
+    airlog("CNT_PendingIO", "nvram", ramId, 1);
 
     completions = SubmitIO(ioCtx);
     return completions;

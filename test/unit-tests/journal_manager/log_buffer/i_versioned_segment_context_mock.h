@@ -21,6 +21,8 @@ public:
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
     MOCK_METHOD(SegmentInfo*, GetUpdatedInfoToFlush, (int logGroupId), (override));
     MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
+    MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo), (override));
 };
 
 } // namespace pos

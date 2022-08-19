@@ -32,9 +32,10 @@
 
 #include "src/io/frontend_io/write_submission.h"
 
+#include <air/Air.h>
+
 #include <mutex>
 
-#include "Air.h"
 #include "src/admin/smart_log_mgr.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_wbstripe_allocator.h"
@@ -91,7 +92,7 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   flowControl(inputFlowControl),
   arrayInfo(inputArrayInfo)
 {
-    airlog("RequestedUserWrite", "AIR_UserIo", GetEventType(), 1);
+    airlog("RequestedUserWrite", "user", GetEventType(), 1);
     if (nullptr == flowControl)
     {
         flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayInfo->GetName());
@@ -225,7 +226,7 @@ WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
         if (false == isRead)
         {
             WriteForParity writeForParity(volumeIo);
-            bool ret  = writeForParity.Execute();
+            bool ret = writeForParity.Execute();
             if (ret == false)
             {
                 POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;
@@ -395,10 +396,10 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
         VirtualBlks targetVsaRange;
 
         uint64_t key = reinterpret_cast<uint64_t>(this) + allocatedBlockCount;
-        airlog("LAT_WrSb_AllocWriteBuf", "AIR_BEGIN", 0, key);
+        airlog("LAT_WrSb_AllocWriteBuf", "begin", 0, key);
         auto result = iBlockAllocator->AllocateWriteBufferBlks(volumeId, remainBlockCount);
         targetVsaRange = result.first;
-        airlog("LAT_WrSb_AllocWriteBuf", "AIR_END", 0, key);
+        airlog("LAT_WrSb_AllocWriteBuf", "end", 0, key);
 
         if (IsUnMapVsa(targetVsaRange.startVsa))
         {

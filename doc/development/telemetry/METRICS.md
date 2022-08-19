@@ -1,36 +1,12 @@
-- [- _**write_rate_bytes_per_second_per_port**_](#--write_rate_bytes_per_second_per_port)
 - [**Common**](#common)
-- [Common group contains the metrics from the overall informaition of PoseidonOS](#common-group-contains-the-metrics-from-the-overall-informaition-of-poseidonos)
   - [_**common_process_uptime_second**_](#common_process_uptime_second)
+
 - [**Device**](#device)
-  - [_**read_unknown_iops_per_ssd**_](#read_unknown_iops_per_ssd)
-  - [_**read_meta_iops_per_ssd**_](#read_meta_iops_per_ssd)
-  - [_**read_gc_iops_per_ssd**_](#read_gc_iops_per_ssd)
-  - [_**read_host_iops_per_ssd**_](#read_host_iops_per_ssd)
-  - [_**read_flush_iops_per_ssd**_](#read_flush_iops_per_ssd)
-  - [_**read_rebuild_iops_per_ssd**_](#read_rebuild_iops_per_ssd)
-  - [_**read_unknown_rate_bytes_per_second_per_ssd**_](#read_unknown_rate_bytes_per_second_per_ssd)
-  - [_**read_meta_rate_bytes_per_second_per_ssd**_](#read_meta_rate_bytes_per_second_per_ssd)
-  - [_**read_gc_rate_bytes_per_second_per_ssd**_](#read_gc_rate_bytes_per_second_per_ssd)
-  - [_**read_host_rate_bytes_per_second_per_ssd**_](#read_host_rate_bytes_per_second_per_ssd)
-  - [_**read_flush_rate_bytes_per_second_per_ssd**_](#read_flush_rate_bytes_per_second_per_ssd)
-  - [_**read_rebuild_rate_bytes_per_second_per_ssd**_](#read_rebuild_rate_bytes_per_second_per_ssd)
-  - [_**write_unknown_iops_per_ssd**_](#write_unknown_iops_per_ssd)
-  - [_**write_meta_iops_per_ssd**_](#write_meta_iops_per_ssd)
-  - [_**write_gc_iops_per_ssd**_](#write_gc_iops_per_ssd)
-  - [_**write_host_iops_per_ssd**_](#write_host_iops_per_ssd)
-  - [_**write_flush_iops_per_ssd**_](#write_flush_iops_per_ssd)
-  - [_**write_rebuild_iops_per_ssd**_](#write_rebuild_iops_per_ssd)
-  - [_**write_unknown_rate_bytes_per_second_per_ssd**_](#write_unknown_rate_bytes_per_second_per_ssd)
-  - [_**write_meta_rate_bytes_per_second_per_ssd**_](#write_meta_rate_bytes_per_second_per_ssd)
-  - [_**write_gc_rate_bytes_per_second_per_ssd**_](#write_gc_rate_bytes_per_second_per_ssd)
-  - [_**write_host_rate_bytes_per_second_per_ssd**_](#write_host_rate_bytes_per_second_per_ssd)
-  - [_**write_flush_rate_bytes_per_second_per_ssd**_](#write_flush_rate_bytes_per_second_per_ssd)
-  - [_**write_rebuild_rate_bytes_per_second_per_ssd**_](#write_rebuild_rate_bytes_per_second_per_ssd)
-  - [_**read_journal_iops_per_ssd**_](#read_journal_iops_per_ssd)
-  - [_**read_journal_rate_bytes_per_second_per_ssd**_](#read_journal_rate_bytes_per_second_per_ssd)
-  - [_**write_journal_iops_per_ssd**_](#write_journal_iops_per_ssd)
-  - [_**write_journal_rate_bytes_per_second_per_ssd**_](#write_journal_rate_bytes_per_second_per_ssd)
+  - [_**read_iops_device**_](#read_iops_device)
+  - [_**read_bps_device**_](#read_bps_device)
+  - [_**write_iops_device**_](#write_iops_device)
+  - [_**write_bps_device**_](#write_bps_device)
+
 - [**Journal**](#journal)
   - [_**jrn_checkpoint**_](#jrn_checkpoint)
   - [_**jrn_log_group_reset_cnt**_](#jrn_log_group_reset_cnt)
@@ -39,6 +15,7 @@
   - [_**jrn_log_count**_](#jrn_log_count)
   - [_**jrn_log_done_count**_](#jrn_log_done_count)
   - [_**jrn_log_write_time_average**_](#jrn_log_write_time_average)
+
 - [**MetaFs**](#metafs)
   - [_**normal_shutdown_npor**_](#normal_shutdown_npor)
   - [_**user_request**_](#user_request)
@@ -67,17 +44,24 @@
   - [_**sampled_mpio_time_from_write_to_release**_](#sampled_mpio_time_from_write_to_release)
   - [_**sampled_mpio_time_from_push_to_pop**_](#sampled_mpio_time_from_push_to_pop)
   - [_**sampled_mpio_count**_](#sampled_mpio_count)
+
 - [**Volume**](#volume)
-  - [_**read_iops**_](#read_iops)
-  - [_**read_rate_bytes_per_second**_](#read_rate_bytes_per_second)
-  - [_**read_latency_mean_ns**_](#read_latency_mean_ns)
-  - [_**read_latency_max_ns**_](#read_latency_max_ns)
-  - [_**write_iops**_](#write_iops)
-  - [_**write_rate_bytes_per_second**_](#write_rate_bytes_per_second)
-  - [_**write_latency_mean_ns**_](#write_latency_mean_ns)
-  - [_**write_latency_max_ns**_](#write_latency_max_ns)
+  - [_**read_iops_volume**_](#read_iops_volume)
+  - [_**read_bps_volume**_](#read_bps_volume)
+  - [_**read_avg_lat_volume**_](#read_avg_lat_volume)
+  - [_**write_iops_volume**_](#write_iops_volume)
+  - [_**write_bps_volume**_](#write_bps_volume)
+  - [_**write_avg_lat_volume**_](#write_avg_lat_volume)
+
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
+
+- [**Network**](#network)
+  - [_**read_iops_network**_](#read_iops_network)
+  - [_**read_bps_network**_](#read_bps_network)
+  - [_**write_iops_network**_](#write_iops_network)
+  - [_**write_bps_network**_](#write_bps_network)
+
 - [**Meta**](#meta)
   - [_**FreeSegmentCount**_](#freesegmentcount)
   - [_**ContextManagerPendingIoCount**_](#contextmanagerpendingiocount)
@@ -94,15 +78,10 @@
   - [_**VSAMapFlushedDirtyPageCount**_](#vsamapflusheddirtypagecount)
   - [_**ArrayUsageBlockCount**_](#arrayusageblockcount)
   - [_**VolumeUsageBlockCount**_](#volumeusageblockcount)
-- [**Volume**](#volume-1)
-  - [_**CreateVolumeId**_](#createvolumeid)
-  - [_**DeleteVolumeId**_](#deletevolumeid)
-  - [_**MountVolumeId**_](#mountvolumeid)
-  - [_**UnmountVolumeId**_](#unmountvolumeid)
-  - [_**QosUpdateVolumeId**_](#qosupdatevolumeid)
-  - [_**RenameVolumeId**_](#renamevolumeid)
+
 - [**Resource**](#resource)
   - [_**AvailableMemorySize**_](#availablememorysize)
+
 - [**Disk**](#disk)
   - [_**softMediaErrorLow**_](#softmediaerrorlow)
   - [_**softMediaErrorHigh**_](#softmediaerrorhigh)
@@ -120,11 +99,7 @@
   - [_**controllerBusyTimeHigh**_](#controllerbusytimehigh)
   - [_**warningTemperatureTime**_](#warningtemperaturetime)
   - [_**criticalTemperatureTime**_](#criticaltemperaturetime)
-- [**Network**](#network)
-  - [_**read_iops_per_port**_](#read_iops_per_port)
-  - [_**read_rate_bytes_per_second_per_port**_](#read_rate_bytes_per_second_per_port)
-  - [_**write_iops_per_port**_](#write_iops_per_port)
-  - [_**write_rate_bytes_per_second_per_port**_](#write_rate_bytes_per_second_per_port)
+
 - [**IOCount**](#iocount)
   - [_**count_of_volume_io_constructors**_](#count_of_volume_io_constructors)
   - [_**count_of_volume_io_destructors**_](#count_of_volume_io_destructors)
@@ -179,7 +154,7 @@ Device group contains the metrics of the Devices (NVMe SSD)
 
 ---
 
-### _**read_unknown_iops_per_ssd**_
+### _**read_iops_device**_
 
 **ID**: 20000
 
@@ -187,15 +162,15 @@ Device group contains the metrics of the Devices (NVMe SSD)
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "device_id": Integer, "source": String}
 
 **Introduced**: v0.11.0
 
-The IOPS of unknown type read in a specific SSD
+The IOs/second of specific source read in a specific device_id
 
 ---
 
-### _**read_meta_iops_per_ssd**_
+### _**read_bps_device**_
 
 **ID**: 20001
 
@@ -203,143 +178,15 @@ The IOPS of unknown type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "device_id": Integer, "source": String}
 
 **Introduced**: v0.11.0
 
-The IOPS of meta type read in a specific SSD
+The Bytes/second of specific source read in a specific device_id
 
 ---
 
-### _**read_gc_iops_per_ssd**_
-
-**ID**: 20002
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of gc type read in a specific SSD
-
----
-
-### _**read_host_iops_per_ssd**_
-
-**ID**: 20003
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of host type read in a specific SSD
-
----
-
-### _**read_flush_iops_per_ssd**_
-
-**ID**: 20004
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of flush type read in a specific SSD
-
----
-
-### _**read_rebuild_iops_per_ssd**_
-
-**ID**: 20005
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of rebuild type read in a specific SSD
-
----
-
-### _**read_unknown_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20006
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of unknown type read in a specific SSD
-
----
-
-### _**read_meta_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20007
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of meta type read in a specific SSD
-
----
-
-### _**read_gc_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20008
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of gc type read in a specific SSD
-
----
-
-### _**read_host_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20009
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.10.0
-
-The rate(bytes/second) of host type read in a specific SSD
-
----
-
-### _**read_flush_rate_bytes_per_second_per_ssd**_
+### _**write_iops_device**_
 
 **ID**: 20010
 
@@ -347,15 +194,15 @@ The rate(bytes/second) of host type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "device_id": Integer, "source": String}
 
-**Introduced**: v0.10.0
+**Introduced**: v0.11.0
 
-The rate(bytes/second) of flush type read in a specific SSD
+The IOs/second of specific source write in a specific device_id
 
 ---
 
-### _**read_rebuild_rate_bytes_per_second_per_ssd**_
+### _**write_bps_device**_
 
 **ID**: 20011
 
@@ -363,269 +210,14 @@ The rate(bytes/second) of flush type read in a specific SSD
 
 **Monitoring**: Mandatory
 
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.10.0
-
-The rate(bytes/second) of host type read in a specific SSD
-
----
-
-### _**write_unknown_iops_per_ssd**_
-
-**ID**: 20012
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
+**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "device_id": Integer, "source": String}
 
 **Introduced**: v0.11.0
 
-The IOPS of unknown type write in a specific SSD
+The Bytes/second of specific source write in a specific device_id
 
 ---
 
-### _**write_meta_iops_per_ssd**_
-
-**ID**: 20013
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of meta type write in a specific SSD
-
----
-
-### _**write_gc_iops_per_ssd**_
-
-**ID**: 20014
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of gc type write in a specific SSD
-
----
-
-### _**write_host_iops_per_ssd**_
-
-**ID**: 20015
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of host type write in a specific SSD
-
----
-
-### _**write_flush_iops_per_ssd**_
-
-**ID**: 20016
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of flush type write in a specific SSD
-
----
-
-### _**write_rebuild_iops_per_ssd**_
-
-**ID**: 20017
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of rebuild type write in a specific SSD
-
----
-
-### _**write_unknown_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20018
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of unknown type write in a specific SSD
-
----
-
-### _**write_meta_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20019
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of meta type write in a specific SSD
-
----
-
-### _**write_gc_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20020
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of gc type write in a specific SSD
-
----
-
-### _**write_host_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20021
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of host type write in a specific SSD
-
----
-
-### _**write_flush_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20022
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of flush type write in a specific SSD
-
----
-
-### _**write_rebuild_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20023
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of rebuild type write in a specific SSD
-
----
-
-### _**read_journal_iops_per_ssd**_
-
-**ID**: 20024
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of journal type read in a specific SSD
-
----
-
-### _**read_journal_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20025
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of journal type read in a specific SSD
-
----
-
-### _**write_journal_iops_per_ssd**_
-
-**ID**: 20026
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The IOPS of journal type read in a specific SSD
-
----
-
-### _**write_journal_rate_bytes_per_second_per_ssd**_
-
-**ID**: 20027
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"thread_id": Integer, "thread_name": String, "interval": Integer, "SSD_id": Integer}
-
-**Introduced**: v0.11.0
-
-The rate(bytes/second) of journal type read in a specific SSD
-
----
 ## **Journal**
 
 Journal group contains the metrics of the Journal.
@@ -1184,7 +776,8 @@ The count of sampled mpio
 Volume group contains the metrics of volume.
 
 ---
-### _**read_iops**_
+
+### _**read_iops_volume**_
 
 **ID**: 50000
 
@@ -1196,11 +789,11 @@ Volume group contains the metrics of volume.
 
 **Introduced**: v0.10.0
 
-The IOPS of read in a volume & an array.
+The IOs/second of read in a volume & an array.
 
 ---
 
-### _**read_rate_bytes_per_second**_
+### _**read_bps_volume**_
 
 **ID**: 50001
 
@@ -1212,11 +805,11 @@ The IOPS of read in a volume & an array.
 
 **Introduced**: v0.10.0
 
-The rate(bytes/second) of read in a volume & an array.
+The Bytes/second of read in a volume & an array.
 
 ---
 
-### _**read_latency_mean_ns**_
+### _**read_avg_lat_volume**_
 
 **ID**: 50002
 
@@ -1224,31 +817,15 @@ The rate(bytes/second) of read in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The mean value of read latency in a volume & an array.
+The average value of read latency in a volume & an array.
 
 ---
 
-### _**read_latency_max_ns**_
-
-**ID**: 50003
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
-
-**Introduced**: v0.10.0
-
-The max value of read latency in a volume & an array.
-
----
-
-### _**write_iops**_
+### _**write_iops_volume**_
 
 **ID**: 50010
 
@@ -1260,11 +837,11 @@ The max value of read latency in a volume & an array.
 
 **Introduced**: v0.10.0
 
-The IOPS of write in a volume & an array.
+The IOs/second of write in a volume & an array.
 
 ---
 
-### _**write_rate_bytes_per_second**_
+### _**write_bps_volume**_
 
 **ID**: 50011
 
@@ -1276,11 +853,11 @@ The IOPS of write in a volume & an array.
 
 **Introduced**: v0.10.0
 
-The rate(bytes/second) of write in a volume & an array.
+The Bytes/second of write in a volume & an array.
 
 ---
 
-### _**write_latency_mean_ns**_
+### _**write_avg_lat_volume**_
 
 **ID**: 50012
 
@@ -1288,27 +865,11 @@ The rate(bytes/second) of write in a volume & an array.
 
 **Monitoring**: Mandatory
 
-**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
+**Labels**: {"array_id": Integer, "volume_id": Integer, "interval": Integer}
 
 **Introduced**: v0.10.0
 
-The mean value of write latency in a volume & an array.
-
----
-
-### _**write_latency_max_ns**_
-
-**ID**: 50013
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_id": Integer, "volume_id": Integer, "sample_count": Integer, "interval": Integer}
-
-**Introduced**: v0.10.0
-
-The max value of write latency in a volume & an array.
+The average value of write latency in a volume & an array.
 
 ---
 
@@ -1334,8 +895,78 @@ The current status of the array
 
 0: NOT_EXIST, 1:EXIST_NORMAL, 2:EXIST_DEGRADED, 3:BROKEN, 4: TRY_MOUNT, 5:TRY_UNMOUNT, 6: NORMAL, 7:DEGRADED, 8:REBUILD
 
+---
+
+## **Network**
+
+Network group contains the metrics from the network related metric of PoseidonOS
 
 ---
+
+### _**read_iops_network**_
+
+**ID**: 70000
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": String, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.11.0
+
+The IOs/second of read in a port.
+
+---
+
+### _**read_bps_network**_
+
+**ID**: 70001
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": String, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.11.0
+
+The Bytes/second of read in a port.
+
+---
+
+### _**write_iops_network**_
+
+**ID**: 70010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": String, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.11.0
+
+The IOs/second of write in a port.
+
+---
+
+### _**write_bps_network**_
+
+**ID**: 70011
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"port": String, "thread_id": Integer, "thread_name": String, "interval": Integer}
+
+**Introduced**: v0.11.0
+
+The Bytes/second of write in a port.
+
+---
+
 ## **Meta**
 
 
@@ -1931,75 +1562,7 @@ Warning Temperature Time Value
 Critical Temperature Time Value
 
 ---
-## **Network**
 
-Network group contains the metrics from the network related metric of PoseidonOS
-
----
-
-### _**read_iops_per_port**_
-
-**ID**: 120001
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
-
-**Introduced**: v0.10.0
-
-The IOPS of read in a port.
-
----
-
-### _**read_rate_bytes_per_second_per_port**_
-
-**ID**: 120002
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
-
-**Introduced**: v0.10.0
-
-The rate(bytes/second) of read in a port.
-
----
-
-### _**write_iops_per_port**_
-
-**ID**: 120011
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
-
-**Introduced**: v0.10.0
-
-The IOPS of write in a port.
-
----
-
-### _**write_rate_bytes_per_second_per_port**_
-
-**ID**: 120012
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"port": Integer, "thread_id": Integer, "thread_name": String, "interval": Integer}
-
-**Introduced**: v0.10.0
-
-The rate(bytes/second) of write in a port.
-
----
 ## **IOCount**
 
 IO Count group contains the metrics for internal count related to IO E2E path

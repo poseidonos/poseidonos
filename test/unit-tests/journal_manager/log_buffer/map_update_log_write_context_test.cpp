@@ -16,7 +16,7 @@ TEST(MapUpdateLogWriteContext, GetDirtyList_testIfExecutedSuccessfully)
     // Given
     MapList expectDirtyMap;
     expectDirtyMap.emplace(1);
-    MapUpdateLogWriteContext mapUpdatedLogWriteContext(expectDirtyMap, nullptr, nullptr, nullptr);
+    MapUpdateLogWriteContext mapUpdatedLogWriteContext(expectDirtyMap, nullptr, nullptr);
 
     // When
     MapList result = mapUpdatedLogWriteContext.GetDirtyList();
@@ -30,15 +30,12 @@ TEST(MapUpdateLogWriteContext, LogWriteDone_testIfExecutedSuccessfully)
     // Given
     NiceMock<MockEvent>* clientCallback = new NiceMock<MockEvent>;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     MapList dirtyMap;
-    MapUpdateLogWriteContext mapUpdatedLogWriteContext(dirtyMap, EventSmartPtr(clientCallback), &notifier, &sequencer);
+    MapUpdateLogWriteContext mapUpdatedLogWriteContext(dirtyMap, EventSmartPtr(clientCallback), &notifier);
 
     // When, Then
     bool retResult = true;
-    EXPECT_CALL(sequencer, GetCallbackExecutionApproval);
     EXPECT_CALL(*clientCallback, Execute).WillOnce(Return(retResult));
-    EXPECT_CALL(sequencer, NotifyCallbackCompleted);
     EXPECT_CALL(notifier, NotifyLogFilled);
 
     mapUpdatedLogWriteContext.IoDone();

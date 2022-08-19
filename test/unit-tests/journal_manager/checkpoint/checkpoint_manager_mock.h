@@ -10,7 +10,8 @@ class MockCheckpointManager : public CheckpointManager
 {
 public:
     using CheckpointManager::CheckpointManager;
-    MOCK_METHOD(void, Init, (IMapFlush* mapFlush, IContextManager* ctxManager, EventScheduler* scheduler, CallbackSequenceController* seqController, DirtyMapManager* dMapManager, TelemetryPublisher* tp), (override));
+    MOCK_METHOD(void, Init, (IMapFlush* mapFlush, IContextManager* ctxManager, EventScheduler* scheduler,
+        DirtyMapManager* dMapManager, TelemetryPublisher* tp), (override));
     MOCK_METHOD(int, RequestCheckpoint, (int logGroupId, EventSmartPtr callback), (override));
     MOCK_METHOD(int, StartCheckpoint, (EventSmartPtr callback), (override));
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));

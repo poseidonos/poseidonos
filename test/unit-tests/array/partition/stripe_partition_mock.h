@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "src/array/partition/stripe_partition.h"
 
@@ -19,7 +20,8 @@ public:
     MOCK_METHOD(int, ByteConvert, (list<PhysicalByteWriteEntry> & dst, const LogicalByteWriteEntry& src), (override));
     MOCK_METHOD(bool, IsByteAccessSupported, (), (override));
     MOCK_METHOD(int, GetRecoverMethod, (UbioSmartPtr ubio, RecoverMethod& out), (override));
-    MOCK_METHOD(unique_ptr<RebuildContext>, GetRebuildCtx, (ArrayDevice * fault), (override));
+    MOCK_METHOD(unique_ptr<RebuildContext>, GetRebuildCtx, (const vector<IArrayDevice*>& fault), (override));
+    MOCK_METHOD(unique_ptr<RebuildContext>, GetQuickRebuildCtx, (const QuickRebuildPair& rebuildPair), (override));
 };
 
 } // namespace pos
