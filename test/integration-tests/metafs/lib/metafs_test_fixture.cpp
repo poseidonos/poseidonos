@@ -131,6 +131,7 @@ MetaFsTestFixture::_SetThreadModel(void)
     cpu_set_t schedulerCPUSet = _GetCpuSet(0, 0);
     cpu_set_t workerCPUSet = _GetCpuSet(1, 1);
 
+    MetaFsServiceSingleton::ResetInstance();
     MetaFsServiceSingleton::Instance(config)
         ->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
