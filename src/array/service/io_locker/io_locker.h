@@ -55,6 +55,7 @@ public:
     bool Register(vector<ArrayDevice*> devList);
     void Unregister(vector<ArrayDevice*> devList);
     bool TryBusyLock(IArrayDevice* dev, StripeId from, StripeId to) override;
+    bool TryBusyLock(set<IArrayDevice*>& devs, StripeId from, StripeId to, IArrayDevice*& failed) override;
     bool ResetBusyLock(IArrayDevice* dev, bool forceReset = false) override;
     bool TryLock(set<IArrayDevice*>& devs, StripeId val) override;
     void Unlock(IArrayDevice* dev, StripeId val) override;

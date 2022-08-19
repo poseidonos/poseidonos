@@ -488,7 +488,7 @@ Array::ReplaceDevice(string devName)
                         _Flush();
                         POS_TRACE_TRACE(EID(REPLACE_DEV_DEBUG_MSG),
                             "device {} is replaced to {} successfully, array:{}", devName, target->GetName(), name_);
-                        DoRebuildAsync(target, swapOut, RebuildTypeEnum::QUICK);
+                        DoRebuildAsync(vector<IArrayDevice*>{target}, vector<IArrayDevice*>{swapOut}, RebuildTypeEnum::QUICK);
                     }
                 }
             }
@@ -965,26 +965,29 @@ Array::_DetachData(ArrayDevice* target)
 }
 
 void
-Array::_RebuildDone(RebuildResult result)
+Array::_RebuildDone(vector<IArrayDevice*> dsts, vector<IArrayDevice*> srcs, RebuildResult result)
 {
     POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG),
         "Array({}) rebuild done. result:{}", name_, REBUILD_STATE_STR[(int)result.result]);
     rebuilder->RebuildDone(result);
     pthread_rwlock_wrlock(&stateLock);
-    if (result.src != nullptr && result.src->GetUblock() != nullptr)
+    for (IArrayDevice* src : srcs)
     {
         // in case of the quick rebuild completed
-        result.src->GetUblock()->SetClass(DeviceClass::SYSTEM);
-        result.src->SetUblock(nullptr);
-        delete result.src;
-    }
-    if (result.dst->GetState() == ArrayDeviceState::REBUILD &&
-        result.result == RebuildState::PASS)
-    {
-        result.dst->SetState(ArrayDeviceState::NORMAL);
+        UblockSharedPtr ublock = src->GetUblock();
+        if (ublock != nullptr)
+        {
+            ublock->SetClass(DeviceClass::SYSTEM);
+            src->SetUblock(nullptr);
+        }
+        delete src;
     }
     if (result.result == RebuildState::PASS)
     {
+        for (IArrayDevice* dst : dsts)
+        {
+            dst->SetState(ArrayDeviceState::NORMAL);
+        }
         int ret = _Flush();
         if (0 != ret)
         {
@@ -1058,7 +1061,7 @@ Array::TriggerRebuild(ArrayDevice* target)
     }
     pthread_rwlock_unlock(&stateLock);
 
-    DoRebuildAsync(target, nullptr, RebuildTypeEnum::BASIC);
+    DoRebuildAsync(vector<IArrayDevice*>{target}, vector<IArrayDevice*>(), RebuildTypeEnum::BASIC);
     return retry;
 }
 
@@ -1080,26 +1083,47 @@ Array::ResumeRebuild(ArrayDevice* target)
 
     pthread_rwlock_unlock(&stateLock);
 
-    DoRebuildAsync(target, nullptr, RebuildTypeEnum::BASIC);
+    DoRebuildAsync(vector<IArrayDevice*>{target}, vector<IArrayDevice*>(), RebuildTypeEnum::BASIC);
     return true;
 }
 
 void
-Array::DoRebuildAsync(ArrayDevice* dst, ArrayDevice* src, RebuildTypeEnum rt)
+Array::DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt)
 {
-    POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG), "DoRebuildAsync, type:{}", rt);
+    POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG), "DoRebuildAsync, type:{}, dstCnt:{}, srcCnt:{}", rt, dst.size(), src.size());
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
     uint32_t arrId = index_;
-    RebuildComplete cb = std::bind(&Array::_RebuildDone, this, placeholders::_1);
+    RebuildComplete cb = bind(&Array::_RebuildDone, this, dst, src, placeholders::_1);
     list<RebuildTarget*> tasks = svc->GetRebuildTargets();
 
-    thread t([arrRebuilder, arrName, arrId, dst, src, cb, tasks, rt]()
+    if (rt == RebuildTypeEnum::BASIC)
     {
-        list<RebuildTarget*> targets = tasks;
-        arrRebuilder->Rebuild(arrName, arrId, dst, src, cb, targets, rt);
-    });
-    t.detach();
+        thread t([arrRebuilder, arrName, arrId, dst, cb, tasks]()
+        {
+            list<RebuildTarget*> targets = tasks;
+            arrRebuilder->Rebuild(arrName, arrId, dst, cb, targets);
+        });
+        t.detach();
+    }
+    else
+    {
+        vector<pair<IArrayDevice*, IArrayDevice*>> quickPair;
+        assert(dst.size() == src.size());
+        uint32_t idx = 0;
+        for (IArrayDevice* dev : dst)
+        {
+            quickPair.emplace_back(make_pair(src.at(idx), dev));
+            idx++;
+        }
+
+        thread t([arrRebuilder, arrName, arrId, quickPair, cb, tasks]()
+        {
+            list<RebuildTarget*> targets = tasks;
+            arrRebuilder->QuickRebuild(arrName, arrId, quickPair, cb, targets);
+        });
+        t.detach();
+    }
 }
 
 int

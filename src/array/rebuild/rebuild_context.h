@@ -35,8 +35,11 @@
 #include <atomic>
 #include <functional>
 #include <string>
+#include <utility>
+#include <vector>
 #include <mutex>
 
+#include "rebuild_method.h"
 #include "rebuild_result.h"
 #include "rebuild_progress.h"
 #include "rebuild_logger.h"
@@ -45,6 +48,7 @@
 #include "src/include/raid_type.h"
 #include "src/include/rebuild_type.h"
 #include "src/include/partition_type.h"
+#include "src/include/recover_func.h"
 #include "src/logger/logger.h"
 
 using namespace std;
@@ -55,25 +59,29 @@ class PartitionPhysicalSize;
 
 using F2PTranslator = function<PhysicalBlkAddr(const FtBlkAddr&)>;
 using RebuildComplete = function<void(RebuildResult)>;
+using RebuildGroupPairs = vector<pair<vector<IArrayDevice*>, vector<IArrayDevice*>>>;
 
 class RebuildContext
 {
 public:
-    string array;
-    PartitionType part = PartitionType::META_NVM;
-    RaidType raidType;
-    RebuildTypeEnum rebuildType;
+    // from array rebuilder
+    string array = "";
     uint32_t arrayIndex = 0;
-    uint32_t faultIdx = 0;
-    ArrayDevice* faultDev = nullptr;
-    ArrayDevice* srcDev = nullptr;
-    uint64_t stripeCnt = 0;
-    atomic<uint32_t> taskCnt;
-    const PartitionPhysicalSize* size = nullptr;
     RebuildProgress* prog = nullptr;
     RebuildLogger* logger = nullptr;
-    F2PTranslator translate;
+    vector<RebuildMethod*> rm;
+
+    // from partitions' via GetRebuildCtx
+    PartitionType part;
+    uint64_t stripeCnt = 0;
+    const PartitionPhysicalSize* size = nullptr;
+    RebuildGroupPairs rgPairs;
+    RecoverFunc recovery;
     RebuildComplete rebuildComplete;
+
+    // from rebuildbehavior during rebuilding
+    atomic<uint32_t> taskCnt;
+
     RebuildState GetResult()
     {
         unique_lock<mutex> lock(mtx);
@@ -94,6 +102,17 @@ public:
             result = reqState;
         }
     }
+
+    // LCOV_EXCL_START
+    virtual ~RebuildContext(void)
+    {
+        for (RebuildMethod* r : rm)
+        {
+            delete r;
+        }
+        rm.clear();
+    }
+    // LCOV_EXCL_END
 
 private:
     RebuildState result = RebuildState::READY;

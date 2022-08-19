@@ -8,7 +8,7 @@ namespace pos
 TEST(RebuildCompleted, RebuildCompleted_testConstructor)
 {
     // Given
-    MockRebuildBehavior* rb = new MockRebuildBehavior(nullptr, nullptr);
+    MockRebuildBehavior* rb = new MockRebuildBehavior(nullptr);
     // When
     RebuildCompleted rc(rb);
 }

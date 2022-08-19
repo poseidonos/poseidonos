@@ -32,51 +32,23 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <array>
-
-#include "src/include/partition_type.h"
-#include "src/include/address_type.h"
-#include "src/include/raid_type.h"
-#include "src/include/raid_state.h"
-#include "src/array/device/array_device.h"
-#include "src/array_models/dto/partition_physical_size.h"
-#include "src/array_models/dto/partition_logical_size.h"
-#include "src/array/service/io_translator/i_translator.h"
-#include "src/array/partition/i_partition_services.h"
-
-using namespace std;
+#include "src/bio/ubio.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
+class EventArgument;
+class Ubio;
 
-class Partition : public ITranslator
+class RebuildPartialCompletion : public Callback
 {
 public:
-    Partition(vector<ArrayDevice*> d, PartitionType type);
-    virtual ~Partition(void);
-    virtual bool IsByteAccessSupported(void) = 0;
-    const PartitionLogicalSize* GetLogicalSize();
-    const PartitionPhysicalSize* GetPhysicalSize();
-    bool IsValidLba(uint64_t lba);
-    int FindDevice(IArrayDevice* dev);
-    virtual RaidState GetRaidState(void) { return RaidState::NORMAL; }
-    virtual void RegisterService(IPartitionServices* svc) {}
-    PartitionType GetType(void) { return type; }
-    uint64_t GetLastLba() { return physicalSize.lastLba; }
-    const vector<ArrayDevice*> GetDevs(void) { return devs; }
-    virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
+    explicit RebuildPartialCompletion(UbioSmartPtr input);
+    virtual ~RebuildPartialCompletion(void) override;
 
-protected:
-    bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);
-    void _UpdateLastLba(void);
-    PartitionLogicalSize logicalSize;
-    PartitionPhysicalSize physicalSize;
-    vector<ArrayDevice*> devs;
-    PartitionType type;
+private:
+    bool _DoSpecificJob(void) override;
+
+    UbioSmartPtr ubio;
 };
-
-using Partitions = array<Partition*, PartitionType::TYPE_COUNT>;
-
 } // namespace pos

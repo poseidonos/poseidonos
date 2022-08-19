@@ -127,6 +127,18 @@ Raid10::CheckNumofDevsToConfigure(uint32_t numofDevs)
     return numofDevs >= minRequiredNumofDevsforRAID10;
 }
 
+vector<pair<vector<uint32_t>, vector<uint32_t>>>
+Raid10::GetRebuildGroupPairs(vector<uint32_t>& targetIndexs)
+{
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> rgPairs;
+    for (uint32_t dst : targetIndexs)
+    {
+        uint32_t src = _GetMirrorIndex(dst);
+        rgPairs.emplace_back(make_pair(vector<uint32_t>{src}, vector<uint32_t>{dst}));
+    }
+    return rgPairs;
+}
+
 void
 Raid10::_BindRecoverFunc(void)
 {

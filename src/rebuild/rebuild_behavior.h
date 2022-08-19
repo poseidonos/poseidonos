@@ -34,39 +34,23 @@
 
 #include <string>
 
-#include "src/rebuild/recovery_methods/recovery_base.h"
 #include "src/array/rebuild/rebuild_context.h"
 #include "src/logger/logger.h"
-#include "src/resource_manager/memory_manager.h"
 
 namespace pos
 {
-class BufferPool;
 class RebuildBehavior
 {
 public:
-    RebuildBehavior(unique_ptr<RebuildContext> c,
-        MemoryManager* mm = MemoryManagerSingleton::Instance());
+    explicit RebuildBehavior(unique_ptr<RebuildContext> c);
     virtual ~RebuildBehavior(void);
+    virtual bool Rebuild(void) = 0;
+    virtual void UpdateProgress(uint32_t val) = 0;
     virtual void StopRebuilding(void);
     virtual RebuildContext* GetContext(void);
-    virtual bool Init(void) = 0;
-    virtual bool Read(void) = 0;
-    virtual bool Write(uint32_t targetId, UbioSmartPtr ubio) = 0;
-    virtual bool Complete(uint32_t targetId, UbioSmartPtr ubio) = 0;
-    virtual void UpdateProgress(uint32_t val) = 0;
 
 protected:
-    bool _InitBuffers(void);
-    virtual string _GetClassName(void) = 0;
     bool isInitialized = false;
     unique_ptr<RebuildContext> ctx = nullptr;
-    RecoveryBase* recovery = nullptr;
-    static const int INIT_REBUILD_MAX_RETRY = 100;
-    int initRebuildRetryCnt = 0;
-
-private:
-    MemoryManager* memMgr = nullptr;
-
 };
 } // namespace pos

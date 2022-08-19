@@ -32,30 +32,13 @@
 
 #pragma once
 
-#include "src/resource_manager/memory_manager.h"
-#include "src/resource_manager/buffer_pool.h"
-#include "src/bio/ubio.h"
+#include <vector>
+#include <utility>
 
 using namespace std;
 
 namespace pos
 {
-
-class RecoveryBase
-{
-public:
-    RecoveryBase(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt);
-    virtual ~RecoveryBase(void);
-    virtual bool Init(MemoryManager* mm, string owner);
-    virtual int Recover(UbioSmartPtr ubio) = 0;
-    virtual BufferPool* GetDestBuffer(void);
-
-protected:
-    MemoryManager* mm = nullptr;
-    BufferPool* srcBuffer = nullptr;
-    BufferPool* destBuffer = nullptr;
-    uint64_t srcSize = 0;
-    uint64_t destSize = 0;
-    uint32_t bufCnt = 0;
-};
+class IArrayDevice;
+using QuickRebuildPair = vector<pair<IArrayDevice*, IArrayDevice*>>;
 } // namespace pos

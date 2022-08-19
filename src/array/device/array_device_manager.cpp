@@ -80,7 +80,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             return ret;
         }
     }
-
+    uint32_t dataIndex = 0;
     for (string devName : nameSet.data)
     {
         DevName name(devName);
@@ -91,11 +91,12 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
-        ret = devs_->AddData((new ArrayDevice(uBlock)));
+        ret = devs_->AddData((new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, dataIndex)));
         if (ret != 0)
         {
             return ret;
         }
+        dataIndex++;
     }
     for (string devName : nameSet.spares)
     {
@@ -134,6 +135,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
         devs_->SetNvm(new ArrayDevice(uBlock));
     }
 
+    uint32_t dataIndex = 0;
     for (DeviceMeta meta : metaSet.data)
     {
         ArrayDevice* dev = nullptr;
@@ -141,7 +143,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
 
         if (ArrayDeviceState::FAULT == meta.state)
         {
-            dev = new ArrayDevice(nullptr, ArrayDeviceState::FAULT);
+            dev = new ArrayDevice(nullptr, ArrayDeviceState::FAULT, dataIndex);
         }
         else
         {
@@ -156,9 +158,10 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
                     "Rebuilding device found {}", meta.uid);
             }
 
-            dev = new ArrayDevice(uBlock, meta.state);
+            dev = new ArrayDevice(uBlock, meta.state, dataIndex);
         }
         devs_->AddData(dev);
+        dataIndex++;
     }
 
     ret = _CheckActiveSsdsCount(devs_->GetDevs().data);

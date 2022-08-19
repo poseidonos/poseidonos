@@ -307,12 +307,11 @@ TEST(StripePartition, GetRebuildCtx_testIfRebuildContextIsFilledInWithFaultyDevi
     sPartition.Create(startLba, segCnt, totalNvmBlks);
 
     // When
-    auto rebuildCtx = sPartition.GetRebuildCtx(arrayDevice4);
+    auto rebuildCtx = sPartition.GetRebuildCtx(vector<IArrayDevice*>{arrayDevice4});
 
     // Then
     ASSERT_TRUE(rebuildCtx != nullptr);
     ASSERT_TRUE(RebuildState::READY == rebuildCtx->GetResult()); // gtest doesn't allow the use of enum class?
-    ASSERT_EQ(3, rebuildCtx->faultIdx);
     int expectedLogicalTotalStripes = sPartition.GetLogicalSize()->totalStripes;
     ASSERT_EQ(expectedLogicalTotalStripes, rebuildCtx->stripeCnt);
 

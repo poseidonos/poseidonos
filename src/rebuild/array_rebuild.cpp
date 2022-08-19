@@ -39,29 +39,25 @@
 #include "src/logger/logger.h"
 namespace pos
 {
-ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
-                        ArrayDevice* dst, ArrayDevice* src, RebuildComplete cb,
-                        list<RebuildTarget*> tgt, RebuildBehaviorFactory* factory,
-                        RebuildTypeEnum rebuildType)
+ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, vector<IArrayDevice*>& dst,
+    RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildBehaviorFactory* factory)
+: arrayName(arrayName),
+  rebuildComplete(cb)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::ArrayRebuild() array {} with total {} tasks",
-        arrayName, tgt.size());
+        "ArrayRebuild(Basic), array {} with total {} tasks, dstCnt:{}",
+        arrayName, tgt.size(), dst.size());
 
     RebuildProgress* prog = new RebuildProgress(arrayName);
     RebuildLogger* rLogger = new RebuildLogger(arrayName);
-    list<PartitionRebuild*> partRebuild;
 
     for (RebuildTarget* tar : tgt)
     {
         unique_ptr<RebuildContext> ctx = tar->GetRebuildCtx(dst);
         if (ctx && factory != nullptr)
         {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "ArrayRebuild rebuildtype:{}", rebuildType);
-            ctx->rebuildType = rebuildType;
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;
-            ctx->srcDev = src;
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
                 "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
@@ -73,7 +69,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
                 PartitionRebuild* ptnRbd = new PartitionRebuild(bhvr);
                 if (ptnRbd->TotalStripes() > 0)
                 {
-                    partRebuild.push_back(ptnRbd);
+                    tasks.push_back(ptnRbd);
                 }
                 else
                 {
@@ -82,21 +78,50 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId,
             }
         }
     }
-    Init(arrayName, dst, src, cb, partRebuild, prog, rLogger);
+    progress = prog;
+    rebuildLogger = rLogger;
+    rebuildLogger->SetArrayRebuildStart();
+    rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
 }
 
-void
-ArrayRebuild::Init(string array, ArrayDevice* dstDev, ArrayDevice* srcDev, RebuildComplete cb,
-    list<PartitionRebuild*> tgt, RebuildProgress* prog, RebuildLogger* rLogger)
+ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair& rebuildPair,
+    RebuildComplete cb, list<RebuildTarget*>& tgt, RebuildBehaviorFactory* factory)
+: arrayName(arrayName),
+  rebuildComplete(cb)
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::Init() array {} with total {} tasks", array, tgt.size());
+        "ArrayRebuild(Quick) begin, array {} with total {} tasks, pairCnt:{}",
+        arrayName, tgt.size(), rebuildPair.size());
+    RebuildProgress* prog = new RebuildProgress(arrayName);
+    RebuildLogger* rLogger = new RebuildLogger(arrayName);
 
-    arrayName = array;
-    dst = dstDev;
-    src = srcDev;
-    rebuildComplete = cb;
-    tasks = tgt;
+    for (RebuildTarget* tar : tgt)
+    {
+        unique_ptr<RebuildContext> ctx = tar->GetQuickRebuildCtx(rebuildPair);
+        if (ctx && factory != nullptr)
+        {
+            ctx->array = arrayName;
+            ctx->arrayIndex = arrayId;
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+                "Try to create PartitionRebuild for {}, pairCnt:{}", PARTITION_TYPE_STR[ctx->part], ctx->rgPairs.size());
+            RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
+            if (bhvr != nullptr)
+            {
+                bhvr->GetContext()->prog = prog;
+                bhvr->GetContext()->logger = rLogger;
+                bhvr->UpdateProgress(0);
+                PartitionRebuild* ptnRbd = new PartitionRebuild(bhvr);
+                if (ptnRbd->TotalStripes() > 0)
+                {
+                    tasks.push_back(ptnRbd);
+                }
+                else
+                {
+                    delete ptnRbd;
+                }
+            }
+        }
+    }
     progress = prog;
     rebuildLogger = rLogger;
     rebuildLogger->SetArrayRebuildStart();
@@ -119,8 +144,6 @@ ArrayRebuild::Start(void)
     {
         RebuildResult res;
         res.array = arrayName;
-        res.dst = dst;
-        res.src = src;
         res.result = RebuildState::READY;
         _RebuildCompleted(res);
     }
@@ -137,8 +160,6 @@ ArrayRebuild::Discard(void)
     tasks.clear();
     RebuildResult res;
     res.array = arrayName;
-    res.dst = dst;
-    res.src = src;
     res.result = RebuildState::FAIL;
     _RebuildCompleted(res);
 }

@@ -34,6 +34,7 @@
 #include "src/logger/logger.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/partition_type.h"
+#include "src/rebuild/rebuild_methods/n_to_m_rebuild.h"
 
 namespace pos
 {
@@ -46,6 +47,14 @@ RebuildBehaviorFactory::RebuildBehaviorFactory(IContextManager* allocator)
 RebuildBehavior*
 RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 {
+    for (auto pair : ctx->rgPairs)
+    {
+        auto src = pair.first;
+        auto dst = pair.second;
+        RebuildMethod* rm = new NToMRebuild(src, dst, ctx->recovery);
+        ctx->rm.push_back(rm);
+    }
+
     if (ctx->part == PartitionType::JOURNAL_SSD)
     {
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild for {} partition is created",

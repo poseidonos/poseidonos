@@ -30,21 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rebuild_recovery.h"
-#include "src/io/backend_io/rebuild_io/rebuild_read.h"
+#include "rebuild_write_done.h"
+#include "src/bio/ubio.h"
+#include "src/include/io_error_type.h"
+#include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
-RebuildRecovery::RebuildRecovery(uint64_t srcSize, uint64_t destSize, uint32_t bufCnt)
-: RecoveryBase(srcSize, destSize, bufCnt)
+RebuildWriteDone::RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback, BufferPool* dstBufferPool)
+: Callback(false, CallbackType_RebuildReadCompleteHandler),
+  ubio(ubio),
+  writeDoneCallback(writeDoneCallback),
+  bufferPool(dstBufferPool)
 {
 }
 
-int
-RebuildRecovery::Recover(UbioSmartPtr ubio)
+bool
+RebuildWriteDone::_DoSpecificJob(void)
 {
-    RebuildRead rebuildRead;
-    return rebuildRead.Recover(ubio, srcBuffer);
+    int ret = 0;
+    if (_GetErrorCount() > 0)
+    {
+        ret = EID(IO_RECOVER_DEBUG_MSG);
+        POS_TRACE_WARN(ret, "rebuild write done with errors");
+    }
+
+    bufferPool->ReturnBuffer(ubio->GetWholeBuffer());
+    writeDoneCallback(ret);
+    ubio = nullptr;
+    return true;
 }
 
 } // namespace pos
+
