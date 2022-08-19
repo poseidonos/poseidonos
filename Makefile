@@ -10,6 +10,8 @@ PROTO_CPP_GENERATED_DIR = $(PROTO_DIR)/generated/cpp
 
 DPDK_ROOT_DIR := $(abspath $(CURDIR)/lib/dpdk)
 
+POS_EVENT_DOCUMENATION_TOOL_DIR := $(abspath $(CURDIR)/tool/document_tool)
+
 include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
 include $(SPDK_ROOT_DIR)/mk/spdk.modules.mk
 include $(SPDK_ROOT_DIR)/mk/spdk.app_vars.mk
@@ -177,7 +179,7 @@ UDEV_FILE = $(UDEV_DIR)/99-custom-nvme.rules
 
 ################################################
 
-all : $(APP) pos-exporter
+all : $(APP) pos-exporter gen_doc
 	@:
 
 install: 
@@ -251,6 +253,8 @@ gen_proto:
 	@`[ -d $(PROTO_CPP_GENERATED_DIR) ] || mkdir -p $(PROTO_CPP_GENERATED_DIR)`
 	protoc --cpp_out=$(PROTO_CPP_GENERATED_DIR) --grpc_out=$(PROTO_CPP_GENERATED_DIR) --plugin=protoc-gen-grpc=/usr/local/bin/grpc_cpp_plugin --proto_path=$(PROTO_DIR) $(PROTO_DIR)/*.proto
 
+gen_doc:
+	python3 $(POS_EVENT_DOCUMENATION_TOOL_DIR)/events_to_markdown_table.py
 
 pos-exporter:
 	@echo Build Telemetry Collector
