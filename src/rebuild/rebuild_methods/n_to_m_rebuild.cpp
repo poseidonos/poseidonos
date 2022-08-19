@@ -72,7 +72,7 @@ NToMRebuild::Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalS
     }
     assert(mem != nullptr);
 
-    airlog("LAT_SegmentBasedRebuildRead", "begin", 0, airKey);
+    airlog("LAT_SegmentRebuildRead", "begin", 0, airKey);
     UbioSmartPtr readUbio(new Ubio(mem, sectorCnt, arrayIndex));
 
     vector<PhysicalBlkAddr> srcAddr;
@@ -120,7 +120,7 @@ NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSi
 {
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
             "NToMRebuild, readdone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, readResult);
-    airlog("LAT_SegmentBasedRebuildRead", "end", 0, airKey);
+    airlog("LAT_SegmentRebuildRead", "end", 0, airKey);
     if (readResult != 0)
     {
         srcBuffer->ReturnBuffer(src);
@@ -138,12 +138,12 @@ NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSi
         // mem = Memory<ArrayConfig::SECTOR_SIZE_BYTE>::Alloc(sectorCnt);
     }
     assert(mem != nullptr);
-    airlog("LAT_SegmentBasedRebuildRecover", "begin", 0, airKey);
+    airlog("LAT_SegmentRebuildRecover", "begin", 0, airKey);
     recoverFunc(mem, src, dstSize);
-    airlog("LAT_SegmentBasedRebuildRecover", "end", 0, airKey);
+    airlog("LAT_SegmentRebuildRecover", "end", 0, airKey);
     srcBuffer->ReturnBuffer(src);
 
-    airlog("LAT_SegmentBasedRebuildWrite", "begin", 0, airKey);
+    airlog("LAT_SegmentRebuildWrite", "begin", 0, airKey);
     UbioSmartPtr writeUbio(new Ubio(mem, sectorCnt, arrayIndex));
     writeUbio->dir = UbioDir::Write;
 
@@ -190,7 +190,7 @@ NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSi
 void
 NToMRebuild::_WriteDone(StripeId stripeId, StripeRebuildDoneCallback callback, int writeResult)
 {
-    airlog("LAT_SegmentBasedRebuildWrite", "end", 0, airKey);
+    airlog("LAT_SegmentRebuildWrite", "end", 0, airKey);
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
             "NToMRebuild, writedone, stripe_id:{}, result:{}", stripeId, writeResult);
     callback(writeResult);
