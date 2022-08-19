@@ -84,14 +84,16 @@ private:
     void _PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWorker* worker);
     void _IssueRequestToMioWorker(MetaFsIoRequest* reqMsg);
     bool _DoesMioWorkerForNumaExist(const int numaId);
+    uint32_t _GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId);
+    uint32_t _GetIndexOfWorkerConsideringNumaDedicatedScheduling(const uint32_t numaId);
 
-    static const size_t TOTAL_NUMA_COUNT = 2;
+    const size_t TOTAL_NUMA_COUNT;
     const bool SUPPORT_NUMA_DEDICATED_SCHEDULING;
     const size_t TOTAL_CORE_COUNT;
     const cpu_set_t MIO_CORE_SET;
     std::unordered_map<uint32_t, std::vector<ScalableMetaIoWorker*>> metaIoWorkerList_;
     size_t mioCoreCount_;
-    size_t mioCoreCountInTheSameNuma_[TOTAL_NUMA_COUNT];
+    std::vector<size_t> mioCoreCountInTheSameNuma_;
     MetaFsConfigManager* config_;
     TelemetryPublisher* tp_;
     size_t cpuStallCnt_;
