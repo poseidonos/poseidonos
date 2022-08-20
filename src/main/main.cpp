@@ -113,6 +113,7 @@ main(int argc, char* argv[])
     {
         return ret;
     }
+    _pos.InitTraceExporter(argv[0]);
     _pos.Run();
     _pos.Terminate();
 
