@@ -165,7 +165,7 @@ private:
     vector<ConfigKeyValue> wtData = {
         {"enable", "false"}
     };
-    vector<ConfigKeyValue> otlpTraceData = {
+    vector<ConfigKeyValue> traceData = {
         {"enable", "false"},
         {"collector_endpoint", "http://localhost:3418/v1/traces"}
     };
@@ -188,7 +188,7 @@ private:
         {"transport", transportData},
         {"metafs", metaFsData},
         {"write_through", wtData},
-        {"otlp_trace", otlpTraceData}
+        {"otlp", traceData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";

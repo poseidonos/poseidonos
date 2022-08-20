@@ -72,10 +72,7 @@
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/resource_checker/resource_checker.h"
 #include "src/resource_checker/smart_collector.h"
-#include "opentelemetry/exporters/otlp/otlp_http_exporter.h"
-#include "opentelemetry/sdk/trace/simple_processor.h"
-#include "opentelemetry/sdk/trace/tracer_provider.h"
-#include "opentelemetry/trace/provider.h"
+#include "src/trace/trace_exporter.h"
 
 namespace pos
 {
@@ -83,7 +80,6 @@ int
 Poseidonos::Init(int argc, char** argv)
 {
     POS_TRACE_TRACE(EID(POS_TRACE_STARTED), "");
-    Poseidonos::_SetProcName(argv[0]);
     int ret = _LoadConfiguration();
     if (ret == 0)
     {
@@ -98,7 +94,6 @@ Poseidonos::Init(int argc, char** argv)
         _InitIOInterface();
         _InitMemoryChecker();
         _InitResourceChecker();
-        _InitTraceExporter();
     }
     else
     {
@@ -176,6 +171,8 @@ Poseidonos::Terminate(void)
     SignalHandlerSingleton::ResetInstance();
     ResourceCheckerSingleton::ResetInstance();
     SmartCollectorSingleton::ResetInstance();
+
+    TraceExporterSingleton::ResetInstance();
 
     POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
 }
@@ -408,75 +405,60 @@ Poseidonos::_RunCLIService(void)
     GrpcCliServerThread = new std::thread(RunGrpcServer);
 }
 
-void
-Poseidonos::_SetProcName(char *procFullName)
+int
+Poseidonos::InitTraceExporter(char *procFullName)
 {
-    std::vector<std::string> names;
-    std::stringstream ss(procFullName);
-    std::string token;
+    _LoadConfiguration();
 
-    while(std::getline(ss, token, '/')) {
-       names.push_back(token);
-    }
-
-    procName = names.back();
-}
-
-std::string
-Poseidonos::_GetProcName()
-{
-    return procName;
-}
-
-void
-Poseidonos::_InitTraceExporter()
-{
-    ConfigManager& configManager = *ConfigManagerSingleton::Instance();
-    std::string module("otlp_trace");
-    bool trace_enable = false;
-    int ret = configManager.GetValue(module, "enable", &trace_enable, ConfigType::CONFIG_TYPE_BOOL);
+    bool traceEnabled = false;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("trace", "enabled", &traceEnabled, ConfigType::CONFIG_TYPE_BOOL);
 
     if (EID(SUCCESS) == ret)
     {
-        namespace exporter  = opentelemetry::exporter;
-        namespace traceapi  = opentelemetry::trace;
-        namespace sdktrace  = opentelemetry::sdk::trace;
-        namespace resource  = opentelemetry::sdk::resource;
-        namespace nostd     = opentelemetry::nostd;
-        
-        if (true == trace_enable)
+        if (true == traceEnabled)
         {
-            std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
-            std::string endpoint = "";
-            int ret = configManager.GetValue(module, "collector_endpoint", &endpoint, ConfigType::CONFIG_TYPE_STRING);
+            std::string traceEndPoint = "";
+            int ret = ConfigManagerSingleton::Instance()->GetValue("trace", "collector_endpoint", &traceEndPoint, ConfigType::CONFIG_TYPE_STRING);
 
             if (EID(SUCCESS) == ret)
             {
-                // Set trace exporter (otlp-http-exporter)
-                exporter::otlp::OtlpHttpExporterOptions opts;
-                opts.url = endpoint;
-                auto otlp_http_exporter = std::unique_ptr<sdktrace::SpanExporter>(new exporter::otlp::OtlpHttpExporter(opts));
+                // Set service name
+                std::stringstream ss(procFullName);
+                std::string token, serviceName;
 
-                // Set trace resource
-                auto resource_attributes = resource::ResourceAttributes
+                while(std::getline(ss, token, '/')) {
+                    serviceName = token;
+                }
+
+                // Set service version
+                std::string serviceVersion = pos::VersionProviderSingleton::Instance()->GetVersion();
+
+                // Initialize trace exporter
+                TraceExporterSingleton::Instance()->Init(serviceName, serviceVersion, traceEndPoint);
+
+                if(TraceExporterSingleton::Instance()->IsEnabled())
                 {
-                    {"service.name", _GetProcName().c_str()},
-                    {"service.version", version.c_str()}
-                };
-                auto resource = resource::Resource::Create(resource_attributes);
-                
-                // Set trace processor
-                auto processor = std::unique_ptr<sdktrace::SpanProcessor>(
-                    new sdktrace::SimpleSpanProcessor(std::move(otlp_http_exporter)));
-                    
-                // Set trace provider
-                auto provider = nostd::shared_ptr<traceapi::TracerProvider>(
-                    new sdktrace::TracerProvider(std::move(processor), resource));
-
-                // Set trace provider as global
-                traceapi::Provider::SetTracerProvider(provider); 
+                    POS_TRACE_INFO(POS_EVENT_ID::TRACE_ENABLED, "Trace is enabled. Traces generated by {} will be exported to {}", serviceName + " " + serviceVersion, traceEndPoint);
+                    return EID(SUCCESS);
+                }
+            }
+            else
+            {
+                POS_TRACE_INFO(POS_EVENT_ID::TRACE_CONFIG_ERROR, "Trace is not enabled. Specify an endpoint of the traces in configuration");
+                return EID(TRACE_CONFIG_ERROR);
             }
         }
-    }   
+        else
+        {
+            POS_TRACE_INFO(POS_EVENT_ID::TRACE_NOT_ENABLED, "The trace is not enabled by configuration");
+        }
+    }
+    else
+    {
+        POS_TRACE_INFO(POS_EVENT_ID::TRACE_CONFIG_ERROR, "Specify whether the trace should be enabled or not in configuration");
+        return EID(TRACE_CONFIG_ERROR);
+    }
+
+    return EID(TRACE_NOT_ENABLED);
 }
 } // namespace pos

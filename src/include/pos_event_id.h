@@ -1311,6 +1311,15 @@ enum class POS_EVENT_ID
     DEBUG_ATOMIC_UNDERFLOW,
     DEBUG_SIGNAL_HANDLING,
 
+    // --------------Trace (10500)----------------
+    TRACE_START = 10500,
+    TRACE_ENABLED,
+    TRACE_NOT_ENABLED,
+    TRACE_CONFIG_ERROR,
+    TRACE_EXPORTER_FAIL,
+    TRACE_PROCESSOR_FAIL,
+    TRACE_PROVIDER_FAIL,
+
     // -----------------Exceptions-------------------
     EVENT_ID_MAPPING_WRONG = 0x7FFFFFFE,
     RESERVED = 0x7FFFFFFF,

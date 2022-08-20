@@ -136,7 +136,6 @@ LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
 				-lopentelemetry_otlp_recordable \
 				-lopentelemetry_proto \
 				-lopentelemetry_resources \
-				-lopentelemetry_common \
 				-lopentelemetry_http_client_curl \
 				-lpthread -lcurl
 
