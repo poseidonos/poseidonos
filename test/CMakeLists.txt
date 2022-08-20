@@ -19,9 +19,9 @@ option(POS_DISABLE_LOGGING "Disable the POS logger while running UTs/ITs" ON)
 set(POS_PARALLEL_EXEC_UT "4" CACHE STRING "Specify the number of parallel threads to run unit tests")
 set(POS_PARALLEL_EXEC_IT "1" CACHE STRING "Specify the number of parallel threads to run integration tests")
 
-set(POS_USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
+set(POS_USE_LOCAL_REPO "y" CACHE STRING "Specify use of local repository, y or n")
 
-set(CMAKE_CXX_FLAGS "--coverage -ftest-coverage -fpermissive -fPIC")
+set(CMAKE_CXX_FLAGS "--coverage -ftest-coverage -fpermissive -fPIC -pthread")
 set(CMAKE_SHARED_LINKER_FLAGS "--coverage -ftest-coverage")
 
 if(POS_BUILD_WITH_O2)
@@ -263,6 +263,9 @@ INCLUDE_DIRECTORIES(
     ${PROJ_ROOT}/lib/air/src/api
 
     ${PROJ_ROOT}/lib/spdlog-1.4.2/include
+
+    # for opentelemetry
+    ${PROJ_ROOT}/lib/opentelemetry-cpp/include
 )
 
 # This is to provide "-I" option for unit test file(s) build
@@ -350,6 +353,17 @@ message("Creating nlohmann/json symlink to support both \"nlohmann/json\" and <n
 add_custom_target(nlohmann_json ALL
                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJ_ROOT}/lib/nlohmann ${PROJ_ROOT}/src/include/nlohmann)
 
+# Build opentelemetry conditionally
+SET(POS_DEP_OTLP "${PROJ_ROOT}/lib/opentelemetry-cpp/lib")
+        
+if(EXISTS "${POS_DEP_OTLP}")
+    message("opentelemetry library exists: ${POS_DEP_OTLP}. Build skipped.")
+else()
+    message("opentelemetry library needs to be built.")
+    execute_process(COMMAND make opentelemetry-cpp -j 4 -C ${PROJ_ROOT}/lib)
+    POS_ASSERT_FILE_EXIST("${POS_DEP_OTLP}")
+endif()
+
 #maybe we could embed likely() unlikely() macro into add_definitions() for unit-test's build context
 #commented out UNVME_BUILD since this requires rte_malloc() to function properly, which is meaningful 
 #only in prod release build, but not in unit test build
@@ -400,6 +414,9 @@ link_directories (
 
     # for libspdlog.a
     ${PROJ_ROOT}/lib/spdlog-1.4.2/lib
+
+    # for libopentelemetry_*.a
+    ${PROJ_ROOT}/lib/opentelemetry-cpp/lib
 
     # for libuuid.a, libdl.a
     /usr/lib/x86_64-linux-gnu
@@ -462,8 +479,10 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(PROTOBUF REQUIRED protobuf)
 pkg_check_modules(GRPC REQUIRED grpc++)
 
+list(APPEND DEP_LIBRARIES opentelemetry_common opentelemetry_trace opentelemetry_exporter_otlp_http opentelemetry_exporter_otlp_http_client opentelemetry_otlp_recordable opentelemetry_proto opentelemetry_resources opentelemetry_http_client_curl pthread curl)
 list(APPEND DEP_LIBRARIES ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES})
 list(APPEND DEP_LIBRARIES grpc++_reflection)
+
 
 # For on-demand execution
 add_custom_target(

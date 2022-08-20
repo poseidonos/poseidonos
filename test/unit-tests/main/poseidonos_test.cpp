@@ -1,6 +1,7 @@
-#include "src/main/poseidonos.h"
-
 #include <gtest/gtest.h>
+
+#include "src/include/pos_event_id.h"
+#include "test/unit-tests/main/poseidonos_mock.h"
 
 namespace pos
 {
@@ -50,6 +51,18 @@ TEST(Poseidonos, _RunCLIService_)
 
 TEST(Poseidonos, _SetupThreadModel_)
 {
+}
+
+TEST(Poseidonos, InitTraceExporter_)
+{
+    // Given
+    MockIbofos ibofos;
+
+    // When
+    int ret = ibofos.InitTraceExporter("/home/pos/ibofos/src/../bin/poseidonos");
+
+    // Then
+    ASSERT_EQ(EID(SUCCESS), ret);
 }
 
 } // namespace pos

@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(trace_exporter_ut trace_exporter_test.cpp)

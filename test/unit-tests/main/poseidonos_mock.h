@@ -12,6 +12,7 @@ class MockIbofos : public Poseidonos
 {
 public:
     using Poseidonos::Poseidonos;
+    MOCK_METHOD(int, InitTraceExporter, (char *procFullName));
 };
 
 } // namespace pos
