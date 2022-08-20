@@ -62,7 +62,7 @@ RebuildMethod::~RebuildMethod(void)
         {
             POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
                 "Some buffers in dstBuffer were not returned but deleted.");
-        }
+    }
         mm->DeleteBufferPool(dstBuffer);
         dstBuffer = nullptr;
     }
@@ -71,11 +71,13 @@ RebuildMethod::~RebuildMethod(void)
 bool
 RebuildMethod::Init(string owner)
 {
+    unique_lock<mutex> lock(mtx);
     if (isInitialized == true)
     {
         return true;
     }
 
+    this->owner = owner;
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
             "Trying initailization, owner:{}, srcSize:{}, dstSize:{}", owner, srcSize, dstSize);
     uint32_t numa = AffinityManagerSingleton::Instance()->GetNumaIdFromCurrentThread();

@@ -33,6 +33,7 @@
 #pragma once
 
 #include "rebuild_context.h"
+#include "quick_rebuild_context.h"
 #include "quick_rebuild_pair.h"
 #include "src/include/partition_type.h"
 
