@@ -18,6 +18,7 @@ import fio
 import time
 SRCDEV = MOUNT_VOL_BASIC_1.ANY_DATA
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
+DSTDEV = MOUNT_VOL_BASIC_1.SPARE
 
 
 def execute():
@@ -27,8 +28,9 @@ def execute():
     cli.replace_device(SRCDEV, ARRAYNAME)
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
         time.sleep(1)
-        api.detach_ssd(SRCDEV)
-        if api.wait_situation(ARRAYNAME, "NORMAL") == True:
+        api.detach_ssd(DSTDEV)
+        timeout = 10000 #10s
+        if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) == True:
             return "pass"
     return "fail"
 
