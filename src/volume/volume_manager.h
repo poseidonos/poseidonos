@@ -75,8 +75,8 @@ public:
     int Unmount(std::string name) override;
     int Unmount(int volId) override;
     int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) override;
-    int UpdateVolumeReplicateState(std::string name, VolumeReplicateState state) override;
-    int UpdateVolumeReplicateNodeProperty(std::string name, VolumeReplicateNodeProperty nodeProperty) override;
+    int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) override;
+    int UpdateVolumeReplicateRoleProperty(std::string name, VolumeReplicateRoleProperty nodeProperty) override;
     int Rename(std::string oldname, std::string newname) override;
     int SaveVolumeMeta(void) override;
     int CheckVolumeValidity(std::string name) override;
@@ -87,8 +87,8 @@ public:
     int GetVolumeID(std::string volName) override;
     int GetVolumeCount(void) override;
     int GetVolumeStatus(int volId) override;
-    int GetVolumeReplicateState(int volId) override;
-    int GetVolumeReplicateNodeProperty(int volId) override;
+    int GetVolumeReplicationState(int volId) override;
+    int GetVolumeReplicateRoleProperty(int volId) override;
     int CheckVolumeValidity(int volId) override;
     uint64_t EntireVolumeSize(void) override;
     int GetVolumeSize(int volId, uint64_t& volSize) override;

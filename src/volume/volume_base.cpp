@@ -40,9 +40,8 @@
 
 namespace pos
 {
-
 VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-    VolumeAttribute volumeAttribute)
+        VolumeAttribute volumeAttribute)
 {
     array = arrayName;
     arrayId = arrayIdx;
@@ -56,7 +55,7 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
 }
 
 VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
-    uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw, VolumeAttribute volumeAttribute)
+        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute)
 {
     array = arrayName;
     arrayId = arrayIdx;
@@ -65,10 +64,10 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
     totalSize = volSizeByte;
-    maxiops = maxiops;
-    maxbw = maxbw;
-    miniops = miniops;
-    minbw = minbw;
+    maxiops = _maxiops;
+    maxbw = _maxbw;
+    miniops = _miniops;
+    minbw = _minbw;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} uuid:{} size:{} iops:{} bw:{} attribute:{}, (0:User 1:WAL) created",
         name, uuid, totalSize, maxiops, maxbw, attribute);

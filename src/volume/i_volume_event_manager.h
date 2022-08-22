@@ -52,8 +52,9 @@ public:
     virtual int Unmount(std::string name) = 0;
     virtual int Unmount(int volId) = 0;
     virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
-    virtual int UpdateVolumeReplicateState(std::string name, VolumeReplicateState state) = 0;
-    virtual int UpdateVolumeReplicateNodeProperty(std::string name, VolumeReplicateNodeProperty nodeProperty) = 0;
+    virtual int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) = 0;
+    virtual int UpdateVolumeReplicateRoleProperty(std::string name, 
+    VolumeReplicateRoleProperty nodeProperty) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual int SaveVolumeMeta(void) = 0;
 

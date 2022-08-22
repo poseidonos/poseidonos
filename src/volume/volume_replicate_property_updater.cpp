@@ -41,29 +41,29 @@
 
 namespace pos
 {
-VolumeReplicatePopertyUpdater::VolumeReplicatePopertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
+VolumeReplicatePropertyUpdater::VolumeReplicatePropertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
 : VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
 }
 
-VolumeReplicatePopertyUpdater::~VolumeReplicatePopertyUpdater(void)
+VolumeReplicatePropertyUpdater::~VolumeReplicatePropertyUpdater(void)
 {
 }
 
 
 int
-VolumeReplicatePopertyUpdater::Do(string name, VolumeReplicateState state)
+VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationState state)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    VolumeReplicateState originState = vol->GetReplicateState();
+    VolumeReplicationState originState = vol->GetReplicationState();
 
-    vol->SetReplicateState(state);
+    vol->SetReplicationState(state);
 
     int ret = _SaveVolumes();
     if (ret != EID(SUCCESS))
     {
-        vol->SetReplicateState(originState);
+        vol->SetReplicationState(originState);
         return ret;
     }
 
@@ -71,13 +71,13 @@ VolumeReplicatePopertyUpdater::Do(string name, VolumeReplicateState state)
 }
 
 int
-VolumeReplicatePopertyUpdater::Do(string name, VolumeReplicateNodeProperty nodeProperty)
+VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicateRoleProperty nodeProperty)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    VolumeReplicateNodeProperty originProperty = vol->GeteplicateNodeProperty();
+    VolumeReplicateRoleProperty originProperty = vol->GetReplicateRoleProperty();
 
-    vol->SeteplicateNodeProperty(nodeProperty);
+    vol->SetReplicateRoleProperty(nodeProperty);
 
     _SetVolumeEventBase(vol);
     _SetVolumeEventPerf(vol);
@@ -95,7 +95,7 @@ VolumeReplicatePopertyUpdater::Do(string name, VolumeReplicateNodeProperty nodeP
     int ret = _SaveVolumes();
     if (ret != EID(SUCCESS))
     {
-        vol->SeteplicateNodeProperty(originProperty);
+        vol->SetReplicateRoleProperty(originProperty);
         return ret;
     }
 

@@ -39,14 +39,15 @@
 
 namespace pos
 {
-class VolumeReplicatePopertyUpdater : public VolumeInterface
+class VolumeReplicatePropertyUpdater : public VolumeInterface
 {
 public:
-    explicit VolumeReplicatePopertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr);
-    ~VolumeReplicatePopertyUpdater(void) override;
+    explicit VolumeReplicatePropertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID,
+        VolumeEventPublisher* volumeEventPublisher = nullptr);
+    ~VolumeReplicatePropertyUpdater(void) override;
 
-    int Do(string name, VolumeReplicateState state);
-    int Do(string name, VolumeReplicateNodeProperty nodeProperty);
+    int Do(string name, VolumeReplicationState state);
+    int Do(string name, VolumeReplicateRoleProperty nodeProperty);
 };
 
 }  // namespace pos

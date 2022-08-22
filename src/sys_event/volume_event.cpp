@@ -56,14 +56,14 @@ VolumeEvent::Tag(void)
 
 void
 VolumeEvent::SetVolumeBase(VolumeEventBase* volEventBase, int volId, uint64_t volSizeByte, string volName,
-    string uuid, string subnqn, bool isPrimaryReplicateNode)
+    string uuid, string subnqn, bool _isPrimaryRole)
 {
     volEventBase->volId = volId;
     volEventBase->volName = volName;
     volEventBase->volSizeByte = volSizeByte;
     volEventBase->subnqn = subnqn;
     volEventBase->uuid = uuid;
-    volEventBase->isPrimaryReplicateNode = isPrimaryReplicateNode;
+    volEventBase->isPrimaryRole = _isPrimaryRole;
 }
 
 void

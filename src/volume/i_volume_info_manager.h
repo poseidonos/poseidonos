@@ -50,8 +50,8 @@ public:
     virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
     virtual int GetVolumeStatus(int volId) = 0;
-    virtual int GetVolumeReplicateState(int volId) = 0;
-    virtual int GetVolumeReplicateNodeProperty(int volId) = 0;
+    virtual int GetVolumeReplicationState(int volId) = 0;
+    virtual int GetVolumeReplicateRoleProperty(int volId) = 0;
     virtual uint64_t EntireVolumeSize(void) = 0;
     virtual int GetVolumeSize(int volId, uint64_t& volSize) = 0;
     virtual VolumeList* GetVolumeList(void) = 0;
