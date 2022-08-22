@@ -65,7 +65,7 @@ MetaFsService::~MetaFsService(void)
     {
         auto scheduler = info.second;
         POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
-            "MetaScheduler #{} is suspended", count);
+            "MetaScheduler #{} is terminated", count);
 
         scheduler->ExitThread();
 
@@ -162,16 +162,16 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
     const cpu_set_t schedSet, const cpu_set_t mioSet)
 {
     const std::string threadName = "MetaScheduler";
-    int numScheduler = 0;
+    int numOfSchedulersCreated = 0;
     for (uint32_t coreId = 0; coreId < totalCoreCount; ++coreId)
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
             POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
                 "MetaScheduler #{} is created, coreId: {}",
-                numScheduler, coreId);
+                numOfSchedulersCreated, coreId);
 
-            if (!configManager_->IsSupportingNumaDedicatedScheduling() && numScheduler == 1)
+            if (!_CheckIfPossibleToCreateScheduler(numOfSchedulersCreated))
             {
                 POS_TRACE_WARN((int)POS_EVENT_ID::MFS_UNNECESSARY_SCHEDULER_SET,
                     "This meta scheduler will not be created, when the numa_dedicated setting is turned on");
@@ -188,21 +188,39 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
             {
                 ioScheduler_.insert({numaId, scheduler});
                 scheduler->StartThread();
-                numScheduler++;
+                numOfSchedulersCreated++;
             }
             else
             {
+                POS_TRACE_WARN((int)POS_EVENT_ID::MFS_TRY_TO_CREATE_SCHEDULER_IN_THE_SAME_NUMA,
+                    "Only one scheduler can be created for each NUMA");
                 delete scheduler;
             }
         }
     }
 
-    if (numScheduler > MAX_SCHEDULER_COUNT)
+    if (numOfSchedulersCreated > MAX_SCHEDULER_COUNT)
     {
         POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MAX_SCHEDULER_EXCEEDED,
-            "It has exceeded the maximum number that can be generated, numScheduler:{}",
-            numScheduler);
+            "It has exceeded the maximum number that can be generated, numOfSchedulersCreated:{}, MAX_SCHEDULER_COUNT: {}",
+            numOfSchedulersCreated, MAX_SCHEDULER_COUNT);
         assert(false);
     }
+}
+
+bool
+MetaFsService::_CheckIfPossibleToCreateScheduler(const int numOfSchedulersCreated)
+{
+    if (configManager_->IsSupportingNumaDedicatedScheduling())
+    {
+        return true;
+    }
+
+    if (numOfSchedulersCreated == 1)
+    {
+        return false;
+    }
+
+    return true;
 }
 } // namespace pos
