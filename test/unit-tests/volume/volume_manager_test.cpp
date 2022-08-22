@@ -64,12 +64,13 @@ TEST(VolumeManager, CreateVolume_testFailedToCreateVolIfArrayIsNotMounted)
     uint64_t size = 1024;
     uint64_t maxIops = 100;
     uint64_t maxBw = 100;
+    std::string uuid = "";
 
     // When
     VolumeManager* volumeManager = new VolumeManager(iArrayInfo, iState);
 
     int expected = EID(VOL_MGR_NOT_INITIALIZED);
-    int actual = volumeManager->Create(name, size, maxIops, maxBw, false);
+    int actual = volumeManager->Create(name, size, maxIops, maxBw, false, uuid);
 
     ASSERT_EQ(actual, expected);
 

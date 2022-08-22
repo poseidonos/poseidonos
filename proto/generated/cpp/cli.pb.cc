@@ -2326,8 +2326,8 @@ constexpr CreateVolumeRequest_Param::CreateVolumeRequest_Param(
   , array_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , uuid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , size_(PROTOBUF_ULONGLONG(0))
-  , maxiops_(0u)
-  , maxbw_(0u)
+  , maxiops_(PROTOBUF_ULONGLONG(0))
+  , maxbw_(PROTOBUF_ULONGLONG(0))
   , iswalvol_(false){}
 struct CreateVolumeRequest_ParamDefaultTypeInternal {
   constexpr CreateVolumeRequest_ParamDefaultTypeInternal()
@@ -4524,7 +4524,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "questor\030\003 \001(\t\0222\n\005param\030\004 \001(\0132#.grpc_cli."
   "CreateVolumeRequest.Param\032r\n\005Param\022\014\n\004na"
   "me\030\001 \001(\t\022\r\n\005array\030\002 \001(\t\022\014\n\004size\030\003 \001(\004\022\017\n"
-  "\007maxiops\030\004 \001(\r\022\r\n\005maxbw\030\005 \001(\r\022\020\n\010iswalvo"
+  "\007maxiops\030\004 \001(\004\022\r\n\005maxbw\030\005 \001(\004\022\020\n\010iswalvo"
   "l\030\006 \001(\010\022\014\n\004uuid\030\007 \001(\t\"\270\001\n\024CreateVolumeRe"
   "sponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006"
   "result\030\003 \001(\0132%.grpc_cli.CreateVolumeResp"
@@ -51315,17 +51315,17 @@ const char* CreateVolumeRequest_Param::_InternalParse(const char* ptr, ::PROTOBU
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint32 maxiops = 4;
+      // uint64 maxiops = 4;
       case 4:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
-          maxiops_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          maxiops_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint32 maxbw = 5;
+      // uint64 maxbw = 5;
       case 5:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
-          maxbw_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          maxbw_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -51399,16 +51399,16 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_size(), target);
   }
 
-  // uint32 maxiops = 4;
+  // uint64 maxiops = 4;
   if (this->maxiops() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(4, this->_internal_maxiops(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_maxiops(), target);
   }
 
-  // uint32 maxbw = 5;
+  // uint64 maxbw = 5;
   if (this->maxbw() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(5, this->_internal_maxbw(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(5, this->_internal_maxbw(), target);
   }
 
   // bool iswalvol = 6;
@@ -51471,17 +51471,17 @@ size_t CreateVolumeRequest_Param::ByteSizeLong() const {
         this->_internal_size());
   }
 
-  // uint32 maxiops = 4;
+  // uint64 maxiops = 4;
   if (this->maxiops() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_maxiops());
   }
 
-  // uint32 maxbw = 5;
+  // uint64 maxbw = 5;
   if (this->maxbw() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_maxbw());
   }
 

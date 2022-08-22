@@ -109,8 +109,8 @@ var (
 	create_volume_volumeName          = ""
 	create_volume_arrayName           = ""
 	create_volume_volumeSize          = ""
-	create_volume_maxIOPS      uint32 = 0
-	create_volume_maxBandwidth uint32 = 0
+	create_volume_maxIOPS      uint64 = 0
+	create_volume_maxBandwidth uint64 = 0
 	create_volume_iswalvol            = false
 	create_volume_uuid                = ""
 )
@@ -132,10 +132,10 @@ func init() {
 If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.)`)
 	CreateVolumeCmd.MarkFlagRequired("size")
 
-	CreateVolumeCmd.Flags().Uint32VarP(&create_volume_maxIOPS,
+	CreateVolumeCmd.Flags().Uint64VarP(&create_volume_maxIOPS,
 		"maxiops", "", 0,
 		"The maximum IOPS for the volume in Kilo.")
-	CreateVolumeCmd.Flags().Uint32VarP(&create_volume_maxBandwidth,
+	CreateVolumeCmd.Flags().Uint64VarP(&create_volume_maxBandwidth,
 		"maxbw", "", 0,
 		"The maximum bandwidth for the volume in MB/s.")
 
