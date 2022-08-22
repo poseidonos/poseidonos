@@ -120,6 +120,8 @@ using grpc_cli::SubsystemInfoRequest;
 using grpc_cli::SubsystemInfoResponse;
 using grpc_cli::CreateTransportRequest;
 using grpc_cli::CreateTransportResponse;
+using grpc_cli::CreateVolumeRequest;
+using grpc_cli::CreateVolumeResponse;
 
 class CommandProcessor
 {
@@ -176,6 +178,9 @@ public:
     grpc::Status ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply);
     grpc::Status ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* request, SubsystemInfoResponse* reply);
     grpc::Status ExecuteCreateTransportCommand(const CreateTransportRequest* request, CreateTransportResponse* reply);
+
+    // Volume Commands
+    grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);
 
 private:
     bool _isPosTerminating;

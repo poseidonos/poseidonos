@@ -1516,6 +1516,81 @@ CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* re
     return grpc::Status::OK;
 }
 
+grpc::Status
+CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string volumeName = "";
+    string arrayName = "";
+    uint64_t size = 0;
+    uint32_t maxIops = 0;
+    uint32_t maxBw = 0;
+    bool isWalVol = false;
+    string uuid = "";
+
+    volumeName = (request->param()).name();
+    arrayName = (request->param()).array();
+    size = (request->param()).size();
+    maxIops = (request->param()).maxiops();
+    maxBw = (request->param()).maxbw();
+    isWalVol = (request->param()).iswalvol();
+    uuid = (request->param()).uuid();
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(CREATE_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(CREATE_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        maxIops = 0;
+        maxBw = 0;
+    }
+
+    IVolumeEventManager* volMgr =
+            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    
+    if (volMgr != nullptr)
+    {
+        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, uuid);
+        if (ret == SUCCESS)
+        {
+            int eventId = EID(SUCCESS);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            int eventId = ret;
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+
+    int eventId = EID(CREATE_VOL_INTERNAL_ERROR);
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
 
 std::string
 CommandProcessor::_GetRebuildImpactString(uint8_t impact)

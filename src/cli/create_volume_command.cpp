@@ -111,7 +111,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         ret = EID(CREATE_VOL_INTERNAL_ERROR);
         if (volMgr != nullptr)
         {
-            ret = volMgr->Create(volName, size, maxiops, maxbw, checkWalVol);
+            ret = volMgr->Create(volName, size, maxiops, maxbw, checkWalVol, "");
             if (ret == SUCCESS)
             {
                 return jFormat.MakeResponse("CREATEVOLUME", rid, SUCCESS,
