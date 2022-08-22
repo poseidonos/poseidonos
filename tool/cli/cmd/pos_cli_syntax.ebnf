@@ -14,6 +14,12 @@ Digit
   | "7" | "8" | "9"
   ;
 
+Hex
+  = "0" | "1" | "2" | "3" | "4" | "5" | "6"
+  | "7" | "8" | "9" | "A" | "B" | "C" | "D"
+  | "E" | "F"
+  ; 
+
 Number = Digit , { Digit } ;
 
 Symbol
@@ -24,6 +30,13 @@ Symbol
 Identifier = Letter , { Letter | Digit | "-" | "_" } ;
 
 BooleanValue = "true" | "false" ;
+
+Uuid = Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , "-" ,
+      Hex , Hex , Hex , Hex , "-" ,
+      Hex , Hex , Hex , Hex , "-" ,
+      Hex , Hex , Hex , Hex , "-" ,
+      Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex
+;
 
 ArrayName = Identifier ;
 
@@ -146,22 +159,22 @@ AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   [ "--raid" , RaidType ] ;
 
 VolumeCmd = "volume" ,
-  ( VolumeCreateCmd  | VolumeDeleteCmd
-  | VolumeMountCmd   | VolumeMountWithSubsystemCmd
-  | VolumeUnmountCmd | VolumeListCmd
-  | VolumeRenameCmd
+  ( CreateVolumeCmd  | DeleteVolumeCmd
+  | MountVolumeCmd   | MountVolumeWithSubsystemCmd
+  | UnmountVolumeCmd | ListVolumeCmd
+  | RenameVolumeCmd
   ) ;
 
-VolumeCreateCmd = "create" , ( "--volume-name" | "-v" ) ,
+CreateVolumeCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
-  [ "--maxbw" , Bandwidth ] , [ "--iswalvol" ] ;
+  [ "--maxbw" , Bandwidth ] , [ "--iswalvol" ] , [ "--uuid" Uuid];
 
-VolumeDeleteCmd = "delete" , ( "--volume-name" | "-v" ) ,
+DeleteVolumeCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   [ "--force" ] ;
 
-VolumeMountCmd = "mount" , ( "--volume-name" | "-v" ) ,
+MountVolumeCmd = "mount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   [ "--subnqn" , TargetNVMSubsystemNVMeQualifiedName ] ,
   [ ( "--trtype" | "-t" ) , TransportType ] ,
@@ -169,20 +182,20 @@ VolumeMountCmd = "mount" , ( "--volume-name" | "-v" ) ,
   [ ( "--trsvcid" | "-p" ) , TransportServiceId ] ,
   [ "--force" ] ;
 
-VolumeMountWithSubsystemCmd = "mount" , ( "--volume-name" | "-v" ) ,
+MountVolumeWithSubsystemCmd = "mount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--subnqn" | "-q" ) , SubsystemNQN ,
   ( "--array-name" | "-a" ) , ArrayName , ( "--trtype" | "-t" ) ,
   TransportType , ( "--traddr" | "-i" ) , TargetAddress ,
   ( "--trsvcid" | "-p" ) , TransportServiceId ;
 
-VolumeUnmountCmd = "unmount" , ( "--volume-name" | "-v" ) ,
+UnmountVolumeCmd = "unmount" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   [ "--force" ] ;
 
-VolumeListCmd = "list" , ( "--array-name" | "-a" ) ,
+ListVolumeCmd = "list" , ( "--array-name" | "-a" ) ,
   ArrayName , [ ( "--volume-name" | "-v" ) , VolumeName ] ;
 
-VolumeRenameCmd = "rename" , ( "--volume-name" | "-v" ) ,
+RenameVolumeCmd = "rename" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--new-volume-name" | "-n" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ;
 
