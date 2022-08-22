@@ -598,6 +598,22 @@ class PosCliServiceImpl final : public PosCli::Service {
 
     return status;
   }
+
+  grpc::Status
+  CreateVolume(ServerContext* context, const CreateVolumeRequest* request,
+                  CreateVolumeResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteCreateVolumeCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+    
+    return status;
+  }
 };
 
 void
