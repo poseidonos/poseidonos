@@ -12,7 +12,7 @@ class MockIVolumeManager : public IVolumeManager
 {
 public:
     using IVolumeManager::IVolumeManager;
-    MOCK_METHOD(int, Create, (std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume), (override));
+    MOCK_METHOD(int, Create, (std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid), (override));
     MOCK_METHOD(int, Delete, (std::string name), (override));
     MOCK_METHOD(int, Mount, (std::string name, std::string subnqn), (override));
     MOCK_METHOD(int, Unmount, (std::string name), (override));

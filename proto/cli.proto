@@ -1144,8 +1144,8 @@ message CreateVolumeRequest {
 		string name = 1;
 		string array = 2;
 		uint64 size = 3;
-		uint32 maxiops = 4;
-		uint32 maxbw = 5;
+		uint64 maxiops = 4;
+		uint64 maxbw = 5;
 		bool iswalvol = 6;
 		string uuid = 7;
 	}

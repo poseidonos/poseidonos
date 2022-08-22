@@ -1526,8 +1526,8 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     string volumeName = "";
     string arrayName = "";
     uint64_t size = 0;
-    uint32_t maxIops = 0;
-    uint32_t maxBw = 0;
+    uint64_t maxIops = 0;
+    uint64_t maxBw = 0;
     bool isWalVol = false;
     string uuid = "";
 

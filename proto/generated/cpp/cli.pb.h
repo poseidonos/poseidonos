@@ -30987,22 +30987,22 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   void _internal_set_size(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 maxiops = 4;
+  // uint64 maxiops = 4;
   void clear_maxiops();
-  ::PROTOBUF_NAMESPACE_ID::uint32 maxiops() const;
-  void set_maxiops(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxiops() const;
+  void set_maxiops(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_maxiops() const;
-  void _internal_set_maxiops(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_maxiops() const;
+  void _internal_set_maxiops(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // uint32 maxbw = 5;
+  // uint64 maxbw = 5;
   void clear_maxbw();
-  ::PROTOBUF_NAMESPACE_ID::uint32 maxbw() const;
-  void set_maxbw(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxbw() const;
+  void set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_maxbw() const;
-  void _internal_set_maxbw(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_maxbw() const;
+  void _internal_set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // bool iswalvol = 6;
@@ -31025,8 +31025,8 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uuid_;
   ::PROTOBUF_NAMESPACE_ID::uint64 size_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 maxiops_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 maxbw_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxiops_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxbw_;
   bool iswalvol_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
@@ -65834,42 +65834,42 @@ inline void CreateVolumeRequest_Param::set_size(::PROTOBUF_NAMESPACE_ID::uint64 
   // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.size)
 }
 
-// uint32 maxiops = 4;
+// uint64 maxiops = 4;
 inline void CreateVolumeRequest_Param::clear_maxiops() {
-  maxiops_ = 0u;
+  maxiops_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 CreateVolumeRequest_Param::_internal_maxiops() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateVolumeRequest_Param::_internal_maxiops() const {
   return maxiops_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 CreateVolumeRequest_Param::maxiops() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateVolumeRequest_Param::maxiops() const {
   // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.maxiops)
   return _internal_maxiops();
 }
-inline void CreateVolumeRequest_Param::_internal_set_maxiops(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void CreateVolumeRequest_Param::_internal_set_maxiops(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   maxiops_ = value;
 }
-inline void CreateVolumeRequest_Param::set_maxiops(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void CreateVolumeRequest_Param::set_maxiops(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_maxiops(value);
   // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.maxiops)
 }
 
-// uint32 maxbw = 5;
+// uint64 maxbw = 5;
 inline void CreateVolumeRequest_Param::clear_maxbw() {
-  maxbw_ = 0u;
+  maxbw_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 CreateVolumeRequest_Param::_internal_maxbw() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateVolumeRequest_Param::_internal_maxbw() const {
   return maxbw_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 CreateVolumeRequest_Param::maxbw() const {
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateVolumeRequest_Param::maxbw() const {
   // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.maxbw)
   return _internal_maxbw();
 }
-inline void CreateVolumeRequest_Param::_internal_set_maxbw(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void CreateVolumeRequest_Param::_internal_set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
   maxbw_ = value;
 }
-inline void CreateVolumeRequest_Param::set_maxbw(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void CreateVolumeRequest_Param::set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   _internal_set_maxbw(value);
   // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.maxbw)
 }

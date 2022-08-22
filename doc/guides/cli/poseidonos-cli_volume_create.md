@@ -26,8 +26,8 @@ poseidonos-cli volume create [flags]
   -a, --array-name string    The name of the array where the volume is created from.
   -h, --help                 help for create
       --iswalvol             If specified, the volume to be created will be a wal volume for HA.
-      --maxbw uint32         The maximum bandwidth for the volume in MB/s.
-      --maxiops uint32       The maximum IOPS for the volume in Kilo.
+      --maxbw uint           The maximum bandwidth for the volume in MB/s.
+      --maxiops uint         The maximum IOPS for the volume in Kilo.
       --size string          The size of the volume in B, K, KB, G, GB, ... (binary units (base-2))
                              If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.) (default "0")
       --uuid string          UUID for the volume to be created.
