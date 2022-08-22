@@ -57,13 +57,14 @@ namespace pos
 {
 class PartitionPhysicalSize;
 
-using F2PTranslator = function<PhysicalBlkAddr(const FtBlkAddr&)>;
 using RebuildComplete = function<void(RebuildResult)>;
 using RebuildGroupPairs = vector<pair<vector<IArrayDevice*>, vector<IArrayDevice*>>>;
 
 class RebuildContext
 {
 public:
+    virtual RecoverFunc GetSecondaryRecovery(void) { return nullptr; }
+    virtual void GetSecondaryRebuildGroupPairs(RebuildGroupPairs& secondaryRgPairs) {}
     // from array rebuilder
     string array = "";
     uint32_t arrayIndex = 0;
@@ -78,6 +79,7 @@ public:
     RebuildGroupPairs rgPairs;
     RecoverFunc recovery;
     RebuildComplete rebuildComplete;
+    RebuildTypeEnum rebuildType = RebuildTypeEnum::BASIC;
 
     // from rebuildbehavior during rebuilding
     atomic<uint32_t> taskCnt;

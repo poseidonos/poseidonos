@@ -4,31 +4,29 @@ import os
 import sys
 sys.path.append("../")
 sys.path.append("../../system/lib/")
-sys.path.append("../device_management/")
+sys.path.append("../volume/")
+sys.path.append("../array/")
 
 import json_parser
 import pos
 import cli
 import api
-import SCAN_DEV_BASIC
+import json
+import CREATE_ARRAY_BASIC
 
-DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2"
-ARRAYNAME = "POSArray"
-ANY_DATA = "unvme-ns-0"
-
+DATA = CREATE_ARRAY_BASIC.ANY_DATA
+ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 
 def execute():
-    SCAN_DEV_BASIC.execute()
-    cli.mbr_reset()
-    out = cli.create_array("uram0", DATA, "", ARRAYNAME, "RAID0")
+    CREATE_ARRAY_BASIC.execute()
+    out = cli.replace_device(DATA, ARRAYNAME)
     return out
-
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
         pos.set_addr(sys.argv[1])
     api.clear_result(__file__)
     out = execute()
-    ret = api.set_result_by_code_eq(out, 0, __file__)
+    ret = api.set_result_by_code_ne(out, 0, __file__)
     pos.flush_and_kill_pos()
     exit(ret)

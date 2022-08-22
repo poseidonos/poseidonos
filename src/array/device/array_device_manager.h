@@ -71,6 +71,7 @@ public:
     virtual ArrayDevice* GetFaulty(void);
     virtual ArrayDevice* GetRebuilding(void);
     virtual vector<ArrayDevice*> GetDataDevices(void);
+    virtual vector<ArrayDevice*> GetAvailableSpareDevices(void);
 
     // This is UT helper method and doesn't need to be inherited. This isn't for production use.
     void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
