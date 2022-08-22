@@ -22,12 +22,14 @@ ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 def execute():
     MOUNT_VOL_BASIC_1.execute()
-    fio_proc = fio.start_fio(0, 20)
-    fio.wait_fio(fio_proc)
+    fio_proc = fio.start_fio(0, 90)
+    time.sleep(10)
     cli.replace_device(REPLACE_TARGET_DEV, ARRAYNAME)
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
         if api.wait_situation(ARRAYNAME, "NORMAL") == True:
-             return "pass"
+            fio.stop_fio(fio_proc)
+            return "pass"
+    fio.stop_fio(fio_proc)
     return "fail"
 
 

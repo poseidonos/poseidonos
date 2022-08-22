@@ -72,6 +72,11 @@ public:
     Method* GetMethod(void) { return method; }
     RaidTypeEnum GetRaidType(void) override { return raidType; }
 
+protected:
+    virtual void _SetRebuildGroupPair(const vector<IArrayDevice*>& fault, RebuildGroupPairs& rgPairs, RecoverFunc& recovery);
+    virtual void _SetQuickRebuildGroupPair(const QuickRebuildPair& rebuildPair, RebuildGroupPairs& rgPairs, RecoverFunc& recovery,
+        RebuildGroupPairs& backupPair, RecoverFunc& backupRecovery);
+
 private:
     list<FtEntry> _L2FTranslate(const LogicalEntry& le);
     list<PhysicalEntry> _F2PTranslate(const list<FtEntry>& fel);

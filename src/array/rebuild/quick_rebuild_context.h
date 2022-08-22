@@ -30,29 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "rebuild_partial_completion.h"
-#include "src/bio/ubio.h"
-#include "src/logger/logger.h"
+#pragma once
+
+#include <atomic>
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
+#include <mutex>
+
+#include "rebuild_context.h"
+
+using namespace std;
 
 namespace pos
 {
-RebuildPartialCompletion::
-    RebuildPartialCompletion(UbioSmartPtr input)
-: Callback(false, CallbackType_RebuildReadIntermediateCompleteHandler),
-  ubio(input)
+class QuickRebuildContext : public RebuildContext
 {
-}
+public:
+    RecoverFunc GetSecondaryRecovery(void) override { return secondaryRecovery; }
+    void GetSecondaryRebuildGroupPairs(RebuildGroupPairs& rgPairs) override
+    {
+        rgPairs = secondaryRgPairs;
+    }
 
-RebuildPartialCompletion::
-    ~RebuildPartialCompletion(void)
-{
-}
-
-bool
-RebuildPartialCompletion::_DoSpecificJob(void)
-{
-    ubio = nullptr;
-    return true;
-}
-
+    RecoverFunc secondaryRecovery = nullptr;
+    RebuildGroupPairs secondaryRgPairs;
+};
 } // namespace pos

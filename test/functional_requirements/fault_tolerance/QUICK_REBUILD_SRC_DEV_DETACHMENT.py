@@ -16,7 +16,7 @@ import json
 import MOUNT_VOL_BASIC_1
 import fio
 import time
-REPLACE_TARGET_DEV = MOUNT_VOL_BASIC_1.ANY_DATA
+SRCDEV = MOUNT_VOL_BASIC_1.ANY_DATA
 ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 
 
@@ -24,10 +24,11 @@ def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 20)
     fio.wait_fio(fio_proc)
-    cli.replace_device(REPLACE_TARGET_DEV, ARRAYNAME)
+    cli.replace_device(SRCDEV, ARRAYNAME)
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
+        api.detach_ssd(SRCDEV)
         if api.wait_situation(ARRAYNAME, "NORMAL") == True:
-             return "pass"
+            return "pass"
     return "fail"
 
 
