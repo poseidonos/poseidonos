@@ -71,11 +71,11 @@ VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationState state)
 }
 
 int
-VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicateRoleProperty nodeProperty)
+VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationRoleProperty nodeProperty)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    VolumeReplicateRoleProperty originProperty = vol->GetReplicateRoleProperty();
+    VolumeReplicationRoleProperty originProperty = vol->GetReplicateRoleProperty();
 
     vol->SetReplicateRoleProperty(nodeProperty);
 

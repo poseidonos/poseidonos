@@ -66,7 +66,7 @@ enum VolumeReplicationState
     MaxVolumeReplicationState
 };
 
-enum VolumeReplicateRoleProperty
+enum VolumeReplicationRoleProperty
 {
     Primary,
     Secondary,
@@ -151,15 +151,15 @@ public:
     {
         replicationState = state;
     }
-    VolumeReplicateRoleProperty
+    VolumeReplicationRoleProperty
     GetReplicateRoleProperty(void)
     {
-        return replicateRole;
+        return replicationRole;
     }
     void        
-    SetReplicateRoleProperty(VolumeReplicateRoleProperty nodeProperty)
+    SetReplicateRoleProperty(VolumeReplicationRoleProperty roleProperty)
     {
-        replicateRole = nodeProperty;
+        replicationRole = roleProperty;
     }
 
     bool
@@ -208,7 +208,7 @@ protected:
     VolumeAttribute attribute;
     VolumeStatus status;
     VolumeReplicationState replicationState;
-    VolumeReplicateRoleProperty replicateRole;
+    VolumeReplicationRoleProperty replicationRole;
     std::string name;
     std::string uuid;
     std::string array;

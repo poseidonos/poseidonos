@@ -47,7 +47,7 @@ public:
     ~VolumeReplicatePropertyUpdater(void) override;
 
     int Do(string name, VolumeReplicationState state);
-    int Do(string name, VolumeReplicateRoleProperty nodeProperty);
+    int Do(string name, VolumeReplicationRoleProperty nodeProperty);
 };
 
 }  // namespace pos

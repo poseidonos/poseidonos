@@ -435,7 +435,7 @@ VolumeManager::UpdateVolumeReplicationState(std::string name, VolumeReplicationS
 }
 
 int
-VolumeManager::UpdateVolumeReplicateRoleProperty(std::string name, VolumeReplicateRoleProperty nodeProperty)
+VolumeManager::UpdateVolumeReplicationRoleProperty(std::string name, VolumeReplicationRoleProperty nodeProperty)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -578,7 +578,7 @@ VolumeManager::GetVolumeReplicationState(int volId)
 }
 
 int
-VolumeManager::GetVolumeReplicateRoleProperty(int volId)
+VolumeManager::GetVolumeReplicationRoleProperty(int volId)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -588,7 +588,7 @@ VolumeManager::GetVolumeReplicateRoleProperty(int volId)
         return EID(VOL_NOT_FOUND);
     }
 
-    VolumeReplicateRoleProperty status = vol->GetReplicateRoleProperty();
+    VolumeReplicationRoleProperty status = vol->GetReplicateRoleProperty();
     return static_cast<int>(status);
 }
 
