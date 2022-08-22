@@ -14,7 +14,7 @@ Syntax:
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
 	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol
-          
+
 
 ```
 poseidonos-cli volume create [flags]
@@ -25,11 +25,12 @@ poseidonos-cli volume create [flags]
 ```
   -a, --array-name string    The name of the array where the volume is created from.
   -h, --help                 help for create
-      --iswalvol             Check user data volume or WAL volume for HA. (default : user data volume)
-      --maxbw int            The maximum bandwidth for the volume in MB/s.
-      --maxiops int          The maximum IOPS for the volume in Kilo.
+      --iswalvol             If specified, the volume to be created will be a wal volume for HA.
+      --maxbw uint32         The maximum bandwidth for the volume in MB/s.
+      --maxiops uint32       The maximum IOPS for the volume in Kilo.
       --size string          The size of the volume in B, K, KB, G, GB, ... (binary units (base-2))
                              If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.) (default "0")
+      --uuid string          UUID for the volume to be created.
   -v, --volume-name string   The name of the volume to create.
 ```
 
