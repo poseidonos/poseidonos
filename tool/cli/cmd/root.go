@@ -128,6 +128,7 @@ func regGlobalFlags() {
 	RootCmd.PersistentFlags().StringVar(&globals.FieldSeparator, "fs", "|", "Field separator for the output.")
 	RootCmd.PersistentFlags().StringVar(&globals.NodeName, "node", "",
 		`Name of the node to send this command. When both --ip and this flag are specified, this flag is applied only.`)
+	RootCmd.PersistentFlags().Uint32Var(&globals.ReqTimeout, "timeout", 180, "Timeout for this command.")
 }
 
 func addCmd() {
