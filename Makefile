@@ -129,13 +129,13 @@ LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
 
 INCLUDE += -I$(OTEL_ROOT_DIR)/include
 LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
-				-lopentelemetry_common \
 				-lopentelemetry_trace \
 				-lopentelemetry_exporter_otlp_http \
 				-lopentelemetry_exporter_otlp_http_client \
 				-lopentelemetry_otlp_recordable \
 				-lopentelemetry_proto \
 				-lopentelemetry_resources \
+				-lopentelemetry_common \
 				-lopentelemetry_http_client_curl \
 				-lpthread -lcurl
 
