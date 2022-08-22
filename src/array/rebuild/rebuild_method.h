@@ -41,6 +41,7 @@
 #include <functional>
 #include <vector>
 #include <string>
+#include <mutex>
 
 using namespace std;
 
@@ -66,6 +67,8 @@ protected:
     uint64_t dstSize = 0;
     uint32_t bufCnt = ArrayConfig::REBUILD_STRIPES_UNIT;
     uint64_t unitSize = ArrayConfig::REBUILD_CHUNK_SIZE_BYTE;
+    string owner;
     bool isInitialized = false;
+    mutex mtx;
 };
 } // namespace pos

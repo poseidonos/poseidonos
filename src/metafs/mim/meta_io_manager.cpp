@@ -135,6 +135,11 @@ MetaIoManager::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage
             POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED,
                 "Adding array has been failed, arrayId:{}", arrayId);
         }
+        else
+        {
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_ADD_SUCCEEDED,
+                "Adding array has been succeeded, arrayId:{}", arrayId);
+        }
     }
     return result;
 }
@@ -150,6 +155,11 @@ MetaIoManager::RemoveArrayInfo(int arrayId)
             result = false;
             POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_FAILED,
                 "Removing array has been failed, arrayId:{}", arrayId);
+        }
+        else
+        {
+            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_SUCCEEDED,
+                "Removing array has been succeeded, arrayId:{}", arrayId);
         }
     }
     return result;

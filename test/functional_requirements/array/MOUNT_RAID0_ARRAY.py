@@ -13,11 +13,12 @@ import json
 import CREATE_RAID0_ARRAY
 
 ARRAYNAME = CREATE_RAID0_ARRAY.ARRAYNAME
+ANY_DATA = CREATE_RAID0_ARRAY.ANY_DATA
+
 
 def execute():
     CREATE_RAID0_ARRAY.execute()
     out = cli.mount_array(ARRAYNAME)
-    print (out)
     return out
 
 if __name__ == "__main__":

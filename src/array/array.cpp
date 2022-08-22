@@ -461,34 +461,42 @@ Array::ReplaceDevice(string devName)
                 {
                     ret = EID(REPLACE_DEV_UNSUPPORTED_RAID_TYPE);
                     POS_TRACE_WARN(ret, "meta_raid:{}, data_raid:{}", GetMetaRaidType(), GetDataRaidType());
-                    target->SetState(ArrayDeviceState::NORMAL);
                 }
                 else
                 {
-                    target->SetState(ArrayDeviceState::REBUILD);
-                    RaidState rs = ptnMgr->GetRaidState();
-                    state->RaidStateUpdated(rs);
-                    if (state->SetRebuild() == false)
+                    vector<ArrayDevice*> spares = devMgr_->GetAvailableSpareDevices();
+                    if (spares.size() == 0)
                     {
-                        // a rebuild state must be obtained.
-                        assert(false);
-                    }
-                    ArrayDevice* swapOut = nullptr;
-                    ret = devMgr_->ReplaceWithSpare(target, swapOut);
-                    if (ret != 0)
-                    {
-                        // rollback tasks performed.
-                        state->SetRebuildDone(false);
-                        target->SetState(ArrayDeviceState::NORMAL);
-                        RaidState rs = ptnMgr->GetRaidState();
-                        state->RaidStateUpdated(rs);
+                        ret = EID(REPLACE_DEV_NO_AVAILABLE_SPARE);
+                        POS_TRACE_WARN(ret, "");
                     }
                     else
                     {
-                        _Flush();
-                        POS_TRACE_TRACE(EID(REPLACE_DEV_DEBUG_MSG),
-                            "device {} is replaced to {} successfully, array:{}", devName, target->GetName(), name_);
-                        DoRebuildAsync(vector<IArrayDevice*>{target}, vector<IArrayDevice*>{swapOut}, RebuildTypeEnum::QUICK);
+                        target->SetState(ArrayDeviceState::REBUILD);
+                        RaidState rs = ptnMgr->GetRaidState();
+                        state->RaidStateUpdated(rs);
+                        if (state->SetRebuild() == false)
+                        {
+                            // a rebuild state must be obtained.
+                            assert(false);
+                        }
+                        ArrayDevice* swapOut = nullptr;
+                        ret = devMgr_->ReplaceWithSpare(target, swapOut);
+                        if (ret != 0)
+                        {
+                            // rollback tasks performed.
+                            state->SetRebuildDone(false);
+                            target->SetState(ArrayDeviceState::NORMAL);
+                            RaidState rs = ptnMgr->GetRaidState();
+                            state->RaidStateUpdated(rs);
+                        }
+                        else
+                        {
+                            _Flush();
+                            POS_TRACE_TRACE(EID(REPLACE_DEV_DEBUG_MSG),
+                                "device {} is replaced to {} successfully, array:{}", devName, target->GetName(), name_);
+                            DoRebuildAsync(vector<IArrayDevice*>{target}, vector<IArrayDevice*>{swapOut}, RebuildTypeEnum::QUICK);
+                        }
                     }
                 }
             }
