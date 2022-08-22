@@ -188,7 +188,7 @@ private:
         {"transport", transportData},
         {"metafs", metaFsData},
         {"write_through", wtData},
-        {"otlp", traceData}
+        {"trace", traceData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";
