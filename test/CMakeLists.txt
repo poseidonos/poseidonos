@@ -19,7 +19,7 @@ option(POS_DISABLE_LOGGING "Disable the POS logger while running UTs/ITs" ON)
 set(POS_PARALLEL_EXEC_UT "4" CACHE STRING "Specify the number of parallel threads to run unit tests")
 set(POS_PARALLEL_EXEC_IT "1" CACHE STRING "Specify the number of parallel threads to run integration tests")
 
-set(POS_USE_LOCAL_REPO "y" CACHE STRING "Specify use of local repository, y or n")
+set(POS_USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
 
 set(CMAKE_CXX_FLAGS "--coverage -ftest-coverage -fpermissive -fPIC -pthread")
 set(CMAKE_SHARED_LINKER_FLAGS "--coverage -ftest-coverage")
