@@ -15,7 +15,6 @@ import (
 
 const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
 const dialTimeout = 10
-const reqTimeout = 180
 
 func dialToCliServer() (*grpc.ClientConn, error) {
 	nodeName := globals.NodeName
@@ -43,7 +42,7 @@ func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.SystemInfo(ctx, req)
@@ -65,7 +64,7 @@ func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.StopSystem(ctx, req)
@@ -88,7 +87,7 @@ func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPrope
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.GetSystemProperty(ctx, req)
@@ -111,7 +110,7 @@ func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPrope
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.SetSystemProperty(ctx, req)
@@ -133,7 +132,7 @@ func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.StartTelemetry(ctx, req)
@@ -156,7 +155,7 @@ func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryRespon
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.StopTelemetry(ctx, req)
@@ -179,7 +178,7 @@ func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrr
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ResetEventWrr(ctx, req)
@@ -201,7 +200,7 @@ func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ResetMbr(ctx, req)
@@ -223,7 +222,7 @@ func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.StopRebuilding(ctx, req)
@@ -245,7 +244,7 @@ func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrRespons
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.UpdateEventWrr(ctx, req)
@@ -267,7 +266,7 @@ func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.AddSpare(ctx, req)
@@ -289,7 +288,7 @@ func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.RemoveSpare(ctx, req)
@@ -311,7 +310,7 @@ func SendReplaceArrayDevice(req *pb.ReplaceArrayDeviceRequest) (*pb.ReplaceArray
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ReplaceArrayDevice(ctx, req)
@@ -333,7 +332,7 @@ func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.CreateArray(ctx, req)
@@ -355,7 +354,7 @@ func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.AutocreateArray(ctx, req)
@@ -377,7 +376,7 @@ func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.DeleteArray(ctx, req)
@@ -399,7 +398,7 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.MountArray(ctx, req)
@@ -421,7 +420,7 @@ func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, er
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.UnmountArray(ctx, req)
@@ -443,7 +442,7 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ArrayInfo(ctx, req)
@@ -465,7 +464,7 @@ func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ListArray(ctx, req)
@@ -487,7 +486,7 @@ func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreference
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.SetLogPreference(ctx, req)
@@ -509,7 +508,7 @@ func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.SetLogLevel(ctx, req)
@@ -531,7 +530,7 @@ func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.LoggerInfo(ctx, req)
@@ -553,7 +552,7 @@ func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.GetLogLevel(ctx, req)
@@ -575,7 +574,7 @@ func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterRespon
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ApplyLogFilter(ctx, req)
@@ -597,7 +596,7 @@ func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, er
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.CreateDevice(ctx, req)
@@ -619,7 +618,7 @@ func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ScanDevice(ctx, req)
@@ -641,7 +640,7 @@ func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ListDevice(ctx, req)
@@ -663,7 +662,7 @@ func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.GetSmartLog(ctx, req)
@@ -685,7 +684,7 @@ func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.CreateSubsystem(ctx, req)
@@ -707,7 +706,7 @@ func SendDeleteSubsystem(req *pb.DeleteSubsystemRequest) (*pb.DeleteSubsystemRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.DeleteSubsystem(ctx, req)
@@ -729,7 +728,7 @@ func SendAddListener(req *pb.AddListenerRequest) (*pb.AddListenerResponse, error
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.AddListener(ctx, req)
@@ -751,7 +750,7 @@ func SendListSubsystem(req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse,
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.ListSubsystem(ctx, req)
@@ -773,7 +772,7 @@ func SendSubsystemInfo(req *pb.SubsystemInfoRequest) (*pb.SubsystemInfoResponse,
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.SubsystemInfo(ctx, req)
@@ -795,7 +794,7 @@ func SendCreateTransport(req *pb.CreateTransportRequest) (*pb.CreateTransportRes
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.CreateTransport(ctx, req)
@@ -817,7 +816,7 @@ func SendCreateVolume(req *pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, er
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*reqTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
 	res, err := c.CreateVolume(ctx, req)
