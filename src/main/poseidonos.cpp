@@ -36,6 +36,7 @@
 
 #include <string>
 
+#include "src/include/pos_event_id.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
 #include "src/cli/grpc_cli_server.h"
@@ -69,6 +70,8 @@
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
+#define POS_EVENT_FILE_PATH "src/event/pos_event.yaml"
+
 namespace pos
 {
 int
@@ -89,6 +92,7 @@ Poseidonos::Init(int argc, char** argv)
         _InitIOInterface();
         _InitMemoryChecker();
         _InitResourceChecker();
+        _LoadPosEvent(POS_EVENT_FILE_PATH);
     }
     else
     {
@@ -388,6 +392,29 @@ Poseidonos::_SetPerfImpact(void)
             POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
                 "Failed to set Rebuild Policy");
         }
+    }
+}
+
+void
+Poseidonos::_LoadPosEvent(std::string eventFilePath)
+{
+    YAML::Node list;
+    list = YAML::LoadFile(eventFilePath)["Event"];
+
+    for (size_t i = 0; i < list.size(); ++i)
+    {
+        YAML::Node event = list[i];
+        int id = event["Id"].as<int>();
+        std::string name = event["Name"].as<std::string>();
+        std::string message = event["Message"].as<std::string>();
+        std::string cause = event["Cause"].as<std::string>();
+        std::string solution = event["Solution"].as<std::string>();
+
+        PosEventInfo.insert(
+            std::make_pair(id,
+                new PosEventInfoEntry(name.c_str(), message.c_str(),
+                cause.c_str(), solution.c_str()))
+        );
     }
 }
 

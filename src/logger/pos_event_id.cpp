@@ -32,6 +32,7 @@
 
 #include "src/include/pos_event_id.hpp"
 #include <string>
+#include <yaml-cpp/yaml.h>
 
 #include "logger.h"
 
@@ -447,5 +448,4 @@ PosEventId::Print(POS_EVENT_ID id, EventLevel level,
         }
     }
 }
-
 } // namespace pos

@@ -67,6 +67,7 @@ private:
     int _LoadConfiguration(void);
     void _RunCLIService(void);
     void _SetupThreadModel(void);
+    void _LoadPosEvent(std::string eventFilePath);
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
 
     IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
