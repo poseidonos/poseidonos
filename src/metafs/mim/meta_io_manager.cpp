@@ -132,12 +132,12 @@ MetaIoManager::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage
         if (!scheduler.second->AddArrayInfo(arrayId, map))
         {
             result = false;
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED,
+            POS_TRACE_ERROR(EID(MFS_ARRAY_ADD_FAILED),
                 "Adding array has been failed, arrayId:{}", arrayId);
         }
         else
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_ADD_SUCCEEDED,
+            POS_TRACE_INFO(EID(MFS_ARRAY_ADD_SUCCEEDED),
                 "Adding array has been succeeded, arrayId:{}", arrayId);
         }
     }
@@ -153,12 +153,12 @@ MetaIoManager::RemoveArrayInfo(int arrayId)
         if (!scheduler.second->RemoveArrayInfo(arrayId))
         {
             result = false;
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_FAILED,
+            POS_TRACE_ERROR(EID(MFS_ARRAY_REMOVE_FAILED),
                 "Removing array has been failed, arrayId:{}", arrayId);
         }
         else
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_SUCCEEDED,
+            POS_TRACE_INFO(EID(MFS_ARRAY_REMOVE_SUCCEEDED),
                 "Removing array has been succeeded, arrayId:{}", arrayId);
         }
     }

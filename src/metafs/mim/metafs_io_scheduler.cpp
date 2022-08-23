@@ -102,7 +102,7 @@ MetaFsIoScheduler::ExitThread(void)
     {
         for (auto metaIoWorker : workerListBelongingToNuma.second)
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "Exit MioHandler, " + metaIoWorker->GetLogString());
 
             metaIoWorker->ExitThread();
@@ -306,14 +306,14 @@ MetaFsIoScheduler::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaSto
         {
             if (!metaIoWorker->AddArrayInfo(arrayId, map))
             {
-                POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED,
+                POS_TRACE_ERROR(EID(MFS_ARRAY_ADD_FAILED),
                     "Adding array has been failed, arrayId:{}", arrayId);
                 result = false;
                 break;
             }
             else
             {
-                POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_ADD_SUCCEEDED,
+                POS_TRACE_INFO(EID(MFS_ARRAY_ADD_SUCCEEDED),
                     "Adding array has been succeeded, arrayId:{}", arrayId);
             }
         }
@@ -333,14 +333,14 @@ MetaFsIoScheduler::RemoveArrayInfo(const int arrayId)
         {
             if (!metaIoWorker->RemoveArrayInfo(arrayId))
             {
-                POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_FAILED,
+                POS_TRACE_ERROR(EID(MFS_ARRAY_REMOVE_FAILED),
                     "Removing array has been failed, arrayId:{}", arrayId);
                 result = false;
                 break;
             }
             else
             {
-                POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_SUCCEEDED,
+                POS_TRACE_INFO(EID(MFS_ARRAY_REMOVE_SUCCEEDED),
                     "Removing array has been succeeded, arrayId:{}", arrayId);
             }
         }
@@ -393,7 +393,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
     {
         if (!_DoesMioWorkerForNumaExist(numa_node_of_cpu(coreId_)))
         {
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MIO_HANDLER_NOT_EXIST,
+            POS_TRACE_ERROR(EID(MFS_MIO_HANDLER_NOT_EXIST),
                 "Any handler has not been created for numaId: {}, coreId_: {}",
                 numa_node_of_cpu(coreId_), coreId_);
             assert(false);

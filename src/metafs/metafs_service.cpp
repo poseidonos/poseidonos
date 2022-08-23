@@ -64,7 +64,7 @@ MetaFsService::~MetaFsService(void)
     for (auto info : ioScheduler_)
     {
         auto scheduler = info.second;
-        POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "MetaScheduler #{} is terminated", count);
 
         scheduler->ExitThread();
@@ -167,13 +167,13 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_INFO_MESSAGE,
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
                 "MetaScheduler #{} is created, coreId: {}",
                 numOfSchedulersCreated, coreId);
 
             if (!_CheckIfPossibleToCreateScheduler(numOfSchedulersCreated))
             {
-                POS_TRACE_WARN((int)POS_EVENT_ID::MFS_UNNECESSARY_SCHEDULER_SET,
+                POS_TRACE_WARN(EID(MFS_UNNECESSARY_SCHEDULER_SET),
                     "This meta scheduler will not be created, when the numa_dedicated setting is turned on");
                 continue;
             }
@@ -192,7 +192,7 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
             }
             else
             {
-                POS_TRACE_WARN((int)POS_EVENT_ID::MFS_TRY_TO_CREATE_SCHEDULER_IN_THE_SAME_NUMA,
+                POS_TRACE_WARN(EID(MFS_TRY_TO_CREATE_SCHEDULER_IN_THE_SAME_NUMA),
                     "Only one scheduler can be created for each NUMA");
                 delete scheduler;
             }
@@ -201,7 +201,7 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
 
     if (numOfSchedulersCreated > MAX_SCHEDULER_COUNT)
     {
-        POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_MAX_SCHEDULER_EXCEEDED,
+        POS_TRACE_ERROR(EID(MFS_MAX_SCHEDULER_EXCEEDED),
             "It has exceeded the maximum number that can be generated, numOfSchedulersCreated:{}, MAX_SCHEDULER_COUNT: {}",
             numOfSchedulersCreated, MAX_SCHEDULER_COUNT);
         assert(false);
