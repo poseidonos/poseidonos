@@ -51,7 +51,9 @@ public:
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;
     virtual int Unmount(int volId) = 0;
-    virtual int UpdateQoS(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
+    virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
+    virtual int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) = 0;
+    virtual int UpdateVolumeReplicationRoleProperty(std::string name, VolumeReplicationRoleProperty nodeProperty) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual int SaveVolumeMeta(void) = 0;
 
@@ -61,7 +63,8 @@ public:
     virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
     virtual int GetVolumeStatus(int volId) = 0;
-    virtual int GetVolumeReplicationMode(int volId) = 0;
+    virtual int GetVolumeReplicationState(int volId) = 0;
+    virtual int GetVolumeReplicationRoleProperty(int volId) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;
     virtual uint64_t EntireVolumeSize(void) = 0;
     virtual int GetVolumeSize(int volId, uint64_t& volSize) = 0;

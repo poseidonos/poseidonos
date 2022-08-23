@@ -54,6 +54,7 @@
 #include "src/volume/volume_unmounter.h"
 #include "src/volume/volume_meta_intf.h"
 #include "src/volume/volume_renamer.h"
+#include "src/volume/volume_replicate_property_updater.h"
 #include "src/volume/volume_qos_updater.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -211,7 +212,7 @@ VolumeManager::_PublishTelemetryArrayUsage(void)
 }
 
 int
-VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume, string uuid)
+VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume, std::string uuid)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -226,7 +227,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(CREATE_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(CREATE_VOL_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -236,7 +237,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     uint64_t defaultMinIops = 0;
     uint64_t defaultMinBw = 0;
 
-    ret = volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, checkWalVolume);
+    ret = volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, uuid, checkWalVolume);
 
     if (EID(SUCCESS) == ret)
     {
@@ -264,7 +265,7 @@ VolumeManager::Delete(std::string name)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(DELETE_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(DELETE_VOL_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -311,7 +312,7 @@ VolumeManager::Mount(std::string name, std::string subnqn)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(MOUNT_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(MOUNT_VOL_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -357,7 +358,7 @@ VolumeManager::Unmount(std::string name)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(UNMOUNT_VOL_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(UNMOUNT_VOL_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -374,7 +375,7 @@ VolumeManager::Unmount(std::string name)
 }
 
 int
-VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw)
+VolumeManager::UpdateQoSProperty(std::string name, uint64_t maxIops, uint64_t maxBw, uint64_t minIops, uint64_t minBw)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -389,7 +390,7 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, name);
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -401,6 +402,62 @@ VolumeManager::UpdateQoS(std::string name, uint64_t maxIops, uint64_t maxBw, uin
     {
         _PublishTelemetryVolumeIdInfo(TEL90004_VOL_QOS_UPDATE_VOLUME_ID, name);
     }
+
+    return ret;
+}
+
+int
+VolumeManager::UpdateVolumeReplicationState(std::string name, VolumeReplicationState state)
+{
+    int ret = _CheckPrerequisite();
+    if (ret != EID(SUCCESS))
+    {
+        return ret;
+    }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> exceptionLock(volumeExceptionLock, std::defer_lock);
+
+    ret = std::try_lock(exceptionLock, eventLock);
+
+    if (ret != -1)
+    {
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
+        
+        return EID(VOL_MGR_BUSY);
+    }
+
+    VolumeReplicatePropertyUpdater volumeReplicatePropertyUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
+
+    ret = volumeReplicatePropertyUpdater.Do(name, state);
+
+    return ret;
+}
+
+int
+VolumeManager::UpdateVolumeReplicationRoleProperty(std::string name, VolumeReplicationRoleProperty nodeProperty)
+{
+    int ret = _CheckPrerequisite();
+    if (ret != EID(SUCCESS))
+    {
+        return ret;
+    }
+
+    unique_lock<mutex> eventLock(volumeEventLock, std::defer_lock);
+    unique_lock<mutex> exceptionLock(volumeExceptionLock, std::defer_lock);
+
+    ret = std::try_lock(exceptionLock, eventLock);
+
+    if (ret != -1)
+    {
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, name);
+        
+        return EID(VOL_MGR_BUSY);
+    }
+
+    VolumeReplicatePropertyUpdater volumeReplicatePropertyUpdater(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
+
+    ret = volumeReplicatePropertyUpdater.Do(name, nodeProperty);
 
     return ret;
 }
@@ -421,7 +478,7 @@ VolumeManager::Rename(std::string oldName, std::string newName)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "fail try lock index : {} fail vol name: {}", ret, oldName);
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "failed try lock index : {} fail vol name: {}", ret, oldName);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -453,7 +510,7 @@ VolumeManager::SaveVolumeMeta(void)
 
     if (ret != -1)
     {
-        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "fail try lock index : {}", ret);
+        POS_TRACE_WARN(EID(VOL_UPDATE_LOCK_FAIL), "failed try lock index : {}", ret);
         
         return EID(VOL_MGR_BUSY);
     }
@@ -506,7 +563,7 @@ VolumeManager::GetVolumeStatus(int volId)
 }
 
 int
-VolumeManager::GetVolumeReplicationMode(int volId)
+VolumeManager::GetVolumeReplicationState(int volId)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -516,7 +573,22 @@ VolumeManager::GetVolumeReplicationMode(int volId)
         return EID(VOL_NOT_FOUND);
     }
 
-    VolumeStatus status = vol->GetStatus();
+    VolumeReplicationState status = vol->GetReplicationState();
+    return static_cast<int>(status);
+}
+
+int
+VolumeManager::GetVolumeReplicationRoleProperty(int volId)
+{
+    VolumeBase* vol = volumes.GetVolume(volId);
+
+    if (vol == nullptr)
+    {
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "volId: {}", volId);
+        return EID(VOL_NOT_FOUND);
+    }
+
+    VolumeReplicationRoleProperty status = vol->GetReplicateRoleProperty();
     return static_cast<int>(status);
 }
 

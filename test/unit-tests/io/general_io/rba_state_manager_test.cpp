@@ -189,7 +189,7 @@ TEST_F(RBAStateManagerFixture, BulkReleaseOwnershipTest)
 TEST_F(RBAStateManagerFixture, VolumeEventTest)
 {
     VolumeEventBase volumeEventBase;
-    rbaStateManager->SetVolumeBase(&volumeEventBase, VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), "", "", "");
+    rbaStateManager->SetVolumeBase(&volumeEventBase, VOLUME_ID, ChangeBlockToByte(RBA_AMOUNT), "", "", "", "");
     VolumeEventPerf volumeMountPerf;
     rbaStateManager->SetVolumePerf(&volumeMountPerf, 0, 0);
     VolumeArrayInfo volumeArrayInfo;

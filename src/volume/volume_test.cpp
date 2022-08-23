@@ -147,7 +147,7 @@ TEST_F(VolumeTest, UpdateVolumeQoSNormalTest)
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE, 0, 0, false);
-    int res = volMgr->UpdateQoS(vol_name, 100, 200, 10, 20);
+    int res = volMgr->UpdateQoSProperty(vol_name, 100, 200, 10, 20);
     EXPECT_TRUE(res == EID(SUCCESS));
 
     // cleanup for next test
@@ -159,7 +159,7 @@ TEST_F(VolumeTest, TryToUpdateInvalidVolumeQoSTest)
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     std::string vol_name = "testvol";
     volMgr->Create(vol_name, SIZE, 0, 0, false);
-    int res = volMgr->UpdateQoS("invalidvol", 100, 200, 10, 20);
+    int res = volMgr->UpdateQoSProperty("invalidvol", 100, 200, 10, 20);
     EXPECT_TRUE(res == EID(VOL_NOT_FOUND));
 
     // cleanup for next test

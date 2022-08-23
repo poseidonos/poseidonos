@@ -47,6 +47,7 @@ struct VolumeEventBase
     string volName;
     string uuid;
     string subnqn;
+    bool isPrimaryRole;
 };
 
 struct VolumeEventPerf
@@ -67,7 +68,8 @@ public:
     VolumeEvent(string _tag, string _arrayName, int _arrayId);
     virtual ~VolumeEvent(void);
     string Tag(void);
-    void SetVolumeBase(VolumeEventBase* volEventBase, int volId, uint64_t volSizeByte, string volName, string uuid, string subnqn);
+    void SetVolumeBase(VolumeEventBase* volEventBase, int volId, uint64_t volSizeByte, string volName, string uuid,
+        string subnqn, bool _isPrimaryRole);
     void SetVolumePerf(VolumeEventPerf* volEventPerf, uint64_t maxiops, uint64_t maxbw);
     void SetVolumeArrayInfo(VolumeArrayInfo* volArrayInfo, int arrayId, string arrayName);
 
