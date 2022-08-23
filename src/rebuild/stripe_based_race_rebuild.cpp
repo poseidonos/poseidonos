@@ -81,7 +81,7 @@ StripeBasedRaceRebuild::_Init(void)
     {
         for (RebuildMethod* rm : ctx->rm)
         {
-            bool ret = rm->Init("StripeBasedRaceRebuild_" + ctx->array);
+            bool ret = rm->Init("StripeBasedRaceRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part]);
             if (ret == false)
             {
                 if (initRetryCnt >= INIT_REBUILD_MAX_RETRY)

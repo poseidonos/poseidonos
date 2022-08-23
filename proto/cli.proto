@@ -198,6 +198,12 @@ service PosCli {
       		post: "/v1/createtransport"
     	};
 	}
+
+	rpc CreateVolume (CreateVolumeRequest) returns (CreateVolumeResponse) {
+		option (google.api.http) = {
+      		post: "/v1/createvolume"
+    	};
+	}
 }
 
 message Status {
@@ -207,6 +213,7 @@ message Status {
 	optional string cause = 4;
 	optional string solution = 5;
 }
+
 
 message PosInfo {
 	string version = 1;
@@ -1120,6 +1127,32 @@ message CreateTransportRequest {
 }
 
 message CreateTransportResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message CreateVolumeRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+		string array = 2;
+		uint64 size = 3;
+		uint64 maxiops = 4;
+		uint64 maxbw = 5;
+		bool iswalvol = 6;
+		string uuid = 7;
+	}
+	Param param = 4;
+}
+
+message CreateVolumeResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

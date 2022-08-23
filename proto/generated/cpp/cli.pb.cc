@@ -2320,8 +2320,68 @@ struct CreateTransportResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateTransportResponseDefaultTypeInternal _CreateTransportResponse_default_instance_;
+constexpr CreateVolumeRequest_Param::CreateVolumeRequest_Param(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , array_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , uuid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , size_(PROTOBUF_ULONGLONG(0))
+  , maxiops_(PROTOBUF_ULONGLONG(0))
+  , maxbw_(PROTOBUF_ULONGLONG(0))
+  , iswalvol_(false){}
+struct CreateVolumeRequest_ParamDefaultTypeInternal {
+  constexpr CreateVolumeRequest_ParamDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~CreateVolumeRequest_ParamDefaultTypeInternal() {}
+  union {
+    CreateVolumeRequest_Param _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateVolumeRequest_ParamDefaultTypeInternal _CreateVolumeRequest_Param_default_instance_;
+constexpr CreateVolumeRequest::CreateVolumeRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , requestor_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , param_(nullptr){}
+struct CreateVolumeRequestDefaultTypeInternal {
+  constexpr CreateVolumeRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~CreateVolumeRequestDefaultTypeInternal() {}
+  union {
+    CreateVolumeRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateVolumeRequestDefaultTypeInternal _CreateVolumeRequest_default_instance_;
+constexpr CreateVolumeResponse_Result::CreateVolumeResponse_Result(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : status_(nullptr){}
+struct CreateVolumeResponse_ResultDefaultTypeInternal {
+  constexpr CreateVolumeResponse_ResultDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~CreateVolumeResponse_ResultDefaultTypeInternal() {}
+  union {
+    CreateVolumeResponse_Result _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateVolumeResponse_ResultDefaultTypeInternal _CreateVolumeResponse_Result_default_instance_;
+constexpr CreateVolumeResponse::CreateVolumeResponse(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : command_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , rid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , result_(nullptr)
+  , info_(nullptr){}
+struct CreateVolumeResponseDefaultTypeInternal {
+  constexpr CreateVolumeResponseDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~CreateVolumeResponseDefaultTypeInternal() {}
+  union {
+    CreateVolumeResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT CreateVolumeResponseDefaultTypeInternal _CreateVolumeResponse_default_instance_;
 }  // namespace grpc_cli
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_cli_2eproto[162];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_cli_2eproto[166];
 static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_cli_2eproto = nullptr;
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_cli_2eproto = nullptr;
 
@@ -3664,6 +3724,42 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateTransportResponse, rid_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateTransportResponse, result_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateTransportResponse, info_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, name_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, array_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, size_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, maxiops_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, maxbw_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, iswalvol_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest_Param, uuid_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest, requestor_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeRequest, param_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse_Result, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse_Result, status_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse, command_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse, rid_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse, result_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::CreateVolumeResponse, info_),
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, 10, sizeof(::grpc_cli::Status)},
@@ -3828,6 +3924,10 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1314, -1, sizeof(::grpc_cli::CreateTransportRequest)},
   { 1323, -1, sizeof(::grpc_cli::CreateTransportResponse_Result)},
   { 1329, -1, sizeof(::grpc_cli::CreateTransportResponse)},
+  { 1338, -1, sizeof(::grpc_cli::CreateVolumeRequest_Param)},
+  { 1350, -1, sizeof(::grpc_cli::CreateVolumeRequest)},
+  { 1359, -1, sizeof(::grpc_cli::CreateVolumeResponse_Result)},
+  { 1365, -1, sizeof(::grpc_cli::CreateVolumeResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -3993,6 +4093,10 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateTransportRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateTransportResponse_Result_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateTransportResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateVolumeRequest_Param_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateVolumeRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateVolumeResponse_Result_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::grpc_cli::_CreateVolumeResponse_default_instance_),
 };
 
 const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -4415,106 +4519,119 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "\002 \001(\t\0228\n\006result\030\003 \001(\0132(.grpc_cli.CreateT"
   "ransportResponse.Result\022\037\n\004info\030\004 \001(\0132\021."
   "grpc_cli.PosInfo\032*\n\006Result\022 \n\006status\030\001 \001"
-  "(\0132\020.grpc_cli.Status2\251\034\n\006PosCli\022_\n\nSyste"
-  "mInfo\022\033.grpc_cli.SystemInfoRequest\032\034.grp"
-  "c_cli.SystemInfoResponse\"\026\202\323\344\223\002\020\022\016/v1/sy"
-  "steminfo\022_\n\nStopSystem\022\033.grpc_cli.StopSy"
-  "stemRequest\032\034.grpc_cli.StopSystemRespons"
-  "e\"\026\202\323\344\223\002\020\022\016/v1/stopsystem\022}\n\021GetSystemPr"
-  "operty\022\".grpc_cli.GetSystemPropertyReque"
-  "st\032#.grpc_cli.GetSystemPropertyResponse\""
-  "\037\202\323\344\223\002\031\022\027/v1/get_system_property\022\205\001\n\021Set"
-  "SystemProperty\022\".grpc_cli.SetSystemPrope"
-  "rtyRequest\032#.grpc_cli.SetSystemPropertyR"
-  "esponse\"\'\202\323\344\223\002!\022\037/v1/set_system_property"
-  "/{level}\022p\n\016StartTelemetry\022\037.grpc_cli.St"
-  "artTelemetryRequest\032 .grpc_cli.StartTele"
-  "metryResponse\"\033\202\323\344\223\002\025\022\023/v1/start_telemet"
-  "ry\022l\n\rStopTelemetry\022\036.grpc_cli.StopTelem"
-  "etryRequest\032\037.grpc_cli.StopTelemetryResp"
-  "onse\"\032\202\323\344\223\002\024\022\022/v1/stop_telemetry\022P\n\rRese"
-  "tEventWrr\022\036.grpc_cli.ResetEventWrrReques"
-  "t\032\037.grpc_cli.ResetEventWrrResponse\022A\n\010Re"
-  "setMbr\022\031.grpc_cli.ResetMbrRequest\032\032.grpc"
-  "_cli.ResetMbrResponse\022S\n\016StopRebuilding\022"
-  "\037.grpc_cli.StopRebuildingRequest\032 .grpc_"
-  "cli.StopRebuildingResponse\022S\n\016UpdateEven"
-  "tWrr\022\037.grpc_cli.UpdateEventWrrRequest\032 ."
-  "grpc_cli.UpdateEventWrrResponse\022W\n\010AddSp"
-  "are\022\031.grpc_cli.AddSpareRequest\032\032.grpc_cl"
-  "i.AddSpareResponse\"\024\202\323\344\223\002\016\"\014/v1/addspare"
-  "\022c\n\013RemoveSpare\022\034.grpc_cli.RemoveSpareRe"
-  "quest\032\035.grpc_cli.RemoveSpareResponse\"\027\202\323"
-  "\344\223\002\021\"\017/v1/removespare\022x\n\022ReplaceArrayDev"
-  "ice\022#.grpc_cli.ReplaceArrayDeviceRequest"
-  "\032$.grpc_cli.ReplaceArrayDeviceResponse\"\027"
-  "\202\323\344\223\002\021\"\017/v1/removespare\022c\n\013CreateArray\022\034"
-  ".grpc_cli.CreateArrayRequest\032\035.grpc_cli."
-  "CreateArrayResponse\"\027\202\323\344\223\002\021\"\017/v1/createa"
-  "rray\022s\n\017AutocreateArray\022 .grpc_cli.Autoc"
-  "reateArrayRequest\032!.grpc_cli.AutocreateA"
-  "rrayResponse\"\033\202\323\344\223\002\025\"\023/v1/autocreatearra"
-  "y\022d\n\013DeleteArray\022\034.grpc_cli.DeleteArrayR"
-  "equest\032\035.grpc_cli.DeleteArrayResponse\"\030\202"
-  "\323\344\223\002\022\"\020/v1/deletearray/\022_\n\nMountArray\022\033."
-  "grpc_cli.MountArrayRequest\032\034.grpc_cli.Mo"
-  "untArrayResponse\"\026\202\323\344\223\002\020\"\016/v1/mountarray"
-  "\022g\n\014UnmountArray\022\035.grpc_cli.UnmountArray"
-  "Request\032\036.grpc_cli.UnmountArrayResponse\""
-  "\030\202\323\344\223\002\022\"\020/v1/unmountarray\022[\n\tListArray\022\032"
-  ".grpc_cli.ListArrayRequest\032\033.grpc_cli.Li"
-  "stArrayResponse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022["
-  "\n\tArrayInfo\022\032.grpc_cli.ArrayInfoRequest\032"
-  "\033.grpc_cli.ArrayInfoResponse\"\025\202\323\344\223\002\017\"\r/v"
-  "1/arrayinfo\022w\n\020SetLogPreference\022!.grpc_c"
-  "li.SetLogPreferenceRequest\032\".grpc_cli.Se"
-  "tLogPreferenceResponse\"\034\202\323\344\223\002\026\"\024/v1/setl"
-  "ogpreference\022c\n\013SetLogLevel\022\034.grpc_cli.S"
-  "etLogLevelRequest\032\035.grpc_cli.SetLogLevel"
-  "Response\"\027\202\323\344\223\002\021\"\017/v1/setloglevel\022_\n\nLog"
-  "gerInfo\022\033.grpc_cli.LoggerInfoRequest\032\034.g"
-  "rpc_cli.LoggerInfoResponse\"\026\202\323\344\223\002\020\"\016/v1/"
-  "loggerinfo\022c\n\013GetLogLevel\022\034.grpc_cli.Get"
-  "LogLevelRequest\032\035.grpc_cli.GetLogLevelRe"
-  "sponse\"\027\202\323\344\223\002\021\"\017/v1/getloglevel\022l\n\016Apply"
-  "LogFilter\022\037.grpc_cli.ApplyLogFilterReque"
-  "st\032 .grpc_cli.ApplyLogFilterResponse\"\027\202\323"
-  "\344\223\002\021\"\017/v1/applyfilter\022g\n\014CreateDevice\022\035."
-  "grpc_cli.CreateDeviceRequest\032\036.grpc_cli."
-  "CreateDeviceResponse\"\030\202\323\344\223\002\022\"\020/v1/create"
-  "device\022_\n\nScanDevice\022\033.grpc_cli.ScanDevi"
-  "ceRequest\032\034.grpc_cli.ScanDeviceResponse\""
-  "\026\202\323\344\223\002\020\"\016/v1/scandevice\022_\n\nListDevice\022\033."
-  "grpc_cli.ListDeviceRequest\032\034.grpc_cli.Li"
-  "stDeviceResponse\"\026\202\323\344\223\002\020\"\016/v1/listdevice"
-  "\022`\n\013GetSmartLog\022\034.grpc_cli.GetSmartLogRe"
-  "quest\032\035.grpc_cli.GetSmartLogResponse\"\024\202\323"
-  "\344\223\002\016\"\014/v1/smartlog\022s\n\017CreateSubsystem\022 ."
-  "grpc_cli.CreateSubsystemRequest\032!.grpc_c"
-  "li.CreateSubsystemResponse\"\033\202\323\344\223\002\025\"\023/v1/"
-  "createsubsystem\022s\n\017DeleteSubsystem\022 .grp"
-  "c_cli.DeleteSubsystemRequest\032!.grpc_cli."
-  "DeleteSubsystemResponse\"\033\202\323\344\223\002\025\"\023/v1/del"
-  "etesubsystem\022c\n\013AddListener\022\034.grpc_cli.A"
-  "ddListenerRequest\032\035.grpc_cli.AddListener"
-  "Response\"\027\202\323\344\223\002\021\"\017/v1/addlistener\022k\n\rLis"
-  "tSubsystem\022\036.grpc_cli.ListSubsystemReque"
-  "st\032\037.grpc_cli.ListSubsystemResponse\"\031\202\323\344"
-  "\223\002\023\"\021/v1/listsubsystem\022k\n\rSubsystemInfo\022"
-  "\036.grpc_cli.SubsystemInfoRequest\032\037.grpc_c"
-  "li.SubsystemInfoResponse\"\031\202\323\344\223\002\023\"\021/v1/su"
-  "bsysteminfo\022s\n\017CreateTransport\022 .grpc_cl"
-  "i.CreateTransportRequest\032!.grpc_cli.Crea"
-  "teTransportResponse\"\033\202\323\344\223\002\025\"\023/v1/createt"
-  "ransportB\tZ\007cli/apib\006proto3"
+  "(\0132\020.grpc_cli.Status\"\356\001\n\023CreateVolumeReq"
+  "uest\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\tre"
+  "questor\030\003 \001(\t\0222\n\005param\030\004 \001(\0132#.grpc_cli."
+  "CreateVolumeRequest.Param\032r\n\005Param\022\014\n\004na"
+  "me\030\001 \001(\t\022\r\n\005array\030\002 \001(\t\022\014\n\004size\030\003 \001(\004\022\017\n"
+  "\007maxiops\030\004 \001(\004\022\r\n\005maxbw\030\005 \001(\004\022\020\n\010iswalvo"
+  "l\030\006 \001(\010\022\014\n\004uuid\030\007 \001(\t\"\270\001\n\024CreateVolumeRe"
+  "sponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006"
+  "result\030\003 \001(\0132%.grpc_cli.CreateVolumeResp"
+  "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
+  "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
+  "i.Status2\222\035\n\006PosCli\022_\n\nSystemInfo\022\033.grpc"
+  "_cli.SystemInfoRequest\032\034.grpc_cli.System"
+  "InfoResponse\"\026\202\323\344\223\002\020\022\016/v1/systeminfo\022_\n\n"
+  "StopSystem\022\033.grpc_cli.StopSystemRequest\032"
+  "\034.grpc_cli.StopSystemResponse\"\026\202\323\344\223\002\020\022\016/"
+  "v1/stopsystem\022}\n\021GetSystemProperty\022\".grp"
+  "c_cli.GetSystemPropertyRequest\032#.grpc_cl"
+  "i.GetSystemPropertyResponse\"\037\202\323\344\223\002\031\022\027/v1"
+  "/get_system_property\022\205\001\n\021SetSystemProper"
+  "ty\022\".grpc_cli.SetSystemPropertyRequest\032#"
+  ".grpc_cli.SetSystemPropertyResponse\"\'\202\323\344"
+  "\223\002!\022\037/v1/set_system_property/{level}\022p\n\016"
+  "StartTelemetry\022\037.grpc_cli.StartTelemetry"
+  "Request\032 .grpc_cli.StartTelemetryRespons"
+  "e\"\033\202\323\344\223\002\025\022\023/v1/start_telemetry\022l\n\rStopTe"
+  "lemetry\022\036.grpc_cli.StopTelemetryRequest\032"
+  "\037.grpc_cli.StopTelemetryResponse\"\032\202\323\344\223\002\024"
+  "\022\022/v1/stop_telemetry\022P\n\rResetEventWrr\022\036."
+  "grpc_cli.ResetEventWrrRequest\032\037.grpc_cli"
+  ".ResetEventWrrResponse\022A\n\010ResetMbr\022\031.grp"
+  "c_cli.ResetMbrRequest\032\032.grpc_cli.ResetMb"
+  "rResponse\022S\n\016StopRebuilding\022\037.grpc_cli.S"
+  "topRebuildingRequest\032 .grpc_cli.StopRebu"
+  "ildingResponse\022S\n\016UpdateEventWrr\022\037.grpc_"
+  "cli.UpdateEventWrrRequest\032 .grpc_cli.Upd"
+  "ateEventWrrResponse\022W\n\010AddSpare\022\031.grpc_c"
+  "li.AddSpareRequest\032\032.grpc_cli.AddSpareRe"
+  "sponse\"\024\202\323\344\223\002\016\"\014/v1/addspare\022c\n\013RemoveSp"
+  "are\022\034.grpc_cli.RemoveSpareRequest\032\035.grpc"
+  "_cli.RemoveSpareResponse\"\027\202\323\344\223\002\021\"\017/v1/re"
+  "movespare\022x\n\022ReplaceArrayDevice\022#.grpc_c"
+  "li.ReplaceArrayDeviceRequest\032$.grpc_cli."
+  "ReplaceArrayDeviceResponse\"\027\202\323\344\223\002\021\"\017/v1/"
+  "removespare\022c\n\013CreateArray\022\034.grpc_cli.Cr"
+  "eateArrayRequest\032\035.grpc_cli.CreateArrayR"
+  "esponse\"\027\202\323\344\223\002\021\"\017/v1/createarray\022s\n\017Auto"
+  "createArray\022 .grpc_cli.AutocreateArrayRe"
+  "quest\032!.grpc_cli.AutocreateArrayResponse"
+  "\"\033\202\323\344\223\002\025\"\023/v1/autocreatearray\022d\n\013DeleteA"
+  "rray\022\034.grpc_cli.DeleteArrayRequest\032\035.grp"
+  "c_cli.DeleteArrayResponse\"\030\202\323\344\223\002\022\"\020/v1/d"
+  "eletearray/\022_\n\nMountArray\022\033.grpc_cli.Mou"
+  "ntArrayRequest\032\034.grpc_cli.MountArrayResp"
+  "onse\"\026\202\323\344\223\002\020\"\016/v1/mountarray\022g\n\014UnmountA"
+  "rray\022\035.grpc_cli.UnmountArrayRequest\032\036.gr"
+  "pc_cli.UnmountArrayResponse\"\030\202\323\344\223\002\022\"\020/v1"
+  "/unmountarray\022[\n\tListArray\022\032.grpc_cli.Li"
+  "stArrayRequest\032\033.grpc_cli.ListArrayRespo"
+  "nse\"\025\202\323\344\223\002\017\"\r/v1/listarray\022[\n\tArrayInfo\022"
+  "\032.grpc_cli.ArrayInfoRequest\032\033.grpc_cli.A"
+  "rrayInfoResponse\"\025\202\323\344\223\002\017\"\r/v1/arrayinfo\022"
+  "w\n\020SetLogPreference\022!.grpc_cli.SetLogPre"
+  "ferenceRequest\032\".grpc_cli.SetLogPreferen"
+  "ceResponse\"\034\202\323\344\223\002\026\"\024/v1/setlogpreference"
+  "\022c\n\013SetLogLevel\022\034.grpc_cli.SetLogLevelRe"
+  "quest\032\035.grpc_cli.SetLogLevelResponse\"\027\202\323"
+  "\344\223\002\021\"\017/v1/setloglevel\022_\n\nLoggerInfo\022\033.gr"
+  "pc_cli.LoggerInfoRequest\032\034.grpc_cli.Logg"
+  "erInfoResponse\"\026\202\323\344\223\002\020\"\016/v1/loggerinfo\022c"
+  "\n\013GetLogLevel\022\034.grpc_cli.GetLogLevelRequ"
+  "est\032\035.grpc_cli.GetLogLevelResponse\"\027\202\323\344\223"
+  "\002\021\"\017/v1/getloglevel\022l\n\016ApplyLogFilter\022\037."
+  "grpc_cli.ApplyLogFilterRequest\032 .grpc_cl"
+  "i.ApplyLogFilterResponse\"\027\202\323\344\223\002\021\"\017/v1/ap"
+  "plyfilter\022g\n\014CreateDevice\022\035.grpc_cli.Cre"
+  "ateDeviceRequest\032\036.grpc_cli.CreateDevice"
+  "Response\"\030\202\323\344\223\002\022\"\020/v1/createdevice\022_\n\nSc"
+  "anDevice\022\033.grpc_cli.ScanDeviceRequest\032\034."
+  "grpc_cli.ScanDeviceResponse\"\026\202\323\344\223\002\020\"\016/v1"
+  "/scandevice\022_\n\nListDevice\022\033.grpc_cli.Lis"
+  "tDeviceRequest\032\034.grpc_cli.ListDeviceResp"
+  "onse\"\026\202\323\344\223\002\020\"\016/v1/listdevice\022`\n\013GetSmart"
+  "Log\022\034.grpc_cli.GetSmartLogRequest\032\035.grpc"
+  "_cli.GetSmartLogResponse\"\024\202\323\344\223\002\016\"\014/v1/sm"
+  "artlog\022s\n\017CreateSubsystem\022 .grpc_cli.Cre"
+  "ateSubsystemRequest\032!.grpc_cli.CreateSub"
+  "systemResponse\"\033\202\323\344\223\002\025\"\023/v1/createsubsys"
+  "tem\022s\n\017DeleteSubsystem\022 .grpc_cli.Delete"
+  "SubsystemRequest\032!.grpc_cli.DeleteSubsys"
+  "temResponse\"\033\202\323\344\223\002\025\"\023/v1/deletesubsystem"
+  "\022c\n\013AddListener\022\034.grpc_cli.AddListenerRe"
+  "quest\032\035.grpc_cli.AddListenerResponse\"\027\202\323"
+  "\344\223\002\021\"\017/v1/addlistener\022k\n\rListSubsystem\022\036"
+  ".grpc_cli.ListSubsystemRequest\032\037.grpc_cl"
+  "i.ListSubsystemResponse\"\031\202\323\344\223\002\023\"\021/v1/lis"
+  "tsubsystem\022k\n\rSubsystemInfo\022\036.grpc_cli.S"
+  "ubsystemInfoRequest\032\037.grpc_cli.Subsystem"
+  "InfoResponse\"\031\202\323\344\223\002\023\"\021/v1/subsysteminfo\022"
+  "s\n\017CreateTransport\022 .grpc_cli.CreateTran"
+  "sportRequest\032!.grpc_cli.CreateTransportR"
+  "esponse\"\033\202\323\344\223\002\025\"\023/v1/createtransport\022g\n\014"
+  "CreateVolume\022\035.grpc_cli.CreateVolumeRequ"
+  "est\032\036.grpc_cli.CreateVolumeResponse\"\030\202\323\344"
+  "\223\002\022\"\020/v1/createvolumeB\tZ\007cli/apib\006proto3"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_cli_2eproto_deps[1] = {
   &::descriptor_table_annotations_2eproto,
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 20427, descriptor_table_protodef_cli_2eproto, "cli.proto", 
-  &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 162,
+  false, false, 20960, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 166,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
 };
@@ -51082,6 +51199,1238 @@ void CreateTransportResponse::InternalSwap(CreateTransportResponse* other) {
 }
 
 
+// ===================================================================
+
+class CreateVolumeRequest_Param::_Internal {
+ public:
+};
+
+CreateVolumeRequest_Param::CreateVolumeRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.CreateVolumeRequest.Param)
+}
+CreateVolumeRequest_Param::CreateVolumeRequest_Param(const CreateVolumeRequest_Param& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_name().empty()) {
+    name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
+      GetArena());
+  }
+  array_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_array().empty()) {
+    array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_array(), 
+      GetArena());
+  }
+  uuid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_uuid().empty()) {
+    uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_uuid(), 
+      GetArena());
+  }
+  ::memcpy(&size_, &from.size_,
+    static_cast<size_t>(reinterpret_cast<char*>(&iswalvol_) -
+    reinterpret_cast<char*>(&size_)) + sizeof(iswalvol_));
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.CreateVolumeRequest.Param)
+}
+
+void CreateVolumeRequest_Param::SharedCtor() {
+name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+array_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+uuid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&size_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&iswalvol_) -
+    reinterpret_cast<char*>(&size_)) + sizeof(iswalvol_));
+}
+
+CreateVolumeRequest_Param::~CreateVolumeRequest_Param() {
+  // @@protoc_insertion_point(destructor:grpc_cli.CreateVolumeRequest.Param)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void CreateVolumeRequest_Param::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  array_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  uuid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void CreateVolumeRequest_Param::ArenaDtor(void* object) {
+  CreateVolumeRequest_Param* _this = reinterpret_cast< CreateVolumeRequest_Param* >(object);
+  (void)_this;
+}
+void CreateVolumeRequest_Param::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void CreateVolumeRequest_Param::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void CreateVolumeRequest_Param::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.CreateVolumeRequest.Param)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  name_.ClearToEmpty();
+  array_.ClearToEmpty();
+  uuid_.ClearToEmpty();
+  ::memset(&size_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&iswalvol_) -
+      reinterpret_cast<char*>(&size_)) + sizeof(iswalvol_));
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CreateVolumeRequest_Param::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string name = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.Param.name"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string array = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_array();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.Param.array"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 size = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
+          size_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 maxiops = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          maxiops_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // uint64 maxbw = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 40)) {
+          maxbw_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // bool iswalvol = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          iswalvol_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string uuid = 7;
+      case 7:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 58)) {
+          auto str = _internal_mutable_uuid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.Param.uuid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* CreateVolumeRequest_Param::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.CreateVolumeRequest.Param)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string name = 1;
+  if (this->name().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeRequest.Param.name");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_name(), target);
+  }
+
+  // string array = 2;
+  if (this->array().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_array().data(), static_cast<int>(this->_internal_array().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeRequest.Param.array");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_array(), target);
+  }
+
+  // uint64 size = 3;
+  if (this->size() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_size(), target);
+  }
+
+  // uint64 maxiops = 4;
+  if (this->maxiops() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_maxiops(), target);
+  }
+
+  // uint64 maxbw = 5;
+  if (this->maxbw() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(5, this->_internal_maxbw(), target);
+  }
+
+  // bool iswalvol = 6;
+  if (this->iswalvol() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(6, this->_internal_iswalvol(), target);
+  }
+
+  // string uuid = 7;
+  if (this->uuid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_uuid().data(), static_cast<int>(this->_internal_uuid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeRequest.Param.uuid");
+    target = stream->WriteStringMaybeAliased(
+        7, this->_internal_uuid(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.CreateVolumeRequest.Param)
+  return target;
+}
+
+size_t CreateVolumeRequest_Param::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.CreateVolumeRequest.Param)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string name = 1;
+  if (this->name().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_name());
+  }
+
+  // string array = 2;
+  if (this->array().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_array());
+  }
+
+  // string uuid = 7;
+  if (this->uuid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_uuid());
+  }
+
+  // uint64 size = 3;
+  if (this->size() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_size());
+  }
+
+  // uint64 maxiops = 4;
+  if (this->maxiops() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_maxiops());
+  }
+
+  // uint64 maxbw = 5;
+  if (this->maxbw() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_maxbw());
+  }
+
+  // bool iswalvol = 6;
+  if (this->iswalvol() != 0) {
+    total_size += 1 + 1;
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void CreateVolumeRequest_Param::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.CreateVolumeRequest.Param)
+  GOOGLE_DCHECK_NE(&from, this);
+  const CreateVolumeRequest_Param* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<CreateVolumeRequest_Param>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.CreateVolumeRequest.Param)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.CreateVolumeRequest.Param)
+    MergeFrom(*source);
+  }
+}
+
+void CreateVolumeRequest_Param::MergeFrom(const CreateVolumeRequest_Param& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.CreateVolumeRequest.Param)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.name().size() > 0) {
+    _internal_set_name(from._internal_name());
+  }
+  if (from.array().size() > 0) {
+    _internal_set_array(from._internal_array());
+  }
+  if (from.uuid().size() > 0) {
+    _internal_set_uuid(from._internal_uuid());
+  }
+  if (from.size() != 0) {
+    _internal_set_size(from._internal_size());
+  }
+  if (from.maxiops() != 0) {
+    _internal_set_maxiops(from._internal_maxiops());
+  }
+  if (from.maxbw() != 0) {
+    _internal_set_maxbw(from._internal_maxbw());
+  }
+  if (from.iswalvol() != 0) {
+    _internal_set_iswalvol(from._internal_iswalvol());
+  }
+}
+
+void CreateVolumeRequest_Param::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.CreateVolumeRequest.Param)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void CreateVolumeRequest_Param::CopyFrom(const CreateVolumeRequest_Param& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.CreateVolumeRequest.Param)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool CreateVolumeRequest_Param::IsInitialized() const {
+  return true;
+}
+
+void CreateVolumeRequest_Param::InternalSwap(CreateVolumeRequest_Param* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  array_.Swap(&other->array_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  uuid_.Swap(&other->uuid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CreateVolumeRequest_Param, iswalvol_)
+      + sizeof(CreateVolumeRequest_Param::iswalvol_)
+      - PROTOBUF_FIELD_OFFSET(CreateVolumeRequest_Param, size_)>(
+          reinterpret_cast<char*>(&size_),
+          reinterpret_cast<char*>(&other->size_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata CreateVolumeRequest_Param::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class CreateVolumeRequest::_Internal {
+ public:
+  static const ::grpc_cli::CreateVolumeRequest_Param& param(const CreateVolumeRequest* msg);
+};
+
+const ::grpc_cli::CreateVolumeRequest_Param&
+CreateVolumeRequest::_Internal::param(const CreateVolumeRequest* msg) {
+  return *msg->param_;
+}
+CreateVolumeRequest::CreateVolumeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.CreateVolumeRequest)
+}
+CreateVolumeRequest::CreateVolumeRequest(const CreateVolumeRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_command().empty()) {
+    command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_command(), 
+      GetArena());
+  }
+  rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_rid().empty()) {
+    rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rid(), 
+      GetArena());
+  }
+  requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_requestor().empty()) {
+    requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_requestor(), 
+      GetArena());
+  }
+  if (from._internal_has_param()) {
+    param_ = new ::grpc_cli::CreateVolumeRequest_Param(*from.param_);
+  } else {
+    param_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.CreateVolumeRequest)
+}
+
+void CreateVolumeRequest::SharedCtor() {
+command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+requestor_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+param_ = nullptr;
+}
+
+CreateVolumeRequest::~CreateVolumeRequest() {
+  // @@protoc_insertion_point(destructor:grpc_cli.CreateVolumeRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void CreateVolumeRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  requestor_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete param_;
+}
+
+void CreateVolumeRequest::ArenaDtor(void* object) {
+  CreateVolumeRequest* _this = reinterpret_cast< CreateVolumeRequest* >(object);
+  (void)_this;
+}
+void CreateVolumeRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void CreateVolumeRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void CreateVolumeRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.CreateVolumeRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  command_.ClearToEmpty();
+  rid_.ClearToEmpty();
+  requestor_.ClearToEmpty();
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CreateVolumeRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_command();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.command"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string rid = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_rid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.rid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string requestor = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_requestor();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.requestor"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.CreateVolumeRequest.Param param = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_param(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* CreateVolumeRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.CreateVolumeRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeRequest.command");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_command(), target);
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeRequest.rid");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_rid(), target);
+  }
+
+  // string requestor = 3;
+  if (this->requestor().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_requestor().data(), static_cast<int>(this->_internal_requestor().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeRequest.requestor");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_requestor(), target);
+  }
+
+  // .grpc_cli.CreateVolumeRequest.Param param = 4;
+  if (this->has_param()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        4, _Internal::param(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.CreateVolumeRequest)
+  return target;
+}
+
+size_t CreateVolumeRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.CreateVolumeRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_command());
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rid());
+  }
+
+  // string requestor = 3;
+  if (this->requestor().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_requestor());
+  }
+
+  // .grpc_cli.CreateVolumeRequest.Param param = 4;
+  if (this->has_param()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *param_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void CreateVolumeRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.CreateVolumeRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const CreateVolumeRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<CreateVolumeRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.CreateVolumeRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.CreateVolumeRequest)
+    MergeFrom(*source);
+  }
+}
+
+void CreateVolumeRequest::MergeFrom(const CreateVolumeRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.CreateVolumeRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.command().size() > 0) {
+    _internal_set_command(from._internal_command());
+  }
+  if (from.rid().size() > 0) {
+    _internal_set_rid(from._internal_rid());
+  }
+  if (from.requestor().size() > 0) {
+    _internal_set_requestor(from._internal_requestor());
+  }
+  if (from.has_param()) {
+    _internal_mutable_param()->::grpc_cli::CreateVolumeRequest_Param::MergeFrom(from._internal_param());
+  }
+}
+
+void CreateVolumeRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.CreateVolumeRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void CreateVolumeRequest::CopyFrom(const CreateVolumeRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.CreateVolumeRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool CreateVolumeRequest::IsInitialized() const {
+  return true;
+}
+
+void CreateVolumeRequest::InternalSwap(CreateVolumeRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  requestor_.Swap(&other->requestor_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(param_, other->param_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata CreateVolumeRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class CreateVolumeResponse_Result::_Internal {
+ public:
+  static const ::grpc_cli::Status& status(const CreateVolumeResponse_Result* msg);
+};
+
+const ::grpc_cli::Status&
+CreateVolumeResponse_Result::_Internal::status(const CreateVolumeResponse_Result* msg) {
+  return *msg->status_;
+}
+CreateVolumeResponse_Result::CreateVolumeResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.CreateVolumeResponse.Result)
+}
+CreateVolumeResponse_Result::CreateVolumeResponse_Result(const CreateVolumeResponse_Result& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  if (from._internal_has_status()) {
+    status_ = new ::grpc_cli::Status(*from.status_);
+  } else {
+    status_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.CreateVolumeResponse.Result)
+}
+
+void CreateVolumeResponse_Result::SharedCtor() {
+status_ = nullptr;
+}
+
+CreateVolumeResponse_Result::~CreateVolumeResponse_Result() {
+  // @@protoc_insertion_point(destructor:grpc_cli.CreateVolumeResponse.Result)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void CreateVolumeResponse_Result::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  if (this != internal_default_instance()) delete status_;
+}
+
+void CreateVolumeResponse_Result::ArenaDtor(void* object) {
+  CreateVolumeResponse_Result* _this = reinterpret_cast< CreateVolumeResponse_Result* >(object);
+  (void)_this;
+}
+void CreateVolumeResponse_Result::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void CreateVolumeResponse_Result::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void CreateVolumeResponse_Result::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.CreateVolumeResponse.Result)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CreateVolumeResponse_Result::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .grpc_cli.Status status = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          ptr = ctx->ParseMessage(_internal_mutable_status(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* CreateVolumeResponse_Result::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.CreateVolumeResponse.Result)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .grpc_cli.Status status = 1;
+  if (this->has_status()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        1, _Internal::status(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.CreateVolumeResponse.Result)
+  return target;
+}
+
+size_t CreateVolumeResponse_Result::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.CreateVolumeResponse.Result)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .grpc_cli.Status status = 1;
+  if (this->has_status()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *status_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void CreateVolumeResponse_Result::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.CreateVolumeResponse.Result)
+  GOOGLE_DCHECK_NE(&from, this);
+  const CreateVolumeResponse_Result* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<CreateVolumeResponse_Result>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.CreateVolumeResponse.Result)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.CreateVolumeResponse.Result)
+    MergeFrom(*source);
+  }
+}
+
+void CreateVolumeResponse_Result::MergeFrom(const CreateVolumeResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.CreateVolumeResponse.Result)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.has_status()) {
+    _internal_mutable_status()->::grpc_cli::Status::MergeFrom(from._internal_status());
+  }
+}
+
+void CreateVolumeResponse_Result::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.CreateVolumeResponse.Result)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void CreateVolumeResponse_Result::CopyFrom(const CreateVolumeResponse_Result& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.CreateVolumeResponse.Result)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool CreateVolumeResponse_Result::IsInitialized() const {
+  return true;
+}
+
+void CreateVolumeResponse_Result::InternalSwap(CreateVolumeResponse_Result* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(status_, other->status_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata CreateVolumeResponse_Result::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class CreateVolumeResponse::_Internal {
+ public:
+  static const ::grpc_cli::CreateVolumeResponse_Result& result(const CreateVolumeResponse* msg);
+  static const ::grpc_cli::PosInfo& info(const CreateVolumeResponse* msg);
+};
+
+const ::grpc_cli::CreateVolumeResponse_Result&
+CreateVolumeResponse::_Internal::result(const CreateVolumeResponse* msg) {
+  return *msg->result_;
+}
+const ::grpc_cli::PosInfo&
+CreateVolumeResponse::_Internal::info(const CreateVolumeResponse* msg) {
+  return *msg->info_;
+}
+CreateVolumeResponse::CreateVolumeResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:grpc_cli.CreateVolumeResponse)
+}
+CreateVolumeResponse::CreateVolumeResponse(const CreateVolumeResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_command().empty()) {
+    command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_command(), 
+      GetArena());
+  }
+  rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_rid().empty()) {
+    rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_rid(), 
+      GetArena());
+  }
+  if (from._internal_has_result()) {
+    result_ = new ::grpc_cli::CreateVolumeResponse_Result(*from.result_);
+  } else {
+    result_ = nullptr;
+  }
+  if (from._internal_has_info()) {
+    info_ = new ::grpc_cli::PosInfo(*from.info_);
+  } else {
+    info_ = nullptr;
+  }
+  // @@protoc_insertion_point(copy_constructor:grpc_cli.CreateVolumeResponse)
+}
+
+void CreateVolumeResponse::SharedCtor() {
+command_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+rid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&result_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&info_) -
+    reinterpret_cast<char*>(&result_)) + sizeof(info_));
+}
+
+CreateVolumeResponse::~CreateVolumeResponse() {
+  // @@protoc_insertion_point(destructor:grpc_cli.CreateVolumeResponse)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void CreateVolumeResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  command_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  rid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (this != internal_default_instance()) delete result_;
+  if (this != internal_default_instance()) delete info_;
+}
+
+void CreateVolumeResponse::ArenaDtor(void* object) {
+  CreateVolumeResponse* _this = reinterpret_cast< CreateVolumeResponse* >(object);
+  (void)_this;
+}
+void CreateVolumeResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void CreateVolumeResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void CreateVolumeResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:grpc_cli.CreateVolumeResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  command_.ClearToEmpty();
+  rid_.ClearToEmpty();
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* CreateVolumeResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string command = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_command();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeResponse.command"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string rid = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_rid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeResponse.rid"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.CreateVolumeResponse.Result result = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          ptr = ctx->ParseMessage(_internal_mutable_result(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // .grpc_cli.PosInfo info = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+          ptr = ctx->ParseMessage(_internal_mutable_info(), ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* CreateVolumeResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:grpc_cli.CreateVolumeResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_command().data(), static_cast<int>(this->_internal_command().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeResponse.command");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_command(), target);
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_rid().data(), static_cast<int>(this->_internal_rid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.CreateVolumeResponse.rid");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_rid(), target);
+  }
+
+  // .grpc_cli.CreateVolumeResponse.Result result = 3;
+  if (this->has_result()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        3, _Internal::result(this), target, stream);
+  }
+
+  // .grpc_cli.PosInfo info = 4;
+  if (this->has_info()) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+      InternalWriteMessage(
+        4, _Internal::info(this), target, stream);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:grpc_cli.CreateVolumeResponse)
+  return target;
+}
+
+size_t CreateVolumeResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:grpc_cli.CreateVolumeResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string command = 1;
+  if (this->command().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_command());
+  }
+
+  // string rid = 2;
+  if (this->rid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_rid());
+  }
+
+  // .grpc_cli.CreateVolumeResponse.Result result = 3;
+  if (this->has_result()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *result_);
+  }
+
+  // .grpc_cli.PosInfo info = 4;
+  if (this->has_info()) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
+        *info_);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void CreateVolumeResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:grpc_cli.CreateVolumeResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  const CreateVolumeResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<CreateVolumeResponse>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:grpc_cli.CreateVolumeResponse)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:grpc_cli.CreateVolumeResponse)
+    MergeFrom(*source);
+  }
+}
+
+void CreateVolumeResponse::MergeFrom(const CreateVolumeResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:grpc_cli.CreateVolumeResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.command().size() > 0) {
+    _internal_set_command(from._internal_command());
+  }
+  if (from.rid().size() > 0) {
+    _internal_set_rid(from._internal_rid());
+  }
+  if (from.has_result()) {
+    _internal_mutable_result()->::grpc_cli::CreateVolumeResponse_Result::MergeFrom(from._internal_result());
+  }
+  if (from.has_info()) {
+    _internal_mutable_info()->::grpc_cli::PosInfo::MergeFrom(from._internal_info());
+  }
+}
+
+void CreateVolumeResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:grpc_cli.CreateVolumeResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void CreateVolumeResponse::CopyFrom(const CreateVolumeResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:grpc_cli.CreateVolumeResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool CreateVolumeResponse::IsInitialized() const {
+  return true;
+}
+
+void CreateVolumeResponse::InternalSwap(CreateVolumeResponse* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  command_.Swap(&other->command_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  rid_.Swap(&other->rid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CreateVolumeResponse, info_)
+      + sizeof(CreateVolumeResponse::info_)
+      - PROTOBUF_FIELD_OFFSET(CreateVolumeResponse, result_)>(
+          reinterpret_cast<char*>(&result_),
+          reinterpret_cast<char*>(&other->result_));
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata CreateVolumeResponse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace grpc_cli
 PROTOBUF_NAMESPACE_OPEN
@@ -51570,6 +52919,18 @@ template<> PROTOBUF_NOINLINE ::grpc_cli::CreateTransportResponse_Result* Arena::
 }
 template<> PROTOBUF_NOINLINE ::grpc_cli::CreateTransportResponse* Arena::CreateMaybeMessage< ::grpc_cli::CreateTransportResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::grpc_cli::CreateTransportResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::CreateVolumeRequest_Param* Arena::CreateMaybeMessage< ::grpc_cli::CreateVolumeRequest_Param >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::CreateVolumeRequest_Param >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::CreateVolumeRequest* Arena::CreateMaybeMessage< ::grpc_cli::CreateVolumeRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::CreateVolumeRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::CreateVolumeResponse_Result* Arena::CreateMaybeMessage< ::grpc_cli::CreateVolumeResponse_Result >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::CreateVolumeResponse_Result >(arena);
+}
+template<> PROTOBUF_NOINLINE ::grpc_cli::CreateVolumeResponse* Arena::CreateMaybeMessage< ::grpc_cli::CreateVolumeResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::grpc_cli::CreateVolumeResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

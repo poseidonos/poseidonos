@@ -46,14 +46,24 @@ class NToMRebuild : public RebuildMethod
 {
 public:
     explicit NToMRebuild(vector<IArrayDevice*> src, vector<IArrayDevice*> dst, RecoverFunc recoverFunc);
+    virtual ~NToMRebuild();
+    void SetBackupMethod(NToMRebuild* backup);
+    void SetFailOver(void);
+    bool IsFailOver(void);
     int Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback) override;
 
 private:
-    void _Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src, int readResult);
-    void _WriteDone(StripeId stripeId, StripeRebuildDoneCallback callback, int writeResult);
+    void _Read(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback);
+    void _ReadDone(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src, int readResult);
+    void _Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src);
+    void _RecoverDone(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem, int recoverResult);
+    void _Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem);
+    void _WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCallback callback, int writeResult);
     vector<IArrayDevice*> src;
     vector<IArrayDevice*> dst;
     RecoverFunc recoverFunc = nullptr;
     uint64_t airKey = 0;
+    NToMRebuild* backupMethod = nullptr;
+    bool isFailOver = false;
 };
 } // namespace pos

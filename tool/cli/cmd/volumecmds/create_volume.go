@@ -1,19 +1,18 @@
 package volumecmds
 
 import (
-	"encoding/json"
+	"errors"
 	"fmt"
-	"os"
-	"pnconnector/src/log"
 	"strings"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
+	"cli/cmd/grpcmgr"
 
 	"code.cloudfoundry.org/bytefmt"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var CreateVolumeCmd = &cobra.Command{
@@ -29,40 +28,53 @@ Syntax:
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
 	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol
-          `,
+`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "CREATEVOLUME"
 
-		req := formCreateVolumeReq(command)
-		reqJSON, err := json.Marshal(req)
+		req, buildErr := buildCreateVolumeReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
+		}
+
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendCreateVolume(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
 		}
+
+		return nil
 	},
 }
 
-func formCreateVolumeReq(command string) messages.Request {
+func buildCreateVolumeReq(command string) (*pb.CreateVolumeRequest, error) {
 
 	if globals.IsValidVolName(create_volume_volumeName) == false {
-		fmt.Println("The volume name must contain [a-zA-Z0-9_- ] only.")
-		os.Exit(1)
+		err := errors.New("The volume name must contain [a-zA-Z0-9_- ] only.")
+		return nil, err
 	}
 
 	volumeSize := strings.ToUpper(strings.TrimSpace(create_volume_volumeSize))
 
 	if strings.Contains(volumeSize, ".") == true {
-		fmt.Println("The size of a volume must be an integer number.")
-		os.Exit(1)
+		err := errors.New("The size of a volume must be an integer number.")
+		return nil, err
 	}
 
 	if volumeSize[len(volumeSize)-1:] != "B" {
@@ -71,38 +83,41 @@ func formCreateVolumeReq(command string) messages.Request {
 
 	volumeSizeInByte, err := bytefmt.ToBytes(volumeSize)
 	if err != nil {
-		log.Fatal("error:", err)
+		return nil, err
 	}
 
-	param := messages.CreateVolumeParam{
-		VOLUMENAME:    create_volume_volumeName,
-		VOLUMESIZE:    volumeSizeInByte,
-		MAXIOPS:       create_volume_maxIOPS,
-		MAXBANDWIDTH:  create_volume_maxBandwidth,
-		ARRAYNAME:     create_volume_arrayName,
-		ISWALVOL:      create_volume_iswalvol,
+	param := &pb.CreateVolumeRequest_Param{
+		Name:    create_volume_volumeName,
+		Array:   create_volume_arrayName,
+		Size:    volumeSizeInByte,
+		Maxiops: create_volume_maxIOPS,
+		Maxbw:   create_volume_maxBandwidth,
+		Uuid:    create_volume_uuid,
 	}
 
 	uuid := globals.GenerateUUID()
 
-	req := messages.BuildReqWithParam(command, uuid, param)
+	req := &pb.CreateVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return req
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var create_volume_volumeName = ""
-var create_volume_arrayName = ""
-var create_volume_volumeSize = ""
-var create_volume_maxIOPS = 0
-var create_volume_maxBandwidth = 0
-var create_volume_iswalvol = false
+var (
+	create_volume_volumeName          = ""
+	create_volume_arrayName           = ""
+	create_volume_volumeSize          = ""
+	create_volume_maxIOPS      uint64 = 0
+	create_volume_maxBandwidth uint64 = 0
+	create_volume_iswalvol            = false
+	create_volume_uuid                = ""
+)
 
 func init() {
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_volumeName,
-		"volume-name", "v", "",		
+		"volume-name", "v", "",
 		"The name of the volume to create.")
 	CreateVolumeCmd.MarkFlagRequired("volume-name")
 
@@ -117,14 +132,18 @@ func init() {
 If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.)`)
 	CreateVolumeCmd.MarkFlagRequired("size")
 
-	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxIOPS,
+	CreateVolumeCmd.Flags().Uint64VarP(&create_volume_maxIOPS,
 		"maxiops", "", 0,
 		"The maximum IOPS for the volume in Kilo.")
-	CreateVolumeCmd.Flags().IntVarP(&create_volume_maxBandwidth,
+	CreateVolumeCmd.Flags().Uint64VarP(&create_volume_maxBandwidth,
 		"maxbw", "", 0,
 		"The maximum bandwidth for the volume in MB/s.")
 
 	CreateVolumeCmd.Flags().BoolVarP(&create_volume_iswalvol,
 		"iswalvol", "", false,
-		"Check user data volume or WAL volume for HA. (default : user data volume)")
+		"If specified, the volume to be created will be a wal volume for HA.")
+
+	CreateVolumeCmd.Flags().StringVarP(&create_volume_uuid,
+		"uuid", "", "",
+		"UUID for the volume to be created.")
 }
