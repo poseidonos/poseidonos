@@ -45,7 +45,7 @@ class MockSpdkRpcClient : public SpdkRpcClient
 {
 public:
     using SpdkRpcClient::SpdkRpcClient;
-    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf), (override));
+    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize), (override));
 };
 
 } // namespace pos

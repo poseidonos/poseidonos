@@ -34,6 +34,7 @@
 #include <algorithm>
 #include <string>
 
+#include "src/include/nvmf_const.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
@@ -48,7 +49,8 @@ TransportConfiguration::TransportConfiguration(ConfigManager* configManager, Spd
 : configManager(configManager),
   trtype(DEFAULT_TRANSPORT_TYPE),
   bufCacheSize(DEFAULT_BUF_CACHE_SIZE),
-  numSharedBuf(DEFAULT_NUM_SHARED_BUFFER),
+  numSharedBuf(DEFAULT_NUM_SHARED_BUF),
+  ioUnitSize(DEFAULT_IO_UNIT_SIZE),
   rpcClient(inputRpcClient)
 {
     if (nullptr == rpcClient)
@@ -103,7 +105,7 @@ TransportConfiguration::CreateTransport(void)
     ReadConfig();
 
     std::transform(trtype.begin(), trtype.end(), trtype.begin(), ::tolower);
-    auto result = rpcClient->TransportCreate(trtype, bufCacheSize, numSharedBuf);
+    auto result = rpcClient->TransportCreate(trtype, bufCacheSize, numSharedBuf, ioUnitSize);
     if (result.first != 0)
     {
         POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_TRANSPORT;
