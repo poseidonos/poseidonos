@@ -164,17 +164,19 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsReturned)
     // When
     int targetLogGroup = 0;
 
-    std::unordered_map<SegmentId, int> changedValidBlkCount;
+    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount;
     changedValidBlkCount.emplace(0, 10);
     changedValidBlkCount.emplace(1, 2);
     changedValidBlkCount.emplace(2, 40);
-    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
+    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
+        GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
 
-    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
     changedOccupiedStripeCount.emplace(0, 1);
     changedOccupiedStripeCount.emplace(1, 1);
     changedOccupiedStripeCount.emplace(2, 0);
-    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
+    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
+        GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
     SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
 
@@ -218,13 +220,13 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsApplied)
 
     // When
     int targetLogGroup = 0;
-    std::unordered_map<SegmentId, int> changedValidBlkCount;
+    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount;
     changedValidBlkCount.emplace(0, -5);
     changedValidBlkCount.emplace(1, 2);
     changedValidBlkCount.emplace(2, 40);
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
 
-    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
     changedOccupiedStripeCount.emplace(0, 2);
     changedOccupiedStripeCount.emplace(1, 1);
     changedOccupiedStripeCount.emplace(2, 0);
@@ -319,11 +321,13 @@ TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
     versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
 
     int targetLogGroup = 0;
-    std::unordered_map<SegmentId, int> changedValidBlkCount;
-    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
+    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount;
+    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
+        GetChangedValidBlockCount).WillOnce(Return(changedValidBlkCount));
 
-    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
-    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
+    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
+        GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
     SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
 

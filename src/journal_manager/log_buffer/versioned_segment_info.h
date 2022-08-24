@@ -33,9 +33,8 @@
 #pragma once
 
 #include <atomic>
-#include <unordered_map>
-
 #include "src/include/address_type.h"
+#include "tbb/concurrent_unordered_map.h"
 
 namespace pos
 {
@@ -50,12 +49,12 @@ public:
     virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual void IncreaseOccupiedStripeCount(SegmentId segId);
 
-    virtual std::unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
-    virtual std::unordered_map<SegmentId, uint32_t> GetChangedOccupiedStripeCount(void);
+    virtual tbb::concurrent_unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
+    virtual tbb::concurrent_unordered_map<SegmentId, uint32_t> GetChangedOccupiedStripeCount(void);
 
 private:
-    std::unordered_map<SegmentId, int> changedValidBlockCount;
-    std::unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlockCount;
+    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
 };
 
 } // namespace pos

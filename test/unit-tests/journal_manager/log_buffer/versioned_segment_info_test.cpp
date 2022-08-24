@@ -31,7 +31,7 @@
  */
 
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
-
+#include "tbb/concurrent_unordered_map.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
@@ -52,11 +52,14 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
     versionedSegInfo.IncreaseValidBlockCount(1, 4);
 
     // Then
-    std::unordered_map<uint32_t, int> expectChangedValidCount;
+    tbb::concurrent_unordered_map<SegmentId, int> expectChangedValidCount;
     expectChangedValidCount[2] = 2;
     expectChangedValidCount[1] = 4;
 
-    EXPECT_EQ(expectChangedValidCount, versionedSegInfo.GetChangedValidBlockCount());
+    auto var = versionedSegInfo.GetChangedValidBlockCount();
+
+    EXPECT_EQ(expectChangedValidCount[1], var[1]);
+    EXPECT_EQ(expectChangedValidCount[2], var[2]);
 
     // When
     versionedSegInfo.Reset();
@@ -71,7 +74,7 @@ TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCount
     VersionedSegmentInfo versionedSegInfo;
 
     // When
-    std::unordered_map<uint32_t, uint32_t> expectChangedOccupiedCount;
+    tbb::concurrent_unordered_map<SegmentId, uint32_t> expectChangedOccupiedCount;
     SegmentId targetSegment = 3;
     int increasedOccupiedCount = 5;
     for (int index = 0; index < increasedOccupiedCount; index++)
@@ -89,7 +92,10 @@ TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCount
     }
 
     // Then
-    EXPECT_EQ(expectChangedOccupiedCount, versionedSegInfo.GetChangedOccupiedStripeCount());
+    auto var = versionedSegInfo.GetChangedOccupiedStripeCount();
+
+    EXPECT_EQ(expectChangedOccupiedCount[3], var[3]);
+    EXPECT_EQ(expectChangedOccupiedCount[2], var[2]);
 
     // When
     versionedSegInfo.Reset();

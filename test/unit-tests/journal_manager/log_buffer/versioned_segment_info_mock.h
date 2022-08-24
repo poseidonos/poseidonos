@@ -34,7 +34,7 @@
 
 #include <list>
 #include <string>
-#include <unordered_map>
+#include "tbb/concurrent_unordered_map.h"
 #include <vector>
 
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
@@ -49,8 +49,8 @@ public:
     MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD((std::unordered_map<SegmentId, int>), GetChangedValidBlockCount, (), (override));
-    MOCK_METHOD((std::unordered_map<SegmentId, uint32_t>), GetChangedOccupiedStripeCount, (), (override));
+    MOCK_METHOD((tbb::concurrent_unordered_map<SegmentId, int>), GetChangedValidBlockCount, (), (override));
+    MOCK_METHOD((tbb::concurrent_unordered_map<SegmentId, uint32_t>), GetChangedOccupiedStripeCount, (), (override));
 };
 
 } // namespace pos
