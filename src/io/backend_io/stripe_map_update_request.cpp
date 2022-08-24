@@ -143,7 +143,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
             EID(NFLSH_EVENT_MAP_UPDATE_FAILED);
         std::stringstream message;
         message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
-        POS_TRACE_ERROR(static_cast<int>(eventId),
+        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, static_cast<int>(eventId),
             "Failed to update map: {}", message.str());
 
         return false;

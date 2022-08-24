@@ -115,7 +115,7 @@ BlockMapUpdateRequest::_UpdateMeta(void)
         int result = metaUpdater->UpdateBlockMap(volumeIo, blockMapUpdateCompletionEvent);
         if (unlikely(result != 0))
         {
-            POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "Write wraup failed at map update ");
+            // retry map update
             return false;
         }
     }
