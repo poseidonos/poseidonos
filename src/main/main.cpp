@@ -45,6 +45,9 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/main/poseidonos.h"
+#include "src/master_context/config_manager.h"
+#include "src/master_context/version_provider.h"
+#include "src/trace/trace_exporter.h"
 
 #if defined UNVME_BUILD
 #include "src/spdk_wrapper/spdk.h"
@@ -113,7 +116,7 @@ main(int argc, char* argv[])
     {
         return ret;
     }
-    _pos.InitTraceExporter(argv[0]);
+    _pos.InitTraceExporter(argv[0], pos::ConfigManagerSingleton::Instance(), pos::VersionProviderSingleton::Instance(), pos::TraceExporterSingleton::Instance());
     _pos.Run();
     _pos.Terminate();
 
