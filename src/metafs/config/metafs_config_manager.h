@@ -61,7 +61,8 @@ enum class MetaFsConfigType
 class MetaFsConfigManager
 {
 public:
-    MetaFsConfigManager(void) = delete;
+    // for test
+    MetaFsConfigManager(void) = default;
     MetaFsConfigManager(ConfigManager* configManager);
     virtual ~MetaFsConfigManager(void);
     virtual bool Init(void);

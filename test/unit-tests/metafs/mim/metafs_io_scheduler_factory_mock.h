@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
 #include <string>
-#include <thread>
 
-#include "src/metafs/include/meta_storage_specific.h"
+#include "src/metafs/mim/metafs_io_scheduler_factory.h"
 
 namespace pos
 {
-class MetaFsIoHandlerBase
+class MockMetaFsIoSchedulerFactory : public MetaFsIoSchedulerFactory
 {
 public:
-    // only for test
-    MetaFsIoHandlerBase(void) = default;
-    explicit MetaFsIoHandlerBase(const int threadId, const int coreId,
-        const std::string& threadName);
-    virtual ~MetaFsIoHandlerBase(void);
-
-    virtual void StartThread(void) = 0;
-    virtual void ExitThread(void);
-
-    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) = 0;
-    virtual bool RemoveArrayInfo(const int arrayId) = 0;
-
-    virtual void PrepareThread(void) const;
-
-    virtual std::string GetLogString(void) const;
-
-protected:
-    int threadId_;
-    int coreId_;
-    std::thread* th_;
-    bool threadExit_;
-    std::string threadName_;
-
-private:
-    void _UpdateThreadName(void) const;
-    void _UpdateCpuPinning(void) const;
+    using MetaFsIoSchedulerFactory::MetaFsIoSchedulerFactory;
+    MOCK_METHOD(MetaFsIoScheduler*, CreateMetaFsIoScheduler,
+        (const int threadId, const int coreId, const int totalCoreCount,
+            const std::string& threadName, const cpu_set_t mioCoreSet,
+            MetaFsConfigManager* config, TelemetryPublisher* tp));
 };
+
 } // namespace pos
