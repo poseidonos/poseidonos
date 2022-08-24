@@ -183,7 +183,7 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
                 new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()),
                 configManager_->GetWrrWeight(), configManager_->IsSupportingNumaDedicatedScheduling());
 
-            int numaId = numa_node_of_cpu(coreId);
+            int numaId = _GetNumaIdConsideringNumaDedicatedScheduling(numa_node_of_cpu(coreId));
             if (ioScheduler_.find(numaId) == ioScheduler_.end())
             {
                 ioScheduler_.insert({numaId, scheduler});
@@ -206,6 +206,12 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
             numOfSchedulersCreated, MAX_SCHEDULER_COUNT);
         assert(false);
     }
+}
+
+uint32_t
+MetaFsService::_GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId) const
+{
+    return configManager_->IsSupportingNumaDedicatedScheduling() ? numaId : 0;
 }
 
 bool

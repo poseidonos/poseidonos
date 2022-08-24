@@ -80,6 +80,7 @@ public:
 private:
     void _CreateScheduler(const uint32_t totalCount, const cpu_set_t schedSet,
         const cpu_set_t workSet);
+    uint32_t _GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId) const;
     bool _CheckIfPossibleToCreateScheduler(const int numOfSchedulersCreated);
 
     const int MAX_SCHEDULER_COUNT = 2;
