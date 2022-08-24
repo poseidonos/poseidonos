@@ -43,8 +43,9 @@ class TraceExporter
 {
 public:
     TraceExporter();
-    void Init(std::string serviceName, std::string serviceVersion, std::string endPoint);
-    bool IsEnabled(void);
+    virtual ~TraceExporter();
+    virtual void Init(std::string serviceName, std::string serviceVersion, std::string endPoint);
+    virtual bool IsEnabled(void);
 
 private:
     void _Enable(void);

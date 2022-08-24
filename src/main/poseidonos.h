@@ -36,6 +36,9 @@
 #include <thread>
 #include <string>
 #include "src/debug/debug_info.h"
+#include "src/master_context/config_manager.h"
+#include "src/master_context/version_provider.h"
+#include "src/trace/trace_exporter.h"
 
 namespace pos
 {
@@ -50,7 +53,10 @@ public:
     int Init(int argc, char** argv);
     void Run(void);
     void Terminate(void);
-    int InitTraceExporter(char* procFullName);
+    int InitTraceExporter(char* procFullName,
+                            ConfigManager *cm,
+                            VersionProvider *vp,
+                            TraceExporter *te);
 
 private:
     void _InitDebugInfo(void);

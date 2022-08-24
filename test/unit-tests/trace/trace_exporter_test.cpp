@@ -1,15 +1,14 @@
 #include <gtest/gtest.h>
 
 #include "src/include/pos_event_id.h"
-#include "test/unit-tests/trace/trace_exporter_mock.h"
-
+#include "src/trace/trace_exporter.h"
 using namespace pos;
 
 TEST(TraceExporter, Init_)
 {
     // Given
-    MockTraceExporter te;
-
+    TraceExporter te;
+    
     // When
     te.Init("TestService", "TestVersion", "test.endpoint");
 
