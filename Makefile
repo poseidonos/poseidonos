@@ -168,6 +168,7 @@ CONFIG_DIR = /etc/pos/
 CONFIG_FILE = $(CONFIG_DIR)/pos.conf
 TELEMETRY_CONFIG_FILE = $(CONFIG_DIR)/telemetry_default.yaml
 PUBLICATION_LIST_FILE = $(CONFIG_DIR)/publication_list_default.yaml
+POS_EVENT_FILE = $(CONFIG_DIR)/pos_event.yaml
 ifeq ($(CONFIG_LIBRARY_BUILD), y)
 LDEXTRAFLAGS += -shared -Wl,-z,nodelete
 endif
@@ -205,6 +206,9 @@ install:
 
 	@echo "copy default telemetry publication list"
 	@cp ./config/publication_list_default.yaml ${PUBLICATION_LIST_FILE};
+
+	@echo "copy event table"
+	@cp ./src/event/pos_event.yaml ${POS_EVENT_FILE};
 
 #	@echo "make cert dir" \
 	@if test -d ${CLI_CERT_DIR}; then \

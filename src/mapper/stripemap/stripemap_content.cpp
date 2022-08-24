@@ -91,7 +91,7 @@ StripeMapContent::SetEntry(StripeId vsid, StripeAddr entry)
         if (unlikely(mpage == nullptr))
         {
             map->ReleaseMpageLock(pageNr);
-            return -EID(STRIPEMAP_SET_FAILURE);
+            return ERRID(STRIPEMAP_SET_FAILURE);
         }
         mapHeader->SetMapAllocated(pageNr);
     }

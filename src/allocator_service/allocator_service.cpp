@@ -31,8 +31,6 @@
  */
 
 #include "src/allocator_service/allocator_service.h"
-
-#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos

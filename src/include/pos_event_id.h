@@ -32,7 +32,10 @@
 
 #pragma once
 
-#define EID(X) ((int)POS_EVENT_ID::X)
+#define UNKNOWN_EVENT_ID -1000
+#define STR(S) #S
+#define EID(X) (GetEventIdFromMap(STR(X)))
+#define ERRID(X) (-GetEventIdFromMap(STR(X)))
 
 #include <unordered_map>
 #include <string>
@@ -1316,12 +1319,11 @@ enum class POS_EVENT_ID
     RESERVED = 0x7FFFFFFF,
 };
 
-// Event information
 class PosEventInfoEntry
 {
     public:
-        PosEventInfoEntry(const char* eventName, const char* message,
-            const char* cause, const char* solution)
+        PosEventInfoEntry(std::string eventName, std::string message,
+            std::string cause, std::string solution)
         {
             this->eventName = eventName;
             this->message = message;
@@ -1332,7 +1334,6 @@ class PosEventInfoEntry
         std::string GetMessage() { return message; }
         std::string GetCause() { return cause; }
         std::string GetSolution() { return solution; }
-
     private:
         std::string eventName = "";
         std::string message = "";
@@ -1341,4 +1342,8 @@ class PosEventInfoEntry
         std::string solution = "";
 };
 
-static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo;
+std::unordered_map<int, PosEventInfoEntry*> _LoadPosEvent();
+std::unordered_map<std::string, int> _LoadEventNameToIdMap();
+static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo = _LoadPosEvent();
+static std::unordered_map<std::string, int> PosEventNameToIdMap = _LoadEventNameToIdMap();
+int GetEventIdFromMap(std::string eventName);

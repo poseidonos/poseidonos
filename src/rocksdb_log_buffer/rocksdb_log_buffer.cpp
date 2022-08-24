@@ -39,7 +39,6 @@
 
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/include/pos_event_id.h"
 #include "src/journal_manager/log/log_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_context.h"

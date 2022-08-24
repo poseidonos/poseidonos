@@ -1618,7 +1618,7 @@ CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status *status)
     std::string message = "";
     std::string cause = "";
     std::string solution = "";
-
+    
     std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
         PosEventInfo.find(eventId);
        

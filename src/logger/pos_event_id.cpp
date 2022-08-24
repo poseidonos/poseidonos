@@ -449,3 +449,83 @@ PosEventId::Print(POS_EVENT_ID id, EventLevel level,
     }
 }
 } // namespace pos
+
+
+int
+GetEventIdFromMap(std::string eventName)
+{
+    if (eventName == "SUCCESS")
+    {
+        return 0;
+    }
+
+    std::unordered_map<std::string, int>::const_iterator it =
+        PosEventNameToIdMap.find(eventName);
+    
+    if (it == PosEventNameToIdMap.end())
+    {
+        return UNKNOWN_EVENT_ID;
+    }
+
+    return it->second;
+}
+
+std::unordered_map<int, PosEventInfoEntry*>
+_LoadPosEvent()
+{
+    std::unordered_map<int, PosEventInfoEntry*> result;
+    YAML::Node events;
+    try
+    {
+        events = YAML::LoadFile(POS_EVENT_FILE_PATH)["Root"]["Event"];
+        for (size_t i = 0; i < events.size(); ++i)
+        {
+            YAML::Node event = events[i];
+            int id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
+            std::string name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
+            std::string message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
+            std::string cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
+            std::string solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
+            
+            result.insert(
+                std::make_pair(id,
+                    new PosEventInfoEntry(name, message, cause, solution)
+                )
+            );
+
+            //PosEventNameToIdMap.insert(std::make_pair(name, id));
+        }
+    }
+    catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return result;
+}
+
+std::unordered_map<std::string, int>
+_LoadEventNameToIdMap()
+{
+    std::unordered_map<std::string, int> result;
+    YAML::Node events;
+    try
+    {
+        events = YAML::LoadFile(POS_EVENT_FILE_PATH)["Root"]["Event"];
+        for (size_t i = 0; i < events.size(); ++i)
+        {
+            YAML::Node event = events[i];
+            int id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
+            std::string name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
+            std::string message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
+            std::string cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
+            std::string solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
+            
+            result.insert(std::make_pair(name, id));
+        }
+    }
+    catch(const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
+
+    return result;
+}

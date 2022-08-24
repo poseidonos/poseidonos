@@ -210,7 +210,7 @@ TEST(Mapper, TestEnableInternalAccess)
     EXPECT_CALL(*revMan, Init).Times(1);
     mapper->Init();
     int ret = mapper->EnableInternalAccess(0);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
 
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(0));
     mapper->VolumeCreated(0, 100);
@@ -227,12 +227,12 @@ TEST(Mapper, TestEnableInternalAccess)
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(0));
     EXPECT_CALL(*vsaMan, LoadVSAMapFile).WillOnce(Return(-1));
     ret = mapper->EnableInternalAccess(2);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
 
     mapper->VolumeLoaded(3, 500);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
     ret = mapper->EnableInternalAccess(3);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
 
     mapper->SetVolumeState(5, VolState::VOLUME_LOADING, 10);
     ON_CALL(*vsaMan, IsVolumeLoaded).WillByDefault(Return(false));
@@ -319,13 +319,13 @@ TEST(Mapper, TestGetVSASetVSA)
     v.startVsa = vsa;
     v.numBlks = 1;
     int ret = mapper->SetVSAsInternal(1, 0, v);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
 
     mapper->VolumeLoaded(1, 500);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(0));
     EXPECT_CALL(*vsaMan, LoadVSAMapFile).WillOnce(Return(0));
     ret = mapper->SetVSAsInternal(1, 0, v);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
 
     EXPECT_CALL(*vsaMan, IsVolumeLoaded).WillOnce(Return(true));
     EXPECT_CALL(*vsaMan, SetVSAsWoCond).WillOnce(Return(0));
@@ -354,7 +354,7 @@ TEST(Mapper, TestGetVSASetVSA)
     EXPECT_EQ(vsa, retblk);
 
     ret = mapper->SetVSAsWithSyncOpen(5, 0, v);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
     mapper->VolumeLoaded(5, 500);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(0));
     EXPECT_CALL(*vsaMan, LoadVSAMapFile).WillOnce(Return(0));
@@ -463,7 +463,7 @@ TEST(Mapper, TestVolumeCreated_Failed)
     ret = mapper->VolumeLoaded(1, 100);
     EXPECT_EQ(EID(VOL_EVENT_FAIL), ret);
     ret = mapper->PrepareVolumeDelete(1);
-    EXPECT_EQ(-EID(MAPPER_FAILED), ret);
+    EXPECT_EQ(ERRID(MAPPER_FAILED), ret);
 
     delete mapper;
     delete arr;
@@ -482,12 +482,12 @@ TEST(Mapper, TestPrepareVolumeDelete_Failed)
 
     mapper->SetVolumeState(1, VolState::VOLUME_DELETING, 10);
     int ret = mapper->PrepareVolumeDelete(1);
-    EXPECT_EQ(-EID(MAPPER_FAILED), ret);
+    EXPECT_EQ(ERRID(MAPPER_FAILED), ret);
 
     mapper->SetVolumeState(1, VolState::EXIST_UNLOADED, 10);
     EXPECT_CALL(*vsaMan, CreateVsaMapContent).WillOnce(Return(-1));
     ret = mapper->PrepareVolumeDelete(1);
-    EXPECT_EQ(-EID(VSAMAP_LOAD_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_LOAD_FAILURE), ret);
 
     delete mapper;
     delete arr;
@@ -531,7 +531,7 @@ TEST(Mapper, TestInvalidateAllBlocks_Failed)
 
     EXPECT_CALL(*vsaMan, InvalidateAllBlocks(volId, _)).WillOnce(Return(-1));
     int ret = mapper->InvalidateAllBlocksTo(volId, &segmentCtx);
-    EXPECT_EQ(ret, -EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE));
+    EXPECT_EQ(ret, ERRID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE));
 
     delete mapper;
     delete arr;
@@ -550,7 +550,7 @@ TEST(Mapper, TestDeleteVolMap_Failed)
 
     EXPECT_CALL(*vsaMan, DeleteVSAMap).WillOnce(Return(-1));
     int ret = mapper->DeleteVolumeMap(1);
-    EXPECT_EQ(-EID(MFS_FILE_DELETE_FAILED), ret);
+    EXPECT_EQ(ERRID(MFS_FILE_DELETE_FAILED), ret);
 
     delete mapper;
     delete arr;

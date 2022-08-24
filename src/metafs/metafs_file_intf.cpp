@@ -78,7 +78,7 @@ MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer
     POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
-        return -EID(MFS_FILE_READ_FAILED);
+        return ERRID(MFS_FILE_READ_FAILED);
 
     return EID(SUCCESS);
 }
@@ -90,7 +90,7 @@ MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffe
     POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer, storageType);
 
     if (POS_EVENT_ID::SUCCESS != rc)
-        return -EID(MFS_FILE_WRITE_FAILED);
+        return ERRID(MFS_FILE_WRITE_FAILED);
 
     return EID(SUCCESS);
 }
@@ -193,7 +193,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
     if (asyncCtx->CheckIOError())
     {
-        error = -EID(MFS_IO_FAILED_DUE_TO_ERROR);
+        error = ERRID(MFS_IO_FAILED_DUE_TO_ERROR);
     }
 
     delete asyncCtx;

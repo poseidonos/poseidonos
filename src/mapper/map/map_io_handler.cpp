@@ -206,7 +206,7 @@ int
 MapIoHandler::FlushHeader(EventSmartPtr callback)
 {
     if (_PrepareFlush(callback) == false)
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     {
     }
     return _IssueFlushHeader();
@@ -217,7 +217,7 @@ MapIoHandler::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr callback)
 {
     if (_PrepareFlush(callback) == false)
     {
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
 
     int result = EID(SUCCESS);
@@ -246,7 +246,7 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
     if (_PrepareFlush(callback) == false)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER FLUSH] Failed to Issue Flush, Another Flush is still progressing, mapId:{}, status:{}", mapId, status);
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
     int result = EID(SUCCESS);
     BitMap* copiedBitmap = mapHeader->GetBitmapFromTempBuffer(mapHeaderTempBuffer);

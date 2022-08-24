@@ -33,7 +33,7 @@
 #include <unordered_map>
 
 #include "json_helper.h"
-#include "src/include/pos_event_id.h"
+#include "logger.h"
 
 static void
 JsonFormatSubStringAddTab(JsonFormatType type, string& subString)
@@ -194,6 +194,7 @@ JsonFormat::MakeResponse(
     std::string eventName = "";
     std::string cause = "";
     std::string solution = "";
+
     std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
                 PosEventInfo.find(eventId);
     if (it != PosEventInfo.end())
@@ -228,6 +229,7 @@ JsonFormat::MakeResponse(
     std::string eventName = "";
     std::string cause = "";
     std::string solution = "";
+
     std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
                 PosEventInfo.find(eventId);
     if (it != PosEventInfo.end())

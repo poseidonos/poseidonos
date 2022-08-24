@@ -744,7 +744,7 @@ SegmentCtx::StopRebuilding(void)
     if (remaining == 0)
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY), "");
-        return -EID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
+        return ERRID(ALLOCATOR_REBUILD_TARGET_SET_EMPTY);
     }
 
     while (rebuildList->GetNumSegments() != 0)

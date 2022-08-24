@@ -195,7 +195,7 @@ MetaFs::Init(void)
         return -(int)rc;
 
     if (!io->AddArray(arrayId_, _MakeLpnMap()))
-        return -EID(MFS_ARRAY_ADD_FAILED);
+        return ERRID(MFS_ARRAY_ADD_FAILED);
     if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
     {
         rc = _CreateRocksDBMetaFs();

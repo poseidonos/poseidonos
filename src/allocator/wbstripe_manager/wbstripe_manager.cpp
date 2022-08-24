@@ -363,7 +363,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     if (0 == blockCount)
     {
         POS_TRACE_ERROR(EID(WRONG_BLOCK_COUNT), "Wrong blockCount:{}", blockCount);
-        return -EID(WRONG_BLOCK_COUNT);
+        return ERRID(WRONG_BLOCK_COUNT);
     }
 
     stripe = GetStripe(wbLsid);

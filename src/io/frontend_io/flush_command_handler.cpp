@@ -123,7 +123,7 @@ FlushCmdHandler::Execute(void)
             ret = iMapFlush->FlushDirtyMpages(volumeId, eventVSAMap);
             if (ret != 0)
             {
-                if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                if (ret == ERRID(MAP_FLUSH_IN_PROGRESS))
                 {
                     return false;
                 }
@@ -165,7 +165,7 @@ FlushCmdHandler::Execute(void)
 
                     if (ret != 0)
                     {
-                        if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                        if (ret == ERRID(MAP_FLUSH_IN_PROGRESS))
                         {
                             return false;
                         }
