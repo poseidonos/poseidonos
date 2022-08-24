@@ -49,7 +49,7 @@ DummyHaServer::DummyHaServer(void)
     // new grpc server setting
     string address(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
 
-    new std::thread(&DummyHaServer::RunServer, this, address);
+    // new std::thread(&DummyHaServer::RunServer, this, address);
 }
 
 DummyHaServer::~DummyHaServer(void)

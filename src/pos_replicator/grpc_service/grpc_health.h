@@ -32,15 +32,25 @@
 
 #pragma once
 
-#include <string>
+#include <grpc++/grpc++.h>
 
-// To do - remove pos conf
+#include "proto/generated/cpp/pos_rpc.grpc.pb.h"
+#include "proto/generated/cpp/pos_rpc.pb.h"
 
 namespace pos
 {
-#define GRPC_TEL_SERVER_SOCKET_ADDRESS "0.0.0.0:50051"
-#define GRPC_HA_PUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50003"
-#define GRPC_HA_SUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50053"
-#define GRPC_HA_VOL_SERVER_SOCKET_ADDRESS "0.0.0.0:50054"
-#define GRPC_CLI_SERVER_SOCKET_ADDRESS "0.0.0.0:50055"
-}
+class GrpcHealth final : public pos_rpc::Health::Service
+{
+public:
+    GrpcHealth(void)
+    {
+    }
+    ~GrpcHealth(void)
+    {
+    }
+    virtual ::grpc::Status Check(
+        ::grpc::ServerContext* context,
+        const pos_rpc::HealthCheckRequest* request,
+        pos_rpc::HealthCheckResponse* response) override;
+};
+} // namespace pos

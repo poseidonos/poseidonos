@@ -34,7 +34,6 @@
 
 #include "src/array_models/interface/i_array_info.h"
 #include "src/array_models/interface/i_mount_sequence.h"
-#include "src/pos_replicator/grpc_volume_management.h"
 #include "src/sys_event/volume_event.h"
 #include "src/volume/i_volume_event_manager.h"
 

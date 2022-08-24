@@ -32,8 +32,13 @@
 
 #include "grpc_publisher.h"
 
+#include <memory>
+#include <string>
+
+#include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/master_context/config_manager.h"
 
 namespace std
 {
@@ -42,11 +47,18 @@ class thread;
 
 namespace pos
 {
-
-GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_)
+GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigManager* configManager)
 {
-    // new grpc server setting
-    string serverAddr(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
+    std::string serverAddr;
+    int ret = configManager->GetValue("replicator", "ha_publisher_address",
+        static_cast<void*>(&serverAddr), CONFIG_TYPE_STRING);
+    if (ret != 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::HA_DEBUG_MSG),
+            "Failed to read grpc publisher address from config file, Address will be set defined in the \"grpc_server_socket_address.h\"");
+        serverAddr = GRPC_HA_PUB_SERVER_SOCKET_ADDRESS;
+    }
+
     std::shared_ptr<grpc::Channel> channel = channel_;
     if (channel == nullptr)
     {
@@ -54,7 +66,7 @@ GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_)
     }
 
     stub = ::replicator_rpc::ReplicatorIo::NewStub(channel);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcPublisher has been initialized with the channel newly established");
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator publisher has been initialized with the channel newly established on {}", serverAddr);
 }
 
 GrpcPublisher::~GrpcPublisher(void)
@@ -73,8 +85,8 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
     request->set_volume_name(volumeName);
     request->set_rba(rba);
     request->set_num_blocks(size);
-    
-/*
+
+    /*
     [To do buffer process]    
     for (int iter = 0; iter < size; iter++)
     {
@@ -158,5 +170,4 @@ GrpcPublisher::CompleteRead(uint64_t lsn, uint64_t size, string volumeName, stri
 
     return EID(SUCCESS);
 }
-
-}
+} // namespace pos
