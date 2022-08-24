@@ -40,4 +40,8 @@ static const uint64_t NS_CREATE_TIMEOUT = 15000000000ULL;
 static const uint64_t NS_DELETE_TIMEOUT = 15000000000ULL;
 static const uint64_t NS_ATTACH_TIMEOUT = 15000000000ULL;
 static const uint64_t NS_DETACH_TIMEOUT = 15000000000ULL;
+    
+static const uint32_t DEFAULT_BUF_CACHE_SIZE = 64;
+static const uint32_t DEFAULT_NUM_SHARED_BUF = 4096;
+static const uint32_t DEFAULT_IO_UNIT_SIZE = 131072;
 } // namespace pos

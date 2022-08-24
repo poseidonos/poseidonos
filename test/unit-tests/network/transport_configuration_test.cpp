@@ -147,7 +147,7 @@ TEST_F(TransportConfigurationFixture, CreateTransport_Success)
         *targetToChange = true;
         return SUCCESS;
     }).WillRepeatedly(Return(SUCCESS));
-    EXPECT_CALL(*mockSpdkRpcClient, TransportCreate(_, _, _)).WillOnce(Return(value));
+    EXPECT_CALL(*mockSpdkRpcClient, TransportCreate(_, _, _, _)).WillOnce(Return(value));
 
     TransportConfiguration transportConfiguration(&mockConfigManager, mockSpdkRpcClient);
     transportConfiguration.CreateTransport();
@@ -171,7 +171,7 @@ TEST_F(TransportConfigurationFixture, CreateTransport_CreateTransport_Fail)
         *targetToChange = true;
         return SUCCESS;
     }).WillRepeatedly(Return(SUCCESS));
-    EXPECT_CALL(*mockSpdkRpcClient, TransportCreate(_, _, _)).WillOnce(Return(value));
+    EXPECT_CALL(*mockSpdkRpcClient, TransportCreate(_, _, _, _)).WillOnce(Return(value));
 
     TransportConfiguration transportConfiguration(&mockConfigManager, mockSpdkRpcClient);
     transportConfiguration.CreateTransport();

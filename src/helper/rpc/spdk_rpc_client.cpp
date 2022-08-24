@@ -197,7 +197,7 @@ SpdkRpcClient::SubsystemList(void)
 }
 
 pair<int, std::string>
-SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf)
+SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize)
 {
     const int SUCCESS = 0;
     const string method = "nvmf_create_transport";
@@ -205,27 +205,25 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
     Json::Value param;
     param["trtype"] = trtype;
 
-    std::for_each(trtype.begin(), trtype.end(), [](char & c)
+    std::for_each(trtype.begin(), trtype.end(), [](char& c)
     {
         c = tolower(c);
     });
 
-    if ("tcp" == trtype)
+    uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
+    uint32_t minSharedBuffers = coreCount * bufCacheSize;
+    if (minSharedBuffers > numSharedBuf)
     {
-        uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
-        uint32_t minSharedBuffers = coreCount * bufCacheSize;
-        if (minSharedBuffers > numSharedBuf)
-        {
-            POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED;
-            POS_TRACE_INFO(static_cast<int>(eventId),
-            "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system",
-            numSharedBuf, minSharedBuffers);
-            numSharedBuf = minSharedBuffers;
-        }
-        param["buf_cache_size"] = bufCacheSize;
-        param["num_shared_buffers"] = numSharedBuf;
+        POS_EVENT_ID eventId =
+            POS_EVENT_ID::IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED;
+        POS_TRACE_INFO(static_cast<int>(eventId),
+        "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system",
+        numSharedBuf, minSharedBuffers);
+        numSharedBuf = minSharedBuffers;
     }
+    param["buf_cache_size"] = bufCacheSize;
+    param["num_shared_buffers"] = numSharedBuf;
+    param["io_unit_size"] = ioUnitSize;
 
     try
     {

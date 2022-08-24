@@ -49,13 +49,12 @@ public:
     virtual void CreateTransport(void);
 
 private:
-    uint32_t const DEFAULT_NUM_SHARED_BUFFER = 4096;
-    uint32_t const DEFAULT_BUF_CACHE_SIZE = 64;
     std::string const DEFAULT_TRANSPORT_TYPE = "tcp";
     ConfigManager* configManager;
     std::string trtype = "";
     uint32_t bufCacheSize = 0;
     uint32_t numSharedBuf = 0;
+    uint32_t ioUnitSize = 0;
     SpdkRpcClient* rpcClient;
     bool _IsEnabled(void);
 };
