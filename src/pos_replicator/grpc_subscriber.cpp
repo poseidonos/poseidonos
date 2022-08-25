@@ -32,131 +32,62 @@
 
 #include "grpc_subscriber.h"
 
-#include <thread>
-#include <string>
 #include <grpc/grpc.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
-#include "src/pos_replicator/posreplicator_manager.h"
+
+#include <string>
+#include <thread>
+
+#include "grpc_service/grpc_health.h"
+#include "src/include/grpc_server_socket_address.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/master_context/config_manager.h"
 
 namespace pos
 {
-GrpcSubscriber::GrpcSubscriber(void)
+GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
 {
-    // new grpc server setting
-    string address(GRPC_HA_SUB_SERVER_SOCKET_ADDRESS);
+    std::string address;
+    int ret = configManager->GetValue("replicator", "ha_subscriber_address",
+        static_cast<void*>(&address), CONFIG_TYPE_STRING);
+    if (ret != 0)
+    {
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::HA_DEBUG_MSG),
+            "Failed to read grpc subscriber address from config file, Address will be set defined in the \"grpc_server_socket_address.h\"");
+        address = GRPC_HA_SUB_SERVER_SOCKET_ADDRESS;
+    }
 
+    healthChecker = new GrpcHealth();
     new std::thread(&GrpcSubscriber::RunServer, this, address);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "posIo GrpcServer has been initialized. Server address : {}", address);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator subscriber has been initialized successfully");
 }
 
 GrpcSubscriber::~GrpcSubscriber(void)
 {
-    posIoGrpcServer->Shutdown();
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "posIo GrpcServer has been destructed");
-}
+    haGrpcServer->Shutdown();
+    if (healthChecker != nullptr)
+    {
+        delete healthChecker;
+        healthChecker = nullptr;
+    }
 
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "POS GrpcServer has been destructed");
+}
 
 void
 GrpcSubscriber::RunServer(std::string address)
 {
     ::grpc::ServerBuilder builder;
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-    builder.RegisterService(this);
+    builder.RegisterService(healthChecker);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Registering HealthCheck service and Starting GrpcServer at {}", address);
 
-    posIoGrpcServer = builder.BuildAndStart();
-    posIoGrpcServer->Wait();
+    haGrpcServer = builder.BuildAndStart();
+    std::cout << "Grpc Replicator server listening on " << address << std::endl;
+    haGrpcServer->Wait();
 }
-
-::grpc::Status
-GrpcSubscriber::_CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
-    std::pair<std::string, int> volumeSet)
-{
-    int ret = PosReplicatorManagerSingleton::Instance()->ConvertNametoIdx(arraySet, volumeSet);
-
-    if (ret != EID(SUCCESS))
-    {
-        POS_TRACE_WARN(ret, "recieve invalid argument");
-        const string errorMsg = "recieve invalid argument";
-        return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, errorMsg);
-    }
-    return ::grpc::Status::OK;
-}
-
-::grpc::Status
-GrpcSubscriber::WriteHostBlocks(::grpc::ServerContext* context,
-    const pos_rpc::WriteHostBlocksRequest* request, pos_rpc::WriteHostBlocksResponse* response)
-{
-    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
-    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
-
-    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-
-    if (ret.ok() == false)
-    {
-        return ret;
-    }
-
-    PosReplicatorManagerSingleton::Instance()->UserVolumeWriteSubmission(request->lsn(), arraySet.second, volumeSet.second);
-    return ::grpc::Status::OK;
-}
-
-::grpc::Status
-GrpcSubscriber::WriteBlocks(::grpc::ServerContext* context,
-    const pos_rpc::WriteBlocksRequest* request, pos_rpc::WriteBlocksResponse* response)
-{
-    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
-    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
-
-    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-
-    if (ret.ok() == false)
-    {
-        return ret;
-    }
-    
-    char buffer[4096];
-    PosReplicatorManagerSingleton::Instance()->HAIOSubmission(IO_TYPE::WRITE, arraySet.second, volumeSet.second,
-        request->rba(), request->num_blocks(), buffer);
-    return ::grpc::Status::OK;
-}
-
-::grpc::Status
-GrpcSubscriber::ReadBlocks(::grpc::ServerContext* context,
-    const pos_rpc::ReadBlocksRequest* request, pos_rpc::ReadBlocksResponse* response)
-{
-    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
-    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
-
-    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-
-    if (ret.ok() == false)
-    {
-        return ret;
-    }
-
-    PosReplicatorManagerSingleton::Instance()->HAIOSubmission(IO_TYPE::READ, arraySet.second, volumeSet.second,
-        request->rba(), request->num_blocks(), nullptr);
-    return ::grpc::Status::OK;
-}
-
-::grpc::Status
-GrpcSubscriber::CompleteHostWrite(::grpc::ServerContext* context, const pos_rpc::CompleteHostWriteRequest* request,
-    pos_rpc::CompleteHostWriteResponse* response)
-{
-    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
-    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
-
-    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-
-    if (ret.ok() == false)
-    {
-        return ret;
-    }
-    PosReplicatorManagerSingleton::Instance()->CompleteUserIO(request->lsn(), arraySet.second, volumeSet.second);
-    return ::grpc::Status::OK;    
-}
-
-}
+} // namespace pos

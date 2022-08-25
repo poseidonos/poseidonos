@@ -467,7 +467,7 @@ list(APPEND DEP_LIBRARIES grpc++_reflection)
 # For on-demand execution
 add_custom_target(
     gen_ut
-	COMMAND cd ${POS_TEST_ROOT}/generator && ./generator.py ${POS_SRC_ROOT} && ../../script/cpp_formatter.py -d ../unit-tests
+	COMMAND cd ${POS_TEST_ROOT}/generator && python2 generator.py ${POS_SRC_ROOT} && ../../script/cpp_formatter.py -d ../unit-tests
 )
 
 # Run code-coverage on-demand (COMMAND mode)

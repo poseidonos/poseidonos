@@ -32,33 +32,30 @@
 
 #pragma once
 
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
-#include "src/include/grpc_server_socket_address.h"
+#include <grpc++/grpc++.h>
+
 #include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
 #include "proto/generated/cpp/replicator_rpc.pb.h"
 
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
-#include <nlohmann/json.hpp>
-#include <grpc++/grpc++.h>
+#include "src/helper/json/json_helper.h"
 
 namespace pos
 {
+class ConfigManager;
+
 class GrpcPublisher
 {
 public:
-    GrpcPublisher(std::shared_ptr<grpc::Channel> channel_);
+    GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigManager* configManager);
     ~GrpcPublisher(void);
 
     int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buf, uint64_t& lsn);
     int CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
     int CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
     int CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf);
+
 private:
+    ConfigManager* configManager;
     std::unique_ptr<replicator_rpc::ReplicatorIo::Stub> stub;
 };
-}
+} // namespace pos
