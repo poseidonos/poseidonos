@@ -271,7 +271,7 @@ ContextManagerIntegrationTest::IncreaseVscOccupiedStripeCount(int logGroupId, in
     return cnt;
 }
 
-TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfValidBlockCountIsIncreasedAndDecreased)
+TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfValidBlockCountIsIncreasedAndDecreased)
 {
     uint32_t targetLogGroup = 0;
     uint32_t firstTestSegId = 2;
@@ -294,7 +294,7 @@ TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfValidBlockCountIsIncrea
     EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
 }
 
-TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfUpdateAllLogGroupButSyncOnlyOneLogGroup)
+TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfUpdateAllLogGroupButSyncOnlyOneLogGroup)
 {
     uint32_t firstTargetLogGroup = 0;
     uint32_t secondTargetLogGroup = 1;
@@ -326,7 +326,7 @@ TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfUpdateAllLogGroupButSyn
     EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
 }
 
-TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfResetFlushedInfo)
+TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfResetFlushedInfo)
 {
     uint32_t firstTargetLogGroup = 0;
     uint32_t secondTargetLogGroup = 1;
@@ -369,7 +369,7 @@ TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfResetFlushedInfo)
     EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg * 2);
 }
 
-TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfOccupiedStripedCountIsIncreased)
+TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfOccupiedStripedCountIsIncreased)
 {
     uint32_t targetLogGroup = 0;
     uint32_t firstTestSegId = 2;
@@ -392,7 +392,7 @@ TEST_F(ContextManagerIntegrationTest, SyncLogGroup_testIfOccupiedStripedCountIsI
         totalOccupiedStripeCountForSecondTestSeg);
 }
 
-TEST_F(ContextManagerIntegrationTest, FlushContexts_SyncLogGroup)
+TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_SyncLogGroup)
 {
     uint32_t firstTargetLogGroup = 0;
     uint32_t secondTargetLogGroup = 1;
