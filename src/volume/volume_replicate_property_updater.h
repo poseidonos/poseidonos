@@ -30,22 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
 #include <string>
-#include <utility>
-#include <vector>
 
-#include "src/helper/rpc/spdk_rpc_client.h"
+#include "src/volume/volume_base.h"
+#include "src/volume/volume_interface.h"
 
 namespace pos
 {
-class MockSpdkRpcClient : public SpdkRpcClient
+class VolumeReplicatePropertyUpdater : public VolumeInterface
 {
 public:
-    using SpdkRpcClient::SpdkRpcClient;
-    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize), (override));
+    explicit VolumeReplicatePropertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID,
+        VolumeEventPublisher* volumeEventPublisher = nullptr);
+    ~VolumeReplicatePropertyUpdater(void) override;
+
+    int Do(string name, VolumeReplicationState state);
+    int Do(string name, VolumeReplicationRoleProperty nodeProperty);
 };
 
-} // namespace pos
+}  // namespace pos

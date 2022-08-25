@@ -162,7 +162,7 @@ TEST(Nvmf, VolumeCreated_Success)
     int actual, expected{EID(VOL_EVENT_OK)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "", "");
     VolumeEventPerf volumeMountPerf;
     nvmf.SetVolumePerf(&volumeMountPerf, maxIops, maxBw);
     VolumeArrayInfo volumeArrayInfo;
@@ -193,7 +193,7 @@ TEST(Nvmf, VolumeCreated_Fail)
     int actual, expected{EID(VOL_EVENT_FAIL)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "", "");
     VolumeEventPerf volumeMountPerf;
     nvmf.SetVolumePerf(&volumeMountPerf, maxIops, maxBw);
     VolumeArrayInfo volumeArrayInfo;
@@ -221,7 +221,7 @@ TEST(Nvmf, VolumeDeleted_Success)
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
     int actual, expected{EID(VOL_EVENT_OK)};
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "", "");
     VolumeArrayInfo volumeArrayInfo;
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
@@ -247,7 +247,7 @@ TEST(Nvmf, VolumeDeleted_Fail)
     Nvmf nvmf(arrayName, 0, &mockVolumeEventPublisher, mockNvmfVolumePos);
     int actual, expected{EID(VOL_EVENT_FAIL)};
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "", "");
     VolumeArrayInfo volumeArrayInfo;
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
@@ -277,7 +277,7 @@ TEST(Nvmf, VolumeMounted_Success)
     int actual, expected{EID(VOL_EVENT_OK)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, volSizeByte, volName, "", "", "");
     VolumeEventPerf volumeMountPerf;
     nvmf.SetVolumePerf(&volumeMountPerf, maxIops, maxBw);
     VolumeArrayInfo volumeArrayInfo;
@@ -305,7 +305,7 @@ TEST(Nvmf, VolumeUnmounted_Success)
     int actual, expected{EID(VOL_EVENT_OK)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "", "");
     VolumeArrayInfo volumeArrayInfo;
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
@@ -331,7 +331,7 @@ TEST(Nvmf, VolumeUnmounted_Fail)
     int actual, expected{EID(VOL_EVENT_FAIL)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "", "");
     VolumeArrayInfo volumeArrayInfo;
     nvmf.SetVolumeArrayInfo(&volumeArrayInfo, 0, arrayName);
 
@@ -360,7 +360,7 @@ TEST(Nvmf, VolumeLoaded_SuccessWithVolumeCreate)
     int actual, expected{EID(VOL_EVENT_OK)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "", "");
     VolumeEventPerf volumeMountPerf;
     nvmf.SetVolumePerf(&volumeMountPerf, maxIops, maxBw);
     VolumeArrayInfo volumeArrayInfo;
@@ -391,7 +391,7 @@ TEST(Nvmf, VolumeUpdated_Success)
     int actual, expected{EID(VOL_EVENT_OK)};
 
     VolumeEventBase volumeEventBase;
-    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "");
+    nvmf.SetVolumeBase(&volumeEventBase, volId, 0, volName, "", "", "");
     VolumeEventPerf volumeMountPerf;
     nvmf.SetVolumePerf(&volumeMountPerf, maxIops, maxBw);
     VolumeArrayInfo volumeArrayInfo;

@@ -30,36 +30,77 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/volume/volume_replicate_property_updater.h"
 
 #include <string>
 
-#include "src/volume/i_volume_checker.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume_list.h"
-#include "src/volume/volume_base.h"
-#include "src/qos/qos_common.h"
 
 namespace pos
 {
-class VolumeBase;
-
-class IVolumeEventManager : public IVolumeChecker
+VolumeReplicatePropertyUpdater::VolumeReplicatePropertyUpdater(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher)
+: VolumeInterface(volumeList, arrayName, arrayID, volumeEventPublisher)
 {
-public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid = "") = 0;
-    virtual int Delete(std::string name) = 0;
-    virtual int Mount(std::string name, std::string subnqn) = 0;
-    virtual int Unmount(std::string name) = 0;
-    virtual int Unmount(int volId) = 0;
-    virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
-    virtual int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) = 0;
-    virtual int UpdateVolumeReplicationRoleProperty(std::string name, 
-    VolumeReplicationRoleProperty nodeProperty) = 0;
-    virtual int Rename(std::string oldname, std::string newname) = 0;
-    virtual int SaveVolumeMeta(void) = 0;
+}
 
-    virtual int CheckVolumeValidity(std::string name) = 0;
-    virtual int CheckVolumeValidity(int volId) = 0;
-};
+VolumeReplicatePropertyUpdater::~VolumeReplicatePropertyUpdater(void)
+{
+}
+
+
+int
+VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationState state)
+{
+    VolumeBase* vol = volumeList.GetVolume(name);
+
+    VolumeReplicationState originState = vol->GetReplicationState();
+
+    vol->SetReplicationState(state);
+
+    int ret = _SaveVolumes();
+    if (ret != EID(SUCCESS))
+    {
+        vol->SetReplicationState(originState);
+        return ret;
+    }
+
+    return EID(SUCCESS);
+}
+
+int
+VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationRoleProperty nodeProperty)
+{
+    VolumeBase* vol = volumeList.GetVolume(name);
+
+    VolumeReplicationRoleProperty originProperty = vol->GetReplicateRoleProperty();
+
+    vol->SetReplicateRoleProperty(nodeProperty);
+
+    _SetVolumeEventBase(vol);
+    _SetVolumeEventPerf(vol);
+    _SetVolumeArrayInfo();
+
+    bool res = eventPublisher->NotifyVolumeUpdated(&volumeEventBase, &volumeEventPerf, &volumeArrayInfo);
+
+    if (res == false)
+    {
+        POS_TRACE_WARN(EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED),
+            "vol_name:{}, array_name: {}", name, arrayName);
+        return EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
+    }
+
+    int ret = _SaveVolumes();
+    if (ret != EID(SUCCESS))
+    {
+        vol->SetReplicateRoleProperty(originProperty);
+        return ret;
+    }
+
+    return EID(SUCCESS);
+}
+
 
 } // namespace pos

@@ -188,7 +188,7 @@ TEST(VolumeManager, UpdateQoS_)
     volumeManager->StateChanged(nullptr, &nextState);
 
     int expected = EID(VOL_MGR_NOT_INITIALIZED);
-    int actual = volumeManager->UpdateQoS(name, maxIops, maxBw, minIops, minBw);
+    int actual = volumeManager->UpdateQoSProperty(name, maxIops, maxBw, minIops, minBw);
 
     ASSERT_EQ(actual, expected);
 

@@ -9,6 +9,7 @@
 #include "src/array/array.h"
 #include "src/cli/request_handler.h"
 #include "src/cli/cli_server.h"
+#include "src/include/nvmf_const.h"
 #include "src/logger/logger.h"
 #include "src/mbr/mbr_info.h"
 #include "src/master_context/version_provider.h"
@@ -1480,16 +1481,16 @@ grpc::Status
 CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* request, CreateTransportResponse* reply)
 {
     string DEFAULT_TRTYPE = "tcp";
-    uint32_t DEFAULT_BUF_CACHE_SIZE = 64;
-    uint32_t DEFAULT_NUM_SHARED_BUF = 4096;
 
     string command = request->command();
     reply->set_command(command);
     reply->set_rid(request->rid());
 
     string trType = DEFAULT_TRTYPE;
-    int32_t bufCacheSize = DEFAULT_BUF_CACHE_SIZE;
-    int32_t numSharedBuf = DEFAULT_NUM_SHARED_BUF; 
+    uint32_t bufCacheSize = DEFAULT_BUF_CACHE_SIZE;
+    uint32_t numSharedBuf = DEFAULT_NUM_SHARED_BUF;
+    uint32_t ioUnitSize = DEFAULT_IO_UNIT_SIZE;
+     
 
     trType = (request->param()).transporttype();
     bufCacheSize = (request->param()).bufcachesize();
@@ -1500,7 +1501,8 @@ CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* re
     auto ret = rpcClient.TransportCreate(
         trType,
         bufCacheSize,
-        numSharedBuf);
+        numSharedBuf,
+        ioUnitSize);
 
     if (ret.first != SUCCESS)
     {

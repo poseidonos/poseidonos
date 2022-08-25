@@ -47,11 +47,10 @@ public:
 
 private:
     int _CreateTransport(json& doc);
-    void _SetDefaultConfig(string trtype);
-    uint32_t DEFAULT_BUF_CACHE_SIZE = 64;
-    uint32_t DEFAULT_NUM_SHARED_BUF = 4096;
+    void _SetDefaultConfig();
     uint32_t bufCacheSize = 0;
     uint32_t numSharedBuf = 0;
+    uint32_t ioUnitSize = 0;
     string errorMessage;
 };
 }; // namespace pos_cli

@@ -79,9 +79,10 @@ enum CallbackType
     CallbackType_UpdateDataHandler,
     CallbackType_BlockMapUpdateRequestCompletion,
     CallbackType_StripeMapUpdateCompletion,
-    CallbackType_FlushCompletion,
+    CallbackType_FlushCompletion = 30,
     CallbackType_WriteThroughStripeLoad,
-    CallbackType_PosReplicatorIOCompletion = 50
+    CallbackType_PosReplicatorIOCompletion,
+    Total_CallbackType_Cnt
 };
 
 class Callback : public Event, public DumpSharedPtr<Callback*, static_cast<int>(DumpSharedPtrType::CALLBACK)>

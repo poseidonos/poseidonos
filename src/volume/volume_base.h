@@ -58,12 +58,19 @@ enum VolumeStatus
     MaxVolumeStatus
 };
 
-enum VolumeReplicationMode
+enum VolumeReplicationState
 {
-    VolumeSyncMode,
-    LiveReplicationMode,
-    SingleNodeMode,
-    MaxVolumeReplicatorStatus
+    VolumeCopyState,
+    LiveReplicationState,
+    StandAloneState,
+    MaxVolumeReplicationState
+};
+
+enum VolumeReplicationRoleProperty
+{
+    Primary,
+    Secondary,
+    MaxNodeCnt
 };
 
 enum VolumeIoType
@@ -86,8 +93,8 @@ class VolumeBase
 public:
     VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
         VolumeAttribute volumeAttribute);
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string uuid,
-        uint64_t volSizeByte, uint64_t maxiops, uint64_t maxbw, VolumeAttribute volumeAttribute);
+    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
+        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);
@@ -134,15 +141,25 @@ public:
     {
         return status;
     }
-    VolumeReplicationMode
-    GetReplicatorMode(void)
+    VolumeReplicationState
+    GetReplicationState(void)
     {
-        return replicationMode;
+        return replicationState;
     }
     void        
-    SetReplicatorStatus(VolumeReplicationMode mode)
+    SetReplicationState(VolumeReplicationState state)
     {
-        replicationMode = mode;
+        replicationState = state;
+    }
+    VolumeReplicationRoleProperty
+    GetReplicateRoleProperty(void)
+    {
+        return replicationRole;
+    }
+    void        
+    SetReplicateRoleProperty(VolumeReplicationRoleProperty roleProperty)
+    {
+        replicationRole = roleProperty;
     }
 
     bool
@@ -190,7 +207,8 @@ public:
 protected:
     VolumeAttribute attribute;
     VolumeStatus status;
-    VolumeReplicationMode replicationMode;
+    VolumeReplicationState replicationState;
+    VolumeReplicationRoleProperty replicationRole;
     std::string name;
     std::string uuid;
     std::string array;

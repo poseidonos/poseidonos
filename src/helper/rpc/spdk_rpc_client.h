@@ -53,7 +53,7 @@ public:
     std::pair<int, std::string> SubsystemDelete(std::string subnqn);
     std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
     Json::Value SubsystemList(void);
-    virtual std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf);
+    virtual std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize);
 
 private:
     void _SetClient(void);

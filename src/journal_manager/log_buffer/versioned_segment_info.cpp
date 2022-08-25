@@ -32,8 +32,6 @@
 
 #include "versioned_segment_info.h"
 
-#include <unordered_map>
-
 namespace pos
 {
 VersionedSegmentInfo::VersionedSegmentInfo(void)
@@ -42,8 +40,7 @@ VersionedSegmentInfo::VersionedSegmentInfo(void)
 
 VersionedSegmentInfo::~VersionedSegmentInfo(void)
 {
-    changedValidBlockCount.clear();
-    changedOccupiedStripeCount.clear();
+    Reset();
 }
 
 void
@@ -71,13 +68,13 @@ VersionedSegmentInfo::IncreaseOccupiedStripeCount(SegmentId segId)
     changedOccupiedStripeCount[segId]++;
 }
 
-std::unordered_map<SegmentId, int>
+tbb::concurrent_unordered_map<SegmentId, int>
 VersionedSegmentInfo::GetChangedValidBlockCount(void)
 {
     return this->changedValidBlockCount;
 }
 
-std::unordered_map<SegmentId, uint32_t>
+tbb::concurrent_unordered_map<SegmentId, uint32_t>
 VersionedSegmentInfo::GetChangedOccupiedStripeCount(void)
 {
     return this->changedOccupiedStripeCount;

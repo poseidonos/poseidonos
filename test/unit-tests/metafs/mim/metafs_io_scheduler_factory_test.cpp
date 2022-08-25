@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "src/metafs/mim/metafs_io_scheduler_factory.h"
 
-#include <list>
+#include <gtest/gtest.h>
+#include <sched.h>
+
 #include <string>
-#include <utility>
 #include <vector>
 
-#include "src/helper/rpc/spdk_rpc_client.h"
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
+
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-class MockSpdkRpcClient : public SpdkRpcClient
+TEST(MetaFsIoSchedulerFactory, CreateMetaFsIoScheduler_testIfMetaFsIoSchedulerCanBeCreated)
 {
-public:
-    using SpdkRpcClient::SpdkRpcClient;
-    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize), (override));
-};
+    NiceMock<MockMetaFsConfigManager> config;
+    std::vector<int> weight;
+    ON_CALL(config, GetTimeIntervalInMillisecondsForMetric).WillByDefault(Return(0));
+    ON_CALL(config, GetWrrWeight).WillByDefault(Return(weight));
+    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
 
+    cpu_set_t test_set;
+    CPU_SET(0, &test_set);
+
+    MetaFsIoSchedulerFactory factory;
+
+    MetaFsIoScheduler* scheduler = nullptr;
+    scheduler = factory.CreateMetaFsIoScheduler(0, 0, 0, "test", test_set, &config, nullptr);
+
+    EXPECT_NE(scheduler, nullptr);
+}
 } // namespace pos

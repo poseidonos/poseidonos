@@ -50,7 +50,8 @@ class MetaFsTimeInterval;
 class MetaFsIoScheduler : public MetaFsIoHandlerBase
 {
 public:
-    MetaFsIoScheduler(void) = delete;
+    // only for test
+    MetaFsIoScheduler(void);
     explicit MetaFsIoScheduler(const int threadId, const int coreId,
         const int totalCoreCount, const std::string& threadName,
         const cpu_set_t mioCoreSet, MetaFsConfigManager* config,

@@ -19,7 +19,9 @@ public:
     MOCK_METHOD(int, Delete, (std::string name), (override));
     MOCK_METHOD(int, Mount, (std::string name, std::string subnqn), (override));
     MOCK_METHOD(int, Unmount, (std::string name), (override));
-    MOCK_METHOD(int, UpdateQoS, (std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw), (override));
+    MOCK_METHOD(int, UpdateQoSProperty, (std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw), (override));
+    MOCK_METHOD(int, UpdateVolumeReplicationState, (std::string name, VolumeReplicationState state), (override));
+    MOCK_METHOD(int, UpdateVolumeReplicationRoleProperty, (std::string name, VolumeReplicationRoleProperty nodeProperty), (override));
     MOCK_METHOD(int, Rename, (std::string oldname, std::string newname), (override));
     MOCK_METHOD(void, DetachVolumes, (), (override));
     MOCK_METHOD(int, GetVolumeName, (int volId, std::string& volName), (override));
@@ -27,6 +29,8 @@ public:
     MOCK_METHOD(int, GetVolumeCount, (), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (int volId), (override));
     MOCK_METHOD(int, GetVolumeStatus, (int volId), (override));
+    MOCK_METHOD(int, GetVolumeReplicationState, (int volId), (override));
+    MOCK_METHOD(int, GetVolumeReplicationRoleProperty, (int volId), (override));
     MOCK_METHOD(uint64_t, EntireVolumeSize, (), (override));
     MOCK_METHOD(int, GetVolumeSize, (int volId, uint64_t& volSize), (override));
     MOCK_METHOD(VolumeList*, GetVolumeList, (), (override));

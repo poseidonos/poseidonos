@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -32,20 +32,20 @@
 
 #include <gmock/gmock.h>
 
-#include <list>
 #include <string>
-#include <utility>
-#include <vector>
 
-#include "src/helper/rpc/spdk_rpc_client.h"
+#include "src/metafs/mim/metafs_io_scheduler_factory.h"
 
 namespace pos
 {
-class MockSpdkRpcClient : public SpdkRpcClient
+class MockMetaFsIoSchedulerFactory : public MetaFsIoSchedulerFactory
 {
 public:
-    using SpdkRpcClient::SpdkRpcClient;
-    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize), (override));
+    using MetaFsIoSchedulerFactory::MetaFsIoSchedulerFactory;
+    MOCK_METHOD(MetaFsIoScheduler*, CreateMetaFsIoScheduler,
+        (const int threadId, const int coreId, const int totalCoreCount,
+            const std::string& threadName, const cpu_set_t mioCoreSet,
+            MetaFsConfigManager* config, TelemetryPublisher* tp));
 };
 
 } // namespace pos

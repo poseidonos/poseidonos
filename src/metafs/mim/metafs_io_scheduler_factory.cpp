@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gmock/gmock.h>
+#include "metafs_io_scheduler_factory.h"
 
-#include <list>
 #include <string>
-#include <utility>
 #include <vector>
 
-#include "src/helper/rpc/spdk_rpc_client.h"
+#include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/lib/metafs_time_interval.h"
+#include "src/metafs/mim/metafs_io_scheduler.h"
 
 namespace pos
 {
-class MockSpdkRpcClient : public SpdkRpcClient
+MetaFsIoScheduler*
+MetaFsIoSchedulerFactory::CreateMetaFsIoScheduler(const int threadId, const int coreId,
+    const int totalCoreCount, const std::string& threadName, const cpu_set_t mioCoreSet,
+    MetaFsConfigManager* config, TelemetryPublisher* tp)
 {
-public:
-    using SpdkRpcClient::SpdkRpcClient;
-    MOCK_METHOD((std::pair<int, std::string>), TransportCreate, (std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize), (override));
-};
-
+    return new MetaFsIoScheduler(threadId, coreId, totalCoreCount,
+        threadName, mioCoreSet, config, tp,
+        new MetaFsTimeInterval(config->GetTimeIntervalInMillisecondsForMetric()),
+        config->GetWrrWeight(), config->IsSupportingNumaDedicatedScheduling());
+}
 } // namespace pos

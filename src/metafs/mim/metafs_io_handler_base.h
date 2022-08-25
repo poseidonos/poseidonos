@@ -42,7 +42,8 @@ namespace pos
 class MetaFsIoHandlerBase
 {
 public:
-    MetaFsIoHandlerBase(void) = delete;
+    // only for test
+    MetaFsIoHandlerBase(void) = default;
     explicit MetaFsIoHandlerBase(const int threadId, const int coreId,
         const std::string& threadName);
     virtual ~MetaFsIoHandlerBase(void);
