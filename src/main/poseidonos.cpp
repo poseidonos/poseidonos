@@ -58,6 +58,9 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/network/nvmf_target.h"
 #include "src/network/transport_configuration.h"
+#include "src/pos_replicator/grpc_publisher.h"
+#include "src/pos_replicator/grpc_subscriber.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/qos/qos_manager.h"
 #include "src/resource_checker/resource_checker.h"
 #include "src/resource_checker/smart_collector.h"
@@ -89,6 +92,7 @@ Poseidonos::Init(int argc, char** argv)
         _InitIOInterface();
         _InitMemoryChecker();
         _InitResourceChecker();
+        _InitReplicatorManager();
     }
     else
     {
@@ -106,6 +110,13 @@ Poseidonos::_InitIOInterface(void)
     ioRecoveryEventFactory = new IoRecoveryEventFactory();
     IoCompleter::RegisterRecoveryEventFactory(ioRecoveryEventFactory);
     IODispatcher::RegisterRecoveryEventFactory(ioRecoveryEventFactory);
+}
+
+void
+Poseidonos::_InitReplicatorManager(void)
+{
+    PosReplicatorManager* posReplicatorManager = PosReplicatorManagerSingleton::Instance();
+    posReplicatorManager->Init(new GrpcPublisher(nullptr, ConfigManagerSingleton::Instance()), new GrpcSubscriber(ConfigManagerSingleton::Instance()));
 }
 
 void

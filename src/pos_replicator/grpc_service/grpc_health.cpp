@@ -30,17 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "grpc_health.h"
 
-#include <string>
+#include <grpc/status.h>
 
-// To do - remove pos conf
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-#define GRPC_TEL_SERVER_SOCKET_ADDRESS "0.0.0.0:50051"
-#define GRPC_HA_PUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50003"
-#define GRPC_HA_SUB_SERVER_SOCKET_ADDRESS "0.0.0.0:50053"
-#define GRPC_HA_VOL_SERVER_SOCKET_ADDRESS "0.0.0.0:50054"
-#define GRPC_CLI_SERVER_SOCKET_ADDRESS "0.0.0.0:50055"
+::grpc::Status
+GrpcHealth::Check(
+    ::grpc::ServerContext* context,
+    const pos_rpc::HealthCheckRequest* request,
+    pos_rpc::HealthCheckResponse* response)
+{
+    response->set_status(pos_rpc::HealthCheckResponse::ServingStatus::HealthCheckResponse_ServingStatus_SERVING);
+
+    return ::grpc::Status::OK;
 }
+} // namespace pos

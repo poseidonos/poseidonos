@@ -31,13 +31,12 @@
  */
 #include "posreplicator_manager.h"
 
-#include "src/io/frontend_io/aio.h"
 #include "src/include/pos_event_id.h"
+#include "src/io/frontend_io/aio.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-
 PosReplicatorManager::PosReplicatorManager(void)
 : volumeSubscriberCnt(0)
 {
@@ -56,13 +55,12 @@ PosReplicatorManager::~PosReplicatorManager(void)
 }
 
 void
-PosReplicatorManager::Init(void)
+PosReplicatorManager::Init(GrpcPublisher* publisher, GrpcSubscriber* subscriber)
 {
     // grpc server or client start
-    grpcPublisher = new GrpcPublisher(nullptr);
-    grpcSubscriber = new GrpcSubscriber();
-    grpcVolumeManagement = new GrpcVolumeManagement();
-    
+    grpcPublisher = publisher;
+    grpcSubscriber = subscriber;
+
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been initialized");
 }
 
@@ -73,14 +71,12 @@ PosReplicatorManager::Dispose(void)
     if (grpcPublisher != nullptr)
     {
         delete grpcPublisher;
+        grpcPublisher = nullptr;
     }
     if (grpcSubscriber != nullptr)
     {
         delete grpcSubscriber;
-    }
-    if (grpcVolumeManagement != nullptr)
-    {
-        delete grpcVolumeManagement;
+        grpcSubscriber = nullptr;
     }
 
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been disposed");
@@ -239,10 +235,9 @@ PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int v
     return EID(SUCCESS);
 }
 
-
 int
 PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks, void* data)
-{/**/
+{
     //IO_TYPE::WRITE
     //IO_TYPE::READ
     pos_io posIo;
@@ -308,16 +303,16 @@ PosReplicatorManager::HAIOCompletion(uint64_t lsn, pos_io io, VolumeIoSmartPtr v
 {
     switch (io.ioType)
     {
-    case IO_TYPE::READ:
-    {
-        HAReadCompletion(lsn, io, volumeIo);
-    }
-    break;
-    case IO_TYPE::WRITE:
-    {
-        HAWriteCompletion(lsn, io);
-    }
-    break;
+        case IO_TYPE::READ:
+        {
+            HAReadCompletion(lsn, io, volumeIo);
+        }
+        break;
+        case IO_TYPE::WRITE:
+        {
+            HAWriteCompletion(lsn, io);
+        }
+        break;
     }
 }
 
@@ -345,7 +340,7 @@ PosReplicatorManager::ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std
 {
     // Volume Idx <-> Volume Name
     IVolumeInfoManager* volMgr =
-            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
 
     int ret = EID(HA_INVALID_INPUT_ARGUMENT);
 
@@ -357,7 +352,6 @@ PosReplicatorManager::ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std
     ret = volMgr->GetVolumeName(volumeId, volumeName);
 
     return ret;
-
 }
 
 int
@@ -381,7 +375,7 @@ int
 PosReplicatorManager::ConvertVolumeNametoVolumeId(std::string volumeName, int arrayId)
 {
     IVolumeInfoManager* volMgr =
-            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
 
     if (volMgr == nullptr)
     {
@@ -415,7 +409,6 @@ PosReplicatorManager::_MakeIoRequest(GrpcCallbackType callbackType, pos_io io, u
 
     aio.SubmitAsyncIO(volumeIo);
 }
-
 
 int
 PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int> arraySet, std::pair<std::string, int> volumeSet)
@@ -462,4 +455,4 @@ PosReplicatorIOCompletion::_DoSpecificJob(void)
     return false;
 }
 
-}
+} // namespace pos

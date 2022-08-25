@@ -32,56 +32,27 @@
 
 #pragma once
 
-#pragma once
+#include <grpcpp/server.h>
 
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/grpc_server_socket_address.h"
-#include "src/include/pos_event_id.h"
-
-#include "proto/generated/cpp/pos_rpc.grpc.pb.h"
-#include "proto/generated/cpp/pos_rpc.pb.h"
-
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
-#include <nlohmann/json.hpp>
+#include <memory>
 
 namespace pos
 {
-class GrpcSubscriber final : public pos_rpc::PosIo::Service
+class ConfigManager;
+class GrpcHealth;
+
+class GrpcSubscriber
 {
 public:
-    GrpcSubscriber(void);
+    GrpcSubscriber(ConfigManager* configManager);
     ~GrpcSubscriber(void);
-
-    virtual ::grpc::Status WriteBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteBlocksRequest* request, 
-        pos_rpc::WriteBlocksResponse* response) override;
-
-    virtual ::grpc::Status WriteHostBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::WriteHostBlocksRequest* request, 
-        pos_rpc::WriteHostBlocksResponse* response) override;
-
-    virtual ::grpc::Status ReadBlocks(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::ReadBlocksRequest* request, 
-        pos_rpc::ReadBlocksResponse* response) override;
-
-    virtual ::grpc::Status CompleteHostWrite(
-        ::grpc::ServerContext* context, 
-        const pos_rpc::CompleteHostWriteRequest* request, 
-        pos_rpc::CompleteHostWriteResponse* response) override;
 
     void RunServer(std::string address);
 
 private:
-    ::grpc::Status _CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int> arraySet,
-            std::pair<std::string, int> volumeSet);
+    ConfigManager* configManager;
+    GrpcHealth* healthChecker;
 
-    std::unique_ptr<::grpc::Server> posIoGrpcServer;
+    std::unique_ptr<::grpc::Server> haGrpcServer;
 };
-}
+} // namespace pos

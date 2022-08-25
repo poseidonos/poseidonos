@@ -32,12 +32,11 @@
 
 #pragma once
 
-#include <thread>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 #include "posreplicator_config.h"
-
 #include "proto/generated/cpp/pos_rpc.grpc.pb.h"
 #include "proto/generated/cpp/pos_rpc.pb.h"
 #include "spdk/pos.h"
@@ -48,23 +47,21 @@
 #include "src/lib/singleton.h"
 #include "src/pos_replicator/grpc_publisher.h"
 #include "src/pos_replicator/grpc_subscriber.h"
+#include "src/pos_replicator/replicator_volume_subscriber.h"
 #include "src/sys_event/volume_event.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/i_volume_info_manager.h"
 #include "src/volume/volume_base.h"
-#include "src/pos_replicator/grpc_volume_management.h"
-#include "src/pos_replicator/replicator_volume_subscriber.h"
 
 namespace pos
 {
-
 class PosReplicatorManager
 {
 public:
     PosReplicatorManager(void);
     ~PosReplicatorManager(void);
 
-    void Init(void);
+    void Init(GrpcPublisher* publisher, GrpcSubscriber* subscriber);
     void Dispose(void);
     void Clear(void);
 
@@ -112,7 +109,6 @@ private:
 
     GrpcPublisher* grpcPublisher;
     GrpcSubscriber* grpcSubscriber;
-    GrpcVolumeManagement* grpcVolumeManagement;
 };
 
 class PosReplicatorIOCompletion : public Callback, public std::enable_shared_from_this<PosReplicatorIOCompletion>
@@ -129,9 +125,8 @@ private:
     uint64_t lsn;
     pos_io& posIo;
     CallbackSmartPtr originCallback;
-
 };
 
 // [To do] grpc contact point for 2node-HA
 using PosReplicatorManagerSingleton = Singleton<PosReplicatorManager>;
-}
+} // namespace pos
