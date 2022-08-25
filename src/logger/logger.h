@@ -103,7 +103,7 @@ public:
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldLog(lvl, eventId))
-        {         
+        {
             std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
                 PosEventInfo.find(eventId);
             try
