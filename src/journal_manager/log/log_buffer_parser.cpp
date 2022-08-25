@@ -97,7 +97,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             LogHandlerInterface* log = _GetLogHandler(dataPtr);
             if (log == nullptr)
             {
-                int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
                 POS_TRACE_ERROR(event, "Unknown type of log is found");
                 return event * -1;
             }
@@ -113,7 +113,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
             if (footer.isReseted)
             {
-                int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
                 POS_TRACE_INFO(event, "Reseted footer is found. Found logs whith SeqNumber ({}) will be reseted ", footer.resetedSequenceNumber);
                 seqNumSeen.erase(footer.resetedSequenceNumber);
                 logs.EraseReplayLogGroup(footer.resetedSequenceNumber);
@@ -125,7 +125,7 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
 
             if (seqNumSeen.size() > 1)
             {
-                int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+                int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
                 std::string seqNumList = "";
                 for (uint32_t seqNum : seqNumSeen)
                 {
@@ -187,7 +187,7 @@ LogBufferParser::_PrintFoundLogTypes(void)
     int numGcStripeFlushedLogs = logsFound[(int)LogType::GC_STRIPE_FLUSHED];
     int numVolumeDeletedLogs = logsFound[(int)LogType::VOLUME_DELETED];
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG,
+    POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
         "Logs found: {} block map, {} stripe map, {} gc stripes, {} volumes deleted",
         numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
 }

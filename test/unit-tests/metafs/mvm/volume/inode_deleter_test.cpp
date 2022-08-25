@@ -149,7 +149,7 @@ TEST_F(InodeDeleterFixture, CheckFileDeletion_Positive)
 
     EXPECT_EQ(fd2InodeMap.size(), 0);
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result.second, EID(SUCCESS));
 }
 
 TEST_F(InodeDeleterFixture, CheckFileDeletion_Negative)
@@ -184,6 +184,6 @@ TEST_F(InodeDeleterFixture, CheckFileDeletion_Negative)
     result = inodeDeleter->Delete(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+    EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
 }
 } // namespace pos

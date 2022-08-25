@@ -54,7 +54,7 @@ IIOSubmitHandler::RegisterInstance(IIOSubmitHandler* ioSubmitHandlerModule)
 {
     if (unlikely(instance != nullptr))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::I_IOSMHDLR_NULLPTR;
+        POS_EVENT_ID eventId = EID(I_IOSMHDLR_NULLPTR);
         POS_TRACE_WARN(eventId, "interface of io submit handler already registered.");
     }
     instance = ioSubmitHandlerModule;
@@ -65,7 +65,7 @@ IIOSubmitHandler::GetInstance(void)
 {
     if (unlikely(instance == nullptr))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::I_IOSMHDLR_NULLPTR;
+        POS_EVENT_ID eventId = EID(I_IOSMHDLR_NULLPTR);
         POS_TRACE_ERROR(eventId, "IIOSubmitHandler instance nullptr!");
     }
     return instance;

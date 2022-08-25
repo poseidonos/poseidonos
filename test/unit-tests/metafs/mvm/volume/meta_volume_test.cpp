@@ -439,13 +439,13 @@ TEST_F(MetaVolumeFixture, CloseVolumeNegative_BackupContent_InodeMgr)
 
 TEST_F(MetaVolumeFixture, CheckActiveFds)
 {
-    EXPECT_CALL(*inodeMgr, AddFileInActiveList).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*inodeMgr, AddFileInActiveList).WillRepeatedly(Return(EID(SUCCESS)));
     EXPECT_CALL(*inodeMgr, CheckFileInActive).WillRepeatedly(Return(true));
     EXPECT_CALL(*inodeMgr, RemoveFileFromActiveList).WillRepeatedly(Return());
 
     for (FileDescriptorType fd = 0; fd < 5; ++fd)
     {
-        EXPECT_EQ(metaVolume->AddFileInActiveList(fd), POS_EVENT_ID::SUCCESS);
+        EXPECT_EQ(metaVolume->AddFileInActiveList(fd), EID(SUCCESS));
     }
 
     for (FileDescriptorType fd = 0; fd < 5; ++fd)
@@ -495,14 +495,14 @@ TEST_F(MetaVolumeFixture, CheckFileCreation_Positive)
     std::string fileName = "TESTFILE";
     MetaFsFileControlRequest reqMsg;
     reqMsg.fileName = &fileName;
-    FileControlResult result = {0, POS_EVENT_ID::SUCCESS};
+    FileControlResult result = {0, EID(SUCCESS)};
 
     EXPECT_CALL(*inodeCreator, Create).WillOnce(Return(result));
 
     result = metaVolume->CreateFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result.second, EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeFixture, CheckFileCreation_Negative)
@@ -510,14 +510,14 @@ TEST_F(MetaVolumeFixture, CheckFileCreation_Negative)
     std::string fileName = "TESTFILE";
     MetaFsFileControlRequest reqMsg;
     reqMsg.fileName = &fileName;
-    FileControlResult result = {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
+    FileControlResult result = {0, EID(MFS_META_SAVE_FAILED)};
 
     EXPECT_CALL(*inodeCreator, Create).WillOnce(Return(result));
 
     result = metaVolume->CreateFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+    EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
 }
 
 TEST_F(MetaVolumeFixture, CheckFileDeletion_Positive)
@@ -525,14 +525,14 @@ TEST_F(MetaVolumeFixture, CheckFileDeletion_Positive)
     std::string fileName = "TESTFILE";
     MetaFsFileControlRequest reqMsg;
     reqMsg.fileName = &fileName;
-    FileControlResult result = {0, POS_EVENT_ID::SUCCESS};
+    FileControlResult result = {0, EID(SUCCESS)};
 
     EXPECT_CALL(*inodeDeleter, Delete).WillOnce(Return(result));
 
     result = metaVolume->DeleteFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result.second, EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeFixture, CheckFileDeletion_Negative)
@@ -540,14 +540,14 @@ TEST_F(MetaVolumeFixture, CheckFileDeletion_Negative)
     std::string fileName = "TESTFILE";
     MetaFsFileControlRequest reqMsg;
     reqMsg.fileName = &fileName;
-    FileControlResult result = {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
+    FileControlResult result = {0, EID(MFS_META_SAVE_FAILED)};
 
     EXPECT_CALL(*inodeDeleter, Delete).WillOnce(Return(result));
 
     result = metaVolume->DeleteFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+    EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
 }
 
 TEST_F(MetaVolumeFixture, CheckCreatedFile)
@@ -599,9 +599,9 @@ TEST_F(MetaVolumeFixture, CheckTrim_Positive)
 
     // _Trim
     EXPECT_CALL(*metaStorage, TrimFileData)
-        .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+        .WillRepeatedly(Return(EID(SUCCESS)));
     EXPECT_CALL(*metaStorage, WritePage)
-        .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+        .WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaVolume->TrimData(reqMsg), true);
 }

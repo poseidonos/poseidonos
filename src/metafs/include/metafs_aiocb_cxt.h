@@ -56,7 +56,7 @@ public:
       nbytes(nbytes),
       buf(buf),
       callback(func),
-      rc(POS_EVENT_ID::MFS_END),
+      rc(EID(MFS_END)),
       tagId(0)
     {
         callbackCount = 0;
@@ -70,7 +70,7 @@ public:
       nbytes(0),
       buf(buf),
       callback(func),
-      rc(POS_EVENT_ID::MFS_END),
+      rc(EID(MFS_END)),
       tagId(0)
     {
     }
@@ -83,7 +83,7 @@ public:
       nbytes(ctx->length),
       buf((void*)ctx->buffer),
       callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
-      rc(POS_EVENT_ID::MFS_END),
+      rc(EID(MFS_END)),
       tagId(0)
     {
         callbackCount = 0;
@@ -105,7 +105,7 @@ public:
 
     bool CheckIOError(void)
     {
-        if (rc != POS_EVENT_ID::SUCCESS)
+        if (rc != EID(SUCCESS))
         {
             return true;
         }
@@ -117,15 +117,15 @@ public:
         // need more error handling
         if (err.first != 0)
         {
-            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+            rc = EID(MFS_IO_FAILED_DUE_TO_ERROR);
         }
         else if (err.second == true)
         {
-            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
+            rc = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
         }
         else
         {
-            rc = POS_EVENT_ID::SUCCESS;
+            rc = EID(SUCCESS);
         }
     }
 

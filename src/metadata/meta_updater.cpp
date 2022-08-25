@@ -82,7 +82,7 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
         if (unlikely(false == executedSuccessfully))
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::WRCMP_MAP_UPDATE_FAILED;
+                EID(WRCMP_MAP_UPDATE_FAILED);
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 "Write wraup failed at map update");
             eventScheduler->EnqueueEvent(blockMapUpdate);
@@ -112,7 +112,7 @@ MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
         if (unlikely(false == executionSuccessful))
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+                EID(NFLSH_STRIPE_DEBUG_UPDATE);
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 "Stripe Map Update Request : stripe.vsid : {}", stripe->GetVsid());
 
@@ -141,7 +141,7 @@ MetaUpdater::UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateI
         if (unlikely(false == executionSuccessful))
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::NFLSH_STRIPE_DEBUG_UPDATE;
+                EID(NFLSH_STRIPE_DEBUG_UPDATE);
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 "Stripe Map Update Request : stripe.vsid : {}", stripe->GetVsid());
 

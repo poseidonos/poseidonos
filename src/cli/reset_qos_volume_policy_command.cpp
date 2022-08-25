@@ -73,7 +73,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
     if (0 == arrayName.compare(""))
     {
-        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), "Array Name Missing", GetPosInfo());
     }
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
@@ -98,7 +98,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
-        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), "Invalid Array Name", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
@@ -113,7 +113,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
             if (EID(SUCCESS) != validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
-                return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
+                return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), errorMsg, GetPosInfo());
             }
             else
             {
@@ -123,7 +123,7 @@ QosResetVolumePolicyCommand::Execute(json& doc, string rid)
     }
     else
     {
-        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "vol, Parameter Missing", GetPosInfo());
+        return jFormat.MakeResponse("RESETQOSVOLUMEPOLICY", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), "vol, Parameter Missing", GetPosInfo());
     }
 
     qos_vol_policy newVolPolicy;

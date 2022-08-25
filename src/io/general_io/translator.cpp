@@ -88,7 +88,7 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
 
     if (unlikely(volumeId >= MAX_VOLUME_COUNT))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_VOLUME_ID;
+        POS_EVENT_ID eventId = EID(TRSLTR_WRONG_VOLUME_ID);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Volume ID is not valid at Translator");
         throw eventId;
@@ -164,7 +164,7 @@ Translator::GetVsa(uint32_t blockIndex)
 {
     if (unlikely(blockIndex >= blockCount))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
+        POS_EVENT_ID eventId = EID(TRSLTR_WRONG_ACCESS);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Only valid for single block Translator");
         return UNMAP_VSA;
@@ -184,7 +184,7 @@ Translator::GetLsidRefResult(uint32_t blockIndex)
 {
     if (unlikely(blockIndex >= blockCount))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
+        POS_EVENT_ID eventId = EID(TRSLTR_WRONG_ACCESS);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Only valid for single block Translator");
         StripeAddr unmapLsid;
@@ -273,7 +273,7 @@ Translator::GetPba(uint32_t blockIndex)
     int ret = iTranslator->Translate(arrayId, partitionType, physicalEntries, logicalEntry);
     if (unlikely(ret != 0))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
+        POS_EVENT_ID eventId = EID(TRANSLATE_CONVERT_FAIL);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Translate() or Convert() is failed");
         throw eventId;
@@ -288,7 +288,7 @@ Translator::_GetLsa(uint32_t blockIndex)
 {
     if (unlikely(blockIndex >= blockCount))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_INVALID_BLOCK_INDEX;
+        POS_EVENT_ID eventId = EID(TRSLTR_INVALID_BLOCK_INDEX);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Block index exceeds block count at Translator");
         throw eventId;
@@ -328,7 +328,7 @@ Translator::GetPhysicalEntries(void* mem, uint32_t blockCount)
         arrayId, partitionType, physicalEntries, logicalEntry);
     if (unlikely(ret != 0))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRANSLATE_CONVERT_FAIL;
+        POS_EVENT_ID eventId = EID(TRANSLATE_CONVERT_FAIL);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Translate() or Convert() is failed");
         throw eventId;
@@ -368,7 +368,7 @@ Translator::_CheckSingleBlock(void)
 {
     if (unlikely(ONLY_ONE != blockCount))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::TRSLTR_WRONG_ACCESS;
+        POS_EVENT_ID eventId = EID(TRSLTR_WRONG_ACCESS);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Only valid for single block Translator");
         throw eventId;

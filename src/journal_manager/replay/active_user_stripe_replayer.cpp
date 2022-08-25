@@ -81,7 +81,7 @@ ActiveUserStripeReplayer::Replay(void)
     StripeId currentSsdLsid = _FindLastLsid(stripesPerSegment);
     contextReplayer->ReplaySsdLsid(currentSsdLsid);
 
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_USER_STRIPE_TAIL);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_USER_STRIPE_TAIL));
     std::ostringstream os;
     os << "[Replay] SSD LSID is updated to " << currentSsdLsid;
 
@@ -139,7 +139,7 @@ ActiveUserStripeReplayer::_FindLastLsid(uint32_t stripesPerSegment)
     {
         lsid = lastLsid.begin()->second;
 
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_USER_STRIPE_TAIL);
+        int eventId = static_cast<int>(EID(JOURNAL_REPLAY_USER_STRIPE_TAIL));
         POS_TRACE_DEBUG(eventId,
             "[Replay] {} active segments are found, picked {} for currentLsid",
             lastLsid.size(), lsid);

@@ -47,11 +47,11 @@ DeviceDetachTrigger::Run(UblockSharedPtr& dev)
 {
     if (dev->GetType() != DeviceType::SSD)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::DEVICE_DETACH_TRIGGER_FAIL,
+        POS_TRACE_WARN(EID(DEVICE_DETACH_TRIGGER_FAIL),
             "Failed to trigger device detach. Not supported device type.");
         return;
     }
-    POS_TRACE_DEBUG(POS_EVENT_ID::DEVICE_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
         "Device detach triggered manually");
     thread(DeviceDetachEventHandler, dev->GetSN()).detach();
 }

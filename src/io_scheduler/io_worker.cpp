@@ -166,7 +166,7 @@ IOWorker::AddDevice(UblockSharedPtr device)
 {
     if (nullptr != device)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IOWORKER_DEVICE_ADDED;
+        POS_EVENT_ID eventId = EID(IOWORKER_DEVICE_ADDED);
         POS_TRACE_INFO(eventId, "{} has been added to IOWorker{}",
             device->GetName(), id);
         operationQueue.SubmitAndWait(INSERT, device);
@@ -297,7 +297,7 @@ IOWorker::_CompleteCommand(void)
             }
             else
             {
-                POS_TRACE_ERROR((uint32_t)POS_EVENT_ID::IOWORKER_UNDERFLOW_HAPPENED,
+                POS_TRACE_ERROR((uint32_t)EID(IOWORKER_UNDERFLOW_HAPPENED),
                     "Command completed more than submitted: current outstanding: {}, completion count: {}",
                     currentOutstandingIOCount, eventCount);
                 currentOutstandingIOCount = 0;

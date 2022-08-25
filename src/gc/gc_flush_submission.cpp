@@ -155,7 +155,7 @@ GcFlushSubmission::Execute(void)
         .stripeId = logicalStripeId,
         .offset = 0};
 
-    POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
+    POS_EVENT_ID eventId = EID(FLUSH_DEBUG_SUBMIT);
 
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId,
         "Flush Submission vsid  {}: StartLSA.stripeId : {} blocksInStripe : {}",

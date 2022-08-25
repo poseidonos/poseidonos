@@ -80,7 +80,7 @@ JournalConfiguration::Init(bool isWriteThroughEnabled)
     // TODO (meta): writeThroughEnabled should be of previous power cycle
     areReplayWbStripesInUserArea = isWriteThroughEnabled;
     metaVolumeToUse = (isWriteThroughEnabled == true) ? (MetaVolumeType::JournalVolume) : (MetaVolumeType::NvRamVolume);
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION), "Journal will be stored on {}", metaVolumeToUse);
+    POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)), "Journal will be stored on {}", metaVolumeToUse);
 }
 
 int
@@ -179,7 +179,7 @@ JournalConfiguration::GetMetaVolumeToUse(void)
 void
 JournalConfiguration::_ReadConfiguration(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION);
+    int eventId = static_cast<int>(EID(JOURNAL_CONFIGURATION));
 
     journalEnabled = _IsJournalEnabled();
     if (journalEnabled == true)
@@ -218,7 +218,7 @@ JournalConfiguration::_IsJournalEnabled(void)
     if (ret != 0)
     {
         enabled = false;
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "Failed to read journal enablement from config file");
     }
     return enabled;
@@ -235,7 +235,7 @@ JournalConfiguration::_IsDebugEnabled(void)
     {
         if (enabled == true)
         {
-            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
                 "Journal debug mode enabled");
             return true;
         }
@@ -253,7 +253,7 @@ JournalConfiguration::_GetIntervalForMetric(void)
 
     if (ret == 0)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "Interval is {}", interval);
         return interval;
     }
@@ -287,7 +287,7 @@ JournalConfiguration::_ReadNumLogGroup(void)
 
     if (ret == 0)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "The number of log groups is {}", count);
     }
     else
@@ -308,17 +308,17 @@ JournalConfiguration::_IsRocksdbEnabled(void)
     {
         if (enabled == true)
         {
-            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
                 "RocksDB Log Buffer is enabled");
             return true;
         }
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "RocksDB Log Buffer is disabled {}", enabled);
         return false;
     }
     else
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "RocksDB Log Buffer is disabled");
         return false;
     }
@@ -333,13 +333,13 @@ JournalConfiguration::_GetRocksdbPath(void)
 
     if (ret == 0)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "RocksDB Log will be saved in {}", path);
     }
     else
     {
         path = "/etc/pos/POSRaid";
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+        POS_TRACE_INFO(static_cast<int>(EID(JOURNAL_CONFIGURATION)),
             "RocksDB Log will be saved in default path {}", path);
     }
     return path;
@@ -357,7 +357,7 @@ JournalConfiguration::_ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl)
 int
 JournalConfiguration::_ConfigureLogBufferSize(uint64_t& size)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION);
+    int eventId = static_cast<int>(EID(JOURNAL_CONFIGURATION));
 
     if (maxPartitionSize <= metaPageSize)
     {
@@ -390,7 +390,7 @@ JournalConfiguration::_SetLogBufferSize(uint64_t size)
     logBufferSize = size;
 
     bufferLayout.Init(logBufferSize, numLogGroups);
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_CONFIGURATION,
+    POS_TRACE_INFO(EID(JOURNAL_CONFIGURATION),
         "Log buffer size is configured to {}", logBufferSize);
 }
 } // namespace pos

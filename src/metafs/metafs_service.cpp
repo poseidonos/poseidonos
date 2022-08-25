@@ -98,7 +98,7 @@ MetaFsService::Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSe
 {
     if (!configManager_->Init())
     {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
+        POS_TRACE_ERROR(static_cast<int>(EID(MFS_INVALID_CONFIG)),
             "The config values are invalid.");
         assert(false);
     }

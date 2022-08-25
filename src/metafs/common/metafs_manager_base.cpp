@@ -48,7 +48,7 @@ POS_EVENT_ID
 MetaFsManagerBase::HandleNewRequest(MetaFsRequestBase& reqMsg)
 {
     POS_EVENT_ID rc = CheckReqSanity(reqMsg);
-    if (rc != POS_EVENT_ID::SUCCESS)
+    if (rc != EID(SUCCESS))
     {
         POS_TRACE_ERROR((int)rc, "Command sanity error detected!");
         return rc;

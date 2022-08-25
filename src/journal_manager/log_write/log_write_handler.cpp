@@ -167,7 +167,7 @@ LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
         if (context->GetError() != 0)
         {
             // When log write fails due to error, should log the error and complete write
-            POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_WRITE_FAILED,
+            POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED),
                 "Log write failed due to io error");
 
             statusUpdatedToStats = false;

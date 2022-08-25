@@ -68,7 +68,7 @@ FlushPendingStripes::GetNumSubTasks(void)
 int
 FlushPendingStripes::Start(void)
 {
-    int loggingEventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    int loggingEventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
     std::ostringstream os;
     os << "[ReplayTask] Flush pending stripes (num: " << pendingStripes.size() << ")";
 
@@ -81,7 +81,7 @@ FlushPendingStripes::Start(void)
         // Finish the stripe
         wbStripeAllocator->FinishStripe(pStripe->wbLsid, pStripe->tailVsa);
 
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH);
+        int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STRIPE_FLUSH));
         std::ostringstream os;
         os << "[Replay] Request to finish stripe, wb lsid " << pStripe->wbLsid
            << ", tail offset " << pStripe->tailVsa.offset;
@@ -97,7 +97,7 @@ FlushPendingStripes::Start(void)
         result = wbStripeAllocator->LoadPendingStripesToWriteBuffer();
         if (result != 0)
         {
-            POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE,
+            POS_TRACE_ERROR(EID(JOURNAL_REPLAY_WB_STRIPE),
                 "Failed to load wb stripes in ssd");
         }
     }

@@ -384,11 +384,11 @@ InodeManager::CheckFileInActive(const FileDescriptorType fd) const
 POS_EVENT_ID
 InodeManager::AddFileInActiveList(const FileDescriptorType fd)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     if (activeFiles_.find(fd) != activeFiles_.end())
     {
-        rc = POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY;
+        rc = EID(MFS_FILE_OPEN_REPETITIONARY);
         POS_TRACE_ERROR((int)rc,
             "You attempt to open fd {} file twice. It is not allowed", fd);
     }

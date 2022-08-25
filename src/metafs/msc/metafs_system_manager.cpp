@@ -64,14 +64,14 @@ MetaFsSystemManager::~MetaFsSystemManager(void)
 POS_EVENT_ID
 MetaFsSystemManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
-    POS_EVENT_ID sc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID sc = EID(SUCCESS);
     MetaFsControlReqMsg* msg = static_cast<MetaFsControlReqMsg*>(&reqMsg);
 
     if (false == msg->IsValid())
     {
         MFS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
             "Given request is incorrect. Please check parameters.");
-        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        return EID(MFS_INVALID_PARAMETER);
     }
 
     return sc;
@@ -141,7 +141,7 @@ MetaFsSystemManager::LoadMbr(bool& isNPOR)
             MFS_TRACE_ERROR(EID(MFS_INVALID_MBR),
                 "Filesystem MBR has been corrupted or Filesystem cannot be found.");
 
-            return POS_EVENT_ID::MFS_INVALID_MBR;
+            return EID(MFS_INVALID_MBR);
         }
 
         isNPOR = mbrMgr->GetPowerStatus();
@@ -156,10 +156,10 @@ MetaFsSystemManager::LoadMbr(bool& isNPOR)
         MFS_TRACE_ERROR(EID(MFS_META_LOAD_FAILED),
             "Error occurred while loading filesystem MBR");
 
-        return POS_EVENT_ID::MFS_META_LOAD_FAILED;
+        return EID(MFS_META_LOAD_FAILED);
     }
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 bool
@@ -181,15 +181,15 @@ POS_EVENT_ID
 MetaFsSystemManager::_HandleInitializeRequest(MetaFsControlReqMsg& reqMsg)
 {
     if (true == Init(*reqMsg.mediaList))
-        return POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
 
-    return POS_EVENT_ID::MFS_ERROR_MOUNTED;
+    return EID(MFS_ERROR_MOUNTED);
 }
 
 POS_EVENT_ID
 MetaFsSystemManager::_HandleCloseRequest(MetaFsControlReqMsg& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     do
     {
@@ -197,16 +197,16 @@ MetaFsSystemManager::_HandleCloseRequest(MetaFsControlReqMsg& reqMsg)
 
         if (true != mbrMgr->SaveContent())
         {
-            rc = POS_EVENT_ID::MFS_META_SAVE_FAILED;
+            rc = EID(MFS_META_SAVE_FAILED);
             break;
         }
 
         mbrMgr->InvalidMBR();
 
         rc = metaStorage->Close();
-        if (POS_EVENT_ID::SUCCESS != rc)
+        if (EID(SUCCESS) != rc)
         {
-            rc = POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED;
+            rc = EID(MFS_META_STORAGE_CLOSE_FAILED);
             break;
         }
     } while (0);

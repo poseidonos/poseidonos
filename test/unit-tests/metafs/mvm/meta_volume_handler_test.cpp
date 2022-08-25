@@ -94,7 +94,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCheckFileExist_testIfTheMethodReturnsPosi
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleCheckFileExist(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCheckFileExist_testIfTheMethodReturnsNegativeWhenTheVolumeIsInvalid)
@@ -102,7 +102,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCheckFileExist_testIfTheMethodReturnsNega
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCheckFileExist(volType, msg),
-        POS_EVENT_ID::MFS_META_VOLUME_NOT_FOUND);
+        EID(MFS_META_VOLUME_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCheckFileExist_testIfTheMethodReturnsNegativeWhenTheFilenameIsInvalid)
@@ -111,7 +111,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCheckFileExist_testIfTheMethodReturnsNega
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCheckFileExist(volType, msg),
-        POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+        EID(MFS_FILE_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCanBeOpenedWhenAllConditionsAreGood)
@@ -119,10 +119,10 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCanBeOpenedWhenA
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(true));
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(true));
     EXPECT_CALL(*container, LookupFileDescByName);
-    EXPECT_CALL(*container, AddFileInActiveList).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*container, AddFileInActiveList).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileIsNotValidWhenTheVolumeIsInvalid)
@@ -130,7 +130,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileIsNotValidWhenTh
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
-        POS_EVENT_ID::MFS_META_VOLUME_NOT_FOUND);
+        EID(MFS_META_VOLUME_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileIsNotValidWhenTheFilenameIsInvalid)
@@ -139,7 +139,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileIsNotValidWhenTh
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+        EID(MFS_FILE_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCannotBeOpenedAgainWhenTheFileIsNotFound)
@@ -149,7 +149,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCannotBeOpenedAg
     EXPECT_CALL(*container, LookupFileDescByName).WillOnce(Return(MetaFsCommonConst::INVALID_FD));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+        EID(MFS_FILE_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCannotBeOpenedAgainWhenTheFileIsAlreadyOpened)
@@ -157,10 +157,10 @@ TEST_F(MetaVolumeHandlerFixture, HandleOpenFileReq_testIfTheFileCannotBeOpenedAg
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(true));
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(true));
     EXPECT_CALL(*container, LookupFileDescByName).WillOnce(Return(0));
-    EXPECT_CALL(*container, AddFileInActiveList).WillOnce(Return(POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY));
+    EXPECT_CALL(*container, AddFileInActiveList).WillOnce(Return(EID(MFS_FILE_OPEN_REPETITIONARY)));
 
     EXPECT_EQ(handler->HandleOpenFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY);
+        EID(MFS_FILE_OPEN_REPETITIONARY));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCloseFileReq_testIfTheFileCanBeClosed)
@@ -169,7 +169,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCloseFileReq_testIfTheFileCanBeClosed)
     EXPECT_CALL(*container, RemoveFileFromActiveList);
 
     EXPECT_EQ(handler->HandleCloseFileReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCloseFileReq_testIfTheFileCannotBeClosedWhenTheFileIsNotOpened)
@@ -177,7 +177,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCloseFileReq_testIfTheFileCannotBeClosedW
     EXPECT_CALL(*container, CheckFileInActive).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCloseFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_NOT_OPENED);
+        EID(MFS_FILE_NOT_OPENED));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCanBeCreated)
@@ -187,7 +187,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCanBeCreated)
     EXPECT_CALL(*container, CreateFile).WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheFilenameIsAlreadyOccupied)
@@ -196,7 +196,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreate
     EXPECT_CALL(*container, CreateFile).Times(0);
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_NAME_EXISTED);
+        EID(MFS_FILE_NAME_EXISTED));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheVolumeDoesNotHaveEnoughSpaceToCreate)
@@ -206,7 +206,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreate
     EXPECT_CALL(*container, CreateFile).Times(0);
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
-        POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE);
+        EID(MFS_META_VOLUME_NOT_ENOUGH_SPACE));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreatedWhenTheVolumeDoesNotHaveEnoughSpaceToCreate2)
@@ -216,7 +216,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreate
     EXPECT_CALL(*container, CreateFile).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_CREATE_FAILED);
+        EID(MFS_FILE_CREATE_FAILED));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCanBeCreated)
@@ -227,7 +227,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCanBeCreated)
     EXPECT_CALL(*container, DeleteFile).WillOnce(Return(true));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDeletedWhenTheVolumeIsInvalid)
@@ -235,7 +235,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDelete
     EXPECT_CALL(*container, IsGivenVolumeExist).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
-        POS_EVENT_ID::MFS_META_VOLUME_NOT_FOUND);
+        EID(MFS_META_VOLUME_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDeletedWhenTheFileIsNotExisted)
@@ -244,7 +244,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDelete
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+        EID(MFS_FILE_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDeletedWhenTrimOperationIsFailed)
@@ -254,7 +254,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDelete
     EXPECT_CALL(*container, TrimData).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_TRIM_FAILED);
+        EID(MFS_FILE_TRIM_FAILED));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDeletedWhenDeleteOperationIsFailed)
@@ -265,7 +265,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleDeleteFileReq_testIfTheFileCannotBeDelete
     EXPECT_CALL(*container, DeleteFile).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleDeleteFileReq(volType, msg),
-        POS_EVENT_ID::MFS_FILE_DELETE_FAILED);
+        EID(MFS_FILE_DELETE_FAILED));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCheckFileAccessibleReq_testIfTheRequestSucceeds)
@@ -273,7 +273,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCheckFileAccessibleReq_testIfTheRequestSu
     EXPECT_CALL(*container, CheckFileInActive).WillOnce(Return(false));
 
     EXPECT_EQ(handler->HandleCheckFileAccessibleReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 
     EXPECT_EQ(msg.completionData.fileAccessible, false);
 }
@@ -283,7 +283,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetDataChunkSizeReq_testIfTheRequestSucce
     EXPECT_CALL(*container, GetDataChunkSize).WillOnce(Return(4032));
 
     EXPECT_EQ(handler->HandleGetDataChunkSizeReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 
     EXPECT_EQ(msg.completionData.dataChunkSize, 4032);
 }
@@ -293,14 +293,14 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetFileSizeReq_testIfTheRequestSucceeds)
     EXPECT_CALL(*container, GetFileSize).WillOnce(Return(4032));
 
     EXPECT_EQ(handler->HandleGetFileSizeReq(volType, msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 
     EXPECT_EQ(msg.completionData.fileSize, 4032);
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleGetTargetMediaTypeReq_testIfTheRequestSucceeds)
 {
-    EXPECT_EQ(handler->HandleGetTargetMediaTypeReq(volType, msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleGetTargetMediaTypeReq(volType, msg), EID(SUCCESS));
     EXPECT_EQ(msg.completionData.targetMediaType, MetaStorageType::SSD);
 }
 
@@ -308,7 +308,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetFileBaseLpnReq_testIfTheRequestSucceed
 {
     EXPECT_CALL(*container, GetFileBaseLpn).WillOnce(Return(1234));
 
-    EXPECT_EQ(handler->HandleGetFileBaseLpnReq(volType, msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleGetFileBaseLpnReq(volType, msg), EID(SUCCESS));
     EXPECT_EQ(msg.completionData.fileBaseLpn, 1234);
 }
 
@@ -316,25 +316,25 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetFreeFileRegionSizeReq_testIfTheRequest
 {
     EXPECT_CALL(*container, GetAvailableSpace).WillOnce(Return(9999));
 
-    EXPECT_EQ(handler->HandleGetFreeFileRegionSizeReq(volType, msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleGetFreeFileRegionSizeReq(volType, msg), EID(SUCCESS));
     EXPECT_EQ(msg.completionData.fileSize, 9999);
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleCreateArrayReq_testIfTheRequestSucceeds)
 {
-    EXPECT_EQ(handler->HandleCreateArrayReq(volType, msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleCreateArrayReq(volType, msg), EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleDeleteArrayReq_testIfTheRequestSucceeds)
 {
-    EXPECT_EQ(handler->HandleDeleteArrayReq(volType, msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleDeleteArrayReq(volType, msg), EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleGetMaxMetaLpnReq_testIfTheRequestSucceeds)
 {
     EXPECT_CALL(*container, GetMaxLpn).WillOnce(Return(9999));
 
-    EXPECT_EQ(handler->HandleGetMaxMetaLpnReq(volType, msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleGetMaxMetaLpnReq(volType, msg), EID(SUCCESS));
     EXPECT_EQ(msg.completionData.maxLpn, 9999);
 }
 
@@ -346,7 +346,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetMetaFileInodeListReq_testIfTheRequestS
     EXPECT_CALL(*container, GetInodeList);
 
     EXPECT_EQ(handler->HandleGetMetaFileInodeListReq(msg),
-        POS_EVENT_ID::SUCCESS);
+        EID(SUCCESS));
 
     delete fileInfoList;
     msg.completionData.fileInfoListPointer = nullptr;
@@ -357,7 +357,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetMetaFileInodeListReq_testIfTheRequestI
     msg.completionData.fileInfoListPointer = nullptr;
 
     EXPECT_EQ(handler->HandleGetMetaFileInodeListReq(msg),
-        POS_EVENT_ID::MFS_INVALID_PARAMETER);
+        EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleGetFileInodeReq_testIfTheRequestSucceeds)
@@ -365,12 +365,12 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetFileInodeReq_testIfTheRequestSucceeds)
     MetaFileInode inode;
 
     EXPECT_CALL(*container, LookupMetaVolumeType(Matcher<std::string&>(_), _))
-        .WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+        .WillRepeatedly(Return(EID(SUCCESS)));
     EXPECT_CALL(*container, LookupFileDescByName).WillRepeatedly(Return(0));
     EXPECT_CALL(*container, GetInode).WillRepeatedly(ReturnRef(inode));
     EXPECT_CALL(*container, CopyInodeToInodeInfo).WillOnce(Return(true));
 
-    EXPECT_EQ(handler->HandleGetFileInodeReq(msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleGetFileInodeReq(msg), EID(SUCCESS));
 
     EXPECT_EQ(msg.completionData.inodeInfoPointer->data.field.dataLocation,
         MetaStorageType::SSD);
@@ -379,26 +379,26 @@ TEST_F(MetaVolumeHandlerFixture, HandleGetFileInodeReq_testIfTheRequestSucceeds)
 TEST_F(MetaVolumeHandlerFixture, HandleGetFileInodeReq_testIfTheRequestIsFailedWhenTheFileIsNotExistedInSpecificVolume)
 {
     EXPECT_CALL(*container, LookupMetaVolumeType(Matcher<std::string&>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::MFS_INVALID_PARAMETER));
+        .WillOnce(Return(EID(MFS_INVALID_PARAMETER)));
 
     EXPECT_EQ(handler->HandleGetFileInodeReq(msg),
-        POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+        EID(MFS_FILE_NOT_FOUND));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleGetFileInodeReq_testIfTheRequestIsFailedWhenTheInodeIsNotExisted)
 {
     EXPECT_CALL(*container, LookupMetaVolumeType(Matcher<std::string&>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*container, LookupFileDescByName(Matcher<std::string&>(_)))
         .WillOnce(Return(0));
     EXPECT_CALL(*container, CopyInodeToInodeInfo).WillOnce(Return(false));
 
-    EXPECT_EQ(handler->HandleGetFileInodeReq(msg), POS_EVENT_ID::MFS_INVALID_PARAMETER);
+    EXPECT_EQ(handler->HandleGetFileInodeReq(msg), EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaVolumeHandlerFixture, HandleEstimateDataChunkSizeReq_testIfTheResultHasTheValidValue)
 {
-    EXPECT_EQ(handler->HandleEstimateDataChunkSizeReq(msg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(handler->HandleEstimateDataChunkSizeReq(msg), EID(SUCCESS));
     EXPECT_EQ(msg.completionData.dataChunkSize, 4032);
 }
 } // namespace pos

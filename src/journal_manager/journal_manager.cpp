@@ -413,7 +413,7 @@ JournalManager::_Reset(void)
     int ret = logBuffer->SyncResetAll();
     if (ret == 0)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_MANAGER_INITIALIZED,
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED),
             "Journal manager is initialized to status {}",
             journalingStatus.Get());
 

@@ -130,35 +130,35 @@ protected:
 
 TEST_F(MetaFsFileIntfFixture, CreateMetaFsFile)
 {
-    EXPECT_CALL(*ctrl, Create).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ctrl, Create).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaFile->Create(fileSize), 0);
 }
 
 TEST_F(MetaFsFileIntfFixture, OpenMetaFsFile)
 {
-    EXPECT_CALL(*ctrl, Open).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ctrl, Open).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaFile->Open(), 0);
 }
 
 TEST_F(MetaFsFileIntfFixture, CloseMetaFsFile)
 {
-    EXPECT_CALL(*ctrl, Close).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ctrl, Close).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaFile->Close(), 0);
 }
 
 TEST_F(MetaFsFileIntfFixture, DeleteMetaFsFile)
 {
-    EXPECT_CALL(*ctrl, Delete).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ctrl, Delete).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaFile->Delete(), 0);
 }
 
 TEST_F(MetaFsFileIntfFixture, DoesFileExist)
 {
-    EXPECT_CALL(*ctrl, CheckFileExist).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ctrl, CheckFileExist).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(metaFile->DoesFileExist());
 }
@@ -172,7 +172,7 @@ TEST_F(MetaFsFileIntfFixture, GetFileSize)
 
 TEST_F(MetaFsFileIntfFixture, IssueAsyncIO)
 {
-    EXPECT_CALL(*io, SubmitIO).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, SubmitIO).WillRepeatedly(Return(EID(SUCCESS)));
 
     AsyncMetaFileIoCtx ctx;
 
@@ -203,14 +203,14 @@ TEST_F(MetaFsFileIntfFixture, CheckFileProperty)
 
 TEST_F(MetaFsFileIntfFixture, ReadMetaFile)
 {
-    EXPECT_CALL(*io, Read(_, _, _, _, _)).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, Read(_, _, _, _, _)).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaFile->Read(0, 0, 0, nullptr), 0);
 }
 
 TEST_F(MetaFsFileIntfFixture, WriteMetaFile)
 {
-    EXPECT_CALL(*io, Write(_, _, _, _, _)).WillRepeatedly(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, Write(_, _, _, _, _)).WillRepeatedly(Return(EID(SUCCESS)));
 
     EXPECT_EQ(metaFile->Write(0, 0, 0, nullptr), 0);
 }

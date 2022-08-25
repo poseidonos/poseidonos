@@ -66,7 +66,7 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
         segmentInfoDiffs.push_back(segmentInfo);
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG,
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG),
         "Versioned segment context is initialized, numLogGroups: {}, numSegments: {}",
         config->GetNumLogGroups(), numSegments);
 }
@@ -107,7 +107,7 @@ VersionedSegmentCtx::Dispose(void)
         segmentInfos = nullptr;
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG, "Disposed versioned segment context");
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "Disposed versioned segment context");
 }
 
 void
@@ -177,7 +177,7 @@ VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
     segmentInfosInFlush = logGroupId;
     _UpdateSegmentContext(logGroupId);
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
+    POS_TRACE_DEBUG(EID(JOURNAL_DEBUG), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
 
     return segmentInfos;
 }
@@ -191,7 +191,7 @@ VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
 
     segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info is flushed, logGroup {}", logGroupId);
+    POS_TRACE_DEBUG(EID(JOURNAL_DEBUG), "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
 int

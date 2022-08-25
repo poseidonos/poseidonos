@@ -177,7 +177,7 @@ ReplayStripe::DeleteBlockMapReplayEvents(void)
         }
     }
 
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_VOLUME_EVENT);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_VOLUME_EVENT));
     POS_TRACE_DEBUG(eventId, "[Replay] {} block log of volume {} is skipped",
         numErasedLogs, status->GetVolumeId());
 }

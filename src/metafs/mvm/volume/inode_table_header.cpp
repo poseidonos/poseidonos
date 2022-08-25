@@ -163,7 +163,7 @@ InodeTableHeader::Load(void)
 {
     bool rc = OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Load();
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Load InodeTableHeader contents");
 
     if (true == rc)
@@ -185,7 +185,7 @@ InodeTableHeader::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
     bool rc = OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Load(
         media, baseLPN, idx, pageCNT);
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Load InodeTableHeader contents");
 
     if (true == rc)
@@ -203,7 +203,7 @@ InodeTableHeader::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
 bool
 InodeTableHeader::Store(void)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Store InodeTableHeader contents");
 
     _PrintLog();
@@ -215,7 +215,7 @@ bool
 InodeTableHeader::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
     MetaLpnType pageCNT)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+    POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Store InodeTableHeader contents");
 
     _PrintLog();
@@ -231,7 +231,7 @@ InodeTableHeader::_PrintLog(void) const
     {
         if (0 != content->allocExtentsList[i].GetCount())
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::MFS_DEBUG_MESSAGE,
+            POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "Allocated extent[{}]: start={}, count={}",
                 i, content->allocExtentsList[i].GetStartLpn(),
                 content->allocExtentsList[i].GetCount());

@@ -80,7 +80,7 @@ MetaIoManager::~MetaIoManager(void)
 POS_EVENT_ID
 MetaIoManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     return rc;
 }
@@ -88,7 +88,7 @@ MetaIoManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 bool
 MetaIoManager::IsSuccess(POS_EVENT_ID rc)
 {
-    return rc == POS_EVENT_ID::SUCCESS;
+    return rc == EID(SUCCESS);
 }
 
 void
@@ -177,7 +177,7 @@ MetaIoManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
 POS_EVENT_ID
 MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     // reqMsg     : original message, used only this thread
     // cloneReqMsg: new copy, only for meta scheduler, not meta handler thread
@@ -200,7 +200,7 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
         {
             MFS_TRACE_ERROR(EID(MFS_IO_FAILED_DUE_TO_ERROR),
                 "[MSG ] Sync I/O failed. req.tagId={}, fd={}", reqMsg.tagId, reqMsg.fd);
-            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+            rc = EID(MFS_IO_FAILED_DUE_TO_ERROR);
         }
     }
 

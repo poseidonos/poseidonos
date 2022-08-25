@@ -111,7 +111,7 @@ ThrottlingPolicyDeficit::_GetBwIopsCorrection(int64_t& bwCorrection, int64_t& io
             {
                 noOfCycles = 0;
                 beginAgain = true;
-                POS_EVENT_ID eventId = POS_EVENT_ID::QOS_MINIMUM_NOT_MET;
+                POS_EVENT_ID eventId = EID(QOS_MINIMUM_NOT_MET);
                 POS_TRACE_ERROR(static_cast<int>(eventId), "Minimum Policy cannot be met, set valid values");
                 return;
             }
@@ -159,7 +159,7 @@ ThrottlingPolicyDeficit::_GetBwIopsCorrection(int64_t& bwCorrection, int64_t& io
         if (totalCycleIter == 1 && volThrottle->CorrectionType() != QosCorrectionDir_NoChange)
         {
             // Minimum not met in first GUARANTEE_CYCLES
-            POS_EVENT_ID eventId = POS_EVENT_ID::QOS_MINIMUM_NOT_MET;
+            POS_EVENT_ID eventId = EID(QOS_MINIMUM_NOT_MET);
             POS_TRACE_ERROR(static_cast<int>(eventId), "Minimum Policy not met in Guarantee Cycles");
         }
         noOfCycles = 0;

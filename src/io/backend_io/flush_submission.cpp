@@ -120,7 +120,7 @@ FlushSubmission::Execute(void)
             arrayId, WRITE_BUFFER, physicalEntries, startWbLogicalEntry);
         if (unlikely(ret != EID(SUCCESS)))
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
+            POS_EVENT_ID eventId = EID(FLUSH_DEBUG_SUBMIT);
             POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);
             // No retry
             FlushCountSingleton::Instance()->pendingFlush--;
@@ -156,7 +156,7 @@ FlushSubmission::Execute(void)
 
     CallbackSmartPtr callback(new StripeMapUpdateRequest(stripe, arrayId));
 
-    POS_EVENT_ID eventId = POS_EVENT_ID::FLUSH_DEBUG_SUBMIT;
+    POS_EVENT_ID eventId = EID(FLUSH_DEBUG_SUBMIT);
 
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId,
         "Flush Submission vsid : {} StartLSA.stripeId : {} blocksInStripe : {}",

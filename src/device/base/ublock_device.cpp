@@ -79,7 +79,7 @@ UBlockDevice::_RegisterContextToCurrentCore(DeviceContext* devCtx)
         currentThreadVirtualId = ++lastVirtualId;
         if (MAX_THREAD_COUNT <= currentThreadVirtualId)
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_THREAD_REGISTERED_FAILED;
+            POS_EVENT_ID eventId = EID(DEVICE_THREAD_REGISTERED_FAILED);
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 "Error: register device context failed: {}", GetName());
 
@@ -123,7 +123,7 @@ UBlockDevice::_RegisterThread(void)
     bool ret = _RegisterContextToCurrentCore(_AllocateDeviceContext());
     if (ret == false)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_THREAD_REGISTERED_FAILED;
+        POS_EVENT_ID eventId = EID(DEVICE_THREAD_REGISTERED_FAILED);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Error: register device context failed: {}", GetName());
         return false;
@@ -204,7 +204,7 @@ UBlockDevice::SubmitAsyncIO(UbioSmartPtr bio)
     DeviceContext* deviceContext = _GetDeviceContext();
     if (likely(deviceContext == nullptr))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_CONTEXT_NOT_FOUND;
+        POS_EVENT_ID eventId = EID(DEVICE_CONTEXT_NOT_FOUND);
         POS_TRACE_DEBUG(eventId, "Device context is not found: {}", GetName());
         IoCompleter ioCompleter(bio);
         ioCompleter.CompleteUbio(IOErrorType::DEVICE_ERROR, true);
@@ -228,7 +228,7 @@ UBlockDevice::CompleteIOs(void)
     DeviceContext* deviceContext = _GetDeviceContext();
     if (unlikely(deviceContext == nullptr))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_CONTEXT_NOT_FOUND;
+        POS_EVENT_ID eventId = EID(DEVICE_CONTEXT_NOT_FOUND);
         POS_TRACE_ERROR(eventId, "Device context is not found: {}", GetName());
         return 0;
     }
@@ -269,7 +269,7 @@ UBlockDevice::AddPendingErrorCount(uint32_t errorsToAdd)
     if (unlikely((UINT32_MAX - oldPendingErrorCount) < errorsToAdd))
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::DEVICE_UNEXPECTED_PENDING_ERROR_COUNT;
+            EID(DEVICE_UNEXPECTED_PENDING_ERROR_COUNT);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Unexpected pending error count: {}, Current pending error count: {}, Added or subtracted error count: {}",
             "overflow!!", oldPendingErrorCount, errorsToAdd);
@@ -283,7 +283,7 @@ UBlockDevice::SubtractPendingErrorCount(uint32_t errorsToSubtract)
     if (unlikely(oldPendingErrorCount < errorsToSubtract))
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::DEVICE_UNEXPECTED_PENDING_ERROR_COUNT;
+            EID(DEVICE_UNEXPECTED_PENDING_ERROR_COUNT);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Unexpected pending error count: {}, Current pending error count: {}, Added or subtracted error count: {}",
             "underflow!!", oldPendingErrorCount, errorsToSubtract);
@@ -296,7 +296,7 @@ UBlockDevice::SetDedicatedIOWorker(IOWorker* ioWorker)
     if (unlikely(dedicatedIOWorker != nullptr))
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::DEVICE_OVERLAPPED_SET_IOWORKER;
+            EID(DEVICE_OVERLAPPED_SET_IOWORKER);
         POS_TRACE_WARN(static_cast<int>(eventId),
             "Overlapped setting for ioworker for single device: {} ",
             GetName());
@@ -310,7 +310,7 @@ UBlockDevice::GetDedicatedIOWorker(void)
     if (unlikely(dedicatedIOWorker == nullptr))
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::DEVICE_NULLPTR_IOWORKER;
+            EID(DEVICE_NULLPTR_IOWORKER);
         POS_TRACE_WARN(static_cast<int>(eventId),
             "Overlapped setting for ioworker for single device: {} ",
             GetName());

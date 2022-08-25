@@ -112,7 +112,7 @@ EventFrameworkApi::SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* ar
 {
     if (unlikely(core >= MAX_REACTOR_COUNT))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::EVENTFRAMEWORK_INVALID_REACTOR;
+        POS_EVENT_ID eventId = EID(EVENTFRAMEWORK_INVALID_REACTOR);
         POS_TRACE_ERROR(eventId, "Reactor {} is not processable", core);
         return false;
     }

@@ -67,19 +67,19 @@ TestMetaStorageSubsystem::~TestMetaStorageSubsystem(void)
 POS_EVENT_ID
 TestMetaStorageSubsystem::CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
 TestMetaStorageSubsystem::Open(void)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
 TestMetaStorageSubsystem::Close(void)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 uint64_t
@@ -91,13 +91,13 @@ TestMetaStorageSubsystem::GetCapacity(MetaStorageType mediaType)
 POS_EVENT_ID
 TestMetaStorageSubsystem::ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
 TestMetaStorageSubsystem::WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 bool
@@ -108,19 +108,19 @@ TestMetaStorageSubsystem::IsAIOSupport(void)
 POS_EVENT_ID
 TestMetaStorageSubsystem::ReadPageAsync(MssAioCbCxt* cb)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
 TestMetaStorageSubsystem::WritePageAsync(MssAioCbCxt* cb)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
 TestMetaStorageSubsystem::TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 LogicalBlkAddr
@@ -138,7 +138,7 @@ TestMetaStorageSubsystem::DoPageIO(MssOpcode opcode, MetaStorageType mediaType, 
 
     throw logic_error("not implemented");
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
@@ -167,6 +167,6 @@ TestMetaStorageSubsystem::DoPageIOAsync(MssOpcode opcode, MssAioCbCxt* cb)
 
     cb->InvokeCallback();
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 } // namespace pos

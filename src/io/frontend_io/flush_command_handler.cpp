@@ -114,7 +114,7 @@ FlushCmdHandler::Execute(void)
                 "All stripes flush completed");
 
             POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                EID(FLUSH_CMD_ONGOING),
                 "User data flush for volume {} completed", volumeId);
 
         {
@@ -214,7 +214,7 @@ FlushCmdHandler::Execute(void)
                 }
 
                 POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                        POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                        EID(FLUSH_CMD_ONGOING),
                         "Meta data flush for volume {} is requested", volumeId);
             }
 

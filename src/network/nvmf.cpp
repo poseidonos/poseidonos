@@ -95,7 +95,7 @@ Nvmf::SetuNVMfIOHandler(unvmf_io_handler handler)
     if (ioHandler.submit || ioHandler.complete)
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_OVERRIDE_UNVMF_IO_HANDLER;
+            EID(IONVMF_OVERRIDE_UNVMF_IO_HANDLER);
         POS_TRACE_WARN(static_cast<int>(eventId), "Override unvmf_io_handler");
     }
     ioHandler.submit = handler.submit;

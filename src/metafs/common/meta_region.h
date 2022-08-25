@@ -198,7 +198,7 @@ MetaRegion<MetaRegionT, MetaContentT>::Load(void)
 
     // The Data in GetDataBuf() is contents of each regions in the  mediaType.
     POS_EVENT_ID rc = mssIntf->ReadPage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
-    return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
+    return (rc == EID(SUCCESS)) ? true : false;
 }
 // LCOV_EXCL_STOP
 
@@ -212,7 +212,7 @@ MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType b
         (int)media, baseLPN, pageCNT);
 
     POS_EVENT_ID rc = mssIntf->ReadPage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
-    return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
+    return (rc == EID(SUCCESS)) ? true : false;
 }
 // LCOV_EXCL_STOP
 
@@ -225,7 +225,7 @@ MetaRegion<MetaRegionT, MetaContentT>::Store(void)
         "Do meta store <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
     POS_EVENT_ID rc = mssIntf->WritePage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
-    return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
+    return (rc == EID(SUCCESS)) ? true : false;
 }
 // LCOV_EXCL_STOP
 
@@ -239,7 +239,7 @@ MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType 
         (int)media, baseLPN, pageCNT);
 
     POS_EVENT_ID rc = mssIntf->WritePage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
-    return (rc == POS_EVENT_ID::SUCCESS) ? true : false;
+    return (rc == EID(SUCCESS)) ? true : false;
 }
 // LCOV_EXCL_STOP
 

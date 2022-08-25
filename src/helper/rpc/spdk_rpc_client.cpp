@@ -217,7 +217,7 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
         if (minSharedBuffers > numSharedBuf)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED;
+                EID(IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED);
             POS_TRACE_INFO(static_cast<int>(eventId),
             "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system",
             numSharedBuf, minSharedBuffers);
