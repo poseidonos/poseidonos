@@ -39,6 +39,8 @@
 // A Meta Filesystem Layer instance accessible by upper modules
 #pragma once
 
+#include <numa.h>
+
 #include <array>
 #include <memory>
 #include <string>
@@ -53,6 +55,7 @@ namespace pos
 class MetaFsIoScheduler;
 class MetaFsConfigManager;
 class TelemetryPublisher;
+class MetaFsIoSchedulerFactory;
 
 using SchedulerMap = std::unordered_map<uint32_t, MetaFsIoScheduler*>;
 
@@ -60,7 +63,8 @@ class MetaFsService
 {
 public:
     MetaFsService(void);
-    MetaFsService(MetaFsConfigManager* configManager);
+    // for test
+    MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory);
     virtual ~MetaFsService(void);
     virtual void Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
         const cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
@@ -80,7 +84,12 @@ public:
 private:
     void _CreateScheduler(const uint32_t totalCount, const cpu_set_t schedSet,
         const cpu_set_t workSet);
+    uint32_t _GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId) const;
     bool _CheckIfPossibleToCreateScheduler(const int numOfSchedulersCreated);
+    virtual uint32_t _GetNumaId(const uint32_t coreId)
+    {
+        return numa_node_of_cpu(coreId);
+    }
 
     const int MAX_SCHEDULER_COUNT = 2;
     std::unordered_map<std::string, int> arrayNameToId_;
@@ -89,6 +98,7 @@ private:
     MetaFsConfigManager* configManager_;
     bool needToRemoveConfig_;
     TelemetryPublisher* tp_;
+    MetaFsIoSchedulerFactory* factory_;
 };
 
 using MetaFsServiceSingleton = Singleton<MetaFsService>;

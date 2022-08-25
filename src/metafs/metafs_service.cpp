@@ -32,13 +32,12 @@
 
 #include "metafs_service.h"
 
-#include <numa.h>
-
 #include <string>
 #include <unordered_map>
 
 #include "src/metafs/config/metafs_config_manager.h"
 #include "src/metafs/mim/metafs_io_scheduler.h"
+#include "src/metafs/mim/metafs_io_scheduler_factory.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
@@ -46,14 +45,16 @@ namespace pos
 MetaFsService::MetaFsService(void)
 : configManager_(new MetaFsConfigManager(ConfigManagerSingleton::Instance())),
   needToRemoveConfig_(true),
-  tp_(nullptr)
+  tp_(nullptr),
+  factory_(new MetaFsIoSchedulerFactory())
 {
 }
 
-MetaFsService::MetaFsService(MetaFsConfigManager* configManager)
+MetaFsService::MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory)
 : configManager_(configManager),
   needToRemoveConfig_(false),
-  tp_(nullptr)
+  tp_(nullptr),
+  factory_(factory)
 {
     fileSystems_.fill(nullptr);
 }
@@ -89,6 +90,11 @@ MetaFsService::~MetaFsService(void)
 
         delete configManager_;
         configManager_ = nullptr;
+    }
+
+    if (factory_)
+    {
+        delete factory_;
     }
 }
 
@@ -173,17 +179,15 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
 
             if (!_CheckIfPossibleToCreateScheduler(numOfSchedulersCreated))
             {
-                POS_TRACE_WARN((int)POS_EVENT_ID::MFS_UNNECESSARY_SCHEDULER_SET,
+                POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_UNNECESSARY_SCHEDULER_SET,
                     "This meta scheduler will not be created, when the numa_dedicated setting is turned on");
-                continue;
+                assert(false);
             }
 
-            MetaFsIoScheduler* scheduler = new MetaFsIoScheduler(0, coreId, totalCoreCount,
-                threadName, mioSet, configManager_, tp_,
-                new MetaFsTimeInterval(configManager_->GetTimeIntervalInMillisecondsForMetric()),
-                configManager_->GetWrrWeight(), configManager_->IsSupportingNumaDedicatedScheduling());
+            MetaFsIoScheduler* scheduler = factory_->CreateMetaFsIoScheduler(0, coreId, totalCoreCount,
+                threadName, mioSet, configManager_, tp_);
 
-            int numaId = numa_node_of_cpu(coreId);
+            int numaId = _GetNumaIdConsideringNumaDedicatedScheduling(_GetNumaId(coreId));
             if (ioScheduler_.find(numaId) == ioScheduler_.end())
             {
                 ioScheduler_.insert({numaId, scheduler});
@@ -192,9 +196,10 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
             }
             else
             {
-                POS_TRACE_WARN((int)POS_EVENT_ID::MFS_TRY_TO_CREATE_SCHEDULER_IN_THE_SAME_NUMA,
+                POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_TRY_TO_CREATE_SCHEDULER_IN_THE_SAME_NUMA,
                     "Only one scheduler can be created for each NUMA");
                 delete scheduler;
+                assert(false);
             }
         }
     }
@@ -206,6 +211,12 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
             numOfSchedulersCreated, MAX_SCHEDULER_COUNT);
         assert(false);
     }
+}
+
+uint32_t
+MetaFsService::_GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId) const
+{
+    return configManager_->IsSupportingNumaDedicatedScheduling() ? numaId : 0;
 }
 
 bool

@@ -46,6 +46,14 @@
 
 namespace pos
 {
+MetaFsIoScheduler::MetaFsIoScheduler(void)
+: TOTAL_NUMA_COUNT(0),
+  SUPPORT_NUMA_DEDICATED_SCHEDULING(0),
+  TOTAL_CORE_COUNT(0),
+  MIO_CORE_SET()
+{
+}
+
 MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
     const int totalCoreCount, const std::string& threadName,
     const cpu_set_t mioCoreSet, MetaFsConfigManager* config,

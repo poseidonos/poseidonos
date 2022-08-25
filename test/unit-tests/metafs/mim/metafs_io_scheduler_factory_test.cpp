@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/metafs/mim/metafs_io_scheduler_factory.h"
+
+#include <gtest/gtest.h>
+#include <sched.h>
 
 #include <string>
-#include <thread>
+#include <vector>
 
-#include "src/metafs/include/meta_storage_specific.h"
+#include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
+
+using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
-class MetaFsIoHandlerBase
+TEST(MetaFsIoSchedulerFactory, CreateMetaFsIoScheduler_testIfMetaFsIoSchedulerCanBeCreated)
 {
-public:
-    // only for test
-    MetaFsIoHandlerBase(void) = default;
-    explicit MetaFsIoHandlerBase(const int threadId, const int coreId,
-        const std::string& threadName);
-    virtual ~MetaFsIoHandlerBase(void);
+    NiceMock<MockMetaFsConfigManager> config;
+    std::vector<int> weight;
+    ON_CALL(config, GetTimeIntervalInMillisecondsForMetric).WillByDefault(Return(0));
+    ON_CALL(config, GetWrrWeight).WillByDefault(Return(weight));
+    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
 
-    virtual void StartThread(void) = 0;
-    virtual void ExitThread(void);
+    cpu_set_t test_set;
+    CPU_SET(0, &test_set);
 
-    virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map) = 0;
-    virtual bool RemoveArrayInfo(const int arrayId) = 0;
+    MetaFsIoSchedulerFactory factory;
 
-    virtual void PrepareThread(void) const;
+    MetaFsIoScheduler* scheduler = nullptr;
+    scheduler = factory.CreateMetaFsIoScheduler(0, 0, 0, "test", test_set, &config, nullptr);
 
-    virtual std::string GetLogString(void) const;
-
-protected:
-    int threadId_;
-    int coreId_;
-    std::thread* th_;
-    bool threadExit_;
-    std::string threadName_;
-
-private:
-    void _UpdateThreadName(void) const;
-    void _UpdateCpuPinning(void) const;
-};
+    EXPECT_NE(scheduler, nullptr);
+}
 } // namespace pos

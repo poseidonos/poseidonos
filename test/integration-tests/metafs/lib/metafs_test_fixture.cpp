@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/metafs/include/metafs_service.h"
+#include "src/metafs/mim/metafs_io_scheduler_factory.h"
 
 using ::testing::_;
 using ::testing::Matcher;
@@ -132,7 +133,7 @@ MetaFsTestFixture::_SetThreadModel(void)
     cpu_set_t workerCPUSet = _GetCpuSet(1, 1);
 
     MetaFsServiceSingleton::ResetInstance();
-    MetaFsServiceSingleton::Instance(config)
+    MetaFsServiceSingleton::Instance(config, new MetaFsIoSchedulerFactory())
         ->Initialize(coreCount, schedulerCPUSet, workerCPUSet, tpForMetaIo);
 }
 
