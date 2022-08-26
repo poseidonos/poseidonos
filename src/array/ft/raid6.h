@@ -30,28 +30,25 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RAID5_H_
-#define RAID5_H_
+#ifndef RAID6_H_
+#define RAID6_H_
+
+#include "method.h"
+#include "src/cpu_affinity/affinity_manager.h"
+#include "src/resource_manager/memory_manager.h"
 
 #include <list>
 #include <vector>
-#include <utility>
-
-#include "method.h"
-#include "src/resource_manager/memory_manager.h"
-#include "src/cpu_affinity/affinity_manager.h"
-
 namespace pos
 {
 class PartitionPhysicalSize;
 class RebuildBehavior;
 class BufferPool;
-
-class Raid5 : public Method
+class Raid6 : public Method
 {
 public:
-    explicit Raid5(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
-    virtual ~Raid5();
+    explicit Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
+    virtual ~Raid6();
     virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
         AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
         MemoryManager* memoryMgr = MemoryManagerSingleton::Instance());
@@ -63,23 +60,24 @@ public:
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
     bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
-    vector<pair<vector<uint32_t>, vector<uint32_t>>> GetRebuildGroupPairs(vector<uint32_t>& targetIndexs) override;
-
     // This function is for unit testing only
     virtual int GetParityPoolSize();
+
 private:
-    void _BindRecoverFunc(void);
-    void _RebuildData(void* dst, void* src, uint32_t size);
+    void _RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rebuildIndex, vector<ArrayDeviceState> devs);
     BufferEntry _AllocChunk();
-    void _ComputeParityChunk(BufferEntry& dst, const list<BufferEntry>& src);
-    void _XorBlocks(void* dst, const void* src, uint32_t memSize);
-    void _XorBlocks(void* dst, void* src1, void* src2, uint32_t memSize);
+    void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
     MemoryManager* memoryManager = nullptr;
     uint64_t parityBufferCntPerNuma = 0;
-    RecoverFunc recoverFunc = nullptr;
+
+    uint32_t chunkSize = 0;
+    uint32_t chunkCnt = 0;
+    uint32_t dataCnt = 0;
+    uint32_t parityCnt = 2;
+    unsigned char* encode_matrix = nullptr;
 };
 
 } // namespace pos
-#endif // RAID5_H_
+#endif // RAID6_H_

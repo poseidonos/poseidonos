@@ -76,7 +76,7 @@ Raid10::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 }
 
 list<FtBlkAddr>
-Raid10::GetRebuildGroup(FtBlkAddr fba)
+Raid10::GetRebuildGroup(FtBlkAddr fba, vector<ArrayDeviceState> devs)
 {
     uint32_t idx = fba.offset / ftSize_.blksPerChunk;
     uint32_t offset = fba.offset % ftSize_.blksPerChunk;
@@ -163,6 +163,12 @@ Raid10::_GetMirrorIndex(uint32_t idx)
     {
         return idx + mirrorDevCnt;
     }
+}
+
+RecoverFunc
+Raid10::GetRecoverFunc(int devIdx, vector<ArrayDeviceState> devs)
+{
+    return recoverFunc;
 }
 
 Raid10::~Raid10()

@@ -97,7 +97,7 @@ Raid5::Translate(const LogicalEntry& le)
 }
 
 list<FtBlkAddr>
-Raid5::GetRebuildGroup(FtBlkAddr fba)
+Raid5::GetRebuildGroup(FtBlkAddr fba, vector<ArrayDeviceState> devs)
 {
     uint32_t blksPerChunk = ftSize_.blksPerChunk;
     uint32_t offsetInChunk = fba.offset % blksPerChunk;
@@ -338,6 +338,10 @@ Raid5::GetParityPoolSize()
     return parityPools.size();
 }
 
-
+RecoverFunc
+Raid5::GetRecoverFunc(int devIdx, vector<ArrayDeviceState> devs)
+{
+    return recoverFunc;
+}
 } // namespace pos
 

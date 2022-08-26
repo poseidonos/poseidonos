@@ -46,6 +46,7 @@
 #include "src/array/ft/raid5.h"
 #include "src/array/ft/raid0.h"
 #include "src/array/ft/raid_none.h"
+#include "src/array/ft/raid6.h"
 #include "src/helper/calc/calc.h"
 
 namespace pos
@@ -221,6 +222,16 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         }
         method = raid5;
     }
+    else if (raidType == RaidTypeEnum::RAID6)
+    {
+        uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
+        uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
+        uint64_t maxGcStripes = 2048;
+        uint64_t parityCnt = 2;
+        uint64_t reqBuffersPerNuma = (totalNvmStripes + maxGcStripes) * parityCnt;
+        Raid6* raid6 = new Raid6(&physicalSize, reqBuffersPerNuma);
+        method = raid6;
+    }
     else if (raidType == RaidTypeEnum::NONE)
     {
         RaidNone* raidNone = new RaidNone(&physicalSize);
@@ -369,7 +380,9 @@ StripePartition::_Pba2Fba(const PhysicalBlkAddr& pba)
 list<PhysicalBlkAddr>
 StripePartition::_GetRebuildGroup(FtBlkAddr fba)
 {
-    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba);
+    auto&& deviceStateList = Enumerable::Select(devs,
+        [](auto d) { return d->GetState(); });
+    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba, deviceStateList);
     list<PhysicalBlkAddr> ret;
     for (FtBlkAddr fba : ftAddrs)
     {
@@ -422,9 +435,12 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
 {
     uint64_t lba = ubio->GetLba();
     ArrayDevice* dev = static_cast<ArrayDevice*>(ubio->GetArrayDev());
+    auto&& deviceStateList = Enumerable::Select(devs,
+        [](auto d) { return d->GetState(); });
     if (IsValidLba(lba))
     {
-        if (FindDevice(dev) >= 0)
+        int devIdx = FindDevice(dev);
+        if (devIdx >= 0)
         {
             // Chunk Aliging check
             const uint32_t sectorSize = ArrayConfig::SECTOR_SIZE_BYTE;
@@ -435,7 +451,7 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
             originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
             FtBlkAddr fba = _Pba2Fba(originPba);
             out.srcAddr = _GetRebuildGroup(fba);
-            out.recoverFunc = method->GetRecoverFunc();
+            out.recoverFunc = method->GetRecoverFunc(devIdx, deviceStateList);
 
             return EID(SUCCESS);
         }
