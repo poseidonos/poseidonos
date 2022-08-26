@@ -423,12 +423,19 @@ DeviceManager::GetNvmeCtrlr(std::string& deviceName)
 void
 DeviceManager::AttachDevice(UblockSharedPtr dev)
 {
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
-    if (_CheckDuplication(dev) == true)
+    bool isNew = false;
     {
-        _PrepareDevice(dev);
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        if (_CheckDuplication(dev) == true)
+        {
+            _PrepareDevice(dev);
+            devices.push_back(dev);
+            isNew = true;
+        }
+    }
+    if (isNew == true)
+    {
         deviceEvent->DeviceAttached(dev);
-        devices.push_back(dev);
         POS_TRACE_TRACE(EID(POS_TRACE_DEVICE_ATTACHED),
             "device_name:{}, device_mn:{}, device_sn:{}",
             dev->GetName(), dev->GetMN(), dev->GetSN());
