@@ -50,7 +50,7 @@ public:
     }
     void ErrorLogUnderflow(void) override
     {
-        POS_TRACE_WARN(POS_EVENT_ID::DEBUG_ATOMIC_UNDERFLOW,
+        POS_TRACE_WARN(EID(DEBUG_ATOMIC_UNDERFLOW),
             "io submit handler count underflow!");
     }
 };

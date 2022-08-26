@@ -95,7 +95,7 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
             "You attempt to create meta storage again. mediaType: {}",
             index);
         Open();
-        return POS_EVENT_ID::SUCCESS; // just return success
+        return EID(SUCCESS); // just return success
     }
 
     // Can also choose update type base on mediaType
@@ -132,7 +132,7 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
 
     retryIoCnt = 0;
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
@@ -141,7 +141,7 @@ MssOnDisk::Open(void)
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Meta storage mgmt is ready");
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
@@ -152,7 +152,7 @@ MssOnDisk::Close(void)
 
     _Finalize();
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 uint64_t
@@ -171,7 +171,7 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
 
     if (_CheckSanityErr(currLpn, totalBlks[static_cast<int>(mediaType)]))
     {
-        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        return EID(MFS_INVALID_PARAMETER);
     }
 
     _AdjustPageIoToFitTargetPartition(mediaType, currLpn, requestLpnCount);
@@ -212,7 +212,7 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
             MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
                 "[MFS IO FAIL] Fail I/O Dut to System Stop State");
 
-            return POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
+            return EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
         }
 
         if (IODirection::TRIM != direction)
@@ -223,7 +223,7 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
         requestLpnCount -= currLpnCnt;
     }
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 std::list<BufferEntry>
@@ -305,14 +305,14 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     MetaLpnType startLpn = aioData->GetMetaLpn();
     MetaLpnType requestLpnCount = aioData->GetLpnCount();
     MetaStorageType mediaType = aioData->GetStorageType();
-    POS_EVENT_ID status = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID status = EID(SUCCESS);
     const bool isJournal = (mediaType != MetaStorageType::SSD) ? true : false;
 
     assert(pos::BLOCK_SIZE == MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
     if (true == _CheckSanityErr(startLpn, totalBlks[(int)mediaType]))
     {
-        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        return EID(MFS_INVALID_PARAMETER);
     }
 
     _AdjustPageIoToFitTargetPartition(mediaType, startLpn, requestLpnCount);
@@ -371,7 +371,7 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
             "[MFS IO FAIL] Fail I/O Dut to System Stop State, type={}, req.tagId={}, mpio_id={}",
             (int)direction, aioData->GetTagId(), aioData->GetMpioId());
 
-        status = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE;
+        status = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
     }
 
     return status;

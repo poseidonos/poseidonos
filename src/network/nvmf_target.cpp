@@ -96,7 +96,7 @@ NvmfTarget::NvmfTarget(SpdkCaller* spdkCaller, bool feQosEnable,
     }
     else
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_NO_CONFIG_MGR;
+        POS_EVENT_ID eventId = EID(IONVMF_NO_CONFIG_MGR);
         POS_TRACE_ERROR(static_cast<int>(eventId), "Fail to get the configManager");
     }
     InitNvmfCallbacks(&nvmfCallbacks);
@@ -121,8 +121,8 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
     bool ret = _InitPosBdev(bdevName);
     if (false == ret)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_INIT_POS_BDEV;
-        POS_TRACE_ERROR(static_cast<int>(eventId), PosEventId::GetString(eventId), bdevName);
+        POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_INIT_POS_BDEV);
+        POS_TRACE_ERROR(static_cast<int>(eventId), "bdevName:{}", bdevName);
         return false;
     }
 
@@ -133,7 +133,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
         if (uuidParse != 0)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_FAIL_TO_PARSE_UUID;
+                EID(IONVMF_FAIL_TO_PARSE_UUID);
             POS_TRACE_ERROR(static_cast<int>(eventId), "Fail to parse uuid string({}) to uuid", uuid);
             if (nullptr != bdev_uuid)
             {
@@ -153,7 +153,7 @@ NvmfTarget::CreatePosBdev(const string& bdevName, const string uuid, uint32_t id
     if (bdev == nullptr)
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
+            EID(IONVMF_FAIL_TO_CREATE_POS_BDEV);
         POS_TRACE_ERROR(static_cast<int>(eventId), "Fail to create pos bdev({})", bdevName);
         return false;
     }
@@ -211,7 +211,7 @@ NvmfTarget::DeletePosBdevAll(string arrayName, uint64_t time)
     {
         if (true == timeChecker.CheckTimeout())
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT;
+            POS_EVENT_ID eventId = EID(IONVMF_VOL_DELETE_TIMEOUT);
             POS_TRACE_WARN(static_cast<int>(eventId),
                 "Timeout occured during deleting all volumes in array:{}", arrayName);
             deletedBdev = 0;
@@ -308,7 +308,7 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
         {
             attachedNsid = NvmfCallbackStatus::FAILED;
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_VOL_MOUNT_TIMEOUT;
+                EID(IONVMF_VOL_MOUNT_TIMEOUT);
             POS_TRACE_WARN(static_cast<int>(eventId),
                 "Volume(id: {}, array: {}) mount timeout.",
                 volId, arrayName);
@@ -373,7 +373,7 @@ NvmfTarget::_AttachNamespaceWithNsid(const string& nqn, const string& bdevName,
     }
     else
     {
-        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        int event = static_cast<int>(EID(IONVMF_SPDK_NVMF_CALLER_NULLPTR));
         POS_TRACE_ERROR(event, "Failed to attach namespace with nsid. SpdkNvmfCaller is nullptr");
         return false;
     }
@@ -404,7 +404,7 @@ NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
     }
     else
     {
-        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        int event = static_cast<int>(EID(IONVMF_SPDK_NVMF_CALLER_NULLPTR));
         POS_TRACE_ERROR(event, "Failed to attach namespace. SpdkNvmfCaller is nullptr");
     }
 }
@@ -527,7 +527,7 @@ NvmfTarget::_DetachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
     }
     else
     {
-        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        int event = static_cast<int>(EID(IONVMF_SPDK_NVMF_CALLER_NULLPTR));
         POS_TRACE_ERROR(event, "Failed to detach namespace. SpdkNvmfCaller is nullptr");
     }
 }
@@ -594,7 +594,7 @@ NvmfTarget::_DetachNamespaceAllWithPause(void* arg1, void* arg2, EventFrameworkA
     }
     else
     {
-        int event = static_cast<int>(POS_EVENT_ID::IONVMF_SPDK_NVMF_CALLER_NULLPTR);
+        int event = static_cast<int>(EID(IONVMF_SPDK_NVMF_CALLER_NULLPTR));
         POS_TRACE_ERROR(event, "Failed to detach namespace all. SpdkNvmfCaller is nullptr");
     }
 }
@@ -808,7 +808,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         if (volIdIdx == string::npos)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_FAIL_TO_FIND_VOLID;
+                EID(IONVMF_FAIL_TO_FIND_VOLID);
             POS_TRACE_WARN(static_cast<int>(eventId), "Fail to parse volume id from bdev name");
             ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
@@ -817,7 +817,7 @@ NvmfTarget::GetAttachedVolumeList(string& subnqn)
         if (arrayNameIdx == string::npos)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_FAIL_TO_FIND_ARRAYNAME;
+                EID(IONVMF_FAIL_TO_FIND_ARRAYNAME);
             POS_TRACE_WARN(static_cast<int>(eventId), "Fail to parse array name from bdev name");
             ns = spdkNvmfCaller->SpdkNvmfSubsystemGetNextNs(subsystem, ns);
             continue;
@@ -843,7 +843,7 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     if (bdev == nullptr)
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_BDEV_DOES_NOT_EXIST;
+            EID(IONVMF_BDEV_DOES_NOT_EXIST);
         POS_TRACE_WARN(static_cast<int>(eventId), "Fail to find requested bdev : {}", bdevName);
         return "";
     }
@@ -851,7 +851,7 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     if (uuid == nullptr)
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_BDEV_UUID_DOES_NOT_EXIST;
+            EID(IONVMF_BDEV_UUID_DOES_NOT_EXIST);
         POS_TRACE_WARN(static_cast<int>(eventId), "Fail to get requeted bdev uuid : {}", bdevName);
         return "";
     }
@@ -859,7 +859,7 @@ NvmfTarget::GetPosBdevUuid(uint32_t id, string arrayName)
     if (ret != 0)
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING;
+            EID(IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING);
         POS_TRACE_WARN(static_cast<int>(eventId), "Fail to convert uuid into string : {}", bdevName);
         return "";
     }

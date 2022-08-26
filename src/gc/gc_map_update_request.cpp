@@ -150,7 +150,7 @@ GcMapUpdateRequest::_UpdateMeta(void)
     int result = metaUpdater->UpdateGcMap(stripe, mapUpdates, invalidSegCnt, completionEvent);
     if (unlikely(0 != result))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::GC_MAP_UPDATE_FAILED;
+        POS_EVENT_ID eventId = EID(GC_MAP_UPDATE_FAILED);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "gc map update failed, arrayName:{}, stripeUserLsid:{}",
             iArrayInfo->GetName(), mapUpdates.userLsid);

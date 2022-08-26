@@ -82,7 +82,7 @@ RocksDBMetaFsIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buf
 {
     if (rocksMeta == nullptr)
     {
-        return -EID(MFS_FILE_READ_FAILED);
+        return ERRID(MFS_FILE_READ_FAILED);
     }
 
     std::string key = _MakeRocksDbKey(fd, fileOffset);
@@ -99,7 +99,7 @@ RocksDBMetaFsIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buf
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_INTERNAL_READ_FAILED), "RocksDBMetaFsIntf Internal Read failed fd {} , fileOffset : {} , length : {}", fileName, fd, length);
-        return -EID(ROCKSDB_MFS_INTERNAL_READ_FAILED);
+        return ERRID(ROCKSDB_MFS_INTERNAL_READ_FAILED);
     }
 }
 
@@ -108,7 +108,7 @@ RocksDBMetaFsIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* bu
 {
     if (rocksMeta == nullptr)
     {
-        return -EID(MFS_FILE_WRITE_FAILED);
+        return ERRID(MFS_FILE_WRITE_FAILED);
     }
     std::string key = _MakeRocksDbKey(fd, fileOffset);
     std::string value(buffer, length);
@@ -121,7 +121,7 @@ RocksDBMetaFsIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* bu
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_INTERNAL_WRITE_FAILED), "RocksDBMetaFsIntf Internal Write failed fd {} , fileOffset : {} , length : {}", fileName, fd, length);
-        return -EID(ROCKSDB_MFS_INTERNAL_WRITE_FAILED);
+        return ERRID(ROCKSDB_MFS_INTERNAL_WRITE_FAILED);
     }
 }
 
@@ -131,7 +131,7 @@ RocksDBMetaFsIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     if (ctx->fileOffset >= size)
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR), "RocksDBMetaFsIntf Internal Write failed fd {} , fileOffset : {} , length : {}", fileName, fd, size);
-        return -EID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR);
+        return ERRID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR);
     }
 
     ctx->ioDoneCheckCallback =
@@ -187,7 +187,7 @@ RocksDBMetaFsIntf::Create(uint64_t fileSize)
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_CREATE_FAILED), "RocksDBMetaFsIntf Create file failed name : {}", fileName);
-        return -EID(ROCKSDB_MFS_CREATE_FAILED);
+        return ERRID(ROCKSDB_MFS_CREATE_FAILED);
     }
 }
 
@@ -210,7 +210,7 @@ RocksDBMetaFsIntf::Open(void)
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_OPEN_FAILED), "RocksDBMetaFsIntf Open file failed name : {} , code : {} ", fileName, status.code());
-        return -EID(ROCKSDB_MFS_OPEN_FAILED);
+        return ERRID(ROCKSDB_MFS_OPEN_FAILED);
     }
 }
 
@@ -265,7 +265,7 @@ RocksDBMetaFsIntf::Delete(void)
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_FILE_DELETE_FAILED), "RocksDBMetaFsIntf Delete failed filename : {}", fileName);
-        return -EID(ROCKSDB_MFS_FILE_DELETE_FAILED);
+        return ERRID(ROCKSDB_MFS_FILE_DELETE_FAILED);
     }
 }
 
@@ -283,7 +283,7 @@ RocksDBMetaFsIntf::GetFileSize(void)
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_GET_FILE_SIZE_FAILED), "RocksDBMetaFsIntf GetFileSize failed filename : {}", fileName);
-        return -EID(ROCKSDB_MFS_GET_FILE_SIZE_FAILED);
+        return ERRID(ROCKSDB_MFS_GET_FILE_SIZE_FAILED);
     }
 }
 
@@ -313,7 +313,7 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_WRITE_FAILED), "RocksDBMetaFsIntf::AsyncIO error write failed fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
-        return -EID(ROCKSDB_MFS_ASYNCIO_WRITE_FAILED);
+        return ERRID(ROCKSDB_MFS_ASYNCIO_WRITE_FAILED);
     }
 }
 
@@ -361,7 +361,7 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
         else
         {
             POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED), "RocksDBMetaFsIntf AsyncIO fullio read failed fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
-            return -EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED);
+            return ERRID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED);
         }
     }
     else
@@ -411,7 +411,7 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
         else
         {
             POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED), "RocksDBMetaFsIntf::AsyncIO partial io read failed , fd : {}, fileoffset : {} ", ctx->fd, ctx->fileOffset);
-            return -EID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED);
+            return ERRID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED);
         }
     }
 }
@@ -430,7 +430,7 @@ RocksDBMetaFsIntf::CreateDirectory(std::string pathName)
     if (ret != true)
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_DIR_CREATION_FAILED), "RocksDB mfs directory creation failed (path :{}) ", pathName);
-        return -EID(ROCKSDB_MFS_DIR_CREATION_FAILED);
+        return ERRID(ROCKSDB_MFS_DIR_CREATION_FAILED);
     }
 
     POS_TRACE_INFO(EID(ROCKSDB_MFS_DIR_CREATION_SUCCEED), "RocksDB mfs directory created (path :{}) ", pathName);
@@ -444,7 +444,7 @@ RocksDBMetaFsIntf::DeleteDirectory(void)
     if (ret != true)
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_DIR_DELETION_FAILED), "RocksDB mfs directory does not exists, so deletion failed (path :{}) ", pathName);
-        return -EID(ROCKSDB_LOG_BUFFER_DIR_DELETION_FAILED);
+        return ERRID(ROCKSDB_LOG_BUFFER_DIR_DELETION_FAILED);
     }
     POS_TRACE_INFO(EID(ROCKSDB_MFS_DIR_DELETION_SUCCEED), "RocksDB mfs directory deleted (path :{}) ", pathName);
     return EID(SUCCESS);
@@ -466,7 +466,7 @@ RocksDBMetaFsIntf::SetRocksMeta(std::string pathName)
     else
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_SET_ROCKS_META_FAILED), "RocksDB mfs set RocksMeta Failed, filename : {} ", pathName);
-        return -EID(ROCKSDB_MFS_SET_ROCKS_META_FAILED);
+        return ERRID(ROCKSDB_MFS_SET_ROCKS_META_FAILED);
     }
 }
 

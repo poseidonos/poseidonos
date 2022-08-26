@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/include/backend_event.h"
+#include "src/include/pos_event_id.h"
 #include "proto/generated/cpp/cli.grpc.pb.h"
 #include "proto/generated/cpp/cli.pb.h"
 #include <string>
@@ -194,7 +195,7 @@ private:
     void _FillSmartData(struct spdk_nvme_health_information_page payload, grpc_cli::SmartLog* data);
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
-    
+
     typedef struct BiosInfo {
         std::string vendor;
         std::string version;

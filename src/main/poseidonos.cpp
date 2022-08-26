@@ -36,6 +36,7 @@
 
 #include <string>
 
+#include "src/include/pos_event_id.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
 #include "src/cli/grpc_cli_server.h"
@@ -237,13 +238,13 @@ Poseidonos::_InitDebugInfo(void)
     ret = system("mkdir -p /etc/pos/core");
     if (ret != 0)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::DEBUG_CORE_DUMP_SETTING_FAILED, "Core directory will not be created");
+        POS_TRACE_DEBUG(EID(DEBUG_CORE_DUMP_SETTING_FAILED), "Core directory will not be created");
         return;
     }
     ret = system("echo /etc/pos/core/%E.core > /proc/sys/kernel/core_pattern");
     if (ret != 0)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::DEBUG_CORE_DUMP_SETTING_FAILED, "Core pattern is not set properly");
+        POS_TRACE_DEBUG(EID(DEBUG_CORE_DUMP_SETTING_FAILED), "Core pattern is not set properly");
         return;
     }
 
@@ -281,7 +282,7 @@ Poseidonos::_SetupThreadModel(void)
 {
     AffinityManager* affinityManager = pos::AffinityManagerSingleton::Instance();
     SpdkCallerSingleton::Instance()->SpdkBdevPosRegisterPoller(UNVMfCompleteHandler);
-    POS_TRACE_DEBUG(POS_EVENT_ID::DEVICEMGR_SETUPMODEL, "_SetupThreadModel");
+    POS_TRACE_DEBUG(EID(DEVICEMGR_SETUPMODEL), "_SetupThreadModel");
     uint32_t coreCount =
         affinityManager->GetCoreCount(CoreType::EVENT_WORKER);
     uint32_t workerCount = coreCount * EVENT_THREAD_CORE_RATIO;
@@ -359,7 +360,7 @@ Poseidonos::_LoadVersion(void)
 {
     std::string version =
         pos::VersionProviderSingleton::Instance()->GetVersion();
-    POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::SYSTEM_VERSION_LOAD_SUCCESS),
+    POS_TRACE_INFO(EID(SYSTEM_VERSION_LOAD_SUCCESS),
         "POS Version {}", version.c_str());
 }
 
@@ -389,14 +390,14 @@ Poseidonos::_SetPerfImpact(void)
         else
         {
             newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
-            POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
+            POS_TRACE_INFO(static_cast<uint32_t>(EID(QOS_SET_EVENT_POLICY)),
                 "Rebuild Perf Impact not supported, Set to default lowest");
         }
         newRebuildPolicy.policyChange = true;
         retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newRebuildPolicy);
         if (retVal != SUCCESS)
         {
-            POS_TRACE_INFO(static_cast<uint32_t>(POS_EVENT_ID::QOS_SET_EVENT_POLICY),
+            POS_TRACE_INFO(static_cast<uint32_t>(EID(QOS_SET_EVENT_POLICY)),
                 "Failed to set Rebuild Policy");
         }
     }

@@ -70,7 +70,7 @@ AsyncIOComplete(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     if (unlikely(false == success))
     {
         IOErrorType = IOErrorType::GENERIC_ERROR;
-        POS_TRACE_ERROR(POS_EVENT_ID::URAM_COMPLETION_FAILED,
+        POS_TRACE_ERROR(EID(URAM_COMPLETION_FAILED),
             "URAM Async IO Failed");
     }
 
@@ -142,17 +142,17 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
     devCtx->bdev = spdkBdevCaller->SpdkBdevGetByName(devCtx->name);
     if (NULL == devCtx->bdev)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::DEVICE_OPEN_FAILED,
+        POS_TRACE_ERROR(EID(DEVICE_OPEN_FAILED),
             "Could not find the bdev: {}", devCtx->name);
         return false;
     }
-    POS_TRACE_INFO(POS_EVENT_ID::DEVICE_INFO_MSG,
+    POS_TRACE_INFO(EID(DEVICE_INFO_MSG),
         "Opening the bdev {}", devCtx->name);
     spdk_bdev_event_cb_t cb =
         [](enum spdk_bdev_event_type type,
             struct spdk_bdev* bdev,
             void* event_ctx) -> void {
-        POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
+        POS_TRACE_WARN(EID(DEVICE_INFO_MSG),
             "Unsupported bdev event: type {}", type);
     };
 
@@ -160,7 +160,7 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
         devCtx->name, true, cb, NULL, &bdev_desc);
     if (rc < 0)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::DEVICE_OPEN_FAILED,
+        POS_TRACE_ERROR(EID(DEVICE_OPEN_FAILED),
             "Could not open bdev: {}", devCtx->name);
         return false;
     }
@@ -169,7 +169,7 @@ UramDrv::_OpenBdev(UramDeviceContext* devCtx)
     devCtx->bdev_io_channel = spdkBdevCaller->SpdkBdevGetIoChannel(devCtx->bdev_desc);
     if (devCtx->bdev_io_channel == NULL)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::DEVICE_INFO_MSG,
+        POS_TRACE_WARN(EID(DEVICE_INFO_MSG),
             "Bdev opened, but not enough io channel");
         spdkBdevCaller->SpdkBdevClose(devCtx->bdev_desc);
         devCtx->bdev_desc = nullptr;
@@ -263,7 +263,7 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
     int retValue = 0;
     if (ioCtx == nullptr)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::DEVICE_WARN_MSG;
+        POS_EVENT_ID eventId = EID(DEVICE_WARN_MSG);
         POS_REPORT_WARN(eventId, "Failed to SumbitIO. IOContext is null");
         return 0;
     }
@@ -286,24 +286,24 @@ UramDrv::SubmitIO(UramIOContext* ioCtx)
             if (unlikely(false == ioCtx->RequestRetry(retryFunc)))
             {
                 callbackFunc(nullptr, false, ioCtx);
-                POS_EVENT_ID eventId = POS_EVENT_ID::URAM_FAIL_TO_RETRY_IO;
-                PosEventId::Print(eventId, EventLevel::WARNING);
+                POS_EVENT_ID eventId = EID(URAM_FAIL_TO_RETRY_IO);
+                POS_TRACE_WARN(eventId, "");
             }
             return 0;
         }
         else
         {
             callbackFunc(nullptr, false, ioCtx);
-            POS_EVENT_ID eventId = POS_EVENT_ID::URAM_SUBMISSION_TIMEOUT;
-            PosEventId::Print(eventId, EventLevel::WARNING);
+            POS_EVENT_ID eventId = EID(URAM_SUBMISSION_TIMEOUT);
+            POS_TRACE_WARN(eventId, "");
             return 0;
         }
     }
     else if (unlikely(retValue))
     {
         callbackFunc(nullptr, false, ioCtx);
-        POS_EVENT_ID eventId = POS_EVENT_ID::URAM_SUBMISSION_FAILED;
-        PosEventId::Print(eventId, EventLevel::WARNING);
+        POS_EVENT_ID eventId = EID(URAM_SUBMISSION_FAILED);
+        POS_TRACE_WARN(eventId, "");
         return 0;
     }
 
@@ -352,7 +352,7 @@ UramDrv::_RequestIO(UramDeviceContext* devCtx,
                 callbackFunc, static_cast<void*>(ioCtx));
             break;
         default:
-            POS_TRACE_INFO(POS_EVENT_ID::DEVICE_INFO_MSG,
+            POS_TRACE_INFO(EID(DEVICE_INFO_MSG),
                 "Neither Read Nor Write {}", static_cast<int>(dir));
             break;
     }

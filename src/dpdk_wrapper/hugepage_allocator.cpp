@@ -52,7 +52,7 @@ HugepageAllocator::AllocFromSocket(const uint32_t size,
     }
     if (ret == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_HUGEPAGE_ALLOCATION_FAIL,
+        POS_TRACE_WARN(EID(RESOURCE_HUGEPAGE_ALLOCATION_FAIL),
             "Failed to allocate Hugepages, size:{}, count:{}", size, count);
     }
     return ret;

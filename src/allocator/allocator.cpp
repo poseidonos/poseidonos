@@ -280,7 +280,7 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_START), "WBT failed to open output file {}", fname);
-        return -EID(ALLOCATOR_START);
+        return ERRID(ALLOCATOR_START);
     }
 
     dumpFile->Open();
@@ -295,7 +295,7 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(SegmentInfo) to {} Failed, ret:{}", fname, ret);
-            ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
+            ret = ERRID(ALLOCATOR_META_ARCHIVE_STORE);
         }
         delete[] buf;
     }
@@ -304,7 +304,7 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
         if (WBT_NUM_ALLOCATOR_META <= type)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT wrong alloctor meta type, type:{}", type);
-            ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
+            ret = ERRID(ALLOCATOR_META_ARCHIVE_STORE);
         }
         else
         {
@@ -312,7 +312,7 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
             if (ret < 0)
             {
                 POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_STORE), "WBT Sync Write(allocatorCtx) to {} Failed, ret:{}", fname, ret);
-                ret = -EID(ALLOCATOR_META_ARCHIVE_STORE);
+                ret = ERRID(ALLOCATOR_META_ARCHIVE_STORE);
             }
         }
     }
@@ -343,7 +343,7 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(SegmentInfo) from {} Failed, ret:{}", fname, ret);
-            ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+            ret = ERRID(ALLOCATOR_META_ARCHIVE_LOAD);
         }
         else
         {
@@ -361,7 +361,7 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
             if (ret < 0)
             {
                 POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(wblsid bitmap) from {} Failed, ret:{}", fname, ret);
-                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+                ret = ERRID(ALLOCATOR_META_ARCHIVE_LOAD);
             }
             else
             {
@@ -376,7 +376,7 @@ Allocator::SetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
             if (ret < 0)
             {
                 POS_TRACE_ERROR(EID(ALLOCATOR_META_ARCHIVE_LOAD), "WBT Sync Read(allocatorCtx) from {} Failed, ret:{}", fname, ret);
-                ret = -EID(ALLOCATOR_META_ARCHIVE_LOAD);
+                ret = ERRID(ALLOCATOR_META_ARCHIVE_LOAD);
             }
         }
     }

@@ -92,7 +92,7 @@ BlockMapUpdate::_DoSpecificJob(void)
         bool allowVictimSegRelease = false;
         InvalidateBlks(vsaRange, allowVictimSegRelease);
 
-        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::META, POS_EVENT_ID::MAPPER_SUCCESS,
+        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::META, EID(MAPPER_SUCCESS),
             "Invalidate rba {} vsid {}", ChangeSectorToBlock(volumeIo->GetSectorRba()), vsaRange.startVsa.stripeId);
     }
 
@@ -125,7 +125,7 @@ BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
 
     if (unlikely(nullptr == foundStripe))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::WRCMP_INVALID_STRIPE;
+        POS_EVENT_ID eventId = EID(WRCMP_INVALID_STRIPE);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Stripe is null at WriteCompleting state");
         throw eventId;

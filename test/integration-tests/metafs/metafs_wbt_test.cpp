@@ -73,7 +73,7 @@ public:
         POS_EVENT_ID rc_mgmt;
         MetaFilePropertySet prop;
         rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, volumeType);
-        EXPECT_EQ(rc_mgmt, POS_EVENT_ID::SUCCESS);
+        EXPECT_EQ(rc_mgmt, EID(SUCCESS));
     }
 
     virtual void TearDown(void)

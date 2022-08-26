@@ -128,7 +128,7 @@ WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
     {
         VirtualBlkAddr startVsa = volumeIo->GetVsa();
         StripeId vsid = startVsa.stripeId;
-        POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_STRIPE_NOT_FOUND;
+        POS_EVENT_ID eventId = EID(WRWRAPUP_STRIPE_NOT_FOUND);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Stripe #{} not found at WriteWrapup state", vsid);
 
@@ -153,7 +153,7 @@ WriteCompletion::_RequestFlush(Stripe* stripe)
 
     if (unlikely(stripe->Flush(event) < 0))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::WRWRAPUP_EVENT_ALLOC_FAILED;
+        POS_EVENT_ID eventId = EID(WRWRAPUP_EVENT_ALLOC_FAILED);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Flush Event allocation failed at WriteWrapup state");
 

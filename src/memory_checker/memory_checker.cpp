@@ -172,7 +172,7 @@ MemoryChecker::_CheckDoubleFree(uint64_t baseAddress)
     if (freeListMap.find(baseAddress) != freeListMap.end())
     {
         freeListMap[baseAddress]->PrintDumpStack();
-        POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_MEMORY_CHECK_DOUBLE_FREE,
+        POS_TRACE_ERROR(EID(DEBUG_MEMORY_CHECK_DOUBLE_FREE),
             "double free {}", baseAddress);
         assert(0);
     }
@@ -189,7 +189,7 @@ MemoryChecker::_CheckDoubleFree(uint64_t baseAddress)
     if (iterator->first + iterator->second->size > baseAddress)
     {
         freeListMap[baseAddress]->PrintDumpStack();
-        POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_MEMORY_CHECK_DOUBLE_FREE,
+        POS_TRACE_ERROR(EID(DEBUG_MEMORY_CHECK_DOUBLE_FREE),
             "double free {} {} {}", iterator->first, iterator->second->size, baseAddress);
         assert(0);
     }
@@ -237,7 +237,7 @@ MemoryChecker::_TrackDelete(void* ptr)
             if (patternSuffix != key)
             {
                 freeListMap[key]->PrintDumpStack();
-                POS_TRACE_ERROR(POS_EVENT_ID::DEBUG_MEMORY_CHECK_INVALID_ACCESS,
+                POS_TRACE_ERROR(EID(DEBUG_MEMORY_CHECK_INVALID_ACCESS),
                     "invalid access base : {} size : {}", key, (size - PADDING_BYTE));
                 assert(0);
             }

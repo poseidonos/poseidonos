@@ -229,7 +229,7 @@ WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
             bool ret = writeForParity.Execute();
             if (ret == false)
             {
-                POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;
+                POS_EVENT_ID eventId = EID(WRITE_FOR_PARITY_FAILED);
                 POS_TRACE_ERROR(static_cast<int>(eventId),
                     "Failed to copy user data to dram for parity");
             }
@@ -403,7 +403,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
         if (IsUnMapVsa(targetVsaRange.startVsa))
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_NO_FREE_SPACE;
+            POS_EVENT_ID eventId = EID(WRHDLR_NO_FREE_SPACE);
             POS_TRACE_DEBUG(eventId, "No free space in write buffer");
 
             IStateControl* stateControl =
@@ -411,11 +411,11 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             if (unlikely(stateControl->GetState()->ToStateType() == StateEnum::STOP))
             {
                 POS_EVENT_ID eventId =
-                    POS_EVENT_ID::WRHDLR_FAIL_BY_SYSTEM_STOP;
+                    EID(WRHDLR_FAIL_BY_SYSTEM_STOP);
                 POS_TRACE_ERROR(eventId, "System Stop incurs write fail");
                 if (!iBlockAllocator->Unlock(volumeId))
                 {
-                    POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_FAIL_TO_UNLOCK;
+                    POS_EVENT_ID eventId = EID(WRHDLR_FAIL_TO_UNLOCK);
                     POS_TRACE_DEBUG(eventId, "volumeId:{}", volumeId);
                 }
                 throw eventId;
@@ -454,7 +454,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
 
     if (!iBlockAllocator->Unlock(volumeId))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::WRHDLR_FAIL_TO_UNLOCK;
+        POS_EVENT_ID eventId = EID(WRHDLR_FAIL_TO_UNLOCK);
         POS_TRACE_DEBUG(eventId, "volumeId:{}", volumeId);
     }
 }

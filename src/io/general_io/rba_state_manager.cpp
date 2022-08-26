@@ -168,7 +168,7 @@ RBAStateManager::_AcquireOwnership(uint32_t volumeID, BlkAddr startRba,
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
         std::pair<POS_EVENT_ID, EventLevel> eventIdWithLevel(
-            POS_EVENT_ID::RBAMGR_WRONG_VOLUME_ID, EventLevel::ERROR);
+            EID(RBAMGR_WRONG_VOLUME_ID), EventLevel::ERROR);
         throw eventIdWithLevel;
     }
 
@@ -185,8 +185,7 @@ RBAStateManager::_ReleaseOwnership(uint32_t volumeID, BlkAddr startRba,
 {
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
-        PosEventId::Print(POS_EVENT_ID::RBAMGR_WRONG_VOLUME_ID,
-            EventLevel::ERROR);
+        POS_TRACE_ERROR(EID(RBAMGR_WRONG_VOLUME_ID), "");
         return;
     }
 

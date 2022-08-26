@@ -110,7 +110,7 @@ TEST_F(MetaFsSystemManagerFixture, CheckReqSanity_Positive)
 
     EXPECT_CALL(req, IsValid).WillOnce(Return(true));
 
-    EXPECT_EQ(systemMgr->CheckReqSanity(req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(systemMgr->CheckReqSanity(req), EID(SUCCESS));
 }
 
 TEST_F(MetaFsSystemManagerFixture, CheckReqSanity_Negative)
@@ -119,7 +119,7 @@ TEST_F(MetaFsSystemManagerFixture, CheckReqSanity_Negative)
 
     EXPECT_CALL(req, IsValid).WillOnce(Return(false));
 
-    EXPECT_EQ(systemMgr->CheckReqSanity(req), POS_EVENT_ID::MFS_INVALID_PARAMETER);
+    EXPECT_EQ(systemMgr->CheckReqSanity(req), EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaFsSystemManagerFixture, CheckPartitionInfo)
@@ -146,7 +146,7 @@ TEST_F(MetaFsSystemManagerFixture, LoadMbr_Positive)
     EXPECT_CALL(*mbr, IsValidMBRExist).WillOnce(Return(true));
     EXPECT_CALL(*mbr, GetPowerStatus).WillOnce(Return(true));
 
-    EXPECT_EQ(systemMgr->LoadMbr(isNpor), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(systemMgr->LoadMbr(isNpor), EID(SUCCESS));
 }
 
 TEST_F(MetaFsSystemManagerFixture, LoadMbr_Negative0)
@@ -156,7 +156,7 @@ TEST_F(MetaFsSystemManagerFixture, LoadMbr_Negative0)
     EXPECT_CALL(*mbr, LoadMBR).WillOnce(Return(true));
     EXPECT_CALL(*mbr, IsValidMBRExist).WillOnce(Return(false));
 
-    EXPECT_EQ(systemMgr->LoadMbr(isNpor), POS_EVENT_ID::MFS_INVALID_MBR);
+    EXPECT_EQ(systemMgr->LoadMbr(isNpor), EID(MFS_INVALID_MBR));
 }
 
 TEST_F(MetaFsSystemManagerFixture, LoadMbr_Negative1)
@@ -165,7 +165,7 @@ TEST_F(MetaFsSystemManagerFixture, LoadMbr_Negative1)
 
     EXPECT_CALL(*mbr, LoadMBR).WillOnce(Return(false));
 
-    EXPECT_EQ(systemMgr->LoadMbr(isNpor), POS_EVENT_ID::MFS_META_LOAD_FAILED);
+    EXPECT_EQ(systemMgr->LoadMbr(isNpor), EID(MFS_META_LOAD_FAILED));
 }
 
 TEST_F(MetaFsSystemManagerFixture, CheckClean_Positive)
@@ -210,7 +210,7 @@ TEST_F(MetaFsSystemManagerFixture, InitSystem_Positive)
     EXPECT_CALL(*mbr, SetMss);
     EXPECT_CALL(*mbr, RegisterVolumeGeometry);
 
-    EXPECT_EQ(systemMgr->ProcessNewReq(req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(systemMgr->ProcessNewReq(req), EID(SUCCESS));
 }
 
 TEST_F(MetaFsSystemManagerFixture, CloseSystem_Positive)
@@ -222,7 +222,7 @@ TEST_F(MetaFsSystemManagerFixture, CloseSystem_Positive)
     EXPECT_CALL(*mbr, SaveContent).WillOnce(Return(true));
     EXPECT_CALL(*mbr, InvalidMBR);
 
-    EXPECT_EQ(systemMgr->ProcessNewReq(req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(systemMgr->ProcessNewReq(req), EID(SUCCESS));
 }
 
 TEST_F(MetaFsSystemManagerFixture, CloseSystem_Negative0)
@@ -233,7 +233,7 @@ TEST_F(MetaFsSystemManagerFixture, CloseSystem_Negative0)
     EXPECT_CALL(*mbr, SetPowerStatus);
     EXPECT_CALL(*mbr, SaveContent).WillOnce(Return(false));
 
-    EXPECT_EQ(systemMgr->ProcessNewReq(req), POS_EVENT_ID::MFS_META_SAVE_FAILED);
+    EXPECT_EQ(systemMgr->ProcessNewReq(req), EID(MFS_META_SAVE_FAILED));
 }
 
 TEST_F(MetaFsSystemManagerFixture, CloseSystem_Negative1)
@@ -244,8 +244,8 @@ TEST_F(MetaFsSystemManagerFixture, CloseSystem_Negative1)
     EXPECT_CALL(*mbr, SetPowerStatus);
     EXPECT_CALL(*mbr, SaveContent).WillOnce(Return(true));
     EXPECT_CALL(*mbr, InvalidMBR);
-    EXPECT_CALL(*mss, Close).WillOnce(Return(POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED));
+    EXPECT_CALL(*mss, Close).WillOnce(Return(EID(MFS_META_STORAGE_CLOSE_FAILED)));
 
-    EXPECT_EQ(systemMgr->ProcessNewReq(req), POS_EVENT_ID::MFS_META_STORAGE_CLOSE_FAILED);
+    EXPECT_EQ(systemMgr->ProcessNewReq(req), EID(MFS_META_STORAGE_CLOSE_FAILED));
 }
 } // namespace pos

@@ -108,14 +108,14 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
             if (errno == ENOENT)
             {
                 POS_EVENT_ID eventId =
-                    POS_EVENT_ID::URAM_BACKUP_FILE_NOT_EXISTS;
+                    EID(URAM_BACKUP_FILE_NOT_EXISTS);
                 EventLevel eventLevel = EventLevel::INFO;
                 throw std::make_pair(eventId, eventLevel);
             }
             else
             {
                 POS_EVENT_ID eventId =
-                    POS_EVENT_ID::URAM_BACKUP_FILE_OPEN_FAILED;
+                    EID(URAM_BACKUP_FILE_OPEN_FAILED);
                 EventLevel eventLevel = EventLevel::WARNING;
                 throw std::make_pair(eventId, eventLevel);
             }
@@ -126,7 +126,7 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
         if (0 > rc)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::URAM_BACKUP_FILE_STAT_FAILED;
+                EID(URAM_BACKUP_FILE_STAT_FAILED);
             EventLevel eventLevel = EventLevel::WARNING;
             throw std::make_pair(eventId, eventLevel);
         }
@@ -153,7 +153,7 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
             else
             {
                 POS_EVENT_ID eventId =
-                    POS_EVENT_ID::URAM_BACKUP_FILE_READ_FAILED;
+                    EID(URAM_BACKUP_FILE_READ_FAILED);
                 std::string additionalMessage(
                     "Read page # " + std::to_string(pageIndex) + " failed");
                 throw std::make_pair(eventId, additionalMessage);
@@ -163,9 +163,8 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
     catch (std::pair<POS_EVENT_ID, EventLevel> eventWithLevel)
     {
         POS_EVENT_ID eventId = eventWithLevel.first;
-        EventLevel eventLevel = eventWithLevel.second;
-        PosEventId::Print(eventId, eventLevel);
-        if (eventId != POS_EVENT_ID::URAM_BACKUP_FILE_NOT_EXISTS)
+        POS_TRACE_WARN(eventId, "");
+        if (eventId != EID(URAM_BACKUP_FILE_NOT_EXISTS))
         {
             restoreSuccessful = false;
         }
@@ -174,7 +173,7 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
     {
         POS_EVENT_ID eventId = eventWithMessage.first;
         std::string& additionalMessage = eventWithMessage.second;
-        PosEventId::Print(eventId, EventLevel::WARNING, additionalMessage);
+        POS_TRACE_WARN(eventId, "{}", additionalMessage);
         restoreSuccessful = false;
     }
 
@@ -211,7 +210,7 @@ Uram::_InitByteAddress(void)
     }
     else
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::URAM_CONFIG_FILE_OPEN_FAILED,
+        POS_TRACE_ERROR(EID(URAM_CONFIG_FILE_OPEN_FAILED),
             "Cannot open uram config file");
     }
     baseByteAddress = reinterpret_cast<void*>(byteAddressInt);

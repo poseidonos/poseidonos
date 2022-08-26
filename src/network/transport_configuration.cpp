@@ -76,20 +76,20 @@ TransportConfiguration::ReadConfig(void)
         ret = configManager->GetValue("transport", "buf_cache_size", &bufCacheSize, ConfigType::CONFIG_TYPE_UINT32);
         if (EID(SUCCESS) != ret)
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+            POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG);
             POS_TRACE_WARN(static_cast<uint32_t>(eventId), "Fail to read transport config. Default buf_cache_size: {}", bufCacheSize);
         }
         ret = configManager->GetValue("transport", "num_shared_buffer", &numSharedBuf, ConfigType::CONFIG_TYPE_UINT32);
         if (EID(SUCCESS) != ret)
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+            POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG);
             POS_TRACE_WARN(static_cast<uint32_t>(eventId),
                 "Fail to read transport config. Default num_shared_buffer: {} (May change according to the env.)", numSharedBuf);
         }
     }
     else
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+        POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG);
         POS_TRACE_WARN(static_cast<uint32_t>(eventId), "Fail to read transport config. Default transport type: {}", trtype);
     }
 }
@@ -108,7 +108,7 @@ TransportConfiguration::CreateTransport(void)
     auto result = rpcClient->TransportCreate(trtype, bufCacheSize, numSharedBuf, ioUnitSize);
     if (result.first != 0)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_TRANSPORT;
+        POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_CREATE_TRANSPORT);
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId), "Fail to create transport : {}", result.second);
     }
 }
@@ -120,7 +120,7 @@ TransportConfiguration::_IsEnabled(void)
     int ret = configManager->GetValue("transport", "enable", &enabled, ConfigType::CONFIG_TYPE_BOOL);
     if (EID(SUCCESS) != ret)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG;
+        POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG);
         POS_TRACE_WARN(static_cast<uint32_t>(eventId), "Fail to read transport config. Need to create tranport manually.");
         return false;
     }

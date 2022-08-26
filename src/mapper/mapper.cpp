@@ -267,14 +267,14 @@ Mapper::EnableInternalAccess(int volId)
     VolState state = volState[volId].GetState();
     if ((VolState::VOLUME_DELETING == state) || (VolState::NOT_EXIST == state))
     {
-        return -EID(VSAMAP_LOAD_FAILURE);
+        return ERRID(VSAMAP_LOAD_FAILURE);
     }
     if (VolState::EXIST_UNLOADED == state)
     {
         if (_LoadVolumeMeta(volId) < 0)
         {
             POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper EnableInternalAccess] failed to load VolumeId:{}, state:{} arrayId:{}", volId, volState[volId].GetState(), arrayId);
-            return -EID(VSAMAP_LOAD_FAILURE);
+            return ERRID(VSAMAP_LOAD_FAILURE);
         }
         else
         {
@@ -330,7 +330,7 @@ Mapper::SetVSAsInternal(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
     {
         // there is no NEED_RETY Handling sequence for SetVSAsInternal in caller(GC).
         POS_TRACE_ERROR(EID(VSAMAP_LOAD_FAILURE), "[Mapper SetVSAInternal] VolumeId:{} arrayId:{} volume is not accessible", volId, arrayId);
-        return -EID(VSAMAP_LOAD_FAILURE);
+        return ERRID(VSAMAP_LOAD_FAILURE);
     }
     return vsaMapManager->SetVSAsWoCond(volId, startRba, virtualBlks);
 }
@@ -524,7 +524,7 @@ Mapper::PrepareVolumeDelete(int volId)
     if ((VolState::VOLUME_DELETING == state) || (VolState::NOT_EXIST == state))
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeDeleted] failed to Deleted VolumeId:{} arrayId:{} state:{}", volId, arrayId, state);
-        return -EID(MAPPER_FAILED);
+        return ERRID(MAPPER_FAILED);
     }
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} arrayId:{}", volId, arrayId);
     vsaMapManager->DisableVsaMapInternalAccess(volId);
@@ -536,7 +536,7 @@ Mapper::PrepareVolumeDelete(int volId)
         if (_LoadVolumeMeta(volId, true) < 0)
         {
             POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted]VSAMap load failed, volumeID:{} arrayId:{} @VolumeDeleted", volId, arrayId);
-            return -EID(VSAMAP_LOAD_FAILURE);
+            return ERRID(VSAMAP_LOAD_FAILURE);
         }
         vsaMapManager->WaitVolumePendingIoDone(volId);
     }
@@ -550,7 +550,7 @@ Mapper::PrepareVolumeDelete(int volId)
         if (_ChangeVolumeStateDeleting(volId) == false)
         {
             POS_TRACE_WARN(EID(VSAMAP_LOAD_FAILURE), "[Mapper VolumeDeleted] Another thread started to delete volumeID:{} arrayId:{} @VolumeDeleted", volId, arrayId);
-            return -EID(VSAMAP_LOAD_FAILURE);
+            return ERRID(VSAMAP_LOAD_FAILURE);
         }
     }
 
@@ -570,7 +570,7 @@ Mapper::InvalidateAllBlocksTo(int volId, ISegmentCtx* segmentCtx)
         POS_TRACE_WARN(EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE),
             "[Mapper VolumeDeleted] VSAMap Invalidate all blocks Failed, volumeID:{} arrayId:{} @VolumeDeleted",
             volId, arrayId);
-        return -EID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE);
+        return ERRID(VSAMAP_INVALIDATE_ALLBLKS_FAILURE);
     }
     return 0;
 }
@@ -581,7 +581,7 @@ Mapper::DeleteVolumeMap(int volId)
     if (0 != vsaMapManager->DeleteVSAMap(volId))
     {
         POS_TRACE_WARN(EID(MFS_FILE_DELETE_FAILED), "[Mapper VolumeDeleted] failed to delete VSA Map, volumeID:{} arrayId:{} @VolumeDeleted", volId, arrayId);
-        return -EID(MFS_FILE_DELETE_FAILED);
+        return ERRID(MFS_FILE_DELETE_FAILED);
     }
     volState[volId].SetState(VolState::NOT_EXIST);
     return 0;

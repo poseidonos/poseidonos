@@ -107,7 +107,7 @@ NvmfVolumePos::_NamespaceDetachedAllHandler(void* cbArg, int status)
         if (nullptr == subsystem)
         {
             detachFailed = true;
-            POS_EVENT_ID eventId = POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM;
+            POS_EVENT_ID eventId = EID(IONVMF_FAIL_TO_FIND_SUBSYSTEM);
             POS_TRACE_WARN(static_cast<int>(eventId),
             "Subsystem is not found Requested, volumes may have been detached since subsystem does not exist.");
         }
@@ -156,7 +156,7 @@ NvmfVolumePos::_VolumeCreateHandler(void* arg1, void* arg2)
         if (false == ret)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_FAIL_TO_CREATE_POS_BDEV;
+                EID(IONVMF_FAIL_TO_CREATE_POS_BDEV);
             POS_TRACE_WARN(static_cast<int>(eventId), "Fail to create pos bdev({})", bdevName);
         }
     }
@@ -200,7 +200,7 @@ NvmfVolumePos::_VolumeDeleteHandler(void* arg1, void* arg2)
         if (false == ret)
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV;
+                EID(IONVMF_FAIL_TO_DELETE_POS_BDEV);
             POS_TRACE_WARN(static_cast<int>(eventId), "Fail to delete pos bdev");
         }
 
@@ -274,7 +274,7 @@ NvmfVolumePos::_VolumeUnmountHandler(void* arg1, void* arg2)
             if (false == ret)
             {
                 POS_EVENT_ID eventId =
-                    POS_EVENT_ID::IONVMF_FAIL_TO_DELETE_POS_BDEV;
+                    EID(IONVMF_FAIL_TO_DELETE_POS_BDEV);
                 POS_TRACE_WARN(static_cast<int>(eventId), "Fail to delete pos bdev");
             }
         }
@@ -406,7 +406,7 @@ NvmfVolumePos::_WaitVolumeDetached(uint32_t volCnt, uint64_t time)
     if (volumeDetachedCnt > volCnt)
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::IONVMF_VOLUME_DETACH_COUNT_OVERFLOW;
+            EID(IONVMF_VOLUME_DETACH_COUNT_OVERFLOW);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Volume detached count is bigger than expected volume count");
         volumeDetachedCnt = 0;
@@ -439,7 +439,7 @@ NvmfVolumePos::_WaitVolumeCreated(uint32_t volId, string arrayName, uint64_t tim
         if (true == timeChecker.CheckTimeout())
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_VOL_CREATE_TIMEOUT;
+                EID(IONVMF_VOL_CREATE_TIMEOUT);
             POS_TRACE_WARN(static_cast<int>(eventId),
                 "Volume(id: {}, array: {}) create timeout.", volId, arrayName);
             return false;
@@ -460,7 +460,7 @@ NvmfVolumePos::_WaitVolumeDeleted(uint32_t volId, string arrayName, uint64_t tim
         if (true == timeChecker.CheckTimeout())
         {
             POS_EVENT_ID eventId =
-                POS_EVENT_ID::IONVMF_VOL_DELETE_TIMEOUT;
+                EID(IONVMF_VOL_DELETE_TIMEOUT);
             POS_TRACE_WARN(static_cast<int>(eventId),
                 "Volume(id: {}, array: {}) delete timeout.", volId, arrayName);
             return false;

@@ -131,12 +131,12 @@ TEST_F(RocksDbMetaFsIoTest, testIfMetaFsCanRejectTheRequestsDueToOutOfRange)
 {
     AsyncMetaFileIoCtx* writeReq = CreateRequest(MetaFsIoOpcode::Write, arrayId, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, writeBuf);
     int result = rocksDBMetaFsList[arrayId]->AsyncIO(writeReq);
-    ASSERT_EQ(result, -EID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR));
+    ASSERT_EQ(result, ERRID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR));
     delete writeReq;
 
     AsyncMetaFileIoCtx* readReq = CreateRequest(MetaFsIoOpcode::Read, arrayId, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
     result = rocksDBMetaFsList[arrayId]->AsyncIO(readReq);
-    EXPECT_EQ(result, -EID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR));
+    EXPECT_EQ(result, ERRID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR));
     delete readReq;
 }
 

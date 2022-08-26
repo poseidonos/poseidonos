@@ -84,7 +84,7 @@ ReadLogBuffer::GetNumSubTasks(void)
 int
 ReadLogBuffer::Start(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
     POS_TRACE_DEBUG(eventId, "[ReplayTask] Read log buffer started");
 
     int result = 0;
@@ -114,7 +114,7 @@ ReadLogBuffer::Start(void)
     {
         if (logList.IsEmpty() == true)
         {
-            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STOPPED);
+            int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STOPPED));
             std::ostringstream os;
             os << "No logs to replay. Stop replaying";
 

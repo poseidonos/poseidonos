@@ -99,7 +99,7 @@ TEST_F(MetaVolumeManagerFixture, CheckReqSanity_Positive)
 
     EXPECT_CALL(req, IsValid).WillOnce(Return(true));
 
-    EXPECT_EQ(volumeMgr->CheckReqSanity(req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(volumeMgr->CheckReqSanity(req), EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeManagerFixture, CheckReqSanity_Negative)
@@ -108,7 +108,7 @@ TEST_F(MetaVolumeManagerFixture, CheckReqSanity_Negative)
 
     EXPECT_CALL(req, IsValid).WillOnce(Return(false));
 
-    EXPECT_EQ(volumeMgr->CheckReqSanity(req), POS_EVENT_ID::MFS_INVALID_PARAMETER);
+    EXPECT_EQ(volumeMgr->CheckReqSanity(req), EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaVolumeManagerFixture, InitModule0)
@@ -187,7 +187,7 @@ TEST_F(MetaVolumeManagerFixture, CheckFileAccessible_Negative_DueTo_VolumeType)
 
     POS_EVENT_ID rc = volumeMgr->CheckFileAccessible(fd, volType);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::MFS_INVALID_PARAMETER);
+    EXPECT_EQ(rc, EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaVolumeManagerFixture, CheckFileAccessible_Negative_DueTo_LookupFail)
@@ -196,11 +196,11 @@ TEST_F(MetaVolumeManagerFixture, CheckFileAccessible_Negative_DueTo_LookupFail)
     MetaVolumeType volType = MetaVolumeType::SsdVolume;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::MFS_INVALID_PARAMETER));
+        .WillOnce(Return(EID(MFS_INVALID_PARAMETER)));
 
     POS_EVENT_ID rc = volumeMgr->CheckFileAccessible(fd, volType);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::MFS_INVALID_PARAMETER);
+    EXPECT_EQ(rc, EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaVolumeManagerFixture, CheckFileAccessible_Positive)
@@ -209,12 +209,12 @@ TEST_F(MetaVolumeManagerFixture, CheckFileAccessible_Positive)
     MetaVolumeType volType = MetaVolumeType::SsdVolume;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
 
     POS_EVENT_ID rc = volumeMgr->CheckFileAccessible(fd, volType);
 
     // can't control req.completionData.fileAccessible
-    EXPECT_EQ(rc, POS_EVENT_ID::MFS_FILE_INACTIVATED);
+    EXPECT_EQ(rc, EID(MFS_FILE_INACTIVATED));
 }
 
 TEST_F(MetaVolumeManagerFixture, GetFileSize_Positive)
@@ -224,11 +224,11 @@ TEST_F(MetaVolumeManagerFixture, GetFileSize_Positive)
     FileSizeType outFileByteSize;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
 
     POS_EVENT_ID rc = volumeMgr->GetFileSize(fd, volType, outFileByteSize);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc, EID(SUCCESS));
     EXPECT_EQ(outFileByteSize, 0);
 }
 
@@ -239,11 +239,11 @@ TEST_F(MetaVolumeManagerFixture, GetDataChunkSize_Positive)
     FileSizeType outFileByteSize;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
 
     POS_EVENT_ID rc = volumeMgr->GetDataChunkSize(fd, volType, outFileByteSize);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc, EID(SUCCESS));
     EXPECT_EQ(outFileByteSize, 0);
 }
 
@@ -254,11 +254,11 @@ TEST_F(MetaVolumeManagerFixture, GetDataChunkSize_Negative)
     FileSizeType outFileByteSize;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::MFS_INVALID_PARAMETER));
+        .WillOnce(Return(EID(MFS_INVALID_PARAMETER)));
 
     POS_EVENT_ID rc = volumeMgr->GetDataChunkSize(fd, volType, outFileByteSize);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::MFS_INVALID_PARAMETER);
+    EXPECT_EQ(rc, EID(MFS_INVALID_PARAMETER));
 }
 
 TEST_F(MetaVolumeManagerFixture, GetTargetMediaType_Positive)
@@ -268,11 +268,11 @@ TEST_F(MetaVolumeManagerFixture, GetTargetMediaType_Positive)
     MetaStorageType type;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
 
     POS_EVENT_ID rc = volumeMgr->GetTargetMediaType(fd, volType, type);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc, EID(SUCCESS));
     EXPECT_EQ(type, MetaStorageType::SSD);
 }
 
@@ -283,11 +283,11 @@ TEST_F(MetaVolumeManagerFixture, GetFileBaseLpn_Positive)
     MetaLpnType outFileBaseLpn;
 
     EXPECT_CALL(*volContainer, LookupMetaVolumeType(Matcher<FileDescriptorType>(_), _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
 
     POS_EVENT_ID rc = volumeMgr->GetFileBaseLpn(fd, volType, outFileBaseLpn);
 
-    EXPECT_EQ(rc, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(rc, EID(SUCCESS));
     EXPECT_EQ(outFileBaseLpn, 0);
 }
 

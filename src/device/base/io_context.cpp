@@ -126,7 +126,7 @@ IOContext::GetErrorKey(void)
 {
     if (unlikely(false == keyForPendingErrorListSet))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::IOCTX_ERROR_KEY_NOT_SET;
+        POS_EVENT_ID eventId = EID(IOCTX_ERROR_KEY_NOT_SET);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Key for pending ERROR was not set, before!");
     }

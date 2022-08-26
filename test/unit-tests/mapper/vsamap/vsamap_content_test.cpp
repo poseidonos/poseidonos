@@ -37,7 +37,7 @@ TEST(VSAMapContent, SetEntry_TestFailCase)
     EXPECT_CALL(*map, AllocateMpage).WillOnce(Return(nullptr));
     EXPECT_CALL(*map, ReleaseMpageLock).Times(1);
     int ret = vsacon.SetEntry(0, vsa);
-    EXPECT_EQ(-EID(VSAMAP_SET_FAILURE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_SET_FAILURE), ret);
 
     delete fl;
 }

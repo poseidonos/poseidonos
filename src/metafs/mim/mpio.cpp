@@ -252,11 +252,11 @@ Mpio::DoIO(const MpAioState expNextState)
 
         ret = mssIntf->DoPageIOAsync(opcode, &mssAioCbCxt);
 
-        if (ret != POS_EVENT_ID::SUCCESS)
+        if (ret != EID(SUCCESS))
         {
             SetNextState(MpAioState::Error);
 
-            if (ret == POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
+            if (ret == EID(MFS_IO_FAILED_DUE_TO_STOP_STATE))
             {
                 errorStopState = true;
                 mssAioData.SetErrorStopState(true);
@@ -268,7 +268,7 @@ Mpio::DoIO(const MpAioState expNextState)
     else
     {
         ret = mssIntf->DoPageIO(opcode, io.targetMediaType, io.metaLpn, buf, io.pageCnt, io.mpioId, io.tagId);
-        if (ret == POS_EVENT_ID::SUCCESS)
+        if (ret == EID(SUCCESS))
         {
             SetNextState(expNextState);
         }
@@ -276,7 +276,7 @@ Mpio::DoIO(const MpAioState expNextState)
         {
             SetNextState(MpAioState::Error);
 
-            if (ret == POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_STOP_STATE)
+            if (ret == EID(MFS_IO_FAILED_DUE_TO_STOP_STATE))
             {
                 errorStopState = true;
             }

@@ -46,7 +46,7 @@ SegmentBasedRebuild::SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextM
 : RebuildBehavior(move(c)),
   allocatorSvc(allocatorSvc)
 {
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG, "SegmentBasedRebuild");
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild");
 }
 
 SegmentBasedRebuild::~SegmentBasedRebuild(void)
@@ -73,7 +73,7 @@ void SegmentBasedRebuild::UpdateProgress(uint32_t val)
     // the val is always 0, but the progress is increased due to reduced remaining.
     uint32_t remainingStripe =
         allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;
-    POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
+    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
         "SegmentBasedRebuild::UpdateProgress, remainings:{}", remainingStripe);
     ctx->prog->Update(PARTITION_TYPE_STR[ctx->part], val, remainingStripe);
 }

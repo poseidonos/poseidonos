@@ -107,7 +107,7 @@ VSAMapContent::SetEntry(BlkAddr rba, VirtualBlkAddr vsa)
         if (unlikely(mpage == nullptr))
         {
             map->ReleaseMpageLock(pageNr);
-            return -EID(VSAMAP_SET_FAILURE);
+            return ERRID(VSAMAP_SET_FAILURE);
         }
         mapHeader->SetMapAllocated(pageNr);
     }

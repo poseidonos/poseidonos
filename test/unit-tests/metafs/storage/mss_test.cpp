@@ -48,15 +48,15 @@ public:
     }
     POS_EVENT_ID CreateMetaStore(int arrayId, MetaStorageType mediaType, uint64_t capacity, bool formatFlag = false)
     {
-        return POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
     }
     POS_EVENT_ID Open(void)
     {
-        return POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
     }
     POS_EVENT_ID Close(void)
     {
-        return POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
     }
     uint64_t GetCapacity(MetaStorageType mediaType)
     {
@@ -64,11 +64,11 @@ public:
     }
     POS_EVENT_ID ReadPage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages)
     {
-        return POS_EVENT_ID::MFS_ARRAY_ADD_FAILED;
+        return EID(MFS_ARRAY_ADD_FAILED);
     }
     POS_EVENT_ID WritePage(MetaStorageType mediaType, MetaLpnType metaLpn, void* buffer, MetaLpnType numPages)
     {
-        return POS_EVENT_ID::MFS_ARRAY_DELETE_FAILED;
+        return EID(MFS_ARRAY_DELETE_FAILED);
     }
     bool IsAIOSupport(void)
     {
@@ -76,15 +76,15 @@ public:
     }
     POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb)
     {
-        return POS_EVENT_ID::MFS_SYSTEM_MOUNT_AGAIN;
+        return EID(MFS_SYSTEM_MOUNT_AGAIN);
     }
     POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb)
     {
-        return POS_EVENT_ID::MFS_SYSTEM_OPEN_FAILED;
+        return EID(MFS_SYSTEM_OPEN_FAILED);
     }
     POS_EVENT_ID TrimFileData(MetaStorageType mediaType, MetaLpnType startLpn, void* buffer, MetaLpnType numPages)
     {
-        return POS_EVENT_ID::MFS_ARRAY_CREATE_FAILED;
+        return EID(MFS_ARRAY_CREATE_FAILED);
     }
     LogicalBlkAddr TranslateAddress(MetaStorageType type, MetaLpnType theLpn)
     {
@@ -104,7 +104,7 @@ TEST(MssTester, CheckRead)
     uint32_t tagid = 0;
 
     EXPECT_EQ(mss->DoPageIO(opcode, mediaType, metaLpn, nullptr, numPages,
-                mpio_id, tagid), POS_EVENT_ID::MFS_ARRAY_ADD_FAILED);
+                mpio_id, tagid), EID(MFS_ARRAY_ADD_FAILED));
 
     delete mss;
 }
@@ -121,7 +121,7 @@ TEST(MssTester, CheckWrite)
     uint32_t tagid = 0;
 
     EXPECT_EQ(mss->DoPageIO(opcode, mediaType, metaLpn, nullptr, numPages,
-                mpio_id, tagid), POS_EVENT_ID::MFS_ARRAY_DELETE_FAILED);
+                mpio_id, tagid), EID(MFS_ARRAY_DELETE_FAILED));
 
     delete mss;
 }
@@ -138,7 +138,7 @@ TEST(MssTester, CheckTrim)
     uint32_t tagid = 0;
 
     EXPECT_EQ(mss->DoPageIO(opcode, mediaType, metaLpn, nullptr, numPages,
-                mpio_id, tagid), POS_EVENT_ID::MFS_ARRAY_CREATE_FAILED);
+                mpio_id, tagid), EID(MFS_ARRAY_CREATE_FAILED));
 
     delete mss;
 }
@@ -149,7 +149,7 @@ TEST(MssTester, CheckRead_Async)
 
     MssOpcode opcode = MssOpcode::Read;
 
-    EXPECT_EQ(mss->DoPageIOAsync(opcode, nullptr), POS_EVENT_ID::MFS_SYSTEM_MOUNT_AGAIN);
+    EXPECT_EQ(mss->DoPageIOAsync(opcode, nullptr), EID(MFS_SYSTEM_MOUNT_AGAIN));
 
     delete mss;
 }
@@ -160,7 +160,7 @@ TEST(MssTester, CheckWrite_Async)
 
     MssOpcode opcode = MssOpcode::Write;
 
-    EXPECT_EQ(mss->DoPageIOAsync(opcode, nullptr), POS_EVENT_ID::MFS_SYSTEM_OPEN_FAILED);
+    EXPECT_EQ(mss->DoPageIOAsync(opcode, nullptr), EID(MFS_SYSTEM_OPEN_FAILED));
 
     delete mss;
 }

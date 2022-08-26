@@ -135,12 +135,12 @@ CommandTimeoutHandler::AbortCompletionHandler::AbortCompletionHandler(AbortConte
 bool
 CommandTimeoutHandler::AbortCompletionHandler::_DoSpecificJob(void)
 {
-    POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_ABORT_COMPLETION;
+    POS_EVENT_ID eventId = EID(UNVME_ABORT_COMPLETION);
     const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(abortContext->ctrlr);
 
     if (_GetErrorCount() > 0)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_ABORT_COMPLETION_FAILED;
+        POS_EVENT_ID eventId = EID(UNVME_ABORT_COMPLETION_FAILED);
         const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(abortContext->ctrlr);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to complete command abort: SN: {}", ctrlrData->sn);
@@ -193,7 +193,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
 
     if (qpair == nullptr)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_ABORT_TIMEOUT;
+        POS_EVENT_ID eventId = EID(UNVME_ABORT_TIMEOUT);
         const struct spdk_nvme_ctrlr_data* ctrlrData = spdk_nvme_ctrlr_get_data(ctrlr);
         POS_TRACE_INFO(static_cast<int>(eventId),
             "Abort Also Timeout: SN: {}, QPair: {}, CID: {}",
@@ -207,7 +207,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
     mapAbort[key] = timeoutChecker;
     timeoutChecker->SetTimeout(ABORT_TIMEOUT_IN_NS);
 
-    POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SUBMITTING_CMD_ABORT;
+    POS_EVENT_ID eventId = EID(UNVME_SUBMITTING_CMD_ABORT);
     POS_TRACE_INFO(static_cast<int>(eventId),
         "Requesting command abort: SN: {}, QPair: {}, CID: {}",
         ctrlrData->sn, reinterpret_cast<uint64_t>(qpair), cid);
@@ -226,7 +226,7 @@ CommandTimeoutHandler::_ResetHandler(
     // Todo:: We just ctrl state as removed and failed,
     // We can fix this issue in spdk 20.07
     spdk_nvme_ctrlr_fail_and_remove(ctrlr);
-    POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_CONTROLLER_RESET;
+    POS_EVENT_ID eventId = EID(UNVME_CONTROLLER_RESET);
     POS_TRACE_ERROR(static_cast<int>(eventId),
         "Controller Reset : SN : {}", ctrlrData->sn);
 }

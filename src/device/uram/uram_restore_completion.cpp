@@ -68,7 +68,7 @@ bool UramRestoreCompletion::_DoSpecificJob(void)
     const uint32_t bytesPerHugepage = 2 * SZ_1MB;
     uint32_t unitsPerHugepage = bytesPerHugepage / Ubio::BYTES_PER_UNIT;
 
-    POS_EVENT_ID eventId = POS_EVENT_ID::URAM_RESTORING_PAGE_DONE;
+    POS_EVENT_ID eventId = EID(URAM_RESTORING_PAGE_DONE);
 
     pendingUbio--;
     POS_TRACE_INFO((int)eventId,

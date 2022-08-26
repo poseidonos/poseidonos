@@ -33,7 +33,7 @@ TEST(StripeMapContent, SetEntry_TestFail)
     EXPECT_EQ(0, ret);
     EXPECT_CALL(*map, AllocateMpage).WillOnce(Return(nullptr));
     ret = scon.SetEntry(0, sa);
-    EXPECT_EQ(-EID(STRIPEMAP_SET_FAILURE), ret);
+    EXPECT_EQ(ERRID(STRIPEMAP_SET_FAILURE), ret);
 }
 
 } // namespace pos

@@ -124,7 +124,7 @@ TEST(MetaRegion, CheckLoad_Positive0)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, ReadPage).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(obj.Load());
 }
@@ -136,7 +136,7 @@ TEST(MetaRegion, CheckLoad_Negative0)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage).WillOnce(Return(POS_EVENT_ID::MFS_META_STORAGE_NOT_READY));
+    EXPECT_CALL(mss, ReadPage).WillOnce(Return(EID(MFS_META_STORAGE_NOT_READY)));
 
     EXPECT_FALSE(obj.Load());
 }
@@ -148,7 +148,7 @@ TEST(MetaRegion, CheckLoad_Positive1)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, ReadPage).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(obj.Load(MetaStorageType::SSD, 0, 0, 0));
 }
@@ -160,7 +160,7 @@ TEST(MetaRegion, CheckLoad_Negative1)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage).WillOnce(Return(POS_EVENT_ID::MFS_META_STORAGE_NOT_READY));
+    EXPECT_CALL(mss, ReadPage).WillOnce(Return(EID(MFS_META_STORAGE_NOT_READY)));
 
     EXPECT_FALSE(obj.Load(MetaStorageType::SSD, 0, 0, 0));
 }
@@ -172,7 +172,7 @@ TEST(MetaRegion, CheckStore_Positive0)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, WritePage).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(obj.Store());
 }
@@ -184,7 +184,7 @@ TEST(MetaRegion, CheckStore_Negative0)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage).WillOnce(Return(POS_EVENT_ID::MFS_META_STORAGE_NOT_READY));
+    EXPECT_CALL(mss, WritePage).WillOnce(Return(EID(MFS_META_STORAGE_NOT_READY)));
 
     EXPECT_FALSE(obj.Store());
 }
@@ -196,7 +196,7 @@ TEST(MetaRegion, CheckStore_Positive1)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, WritePage).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(obj.Store(MetaStorageType::SSD, 0, 0, 0));
 }
@@ -208,7 +208,7 @@ TEST(MetaRegion, CheckStore_Negative1)
 
     obj.SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage).WillOnce(Return(POS_EVENT_ID::MFS_META_STORAGE_NOT_READY));
+    EXPECT_CALL(mss, WritePage).WillOnce(Return(EID(MFS_META_STORAGE_NOT_READY)));
 
     EXPECT_FALSE(obj.Store(MetaStorageType::SSD, 0, 0, 0));
 }

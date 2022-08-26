@@ -89,13 +89,13 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
 
     if (configExist == false || (useConfig == false))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_NO_USE_CONFIG;
+        POS_EVENT_ID eventId = EID(AFTMGR_NO_USE_CONFIG);
         POS_TRACE_INFO(static_cast<uint32_t>(eventId),
             "Use core description from default value");
         return;
     }
 
-    POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_USE_CONFIG;
+    POS_EVENT_ID eventId = EID(AFTMGR_USE_CONFIG);
     POS_TRACE_INFO(static_cast<uint32_t>(eventId),
         "Use core description from config file");
 
@@ -107,14 +107,14 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
         (ret == EID(SUCCESS));
     if (configExist == false || useReactorConfig == false)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_USE_CONFIG;
+        POS_EVENT_ID eventId = EID(AFTMGR_USE_CONFIG);
         POS_TRACE_INFO(static_cast<uint32_t>(eventId),
             "Use EventWorker and IOWorker");
     }
     else
     {
         useReactorOnly = true;
-        POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_USE_CONFIG;
+        POS_EVENT_ID eventId = EID(AFTMGR_USE_CONFIG);
         POS_TRACE_INFO(static_cast<uint32_t>(eventId),
             "Use reactors for backend events and IOs.");
         POS_TRACE_INFO(static_cast<uint32_t>(eventId),

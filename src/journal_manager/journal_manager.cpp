@@ -311,7 +311,7 @@ JournalManager::_DoRecovery(void)
     {
         POS_TRACE_ERROR(EID(JOURNAL_MANAGER_NOT_INITIALIZED),
             "Journal manager accessed without initialization");
-        return -EID(JOURNAL_REPLAY_FAILED);
+        return ERRID(JOURNAL_REPLAY_FAILED);
     }
 
     if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
@@ -324,7 +324,7 @@ JournalManager::_DoRecovery(void)
         if (result < 0)
         {
             journalingStatus.Set(JOURNAL_BROKEN);
-            return -EID(JOURNAL_REPLAY_FAILED);
+            return ERRID(JOURNAL_REPLAY_FAILED);
         }
 
         _ResetModules();
@@ -413,7 +413,7 @@ JournalManager::_Reset(void)
     int ret = logBuffer->SyncResetAll();
     if (ret == 0)
     {
-        POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_MANAGER_INITIALIZED,
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED),
             "Journal manager is initialized to status {}",
             journalingStatus.Get());
 

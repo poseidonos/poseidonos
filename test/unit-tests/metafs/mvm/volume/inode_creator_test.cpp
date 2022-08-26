@@ -135,7 +135,7 @@ TEST_F(InodeCreatorFixture, CheckFileCreation_Positive)
     result = inodeCreator->Create(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(result.second, EID(SUCCESS));
 }
 
 TEST_F(InodeCreatorFixture, CheckFileCreation_Negative)
@@ -169,6 +169,6 @@ TEST_F(InodeCreatorFixture, CheckFileCreation_Negative)
     result = inodeCreator->Create(reqMsg);
 
     EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, POS_EVENT_ID::MFS_META_SAVE_FAILED);
+    EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
 }
 } // namespace pos

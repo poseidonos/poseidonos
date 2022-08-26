@@ -239,7 +239,7 @@ EventScheduler::_BuildCpuSet(cpu_set_t& cpuSet)
             if (unlikely(cpuIndex >= totalCore))
             {
                 POS_EVENT_ID eventId =
-                    POS_EVENT_ID::EVENTSCHEDULER_NOT_MATCH_WORKER_COUNT;
+                    EID(EVENTSCHEDULER_NOT_MATCH_WORKER_COUNT);
                 POS_TRACE_ERROR(static_cast<int>(eventId),
                     "EventScheduler receives wrong worker count and cpu_set_t");
                 throw std::runtime_error("cpuIndex is bigger than totalCore");

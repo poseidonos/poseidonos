@@ -1030,7 +1030,7 @@ Array::TriggerRebuild(ArrayDevice* target)
     }
     if (target->GetState() != ArrayDeviceState::FAULT || target->GetUblock() != nullptr)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::REBUILD_DEBUG_MSG,
+        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
             "Rebuild target device is not removed yet");
         pthread_rwlock_unlock(&stateLock);
         retry = true;
@@ -1039,7 +1039,7 @@ Array::TriggerRebuild(ArrayDevice* target)
 
     if (state->SetRebuild() == false)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::REBUILD_TRIGGER_FAIL,
+        POS_TRACE_WARN(EID(REBUILD_TRIGGER_FAIL),
             "Failed to trigger rebuild. Current array state is not rebuildable");
         pthread_rwlock_unlock(&stateLock);
         return retry;
@@ -1052,7 +1052,7 @@ Array::TriggerRebuild(ArrayDevice* target)
     {
         state->SetRebuildDone(false);
         state->SetDegraded();
-        POS_TRACE_WARN(POS_EVENT_ID::REBUILD_TRIGGER_FAIL,
+        POS_TRACE_WARN(EID(REBUILD_TRIGGER_FAIL),
             "Failed to trigger rebuild. spare device is not available");
         pthread_rwlock_unlock(&stateLock);
         return retry;
@@ -1062,7 +1062,7 @@ Array::TriggerRebuild(ArrayDevice* target)
     ret = _Flush();
     if (0 != ret)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::REBUILD_TRIGGER_FAIL,
+        POS_TRACE_WARN(EID(REBUILD_TRIGGER_FAIL),
             "Failed to trigger rebuild. Flush failed.");
         pthread_rwlock_unlock(&stateLock);
         return retry;
@@ -1083,7 +1083,7 @@ Array::ResumeRebuild(ArrayDevice* target)
 
     if (state->SetRebuild() == false)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::REBUILD_TRIGGER_FAIL,
+        POS_TRACE_WARN(EID(REBUILD_TRIGGER_FAIL),
             "Failed to resume rebuild. Array({})'s state is not rebuildable", name_);
         pthread_rwlock_unlock(&stateLock);
         return false;
