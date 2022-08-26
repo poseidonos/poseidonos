@@ -54,7 +54,7 @@ GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigMana
         static_cast<void*>(&serverAddr), CONFIG_TYPE_STRING);
     if (ret != 0)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::HA_DEBUG_MSG),
+        POS_TRACE_INFO(static_cast<int>(EID(HA_DEBUG_MSG)),
             "Failed to read grpc publisher address from config file, Address will be set defined in the \"grpc_server_socket_address.h\"");
         serverAddr = GRPC_HA_PUB_SERVER_SOCKET_ADDRESS;
     }

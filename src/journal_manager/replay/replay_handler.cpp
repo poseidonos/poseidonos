@@ -114,7 +114,7 @@ ReplayHandler::Start(void)
 {
     replayState.GetRecoverState();
 
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STARTED);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STARTED));
     POS_TRACE_INFO(eventId, "Journal replay started");
 
     int result = _ExecuteReplayTasks();
@@ -125,7 +125,7 @@ ReplayHandler::Start(void)
     }
     replayState.RemoveRecoverState();
 
-    eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_COMPLETED);
+    eventId = static_cast<int>(EID(JOURNAL_REPLAY_COMPLETED));
     POS_TRACE_INFO(eventId, "Journal replay completed");
 
     return result;

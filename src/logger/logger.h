@@ -39,6 +39,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <yaml-cpp/yaml.h>
 
 #include "preferences.h"
 #include "spdlog/spdlog.h"
@@ -46,8 +47,11 @@
 #include "src/dump/dump_module.hpp"
 #include "src/lib/singleton.h"
 #include "src/lib/signal_mask.h"
+#include "src/include/pos_event_id.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/cli/cli_event_code.h"
+
+#define POS_EVENT_FILE_PATH "/etc/pos/pos_event.yaml"
 
 using namespace std;
 

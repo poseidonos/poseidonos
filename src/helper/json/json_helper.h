@@ -39,6 +39,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/include/pos_event_id.h"
+
 using namespace std;
 
 enum JsonFormatType

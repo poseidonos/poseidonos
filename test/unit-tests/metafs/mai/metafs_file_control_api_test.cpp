@@ -59,8 +59,8 @@ TEST(MetaFsFileControlApi, WBT_testIfMetaFileInfoListCanBeReturned)
 
     std::vector<MetaFileInfoDumpCxt> result;
 
-    EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*volMgr, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*volMgr, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     result = api.Wbt_GetMetaFileList(type);
 }
@@ -78,8 +78,8 @@ TEST(MetaFsFileControlApi, WBT_testIfMetaFileInodeCanBeReturned)
 
     MetaFileInodeInfo* result = nullptr;
 
-    EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*volMgr, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*volMgr, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     result = api.Wbt_GetMetaFileInode(fileName, type);
 }
@@ -96,8 +96,8 @@ TEST(MetaFsFileControlApi, Get_testIfFileIoSizeCanBeRetrieved)
     MetaFsFileControlApi api(arrayId, storage, mgmt, nullptr, volMgr);
     api.SetStatus(true);
 
-    EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*volMgr, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*volMgr, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*volMgr, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     size_t size = api.GetAlignedFileIOSize(fd, type);
 

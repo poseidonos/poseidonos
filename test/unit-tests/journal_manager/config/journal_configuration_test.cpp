@@ -466,7 +466,7 @@ TEST(JournalConfiguration, SetLogBufferSize_testIfNVRAMSpaceIsNotEnough)
     ON_CALL(metaFsCtrl, GetAvailableSpace).WillByDefault(Return(maxPartitionSize));
 
     // When, Then: Will journal configuration return the error code
-    int errorReturnCode = static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION) * -1;
+    int errorReturnCode = static_cast<int>(EID(JOURNAL_CONFIGURATION)) * -1;
     EXPECT_EQ(config.SetLogBufferSize(0, &metaFsCtrl), errorReturnCode);
 
     delete configManager;

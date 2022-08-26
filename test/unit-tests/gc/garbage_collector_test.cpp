@@ -89,7 +89,7 @@ TEST_F(GarbageCollectorTestFixture, GarbageCollector_testIfMakeCopierPtrFailWhen
 
     // when garbage collector init
     // then return fail with "gc cannot create copier" event id
-    EXPECT_TRUE(testGc->Init() == static_cast<int>(POS_EVENT_ID::GC_CANNOT_CREATE_COPIER));
+    EXPECT_TRUE(testGc->Init() == static_cast<int>(EID(GC_CANNOT_CREATE_COPIER)));
     delete testGc;
 }
 

@@ -162,7 +162,7 @@ StripeLogWriteStatus::GcStripeLogFound(GcStripeFlushedLog dat)
 void
 StripeLogWriteStatus::Print(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
+    int eventId = static_cast<int>(EID(JOURNAL_DEBUG));
     std::ostringstream os;
 
     os << "Stripe written(vsid " << GetVsid() << "), ";

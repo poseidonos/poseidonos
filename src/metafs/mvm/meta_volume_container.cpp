@@ -228,15 +228,15 @@ MetaVolumeContainer::DetermineVolumeToCreateFile(FileSizeType fileByteSize,
 
     if (search == volumeContainer.end())
     {
-        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        return EID(MFS_INVALID_PARAMETER);
     }
 
     if (!search->second->IsOkayToStore(fileByteSize, prop))
     {
-        return POS_EVENT_ID::MFS_META_VOLUME_NOT_ENOUGH_SPACE;
+        return EID(MFS_META_VOLUME_NOT_ENOUGH_SPACE);
     }
 
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 bool
@@ -261,7 +261,7 @@ MetaVolumeContainer::CreateFile(const MetaVolumeType volumeType, MetaFsFileContr
 {
     auto result = volumeContainer[volumeType]->CreateFile(reqMsg);
 
-    return (result.second == POS_EVENT_ID::SUCCESS);
+    return (result.second == EID(SUCCESS));
 }
 
 bool
@@ -269,7 +269,7 @@ MetaVolumeContainer::DeleteFile(const MetaVolumeType volumeType, MetaFsFileContr
 {
     auto result = volumeContainer[volumeType]->DeleteFile(reqMsg);
 
-    return (result.second == POS_EVENT_ID::SUCCESS);
+    return (result.second == EID(SUCCESS));
 }
 
 MetaLpnType
@@ -309,9 +309,9 @@ MetaVolumeContainer::LookupMetaVolumeType(FileDescriptorType fd, const MetaVolum
 {
     auto name = volumeContainer[volumeType]->LookupNameByDescriptor(fd);
     if (name != "")
-        return POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
 
-    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+    return EID(MFS_INVALID_PARAMETER);
 }
 
 POS_EVENT_ID
@@ -319,9 +319,9 @@ MetaVolumeContainer::LookupMetaVolumeType(std::string& fileName, const MetaVolum
 {
     auto fd = volumeContainer[volumeType]->LookupDescriptorByName(fileName);
     if (fd != MetaFsCommonConst::INVALID_FD)
-        return POS_EVENT_ID::SUCCESS;
+        return EID(SUCCESS);
 
-    return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+    return EID(MFS_INVALID_PARAMETER);
 }
 
 bool

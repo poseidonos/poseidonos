@@ -80,7 +80,7 @@ MetaIoManager::~MetaIoManager(void)
 POS_EVENT_ID
 MetaIoManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     return rc;
 }
@@ -88,7 +88,7 @@ MetaIoManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 bool
 MetaIoManager::IsSuccess(POS_EVENT_ID rc)
 {
-    return rc == POS_EVENT_ID::SUCCESS;
+    return rc == EID(SUCCESS);
 }
 
 void
@@ -132,12 +132,12 @@ MetaIoManager::AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage
         if (!scheduler.second->AddArrayInfo(arrayId, map))
         {
             result = false;
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_ADD_FAILED,
+            POS_TRACE_ERROR(EID(MFS_ARRAY_ADD_FAILED),
                 "Adding array has been failed, arrayId:{}", arrayId);
         }
         else
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_ADD_SUCCEEDED,
+            POS_TRACE_INFO(EID(MFS_ARRAY_ADD_SUCCEEDED),
                 "Adding array has been succeeded, arrayId:{}", arrayId);
         }
     }
@@ -153,12 +153,12 @@ MetaIoManager::RemoveArrayInfo(int arrayId)
         if (!scheduler.second->RemoveArrayInfo(arrayId))
         {
             result = false;
-            POS_TRACE_ERROR((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_FAILED,
+            POS_TRACE_ERROR(EID(MFS_ARRAY_REMOVE_FAILED),
                 "Removing array has been failed, arrayId:{}", arrayId);
         }
         else
         {
-            POS_TRACE_INFO((int)POS_EVENT_ID::MFS_ARRAY_REMOVE_SUCCEEDED,
+            POS_TRACE_INFO(EID(MFS_ARRAY_REMOVE_SUCCEEDED),
                 "Removing array has been succeeded, arrayId:{}", arrayId);
         }
     }
@@ -177,7 +177,7 @@ MetaIoManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
 POS_EVENT_ID
 MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     // reqMsg     : original message, used only this thread
     // cloneReqMsg: new copy, only for meta scheduler, not meta handler thread
@@ -200,7 +200,7 @@ MetaIoManager::_ProcessNewIoReq(MetaFsIoRequest& reqMsg)
         {
             MFS_TRACE_ERROR(EID(MFS_IO_FAILED_DUE_TO_ERROR),
                 "[MSG ] Sync I/O failed. req.tagId={}, fd={}", reqMsg.tagId, reqMsg.fd);
-            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+            rc = EID(MFS_IO_FAILED_DUE_TO_ERROR);
         }
     }
 

@@ -77,7 +77,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
     {
         if (unlikely(nullptr == argument))
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::BLKALGN_INVALID_UBIO;
+            POS_EVENT_ID eventId = EID(BLKALGN_INVALID_UBIO);
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 "Block aligning Ubio is null");
             throw eventId;
@@ -129,7 +129,7 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
                         bool ret = writeForParity.Execute();
                         if (ret == false)
                         {
-                            POS_EVENT_ID eventId = POS_EVENT_ID::WRITE_FOR_PARITY_FAILED;
+                            POS_EVENT_ID eventId = EID(WRITE_FOR_PARITY_FAILED);
                             POS_TRACE_ERROR(static_cast<int>(eventId),
                                 "Failed to copy user data to dram for parity");
                         }
@@ -183,7 +183,7 @@ ReadCompletionForPartialWrite::_DoSpecificJob(void)
         VolumeIoSmartPtr split = volumeIo->GetOriginVolumeIo();
         if (unlikely(nullptr == split))
         {
-            POS_EVENT_ID eventId = POS_EVENT_ID::BLKALGN_INVALID_UBIO;
+            POS_EVENT_ID eventId = EID(BLKALGN_INVALID_UBIO);
             POS_TRACE_ERROR(static_cast<int>(eventId),
                 "Block aligning Ubio is null");
             throw eventId;

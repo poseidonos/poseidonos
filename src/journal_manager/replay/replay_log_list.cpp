@@ -100,7 +100,7 @@ void
 ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
 {
     ReplayLogGroup replayLogGroup = logGroups[seqNum];
-    int event = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND);
+    int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
     POS_TRACE_INFO(event, "Erasing Replay Log Group for SeqNum {} with {} entries", seqNum, replayLogGroup.logs.size());
     for (ReplayLog replayLog : replayLogGroup.logs)
     {

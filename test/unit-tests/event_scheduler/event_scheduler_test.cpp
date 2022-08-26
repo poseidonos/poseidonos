@@ -82,11 +82,11 @@ TEST(EventScheduler, EventScheduler_Stack)
     NiceMock<MockAffinityManager> mockAffinityManager;
 
     // When 1: Create EventScheduler with numaDedicatedSchedulingPolicy
-    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(EID(SUCCESS))));
     EventScheduler eventScheduler1{&mockQosManager, &mockConfigManager, &mockAffinityManager};
 
     // When 2: Create EventScheduler without numaDedicatedSchedulingPolicy
-    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(POS_EVENT_ID::EVENT_ID_MAPPING_WRONG)));
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(EID(EVENT_ID_MAPPING_WRONG))));
     EventScheduler eventScheduler2{&mockQosManager, &mockConfigManager, &mockAffinityManager};
 
     // Then: Do nothing
@@ -109,7 +109,7 @@ TEST(EventScheduler, Initialize_EnoughCore)
     NiceMock<MockQosManager> mockQosManager;
     NiceMock<MockConfigManager> mockConfigManager;
     NiceMock<MockAffinityManager> mockAffinityManager;
-    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(EID(SUCCESS))));
     ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(10));
     ON_CALL(mockAffinityManager, GetNumaIdFromCoreId(_)).WillByDefault(Return(0));
     EventScheduler eventSchechduler{&mockQosManager, &mockConfigManager, &mockAffinityManager};
@@ -131,7 +131,7 @@ TEST(EventScheduler, Initialize_NotEnoughCore)
     NiceMock<MockQosManager> mockQosManager;
     NiceMock<MockConfigManager> mockConfigManager;
     NiceMock<MockAffinityManager> mockAffinityManager;
-    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(EID(SUCCESS))));
     ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(0));
     ON_CALL(mockAffinityManager, GetNumaIdFromCoreId(_)).WillByDefault(Return(0));
     EventScheduler eventSchechduler{&mockQosManager, &mockConfigManager, &mockAffinityManager};
@@ -157,7 +157,7 @@ TEST(EventScheduler, Initialize_NotEnoughCore)
         [this] (string module, string key, void* value, ConfigType type)
         {
             *(bool*)value = true;
-            return static_cast<int>(POS_EVENT_ID::SUCCESS);
+            return static_cast<int>(EID(SUCCESS));
         });
     ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(10));
     ON_CALL(mockAffinityManager, GetNumaIdFromCoreId).WillByDefault(
@@ -188,7 +188,7 @@ TEST(EventScheduler, EnqueueEvent_VarietyInputs)
     NiceMock<MockQosManager> mockQosManager;
     NiceMock<MockConfigManager> mockConfigManager;
     NiceMock<MockAffinityManager> mockAffinityManager;
-    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(POS_EVENT_ID::SUCCESS)));
+    ON_CALL(mockConfigManager, GetValue(_, _, _, _)).WillByDefault(Return(static_cast<int>(EID(SUCCESS))));
     ON_CALL(mockAffinityManager, GetTotalCore()).WillByDefault(Return(10));
     ON_CALL(mockAffinityManager, GetNumaIdFromCoreId(_)).WillByDefault(Return(0));
     EventScheduler eventSchechduler{&mockQosManager, &mockConfigManager, &mockAffinityManager};

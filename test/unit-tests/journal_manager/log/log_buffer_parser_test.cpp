@@ -305,7 +305,7 @@ TEST(LogBufferParser, GetLogs_testIfSeveralSequenceNumberSeen)
     int result = parser.GetLogs(logBuffer, logBufferSize, logList);
 
     // Then: LogBufferParser will return the error code
-    int expect = static_cast<int>(POS_EVENT_ID::JOURNAL_INVALID_LOG_FOUND) * -1;
+    int expect = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND)) * -1;
     EXPECT_EQ(result, expect);
     free(logBuffer);
 }

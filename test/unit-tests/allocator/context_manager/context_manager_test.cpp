@@ -424,7 +424,7 @@ TEST(ContextManager, SetNextSsdLsid_TestCheckReturnedSegmentId)
     // when 2.
     ret = ctxManager.SetNextSsdLsid();
     // then 2.
-    EXPECT_EQ((int)-EID(ALLOCATOR_NO_FREE_SEGMENT), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_NO_FREE_SEGMENT), ret);
 }
 
 TEST(ContextManager, GetSegmentCtx_TestSimpleGetter)

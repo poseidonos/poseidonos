@@ -197,7 +197,7 @@ Ubio::SetPba(PhysicalBlkAddr& pba)
 {
     if (unlikely(pba.arrayDev == nullptr))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_PBA;
+        POS_EVENT_ID eventId = EID(UBIO_INVALID_PBA);
         POS_TRACE_ERROR(eventId, "Invalid PBA for Ubio");
         return;
     }
@@ -245,14 +245,12 @@ Ubio::MarkDone(void)
 {
     if (unlikely(false == sync))
     {
-        PosEventId::Print(POS_EVENT_ID::UBIO_SYNC_FLAG_NOT_SET,
-            EventLevel::WARNING);
+        POS_TRACE_WARN(EID(UBIO_SYNC_FLAG_NOT_SET), "");
         return;
     }
     if (unlikely(true == syncDone))
     {
-        PosEventId::Print(POS_EVENT_ID::UBIO_ALREADY_SYNC_DONE,
-            EventLevel::WARNING);
+        POS_TRACE_WARN(EID(UBIO_ALREADY_SYNC_DONE), "");
         return;
     }
 
@@ -264,8 +262,7 @@ Ubio::WaitDone(void)
 {
     if (unlikely(false == sync))
     {
-        PosEventId::Print(POS_EVENT_ID::UBIO_SYNC_FLAG_NOT_SET,
-            EventLevel::WARNING);
+        POS_TRACE_WARN(EID(UBIO_SYNC_FLAG_NOT_SET), "");
         return;
     }
 
@@ -342,7 +339,7 @@ Ubio::GetOriginUbio(void)
 {
     if (unlikely(false == CheckOriginUbioSet()))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_ORIGIN_UBIO;
+        POS_EVENT_ID eventId = EID(UBIO_INVALID_ORIGIN_UBIO);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Invalid original Ubio");
         return nullptr;
@@ -410,7 +407,7 @@ Ubio::NeedRecovery(void) // TODO: will be moved. AWIBOF-2751
     uBlock = arrayDev->GetUblock();
     if (uBlock == nullptr)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UBIO_INVALID_DEVICE;
+        POS_EVENT_ID eventId = EID(UBIO_INVALID_DEVICE);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Invalid UblockDevice for Ubio");
         assert(0);

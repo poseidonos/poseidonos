@@ -137,7 +137,7 @@ jobs:
     
     - name: Rebuild SPOR Test
       id: rebuild_spor_test
-      timeout-minutes: 3
+      timeout-minutes: 8
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/rebuild_spor/rebuild_spor.sh
@@ -184,7 +184,7 @@ jobs:
     
     - name: Rebuild Test 
       id: rebuild_test
-      timeout-minutes: 3
+      timeout-minutes: 8
       working-directory: ${{github.workspace}}
       run: |
         chmod +x .github/workflows/script/rebuild/rebuild.sh

@@ -48,12 +48,12 @@ MetaIntegrityManager::~MetaIntegrityManager(void)
 POS_EVENT_ID
 MetaIntegrityManager::CheckReqSanity(MetaFsRequestBase& reqMsg)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 
 POS_EVENT_ID
 MetaIntegrityManager::ProcessNewReq(MetaFsRequestBase& reqMsg)
 {
-    return POS_EVENT_ID::SUCCESS;
+    return EID(SUCCESS);
 }
 } // namespace pos

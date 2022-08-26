@@ -114,7 +114,7 @@ FlushCmdHandler::Execute(void)
                 "All stripes flush completed");
 
             POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                EID(FLUSH_CMD_ONGOING),
                 "User data flush for volume {} completed", volumeId);
 
         {
@@ -123,7 +123,7 @@ FlushCmdHandler::Execute(void)
             ret = iMapFlush->FlushDirtyMpages(volumeId, eventVSAMap);
             if (ret != 0)
             {
-                if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                if (ret == ERRID(MAP_FLUSH_IN_PROGRESS))
                 {
                     return false;
                 }
@@ -165,7 +165,7 @@ FlushCmdHandler::Execute(void)
 
                     if (ret != 0)
                     {
-                        if (ret == -EID(MAP_FLUSH_IN_PROGRESS))
+                        if (ret == ERRID(MAP_FLUSH_IN_PROGRESS))
                         {
                             return false;
                         }
@@ -214,7 +214,7 @@ FlushCmdHandler::Execute(void)
                 }
 
                 POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::FLUSH_CMD,
-                        POS_EVENT_ID::FLUSH_CMD_ONGOING,
+                        EID(FLUSH_CMD_ONGOING),
                         "Meta data flush for volume {} is requested", volumeId);
             }
 

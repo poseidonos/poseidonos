@@ -138,7 +138,7 @@ private:
             (void*)value, (ConfigType)configMap_.at(type).second);
 
         if (ret)
-            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+            POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
                 "Failed to read configuration from config file");
 
         return ret;

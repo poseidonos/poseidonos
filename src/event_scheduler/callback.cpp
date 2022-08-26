@@ -98,7 +98,7 @@ Callback::~Callback(void)
     airlog("Callback_Destructor", "internal", type, 1);
     if (unlikely(executed == false))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITHOUT_EXECUTED;
+        POS_EVENT_ID eventId = EID(CALLBACK_DESTROY_WITHOUT_EXECUTED);
         POS_TRACE_WARN(
             eventId,
             "Callback destroy without executed : {}",
@@ -109,7 +109,7 @@ Callback::~Callback(void)
 
     if (unlikely(errorCount > 0))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_DESTROY_WITH_ERROR;
+        POS_EVENT_ID eventId = EID(CALLBACK_DESTROY_WITH_ERROR);
         POS_TRACE_WARN(
             eventId,
             "Callback Error : Type : {}, Critical Error : {}",
@@ -124,7 +124,7 @@ Callback::~Callback(void)
         {
             try
             {
-                POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_TIMEOUT;
+                POS_EVENT_ID eventId = EID(CALLBACK_TIMEOUT);
                 POS_TRACE_DEBUG_IN_MEMORY(
                     ModuleInDebugLogDump::CALLBACK_TIMEOUT,
                     eventId,
@@ -237,7 +237,7 @@ Callback::SetCallee(CallbackSmartPtr inputCallee)
 {
     if (unlikely(nullptr == inputCallee))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_CALLEE;
+        POS_EVENT_ID eventId = EID(CALLBACK_INVALID_CALLEE);
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
             "Invalid callee for callback");
         return;
@@ -245,7 +245,7 @@ Callback::SetCallee(CallbackSmartPtr inputCallee)
 
     if (unlikely(nullptr != callee))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_CALLEE;
+        POS_EVENT_ID eventId = EID(CALLBACK_INVALID_CALLEE);
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
             "Invalid callee for callback");
         return;
@@ -273,7 +273,7 @@ Callback::_RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount
     }
     else if (unlikely(increasedCompletionCount > localWaitingCount))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::CALLBACK_INVALID_COUNT;
+        POS_EVENT_ID eventId = EID(CALLBACK_INVALID_COUNT);
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
             "CompletionCount exceeds WaitingCount");
     }

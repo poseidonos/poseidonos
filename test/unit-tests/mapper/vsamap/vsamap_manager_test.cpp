@@ -135,7 +135,7 @@ TEST(VSAMapManager, GetVSAMapContent_TestFailSetVSA)
     vsaMap->DisableVsaMapAccess(0);
     VirtualBlks vv;
     int ret = vsaMap->SetVSAs(0, 0, vv);
-    EXPECT_EQ(-EID(VSAMAP_NOT_ACCESSIBLE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_NOT_ACCESSIBLE), ret);
     delete vsaMap;
 }
 
@@ -152,7 +152,7 @@ TEST(VSAMapManager, GetVSAs_TestFailGetVSA)
     VsaArray vv;
     vv[0] = vsa;
     int ret = vsaMap->GetVSAs(0, 0, 1, vv);
-    EXPECT_EQ(-EID(VSAMAP_NOT_ACCESSIBLE), ret);
+    EXPECT_EQ(ERRID(VSAMAP_NOT_ACCESSIBLE), ret);
     delete vsaMap;
 }
 
@@ -229,7 +229,7 @@ TEST(VSAMapManager, FlushDirtyPagesGiven_TestFail1)
     MpageList d;
     vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
     int ret = vsaMap->FlushDirtyPagesGiven(0, d, nullptr);
-    EXPECT_EQ(-EID(MAP_FLUSH_IN_PROGRESS), ret);
+    EXPECT_EQ(ERRID(MAP_FLUSH_IN_PROGRESS), ret);
     delete vsaMap;
 }
 

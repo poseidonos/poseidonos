@@ -59,7 +59,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Fully)
 
     api.SetStatus(false);
 
-    EXPECT_EQ(api.Read(fd, nullptr, type), POS_EVENT_ID::MFS_MODULE_NOT_READY);
+    EXPECT_EQ(api.Read(fd, nullptr, type), EID(MFS_MODULE_NOT_READY));
 
     delete ctrl;
 }
@@ -78,7 +78,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenTheModuleIsAbnormal_Partia
 
     api.SetStatus(false);
 
-    EXPECT_EQ(api.Read(fd, 0, 0, nullptr, type), POS_EVENT_ID::MFS_MODULE_NOT_READY);
+    EXPECT_EQ(api.Read(fd, 0, 0, nullptr, type), EID(MFS_MODULE_NOT_READY));
 
     delete ctrl;
 }
@@ -99,7 +99,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Fully)
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(nullptr));
 
-    EXPECT_EQ(api.Read(fd, nullptr, type), POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+    EXPECT_EQ(api.Read(fd, nullptr, type), EID(MFS_FILE_NOT_FOUND));
 
     delete ctrl;
 }
@@ -120,7 +120,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillNotBeReturnedWhenThereIsNoFileInfo_Partiall
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(nullptr));
 
-    EXPECT_EQ(api.Read(fd, 0, 0, nullptr, type), POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+    EXPECT_EQ(api.Read(fd, 0, 0, nullptr, type), EID(MFS_FILE_NOT_FOUND));
 
     delete ctrl;
 }
@@ -155,13 +155,13 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
     fileCtx.storageType = MetaStorageType::SSD;
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(&fileCtx));
-    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     char* rBuf = (char*)malloc(fileCtx.sizeInByte);
     memset(rBuf, 0, fileCtx.sizeInByte);
 
-    EXPECT_EQ(api.Read(fd, rBuf, type), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(api.Read(fd, rBuf, type), EID(SUCCESS));
 
     free(rBuf);
     delete ctrl;
@@ -197,13 +197,13 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
     fileCtx.storageType = MetaStorageType::SSD;
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(&fileCtx));
-    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     char* rBuf = (char*)malloc(fileCtx.sizeInByte);
     memset(rBuf, 0, fileCtx.sizeInByte);
 
-    EXPECT_EQ(api.Read(fd, 0, 0, rBuf, type), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(api.Read(fd, 0, 0, rBuf, type), EID(SUCCESS));
 
     free(rBuf);
     delete ctrl;
@@ -223,7 +223,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Fully)
 
     api.SetStatus(false);
 
-    EXPECT_EQ(api.Write(fd, nullptr, type), POS_EVENT_ID::MFS_MODULE_NOT_READY);
+    EXPECT_EQ(api.Write(fd, nullptr, type), EID(MFS_MODULE_NOT_READY));
 
     delete ctrl;
 }
@@ -242,7 +242,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenTheModuleIsAbnormal_Partial
 
     api.SetStatus(false);
 
-    EXPECT_EQ(api.Write(fd, nullptr, type), POS_EVENT_ID::MFS_MODULE_NOT_READY);
+    EXPECT_EQ(api.Write(fd, nullptr, type), EID(MFS_MODULE_NOT_READY));
 
     delete ctrl;
 }
@@ -263,7 +263,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Fully)
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(nullptr));
 
-    EXPECT_EQ(api.Write(fd, nullptr, type), POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+    EXPECT_EQ(api.Write(fd, nullptr, type), EID(MFS_FILE_NOT_FOUND));
 
     delete ctrl;
 }
@@ -284,7 +284,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillNotBeStoredWhenThereIsNoFileInfo_Partially
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(nullptr));
 
-    EXPECT_EQ(api.Write(fd, nullptr, type), POS_EVENT_ID::MFS_FILE_NOT_FOUND);
+    EXPECT_EQ(api.Write(fd, nullptr, type), EID(MFS_FILE_NOT_FOUND));
 
     delete ctrl;
 }
@@ -319,13 +319,13 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
     fileCtx.storageType = MetaStorageType::SSD;
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(&fileCtx));
-    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     char* rBuf = (char*)malloc(fileCtx.sizeInByte);
     memset(rBuf, 0, fileCtx.sizeInByte);
 
-    EXPECT_EQ(api.Write(fd, rBuf, type), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(api.Write(fd, rBuf, type), EID(SUCCESS));
 
     free(rBuf);
     delete ctrl;
@@ -361,13 +361,13 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
     fileCtx.storageType = MetaStorageType::SSD;
 
     EXPECT_CALL(*ctrl, GetFileInfo).WillOnce(Return(&fileCtx));
-    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(POS_EVENT_ID::SUCCESS));
-    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*io, CheckReqSanity).WillOnce(Return(EID(SUCCESS)));
+    EXPECT_CALL(*io, ProcessNewReq).WillOnce(Return(EID(SUCCESS)));
 
     char* rBuf = (char*)malloc(fileCtx.sizeInByte);
     memset(rBuf, 0, fileCtx.sizeInByte);
 
-    EXPECT_EQ(api.Write(fd, rBuf, type), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(api.Write(fd, rBuf, type), EID(SUCCESS));
 
     free(rBuf);
     delete ctrl;

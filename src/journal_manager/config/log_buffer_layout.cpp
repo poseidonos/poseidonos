@@ -74,7 +74,7 @@ LogBufferLayout::GetLayout(int logGroupId)
 {
     if (static_cast<int>(groupLayout.size()) <= logGroupId)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG,
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
             "Cannot get log buffer layout of group {}, max group is {}", logGroupId, groupLayout.size() - 1);
 
         return LogGroupLayout();

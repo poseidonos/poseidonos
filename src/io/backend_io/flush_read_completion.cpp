@@ -61,7 +61,7 @@ FlushReadCompletion::_DoSpecificJob(void)
     if (unlikely(nullptr == flushEvent))
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY;
+            EID(FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Fail to allocate memory");
         return false;

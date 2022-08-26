@@ -142,7 +142,7 @@ Stripe::Derefer(uint32_t blockCount)
     if (unlikely(blockCount > referenceCount))
     {
         POS_EVENT_ID eventId =
-            POS_EVENT_ID::ALLOCATOR_WRONG_STRIPE_REFERENCE_COUNT;
+            EID(ALLOCATOR_WRONG_STRIPE_REFERENCE_COUNT);
         POS_TRACE_ERROR((int)eventId, "Wrong stripe reference count");
         referenceCount = 0;
         return;
@@ -197,7 +197,7 @@ Stripe::UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
 {
     if (rba != INVALID_RBA && volumeId >= MAX_VOLUME_COUNT)
     {
-        throw POS_EVENT_ID::STRIPE_INVALID_VOLUME_ID;
+        throw EID(STRIPE_INVALID_VOLUME_ID);
     }
     iReverseMap->UpdateReverseMapEntry(revMapPack, wbLsid, offset, rba, volumeId);
 }

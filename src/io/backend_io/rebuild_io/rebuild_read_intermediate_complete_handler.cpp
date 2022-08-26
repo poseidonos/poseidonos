@@ -56,7 +56,7 @@ RebuildReadIntermediateCompleteHandler::_DoSpecificJob(void)
 {
     if (unlikely(nullptr == ubio))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_INVALID_UBIO;
+        POS_EVENT_ID eventId = EID(RDCMP_INVALID_UBIO);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Ubio is null at ReadCompleteHandler");
         return true;
@@ -64,7 +64,7 @@ RebuildReadIntermediateCompleteHandler::_DoSpecificJob(void)
 
     if (unlikely(_GetErrorCount()))
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::RDCMP_READ_FAIL;
+        POS_EVENT_ID eventId = EID(RDCMP_READ_FAIL);
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Uncorrectable data error");
     }

@@ -85,7 +85,7 @@ MetaFsConfigManager::Init(void)
 
     if (!_ValidateConfig())
     {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
+        POS_TRACE_ERROR(static_cast<int>(EID(MFS_INVALID_CONFIG)),
             "The config values are invalid.");
         return false;
     }
@@ -126,7 +126,7 @@ MetaFsConfigManager::_ValidateConfig(void) const
     // add more constraint here
     if (timeIntervalInMillisecondsForMetric_ < MetaFsConfig::MIN_TIME_INTERVAL)
     {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::MFS_INVALID_CONFIG),
+        POS_TRACE_ERROR(static_cast<int>(EID(MFS_INVALID_CONFIG)),
             "The time interval ({}) is not valid.",
             timeIntervalInMillisecondsForMetric_);
         return false;
@@ -142,7 +142,7 @@ MetaFsConfigManager::_GetMioPoolCapacity(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::MioPoolCapacity, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::MioPoolCapacity].first + ": " + std::to_string(count));
 
     return count;
@@ -155,7 +155,7 @@ MetaFsConfigManager::_GetMpioPoolCapacity(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::MpioPoolCapacity, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::MpioPoolCapacity].first + ": " + std::to_string(count));
 
     return count;
@@ -168,7 +168,7 @@ MetaFsConfigManager::_GetWriteMpioCacheCapacity(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::WriteMpioCacheCapacity, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::WriteMpioCacheCapacity].first + ": " + std::to_string(count));
 
     return count;
@@ -181,7 +181,7 @@ MetaFsConfigManager::_IsDirectAccessEnabled(void)
     if (_ReadConfiguration<bool>(MetaFsConfigType::DirectAccessForJournalEnabled, &enabled))
         return false;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::DirectAccessForJournalEnabled].first + (enabled ? " is enabled" : " is disabled"));
 
     return enabled;
@@ -194,7 +194,7 @@ MetaFsConfigManager::_GetTimeIntervalInMillisecondsForMetric(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::TimeIntervalInMillisecondsForMetric, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::TimeIntervalInMillisecondsForMetric].first + ": " + std::to_string(count));
 
     return count;
@@ -207,7 +207,7 @@ MetaFsConfigManager::_GetSamplingSkipCount(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::SamplingSkipCount, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::SamplingSkipCount].first + ": " + std::to_string(count));
 
     return count;
@@ -220,7 +220,7 @@ MetaFsConfigManager::_GetWrrCountSpecialPurposeMap(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountSpecialPurposeMap, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::WrrCountSpecialPurposeMap].first + ": " + std::to_string(count));
 
     return count;
@@ -233,7 +233,7 @@ MetaFsConfigManager::_GetWrrCountJournal(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountJournal, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::WrrCountJournal].first + ": " + std::to_string(count));
 
     return count;
@@ -246,7 +246,7 @@ MetaFsConfigManager::_GetWrrCountMap(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountMap, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::WrrCountMap].first + ": " + std::to_string(count));
 
     return count;
@@ -259,7 +259,7 @@ MetaFsConfigManager::_GetWrrCountGeneral(void)
     if (_ReadConfiguration<size_t>(MetaFsConfigType::WrrCountGeneral, &count))
         return 0;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::WrrCountGeneral].first + ": " + std::to_string(count));
 
     return count;
@@ -276,7 +276,7 @@ MetaFsConfigManager::_IsRocksdbEnabled(void)
     {
         if (enabled == true)
         {
-            POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+            POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
                 "RocksDB Metafs is enabled");
             return true;
         }
@@ -293,13 +293,13 @@ MetaFsConfigManager::_GetRocksDbPath(void)
 
     if (ret == 0)
     {
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
             "RocksDB Metafs will be saved in {}", path);
     }
     else
     {
         path = "/etc/pos/POSRaid";
-        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+        POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
             "RocksDB Metafs will be saved in default path {}", path);
     }
     return path;
@@ -314,7 +314,7 @@ MetaFsConfigManager::_IsSupportingNumaDedicatedScheduling(void)
     if (ret)
         return false;
 
-    POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::MFS_INFO_MESSAGE),
+    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::SupportNumaDedicatedScheduling].first +
             (enabled ? " is supported" : " is not supported"));
 

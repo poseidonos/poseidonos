@@ -86,7 +86,7 @@ ActiveWBStripeReplayer::Update(StripeInfo stripeInfo)
         ActiveStripeAddr addr(stripeInfo.GetVolumeId(), tailVsa,
             stripeInfo.GetWbLsid());
 
-        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE,
+        POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE),
             "Update active wb stripe replayer, index {} volumeId {}, tail offset {}, wbLsid {}",
             index, stripeInfo.GetVolumeId(), tailVsa.offset, stripeInfo.GetWbLsid());
 
@@ -219,7 +219,7 @@ ActiveWBStripeReplayer::_AddActiveStripeToRestore(int index)
     StripeAddr stripeAddr = stripeMap->GetLSA(readTails[index].stripeId);
     if (_IsStripeFull(readTails[index]) && (stripeAddr.stripeLoc == IN_USER_AREA))
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE,
+        POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE),
             "Reconstructing flushed active stripe will be skipped, wbIndex {}, vsid {}",
             index, readTails[index].stripeId);
     }
@@ -257,8 +257,8 @@ ActiveWBStripeReplayer::_SetActiveStripeTail(int index, ActiveStripeAddr addr)
               << ", vsid " << addr.GetTail().stripeId
               << ", wbLsid " << addr.GetWbLsid()
               << ", offset " << addr.GetTail().offset << ")";
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE, logString.str());
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE, logString.str());
+    POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
 }
 
 void
@@ -268,8 +268,8 @@ ActiveWBStripeReplayer::_ResetActiveStripeTail(int index)
 
     std::ostringstream logString;
     logString << "[Replay] Active stripe tail index " << index << " is reset";
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE, logString.str());
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE, logString.str());
+    POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
+    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
 }
 
 ActiveStripeAddr
@@ -286,14 +286,14 @@ ActiveWBStripeReplayer::_FindTargetActiveStripeAndRestore(int index)
         }
         else
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_REPLAY_WB_STRIPE,
+            POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE),
                 "Start reconstructing stripe, vol {}, wbLsid {}", it->GetVolumeId(), it->GetWbLsid());
 
             int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(it->GetVolumeId(),
                 it->GetWbLsid(), it->GetTail(), it->GetRevMap());
             if (reconstructResult < 0)
             {
-                int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
+                int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STRIPE_FLUSH_FAILED));
                 std::ostringstream os;
                 os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
                    << ", tail offset " << it->GetTail().offset;
@@ -327,7 +327,7 @@ ActiveWBStripeReplayer::_RestorePendingStripes(void)
             it->GetWbLsid(), it->GetTail(), it->GetRevMap());
         if (reconstructResult < 0)
         {
-            int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STRIPE_FLUSH_FAILED);
+            int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STRIPE_FLUSH_FAILED));
             std::ostringstream os;
             os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
                << ", tail offset " << it->GetTail().offset;

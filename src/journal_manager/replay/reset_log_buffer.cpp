@@ -57,7 +57,7 @@ ResetLogBuffer::GetNumSubTasks(void)
 int
 ResetLogBuffer::Start(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
     POS_TRACE_DEBUG(eventId, "[ReplayTask] Reset journal log buffer");
 
     int ret = logBuffer->SyncResetAll();

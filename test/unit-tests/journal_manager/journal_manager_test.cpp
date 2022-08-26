@@ -313,7 +313,7 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
     int actualReturnCode = journal.DoRecovery();
 
     // Then: Journal replay will be failed
-    int expectedReturnCode = -EID(JOURNAL_REPLAY_FAILED);
+    int expectedReturnCode = ERRID(JOURNAL_REPLAY_FAILED);
     EXPECT_EQ(expectedReturnCode, actualReturnCode);
 }
 
@@ -331,7 +331,7 @@ TEST_F(JournalManagerTestFixture, Init_testIfReplayFailed)
         nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, tc);
 
     // Then: Journal manager should be return the error code to indicate that replay is failed
-    int expectedReturnCode = -EID(JOURNAL_REPLAY_FAILED);
+    int expectedReturnCode = ERRID(JOURNAL_REPLAY_FAILED);
     EXPECT_EQ(expectedReturnCode, actualReturnCode);
 }
 

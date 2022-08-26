@@ -81,7 +81,7 @@ MemoryManager::CreateBufferPool(BufferInfo& info, uint32_t socket)
     }
     else
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Failed to create BufferPool, owner={}, size={}, count={}",
             info.owner, info.size, info.count);
     }
@@ -108,14 +108,14 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
 {
     if (info.owner == "")
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Illegal buffer policy. Owner is empty");
         return false;
     }
 
     if (info.size == 0)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Illegal buffer policy. Buffer size is zero");
         return false;
     }
@@ -123,7 +123,7 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
     const uint32_t MEMORY_ALIGN_SIZE_BYTE = 4096;
     if (info.size % MEMORY_ALIGN_SIZE_BYTE != 0)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Illegal buffer policy. Buffer size is not aligned");
         return false;
     }
@@ -134,7 +134,7 @@ MemoryManager::_CheckBufferPolicy(const BufferInfo& info, uint32_t& socket)
     }
     else if (socket > affinityManager->GetNumaCount())
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Illegal buffer policy. Invalid socket");
         return false;
     }

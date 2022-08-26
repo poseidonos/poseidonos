@@ -122,7 +122,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
         return RESULT_FAILURE;
 
     POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, volumeType);
-    if (rc != POS_EVENT_ID::SUCCESS)
+    if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
     return RESULT_SUCCESS;
@@ -152,7 +152,7 @@ WbtMetafsCmdHandler::OpenFile(Args argv)
         return RESULT_FAILURE;
 
     POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
-    if (rc != POS_EVENT_ID::SUCCESS)
+    if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
     return fd;
@@ -180,7 +180,7 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
         return RESULT_FAILURE;
 
     POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
-    if (rc != POS_EVENT_ID::SUCCESS)
+    if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
     return RESULT_SUCCESS;
@@ -229,7 +229,7 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
     memset(buffer, 0, byteSize);
 
     POS_EVENT_ID rc = metaFs->io->Read(fd, byteOffset, byteSize, (void*)buffer, storage);
-    if (rc != POS_EVENT_ID::SUCCESS || _WriteBufferInFile(outFile, buffer, byteSize) != RESULT_SUCCESS)
+    if (rc != EID(SUCCESS) || _WriteBufferInFile(outFile, buffer, byteSize) != RESULT_SUCCESS)
     {
         retVal = false;
     }
@@ -284,14 +284,14 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
     }
     else
     {
-        rc = POS_EVENT_ID::MFS_FILE_READ_FAILED;
+        rc = EID(MFS_FILE_READ_FAILED);
     }
 
     // MakeSure to delete buffer
     if (buffer != nullptr)
         delete[] buffer;
 
-    if (rc != POS_EVENT_ID::SUCCESS)
+    if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
     return RESULT_SUCCESS;

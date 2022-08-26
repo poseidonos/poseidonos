@@ -175,7 +175,7 @@ WBStripeManager::FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr fl
         Stripe* activeStripe = _FinishActiveStripe(volumeId);
         if (activeStripe != nullptr)
         {
-            POS_TRACE_INFO(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+            POS_TRACE_INFO(EID(PICKUP_ACTIVE_STRIPE),
                 "Picked Active Stripe: volumeId:{}  wbLsid:{}  vsid:{}  remaining:{}",
                 volumeId, activeStripe->GetWbLsid(), activeStripe->GetVsid(),
                 activeStripe->GetBlksRemaining());
@@ -303,7 +303,7 @@ WBStripeManager::FlushAllPendingStripes(void)
             int flushResult = _RequestStripeFlush(stripe);
             if (flushResult < 0)
             {
-                POS_TRACE_ERROR(POS_EVENT_ID::ALLOCATOR_TRIGGER_FLUSH,
+                POS_TRACE_ERROR(EID(ALLOCATOR_TRIGGER_FLUSH),
                     "Request stripe flush failed, vsid {} lsid {} remaining {}",
                     stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetBlksRemaining());
 
@@ -311,7 +311,7 @@ WBStripeManager::FlushAllPendingStripes(void)
             }
             else
             {
-                POS_TRACE_DEBUG(POS_EVENT_ID::ALLOCATOR_TRIGGER_FLUSH,
+                POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH),
                     "Requested stripe flush, vsid {} lsid {} remaining {}",
                     stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetBlksRemaining());
             }
@@ -333,7 +333,7 @@ WBStripeManager::FinishStripe(StripeId wbLsid, VirtualBlkAddr tail)
 {
     if (wbLsid > addrInfo->GetnumWbStripes())
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+        POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
             "Requested to finish stripe with wrong wb lsid {}", wbLsid);
         return;
     }
@@ -345,7 +345,7 @@ WBStripeManager::FinishStripe(StripeId wbLsid, VirtualBlkAddr tail)
     if (flushRequired == true)
     {
         // This stripe will be flushed by the following call, FlushAllPendingStripes
-        POS_TRACE_INFO(POS_EVENT_ID::ALLOCATOR_TRIGGER_FLUSH,
+        POS_TRACE_INFO(EID(ALLOCATOR_TRIGGER_FLUSH),
             "Stripe is ready to be flushed, wbLsid {}", wbLsid);
     }
 }
@@ -363,7 +363,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     if (0 == blockCount)
     {
         POS_TRACE_ERROR(EID(WRONG_BLOCK_COUNT), "Wrong blockCount:{}", blockCount);
-        return -EID(WRONG_BLOCK_COUNT);
+        return ERRID(WRONG_BLOCK_COUNT);
     }
 
     stripe = GetStripe(wbLsid);
@@ -383,7 +383,7 @@ WBStripeManager::_ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCo
     uint32_t remainingBlks = stripe->DecreseBlksRemaining(blockCount);
     if (remainingBlks == 0)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::ALLOCATOR_REPLAYED_STRIPE_IS_FULL,
+        POS_TRACE_DEBUG(EID(ALLOCATOR_REPLAYED_STRIPE_IS_FULL),
             "Stripe (vsid {}, wbLsid {}) is waiting to be flushed", vsid, wbLsid);
     }
 
@@ -397,7 +397,7 @@ WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
     VirtualBlkAddr currentTail = allocCtx->GetActiveStripeTail(index);
     if (IsUnMapVsa(currentTail) == true)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+        POS_TRACE_DEBUG(EID(PICKUP_ACTIVE_STRIPE),
             "No active stripe for index {}", index);
         return nullptr;
     }
@@ -405,7 +405,7 @@ WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
     StripeAddr stripeAddr = iStripeMap->GetLSA(currentTail.stripeId);
     if (stripeAddr.stripeLoc == IN_USER_AREA || stripeAddr.stripeId == UNMAP_STRIPE)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+        POS_TRACE_DEBUG(EID(PICKUP_ACTIVE_STRIPE),
             "No active stripe for index {}", index);
         return nullptr;
     }
@@ -414,13 +414,13 @@ WBStripeManager::_FinishActiveStripe(ASTailArrayIdx index)
     VirtualBlks remainingVsaRange = _AllocateRemainingBlocks(index);
     if (IsUnMapVsa(remainingVsaRange.startVsa))
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+        POS_TRACE_DEBUG(EID(PICKUP_ACTIVE_STRIPE),
             "No active stripe for index {}", index);
         return nullptr;
     }
     else
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::PICKUP_ACTIVE_STRIPE,
+        POS_TRACE_DEBUG(EID(PICKUP_ACTIVE_STRIPE),
             "Finish active stripe, index {}, wbLsid {}, remaining startVsa stripeId {}, offset {}, numBlks {}",
             index, wbLsid, remainingVsaRange.startVsa.stripeId, remainingVsaRange.startVsa.offset, remainingVsaRange.numBlks);
         return _FinishRemainingBlocks(wbLsid, remainingVsaRange.startVsa.offset, remainingVsaRange.numBlks);
@@ -450,7 +450,7 @@ WBStripeManager::_GetRemainingBlocks(VirtualBlkAddr tail)
     }
     else if (tail.offset > addrInfo->GetblksPerStripe())
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::WRONG_BLOCK_COUNT,
+        POS_TRACE_ERROR(EID(WRONG_BLOCK_COUNT),
             "offsetInTail:{} > blksPerStirpe:{}", tail.offset, addrInfo->GetblksPerStripe());
 
         remainingBlks.startVsa = UNMAP_VSA;
@@ -496,12 +496,12 @@ WBStripeManager::_FinishRemainingBlocks(StripeId wbLsid, BlkOffset startOffset, 
         int ret = _RequestStripeFlush(activeStripe);
         if (ret == 0)
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::ALLOCATOR_TRIGGER_FLUSH,
+            POS_TRACE_DEBUG(EID(ALLOCATOR_TRIGGER_FLUSH),
                 "Flush stripe (vsid {}, wbLsid {})", activeStripe->GetVsid(), wbLsid);
         }
         else
         {
-            POS_TRACE_ERROR(POS_EVENT_ID::ALLOCATOR_TRIGGER_FLUSH,
+            POS_TRACE_ERROR(EID(ALLOCATOR_TRIGGER_FLUSH),
                 "Request stripe flush failed (vsid {}, wbLsid {})", activeStripe->GetVsid(), wbLsid);
         }
     }
@@ -576,7 +576,7 @@ WBStripeManager::_LoadStripe(StripeAddr from, StripeAddr to)
         void* buffer = stripeBufferPool->TryGetBuffer();
         if (buffer == nullptr)
         {
-            POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+            POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
                 "Failed to allocate buffer for stripe load");
             assert(false);
         }

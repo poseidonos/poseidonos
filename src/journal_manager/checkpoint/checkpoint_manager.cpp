@@ -110,10 +110,10 @@ CheckpointManager::StartCheckpoint(EventSmartPtr cb)
 {
     if (checkpointInProgress == true || checkpointBlocked != true)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_CHECKPOINT_IN_PROGRESS,
+        POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_IN_PROGRESS),
             "Checkpoint cannot start right away, inProgress {} blocked {}, arrayId:{}",
             checkpointInProgress, checkpointBlocked, arrayId);
-        return -1 * static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_IN_PROGRESS);
+        return -1 * static_cast<int>(EID(JOURNAL_CHECKPOINT_IN_PROGRESS));
     }
 
     checkpointInProgress = true;

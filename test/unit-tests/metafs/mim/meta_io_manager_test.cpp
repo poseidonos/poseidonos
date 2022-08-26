@@ -54,8 +54,8 @@ using SchedulerMap = std::unordered_map<uint32_t, MetaFsIoScheduler*>;
 TEST(MetaIoManager, CheckSuccess)
 {
     MetaIoManager* mgr = new MetaIoManager(false);
-    EXPECT_TRUE(mgr->IsSuccess(POS_EVENT_ID::SUCCESS));
-    EXPECT_FALSE(mgr->IsSuccess(POS_EVENT_ID::MFS_ERROR_MESSAGE));
+    EXPECT_TRUE(mgr->IsSuccess(EID(SUCCESS)));
+    EXPECT_FALSE(mgr->IsSuccess(EID(MFS_ERROR_MESSAGE)));
     delete mgr;
 }
 
@@ -71,7 +71,7 @@ TEST(MetaIoManager, CheckSanity)
     MockMetaFsIoRequest* req = new MockMetaFsIoRequest();
     MetaIoManager* mgr = new MetaIoManager(false);
 
-    EXPECT_EQ(mgr->CheckReqSanity(*req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr->CheckReqSanity(*req), EID(SUCCESS));
 
     delete mgr;
     delete req;
@@ -101,10 +101,10 @@ TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenSyncIoIsEnabledAndIoHa
     MetaIoManager* mgr = new MetaIoManager(false, schedulerList, storage);
     mgr->Init();
 
-    EXPECT_EQ(mgr->ProcessNewReq(*req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr->ProcessNewReq(*req), EID(SUCCESS));
 
     req->reqType = MetaIoRequestType::Write;
-    EXPECT_EQ(mgr->ProcessNewReq(*req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr->ProcessNewReq(*req), EID(SUCCESS));
 
     delete mgr;
     delete req;
@@ -135,10 +135,10 @@ TEST(MetaIoManager, ProcessNewReq_testIfReturnsSuccessWhenReqTypeIsReadAndIoMode
     MetaIoManager* mgr = new MetaIoManager(false, schedulerList, storage);
     mgr->Init();
 
-    EXPECT_EQ(mgr->ProcessNewReq(*req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr->ProcessNewReq(*req), EID(SUCCESS));
 
     req->reqType = MetaIoRequestType::Write;
-    EXPECT_EQ(mgr->ProcessNewReq(*req), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr->ProcessNewReq(*req), EID(SUCCESS));
 
     delete mgr;
     delete req;

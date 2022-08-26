@@ -211,7 +211,7 @@ QosManager::FinalizeSpdkManager(void)
     {
         spdkManager->Finalize();
     }
-    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosSpdkManager Finalization complete");
+    POS_TRACE_INFO(EID(QOS_FINALIZATION), "QosSpdkManager Finalization complete");
     delete spdkManager;
 }
 /* --------------------------------------------------------------------------*/
@@ -237,7 +237,7 @@ QosManager::_Finalize(void)
     {
         qosThread->join();
     }
-    POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization complete");
+    POS_TRACE_INFO(EID(QOS_FINALIZATION), "QosManager Finalization complete");
 }
 
 /* --------------------------------------------------------------------------*/
@@ -350,7 +350,7 @@ QosManager::_QosWorker(void)
     {
         if (true == IsExitQosSet())
         {
-            POS_TRACE_INFO(POS_EVENT_ID::QOS_FINALIZATION, "QosManager Finalization Triggered, QosWorker thread exit");
+            POS_TRACE_INFO(EID(QOS_FINALIZATION), "QosManager Finalization Triggered, QosWorker thread exit");
             break;
         }
         currentManager->Execute();
@@ -961,7 +961,7 @@ QosManager::UpdateArrayMap(std::string arrayName)
     }
     if (currentNumberOfArrays >= MAX_ARRAY_COUNT)
     {
-        POS_TRACE_WARN(static_cast<int>(POS_EVENT_ID::QOS_MAX_ARRAYS_EXCEEDED), "Trying to create more arrays than maximum possible arrays");
+        POS_TRACE_WARN(static_cast<int>(EID(QOS_MAX_ARRAYS_EXCEEDED)), "Trying to create more arrays than maximum possible arrays");
         return;
     }
     else
@@ -997,7 +997,7 @@ QosManager::DeleteEntryArrayMap(std::string arrayName)
     std::lock_guard<std::mutex> lock(mapUpdateLock);
     if (arrayNameMap.find(arrayName) == arrayNameMap.end())
     {
-        POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::QOS_ARRAY_DOES_NOT_EXIST), "Deleting array which does not exist");
+        POS_TRACE_ERROR(static_cast<int>(EID(QOS_ARRAY_DOES_NOT_EXIST)), "Deleting array which does not exist");
         return;
     }
     else

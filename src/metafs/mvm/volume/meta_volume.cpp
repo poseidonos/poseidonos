@@ -389,7 +389,7 @@ MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 {
     auto result = inodeCreator_->Create(reqMsg);
 
-    if (POS_EVENT_ID::SUCCESS != result.second)
+    if (EID(SUCCESS) != result.second)
         return result;
 
     StringHashType fileKey = MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName);
@@ -421,7 +421,7 @@ MetaVolume::DeleteFile(MetaFsFileControlRequest& reqMsg)
 {
     auto result = inodeDeleter_->Delete(reqMsg);
 
-    if (POS_EVENT_ID::SUCCESS != result.second)
+    if (EID(SUCCESS) != result.second)
         return result;
 
     fileKey2VolTypeMap_.erase(MetaFileUtil::GetHashKeyFromFileName(*reqMsg.fileName));
@@ -458,13 +458,13 @@ MetaVolume::_TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count
     }
 
     POS_EVENT_ID rc = metaStorage_->TrimFileData(type, start, nullptr, count);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
     {
         POS_TRACE_INFO((int)rc,
             "Meta file trim has been failed with NVMe DSM.");
 
         rc = metaStorage_->WritePage(type, start, trimBuffer_, count);
-        if (POS_EVENT_ID::SUCCESS != rc)
+        if (EID(SUCCESS) != rc)
         {
             POS_TRACE_INFO((int)rc,
                 "Meta file trim has been failed with zero writing.");
