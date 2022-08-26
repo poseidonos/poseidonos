@@ -58,7 +58,9 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
     dataCnt = chunkCnt - parityCnt;
     chunkSize = ArrayConfig::BLOCK_SIZE_BYTE * ftSize_.blksPerChunk;
     encode_matrix = new unsigned char[chunkCnt * dataCnt];
+    g_tbls = new unsigned char[dataCnt * parityCnt * 32];
     gf_gen_cauchy1_matrix(encode_matrix, chunkCnt, dataCnt);
+    ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
 }
 
 list<FtEntry>
@@ -231,8 +233,6 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
         memcpy(sources[src_iter++], src_ptr, chunkSize);
     }
 
-    unsigned char* g_tbls = new unsigned char[dataCnt * parityCnt * 32];
-    ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
     ec_encode_data(chunkSize, dataCnt, parityCnt, g_tbls, sources, &sources[dataCnt]);
 
     int32_t dst_iter = 0;
@@ -246,8 +246,6 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
     {
         delete sources[i];
     }
-
-    delete[] g_tbls;
 }
 
 void
@@ -404,6 +402,7 @@ Raid6::~Raid6()
 {
     ClearParityPools();
     delete[] encode_matrix;
+    delete[] g_tbls;
 }
 
 int

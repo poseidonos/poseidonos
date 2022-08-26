@@ -77,6 +77,7 @@ private:
     uint32_t dataCnt = 0;
     uint32_t parityCnt = 2;
     unsigned char* encode_matrix = nullptr;
+    unsigned char* g_tbls = nullptr;
 };
 
 } // namespace pos
