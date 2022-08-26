@@ -17,10 +17,12 @@ ANY_DATA = CREATE_ARRAY_BASIC.ANY_DATA
 ANY_OTHER_DATA = CREATE_ARRAY_BASIC.ANY_OTHER_DATA
 ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 
+
 def execute():
     CREATE_ARRAY_BASIC.execute()
     out = cli.mount_array(ARRAYNAME)
     return out
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
