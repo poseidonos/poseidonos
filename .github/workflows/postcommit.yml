@@ -68,8 +68,8 @@ jobs:
     - name: Volume Test
       working-directory: ${{github.workspace}}
       run: |
-        chmod +x .github/workflows/script/volume/volume.sh
-        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+        chmod +x .github/workflows/script/volume/volume_postcommit.sh
+        .github/workflows/script/volume/volume_postcommit.sh ${{github.workspace}}
 
     - name: Upload POS log
       if: always()

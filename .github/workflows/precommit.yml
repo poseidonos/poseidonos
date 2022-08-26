@@ -321,8 +321,8 @@ jobs:
       id: volume_test
       working-directory: ${{github.workspace}}
       run: |
-        chmod +x .github/workflows/script/volume/volume.sh
-        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+        chmod +x .github/workflows/script/volume/volume_precommit.sh
+        .github/workflows/script/volume/volume_precommit.sh ${{github.workspace}}
 
     - name: Upload POS log
       if: always()
