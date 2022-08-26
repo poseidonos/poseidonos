@@ -138,7 +138,7 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     }
     g_meta_outstandingCmd++;
 
-    return (POS_EVENT_ID::SUCCESS == rc_io) ? 0 : 1;
+    return (EID(SUCCESS) == rc_io) ? 0 : 1;
 }
 
 void

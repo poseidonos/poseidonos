@@ -72,7 +72,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         arrayName = doc["param"]["array"].get<std::string>();
         if (0 == arrayName.compare(""))
         {
-            return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Array Name Missing", GetPosInfo());
+            return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), "Array Name Missing", GetPosInfo());
         }
     }
     JsonElement data("data");
@@ -117,7 +117,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
     if (nullptr == volMgr)
     {
-        return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), "Invalid Array Name", GetPosInfo());
+        return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), "Invalid Array Name", GetPosInfo());
     }
     if (doc["param"].contains("vol"))
     {
@@ -132,7 +132,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
             if (EID(SUCCESS) != validVol)
             {
                 errorMsg = "Invalid Volume Name " + (*vol);
-                return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(POS_EVENT_ID::QOS_CLI_WRONG_MISSING_PARAMETER), errorMsg, GetPosInfo());
+                return jFormat.MakeResponse("LISTQOSPOLICIES", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), errorMsg, GetPosInfo());
             }
             else
             {

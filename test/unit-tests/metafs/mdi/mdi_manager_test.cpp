@@ -9,8 +9,8 @@ TEST(MetaIntegrityManager, CheckDefaultMethods)
     MetaIntegrityManager mgr;
     MetaFsRequestBase reqMsg;
 
-    EXPECT_EQ(mgr.CheckReqSanity(reqMsg), POS_EVENT_ID::SUCCESS);
-    EXPECT_EQ(mgr.ProcessNewReq(reqMsg), POS_EVENT_ID::SUCCESS);
+    EXPECT_EQ(mgr.CheckReqSanity(reqMsg), EID(SUCCESS));
+    EXPECT_EQ(mgr.ProcessNewReq(reqMsg), EID(SUCCESS));
 }
 
 } // namespace pos

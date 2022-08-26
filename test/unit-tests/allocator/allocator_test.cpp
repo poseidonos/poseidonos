@@ -171,7 +171,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     // when 1.
     int ret = alloc.GetMeta(WBT_SEGMENT_VALID_COUNT, "", file);
     // then 1.
-    EXPECT_EQ((int)-EID(ALLOCATOR_START), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_START), ret);
 
     // given 2. fail to Write file
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
@@ -183,7 +183,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     // when 2.
     ret = alloc.GetMeta(WBT_SEGMENT_VALID_COUNT, "", file);
     // then 2.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_STORE), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_STORE), ret);
 
     // given 3. success to Write file
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
@@ -206,7 +206,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     // when 4.
     ret = alloc.GetMeta(WBT_NUM_ALLOCATOR_META, "", file);
     // then 4.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_STORE), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_STORE), ret);
 
     // given 5. failed to appendIo
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
@@ -217,7 +217,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     // when 5.
     ret = alloc.GetMeta(WBT_CURRENT_SSD_LSID, "", file);
     // then 5.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_STORE), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_STORE), ret);
 
     // given 6. success to appendIo
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
@@ -254,7 +254,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     // when 1.
     int ret = alloc.SetMeta(WBT_SEGMENT_VALID_COUNT, "", file);
     // then 1.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
     // given 2. success to appendIo file
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
@@ -276,7 +276,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     // when 3.
     ret = alloc.SetMeta(WBT_WBLSID_BITMAP, "", file);
     // then 3.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
     // given 4. success to append Io
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
@@ -298,7 +298,7 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     // when 5.
     ret = alloc.SetMeta(WBT_ACTIVE_STRIPE_TAIL, "", file);
     // then 5.
-    EXPECT_EQ((int)-EID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_LOAD), ret);
 
     // given 6. success to appendIo
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);

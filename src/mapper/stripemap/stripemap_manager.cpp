@@ -147,7 +147,7 @@ StripeMapManager::LoadStripeMapFile(void)
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper StripeMap] Issue Load StripeMap, array:{}, arrayId:{}",
         addrInfo->GetArrayName(), addrInfo->GetArrayId());
     int ret = stripeMap->Load(cb);
-    if (ret == -EID(MAP_LOAD_COMPLETED))
+    if (ret == ERRID(MAP_LOAD_COMPLETED))
     {
         numLoadIssuedCount--;
         POS_TRACE_ERROR(EID(MAPPER_START), "[Mapper StripeMap] failed To Load StripeMap");
@@ -166,7 +166,7 @@ StripeMapManager::FlushDirtyPagesGiven(MpageList dirtyPages, EventSmartPtr cb)
     if (numWriteIssuedCount != 0)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER StripeMap FlushDirtyPagesGiven] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
 
     assert(callback == nullptr);
@@ -195,7 +195,7 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
     if (numWriteIssuedCount != 0)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER StripeMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
 
     assert(callback == nullptr);

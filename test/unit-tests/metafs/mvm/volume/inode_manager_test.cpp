@@ -366,9 +366,9 @@ TEST_F(InodeManagerFixture, CheckFileInActive)
 TEST_F(InodeManagerFixture, CheckAddedFileInActive)
 {
     EXPECT_EQ(inodeMgr->AddFileInActiveList(0),
-                    POS_EVENT_ID::SUCCESS);
+                    EID(SUCCESS));
     EXPECT_EQ(inodeMgr->AddFileInActiveList(0),
-                    POS_EVENT_ID::MFS_FILE_OPEN_REPETITIONARY);
+                    EID(MFS_FILE_OPEN_REPETITIONARY));
 }
 
 TEST_F(InodeManagerFixture, RemoveFileInActive)

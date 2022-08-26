@@ -58,7 +58,7 @@ FlushMetadata::GetNumSubTasks(void)
 int
 FlushMetadata::Start(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
     POS_TRACE_DEBUG(eventId, "[ReplayTask] Start flushing replayed metadata");
 
     int result = mapFlush->StoreAll();

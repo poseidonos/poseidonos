@@ -167,7 +167,7 @@ TEST(InodeTableHeader, CheckLoad0_Positive)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(header->Load());
 
@@ -181,7 +181,7 @@ TEST(InodeTableHeader, CheckLoad0_Negative)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(EID(MFS_ERROR_UNMOUNTED)));
 
     EXPECT_FALSE(header->Load());
 
@@ -195,7 +195,7 @@ TEST(InodeTableHeader, CheckLoad1_Positive)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(header->Load(MetaStorageType::SSD, 0, 0, 0));
 
@@ -209,7 +209,7 @@ TEST(InodeTableHeader, CheckLoad1_Negative)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+    EXPECT_CALL(mss, ReadPage(_, _, _, _)).WillOnce(Return(EID(MFS_ERROR_UNMOUNTED)));
 
     EXPECT_FALSE(header->Load(MetaStorageType::SSD, 0, 0, 0));
 
@@ -223,7 +223,7 @@ TEST(InodeTableHeader, CheckStore0_Positive)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(header->Store());
 
@@ -237,7 +237,7 @@ TEST(InodeTableHeader, CheckStore0_Negative)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(EID(MFS_ERROR_UNMOUNTED)));
 
     EXPECT_FALSE(header->Store());
 
@@ -251,7 +251,7 @@ TEST(InodeTableHeader, CheckStore1_Positive)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(EID(SUCCESS)));
 
     EXPECT_TRUE(header->Store(MetaStorageType::SSD, 0, 0, 0));
 
@@ -265,7 +265,7 @@ TEST(InodeTableHeader, CheckStore1_Negative)
 
     header->SetMss(&mss);
 
-    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(POS_EVENT_ID::MFS_ERROR_UNMOUNTED));
+    EXPECT_CALL(mss, WritePage(_, _, _, _)).WillOnce(Return(EID(MFS_ERROR_UNMOUNTED)));
 
     EXPECT_FALSE(header->Store(MetaStorageType::SSD, 0, 0, 0));
 

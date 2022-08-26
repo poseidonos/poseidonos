@@ -113,7 +113,7 @@ protected:
 TEST_F(MetaFsFixture, InitMetaFs)
 {
     EXPECT_CALL(*mgmt, InitializeSystem(_, _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*arrayInfo, GetSizeInfo).WillRepeatedly(Return(&ptnSize));
     EXPECT_CALL(*mgmt, GetAllStoragePartitionInfo)
         .WillRepeatedly(ReturnRef(mediaInfoList));
@@ -151,7 +151,7 @@ TEST_F(MetaFsFixture, CheckShutdown_Without_Storage)
 TEST_F(MetaFsFixture, CheckShutdown_With_Storage)
 {
     EXPECT_CALL(*mgmt, InitializeSystem(_, _))
-        .WillOnce(Return(POS_EVENT_ID::SUCCESS));
+        .WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*arrayInfo, GetSizeInfo).WillRepeatedly(Return(&ptnSize));
     EXPECT_CALL(*mgmt, GetAllStoragePartitionInfo)
         .WillRepeatedly(ReturnRef(mediaInfoList));

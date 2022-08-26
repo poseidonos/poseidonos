@@ -132,7 +132,7 @@ UnvmeMgmt::ScanDevs(vector<UblockSharedPtr>* devs, Nvme* nvmeSsd, UnvmeDrv* drv)
                     UblockSharedPtr dev = make_shared<UnvmeSsd>(name, diskSize, drv,
                         nsEntry->u.nvme.ns, nsEntry->trAddr);
 
-                    POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_DEBUG_CREATED;
+                    POS_EVENT_ID eventId = EID(UNVME_SSD_DEBUG_CREATED);
                     POS_TRACE_DEBUG(eventId, "Create Ublock, Pointer : {}", name);
                     devs->push_back(dev);
                     addedDeviceCount++;
@@ -201,7 +201,7 @@ UnvmeMgmt::Close(DeviceContext* deviceContext)
             int retError = spdkCaller->SpdkNvmeCtrlrFreeIoQpair(devCtx->ioQPair);
             if (0 != retError)
             {
-                POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_SSD_CLOSE_FAILED;
+                POS_EVENT_ID eventId = EID(UNVME_SSD_CLOSE_FAILED);
                 POS_TRACE_ERROR(static_cast<int>(eventId),
                     "uNVMe Device close failed: namespace #{}",
                     spdkCaller->SpdkNvmeNsGetId(devCtx->ns));
@@ -225,7 +225,7 @@ UnvmeMgmt::_CheckConstraints(const NsEntry* nsEntry)
     struct spdk_nvme_ns* ns = nsEntry->u.nvme.ns;
     if (spdkCaller->SpdkNvmeNsGetSectorSize(ns) != ALLOWED_DEVICE_SECTOR_SIZE)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_NOT_SUPPORTED_DEVICE;
+        POS_EVENT_ID eventId = EID(UNVME_NOT_SUPPORTED_DEVICE);
         POS_TRACE_WARN(eventId,
             "Device {} is not supported. Sector size is not {}",
             nsEntry->name,

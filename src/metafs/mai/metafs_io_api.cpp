@@ -75,7 +75,7 @@ POS_EVENT_ID
 MetaFsIoApi::Read(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
-        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+        return EID(MFS_MODULE_NOT_READY);
 
     MetaFsIoRequest reqMsg;
     reqMsg.reqType = MetaIoRequestType::Read;
@@ -95,7 +95,7 @@ MetaFsIoApi::Read(FileDescriptorType fd, FileSizeType byteOffset,
     FileSizeType byteSize, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
-        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+        return EID(MFS_MODULE_NOT_READY);
 
     MetaFsIoRequest reqMsg;
     reqMsg.reqType = MetaIoRequestType::Read;
@@ -116,7 +116,7 @@ POS_EVENT_ID
 MetaFsIoApi::Write(FileDescriptorType fd, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
-        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+        return EID(MFS_MODULE_NOT_READY);
 
     MetaFsIoRequest reqMsg;
     reqMsg.reqType = MetaIoRequestType::Write;
@@ -136,7 +136,7 @@ MetaFsIoApi::Write(FileDescriptorType fd, FileSizeType byteOffset,
     FileSizeType byteSize, void* buf, MetaStorageType mediaType)
 {
     if (!isNormal)
-        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+        return EID(MFS_MODULE_NOT_READY);
 
     MetaFsIoRequest reqMsg;
     reqMsg.reqType = MetaIoRequestType::Write;
@@ -157,7 +157,7 @@ POS_EVENT_ID
 MetaFsIoApi::SubmitIO(MetaFsAioCbCxt* cxt, MetaStorageType mediaType)
 {
     if (!isNormal)
-        return POS_EVENT_ID::MFS_MODULE_NOT_READY;
+        return EID(MFS_MODULE_NOT_READY);
 
     cxt->SetTagId(aiocbTagIdAllocator());
 
@@ -227,7 +227,7 @@ MetaFsIoApi::_AddExtraIoReqInfo(MetaFsIoRequest& reqMsg)
 POS_EVENT_ID
 MetaFsIoApi::_CheckFileIoBoundary(MetaFsIoRequest& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
     FileSizeType fileByteSize = reqMsg.fileCtx->sizeInByte;
 
     if (reqMsg.isFullFileIo)
@@ -235,7 +235,7 @@ MetaFsIoApi::_CheckFileIoBoundary(MetaFsIoRequest& reqMsg)
         if (reqMsg.byteOffsetInFile != 0 ||
             reqMsg.byteSize != fileByteSize)
         {
-            rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+            rc = EID(MFS_INVALID_PARAMETER);
         }
     }
     else
@@ -243,7 +243,7 @@ MetaFsIoApi::_CheckFileIoBoundary(MetaFsIoRequest& reqMsg)
         if (reqMsg.byteOffsetInFile >= fileByteSize ||
             (reqMsg.byteOffsetInFile + reqMsg.byteSize) > fileByteSize)
         {
-            rc = POS_EVENT_ID::MFS_INVALID_PARAMETER;
+            rc = EID(MFS_INVALID_PARAMETER);
         }
     }
     return rc;
@@ -252,15 +252,15 @@ MetaFsIoApi::_CheckFileIoBoundary(MetaFsIoRequest& reqMsg)
 POS_EVENT_ID
 MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     if (!reqMsg.IsValid())
     {
-        return POS_EVENT_ID::MFS_INVALID_PARAMETER;
+        return EID(MFS_INVALID_PARAMETER);
     }
 
     rc = _CheckFileIoBoundary(reqMsg);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
     {
         MFS_TRACE_ERROR((int)rc,
             "I/O boundary error. " + reqMsg.GetLogString());
@@ -269,7 +269,7 @@ MetaFsIoApi::_CheckReqSanity(MetaFsIoRequest& reqMsg)
 
     if (!reqMsg.fileCtx->isActivated)
     {
-        rc = POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        rc = EID(MFS_FILE_NOT_FOUND);
         MFS_TRACE_ERROR((int)rc,
             "The File not found. " + reqMsg.GetLogString());
         return rc;
@@ -283,14 +283,14 @@ MetaFsIoApi::_ProcessRequest(MetaFsIoRequest& reqMsg)
 {
     if (!_AddFileInfo(reqMsg))
     {
-        return POS_EVENT_ID::MFS_FILE_NOT_FOUND;
+        return EID(MFS_FILE_NOT_FOUND);
     }
 
     _AddExtraIoReqInfo(reqMsg);
 
     POS_EVENT_ID rc = _CheckReqSanity(reqMsg);
 
-    if (POS_EVENT_ID::SUCCESS == rc)
+    if (EID(SUCCESS) == rc)
     {
         size_t byteSize = 0;
         if (reqMsg.ioMode == MetaIoMode::Async)

@@ -100,13 +100,13 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
     // 2. write log
     uint64_t segCtxVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+    POS_TRACE_INFO(EID(JOURNAL_HANDLE_VOLUME_DELETION),
         "Write volume deleted log, volume id {} segInfo version is {}", volumeId, segCtxVersion);
 
     int ret = _WriteVolumeDeletedLog(volumeId, segCtxVersion);
     if (EID(SUCCESS) > ret)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+        POS_TRACE_DEBUG(EID(JOURNAL_HANDLE_VOLUME_DELETION),
             "Writing volume deleted log failed (volume id {})", volumeId);
 
         checkpointManager->UnblockCheckpoint();
@@ -117,7 +117,7 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
 
     dirtyMapManager->DeleteDirtyList(volumeId);
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+    POS_TRACE_INFO(EID(JOURNAL_HANDLE_VOLUME_DELETION),
         "Write volume deleted log done, volume id {} segInfo version is {}", volumeId, segCtxVersion);
 
     return 0;
@@ -158,7 +158,7 @@ JournalVolumeEventHandler::TriggerMetadataFlush(void)
 
     flushInProgress = true;
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+    POS_TRACE_INFO(EID(JOURNAL_HANDLE_VOLUME_DELETION),
         "Start checkpoint, triggered by volume deletion");
 
     EventSmartPtr callback(new MetaFlushCompleted(this));
@@ -171,7 +171,7 @@ JournalVolumeEventHandler::TriggerMetadataFlush(void)
 
     checkpointManager->UnblockCheckpoint();
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_HANDLE_VOLUME_DELETION,
+    POS_TRACE_INFO(EID(JOURNAL_HANDLE_VOLUME_DELETION),
         "Completed checkpoint, triggered by volume deletion");
     return ret;
 }

@@ -48,7 +48,7 @@ BufferPool::BufferPool(const BufferInfo info,
 {
     if (hugepageAllocator == nullptr)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_ERROR(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Faild to get hugepageAllocator");
         return;
     }
@@ -147,7 +147,7 @@ BufferPool::ReturnBuffer(void* buffer)
 {
     if (buffer == nullptr)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::RESOURCE_MANAGER_DEBUG_MSG,
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Failed to return buffer. Buffer is Null");
         return;
     }

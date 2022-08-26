@@ -68,7 +68,7 @@ ListSubsystemCommand::Execute(json& doc, string rid)
         subnqn = doc["param"]["name"].get<std::string>();
         if (nullptr == target.FindSubsystem(subnqn))
         {
-            POS_EVENT_ID result = POS_EVENT_ID::IONVMF_FAIL_TO_FIND_SUBSYSTEM;
+            POS_EVENT_ID result = EID(IONVMF_FAIL_TO_FIND_SUBSYSTEM);
             return jFormat.MakeResponse(command, rid, static_cast<int>(result),
                 "Subsystem is not found", data, GetPosInfo());
         }

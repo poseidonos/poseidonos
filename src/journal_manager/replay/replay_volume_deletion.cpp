@@ -71,16 +71,16 @@ ReplayVolumeDeletion::Start(void)
 
                 if (result == 0)
                 {
-                    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_REPLAY_VOLUME_EVENT,
+                    POS_TRACE_INFO(EID(JOURNAL_REPLAY_VOLUME_EVENT),
                         "[Replay] volume {} is deleted", vol.volumeId);
                 }
                 else
                 {
-                    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_REPLAY_VOLUME_EVENT,
+                    POS_TRACE_INFO(EID(JOURNAL_REPLAY_VOLUME_EVENT),
                         "[Replay] volume {} delete failed", vol.volumeId);
                 }
 
-                POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_REPLAY_VOLUME_EVENT,
+                POS_TRACE_INFO(EID(JOURNAL_REPLAY_VOLUME_EVENT),
                     "[Replay] Volume delete replayed, prev ver {}, stored ver {}",
                     vol.prevSegInfoVersion, storedContextVersion);
             }

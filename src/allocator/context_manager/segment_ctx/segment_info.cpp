@@ -156,7 +156,7 @@ SegmentInfo::MoveToNvramState(void)
     std::lock_guard<std::mutex> lock(seglock);
     if (state != SegmentState::FREE)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+        POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
             "Failed to move to NVRAM state. Segment state {} valid count {} occupied stripe count {}",
             state, validBlockCount, occupiedStripeCount);
         assert(false);
@@ -189,7 +189,7 @@ SegmentInfo::MoveToVictimState(void)
     std::lock_guard<std::mutex> lock(seglock);
     if (state != SegmentState::SSD)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNKNOWN_ALLOCATOR_ERROR,
+        POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
             "Cannot move to victim state as it's not SSD state, state: {}", state);
         return false;
     }

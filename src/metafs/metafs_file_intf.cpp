@@ -77,8 +77,8 @@ MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
     POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer, storageType);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
-        return -EID(MFS_FILE_READ_FAILED);
+    if (EID(SUCCESS) != rc)
+        return ERRID(MFS_FILE_READ_FAILED);
 
     return EID(SUCCESS);
 }
@@ -89,8 +89,8 @@ MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffe
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
     POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer, storageType);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
-        return -EID(MFS_FILE_WRITE_FAILED);
+    if (EID(SUCCESS) != rc)
+        return ERRID(MFS_FILE_WRITE_FAILED);
 
     return EID(SUCCESS);
 }
@@ -141,7 +141,7 @@ MetaFsFileIntf::_CalculateByteAddress(uint64_t pageNumber, uint64_t offset,
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
-    POS_EVENT_ID rc = POS_EVENT_ID::SUCCESS;
+    POS_EVENT_ID rc = EID(SUCCESS);
 
     if (BYTE_ACCESS_ENABLED &&
         ctx->opcode == MetaFsIoOpcode::Write &&
@@ -169,7 +169,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
             MFS_TRACE_ERROR(EID(MFS_IO_FAILED_DUE_TO_ERROR),
                 "It is failed to submit the write request to NVRAM using direct method");
 
-            rc = POS_EVENT_ID::MFS_IO_FAILED_DUE_TO_ERROR;
+            rc = EID(MFS_IO_FAILED_DUE_TO_ERROR);
         }
     }
     else
@@ -180,7 +180,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
     }
 
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
         return -(int)rc;
 
     return EID(SUCCESS);
@@ -193,7 +193,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
     if (asyncCtx->CheckIOError())
     {
-        error = -EID(MFS_IO_FAILED_DUE_TO_ERROR);
+        error = ERRID(MFS_IO_FAILED_DUE_TO_ERROR);
     }
 
     delete asyncCtx;
@@ -204,7 +204,7 @@ int
 MetaFsFileIntf::Create(uint64_t fileSize)
 {
     POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, volumeType);
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
     {
         return -(int)rc;
     }
@@ -219,7 +219,7 @@ MetaFsFileIntf::Open(void)
 {
     POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
     {
         return -(int)rc;
     }
@@ -232,7 +232,7 @@ MetaFsFileIntf::Close(void)
 {
     POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
     {
         return -(int)rc;
     }
@@ -245,7 +245,7 @@ MetaFsFileIntf::DoesFileExist(void)
 {
     POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName, volumeType);
 
-    return (POS_EVENT_ID::SUCCESS == rc);
+    return (EID(SUCCESS) == rc);
 }
 
 int
@@ -253,7 +253,7 @@ MetaFsFileIntf::Delete(void)
 {
     POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName, volumeType);
 
-    if (POS_EVENT_ID::SUCCESS != rc)
+    if (EID(SUCCESS) != rc)
     {
         return -(int)rc;
     }

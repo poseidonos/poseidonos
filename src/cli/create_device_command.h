@@ -75,7 +75,7 @@ private:
     int _CreateUramDevice(const CreateDeviceParam& param);
 
     string errorMessage;
-    const int ERROR_CODE = static_cast<int>(POS_EVENT_ID::CLI_CREATE_DEVICE_FAILURE);
+    const int ERROR_CODE = static_cast<int>(EID(CLI_CREATE_DEVICE_FAILURE));
 
     AffinityManager* affinityManager = nullptr;
     SpdkRpcClient* spdkRpcClient = nullptr;

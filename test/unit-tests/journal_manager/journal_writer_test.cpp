@@ -65,7 +65,7 @@ TEST(JournalWriter, AddBlockMapUpdatedLog_testIfExectedWithoutInitialilzation)
     int actualReturnCode = writer.AddBlockMapUpdatedLog(nullptr, nullptr);
 
     // Then: JournalWriter return the error code;
-    int expectedReturnCode = -EID(JOURNAL_INVALID);
+    int expectedReturnCode = ERRID(JOURNAL_INVALID);
     EXPECT_EQ(expectedReturnCode, actualReturnCode);
 }
 

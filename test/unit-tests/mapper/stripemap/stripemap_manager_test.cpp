@@ -50,9 +50,9 @@ TEST(StripeMapManager, Init_TestFailCase2)
     StripeMapManager smap(nullptr, con, &eventScheduler, &addrInfo);
 
     EXPECT_CALL(*con, OpenMapFile).WillOnce(Return(0));
-    EXPECT_CALL(*con, Load).WillOnce(Return(-EID(MAP_LOAD_COMPLETED)));
+    EXPECT_CALL(*con, Load).WillOnce(Return(ERRID(MAP_LOAD_COMPLETED)));
     int ret = smap.Init();
-    EXPECT_EQ(-EID(MAP_LOAD_COMPLETED), ret);
+    EXPECT_EQ(ERRID(MAP_LOAD_COMPLETED), ret);
 }
 
 TEST(StripeMapManager, FlushDirtyPageGiven_TestFailCase0)
@@ -69,7 +69,7 @@ TEST(StripeMapManager, FlushDirtyPageGiven_TestFailCase0)
     int ret = smap.FlushDirtyPagesGiven(d, nullptr);
     EXPECT_EQ(0, ret);
     ret = smap.FlushDirtyPagesGiven(d, nullptr);
-    EXPECT_LE(-EID(MAP_FLUSH_IN_PROGRESS), ret);
+    EXPECT_LE(ERRID(MAP_FLUSH_IN_PROGRESS), ret);
 }
 
 TEST(StripeMapManager, FlushDirtyPageGiven_TestFailCase1)
@@ -100,7 +100,7 @@ TEST(StripeMapManager, FlushTouchedPages_TestFailCase0)
     int ret = smap.FlushTouchedPages(nullptr);
     EXPECT_EQ(0, ret);
     ret = smap.FlushTouchedPages(nullptr);
-    EXPECT_LE(-EID(MAP_FLUSH_IN_PROGRESS), ret);
+    EXPECT_LE(ERRID(MAP_FLUSH_IN_PROGRESS), ret);
 }
 
 TEST(StripeMapManager, FlushTouchedPages_TestFailCase1)

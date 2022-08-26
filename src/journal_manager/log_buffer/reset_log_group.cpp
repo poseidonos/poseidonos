@@ -54,13 +54,13 @@ ResetLogGroup::Execute(void)
     bool result = event->Execute();
     if (result != true)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::JOUNRAL_WRITE_LOG_GROUP_FOOTER,
+        POS_TRACE_ERROR(EID(JOUNRAL_WRITE_LOG_GROUP_FOOTER),
             "Failed to reset log group using log group footer");
         return false;
     }
     else
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::JOUNRAL_WRITE_LOG_GROUP_FOOTER,
+        POS_TRACE_DEBUG(EID(JOUNRAL_WRITE_LOG_GROUP_FOOTER),
             "Success to reset log group using log group footer (LogGroupId {}, seqNum {})", logGroupId, footer.resetedSequenceNumber);
         return true;
     }

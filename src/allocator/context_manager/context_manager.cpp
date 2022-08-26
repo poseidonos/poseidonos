@@ -154,7 +154,7 @@ ContextManager::SetNextSsdLsid(void)
     SegmentId segId = AllocateFreeSegment();
     if (segId == UNMAP_SEGMENT)
     {
-        return -EID(ALLOCATOR_NO_FREE_SEGMENT);
+        return ERRID(ALLOCATOR_NO_FREE_SEGMENT);
     }
 
     std::unique_lock<std::mutex> lock(allocatorCtx->GetCtxLock());

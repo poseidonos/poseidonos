@@ -104,10 +104,10 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
                 extent.GetStartLpn(), extent.GetCount());
         }
 
-        return {0, POS_EVENT_ID::MFS_META_SAVE_FAILED};
+        return {0, EID(MFS_META_SAVE_FAILED)};
     }
 
-    return {fd, POS_EVENT_ID::SUCCESS};
+    return {fd, EID(SUCCESS)};
 }
 
 MetaFileInode&

@@ -99,12 +99,12 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     }
     else
     {
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_CHECKPOINT_STARTED);
+        int eventId = static_cast<int>(EID(JOURNAL_CHECKPOINT_STARTED));
         POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush, arrayId:{}", numMapsToFlush, arrayId);
 
         for (auto mapId : pendingDirtyMaps)
         {
-            eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_DEBUG);
+            eventId = static_cast<int>(EID(JOURNAL_DEBUG));
 
             EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId));
             ret = mapFlush->FlushDirtyMpages(mapId, eventMapFlush);

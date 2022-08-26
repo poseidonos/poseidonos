@@ -297,7 +297,7 @@ TelemetryAirDelegator::TelemetryAirDelegator(
         }
         catch (std::exception& e)
         {
-            POS_TRACE_ERROR(static_cast<int>(POS_EVENT_ID::TELEMETRY_AIR_DATA_PARSING_FAILED),
+            POS_TRACE_ERROR(static_cast<int>(EID(TELEMETRY_AIR_DATA_PARSING_FAILED)),
                 "TelemetryAirDelegator failed to parsing data : {}", e.what());
             this->returnState = State::ERR_DATA;
 

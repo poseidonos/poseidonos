@@ -148,7 +148,7 @@ JournalLogBuffer::Create(uint64_t logBufferSize)
 {
     if (logFile->DoesFileExist() == true)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_CREATE_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_CREATE_FAILED),
             "Log buffer already exists");
         return -1 * EID(JOURNAL_LOG_BUFFER_CREATE_FAILED);
     }
@@ -178,7 +178,7 @@ JournalLogBuffer::Open(uint64_t& logBufferSize)
 {
     if (logFile->DoesFileExist() == false)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_OPEN_FAILED),
             "Log buffer does not exist");
         return (-1 * EID(JOURNAL_LOG_BUFFER_OPEN_FAILED));
     }
@@ -186,14 +186,14 @@ JournalLogBuffer::Open(uint64_t& logBufferSize)
     int ret = logFile->Open();
     if (ret != 0)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::JOURNAL_LOG_BUFFER_OPEN_FAILED,
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_OPEN_FAILED),
             "Failed to open log buffer");
         return ret;
     }
 
     logBufferSize = logFile->GetFileSize();
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_LOG_BUFFER_LOADED,
+    POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_LOADED),
         "Journal log buffer is loaded");
     return ret;
 }

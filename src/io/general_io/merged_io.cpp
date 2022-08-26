@@ -146,7 +146,7 @@ MergedIO::_CheckAsyncReadError(int arrayId)
 
     if (StateEnum::STOP == stateType)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::REF_COUNT_RAISE_FAIL;
+        POS_EVENT_ID eventId = EID(REF_COUNT_RAISE_FAIL);
         POS_TRACE_ERROR(eventId, "When Io Submit, refcount raise fail");
         return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
     }

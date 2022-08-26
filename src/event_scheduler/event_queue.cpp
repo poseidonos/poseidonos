@@ -109,7 +109,7 @@ EventQueue::EnqueueEvent(EventSmartPtr input)
 {
     if (unlikely(nullptr == input))
     {
-        PosEventId::Print(POS_EVENT_ID::EVTQ_INVALID_EVENT, EventLevel::WARNING);
+        POS_TRACE_WARN(EID(EVTQ_INVALID_EVENT), "");
         return;
     }
     {

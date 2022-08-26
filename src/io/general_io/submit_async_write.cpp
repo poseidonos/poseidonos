@@ -120,7 +120,7 @@ SubmitAsyncWrite::Execute(
         {
             IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
-            POS_EVENT_ID eventId = POS_EVENT_ID::PARITY_ONLY_NOT_SUPPORTED;
+            POS_EVENT_ID eventId = EID(PARITY_ONLY_NOT_SUPPORTED);
             POS_TRACE_ERROR(eventId, "Meta Partition with parity only is not supported");
             return errorToReturn;
         }
@@ -226,7 +226,7 @@ SubmitAsyncWrite::_CheckAsyncWriteError(int arrayId)
     IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(info->GetName());
     if (stateControl->GetState()->ToStateType() == StateEnum::STOP)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::REF_COUNT_RAISE_FAIL;
+        POS_EVENT_ID eventId = EID(REF_COUNT_RAISE_FAIL);
         POS_TRACE_ERROR(eventId, "When Io Submit, refcount raise fail");
         return IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP;
     }

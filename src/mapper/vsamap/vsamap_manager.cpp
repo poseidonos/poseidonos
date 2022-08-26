@@ -204,7 +204,7 @@ VSAMapManager::LoadVSAMapFile(int volId)
         numLoadIssuedCount--;
         v.gauge = numLoadIssuedCount;
         tp->PublishData(TEL33007_MAP_VSA_LOAD_PENDINGIO_CNT, v, MT_GAUGE);
-        if (-EID(MAP_LOAD_COMPLETED) == ret)
+        if (ERRID(MAP_LOAD_COMPLETED) == ret)
         {
             ret = 0; // This is a normal case
             POS_TRACE_INFO(EID(MAPPER_START), "[Mapper VSAMap] No mpage to Load, so VSAMap Load Finished, volId:{}, arrayId:{}", volId, addrInfo->GetArrayId());
@@ -223,7 +223,7 @@ VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartP
     if (mapFlushState[volId] != MapFlushState::FLUSH_DONE)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushDirtyPagesGiven] Failed to Issue Flush, Another Flush is still progressing in volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
     int cnt = dirtyPages.size();
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, arrayId:{}, numdirtyPages:{}", volId, addrInfo->GetArrayId(), cnt);
@@ -261,7 +261,7 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
     if (mapFlushState[volId] != MapFlushState::FLUSH_DONE)
     {
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing in volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
-        return -EID(MAP_FLUSH_IN_PROGRESS);
+        return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
     POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushTouchedPages] Issue Flush VSAMap, volume :{}, arrayId:{}", volId, addrInfo->GetArrayId());
     assert(vsaMaps[volId] != nullptr);
@@ -431,7 +431,7 @@ VSAMapManager::GetVSAs(int volId, BlkAddr startRba, uint32_t numBlks, VsaArray& 
         {
             vsaArray[blkIdx] = UNMAP_VSA;
         }
-        return -EID(VSAMAP_NOT_ACCESSIBLE);
+        return ERRID(VSAMAP_NOT_ACCESSIBLE);
     }
 
     VSAMapContent* vsaMap = vsaMaps[volId];
@@ -449,7 +449,7 @@ VSAMapManager::SetVSAs(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
     if (false == isVsaMapAccessable[volId])
     {
         POS_TRACE_WARN(EID(VSAMAP_NOT_ACCESSIBLE), "[Mapper VSAMap] VolumeId:{} is not accessible, maybe unmounted", volId);
-        return -EID(VSAMAP_NOT_ACCESSIBLE);
+        return ERRID(VSAMAP_NOT_ACCESSIBLE);
     }
     return _UpdateVsaMap(volId, startRba, virtualBlks);
 }

@@ -59,7 +59,7 @@ StripeReplayStatus::~StripeReplayStatus(void)
 void
 StripeReplayStatus::Print(void)
 {
-    int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
 
     std::ostringstream os;
 
@@ -124,7 +124,7 @@ StripeReplayStatus::StripeFlushed(void)
 {
     if (stripeMapReplayed == true)
     {
-        int eventId = static_cast<int>(POS_EVENT_ID::JOURNAL_REPLAY_STATUS);
+        int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
         POS_TRACE_ERROR(eventId, "[Replay] Stripe flush replayed more than once");
     }
     stripeMapReplayed = true;

@@ -62,7 +62,7 @@ TEST(MetaIoHandler, Submit_testJustCallSubmitHandler)
     NiceMock<MockMetaFs> metaFs;
     NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
     metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
 
     MetaIoHandler handler(1);
     handler.metaFs = &metaFs;
@@ -80,7 +80,7 @@ TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler0)
     NiceMock<MockMetaFs> metaFs;
     NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
     metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
 
     MetaIoHandler handler(1);
     handler.metaFs = &metaFs;
@@ -98,7 +98,7 @@ TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler1)
     NiceMock<MockMetaFs> metaFs;
     NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
     metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
 
     MetaIoHandler handler(1);
     handler.metaFs = &metaFs;
@@ -116,7 +116,7 @@ TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler2)
     NiceMock<MockMetaFs> metaFs;
     NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
     metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
 
     MetaIoHandler handler(1);
     handler.metaFs = &metaFs;
@@ -134,7 +134,7 @@ TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler3)
     NiceMock<MockMetaFs> metaFs;
     NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
     metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(POS_EVENT_ID::SUCCESS));
+    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
 
     MetaIoHandler handler(1);
     handler.metaFs = &metaFs;

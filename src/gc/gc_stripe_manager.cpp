@@ -90,7 +90,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
     if (_SetBufferPool() == false)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::GC_ERROR_MSG,
+        POS_TRACE_ERROR(EID(GC_ERROR_MSG),
             "Failed to allocated memory in GC_STRIPE_MANAGER");
     }
 }

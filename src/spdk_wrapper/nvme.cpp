@@ -122,7 +122,7 @@ Nvme::_Initialize(void)
     {
         if (ctrlTimeout > MAX_TIMEOUT_IN_US)
         {
-            POS_TRACE_WARN(POS_EVENT_ID::UNVME_MAX_TIMEOUT_EXCEED,
+            POS_TRACE_WARN(EID(UNVME_MAX_TIMEOUT_EXCEED),
                 "SSD Timeout usec From Configuration File Excceds Max timeout : {}, Input : {}",
                 MAX_TIMEOUT_IN_US, ctrlTimeout);
             ctrlTimeout = MAX_TIMEOUT_IN_US;
@@ -138,7 +138,7 @@ Nvme::_Initialize(void)
     {
         if (inputRetryCount > MAX_RETRY)
         {
-            POS_TRACE_WARN(POS_EVENT_ID::UNVME_MAX_RETRY_EXCEED,
+            POS_TRACE_WARN(EID(UNVME_MAX_RETRY_EXCEED),
                 "Backend's Retry Count from Configuration File Excceds Max Retry Count : {}, Input : {}",
                 MAX_RETRY, inputRetryCount);
             inputRetryCount = MAX_RETRY;
@@ -153,7 +153,7 @@ Nvme::_Initialize(void)
     {
         if (inputRetryCount > MAX_RETRY)
         {
-            POS_TRACE_DEBUG(POS_EVENT_ID::UNVME_MAX_RETRY_EXCEED,
+            POS_TRACE_DEBUG(EID(UNVME_MAX_RETRY_EXCEED),
                 "Frontend's Retry Count from Configuration File Excceds Max Retry Count : {}, Input : {}",
                 MAX_RETRY, inputRetryCount);
             inputRetryCount = MAX_RETRY;
@@ -173,7 +173,7 @@ Nvme::Start(void)
 {
     if (isRunning == false)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::UNVME_DAEMON_START, "spdk daemon started");
+        POS_TRACE_DEBUG(EID(UNVME_DAEMON_START), "spdk daemon started");
         isRunning = true;
         _Monitoring();
     }
@@ -185,7 +185,7 @@ Nvme::Stop(void)
     Resume();
     if (isRunning == true)
     {
-        POS_TRACE_DEBUG(POS_EVENT_ID::UNVME_DAEMON_FINISH, "spdk daemon stopped");
+        POS_TRACE_DEBUG(EID(UNVME_DAEMON_FINISH), "spdk daemon stopped");
         isRunning = false;
     }
 }
@@ -193,7 +193,7 @@ Nvme::Stop(void)
 void
 Nvme::_Monitoring(void)
 {
-    POS_TRACE_INFO(POS_EVENT_ID::UNVME_DAEMON_START, "spdk daemon monitoring started");
+    POS_TRACE_INFO(EID(UNVME_DAEMON_START), "spdk daemon monitoring started");
     AffinityManagerSingleton::Instance()->SetGeneralAffinitySelf();
 
     while (isRunning)
@@ -211,14 +211,14 @@ Nvme::_Monitoring(void)
         if (spdk_nvme_probe(NULL, NULL, _ProbeCallback,
                 _AttachCallback, _RemoveCallback) != 0)
         {
-            POS_TRACE_ERROR(POS_EVENT_ID::UNVME_DAEMON_FINISH, "spdk daemon stopped unexpectedly");
+            POS_TRACE_ERROR(EID(UNVME_DAEMON_FINISH), "spdk daemon stopped unexpectedly");
             break;
         }
 
         usleep(10000);
     }
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::UNVME_DAEMON_FINISH, "spdk daemon monitoring stopped");
+    POS_TRACE_DEBUG(EID(UNVME_DAEMON_FINISH), "spdk daemon monitoring stopped");
     Cleanup(nullptr);
 }
 
@@ -227,7 +227,7 @@ Nvme::_ProbeCallback(void* cbCtx,
     const spdk_nvme_transport_id* trid,
     spdk_nvme_ctrlr_opts* opts)
 {
-    POS_TRACE_INFO(POS_EVENT_ID::UNVME_PROBE_CALLBACK, "Probing {} ", trid->traddr);
+    POS_TRACE_INFO(EID(UNVME_PROBE_CALLBACK), "Probing {} ", trid->traddr);
     return true;
 }
 
@@ -241,10 +241,10 @@ Nvme::_RegisterNamespace(
     const struct spdk_nvme_ctrlr_data* ctrlrData;
 
     ctrlrData = spdk_nvme_ctrlr_get_data(ctrlr);
-    POS_TRACE_INFO(POS_EVENT_ID::UNVME_REGISTER_NS, "Controller - MDTS: {}", ctrlrData->mdts);
+    POS_TRACE_INFO(EID(UNVME_REGISTER_NS), "Controller - MDTS: {}", ctrlrData->mdts);
     if (!spdk_nvme_ns_is_active(ns))
     {
-        POS_TRACE_INFO(POS_EVENT_ID::UNVME_REGISTER_NS,
+        POS_TRACE_INFO(EID(UNVME_REGISTER_NS),
             "Controller {} ({}): Skipping inactive NS {}\n",
             ctrlrData->mn, ctrlrData->sn,
             spdk_nvme_ns_get_id(ns));
@@ -254,7 +254,7 @@ Nvme::_RegisterNamespace(
     if (spdk_nvme_ns_get_size(ns) < ioSizeBytes ||
         spdk_nvme_ns_get_sector_size(ns) > ioSizeBytes)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::UNVME_REGISTER_NS,
+        POS_TRACE_WARN(EID(UNVME_REGISTER_NS),
             "WARNING: controller {} ({}) ns {} has invalid "
             "ns size {} / block size {} for I/O size {}\n",
             ctrlrData->mn, ctrlrData->sn, spdk_nvme_ns_get_id(ns),
@@ -265,7 +265,7 @@ Nvme::_RegisterNamespace(
     entry = (NsEntry*)malloc(sizeof(NsEntry));
     if (entry == NULL)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNVME_REGISTER_NS, "ns_entry malloc");
+        POS_TRACE_ERROR(EID(UNVME_REGISTER_NS), "ns_entry malloc");
         exit(1);
     }
 
@@ -308,7 +308,7 @@ Nvme::_RegisterController(struct spdk_nvme_ctrlr* ctrlr, const char* trAddr)
 
     if (entry == NULL)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNVME_REGISTER_CTRL, "ctrlr_entry malloc");
+        POS_TRACE_ERROR(EID(UNVME_REGISTER_CTRL), "ctrlr_entry malloc");
         exit(1);
     }
 
@@ -317,7 +317,7 @@ Nvme::_RegisterController(struct spdk_nvme_ctrlr* ctrlr, const char* trAddr)
         4096);
     if (entry->latencyPage == NULL)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNVME_REGISTER_CTRL, "Allocation error (latency page)");
+        POS_TRACE_ERROR(EID(UNVME_REGISTER_CTRL), "Allocation error (latency page)");
         exit(1);
     }
 
@@ -342,7 +342,7 @@ Nvme::_InitScanCallback(void* cbCtx,
     spdk_nvme_ctrlr* ctrlr,
     const spdk_nvme_ctrlr_opts* opts)
 {
-    POS_TRACE_INFO(POS_EVENT_ID::UNVME_INIT_SCAN_CALLBACK,
+    POS_TRACE_INFO(EID(UNVME_INIT_SCAN_CALLBACK),
         "Attaching to {}", trid->traddr);
     _RegisterController(ctrlr, trid->traddr);
 }
@@ -353,7 +353,7 @@ Nvme::_AttachCallback(void* cbCtx,
     spdk_nvme_ctrlr* ctrlr,
     const spdk_nvme_ctrlr_opts* opts)
 {
-    POS_TRACE_WARN(POS_EVENT_ID::UNVME_ATTACH_CALLBACK,
+    POS_TRACE_WARN(EID(UNVME_ATTACH_CALLBACK),
         "spdk device attachment detected");
 
     _RegisterController(ctrlr, trid->traddr);
@@ -369,7 +369,7 @@ Nvme::_AttachCallback(void* cbCtx,
     }
     else
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNVME_ATTACH_CALLBACK,
+        POS_TRACE_ERROR(EID(UNVME_ATTACH_CALLBACK),
             "set device event callback");
     }
 }
@@ -395,7 +395,7 @@ Nvme::Resume(void)
 void
 Nvme::_RemoveCallback(void* cbCtx, struct spdk_nvme_ctrlr* ctrlr)
 {
-    POS_TRACE_WARN(POS_EVENT_ID::UNVME_DETACH_CALLBACK,
+    POS_TRACE_WARN(EID(UNVME_DETACH_CALLBACK),
         "spdk device detachment detected");
     if (detachCb != nullptr)
     {
@@ -412,7 +412,7 @@ Nvme::_RemoveCallback(void* cbCtx, struct spdk_nvme_ctrlr* ctrlr)
     }
     else
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNVME_DETACH_CALLBACK,
+        POS_TRACE_ERROR(EID(UNVME_DETACH_CALLBACK),
             "set device event callback");
     }
 }
@@ -423,7 +423,7 @@ Nvme::SpdkDetach(void* arg1)
     struct spdk_nvme_ns* ns = static_cast<struct spdk_nvme_ns*>(arg1);
     if (ns == NULL)
     {
-        POS_TRACE_WARN(POS_EVENT_ID::UNVME_SPDK_DETACH,
+        POS_TRACE_WARN(EID(UNVME_SPDK_DETACH),
             "SpdkDetach - ns == NULL");
         return;
     }
@@ -436,7 +436,7 @@ Nvme::SpdkDetach(void* arg1)
     {
         if ((*iter)->u.nvme.ns == ns)
         {
-            POS_TRACE_INFO(POS_EVENT_ID::UNVME_SPDK_DETACH, "SpdkDetach - free NsEntry");
+            POS_TRACE_INFO(EID(UNVME_SPDK_DETACH), "SpdkDetach - free NsEntry");
 
             free(*iter);
             namespaces.erase(iter);
@@ -451,7 +451,7 @@ Nvme::SpdkDetach(void* arg1)
     {
         if ((*iter)->ctrlr == ctrlr)
         {
-            POS_TRACE_INFO(POS_EVENT_ID::UNVME_SPDK_DETACH, "SpdkDetach - free ctrlr");
+            POS_TRACE_INFO(EID(UNVME_SPDK_DETACH), "SpdkDetach - free ctrlr");
             spdk_nvme_detach((*iter)->ctrlr);
             free(*iter);
 
@@ -461,14 +461,14 @@ Nvme::SpdkDetach(void* arg1)
         }
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::UNVME_SPDK_DETACH, "SpdkDetach done");
+    POS_TRACE_INFO(EID(UNVME_SPDK_DETACH), "SpdkDetach done");
 }
 
 void
 Nvme::Cleanup(void* arg1)
 {
     std::lock_guard<std::mutex> guard(nvmeMutex);
-    POS_TRACE_INFO(POS_EVENT_ID::UNVME_CLEAN_UP, "Detaching SPDK controlllers!");
+    POS_TRACE_INFO(EID(UNVME_CLEAN_UP), "Detaching SPDK controlllers!");
 
     for (std::list<NsEntry*>::iterator iter = namespaces.begin();
         iter != namespaces.end(); iter++)
@@ -498,12 +498,12 @@ Nvme::InitController(void)
     int rc = spdk_nvme_probe(NULL, NULL, _ProbeCallback, _InitScanCallback, _RemoveCallback);
     if (rc != 0)
     {
-        POS_TRACE_ERROR(POS_EVENT_ID::UNVME_INIT_CONTROLLER, "spdk_nvme_probe() failed");
+        POS_TRACE_ERROR(EID(UNVME_INIT_CONTROLLER), "spdk_nvme_probe() failed");
         Nvme::Cleanup(nullptr);
         return nullptr;
     }
 
-    POS_TRACE_WARN(POS_EVENT_ID::UNVME_INIT_CONTROLLER, "Initialization complete.");
+    POS_TRACE_WARN(EID(UNVME_INIT_CONTROLLER), "Initialization complete.");
 
     return &namespaces;
 }
@@ -515,14 +515,14 @@ Nvme::ControllerTimeoutCallback(void* cbArg, struct spdk_nvme_ctrlr* ctrlr,
     const struct spdk_nvme_ctrlr_data* ctrlData =
         spdk_nvme_ctrlr_get_data(ctrlr);
 
-    POS_EVENT_ID eventId = POS_EVENT_ID::UNVME_COMPLETION_TIMEOUT;
+    POS_EVENT_ID eventId = EID(UNVME_COMPLETION_TIMEOUT);
     POS_TRACE_WARN(static_cast<int>(eventId),
         "uNVMe completion checking timed out: SN: {}", ctrlData->sn);
 
     union spdk_nvme_csts_register csts = spdk_nvme_ctrlr_get_regs_csts(ctrlr);
     if (csts.bits.cfs)
     {
-        eventId = POS_EVENT_ID::UNVME_CONTROLLER_FATAL_STATUS;
+        eventId = EID(UNVME_CONTROLLER_FATAL_STATUS);
         POS_TRACE_WARN(static_cast<int>(eventId),
             "Controller Fatal Status, reset required: SN: {}", ctrlData->sn);
 

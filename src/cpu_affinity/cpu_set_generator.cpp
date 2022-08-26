@@ -94,7 +94,7 @@ CpuSetGenerator::_GetNextCpuFromThisNuma(uint32_t cpu)
     int32_t numa = numa_node_of_cpu(cpu);
     if (static_cast<uint32_t>(numa) == INVALID_NUMA)
     {
-        POS_EVENT_ID eventId = POS_EVENT_ID::AFTMGR_DISABLED_CORE;
+        POS_EVENT_ID eventId = EID(AFTMGR_DISABLED_CORE);
         POS_TRACE_ERROR(eventId, "Core {} is disabled", cpu);
         return 0;
     }
