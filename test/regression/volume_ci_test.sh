@@ -182,15 +182,17 @@ tc_vol_5()
 ############################
 tc_vol_6()
 {
+    get_test_iteration_cnt 2;
+    tcTestCount=$?
+
     tcName="tc_vol_6"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
-    print_info "scenario: {[create/mount] vol1 & vol2  -> [unmount] vol1 & vol2 -> [delete] vol1 & vol2 } x 10"
+    print_info "scenario: {[create/mount] vol1 & vol2  -> [unmount] vol1 & vol2 -> [delete] vol1 & vol2 } x ${tcTestCount}"
 
     bringup_pos create
     EXPECT_PASS "bringup_pos" $?
 
-    tcTestCount=2
     for fidx in `seq 1 ${tcTestCount}`
     do           
         print_notice "TC=${tcName} : All test count =  ${fidx}, total = ${tcTestCount}"    
@@ -230,10 +232,13 @@ tc_vol_6()
 ############################
 tc_vol_7()
 {
+    get_test_iteration_cnt 2;
+    tcTestCount=$?
+
     tcName="tc_vol_7"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
-    print_info "scenario: [create] vol1 & vol2  -> {[mount] vol1 & vol2 -> [unmount] vol1 & vol2 } x 10"
+    print_info "scenario: [create] vol1 & vol2  -> {[mount] vol1 & vol2 -> [unmount] vol1 & vol2 } x ${tcTestCount}"
 
     bringup_pos create
     EXPECT_PASS "bringup_pos" $?
@@ -244,7 +249,6 @@ tc_vol_7()
     create_and_check '2' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
-    tcTestCount=2
     for fidx in `seq 1 ${tcTestCount}`
     do           
         print_notice "TC=${tcName} : All test count =  ${fidx}, total = ${tcTestCount}"    
@@ -273,10 +277,13 @@ tc_vol_7()
 ############################
 tc_vol_8()
 {
+    get_test_iteration_cnt 2;
+    tcTestCount=$?
+    
     tcName="tc_vol_8"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
-    print_info "scenario: { [mount] poseidonos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] poseidonos } x 10"
+    print_info "scenario: { [mount] poseidonos -> [create/mount/unmount] vol -> [delete] vol -> [unmount] poseidonos } x ${tcTestCount}"
 
     start_pos;
     EXPECT_PASS "start_pos" $?
@@ -286,7 +293,6 @@ tc_vol_8()
 
     create_subsystem
 
-    tcTestCount=2
     for fidx in `seq 1 ${tcTestCount}`
     do
         print_notice "${tcName}: test count=${fidx}, total=${tcTestCount}"
@@ -464,10 +470,13 @@ tc_npor_2()
 ############################
 tc_npor_3()
 {
+    get_test_iteration_cnt 5;
+    tcTestCount=$?
+
     tcName="tc_npor_3"
     show_tc_info "${tcName}"
     start_tc "${tcName}"
-    print_info "scenario: { [create] vol1 -> ([mount] vol1 -> [write] vol1 -> [unmount] vol1 -> [NPOR] } x 50"
+    print_info "scenario: { [create] vol1 -> ([mount] vol1 -> [write] vol1 -> [unmount] vol1 -> [NPOR] } x ${tcTestCount}"
 
     bringup_pos create
     EXPECT_PASS "bringup" $?
@@ -475,7 +484,6 @@ tc_npor_3()
     create_and_check '1' 2GB 0 0
     EXPECT_PASS "create_and_check" $?
 
-    tcTestCount=5
     for fidx in `seq 1 ${tcTestCount}`
     do
         print_notice "TC=${tcName} : All test count=${fidx}, total=${tcTestCount}"
@@ -646,15 +654,30 @@ run()
     ####################################
     # add tc name here
     ####################################
+    if [ "$test_mode" == "precommit" ];
+    then
+        max_test_iteration=1
+    fi
+
     if [ $isVm == 0 ];
     then
+        # PM TEST
         tc_array=(
                 tc_vol_2 tc_vol_3 tc_vol_4
                 tc_vol_5 tc_vol_6 tc_vol_7 tc_vol_8
                 tc_npor_1 tc_npor_2 tc_npor_4
                 tc_inode_0
             )
+    elif [ $isVm == 1 ] && [ "$test_mode" == "precommit" ];
+    then
+        # VM PRECOMMIT TEST
+        tc_array=(
+                tc_vol_6 tc_vol_7
+                tc_npor_2
+                tc_inode_0
+            )
     else
+        # VM POSTCOMMIT TEST
         tc_array=(
                 tc_vol_5 tc_vol_6 tc_vol_7
                 tc_npor_2 tc_npor_3 tc_npor_4
@@ -701,14 +724,27 @@ run()
     print_notice "All TCs (${tcTotalCount} TCs) have passed.\n${tcList}"
 }
 
-isVm=0
+get_test_iteration_cnt()
+{
+    if [[ $1 -gt ${max_test_iteration} ]]; then
+        return ${max_test_iteration}
+    else
+        return $1
+    fi
+}
 
-while getopts "f:v:" opt
+isVm=0
+max_test_iteration=100
+test_mode=""
+
+while getopts "f:v:p:" opt
 do
     case "$opt" in
         f) target_fabric_ip="$OPTARG"
             ;;
         v) isVm="$OPTARG"
+            ;;
+        p) test_mode="precommit"
             ;;
         ?) exit 2
             ;;
