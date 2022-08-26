@@ -32,26 +32,22 @@
 
 #pragma once
 
-#include <atomic>
-#include <functional>
-#include <string>
-#include <utility>
+#include "src/include/recover_func.h"
 #include <vector>
-#include <mutex>
-
-#include "rebuild_context.h"
 
 using namespace std;
 
 namespace pos
 {
-class QuickRebuildContext : public RebuildContext
+class IArrayDevice;
+
+class RebuildPair
 {
 public:
-    void GetSecondaryRebuildPairs(RebuildPairs& secondaryRp) override
-    {
-        secondaryRp = secondaryRp;
-    }
-    RebuildPairs secondaryRp;
+    explicit RebuildPair(vector<IArrayDevice*> srcs, vector<IArrayDevice*> dsts, RecoverFunc recovery)
+    : srcs(srcs), dsts(dsts), recovery(recovery) {}
+    vector<IArrayDevice*> srcs;
+    vector<IArrayDevice*> dsts;
+    RecoverFunc recovery;
 };
 } // namespace pos

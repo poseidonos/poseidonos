@@ -40,6 +40,7 @@
 #include <mutex>
 
 #include "rebuild_method.h"
+#include "rebuild_pair.h"
 #include "rebuild_result.h"
 #include "rebuild_progress.h"
 #include "rebuild_logger.h"
@@ -48,7 +49,6 @@
 #include "src/include/raid_type.h"
 #include "src/include/rebuild_type.h"
 #include "src/include/partition_type.h"
-#include "src/include/recover_func.h"
 #include "src/logger/logger.h"
 
 using namespace std;
@@ -58,13 +58,12 @@ namespace pos
 class PartitionPhysicalSize;
 
 using RebuildComplete = function<void(RebuildResult)>;
-using RebuildGroupPairs = vector<pair<vector<IArrayDevice*>, vector<IArrayDevice*>>>;
+using RebuildPairs = vector<RebuildPair*>;
 
 class RebuildContext
 {
 public:
-    virtual RecoverFunc GetSecondaryRecovery(void) { return nullptr; }
-    virtual void GetSecondaryRebuildGroupPairs(RebuildGroupPairs& secondaryRgPairs) {}
+    virtual void GetSecondaryRebuildPairs(RebuildPairs& secondaryRp) {}
     // from array rebuilder
     string array = "";
     uint32_t arrayIndex = 0;
@@ -76,8 +75,7 @@ public:
     PartitionType part;
     uint64_t stripeCnt = 0;
     const PartitionPhysicalSize* size = nullptr;
-    RebuildGroupPairs rgPairs;
-    RecoverFunc recovery;
+    RebuildPairs rp;
     RebuildComplete rebuildComplete;
     RebuildTypeEnum rebuildType = RebuildTypeEnum::BASIC;
 
@@ -113,6 +111,11 @@ public:
             delete r;
         }
         rm.clear();
+        for (RebuildPair* r : rp)
+        {
+            delete r;
+        }
+        rp.clear();
     }
     // LCOV_EXCL_END
 

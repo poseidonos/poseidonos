@@ -73,9 +73,9 @@ public:
     RaidTypeEnum GetRaidType(void) override { return raidType; }
 
 protected:
-    virtual void _SetRebuildGroupPair(const vector<IArrayDevice*>& fault, RebuildGroupPairs& rgPairs, RecoverFunc& recovery);
-    virtual void _SetQuickRebuildGroupPair(const QuickRebuildPair& rebuildPair, RebuildGroupPairs& rgPairs, RecoverFunc& recovery,
-        RebuildGroupPairs& backupPair, RecoverFunc& backupRecovery);
+    virtual void _SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPairs& rp);
+    virtual void _SetQuickRebuildPair(const QuickRebuildPair& quickRebuildPair, RebuildPairs& rp,
+        RebuildPairs& backupRp);
 
 private:
     list<FtEntry> _L2FTranslate(const LogicalEntry& le);
