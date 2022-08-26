@@ -33,7 +33,6 @@
 #include <unordered_map>
 
 #include "json_helper.h"
-#include "logger.h"
 
 static void
 JsonFormatSubStringAddTab(JsonFormatType type, string& subString)

@@ -72,7 +72,7 @@ def start_pos():
         with open(TEST.pos_log_path, "a") as log_file:
             telemetry_proc = subprocess.Popen([telemetry_execution, "telemetry", "start"], stdout=log_file, stderr=log_file)
 
-    subprocess.call(["sleep", "10"])
+    subprocess.call(["sleep", "50"])
 
     detect_pos_crash = True
 
