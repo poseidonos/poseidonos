@@ -13,7 +13,7 @@ If you have any questions, please feel free to [open an issue](https://github.co
 {:.note}
 
 ## POS Roadmap
-- [Roadmap](roadmap.md) --- POS Roadmap (2022 ~ 2024).
+- [Roadmap (2022 ~ 2024)](roadmap.md)
 
 ## POS Concepts
 This document will walk you through the basic concepts and terms to understand POS with a few illustrative examples of the network architecture and software stack.
