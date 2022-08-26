@@ -72,10 +72,11 @@ if [ -f /etc/debian_version ]; then
     # for rocksdb
     apt install -y librocksdb-dev
     # for markdownTable
-
     pip3 install py-markdown-table
     # for pyyaml
     pip3 install pyyaml
+    # for isal
+    apt install -y libisal-dev
 
 else
     echo "pkgdep: unknown system type."
