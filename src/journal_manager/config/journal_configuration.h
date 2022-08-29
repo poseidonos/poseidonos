@@ -56,6 +56,7 @@ public:
     // Can be called before initialized
     virtual bool IsEnabled(void);
     virtual bool IsDebugEnabled(void);
+    virtual bool IsVscEnabled(void);
     virtual uint64_t GetIntervalForMetric(void);
     virtual bool AreReplayWbStripesInUserArea(void);
     virtual bool IsRocksdbEnabled(void);
@@ -88,10 +89,12 @@ protected:
     bool rocksdbEnabled;
     MetaVolumeType metaVolumeToUse;
     std::string rocksdbPath;
+    bool vscEnabled;
 
 private:
     void _ReadConfiguration(void);
     bool _IsJournalEnabled(void);
+    bool _IsVscEnabled(void);
     bool _IsDebugEnabled(void);
     uint64_t _GetIntervalForMetric(void);
     uint64_t _ReadLogBufferSize(void);

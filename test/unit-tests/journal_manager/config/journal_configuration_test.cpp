@@ -146,6 +146,12 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenJournalEnabledIsJournalR
         });
     EXPECT_CALL(configManager, GetValue("meta_rocksdb", "rocksdb_path", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         { return 0; });
+    EXPECT_CALL(configManager, GetValue("journal", "enable_vsc", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
     JournalConfiguration config(&configManager);
 
     // Then: Will IsRocksdbEnabled() is true
@@ -184,6 +190,12 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenTimeIntervalIsValid)
         });
     EXPECT_CALL(configManager, GetValue("meta_rocksdb", "rocksdb_path", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         { return 0; });
+    EXPECT_CALL(configManager, GetValue("journal", "enable_vsc", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
     JournalConfiguration config(&configManager);
 
     // Then
@@ -226,6 +238,12 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenTheNumOfLogGroupsIsValid
         });
     EXPECT_CALL(configManager, GetValue("meta_rocksdb", "rocksdb_path", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         { return 0; });
+    EXPECT_CALL(configManager, GetValue("journal", "enable_vsc", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
     JournalConfiguration config(&configManager);
 
     // Then
@@ -270,7 +288,12 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadLogBufferSiz
         { return 0; });
     EXPECT_CALL(configManager, GetValue("meta_rocksdb", "journal_use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         { return 0; });
-
+    EXPECT_CALL(configManager, GetValue("journal", "enable_vsc", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
     JournalConfiguration config(&configManager);
 
     // Then: Will log buffer size be default value
@@ -299,7 +322,12 @@ TEST(JournalConfiguration, JournalConfiguration_testWhenFailedToReadNumLogGroups
         { return 0; });
     EXPECT_CALL(configManager, GetValue("meta_rocksdb", "journal_use_rocksdb", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type) 
         { return 0; });
-
+    EXPECT_CALL(configManager, GetValue("journal", "enable_vsc", _, _)).WillOnce([&](string module, string key, void* value, ConfigType type)
+        {
+            bool* targetToChange = static_cast<bool*>(value);
+            *targetToChange = true;
+            return 0;
+        });
     JournalConfiguration config(&configManager);
 
     // Then: Will the number is default value

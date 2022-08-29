@@ -60,6 +60,7 @@ JournalConfiguration::JournalConfiguration(ConfigManager* configManager)
   rocksdbEnabled(false),
   metaVolumeToUse(),
   rocksdbPath(""),
+  vscEnabled(false),
   areReplayWbStripesInUserArea(false),
   debugEnabled(false),
   intervalForMetric(0),
@@ -109,6 +110,12 @@ bool
 JournalConfiguration::IsEnabled(void)
 {
     return journalEnabled;
+}
+
+bool
+JournalConfiguration::IsVscEnabled(void)
+{
+    return vscEnabled;
 }
 
 bool
@@ -195,6 +202,7 @@ JournalConfiguration::_ReadConfiguration(void)
         rocksdbEnabled = _IsRocksdbEnabled();
         intervalForMetric = _GetIntervalForMetric();
         numLogGroups = _ReadNumLogGroup();
+        vscEnabled = _IsVscEnabled();
         if (rocksdbEnabled)
         {
             rocksdbPath = _GetRocksdbPath();
@@ -220,6 +228,21 @@ JournalConfiguration::_IsJournalEnabled(void)
         enabled = false;
         POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
             "Failed to read journal enablement from config file");
+    }
+    return enabled;
+}
+
+bool
+JournalConfiguration::_IsVscEnabled(void)
+{
+    bool enabled = false;
+    int ret = configManager->GetValue("journal", "enable_vsc",
+        static_cast<void*>(&enabled), CONFIG_TYPE_BOOL);
+    if (ret != 0)
+    {
+        enabled = false;
+        POS_TRACE_INFO(static_cast<int>(POS_EVENT_ID::JOURNAL_CONFIGURATION),
+            "Failed to read versioned segment context enablement from config file");
     }
     return enabled;
 }

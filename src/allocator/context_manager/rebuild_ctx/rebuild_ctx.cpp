@@ -223,10 +223,16 @@ RebuildCtx::GetNumSections(void)
 }
 
 int
+RebuildCtx::GetDstSectionIdForExternalBufCopy(void)
+{
+    return INVALID_SECTION_ID;
+}
+
+int
 RebuildCtx::_FlushContext(void)
 {
     AllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
-    int ret = fileIo->Flush(completion);
+    int ret = fileIo->Flush(completion, INVALID_SECTION_ID);
 
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),
         "[RebuildCtxFlush] rebuildIssuedCount:{}, start to flush",

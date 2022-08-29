@@ -83,7 +83,8 @@ ContextIoManager::Init(void)
         if (ret == 0) // new file created
         {
             AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
-            ret = fileIo[owner]->Flush(completion);
+            uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
+            ret = fileIo[owner]->Flush(completion, dstSectionId);
             if (ret == 0)
             {
                 WaitPendingIo(IOTYPE_ALL);
@@ -124,7 +125,7 @@ ContextIoManager::Dispose(void)
 }
 
 int
-ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
+ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externalBuf)
 {
     if (flushInProgress.exchange(true) == true)
     {
@@ -138,7 +139,9 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync)
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
-        ret = fileIo[owner]->Flush(completion);
+
+        uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
+        ret = fileIo[owner]->Flush(completion, dstSectionId, externalBuf);
         if (ret != 0)
         {
             break;

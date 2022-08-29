@@ -33,6 +33,7 @@
 #include "src/metadata/segment_context_updater.h"
 
 #include "src/array_models/dto/partition_logical_size.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
@@ -65,10 +66,9 @@ SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
 void
 SegmentContextUpdater::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
+    activeSegmentCtx->ValidateBlks(blks);
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
     versionedContext->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-
-    activeSegmentCtx->ValidateBlks(blks);
 }
 
 bool
@@ -76,7 +76,6 @@ SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForc
 {
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
     versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-
     return activeSegmentCtx->InvalidateBlks(blks, isForced);
 }
 

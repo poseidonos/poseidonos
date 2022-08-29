@@ -79,6 +79,7 @@ public:
     virtual std::string GetFilename(void);
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
+    virtual int GetDstSectionIdForExternalBufCopy(void);
 
     virtual void MoveToFreeState(SegmentId segId);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
@@ -107,8 +108,6 @@ public:
 
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
-
-    void CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments);
 
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
@@ -163,6 +162,7 @@ private:
     TelemetryPublisher* tp;
 
     int arrayId;
+    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos

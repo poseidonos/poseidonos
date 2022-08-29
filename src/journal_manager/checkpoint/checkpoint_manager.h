@@ -46,7 +46,6 @@ class IMapFlush;
 class IContextManager;
 class EventScheduler;
 
-class CallbackSequenceController;
 class DirtyMapManager;
 class CheckpointHandler;
 class TelemetryPublisher;

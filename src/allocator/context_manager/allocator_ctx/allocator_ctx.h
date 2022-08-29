@@ -65,6 +65,7 @@ public:
     virtual std::string GetFilename(void);
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
+    virtual int GetDstSectionIdForExternalBufCopy(void);
 
     virtual void SetCurrentSsdLsid(StripeId stripe);
     virtual StripeId GetCurrentSsdLsid(void);
@@ -101,6 +102,8 @@ private:
 
     std::mutex allocCtxLock;
     bool initialized;
+
+    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos
