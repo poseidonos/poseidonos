@@ -101,9 +101,9 @@ StripeBasedRaceRebuild::_Init(void)
                 return false;
             }
         }
-        for (auto rg : ctx->rgPairs)
+        for (auto rp : ctx->rp)
         {
-            for (IArrayDevice* dev : rg.second)
+            for (IArrayDevice* dev : rp->dsts)
             {
                 targetDevs.insert(dev);
             }

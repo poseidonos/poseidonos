@@ -111,7 +111,10 @@ TEST(Raid10, GetRebuildGroup_testIfRebuildGroupIsReturnedWhenChunkIndexIsLargerT
     Raid10 raid10(&physicalSize);
 
     // When
-    list<FtBlkAddr> actual = raid10.GetRebuildGroup(fba);
+    vector<uint32_t> abnormaiDeviceIndex;
+    uint32_t testTargetDeviceIndex = 0;
+    abnormaiDeviceIndex.push_back(testTargetDeviceIndex);
+    list<FtBlkAddr> actual = raid10.GetRebuildGroup(fba, abnormaiDeviceIndex);
 
     // Then
     ASSERT_EQ(1, actual.size());

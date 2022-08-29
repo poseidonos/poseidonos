@@ -32,25 +32,22 @@
 
 #pragma once
 
-#include <list>
+#include "src/include/recover_func.h"
 #include <vector>
 
-#include "method.h"
+using namespace std;
 
 namespace pos
 {
-class PartitionPhysicalSize;
+class IArrayDevice;
 
-class Raid0 : public Method
+class RebuildPair
 {
 public:
-    explicit Raid0(const PartitionPhysicalSize* pSize);
-    virtual ~Raid0();
-    virtual list<FtEntry> Translate(const LogicalEntry& le) override;
-    virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
-    virtual RaidState GetRaidState(const vector<ArrayDeviceState>& devs) override;
-    bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
-    virtual bool IsRecoverable(void) override { return false; }
+    explicit RebuildPair(vector<IArrayDevice*> srcs, vector<IArrayDevice*> dsts, RecoverFunc recovery)
+    : srcs(srcs), dsts(dsts), recovery(recovery) {}
+    vector<IArrayDevice*> srcs;
+    vector<IArrayDevice*> dsts;
+    RecoverFunc recovery;
 };
-
 } // namespace pos

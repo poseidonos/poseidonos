@@ -48,7 +48,7 @@ public:
     virtual ~RaidNone();
     virtual list<FtEntry> Translate(const LogicalEntry& le) override;
     virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
-    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
+    virtual RaidState GetRaidState(const vector<ArrayDeviceState>& devs) override;
     bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
     virtual bool IsRecoverable(void) override { return false; }
 };
