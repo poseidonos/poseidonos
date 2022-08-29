@@ -230,6 +230,13 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
 {
     auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, allowVictimSegRelease);
 
+    if (result.second == SegmentState::ERROR)
+    {
+        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
+            "segId{} cnt:{} , allow {}", segId, cnt, allowVictimSegRelease);
+        assert(false);
+    }
+
     bool segmentFreed = result.first;
     if (segmentFreed == true)
     {
@@ -397,6 +404,12 @@ int
 SegmentCtx::GetNumSections(void)
 {
     return NUM_SEGMENT_CTX_SECTION;
+}
+
+int
+SegmentCtx::GetDstSectionIdForExternalBufCopy(void)
+{
+    return SC_SEGMENT_INFO;
 }
 
 SegmentState
@@ -586,6 +599,8 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 void
 SegmentCtx::ResetSegmentsStates(void)
 {
+    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "egmentCtx::ResetSegmentsStates");
+
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
         bool segmentFreed = false;
@@ -826,19 +841,6 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
         else
         {
             segmentInfos[segId].SetOccupiedStripeCount(src[segId]);
-        }
-    }
-}
-
-void
-SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments)
-{
-    if (nullptr != vscSegInfo)
-    {
-        for (int segId = 0; segId < numSegments; segId++)
-        {
-            segmentInfos[segId].SetValidBlockCount(vscSegInfo[segId].GetValidBlockCount());
-            segmentInfos[segId].SetOccupiedStripeCount(vscSegInfo[segId].GetOccupiedStripeCount());
         }
     }
 }

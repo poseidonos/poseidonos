@@ -16,7 +16,7 @@ class IContextManagerMock : public IContextManager
 {
 public:
     using IContextManager::IContextManager;
-    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, int logGroupId), (override));
 
     virtual void UpdateOccupiedStripeCount(StripeId lsid) {}
     virtual SegmentId AllocateFreeSegment(void) { return 0; }
@@ -31,18 +31,17 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     virtual SegmentCtx* GetSegmentCtx(void) { return nullptr; }
     virtual GcCtx* GetGcCtx(void) { return nullptr; }
-    virtual void SyncLogGroup(int logGroupId) { return; }
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx) { return; }
     virtual void ResetFlushedInfo(int logGroupId) { return; }
 
     IContextManagerMock(void)
     {
         ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this, &IContextManagerMock::_FlushContexts));
-        EXPECT_CALL(*this, FlushContexts(_, true)).Times(AtLeast(0));
+        EXPECT_CALL(*this, FlushContexts(_, true, _)).Times(AtLeast(0));
     }
 
 private:
-    int _FlushContexts(EventSmartPtr callback, bool sync)
+    int _FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
     {
         if (callback != nullptr)
         {

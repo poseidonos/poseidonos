@@ -74,9 +74,8 @@ CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManage
 }
 
 void
-CheckpointHandler::SyncContext(int logGroupId)
+CheckpointHandler::UpdateInprogressLogGroupId(int logGroupId)
 {
-    contextManager->SyncLogGroup(logGroupId);
     logGroupIdInProgress = logGroupId;
 }
 
@@ -106,7 +105,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
         {
             eventId = static_cast<int>(EID(JOURNAL_DEBUG));
 
-            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId));
+            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId, logGroupIdInProgress));
             ret = mapFlush->FlushDirtyMpages(mapId, eventMapFlush);
             if (ret != 0)
             {
@@ -119,9 +118,10 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     }
 
     EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
-        ALLOCATOR_META_ID));
+        ALLOCATOR_META_ID, logGroupIdInProgress));
 
-    ret = contextManager->FlushContexts(allocMetaFlushCallback, false);
+    ret = contextManager->FlushContexts(allocMetaFlushCallback, false,
+        logGroupIdInProgress);
     if (ret != 0)
     {
         POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
@@ -148,7 +148,7 @@ CheckpointHandler::_CheckMapFlushCompleted(void)
 }
 
 int
-CheckpointHandler::FlushCompleted(int metaId)
+CheckpointHandler::FlushCompleted(int metaId, int logGroupId)
 {
     if (metaId == ALLOCATOR_META_ID)
     {
@@ -157,8 +157,7 @@ CheckpointHandler::FlushCompleted(int metaId)
         assert(allocatorMetaFlushCompleted == false);
 
         allocatorMetaFlushCompleted = true;
-        contextManager->ResetFlushedInfo(logGroupIdInProgress);
-        logGroupIdInProgress = INT32_MAX;
+        contextManager->ResetFlushedInfo(logGroupId);
     }
     else
     {

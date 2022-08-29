@@ -14,9 +14,8 @@ public:
     using CheckpointHandler::CheckpointHandler;
     MOCK_METHOD(void, Init, (IMapFlush * mapFlush, IContextManager* contextManager, EventScheduler* scheduler), (override));
     MOCK_METHOD(int, Start, (MapList pendingDirtyMaps, EventSmartPtr callback), (override));
-    MOCK_METHOD(int, FlushCompleted, (int metaId), (override));
+    MOCK_METHOD(int, FlushCompleted, (int metaId, int logGroupId), (override));
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));
-    MOCK_METHOD(void, SyncContext, (int logGroupId), (override));
 };
 
 } // namespace pos

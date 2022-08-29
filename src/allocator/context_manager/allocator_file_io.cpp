@@ -237,10 +237,17 @@ AllocatorFileIo::_AfterLoad(char* buffer)
 }
 
 int
-AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback)
+AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf)
 {
     char* buf = new char[fileSize]();
     _PrepareBuffer(buf);
+
+    if ((nullptr != externalBuf) && (INVALID_SECTION_ID != dstSectionId))
+    {
+        memcpy((buf + sections[dstSectionId].offset),
+            externalBuf,
+            sections[dstSectionId].size);
+    }
 
     numFilesFlushing++;
     MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);
@@ -315,6 +322,12 @@ int
 AllocatorFileIo::GetSectionSize(int section)
 {
     return sections[section].size;
+}
+
+int
+AllocatorFileIo::GetDstSectionIdForExternalBufCopy(void)
+{
+    return INVALID_SECTION_ID;
 }
 
 void

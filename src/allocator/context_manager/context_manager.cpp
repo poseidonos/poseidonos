@@ -56,7 +56,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_, ContextIoManager* ioManager_,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
-  arrayId(arrayId_)
+  arrayId(arrayId_),
+  segmentInfosInFlush(INVALID_SEGMENT_CONTEXT)
 {
     // for UT
     ioManager = ioManager_;
@@ -88,6 +89,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
 
     rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
+
+    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
 }
 
 ContextManager::~ContextManager(void)
@@ -121,9 +124,20 @@ ContextManager::Dispose(void)
 }
 
 int
-ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
+ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
-    return ioManager->FlushContexts(callback, sync);
+    if (segmentInfosInFlush == logGroupId)
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+            "Failed to flush contexts, log group {} is already in use",
+            logGroupId);
+        return EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID);
+    }
+
+    segmentInfosInFlush = logGroupId;
+
+    SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
+    return ioManager->FlushContexts(callback, sync, reinterpret_cast<char*>(vscSegInfo));
 }
 
 SegmentId
@@ -226,30 +240,6 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 }
 
 void
-ContextManager::_SyncLogGroup(int logGroupId)
-{
-    int numSegments = versionedSegCtx->GetNumSegments();
-    SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
-    segmentCtx->CopySegInfoFromVersionedSegInfo(vscSegInfo, numSegments);
-}
-
-void
-ContextManager::SyncLogGroup(int logGroupId)
-{
-    if (ALL_LOG_GROUP == logGroupId)
-    {
-        for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
-        {
-            _SyncLogGroup(id);
-        }
-    }
-    else
-    {
-        _SyncLogGroup(logGroupId);
-    }
-}
-
-void
 ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
 {
     versionedSegCtx = versionedSegCtx_;
@@ -258,6 +248,7 @@ ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSe
 void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "ContextManager::ResetFlushedInfo {}", logGroupId);
     if (ALL_LOG_GROUP == logGroupId)
     {
         for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
@@ -269,5 +260,7 @@ ContextManager::ResetFlushedInfo(int logGroupId)
     {
         versionedSegCtx->ResetFlushedInfo(logGroupId);
     }
+
+    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
 }
 } // namespace pos

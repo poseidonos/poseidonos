@@ -54,6 +54,7 @@ public:
     virtual std::string GetFilename(void) = 0;
     virtual uint32_t GetSignature(void) = 0;
     virtual int GetNumSections(void) = 0;
+    virtual int GetDstSectionIdForExternalBufCopy(void) = 0;
 };
 
 } // namespace pos

@@ -166,8 +166,8 @@ TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointCompleted)
     EXPECT_CALL(*(MockEvent*)(checkpointCompletion.get()), Execute);
 
     // When: All dirty maps and allocator meta are flushed
-    EXPECT_TRUE(checkpointHandler->FlushCompleted(0) == 0);
-    EXPECT_TRUE(checkpointHandler->FlushCompleted(ALLOCATOR_META_ID) == 0);
+    EXPECT_TRUE(checkpointHandler->FlushCompleted(0, 0) == 0);
+    EXPECT_TRUE(checkpointHandler->FlushCompleted(ALLOCATOR_META_ID, 0) == 0);
 
     // Then: Checkpoint status should be changed to COMPLETED
     EXPECT_TRUE(checkpointHandler->GetStatus() == COMPLETED);
@@ -192,7 +192,7 @@ TEST_F(CheckpointHandlerTestFixture, FlushCompleted_testIfCheckpointFailedWhenMa
     EXPECT_TRUE(checkpointHandler->GetStatus() != COMPLETED);
 
     // When: Allocatator meta flush is completed
-    EXPECT_TRUE(checkpointHandler->FlushCompleted(ALLOCATOR_META_ID) == 0);
+    EXPECT_TRUE(checkpointHandler->FlushCompleted(ALLOCATOR_META_ID, 0) == 0);
 
     // Then: Checkpoint status should not be changed to COMPLETED
     EXPECT_TRUE(checkpointHandler->GetStatus() != COMPLETED);

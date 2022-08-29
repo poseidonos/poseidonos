@@ -10,7 +10,7 @@ class MockIContextManager : public IContextManager
 {
 public:
     using IContextManager::IContextManager;
-    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, int logGroupId), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
@@ -22,7 +22,6 @@ public:
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(SegmentCtx*, GetSegmentCtx, (), (override));
     MOCK_METHOD(GcCtx*, GetGcCtx, (), (override));
-    MOCK_METHOD(void, SyncLogGroup, (int logGroupId), (override));
     MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
     MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
 };

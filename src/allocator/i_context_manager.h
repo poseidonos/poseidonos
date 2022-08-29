@@ -45,7 +45,7 @@ namespace pos
 class IContextManager
 {
 public:
-    virtual int FlushContexts(EventSmartPtr callback, bool sync) = 0;
+    virtual int FlushContexts(EventSmartPtr callback, bool sync, int logGroupId = ALL_LOG_GROUP) = 0;
     virtual uint64_t GetStoredContextVersion(int owner) = 0;
 
     virtual SegmentId AllocateFreeSegment(void) = 0;
@@ -59,9 +59,11 @@ public:
 
     virtual SegmentCtx* GetSegmentCtx(void) = 0;
     virtual GcCtx* GetGcCtx(void) = 0;
-    virtual void SyncLogGroup(int logGroupId) = 0;
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_) = 0;
     virtual void ResetFlushedInfo(int logGroupId) = 0;
+
+private:
+    static const int ALL_LOG_GROUP = -1;
 };
 
 } // namespace pos

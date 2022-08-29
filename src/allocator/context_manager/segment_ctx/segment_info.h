@@ -47,6 +47,7 @@ enum SegmentState : int
     NVRAM,
     SSD,
     VICTIM,
+    ERROR,
     NUM_STATES,
 };
 
