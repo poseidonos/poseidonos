@@ -7,11 +7,13 @@ import sys
 POS_ROOT = '../../../'
 POS_CLI = POS_ROOT + "bin/poseidonos-cli"
 
-
 def send_request(msg):
     cli_req = POS_CLI + " --json-res "
-    out = subprocess.check_output(cli_req + msg, universal_newlines=True, shell=True)
-    return out
+    try:
+        out = subprocess.check_output(cli_req + msg, universal_newlines=True, shell=True)
+        return out
+    except subprocess.CalledProcessError as e:
+        return ("cli request error")
 
 
 def exit_pos():
