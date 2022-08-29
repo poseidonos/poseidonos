@@ -148,6 +148,23 @@ Raid6::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
     return recoveryGroup;
 }
 
+vector<pair<vector<uint32_t>, vector<uint32_t>>>
+Raid6::GetRebuildGroupPairs(vector<uint32_t>& targetIndexs)
+{
+    assert(targetIndexs.size() <= 2);
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> rgPair;
+    vector<uint32_t> srcIdx;
+    for (uint32_t i = 0; i < chunkCnt; i++)
+    {
+        if (find(targetIndexs.begin(), targetIndexs.end(), i) == targetIndexs.end())
+        {
+            srcIdx.push_back(i);
+        }
+    }
+    rgPair.emplace_back(make_pair(srcIdx, targetIndexs));
+    return rgPair;
+}
+
 RaidState
 Raid6::GetRaidState(const vector<ArrayDeviceState>& devs)
 {

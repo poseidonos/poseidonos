@@ -56,6 +56,7 @@ public:
     virtual list<FtEntry> Translate(const LogicalEntry& le) override;
     virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
     virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex) override;
+    virtual vector<pair<vector<uint32_t>, vector<uint32_t>>> GetRebuildGroupPairs(vector<uint32_t>& targetIndexs) override;
     RecoverFunc GetRecoverFunc(int devIdx, vector<uint32_t> abnormalDeviceIndex) override;
     virtual RaidState GetRaidState(const vector<ArrayDeviceState>& devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
