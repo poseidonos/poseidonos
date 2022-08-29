@@ -23,7 +23,7 @@ if [ $retVal -ne 0 ]; then
 fi
 
 echo "Building test files..."
-cd ${pos_working_dir}/test/; sudo make -j 8
+cd ${pos_working_dir}/test/; sudo make -j 12
 retVal=$?
 if [ $retVal -ne 0 ]; then
     echo "Cannot proceed due to UT build error."
