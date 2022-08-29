@@ -43,7 +43,8 @@
 
 using namespace pos;
 
-#define GENERAL_FIRMWARE "0"
+#define GENERAL_FR_NAME "0"
+#define GENERAL_FR_LENGTH 8
 
 UnvmeSsd::UnvmeSsd(
     std::string name,
@@ -162,9 +163,12 @@ UnvmeSsd::GetNs(void)
 void
 UnvmeSsd::_ClassifyDevice(DeviceProperty* property)
 {
-    if ((property->mn.find("SAMSUNG") != string::npos) &&
-        (property->fr.substr(5, 1) == GENERAL_FIRMWARE))
+    if (string::npos != property->mn.find("SAMSUNG"))
     {
-        _SetSupportedExtSmart();
+        if ((GENERAL_FR_LENGTH == property->fr.length()) && 
+            (GENERAL_FR_NAME == property->fr.substr(5, 1)))
+        {
+            _SetSupportedExtSmart();
+        }
     }
 }
