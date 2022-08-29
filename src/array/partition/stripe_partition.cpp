@@ -380,9 +380,9 @@ StripePartition::_Pba2Fba(const PhysicalBlkAddr& pba)
 list<PhysicalBlkAddr>
 StripePartition::_GetRebuildGroup(FtBlkAddr fba)
 {
-    auto&& deviceStateList = Enumerable::Select(devs,
-        [](auto d) { return d->GetState(); });
-    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba, deviceStateList);
+    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
+
+    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba, abnormalDeviceIndex);
     list<PhysicalBlkAddr> ret;
     for (FtBlkAddr fba : ftAddrs)
     {
@@ -435,8 +435,8 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
 {
     uint64_t lba = ubio->GetLba();
     ArrayDevice* dev = static_cast<ArrayDevice*>(ubio->GetArrayDev());
-    auto&& deviceStateList = Enumerable::Select(devs,
-        [](auto d) { return d->GetState(); });
+    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
+
     if (IsValidLba(lba))
     {
         int devIdx = FindDevice(dev);
@@ -451,7 +451,7 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
             originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
             FtBlkAddr fba = _Pba2Fba(originPba);
             out.srcAddr = _GetRebuildGroup(fba);
-            out.recoverFunc = method->GetRecoverFunc(devIdx, deviceStateList);
+            out.recoverFunc = method->GetRecoverFunc(devIdx, abnormalDeviceIndex);
 
             return EID(SUCCESS);
         }
@@ -600,4 +600,25 @@ StripePartition::_SetQuickRebuildPair(const QuickRebuildPair& quickRebuildPair, 
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "QuickRebuildPairsBackup, pairCnt:{}, part:{}", backupRp.size(), PARTITION_TYPE_STR[type]);
 }
+
+vector<uint32_t>
+StripePartition::_GetAbnormalDeviceIndex(void)
+{
+    auto&& deviceStateList = Enumerable::Select(devs,
+        [](auto d) { return d->GetState(); });
+
+    vector<uint32_t> abnormalDeviceIndex;
+    uint32_t deviceStateIdx = 0;
+    for (auto devState : deviceStateList)
+    {
+        if (devState != ArrayDeviceState::NORMAL)
+        {
+            abnormalDeviceIndex.push_back(deviceStateIdx);
+        }
+        deviceStateIdx++;
+    }
+
+    return abnormalDeviceIndex;
+}
+
 } // namespace pos

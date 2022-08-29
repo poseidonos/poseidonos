@@ -92,6 +92,7 @@ private:
     list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba);
     RaidTypeEnum raidType;
     Method* method = nullptr;
+    vector<uint32_t> _GetAbnormalDeviceIndex(void);
 };
 
 } // namespace pos

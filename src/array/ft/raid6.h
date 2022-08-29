@@ -55,8 +55,8 @@ public:
     virtual void ClearParityPools();
     virtual list<FtEntry> Translate(const LogicalEntry& le) override;
     virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) override;
-    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba, vector<ArrayDeviceState> devs) override;
-    RecoverFunc GetRecoverFunc(int devIdx, vector<ArrayDeviceState> devs) override;
+    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex) override;
+    RecoverFunc GetRecoverFunc(int devIdx, vector<uint32_t> abnormalDeviceIndex) override;
     virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
     bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
@@ -64,7 +64,7 @@ public:
     virtual int GetParityPoolSize();
 
 private:
-    void _RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rebuildIndex, vector<ArrayDeviceState> devs);
+    void _RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> readDeviceIndex, vector<uint32_t> abnormalDeviceIndex);
     BufferEntry _AllocChunk();
     void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
     vector<BufferPool*> parityPools;
