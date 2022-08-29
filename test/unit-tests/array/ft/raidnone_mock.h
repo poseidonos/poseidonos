@@ -16,8 +16,8 @@ public:
     using RaidNone::RaidNone;
     MOCK_METHOD(list<FtEntry>, Translate, (const LogicalEntry&), (override));
     MOCK_METHOD(int, MakeParity, (list<FtWriteEntry>&, const LogicalWriteEntry&), (override));
-    MOCK_METHOD(list<FtBlkAddr>, GetRebuildGroup, (FtBlkAddr fba), (override));
-    MOCK_METHOD(RaidState, GetRaidState, (vector<ArrayDeviceState> devs), (override));
+    MOCK_METHOD(list<FtBlkAddr>, GetRebuildGroup, (FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex), (override));
+    MOCK_METHOD(RaidState, GetRaidState, (const vector<ArrayDeviceState>& devs), (override));
 };
 
 } // namespace pos

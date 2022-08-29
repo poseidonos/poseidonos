@@ -82,6 +82,7 @@ private:
         "RAID0",
         "RAID5",
         "RAID10",
+        "RAID6",
     };
 };
 

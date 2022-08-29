@@ -183,8 +183,11 @@ TEST(Raid5, GetRebuildGroup_testIfRebuildGroupDoesNotContainTargetFtBlockAddr)
         .stripeId = STRIPE_ID,
         .offset = BLK_OFFSET};
 
+    vector<uint32_t> abnormaiDeviceIndex;
+    uint32_t testTargetDeviceIndex = 0;
+    abnormaiDeviceIndex.push_back(testTargetDeviceIndex);
     // When
-    list<FtBlkAddr> actual = raid5.GetRebuildGroup(fba);
+    list<FtBlkAddr> actual = raid5.GetRebuildGroup(fba, abnormaiDeviceIndex);
 
     // Then
     int expectedChunkIndex = BLK_OFFSET / physicalSize.blksPerChunk; // 400 / 27 == 14
