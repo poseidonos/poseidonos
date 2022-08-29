@@ -149,7 +149,7 @@ Raid6::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
 }
 
 RaidState
-Raid6::GetRaidState(vector<ArrayDeviceState> devs)
+Raid6::GetRaidState(const vector<ArrayDeviceState>& devs)
 {
     auto&& abnormalDevs = Enumerable::Where(devs,
         [](auto d) { return d != ArrayDeviceState::NORMAL; });

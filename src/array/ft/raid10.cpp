@@ -89,7 +89,7 @@ Raid10::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
 }
 
 RaidState
-Raid10::GetRaidState(vector<ArrayDeviceState> devs)
+Raid10::GetRaidState(const vector<ArrayDeviceState>& devs)
 {
     RaidState rs = RaidState::NORMAL;
     for (size_t i = 0; i < devs.size(); i++)
