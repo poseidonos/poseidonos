@@ -15,3 +15,16 @@
 | SSD         | PCIe Gen4 SSD                   |||| PCIe Gen5 SSD             |||| PCIe Gen6 SSD          ||||
 |             |                                 |||| ^^ ZNS/QLC SSD            |||| ^^ Smart SSD           ||||
 |             |                                 ||||                           |||| ^^ CXL SSD             ||||    
+
+
+
+|               |          Grouping             ||         Grouping 2         ||  Not Grouped    |
+| First Header  | Second Header | Third Header   | Forth Header | Fifth Header | Sixth Header    |
+| ------------- | :-----------: | -------------: | :----------: | :----------: | --------------- |
+| Tall Cell     |          *Long Cell*          ||         *Long Long Cell*                    |||
+| ^^            |   **Bold**    | 1. first item  | *Italic*     | 3. third item | + first point  |\
+| ^^            |               | 1. second item |              | 1. forth item | + second point |
+
+| New section   |     More      |         Data   | ... - -- --- |||
+| And more      | With an escaped \|          || "Try 'quotes' in quotes "         |||
+[Compicated table]
