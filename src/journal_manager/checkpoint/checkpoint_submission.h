@@ -38,7 +38,6 @@
 namespace pos
 {
 class CheckpointManager;
-class CallbackSequenceController;
 
 class CheckpointSubmission : public Event
 {

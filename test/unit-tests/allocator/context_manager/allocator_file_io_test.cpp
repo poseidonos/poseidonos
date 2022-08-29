@@ -282,7 +282,8 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
         });
 
     auto testCallback = []() {}; // do nothing
-    int ret = fileManager.Flush(testCallback);
+    const int INVALID_SECTION_ID = -1;
+    int ret = fileManager.Flush(testCallback, INVALID_SECTION_ID);
     EXPECT_EQ(ret, 0);
     EXPECT_EQ(fileManager.GetNumFilesFlushing(), 0);
 
@@ -317,7 +318,8 @@ TEST(AllocatorFileIo, Flush_testFlushFail)
     EXPECT_CALL(*file, AsyncIO).WillOnce(Return(-1));
 
     auto testCallback = []() {}; // do nothing
-    int ret = fileManager.Flush(testCallback);
+    const int INVALID_SECTION_ID = -1;
+    int ret = fileManager.Flush(testCallback, INVALID_SECTION_ID);
     EXPECT_TRUE(ret < 0);
 
     for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)

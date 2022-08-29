@@ -44,7 +44,7 @@ class SegmentContextUpdater : public ISegmentCtx
 public:
     SegmentContextUpdater(ISegmentCtx* segmentCtx_, IVersionedSegmentContext* versionedContext_,
         const PartitionLogicalSize* addrInfo_);
-    virtual ~SegmentContextUpdater(void) = default;
+    virtual ~SegmentContextUpdater(void);
 
     virtual void ValidateBlks(VirtualBlks blks);
     virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
@@ -57,6 +57,7 @@ private:
     const PartitionLogicalSize* addrInfo;
     ISegmentCtx* activeSegmentCtx;
     IVersionedSegmentContext* versionedContext;
+    pthread_rwlock_t lock;
 };
 
 } // namespace pos

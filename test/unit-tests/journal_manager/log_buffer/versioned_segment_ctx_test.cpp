@@ -271,36 +271,6 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenInvalidLogGroupId
     delete[] segmentInfos;
 }
 
-TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenRequestedTwice)
-{
-    // Given
-    VersionedSegmentCtx versionedSegCtx;
-    int numLogGroups = 2;
-    NiceMock<MockJournalConfiguration> config;
-    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
-
-    int numSegments = 3;
-    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
-
-    std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
-    for (int index = 0; index < numLogGroups; index++)
-    {
-        std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
-        versionedSegmentInfo.push_back(input);
-    }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
-
-    // When
-    int targetLogGroupId = 0;
-    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroupId);
-    EXPECT_NE(result, nullptr);
-
-    result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroupId);
-    EXPECT_EQ(result, nullptr);
-
-    delete[] segmentInfos;
-}
-
 TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
 {
     // Given

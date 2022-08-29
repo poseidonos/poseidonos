@@ -108,8 +108,6 @@ public:
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
-    void CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments);
-
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
@@ -163,6 +161,7 @@ private:
     TelemetryPublisher* tp;
 
     int arrayId;
+    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos

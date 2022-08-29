@@ -26,5 +26,6 @@ private:
     uint64_t partitionSize;
     bool isRocksDBEnabled;
     std::string rocksDBBasePath;
+    bool isVscEnabled;
 };
 } // namespace pos

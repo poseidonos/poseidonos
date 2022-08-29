@@ -7,7 +7,8 @@ namespace pos
 class JournalConfigurationSpy : public JournalConfiguration
 {
 public:
-    JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize, uint64_t partitionSize, bool isRocksDBEnabled, std::string rocksDBBasePath);
+    JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize,
+        uint64_t partitionSize, bool isRocksDBEnabled, std::string rocksDBBasePath, bool isVscEnabled);
     virtual ~JournalConfigurationSpy(void);
 
     virtual int SetLogBufferSize(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr) override;

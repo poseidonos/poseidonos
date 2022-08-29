@@ -47,6 +47,7 @@ enum SegmentState : int
     NVRAM,
     SSD,
     VICTIM,
+    ERROR,
     NUM_STATES,
 };
 
@@ -66,6 +67,7 @@ public:
     virtual uint32_t GetOccupiedStripeCount(void);
     virtual uint32_t IncreaseOccupiedStripeCount(void);
 
+    virtual void SetState(SegmentState newState);
     virtual SegmentState GetState(void);
 
     virtual void MoveToNvramState(void);
