@@ -5,13 +5,5 @@
 | :---------: | :--: | :-----: | :--: | :---------: | :--: | :--: | :--: | :------: | :--: | :--: | :--: | :---: |
 | POS Version |      | v0.11.0 |      | v0.12.0     | v1.0 | v1.1 |      | v1.2     |      | v1.3 |      | v1.4  |
 | Performance | 200GbE                           |||| 400GbE                     |||| 400GbE                  ||||
-| Feature     | Write Through                    |||| CNS-to-ZNS                 |||| 2-CTRL HA               ||||
-|^             |^ 2-Node HA                       |||| ^Security                  |||| ^Thin Provisioning      ||||
-|^             |^ Backend QoS                     |||| ^Encryption                |||| ^Snapshot               ||||
-|^             |^ RAID6                           |||| ^Data Scrubbing            |||| ^Compression            ||||
-|^             |^ Quick Rebuild                   |||| ^Array Expansion           |||| ^Deduplication          ||||
-|^             |^ Telemetry                       |||| ^Lifetime Prediction       |||| ^DPU Adoption           ||||
-|^             |^ Cluter CLI                      |||| ^Auto Configuration        ||||                         ||||
-| SSD         | PCIe Gen4 SSD                    |||| PCIe Gen5 SSD              |||| PCIe Gen6 SSD           ||||
-|             |^                                |||| ^ZNS/QLC SSD               |||| ^Smart SSD              ||||
-|             |^                                ||||                            |||| ^CXL SSD                ||||    
+| Feature     | Write Through <br> 2-Node HA <br> Backend QoS <br> RAID6 <br> Quick Rebuild <br> Telemetry <br> Cluster CLI |||| CNS-to-ZNS <br> Security <br> Encryption <br> Data Scrubbing <br> Array Expansion <br> Lifetime Prediction <br> Auto Configuration |||| 2-CTRL HA <br> Thin Provisioning <br> Snapshot <br> Compression <br> Deduplication <br> DPU Adoption ||||
+| SSD         | PCIe Gen4 SSD                   |||| PCIe Gen5 SSD <br> ZNS/QLC SSD |||| PCIe Gen6 SSD <br> Smart SSD <br> CXL SSD           ||||
