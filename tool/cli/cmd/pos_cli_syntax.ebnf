@@ -18,7 +18,7 @@ Hex
   = "0" | "1" | "2" | "3" | "4" | "5" | "6"
   | "7" | "8" | "9" | "A" | "B" | "C" | "D"
   | "E" | "F"
-  ; 
+  ;
 
 Number = Digit , { Digit } ;
 
@@ -31,12 +31,10 @@ Identifier = Letter , { Letter | Digit | "-" | "_" } ;
 
 BooleanValue = "true" | "false" ;
 
-Uuid = Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex
-;
+Uuid = Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex ,
+  "-" , Hex , Hex , Hex , Hex , "-" , Hex , Hex , Hex ,
+  Hex , "-" , Hex , Hex , Hex , Hex , "-" , Hex , Hex ,
+  Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex ;
 
 ArrayName = Identifier ;
 
@@ -118,10 +116,10 @@ Cmd = ApplicationName , GlobalFlagList ,
   ) ;
 
 ArrayCmd = "array" ,
-  ( MountArrayCmd  | UnmountArrayCmd
-  | ListArrayCmd   | AddSpareCmd
-  | RemoveSpareCmd | DeleteArrayCmd
-  | CreateArrayCmd | AutoCreateArrayCmd
+  ( MountArrayCmd         | UnmountArrayCmd
+  | ListArrayCmd          | AddSpareCmd
+  | RemoveSpareCmd        | DeleteArrayCmd
+  | CreateArrayCmd        | AutoCreateArrayCmd
   | ReplaceArrayDeviceCmd
   ) ;
 
@@ -162,13 +160,14 @@ VolumeCmd = "volume" ,
   ( CreateVolumeCmd  | DeleteVolumeCmd
   | MountVolumeCmd   | MountVolumeWithSubsystemCmd
   | UnmountVolumeCmd | ListVolumeCmd
-  | RenameVolumeCmd
+  | RenameVolumeCmd  | SetVolumePropertyCmd
   ) ;
 
 CreateVolumeCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
-  [ "--maxbw" , Bandwidth ] , [ "--iswalvol" ] , [ "--uuid" Uuid];
+  [ "--maxbw" , Bandwidth ] , [ "--wal-volume" ] ,
+  [ "--uuid" , Uuid ] ;
 
 DeleteVolumeCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
@@ -198,6 +197,12 @@ ListVolumeCmd = "list" , ( "--array-name" | "-a" ) ,
 RenameVolumeCmd = "rename" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--new-volume-name" | "-n" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ;
+
+SetVolumePropertyCmd = "set-property" , ( "--volume-name" | "-v" ) ,
+  VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
+  ( "--new-volume-name" | "-n" ) , VolumeName ,
+  [ ( "--user-volume" ) ] , [ ( "--wal-volume" ) ] ,
+  [ ( "--primary-volume" ) ] , [ ( "--secondary-volume" ) ] ;
 
 DeviceCmd = "device" ,
   ( CreateDeviceCmd
