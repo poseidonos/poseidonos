@@ -204,6 +204,12 @@ service PosCli {
       		post: "/v1/createvolume"
     	};
 	}
+
+	rpc SetVolumeProperty (SetVolumePropertyRequest) returns (SetVolumePropertyResponse) {
+		option (google.api.http) = {
+      		post: "/v1/setvolumeproperty"
+    	};
+	}
 }
 
 message Status {
@@ -1153,6 +1159,35 @@ message CreateVolumeRequest {
 }
 
 message CreateVolumeResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetVolumePropertyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+		string array = 2;
+		string newVolumeName = 3;
+		uint64 size = 4;
+		uint64 maxiops = 5;
+		uint64 maxbw = 6;
+		bool updatewalvol = 7;
+		bool iswalvol = 8;
+		bool updateprimaryvol = 9;
+		bool isprimaryvol = 10;
+	}
+	Param param = 4;
+}
+
+message SetVolumePropertyResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
