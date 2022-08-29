@@ -17,8 +17,10 @@ import time
 import fio
 import MOUNT_VOL_ON_RAID6_ARRAY
 ARRAYNAME = MOUNT_VOL_ON_RAID6_ARRAY.ARRAYNAME
+
+# DETACH_TARGET must be a device that is not mirror-related to each other since META partition still in RAID10
 DETACH_TARGET1 = "unvme-ns-0"
-DETACH_TARGET2 = "unvme-ns-2"
+DETACH_TARGET2 = "unvme-ns-3"
 
 
 def execute():
