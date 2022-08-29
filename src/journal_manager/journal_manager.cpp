@@ -222,7 +222,7 @@ JournalManager::_CreateVersionedSegmentCtx(void)
 {
     if (config->IsEnabled() == true)
     {
-        return new DummyVersionedSegmentCtx();
+        return new VersionedSegmentCtx();
     }
     else
     {

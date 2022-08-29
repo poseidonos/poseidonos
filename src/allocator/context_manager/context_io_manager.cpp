@@ -138,7 +138,15 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externa
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
         AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
-        ret = fileIo[owner]->Flush(completion, externalBuf);
+        if (SEGMENT_CTX != owner)
+        {
+            ret = fileIo[owner]->Flush(completion, nullptr);
+        }
+        else
+        {
+            ret = fileIo[owner]->Flush(completion, externalBuf);
+        }
+
         if (ret != 0)
         {
             break;
