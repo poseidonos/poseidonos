@@ -122,6 +122,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     checkpointManager = cpManager;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
+
     replayHandler = replay;
     arrayInfo = info;
 

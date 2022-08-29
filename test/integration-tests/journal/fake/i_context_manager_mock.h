@@ -31,7 +31,6 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     virtual SegmentCtx* GetSegmentCtx(void) { return nullptr; }
     virtual GcCtx* GetGcCtx(void) { return nullptr; }
-    virtual void SyncLogGroup(int logGroupId) { return; }
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx) { return; }
     virtual void ResetFlushedInfo(int logGroupId) { return; }
 

@@ -63,7 +63,8 @@ public:
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual int FlushContexts(EventSmartPtr callback, bool sync);
+    virtual int FlushContexts(EventSmartPtr callback, bool sync,
+        char* externalBuf = nullptr);
 
     virtual void WaitPendingIo(IOTYPE type);
 

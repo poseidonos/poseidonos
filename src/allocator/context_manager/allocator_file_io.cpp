@@ -237,10 +237,17 @@ AllocatorFileIo::_AfterLoad(char* buffer)
 }
 
 int
-AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback)
+AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, char* externalBuf)
 {
     char* buf = new char[fileSize]();
     _PrepareBuffer(buf);
+
+    if (nullptr != externalBuf)
+    {
+        memcpy((buf + sections[SC_SEGMENT_INFO].offset),
+            externalBuf,
+            sections[SC_SEGMENT_INFO].size);
+    }
 
     numFilesFlushing++;
     MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);

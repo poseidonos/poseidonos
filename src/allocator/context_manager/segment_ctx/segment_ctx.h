@@ -108,7 +108,7 @@ public:
     virtual void CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
     virtual void CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* dstBuf);
 
-    void CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments);
+    void CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfoRemain, SegmentInfo* vscSegInfo, int numSegments);
 
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;

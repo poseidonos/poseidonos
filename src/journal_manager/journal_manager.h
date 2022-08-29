@@ -67,7 +67,6 @@ class JournalStatusProvider;
 class CheckpointManager;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
-class CallbackSequenceController;
 class BufferedSegmentContextManager;
 
 class Stripe;

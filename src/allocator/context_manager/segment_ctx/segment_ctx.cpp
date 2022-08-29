@@ -230,6 +230,13 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
 {
     auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, allowVictimSegRelease);
 
+    if (result.second == SegmentState::ERROR)
+    {
+        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
+            "segId{} cnt:{} , allow {}", segId, cnt, allowVictimSegRelease);
+        assert(false);
+    }
+
     bool segmentFreed = result.first;
     if (segmentFreed == true)
     {
@@ -586,6 +593,8 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 void
 SegmentCtx::ResetSegmentsStates(void)
 {
+    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "egmentCtx::ResetSegmentsStates");
+
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
         bool segmentFreed = false;
@@ -831,12 +840,24 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
 }
 
 void
-SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments)
+SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfoRemain, SegmentInfo* vscSegInfo, int numSegments)
 {
     if (nullptr != vscSegInfo)
     {
         for (int segId = 0; segId < numSegments; segId++)
         {
+            uint32_t vscInfo = vscSegInfo[segId].GetValidBlockCount();
+            uint32_t segInfo = segmentInfos[segId].GetValidBlockCount();
+
+            uint32_t vscInfoRemain = vscSegInfoRemain[segId].GetValidBlockCount();
+            if (segInfo != vscInfo)
+            {
+                POS_TRACE_INFO(EID(JOURNAL_DEBUG),
+                    "Copy different data segId {}. segInfocnt {}. vscInfocnt {}, remainCnt {}",
+                    segId, segInfo, vscInfo, vscInfoRemain);
+                continue;
+            }
+
             segmentInfos[segId].SetValidBlockCount(vscSegInfo[segId].GetValidBlockCount());
             segmentInfos[segId].SetOccupiedStripeCount(vscSegInfo[segId].GetOccupiedStripeCount());
         }
@@ -846,18 +867,21 @@ SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegm
 void
 SegmentCtx::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
+    assert(false);
     ValidateBlks(blks);
 }
 
 bool
 SegmentCtx::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
 {
+    assert(false);
     return InvalidateBlks(blks, isForced);
 }
 
 bool
 SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
 {
+    assert(false);
     return UpdateOccupiedStripeCount(lsid);
 }
 

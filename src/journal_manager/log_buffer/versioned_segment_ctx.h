@@ -100,6 +100,7 @@ private:
 
     int segmentInfosInFlush;
     SegmentInfo* segmentInfos;
+    const int ALL_LOG_GROUP = -1;
 };
 
 } // namespace pos

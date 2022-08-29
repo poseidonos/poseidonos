@@ -121,9 +121,10 @@ ContextManager::Dispose(void)
 }
 
 int
-ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
+ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
-    return ioManager->FlushContexts(callback, sync);
+    SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
+    return ioManager->FlushContexts(callback, sync, reinterpret_cast<char*>(vscSegInfo));
 }
 
 SegmentId
@@ -226,30 +227,6 @@ ContextManager::GetRebuildTargetSegmentCount(void)
 }
 
 void
-ContextManager::_SyncLogGroup(int logGroupId)
-{
-    int numSegments = versionedSegCtx->GetNumSegments();
-    SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
-    segmentCtx->CopySegInfoFromVersionedSegInfo(vscSegInfo, numSegments);
-}
-
-void
-ContextManager::SyncLogGroup(int logGroupId)
-{
-    if (ALL_LOG_GROUP == logGroupId)
-    {
-        for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
-        {
-            _SyncLogGroup(id);
-        }
-    }
-    else
-    {
-        _SyncLogGroup(logGroupId);
-    }
-}
-
-void
 ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
 {
     versionedSegCtx = versionedSegCtx_;
@@ -258,6 +235,7 @@ ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSe
 void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
+    POS_TRACE_INFO(-1, "ContextManager::ResetFlushedInfo {}", logGroupId);
     if (ALL_LOG_GROUP == logGroupId)
     {
         for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)

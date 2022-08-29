@@ -31,6 +31,7 @@
  */
 
 #include "versioned_segment_info.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {

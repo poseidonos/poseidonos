@@ -43,7 +43,8 @@ MapUpdateLogWriteContext::MapUpdateLogWriteContext(MapList dirtyList, EventSmart
 }
 
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
-    MapList dirtyList, EventSmartPtr callback, LogBufferWriteDoneNotifier* logFilledNotifier)
+    MapList dirtyList, EventSmartPtr callback,
+    LogBufferWriteDoneNotifier* logFilledNotifier)
 : LogWriteContext(log, callback, logFilledNotifier),
   dirty(dirtyList)
 {

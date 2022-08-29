@@ -66,7 +66,7 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
         segmentInfoDiffs.push_back(segmentInfo);
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG,
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG),
         "Versioned segment context is initialized, numLogGroups: {}, numSegments: {}",
         config->GetNumLogGroups(), numSegments);
 }
@@ -92,6 +92,10 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     {
         if (nullptr != loadedSegmentInfo)
         {
+            POS_TRACE_INFO(EID(JOURNAL_DEBUG), "VSC Init segId {}, validcnt {}, stripeCnt {}",
+                           segId, loadedSegmentInfo[segId].GetValidBlockCount(),
+                           loadedSegmentInfo[segId].GetOccupiedStripeCount());
+
             segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
             segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
         }
@@ -107,7 +111,7 @@ VersionedSegmentCtx::Dispose(void)
         segmentInfos = nullptr;
     }
 
-    POS_TRACE_INFO(POS_EVENT_ID::JOURNAL_DEBUG, "Disposed versioned segment context");
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "Disposed versioned segment context");
 }
 
 void
@@ -149,7 +153,22 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         auto segmentId = it->first;
         auto validBlockCountDiff = it->second;
 
-        segmentInfos[segmentId].SetValidBlockCount(segmentInfos[segmentId].GetValidBlockCount() + validBlockCountDiff);
+        uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
+        uint32_t result = getValidCount + validBlockCountDiff;
+        // TODO remove this.
+        POS_TRACE_INFO(EID(JOURNAL_DEBUG),
+           "Before _UpdateSegmentContext, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
+            logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
+
+        segmentInfos[segmentId].SetValidBlockCount(result);
+
+        if (0 > (int)getValidCount)
+        {
+            POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+                "After update underflow occurred, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
+                logGroupId, segmentId, getValidCount, validBlockCountDiff);
+            assert(false);
+        }
     }
 
     tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
@@ -175,9 +194,20 @@ VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
     }
 
     segmentInfosInFlush = logGroupId;
-    _UpdateSegmentContext(logGroupId);
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
+    if (ALL_LOG_GROUP == logGroupId)
+    {
+        for (int id = 0; id < GetNumLogGroups(); id++)
+        {
+            _UpdateSegmentContext(logGroupId);
+        }
+    }
+    else
+    {
+        _UpdateSegmentContext(logGroupId);
+    }
+
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
 
     return segmentInfos;
 }
@@ -187,11 +217,40 @@ VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
 {
     _CheckLogGroupIdValidity(logGroupId);
 
+    shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
+    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
+    for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
+    {
+        auto segmentId = it->first;
+        auto validBlockCountDiff = it->second;
+
+        uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
+        POS_TRACE_INFO(EID(JOURNAL_DEBUG),
+            "Before Reset group {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
+            logGroupId, segmentId, getValidCount, validBlockCountDiff);
+    }
+
+    // TODO: Remove this
+    int nextLogGroupId = logGroupId == 0 ? 1 : 0;
+
+    targetSegInfo = segmentInfoDiffs[nextLogGroupId];
+    changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
+    for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
+    {
+        auto segmentId = it->first;
+        auto validBlockCountDiff = it->second;
+
+        uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
+        POS_TRACE_INFO(EID(JOURNAL_DEBUG),
+            "Chk!! Before Reset group {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
+            nextLogGroupId, segmentId, getValidCount, validBlockCountDiff);
+    }
+
     segmentInfoDiffs[logGroupId]->Reset();
 
     segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
 
-    POS_TRACE_DEBUG(POS_EVENT_ID::JOURNAL_DEBUG, "Versioned segment info is flushed, logGroup {}", logGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
 int
