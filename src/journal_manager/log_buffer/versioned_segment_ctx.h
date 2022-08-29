@@ -98,7 +98,6 @@ private:
 
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
 
-    int segmentInfosInFlush;
     SegmentInfo* segmentInfos;
     const int ALL_LOG_GROUP = -1;
 };

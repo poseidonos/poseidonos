@@ -48,21 +48,18 @@ SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* segmentCtx_, IVersione
 void
 SegmentContextUpdater::ValidateBlks(VirtualBlks blks)
 {
-    assert(false);
     activeSegmentCtx->ValidateBlks(blks);
 }
 
 bool
 SegmentContextUpdater::InvalidateBlks(VirtualBlks blks, bool isForced)
 {
-    assert(false);
     return activeSegmentCtx->InvalidateBlks(blks, isForced);
 }
 
 bool
 SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
 {
-    assert(false);
     return activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
 }
 

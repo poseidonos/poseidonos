@@ -64,7 +64,7 @@ void
 RocksDBJournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false)).Times(volumesToDelete.size());
+    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false, _)).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
         EXPECT_TRUE(journal->VolumeDeleted(volId) == 0);

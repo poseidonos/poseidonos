@@ -106,7 +106,6 @@ public:
 
 private:
     ContextIoManager* ioManager;
-
     AllocatorAddressInfo* addrInfo;
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
@@ -121,6 +120,8 @@ private:
 
     TelemetryPublisher* telPublisher;
 
+    int segmentInfosInFlush;
+    const int INVALID_SEGMENT_CONTEXT = 0xFFFF;
     static const int ALL_LOG_GROUP = -1;
 };
 

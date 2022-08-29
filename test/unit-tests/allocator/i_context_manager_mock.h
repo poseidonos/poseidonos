@@ -10,7 +10,7 @@ class MockIContextManager : public IContextManager
 {
 public:
     using IContextManager::IContextManager;
-    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, int logGroupId), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));

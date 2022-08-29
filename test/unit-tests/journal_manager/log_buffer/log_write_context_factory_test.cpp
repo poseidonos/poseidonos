@@ -79,7 +79,6 @@ TEST(LogWriteContextFactory, CreateBlockMapLogWriteContext_testIfExecutedSuccess
     EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
 
     EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
     EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
 }
 
@@ -117,7 +116,6 @@ TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSucces
     EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
 
     EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
     EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
 }
 

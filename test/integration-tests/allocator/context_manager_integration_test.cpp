@@ -271,7 +271,7 @@ ContextManagerIntegrationTest::IncreaseVscOccupiedStripeCount(int logGroupId, in
     return cnt;
 }
 
-TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
+TEST_F(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
 {
     // Constant
     const int TEST_SEG_CNT = 1;
@@ -340,7 +340,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     delete allocatorAddressInfo;
 }
 
-TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
+TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
 {
     NiceMock<MockAllocatorAddressInfo> allocatorAddressInfo;
     NiceMock<MockTelemetryPublisher> telemetryPublisher;
@@ -371,7 +371,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     allocCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(allocCtxFlush->buffer))->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback, char* externalBuf)
         {
             std::thread allocCtxFlushCallback([&]
             {
@@ -390,7 +390,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     segCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(segCtxFlush->buffer))->sig = SegmentCtx::SIG_SEGMENT_CTX;
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback, char* externalBuf)
         {
             std::thread segCtxFlushCallback([&]
             {
@@ -415,7 +415,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     rebuildCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(rebuildCtxFlush->buffer))->sig = RebuildCtx::SIG_REBUILD_CTX;
     EXPECT_CALL(*rebuildCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback, char* externalBuf)
         {
             callback();
 

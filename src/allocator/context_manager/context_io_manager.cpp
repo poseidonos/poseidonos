@@ -140,7 +140,7 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externa
         AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
         if (SEGMENT_CTX != owner)
         {
-            ret = fileIo[owner]->Flush(completion, nullptr);
+            ret = fileIo[owner]->Flush(completion);
         }
         else
         {

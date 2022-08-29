@@ -840,48 +840,20 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
 }
 
 void
-SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfoRemain, SegmentInfo* vscSegInfo, int numSegments)
-{
-    if (nullptr != vscSegInfo)
-    {
-        for (int segId = 0; segId < numSegments; segId++)
-        {
-            uint32_t vscInfo = vscSegInfo[segId].GetValidBlockCount();
-            uint32_t segInfo = segmentInfos[segId].GetValidBlockCount();
-
-            uint32_t vscInfoRemain = vscSegInfoRemain[segId].GetValidBlockCount();
-            if (segInfo != vscInfo)
-            {
-                POS_TRACE_INFO(EID(JOURNAL_DEBUG),
-                    "Copy different data segId {}. segInfocnt {}. vscInfocnt {}, remainCnt {}",
-                    segId, segInfo, vscInfo, vscInfoRemain);
-                continue;
-            }
-
-            segmentInfos[segId].SetValidBlockCount(vscSegInfo[segId].GetValidBlockCount());
-            segmentInfos[segId].SetOccupiedStripeCount(vscSegInfo[segId].GetOccupiedStripeCount());
-        }
-    }
-}
-
-void
 SegmentCtx::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
-    assert(false);
     ValidateBlks(blks);
 }
 
 bool
 SegmentCtx::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
 {
-    assert(false);
     return InvalidateBlks(blks, isForced);
 }
 
 bool
 SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
 {
-    assert(false);
     return UpdateOccupiedStripeCount(lsid);
 }
 

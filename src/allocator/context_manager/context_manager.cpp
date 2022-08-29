@@ -56,7 +56,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_, ContextIoManager* ioManager_,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
-  arrayId(arrayId_)
+  arrayId(arrayId_),
+  segmentInfosInFlush(INVALID_SEGMENT_CONTEXT)
 {
     // for UT
     ioManager = ioManager_;
@@ -123,6 +124,16 @@ ContextManager::Dispose(void)
 int
 ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
+    if (segmentInfosInFlush == logGroupId)
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+            "Failed to flush contexts, log group {} is already in use",
+            logGroupId, segmentInfosInFlush);
+        return EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID);
+    }
+
+    segmentInfosInFlush = logGroupId;
+
     SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
     return ioManager->FlushContexts(callback, sync, reinterpret_cast<char*>(vscSegInfo));
 }
@@ -235,7 +246,7 @@ ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSe
 void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
-    POS_TRACE_INFO(-1, "ContextManager::ResetFlushedInfo {}", logGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "ContextManager::ResetFlushedInfo {}", logGroupId);
     if (ALL_LOG_GROUP == logGroupId)
     {
         for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
@@ -247,5 +258,7 @@ ContextManager::ResetFlushedInfo(int logGroupId)
     {
         versionedSegCtx->ResetFlushedInfo(logGroupId);
     }
+
+    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
 }
 } // namespace pos
