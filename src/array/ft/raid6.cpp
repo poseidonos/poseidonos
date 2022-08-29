@@ -129,20 +129,8 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 }
 
 list<FtBlkAddr>
-Raid6::GetRebuildGroup(FtBlkAddr fba, vector<ArrayDeviceState> devs)
+Raid6::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
 {
-    uint32_t deviceStateIdx = 0;
-    vector<int> abnormalIdx;
-
-    for (auto devState : devs)
-    {
-        if (devState != ArrayDeviceState::NORMAL)
-        {
-            abnormalIdx.push_back(deviceStateIdx);
-        }
-        deviceStateIdx++;
-    }
-
     uint32_t blksPerChunk = ftSize_.blksPerChunk;
     uint32_t offsetInChunk = fba.offset % blksPerChunk;
     uint32_t chunkIndex = fba.offset / blksPerChunk;
@@ -150,7 +138,7 @@ Raid6::GetRebuildGroup(FtBlkAddr fba, vector<ArrayDeviceState> devs)
     list<FtBlkAddr> recoveryGroup;
     for (uint32_t i = 0; i < ftSize_.chunksPerStripe; i++)
     {
-        if (i != chunkIndex && find(abnormalIdx.begin(), abnormalIdx.end(), i) == abnormalIdx.end())
+        if (i != chunkIndex && find(abnormalDeviceIndex.begin(), abnormalDeviceIndex.end(), i) == abnormalDeviceIndex.end())
         {
             FtBlkAddr fsa = {.stripeId = fba.stripeId,
                 .offset = offsetInChunk + i * blksPerChunk};
@@ -249,20 +237,9 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 }
 
 void
-Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> readIndex, vector<ArrayDeviceState> devs)
+Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> readDeviceIndex, vector<uint32_t> abnormalDeviceIndex)
 {
-    vector<uint32_t> errorIndex;
-    uint32_t deviceStateIdx = 0;
-    for (auto devState : devs)
-    {
-        if (devState != ArrayDeviceState::NORMAL)
-        {
-            errorIndex.push_back(deviceStateIdx);
-        }
-        deviceStateIdx++;
-    }
-
-    uint32_t destCnt = errorIndex.size();
+    uint32_t destCnt = abnormalDeviceIndex.size();
     assert(destCnt <= parityCnt);
     uint32_t rebuildCnt = chunkCnt - destCnt;
 
@@ -284,7 +261,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        err_index[errorIndex[i]] = 1;
+        err_index[abnormalDeviceIndex[i]] = 1;
     }
 
     for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
@@ -303,11 +280,11 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        if (errorIndex[i] < dataCnt)
+        if (abnormalDeviceIndex[i] < dataCnt)
         {
             for (uint32_t j = 0; j < dataCnt; j++)
             {
-                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * errorIndex[i] + j];
+                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * abnormalDeviceIndex[i] + j];
             }
         }
         else
@@ -317,7 +294,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
                 unsigned char s = 0;
                 for (uint32_t j = 0; j < dataCnt; j++)
                 {
-                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * errorIndex[i] + j]);
+                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * abnormalDeviceIndex[i] + j]);
                 }
                 decode_matrix[dataCnt * i + pidx] = s;
             }
@@ -336,7 +313,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
     // TODO return two recovered devices at the same time when two devices failure occured
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        if (find(readIndex.begin(), readIndex.end(), errorIndex[i]) != readIndex.end())
+        if (find(readDeviceIndex.begin(), readDeviceIndex.end(), abnormalDeviceIndex[i]) != readDeviceIndex.end())
         {
             memcpy(dst, recover_outp[i], dstSize);
         }
@@ -412,11 +389,11 @@ Raid6::GetParityPoolSize()
 }
 
 RecoverFunc
-Raid6::GetRecoverFunc(int devIdx, vector<ArrayDeviceState> devs)
+Raid6::GetRecoverFunc(int devIdx, vector<uint32_t> abnormalDeviceIndex)
 {
     vector<uint32_t> errorIndex;
     errorIndex.push_back(devIdx);
-    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this, placeholders::_1, placeholders::_2, placeholders::_3, errorIndex, devs);
+    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this, placeholders::_1, placeholders::_2, placeholders::_3, errorIndex, abnormalDeviceIndex);
     return recoverFunc;
 }
 
