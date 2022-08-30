@@ -181,7 +181,7 @@ UDEV_FILE = $(UDEV_DIR)/99-custom-nvme.rules
 
 ################################################
 
-all : $(APP) pos-exporter gen_doc
+all : gen_proto $(APP) pos-exporter gen_doc
 	@:
 
 install: 

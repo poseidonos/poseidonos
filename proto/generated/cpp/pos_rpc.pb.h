@@ -47,7 +47,7 @@ struct TableStruct_pos_5frpc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[33]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[30]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -56,12 +56,6 @@ struct TableStruct_pos_5frpc_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5frpc_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_pos_5frpc_2eproto_metadata_getter(int index);
 namespace pos_rpc {
-class ArrayInfo;
-struct ArrayInfoDefaultTypeInternal;
-extern ArrayInfoDefaultTypeInternal _ArrayInfo_default_instance_;
-class ArrayListResponse;
-struct ArrayListResponseDefaultTypeInternal;
-extern ArrayListResponseDefaultTypeInternal _ArrayListResponse_default_instance_;
 class Chunk;
 struct ChunkDefaultTypeInternal;
 extern ChunkDefaultTypeInternal _Chunk_default_instance_;
@@ -71,27 +65,12 @@ extern CompleteHostWriteRequestDefaultTypeInternal _CompleteHostWriteRequest_def
 class CompleteHostWriteResponse;
 struct CompleteHostWriteResponseDefaultTypeInternal;
 extern CompleteHostWriteResponseDefaultTypeInternal _CompleteHostWriteResponse_default_instance_;
-class CreateArrayRequest;
-struct CreateArrayRequestDefaultTypeInternal;
-extern CreateArrayRequestDefaultTypeInternal _CreateArrayRequest_default_instance_;
-class CreateVolumeRequest;
-struct CreateVolumeRequestDefaultTypeInternal;
-extern CreateVolumeRequestDefaultTypeInternal _CreateVolumeRequest_default_instance_;
-class DeleteArrayRequest;
-struct DeleteArrayRequestDefaultTypeInternal;
-extern DeleteArrayRequestDefaultTypeInternal _DeleteArrayRequest_default_instance_;
-class DeleteVolumeRequest;
-struct DeleteVolumeRequestDefaultTypeInternal;
-extern DeleteVolumeRequestDefaultTypeInternal _DeleteVolumeRequest_default_instance_;
 class FinishVolumeSyncRequest;
 struct FinishVolumeSyncRequestDefaultTypeInternal;
 extern FinishVolumeSyncRequestDefaultTypeInternal _FinishVolumeSyncRequest_default_instance_;
 class FinishVolumeSyncResponse;
 struct FinishVolumeSyncResponseDefaultTypeInternal;
 extern FinishVolumeSyncResponseDefaultTypeInternal _FinishVolumeSyncResponse_default_instance_;
-class GetArrayListRequest;
-struct GetArrayListRequestDefaultTypeInternal;
-extern GetArrayListRequestDefaultTypeInternal _GetArrayListRequest_default_instance_;
 class GetVolumeListRequest;
 struct GetVolumeListRequestDefaultTypeInternal;
 extern GetVolumeListRequestDefaultTypeInternal _GetVolumeListRequest_default_instance_;
@@ -101,9 +80,6 @@ extern HealthCheckRequestDefaultTypeInternal _HealthCheckRequest_default_instanc
 class HealthCheckResponse;
 struct HealthCheckResponseDefaultTypeInternal;
 extern HealthCheckResponseDefaultTypeInternal _HealthCheckResponse_default_instance_;
-class MountVolumeRequest;
-struct MountVolumeRequestDefaultTypeInternal;
-extern MountVolumeRequestDefaultTypeInternal _MountVolumeRequest_default_instance_;
 class PosResponse;
 struct PosResponseDefaultTypeInternal;
 extern PosResponseDefaultTypeInternal _PosResponse_default_instance_;
@@ -113,6 +89,12 @@ extern ReadBlocksRequestDefaultTypeInternal _ReadBlocksRequest_default_instance_
 class ReadBlocksResponse;
 struct ReadBlocksResponseDefaultTypeInternal;
 extern ReadBlocksResponseDefaultTypeInternal _ReadBlocksResponse_default_instance_;
+class ReadBlocksSyncRequest;
+struct ReadBlocksSyncRequestDefaultTypeInternal;
+extern ReadBlocksSyncRequestDefaultTypeInternal _ReadBlocksSyncRequest_default_instance_;
+class ReadBlocksSyncResponse;
+struct ReadBlocksSyncResponseDefaultTypeInternal;
+extern ReadBlocksSyncResponseDefaultTypeInternal _ReadBlocksSyncResponse_default_instance_;
 class ResumeWriteRequest;
 struct ResumeWriteRequestDefaultTypeInternal;
 extern ResumeWriteRequestDefaultTypeInternal _ResumeWriteRequest_default_instance_;
@@ -131,9 +113,6 @@ extern SuspendWriteRequestDefaultTypeInternal _SuspendWriteRequest_default_insta
 class SuspendWriteResponse;
 struct SuspendWriteResponseDefaultTypeInternal;
 extern SuspendWriteResponseDefaultTypeInternal _SuspendWriteResponse_default_instance_;
-class UnmountVolumeRequest;
-struct UnmountVolumeRequestDefaultTypeInternal;
-extern UnmountVolumeRequestDefaultTypeInternal _UnmountVolumeRequest_default_instance_;
 class UpdateVoluemMetaRequest;
 struct UpdateVoluemMetaRequestDefaultTypeInternal;
 extern UpdateVoluemMetaRequestDefaultTypeInternal _UpdateVoluemMetaRequest_default_instance_;
@@ -149,47 +128,56 @@ extern WriteBlocksRequestDefaultTypeInternal _WriteBlocksRequest_default_instanc
 class WriteBlocksResponse;
 struct WriteBlocksResponseDefaultTypeInternal;
 extern WriteBlocksResponseDefaultTypeInternal _WriteBlocksResponse_default_instance_;
+class WriteBlocksSyncRequest;
+struct WriteBlocksSyncRequestDefaultTypeInternal;
+extern WriteBlocksSyncRequestDefaultTypeInternal _WriteBlocksSyncRequest_default_instance_;
+class WriteBlocksSyncResponse;
+struct WriteBlocksSyncResponseDefaultTypeInternal;
+extern WriteBlocksSyncResponseDefaultTypeInternal _WriteBlocksSyncResponse_default_instance_;
 class WriteHostBlocksRequest;
 struct WriteHostBlocksRequestDefaultTypeInternal;
 extern WriteHostBlocksRequestDefaultTypeInternal _WriteHostBlocksRequest_default_instance_;
 class WriteHostBlocksResponse;
 struct WriteHostBlocksResponseDefaultTypeInternal;
 extern WriteHostBlocksResponseDefaultTypeInternal _WriteHostBlocksResponse_default_instance_;
+class WriteHostBlocksSyncRequest;
+struct WriteHostBlocksSyncRequestDefaultTypeInternal;
+extern WriteHostBlocksSyncRequestDefaultTypeInternal _WriteHostBlocksSyncRequest_default_instance_;
+class WriteHostBlocksSyncResponse;
+struct WriteHostBlocksSyncResponseDefaultTypeInternal;
+extern WriteHostBlocksSyncResponseDefaultTypeInternal _WriteHostBlocksSyncResponse_default_instance_;
 }  // namespace pos_rpc
 PROTOBUF_NAMESPACE_OPEN
-template<> ::pos_rpc::ArrayInfo* Arena::CreateMaybeMessage<::pos_rpc::ArrayInfo>(Arena*);
-template<> ::pos_rpc::ArrayListResponse* Arena::CreateMaybeMessage<::pos_rpc::ArrayListResponse>(Arena*);
 template<> ::pos_rpc::Chunk* Arena::CreateMaybeMessage<::pos_rpc::Chunk>(Arena*);
 template<> ::pos_rpc::CompleteHostWriteRequest* Arena::CreateMaybeMessage<::pos_rpc::CompleteHostWriteRequest>(Arena*);
 template<> ::pos_rpc::CompleteHostWriteResponse* Arena::CreateMaybeMessage<::pos_rpc::CompleteHostWriteResponse>(Arena*);
-template<> ::pos_rpc::CreateArrayRequest* Arena::CreateMaybeMessage<::pos_rpc::CreateArrayRequest>(Arena*);
-template<> ::pos_rpc::CreateVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::CreateVolumeRequest>(Arena*);
-template<> ::pos_rpc::DeleteArrayRequest* Arena::CreateMaybeMessage<::pos_rpc::DeleteArrayRequest>(Arena*);
-template<> ::pos_rpc::DeleteVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::DeleteVolumeRequest>(Arena*);
 template<> ::pos_rpc::FinishVolumeSyncRequest* Arena::CreateMaybeMessage<::pos_rpc::FinishVolumeSyncRequest>(Arena*);
 template<> ::pos_rpc::FinishVolumeSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::FinishVolumeSyncResponse>(Arena*);
-template<> ::pos_rpc::GetArrayListRequest* Arena::CreateMaybeMessage<::pos_rpc::GetArrayListRequest>(Arena*);
 template<> ::pos_rpc::GetVolumeListRequest* Arena::CreateMaybeMessage<::pos_rpc::GetVolumeListRequest>(Arena*);
 template<> ::pos_rpc::HealthCheckRequest* Arena::CreateMaybeMessage<::pos_rpc::HealthCheckRequest>(Arena*);
 template<> ::pos_rpc::HealthCheckResponse* Arena::CreateMaybeMessage<::pos_rpc::HealthCheckResponse>(Arena*);
-template<> ::pos_rpc::MountVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::MountVolumeRequest>(Arena*);
 template<> ::pos_rpc::PosResponse* Arena::CreateMaybeMessage<::pos_rpc::PosResponse>(Arena*);
 template<> ::pos_rpc::ReadBlocksRequest* Arena::CreateMaybeMessage<::pos_rpc::ReadBlocksRequest>(Arena*);
 template<> ::pos_rpc::ReadBlocksResponse* Arena::CreateMaybeMessage<::pos_rpc::ReadBlocksResponse>(Arena*);
+template<> ::pos_rpc::ReadBlocksSyncRequest* Arena::CreateMaybeMessage<::pos_rpc::ReadBlocksSyncRequest>(Arena*);
+template<> ::pos_rpc::ReadBlocksSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::ReadBlocksSyncResponse>(Arena*);
 template<> ::pos_rpc::ResumeWriteRequest* Arena::CreateMaybeMessage<::pos_rpc::ResumeWriteRequest>(Arena*);
 template<> ::pos_rpc::ResumeWriteResponse* Arena::CreateMaybeMessage<::pos_rpc::ResumeWriteResponse>(Arena*);
 template<> ::pos_rpc::StartVolumeSyncRequest* Arena::CreateMaybeMessage<::pos_rpc::StartVolumeSyncRequest>(Arena*);
 template<> ::pos_rpc::StartVolumeSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::StartVolumeSyncResponse>(Arena*);
 template<> ::pos_rpc::SuspendWriteRequest* Arena::CreateMaybeMessage<::pos_rpc::SuspendWriteRequest>(Arena*);
 template<> ::pos_rpc::SuspendWriteResponse* Arena::CreateMaybeMessage<::pos_rpc::SuspendWriteResponse>(Arena*);
-template<> ::pos_rpc::UnmountVolumeRequest* Arena::CreateMaybeMessage<::pos_rpc::UnmountVolumeRequest>(Arena*);
 template<> ::pos_rpc::UpdateVoluemMetaRequest* Arena::CreateMaybeMessage<::pos_rpc::UpdateVoluemMetaRequest>(Arena*);
 template<> ::pos_rpc::VolumeInfo* Arena::CreateMaybeMessage<::pos_rpc::VolumeInfo>(Arena*);
 template<> ::pos_rpc::VolumeListResponse* Arena::CreateMaybeMessage<::pos_rpc::VolumeListResponse>(Arena*);
 template<> ::pos_rpc::WriteBlocksRequest* Arena::CreateMaybeMessage<::pos_rpc::WriteBlocksRequest>(Arena*);
 template<> ::pos_rpc::WriteBlocksResponse* Arena::CreateMaybeMessage<::pos_rpc::WriteBlocksResponse>(Arena*);
+template<> ::pos_rpc::WriteBlocksSyncRequest* Arena::CreateMaybeMessage<::pos_rpc::WriteBlocksSyncRequest>(Arena*);
+template<> ::pos_rpc::WriteBlocksSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::WriteBlocksSyncResponse>(Arena*);
 template<> ::pos_rpc::WriteHostBlocksRequest* Arena::CreateMaybeMessage<::pos_rpc::WriteHostBlocksRequest>(Arena*);
 template<> ::pos_rpc::WriteHostBlocksResponse* Arena::CreateMaybeMessage<::pos_rpc::WriteHostBlocksResponse>(Arena*);
+template<> ::pos_rpc::WriteHostBlocksSyncRequest* Arena::CreateMaybeMessage<::pos_rpc::WriteHostBlocksSyncRequest>(Arena*);
+template<> ::pos_rpc::WriteHostBlocksSyncResponse* Arena::CreateMaybeMessage<::pos_rpc::WriteHostBlocksSyncResponse>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace pos_rpc {
 
@@ -218,35 +206,6 @@ inline bool HealthCheckResponse_ServingStatus_Parse(
     ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, HealthCheckResponse_ServingStatus* value) {
   return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<HealthCheckResponse_ServingStatus>(
     HealthCheckResponse_ServingStatus_descriptor(), name, value);
-}
-enum ArrayInfo_ArrayState : int {
-  ArrayInfo_ArrayState_OFFLINE = 0,
-  ArrayInfo_ArrayState_PAUSE = 1,
-  ArrayInfo_ArrayState_NORMAL = 2,
-  ArrayInfo_ArrayState_BUSY = 3,
-  ArrayInfo_ArrayState_STOP = 4,
-  ArrayInfo_ArrayState_SNAPSHOT = 5,
-  ArrayInfo_ArrayState_ArrayInfo_ArrayState_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  ArrayInfo_ArrayState_ArrayInfo_ArrayState_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
-};
-bool ArrayInfo_ArrayState_IsValid(int value);
-constexpr ArrayInfo_ArrayState ArrayInfo_ArrayState_ArrayState_MIN = ArrayInfo_ArrayState_OFFLINE;
-constexpr ArrayInfo_ArrayState ArrayInfo_ArrayState_ArrayState_MAX = ArrayInfo_ArrayState_SNAPSHOT;
-constexpr int ArrayInfo_ArrayState_ArrayState_ARRAYSIZE = ArrayInfo_ArrayState_ArrayState_MAX + 1;
-
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* ArrayInfo_ArrayState_descriptor();
-template<typename T>
-inline const std::string& ArrayInfo_ArrayState_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, ArrayInfo_ArrayState>::value ||
-    ::std::is_integral<T>::value,
-    "Incorrect type passed to function ArrayInfo_ArrayState_Name.");
-  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    ArrayInfo_ArrayState_descriptor(), enum_t_value);
-}
-inline bool ArrayInfo_ArrayState_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, ArrayInfo_ArrayState* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<ArrayInfo_ArrayState>(
-    ArrayInfo_ArrayState_descriptor(), name, value);
 }
 enum VolumeInfo_VolumeState : int {
   VolumeInfo_VolumeState_UNKNOWN = 0,
@@ -617,964 +576,6 @@ class HealthCheckResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class CreateArrayRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.CreateArrayRequest) */ {
- public:
-  inline CreateArrayRequest() : CreateArrayRequest(nullptr) {}
-  virtual ~CreateArrayRequest();
-  explicit constexpr CreateArrayRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  CreateArrayRequest(const CreateArrayRequest& from);
-  CreateArrayRequest(CreateArrayRequest&& from) noexcept
-    : CreateArrayRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline CreateArrayRequest& operator=(const CreateArrayRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline CreateArrayRequest& operator=(CreateArrayRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const CreateArrayRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const CreateArrayRequest* internal_default_instance() {
-    return reinterpret_cast<const CreateArrayRequest*>(
-               &_CreateArrayRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    2;
-
-  friend void swap(CreateArrayRequest& a, CreateArrayRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(CreateArrayRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(CreateArrayRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline CreateArrayRequest* New() const final {
-    return CreateMaybeMessage<CreateArrayRequest>(nullptr);
-  }
-
-  CreateArrayRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<CreateArrayRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const CreateArrayRequest& from);
-  void MergeFrom(const CreateArrayRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(CreateArrayRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.CreateArrayRequest";
-  }
-  protected:
-  explicit CreateArrayRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kCapacityFieldNumber = 2,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // uint64 capacity = 2;
-  void clear_capacity();
-  ::PROTOBUF_NAMESPACE_ID::uint64 capacity() const;
-  void set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_capacity() const;
-  void _internal_set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.CreateArrayRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 capacity_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class DeleteArrayRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.DeleteArrayRequest) */ {
- public:
-  inline DeleteArrayRequest() : DeleteArrayRequest(nullptr) {}
-  virtual ~DeleteArrayRequest();
-  explicit constexpr DeleteArrayRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  DeleteArrayRequest(const DeleteArrayRequest& from);
-  DeleteArrayRequest(DeleteArrayRequest&& from) noexcept
-    : DeleteArrayRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline DeleteArrayRequest& operator=(const DeleteArrayRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline DeleteArrayRequest& operator=(DeleteArrayRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const DeleteArrayRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const DeleteArrayRequest* internal_default_instance() {
-    return reinterpret_cast<const DeleteArrayRequest*>(
-               &_DeleteArrayRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    3;
-
-  friend void swap(DeleteArrayRequest& a, DeleteArrayRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(DeleteArrayRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(DeleteArrayRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline DeleteArrayRequest* New() const final {
-    return CreateMaybeMessage<DeleteArrayRequest>(nullptr);
-  }
-
-  DeleteArrayRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeleteArrayRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeleteArrayRequest& from);
-  void MergeFrom(const DeleteArrayRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(DeleteArrayRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.DeleteArrayRequest";
-  }
-  protected:
-  explicit DeleteArrayRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.DeleteArrayRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class CreateVolumeRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.CreateVolumeRequest) */ {
- public:
-  inline CreateVolumeRequest() : CreateVolumeRequest(nullptr) {}
-  virtual ~CreateVolumeRequest();
-  explicit constexpr CreateVolumeRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  CreateVolumeRequest(const CreateVolumeRequest& from);
-  CreateVolumeRequest(CreateVolumeRequest&& from) noexcept
-    : CreateVolumeRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline CreateVolumeRequest& operator=(const CreateVolumeRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline CreateVolumeRequest& operator=(CreateVolumeRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const CreateVolumeRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const CreateVolumeRequest* internal_default_instance() {
-    return reinterpret_cast<const CreateVolumeRequest*>(
-               &_CreateVolumeRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    4;
-
-  friend void swap(CreateVolumeRequest& a, CreateVolumeRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(CreateVolumeRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(CreateVolumeRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline CreateVolumeRequest* New() const final {
-    return CreateMaybeMessage<CreateVolumeRequest>(nullptr);
-  }
-
-  CreateVolumeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<CreateVolumeRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const CreateVolumeRequest& from);
-  void MergeFrom(const CreateVolumeRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(CreateVolumeRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.CreateVolumeRequest";
-  }
-  protected:
-  explicit CreateVolumeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-    kCapacityFieldNumber = 3,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // uint64 capacity = 3;
-  void clear_capacity();
-  ::PROTOBUF_NAMESPACE_ID::uint64 capacity() const;
-  void set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_capacity() const;
-  void _internal_set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.CreateVolumeRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 capacity_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class DeleteVolumeRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.DeleteVolumeRequest) */ {
- public:
-  inline DeleteVolumeRequest() : DeleteVolumeRequest(nullptr) {}
-  virtual ~DeleteVolumeRequest();
-  explicit constexpr DeleteVolumeRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  DeleteVolumeRequest(const DeleteVolumeRequest& from);
-  DeleteVolumeRequest(DeleteVolumeRequest&& from) noexcept
-    : DeleteVolumeRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline DeleteVolumeRequest& operator=(const DeleteVolumeRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline DeleteVolumeRequest& operator=(DeleteVolumeRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const DeleteVolumeRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const DeleteVolumeRequest* internal_default_instance() {
-    return reinterpret_cast<const DeleteVolumeRequest*>(
-               &_DeleteVolumeRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    5;
-
-  friend void swap(DeleteVolumeRequest& a, DeleteVolumeRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(DeleteVolumeRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(DeleteVolumeRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline DeleteVolumeRequest* New() const final {
-    return CreateMaybeMessage<DeleteVolumeRequest>(nullptr);
-  }
-
-  DeleteVolumeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<DeleteVolumeRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const DeleteVolumeRequest& from);
-  void MergeFrom(const DeleteVolumeRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(DeleteVolumeRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.DeleteVolumeRequest";
-  }
-  protected:
-  explicit DeleteVolumeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.DeleteVolumeRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class MountVolumeRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.MountVolumeRequest) */ {
- public:
-  inline MountVolumeRequest() : MountVolumeRequest(nullptr) {}
-  virtual ~MountVolumeRequest();
-  explicit constexpr MountVolumeRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  MountVolumeRequest(const MountVolumeRequest& from);
-  MountVolumeRequest(MountVolumeRequest&& from) noexcept
-    : MountVolumeRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline MountVolumeRequest& operator=(const MountVolumeRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline MountVolumeRequest& operator=(MountVolumeRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const MountVolumeRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const MountVolumeRequest* internal_default_instance() {
-    return reinterpret_cast<const MountVolumeRequest*>(
-               &_MountVolumeRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    6;
-
-  friend void swap(MountVolumeRequest& a, MountVolumeRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(MountVolumeRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(MountVolumeRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline MountVolumeRequest* New() const final {
-    return CreateMaybeMessage<MountVolumeRequest>(nullptr);
-  }
-
-  MountVolumeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<MountVolumeRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const MountVolumeRequest& from);
-  void MergeFrom(const MountVolumeRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(MountVolumeRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.MountVolumeRequest";
-  }
-  protected:
-  explicit MountVolumeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.MountVolumeRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class UnmountVolumeRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.UnmountVolumeRequest) */ {
- public:
-  inline UnmountVolumeRequest() : UnmountVolumeRequest(nullptr) {}
-  virtual ~UnmountVolumeRequest();
-  explicit constexpr UnmountVolumeRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  UnmountVolumeRequest(const UnmountVolumeRequest& from);
-  UnmountVolumeRequest(UnmountVolumeRequest&& from) noexcept
-    : UnmountVolumeRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline UnmountVolumeRequest& operator=(const UnmountVolumeRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline UnmountVolumeRequest& operator=(UnmountVolumeRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const UnmountVolumeRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const UnmountVolumeRequest* internal_default_instance() {
-    return reinterpret_cast<const UnmountVolumeRequest*>(
-               &_UnmountVolumeRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    7;
-
-  friend void swap(UnmountVolumeRequest& a, UnmountVolumeRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(UnmountVolumeRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(UnmountVolumeRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline UnmountVolumeRequest* New() const final {
-    return CreateMaybeMessage<UnmountVolumeRequest>(nullptr);
-  }
-
-  UnmountVolumeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<UnmountVolumeRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const UnmountVolumeRequest& from);
-  void MergeFrom(const UnmountVolumeRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(UnmountVolumeRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.UnmountVolumeRequest";
-  }
-  protected:
-  explicit UnmountVolumeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.UnmountVolumeRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
 class UpdateVoluemMetaRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.UpdateVoluemMetaRequest) */ {
  public:
@@ -1618,7 +619,7 @@ class UpdateVoluemMetaRequest PROTOBUF_FINAL :
                &_UpdateVoluemMetaRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    8;
+    2;
 
   friend void swap(UpdateVoluemMetaRequest& a, UpdateVoluemMetaRequest& b) {
     a.Swap(&b);
@@ -1762,7 +763,7 @@ class PosResponse PROTOBUF_FINAL :
                &_PosResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    3;
 
   friend void swap(PosResponse& a, PosResponse& b) {
     a.Swap(&b);
@@ -1879,525 +880,6 @@ class PosResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
-class GetArrayListRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.GetArrayListRequest) */ {
- public:
-  inline GetArrayListRequest() : GetArrayListRequest(nullptr) {}
-  virtual ~GetArrayListRequest();
-  explicit constexpr GetArrayListRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  GetArrayListRequest(const GetArrayListRequest& from);
-  GetArrayListRequest(GetArrayListRequest&& from) noexcept
-    : GetArrayListRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline GetArrayListRequest& operator=(const GetArrayListRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline GetArrayListRequest& operator=(GetArrayListRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const GetArrayListRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const GetArrayListRequest* internal_default_instance() {
-    return reinterpret_cast<const GetArrayListRequest*>(
-               &_GetArrayListRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    10;
-
-  friend void swap(GetArrayListRequest& a, GetArrayListRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(GetArrayListRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(GetArrayListRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline GetArrayListRequest* New() const final {
-    return CreateMaybeMessage<GetArrayListRequest>(nullptr);
-  }
-
-  GetArrayListRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<GetArrayListRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const GetArrayListRequest& from);
-  void MergeFrom(const GetArrayListRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(GetArrayListRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.GetArrayListRequest";
-  }
-  protected:
-  explicit GetArrayListRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.GetArrayListRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class ArrayInfo PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.ArrayInfo) */ {
- public:
-  inline ArrayInfo() : ArrayInfo(nullptr) {}
-  virtual ~ArrayInfo();
-  explicit constexpr ArrayInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  ArrayInfo(const ArrayInfo& from);
-  ArrayInfo(ArrayInfo&& from) noexcept
-    : ArrayInfo() {
-    *this = ::std::move(from);
-  }
-
-  inline ArrayInfo& operator=(const ArrayInfo& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ArrayInfo& operator=(ArrayInfo&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const ArrayInfo& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const ArrayInfo* internal_default_instance() {
-    return reinterpret_cast<const ArrayInfo*>(
-               &_ArrayInfo_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    11;
-
-  friend void swap(ArrayInfo& a, ArrayInfo& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ArrayInfo* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ArrayInfo* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline ArrayInfo* New() const final {
-    return CreateMaybeMessage<ArrayInfo>(nullptr);
-  }
-
-  ArrayInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ArrayInfo>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ArrayInfo& from);
-  void MergeFrom(const ArrayInfo& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ArrayInfo* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.ArrayInfo";
-  }
-  protected:
-  explicit ArrayInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  typedef ArrayInfo_ArrayState ArrayState;
-  static constexpr ArrayState OFFLINE =
-    ArrayInfo_ArrayState_OFFLINE;
-  static constexpr ArrayState PAUSE =
-    ArrayInfo_ArrayState_PAUSE;
-  static constexpr ArrayState NORMAL =
-    ArrayInfo_ArrayState_NORMAL;
-  static constexpr ArrayState BUSY =
-    ArrayInfo_ArrayState_BUSY;
-  static constexpr ArrayState STOP =
-    ArrayInfo_ArrayState_STOP;
-  static constexpr ArrayState SNAPSHOT =
-    ArrayInfo_ArrayState_SNAPSHOT;
-  static inline bool ArrayState_IsValid(int value) {
-    return ArrayInfo_ArrayState_IsValid(value);
-  }
-  static constexpr ArrayState ArrayState_MIN =
-    ArrayInfo_ArrayState_ArrayState_MIN;
-  static constexpr ArrayState ArrayState_MAX =
-    ArrayInfo_ArrayState_ArrayState_MAX;
-  static constexpr int ArrayState_ARRAYSIZE =
-    ArrayInfo_ArrayState_ArrayState_ARRAYSIZE;
-  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
-  ArrayState_descriptor() {
-    return ArrayInfo_ArrayState_descriptor();
-  }
-  template<typename T>
-  static inline const std::string& ArrayState_Name(T enum_t_value) {
-    static_assert(::std::is_same<T, ArrayState>::value ||
-      ::std::is_integral<T>::value,
-      "Incorrect type passed to function ArrayState_Name.");
-    return ArrayInfo_ArrayState_Name(enum_t_value);
-  }
-  static inline bool ArrayState_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
-      ArrayState* value) {
-    return ArrayInfo_ArrayState_Parse(name, value);
-  }
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kTotalCapacityFieldNumber = 2,
-    kUsedCapacityFieldNumber = 3,
-    kStateFieldNumber = 4,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // uint64 total_capacity = 2;
-  void clear_total_capacity();
-  ::PROTOBUF_NAMESPACE_ID::uint64 total_capacity() const;
-  void set_total_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_total_capacity() const;
-  void _internal_set_total_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 used_capacity = 3;
-  void clear_used_capacity();
-  ::PROTOBUF_NAMESPACE_ID::uint64 used_capacity() const;
-  void set_used_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_used_capacity() const;
-  void _internal_set_used_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // .pos_rpc.ArrayInfo.ArrayState state = 4;
-  void clear_state();
-  ::pos_rpc::ArrayInfo_ArrayState state() const;
-  void set_state(::pos_rpc::ArrayInfo_ArrayState value);
-  private:
-  ::pos_rpc::ArrayInfo_ArrayState _internal_state() const;
-  void _internal_set_state(::pos_rpc::ArrayInfo_ArrayState value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.ArrayInfo)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 total_capacity_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 used_capacity_;
-  int state_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class ArrayListResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.ArrayListResponse) */ {
- public:
-  inline ArrayListResponse() : ArrayListResponse(nullptr) {}
-  virtual ~ArrayListResponse();
-  explicit constexpr ArrayListResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  ArrayListResponse(const ArrayListResponse& from);
-  ArrayListResponse(ArrayListResponse&& from) noexcept
-    : ArrayListResponse() {
-    *this = ::std::move(from);
-  }
-
-  inline ArrayListResponse& operator=(const ArrayListResponse& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline ArrayListResponse& operator=(ArrayListResponse&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const ArrayListResponse& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const ArrayListResponse* internal_default_instance() {
-    return reinterpret_cast<const ArrayListResponse*>(
-               &_ArrayListResponse_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    12;
-
-  friend void swap(ArrayListResponse& a, ArrayListResponse& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(ArrayListResponse* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(ArrayListResponse* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline ArrayListResponse* New() const final {
-    return CreateMaybeMessage<ArrayListResponse>(nullptr);
-  }
-
-  ArrayListResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<ArrayListResponse>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const ArrayListResponse& from);
-  void MergeFrom(const ArrayListResponse& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(ArrayListResponse* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "pos_rpc.ArrayListResponse";
-  }
-  protected:
-  explicit ArrayListResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kInfosFieldNumber = 3,
-    kReasonFieldNumber = 2,
-    kResultFieldNumber = 1,
-  };
-  // repeated .pos_rpc.ArrayInfo infos = 3;
-  int infos_size() const;
-  private:
-  int _internal_infos_size() const;
-  public:
-  void clear_infos();
-  ::pos_rpc::ArrayInfo* mutable_infos(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::ArrayInfo >*
-      mutable_infos();
-  private:
-  const ::pos_rpc::ArrayInfo& _internal_infos(int index) const;
-  ::pos_rpc::ArrayInfo* _internal_add_infos();
-  public:
-  const ::pos_rpc::ArrayInfo& infos(int index) const;
-  ::pos_rpc::ArrayInfo* add_infos();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::ArrayInfo >&
-      infos() const;
-
-  // string reason = 2;
-  bool has_reason() const;
-  private:
-  bool _internal_has_reason() const;
-  public:
-  void clear_reason();
-  const std::string& reason() const;
-  void set_reason(const std::string& value);
-  void set_reason(std::string&& value);
-  void set_reason(const char* value);
-  void set_reason(const char* value, size_t size);
-  std::string* mutable_reason();
-  std::string* release_reason();
-  void set_allocated_reason(std::string* reason);
-  private:
-  const std::string& _internal_reason() const;
-  void _internal_set_reason(const std::string& value);
-  std::string* _internal_mutable_reason();
-  public:
-
-  // .pos_rpc.PosResult result = 1;
-  void clear_result();
-  ::pos_rpc::PosResult result() const;
-  void set_result(::pos_rpc::PosResult value);
-  private:
-  ::pos_rpc::PosResult _internal_result() const;
-  void _internal_set_result(::pos_rpc::PosResult value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:pos_rpc.ArrayListResponse)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::ArrayInfo > infos_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
-  int result_;
-  friend struct ::TableStruct_pos_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
 class GetVolumeListRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.GetVolumeListRequest) */ {
  public:
@@ -2441,7 +923,7 @@ class GetVolumeListRequest PROTOBUF_FINAL :
                &_GetVolumeListRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    13;
+    4;
 
   friend void swap(GetVolumeListRequest& a, GetVolumeListRequest& b) {
     a.Swap(&b);
@@ -2585,7 +1067,7 @@ class VolumeInfo PROTOBUF_FINAL :
                &_VolumeInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    14;
+    5;
 
   friend void swap(VolumeInfo& a, VolumeInfo& b) {
     a.Swap(&b);
@@ -2794,7 +1276,7 @@ class VolumeListResponse PROTOBUF_FINAL :
                &_VolumeListResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    15;
+    6;
 
   friend void swap(VolumeListResponse& a, VolumeListResponse& b) {
     a.Swap(&b);
@@ -2974,7 +1456,7 @@ class Chunk PROTOBUF_FINAL :
                &_Chunk_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    16;
+    7;
 
   friend void swap(Chunk& a, Chunk& b) {
     a.Swap(&b);
@@ -3118,7 +1600,7 @@ class ReadBlocksRequest PROTOBUF_FINAL :
                &_ReadBlocksRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    17;
+    8;
 
   friend void swap(ReadBlocksRequest& a, ReadBlocksRequest& b) {
     a.Swap(&b);
@@ -3302,7 +1784,7 @@ class ReadBlocksResponse PROTOBUF_FINAL :
                &_ReadBlocksResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    18;
+    9;
 
   friend void swap(ReadBlocksResponse& a, ReadBlocksResponse& b) {
     a.Swap(&b);
@@ -3482,7 +1964,7 @@ class WriteBlocksRequest PROTOBUF_FINAL :
                &_WriteBlocksRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    19;
+    10;
 
   friend void swap(WriteBlocksRequest& a, WriteBlocksRequest& b) {
     a.Swap(&b);
@@ -3697,7 +2179,7 @@ class WriteBlocksResponse PROTOBUF_FINAL :
                &_WriteBlocksResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    20;
+    11;
 
   friend void swap(WriteBlocksResponse& a, WriteBlocksResponse& b) {
     a.Swap(&b);
@@ -3814,6 +2296,734 @@ class WriteBlocksResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class WriteBlocksSyncRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.WriteBlocksSyncRequest) */ {
+ public:
+  inline WriteBlocksSyncRequest() : WriteBlocksSyncRequest(nullptr) {}
+  virtual ~WriteBlocksSyncRequest();
+  explicit constexpr WriteBlocksSyncRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  WriteBlocksSyncRequest(const WriteBlocksSyncRequest& from);
+  WriteBlocksSyncRequest(WriteBlocksSyncRequest&& from) noexcept
+    : WriteBlocksSyncRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline WriteBlocksSyncRequest& operator=(const WriteBlocksSyncRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WriteBlocksSyncRequest& operator=(WriteBlocksSyncRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const WriteBlocksSyncRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const WriteBlocksSyncRequest* internal_default_instance() {
+    return reinterpret_cast<const WriteBlocksSyncRequest*>(
+               &_WriteBlocksSyncRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(WriteBlocksSyncRequest& a, WriteBlocksSyncRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(WriteBlocksSyncRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WriteBlocksSyncRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline WriteBlocksSyncRequest* New() const final {
+    return CreateMaybeMessage<WriteBlocksSyncRequest>(nullptr);
+  }
+
+  WriteBlocksSyncRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<WriteBlocksSyncRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const WriteBlocksSyncRequest& from);
+  void MergeFrom(const WriteBlocksSyncRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(WriteBlocksSyncRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.WriteBlocksSyncRequest";
+  }
+  protected:
+  explicit WriteBlocksSyncRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 5,
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+  };
+  // repeated .pos_rpc.Chunk data = 5;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::pos_rpc::Chunk* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >*
+      mutable_data();
+  private:
+  const ::pos_rpc::Chunk& _internal_data(int index) const;
+  ::pos_rpc::Chunk* _internal_add_data();
+  public:
+  const ::pos_rpc::Chunk& data(int index) const;
+  ::pos_rpc::Chunk* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >&
+      data() const;
+
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.WriteBlocksSyncRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class WriteBlocksSyncResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.WriteBlocksSyncResponse) */ {
+ public:
+  inline WriteBlocksSyncResponse() : WriteBlocksSyncResponse(nullptr) {}
+  virtual ~WriteBlocksSyncResponse();
+  explicit constexpr WriteBlocksSyncResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  WriteBlocksSyncResponse(const WriteBlocksSyncResponse& from);
+  WriteBlocksSyncResponse(WriteBlocksSyncResponse&& from) noexcept
+    : WriteBlocksSyncResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline WriteBlocksSyncResponse& operator=(const WriteBlocksSyncResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WriteBlocksSyncResponse& operator=(WriteBlocksSyncResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const WriteBlocksSyncResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const WriteBlocksSyncResponse* internal_default_instance() {
+    return reinterpret_cast<const WriteBlocksSyncResponse*>(
+               &_WriteBlocksSyncResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(WriteBlocksSyncResponse& a, WriteBlocksSyncResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(WriteBlocksSyncResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WriteBlocksSyncResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline WriteBlocksSyncResponse* New() const final {
+    return CreateMaybeMessage<WriteBlocksSyncResponse>(nullptr);
+  }
+
+  WriteBlocksSyncResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<WriteBlocksSyncResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const WriteBlocksSyncResponse& from);
+  void MergeFrom(const WriteBlocksSyncResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(WriteBlocksSyncResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.WriteBlocksSyncResponse";
+  }
+  protected:
+  explicit WriteBlocksSyncResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 2,
+    kResultFieldNumber = 1,
+  };
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // .pos_rpc.PosResult result = 1;
+  void clear_result();
+  ::pos_rpc::PosResult result() const;
+  void set_result(::pos_rpc::PosResult value);
+  private:
+  ::pos_rpc::PosResult _internal_result() const;
+  void _internal_set_result(::pos_rpc::PosResult value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.WriteBlocksSyncResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  int result_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ReadBlocksSyncRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.ReadBlocksSyncRequest) */ {
+ public:
+  inline ReadBlocksSyncRequest() : ReadBlocksSyncRequest(nullptr) {}
+  virtual ~ReadBlocksSyncRequest();
+  explicit constexpr ReadBlocksSyncRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ReadBlocksSyncRequest(const ReadBlocksSyncRequest& from);
+  ReadBlocksSyncRequest(ReadBlocksSyncRequest&& from) noexcept
+    : ReadBlocksSyncRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline ReadBlocksSyncRequest& operator=(const ReadBlocksSyncRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ReadBlocksSyncRequest& operator=(ReadBlocksSyncRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ReadBlocksSyncRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ReadBlocksSyncRequest* internal_default_instance() {
+    return reinterpret_cast<const ReadBlocksSyncRequest*>(
+               &_ReadBlocksSyncRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    14;
+
+  friend void swap(ReadBlocksSyncRequest& a, ReadBlocksSyncRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ReadBlocksSyncRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ReadBlocksSyncRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ReadBlocksSyncRequest* New() const final {
+    return CreateMaybeMessage<ReadBlocksSyncRequest>(nullptr);
+  }
+
+  ReadBlocksSyncRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ReadBlocksSyncRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ReadBlocksSyncRequest& from);
+  void MergeFrom(const ReadBlocksSyncRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ReadBlocksSyncRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.ReadBlocksSyncRequest";
+  }
+  protected:
+  explicit ReadBlocksSyncRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+  };
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.ReadBlocksSyncRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ReadBlocksSyncResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.ReadBlocksSyncResponse) */ {
+ public:
+  inline ReadBlocksSyncResponse() : ReadBlocksSyncResponse(nullptr) {}
+  virtual ~ReadBlocksSyncResponse();
+  explicit constexpr ReadBlocksSyncResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ReadBlocksSyncResponse(const ReadBlocksSyncResponse& from);
+  ReadBlocksSyncResponse(ReadBlocksSyncResponse&& from) noexcept
+    : ReadBlocksSyncResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline ReadBlocksSyncResponse& operator=(const ReadBlocksSyncResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ReadBlocksSyncResponse& operator=(ReadBlocksSyncResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ReadBlocksSyncResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ReadBlocksSyncResponse* internal_default_instance() {
+    return reinterpret_cast<const ReadBlocksSyncResponse*>(
+               &_ReadBlocksSyncResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    15;
+
+  friend void swap(ReadBlocksSyncResponse& a, ReadBlocksSyncResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ReadBlocksSyncResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ReadBlocksSyncResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ReadBlocksSyncResponse* New() const final {
+    return CreateMaybeMessage<ReadBlocksSyncResponse>(nullptr);
+  }
+
+  ReadBlocksSyncResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ReadBlocksSyncResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ReadBlocksSyncResponse& from);
+  void MergeFrom(const ReadBlocksSyncResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ReadBlocksSyncResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.ReadBlocksSyncResponse";
+  }
+  protected:
+  explicit ReadBlocksSyncResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 3,
+    kReasonFieldNumber = 2,
+    kResultFieldNumber = 1,
+  };
+  // repeated .pos_rpc.Chunk data = 3;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::pos_rpc::Chunk* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >*
+      mutable_data();
+  private:
+  const ::pos_rpc::Chunk& _internal_data(int index) const;
+  ::pos_rpc::Chunk* _internal_add_data();
+  public:
+  const ::pos_rpc::Chunk& data(int index) const;
+  ::pos_rpc::Chunk* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >&
+      data() const;
+
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // .pos_rpc.PosResult result = 1;
+  void clear_result();
+  ::pos_rpc::PosResult result() const;
+  void set_result(::pos_rpc::PosResult value);
+  private:
+  ::pos_rpc::PosResult _internal_result() const;
+  void _internal_set_result(::pos_rpc::PosResult value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.ReadBlocksSyncResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  int result_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
 class WriteHostBlocksRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.WriteHostBlocksRequest) */ {
  public:
@@ -3857,7 +3067,7 @@ class WriteHostBlocksRequest PROTOBUF_FINAL :
                &_WriteHostBlocksRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    21;
+    16;
 
   friend void swap(WriteHostBlocksRequest& a, WriteHostBlocksRequest& b) {
     a.Swap(&b);
@@ -3929,9 +3139,7 @@ class WriteHostBlocksRequest PROTOBUF_FINAL :
   enum : int {
     kArrayNameFieldNumber = 1,
     kVolumeNameFieldNumber = 2,
-    kRbaFieldNumber = 3,
-    kNumBlocksFieldNumber = 4,
-    kLsnFieldNumber = 5,
+    kLsnFieldNumber = 3,
   };
   // string array_name = 1;
   void clear_array_name();
@@ -3965,25 +3173,7 @@ class WriteHostBlocksRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_volume_name();
   public:
 
-  // uint64 rba = 3;
-  void clear_rba();
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
-  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
-  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 num_blocks = 4;
-  void clear_num_blocks();
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
-  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
-  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 lsn = 5;
+  // uint64 lsn = 3;
   void clear_lsn();
   ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
   void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -4001,8 +3191,6 @@ class WriteHostBlocksRequest PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
   ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_pos_5frpc_2eproto;
@@ -4052,7 +3240,7 @@ class WriteHostBlocksResponse PROTOBUF_FINAL :
                &_WriteHostBlocksResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    22;
+    17;
 
   friend void swap(WriteHostBlocksResponse& a, WriteHostBlocksResponse& b) {
     a.Swap(&b);
@@ -4169,6 +3357,339 @@ class WriteHostBlocksResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class WriteHostBlocksSyncRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.WriteHostBlocksSyncRequest) */ {
+ public:
+  inline WriteHostBlocksSyncRequest() : WriteHostBlocksSyncRequest(nullptr) {}
+  virtual ~WriteHostBlocksSyncRequest();
+  explicit constexpr WriteHostBlocksSyncRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  WriteHostBlocksSyncRequest(const WriteHostBlocksSyncRequest& from);
+  WriteHostBlocksSyncRequest(WriteHostBlocksSyncRequest&& from) noexcept
+    : WriteHostBlocksSyncRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline WriteHostBlocksSyncRequest& operator=(const WriteHostBlocksSyncRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WriteHostBlocksSyncRequest& operator=(WriteHostBlocksSyncRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const WriteHostBlocksSyncRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const WriteHostBlocksSyncRequest* internal_default_instance() {
+    return reinterpret_cast<const WriteHostBlocksSyncRequest*>(
+               &_WriteHostBlocksSyncRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    18;
+
+  friend void swap(WriteHostBlocksSyncRequest& a, WriteHostBlocksSyncRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(WriteHostBlocksSyncRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WriteHostBlocksSyncRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline WriteHostBlocksSyncRequest* New() const final {
+    return CreateMaybeMessage<WriteHostBlocksSyncRequest>(nullptr);
+  }
+
+  WriteHostBlocksSyncRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<WriteHostBlocksSyncRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const WriteHostBlocksSyncRequest& from);
+  void MergeFrom(const WriteHostBlocksSyncRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(WriteHostBlocksSyncRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.WriteHostBlocksSyncRequest";
+  }
+  protected:
+  explicit WriteHostBlocksSyncRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kLsnFieldNumber = 3,
+  };
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 lsn = 3;
+  void clear_lsn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
+  void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_lsn() const;
+  void _internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.WriteHostBlocksSyncRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class WriteHostBlocksSyncResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.WriteHostBlocksSyncResponse) */ {
+ public:
+  inline WriteHostBlocksSyncResponse() : WriteHostBlocksSyncResponse(nullptr) {}
+  virtual ~WriteHostBlocksSyncResponse();
+  explicit constexpr WriteHostBlocksSyncResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  WriteHostBlocksSyncResponse(const WriteHostBlocksSyncResponse& from);
+  WriteHostBlocksSyncResponse(WriteHostBlocksSyncResponse&& from) noexcept
+    : WriteHostBlocksSyncResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline WriteHostBlocksSyncResponse& operator=(const WriteHostBlocksSyncResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WriteHostBlocksSyncResponse& operator=(WriteHostBlocksSyncResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const WriteHostBlocksSyncResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const WriteHostBlocksSyncResponse* internal_default_instance() {
+    return reinterpret_cast<const WriteHostBlocksSyncResponse*>(
+               &_WriteHostBlocksSyncResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    19;
+
+  friend void swap(WriteHostBlocksSyncResponse& a, WriteHostBlocksSyncResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(WriteHostBlocksSyncResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WriteHostBlocksSyncResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline WriteHostBlocksSyncResponse* New() const final {
+    return CreateMaybeMessage<WriteHostBlocksSyncResponse>(nullptr);
+  }
+
+  WriteHostBlocksSyncResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<WriteHostBlocksSyncResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const WriteHostBlocksSyncResponse& from);
+  void MergeFrom(const WriteHostBlocksSyncResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(WriteHostBlocksSyncResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.WriteHostBlocksSyncResponse";
+  }
+  protected:
+  explicit WriteHostBlocksSyncResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 2,
+    kResultFieldNumber = 1,
+  };
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // .pos_rpc.PosResult result = 1;
+  void clear_result();
+  ::pos_rpc::PosResult result() const;
+  void set_result(::pos_rpc::PosResult value);
+  private:
+  ::pos_rpc::PosResult _internal_result() const;
+  void _internal_set_result(::pos_rpc::PosResult value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.WriteHostBlocksSyncResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  int result_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CompleteHostWriteRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.CompleteHostWriteRequest) */ {
  public:
@@ -4212,7 +3733,7 @@ class CompleteHostWriteRequest PROTOBUF_FINAL :
                &_CompleteHostWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    23;
+    20;
 
   friend void swap(CompleteHostWriteRequest& a, CompleteHostWriteRequest& b) {
     a.Swap(&b);
@@ -4385,7 +3906,7 @@ class CompleteHostWriteResponse PROTOBUF_FINAL :
                &_CompleteHostWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    24;
+    21;
 
   friend void swap(CompleteHostWriteResponse& a, CompleteHostWriteResponse& b) {
     a.Swap(&b);
@@ -4545,7 +4066,7 @@ class StartVolumeSyncRequest PROTOBUF_FINAL :
                &_StartVolumeSyncRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    25;
+    22;
 
   friend void swap(StartVolumeSyncRequest& a, StartVolumeSyncRequest& b) {
     a.Swap(&b);
@@ -4718,7 +4239,7 @@ class StartVolumeSyncResponse PROTOBUF_FINAL :
                &_StartVolumeSyncResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    26;
+    23;
 
   friend void swap(StartVolumeSyncResponse& a, StartVolumeSyncResponse& b) {
     a.Swap(&b);
@@ -4878,7 +4399,7 @@ class FinishVolumeSyncRequest PROTOBUF_FINAL :
                &_FinishVolumeSyncRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    27;
+    24;
 
   friend void swap(FinishVolumeSyncRequest& a, FinishVolumeSyncRequest& b) {
     a.Swap(&b);
@@ -5051,7 +4572,7 @@ class FinishVolumeSyncResponse PROTOBUF_FINAL :
                &_FinishVolumeSyncResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    28;
+    25;
 
   friend void swap(FinishVolumeSyncResponse& a, FinishVolumeSyncResponse& b) {
     a.Swap(&b);
@@ -5211,7 +4732,7 @@ class SuspendWriteRequest PROTOBUF_FINAL :
                &_SuspendWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    29;
+    26;
 
   friend void swap(SuspendWriteRequest& a, SuspendWriteRequest& b) {
     a.Swap(&b);
@@ -5373,7 +4894,7 @@ class SuspendWriteResponse PROTOBUF_FINAL :
                &_SuspendWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    30;
+    27;
 
   friend void swap(SuspendWriteResponse& a, SuspendWriteResponse& b) {
     a.Swap(&b);
@@ -5533,7 +5054,7 @@ class ResumeWriteRequest PROTOBUF_FINAL :
                &_ResumeWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    31;
+    28;
 
   friend void swap(ResumeWriteRequest& a, ResumeWriteRequest& b) {
     a.Swap(&b);
@@ -5695,7 +5216,7 @@ class ResumeWriteResponse PROTOBUF_FINAL :
                &_ResumeWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    32;
+    29;
 
   friend void swap(ResumeWriteResponse& a, ResumeWriteResponse& b) {
     a.Swap(&b);
@@ -5920,680 +5441,6 @@ inline void HealthCheckResponse::set_allocated_reason(std::string* reason) {
 
 // -------------------------------------------------------------------
 
-// CreateArrayRequest
-
-// string array_name = 1;
-inline void CreateArrayRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& CreateArrayRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.CreateArrayRequest.array_name)
-  return _internal_array_name();
-}
-inline void CreateArrayRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.CreateArrayRequest.array_name)
-}
-inline std::string* CreateArrayRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.CreateArrayRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& CreateArrayRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void CreateArrayRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void CreateArrayRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.CreateArrayRequest.array_name)
-}
-inline void CreateArrayRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.CreateArrayRequest.array_name)
-}
-inline void CreateArrayRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.CreateArrayRequest.array_name)
-}
-inline std::string* CreateArrayRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* CreateArrayRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.CreateArrayRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void CreateArrayRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.CreateArrayRequest.array_name)
-}
-
-// uint64 capacity = 2;
-inline void CreateArrayRequest::clear_capacity() {
-  capacity_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateArrayRequest::_internal_capacity() const {
-  return capacity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateArrayRequest::capacity() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.CreateArrayRequest.capacity)
-  return _internal_capacity();
-}
-inline void CreateArrayRequest::_internal_set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  capacity_ = value;
-}
-inline void CreateArrayRequest::set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_capacity(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.CreateArrayRequest.capacity)
-}
-
-// -------------------------------------------------------------------
-
-// DeleteArrayRequest
-
-// string array_name = 1;
-inline void DeleteArrayRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& DeleteArrayRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.DeleteArrayRequest.array_name)
-  return _internal_array_name();
-}
-inline void DeleteArrayRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.DeleteArrayRequest.array_name)
-}
-inline std::string* DeleteArrayRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.DeleteArrayRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& DeleteArrayRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void DeleteArrayRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void DeleteArrayRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.DeleteArrayRequest.array_name)
-}
-inline void DeleteArrayRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.DeleteArrayRequest.array_name)
-}
-inline void DeleteArrayRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.DeleteArrayRequest.array_name)
-}
-inline std::string* DeleteArrayRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* DeleteArrayRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.DeleteArrayRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void DeleteArrayRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.DeleteArrayRequest.array_name)
-}
-
-// -------------------------------------------------------------------
-
-// CreateVolumeRequest
-
-// string array_name = 1;
-inline void CreateVolumeRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& CreateVolumeRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.CreateVolumeRequest.array_name)
-  return _internal_array_name();
-}
-inline void CreateVolumeRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.CreateVolumeRequest.array_name)
-}
-inline std::string* CreateVolumeRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.CreateVolumeRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& CreateVolumeRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void CreateVolumeRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void CreateVolumeRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.CreateVolumeRequest.array_name)
-}
-inline void CreateVolumeRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.CreateVolumeRequest.array_name)
-}
-inline void CreateVolumeRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.CreateVolumeRequest.array_name)
-}
-inline std::string* CreateVolumeRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* CreateVolumeRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.CreateVolumeRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void CreateVolumeRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.CreateVolumeRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void CreateVolumeRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& CreateVolumeRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.CreateVolumeRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void CreateVolumeRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.CreateVolumeRequest.volume_name)
-}
-inline std::string* CreateVolumeRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.CreateVolumeRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& CreateVolumeRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void CreateVolumeRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void CreateVolumeRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.CreateVolumeRequest.volume_name)
-}
-inline void CreateVolumeRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.CreateVolumeRequest.volume_name)
-}
-inline void CreateVolumeRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.CreateVolumeRequest.volume_name)
-}
-inline std::string* CreateVolumeRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* CreateVolumeRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.CreateVolumeRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void CreateVolumeRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.CreateVolumeRequest.volume_name)
-}
-
-// uint64 capacity = 3;
-inline void CreateVolumeRequest::clear_capacity() {
-  capacity_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateVolumeRequest::_internal_capacity() const {
-  return capacity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 CreateVolumeRequest::capacity() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.CreateVolumeRequest.capacity)
-  return _internal_capacity();
-}
-inline void CreateVolumeRequest::_internal_set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  capacity_ = value;
-}
-inline void CreateVolumeRequest::set_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_capacity(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.CreateVolumeRequest.capacity)
-}
-
-// -------------------------------------------------------------------
-
-// DeleteVolumeRequest
-
-// string array_name = 1;
-inline void DeleteVolumeRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& DeleteVolumeRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.DeleteVolumeRequest.array_name)
-  return _internal_array_name();
-}
-inline void DeleteVolumeRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.DeleteVolumeRequest.array_name)
-}
-inline std::string* DeleteVolumeRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.DeleteVolumeRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& DeleteVolumeRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void DeleteVolumeRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void DeleteVolumeRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.DeleteVolumeRequest.array_name)
-}
-inline void DeleteVolumeRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.DeleteVolumeRequest.array_name)
-}
-inline void DeleteVolumeRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.DeleteVolumeRequest.array_name)
-}
-inline std::string* DeleteVolumeRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* DeleteVolumeRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.DeleteVolumeRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void DeleteVolumeRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.DeleteVolumeRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void DeleteVolumeRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& DeleteVolumeRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.DeleteVolumeRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void DeleteVolumeRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.DeleteVolumeRequest.volume_name)
-}
-inline std::string* DeleteVolumeRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.DeleteVolumeRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& DeleteVolumeRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void DeleteVolumeRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void DeleteVolumeRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.DeleteVolumeRequest.volume_name)
-}
-inline void DeleteVolumeRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.DeleteVolumeRequest.volume_name)
-}
-inline void DeleteVolumeRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.DeleteVolumeRequest.volume_name)
-}
-inline std::string* DeleteVolumeRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* DeleteVolumeRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.DeleteVolumeRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void DeleteVolumeRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.DeleteVolumeRequest.volume_name)
-}
-
-// -------------------------------------------------------------------
-
-// MountVolumeRequest
-
-// string array_name = 1;
-inline void MountVolumeRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& MountVolumeRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.MountVolumeRequest.array_name)
-  return _internal_array_name();
-}
-inline void MountVolumeRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.MountVolumeRequest.array_name)
-}
-inline std::string* MountVolumeRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.MountVolumeRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& MountVolumeRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void MountVolumeRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void MountVolumeRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.MountVolumeRequest.array_name)
-}
-inline void MountVolumeRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.MountVolumeRequest.array_name)
-}
-inline void MountVolumeRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.MountVolumeRequest.array_name)
-}
-inline std::string* MountVolumeRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* MountVolumeRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.MountVolumeRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void MountVolumeRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.MountVolumeRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void MountVolumeRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& MountVolumeRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.MountVolumeRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void MountVolumeRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.MountVolumeRequest.volume_name)
-}
-inline std::string* MountVolumeRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.MountVolumeRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& MountVolumeRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void MountVolumeRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void MountVolumeRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.MountVolumeRequest.volume_name)
-}
-inline void MountVolumeRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.MountVolumeRequest.volume_name)
-}
-inline void MountVolumeRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.MountVolumeRequest.volume_name)
-}
-inline std::string* MountVolumeRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* MountVolumeRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.MountVolumeRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void MountVolumeRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.MountVolumeRequest.volume_name)
-}
-
-// -------------------------------------------------------------------
-
-// UnmountVolumeRequest
-
-// string array_name = 1;
-inline void UnmountVolumeRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& UnmountVolumeRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.UnmountVolumeRequest.array_name)
-  return _internal_array_name();
-}
-inline void UnmountVolumeRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.UnmountVolumeRequest.array_name)
-}
-inline std::string* UnmountVolumeRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.UnmountVolumeRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& UnmountVolumeRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void UnmountVolumeRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void UnmountVolumeRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.UnmountVolumeRequest.array_name)
-}
-inline void UnmountVolumeRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.UnmountVolumeRequest.array_name)
-}
-inline void UnmountVolumeRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.UnmountVolumeRequest.array_name)
-}
-inline std::string* UnmountVolumeRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* UnmountVolumeRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.UnmountVolumeRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void UnmountVolumeRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.UnmountVolumeRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void UnmountVolumeRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& UnmountVolumeRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.UnmountVolumeRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void UnmountVolumeRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.UnmountVolumeRequest.volume_name)
-}
-inline std::string* UnmountVolumeRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.UnmountVolumeRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& UnmountVolumeRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void UnmountVolumeRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void UnmountVolumeRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.UnmountVolumeRequest.volume_name)
-}
-inline void UnmountVolumeRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.UnmountVolumeRequest.volume_name)
-}
-inline void UnmountVolumeRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.UnmountVolumeRequest.volume_name)
-}
-inline std::string* UnmountVolumeRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* UnmountVolumeRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.UnmountVolumeRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void UnmountVolumeRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.UnmountVolumeRequest.volume_name)
-}
-
-// -------------------------------------------------------------------
-
 // UpdateVoluemMetaRequest
 
 // string array_name = 1;
@@ -6752,271 +5599,6 @@ inline void PosResponse::set_allocated_reason(std::string* reason) {
   reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.PosResponse.reason)
-}
-
-// -------------------------------------------------------------------
-
-// GetArrayListRequest
-
-// -------------------------------------------------------------------
-
-// ArrayInfo
-
-// string array_name = 1;
-inline void ArrayInfo::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& ArrayInfo::array_name() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayInfo.array_name)
-  return _internal_array_name();
-}
-inline void ArrayInfo::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.ArrayInfo.array_name)
-}
-inline std::string* ArrayInfo::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.ArrayInfo.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& ArrayInfo::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void ArrayInfo::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void ArrayInfo::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ArrayInfo.array_name)
-}
-inline void ArrayInfo::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.ArrayInfo.array_name)
-}
-inline void ArrayInfo::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ArrayInfo.array_name)
-}
-inline std::string* ArrayInfo::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* ArrayInfo::release_array_name() {
-  // @@protoc_insertion_point(field_release:pos_rpc.ArrayInfo.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ArrayInfo::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ArrayInfo.array_name)
-}
-
-// uint64 total_capacity = 2;
-inline void ArrayInfo::clear_total_capacity() {
-  total_capacity_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ArrayInfo::_internal_total_capacity() const {
-  return total_capacity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ArrayInfo::total_capacity() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayInfo.total_capacity)
-  return _internal_total_capacity();
-}
-inline void ArrayInfo::_internal_set_total_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  total_capacity_ = value;
-}
-inline void ArrayInfo::set_total_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_total_capacity(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.ArrayInfo.total_capacity)
-}
-
-// uint64 used_capacity = 3;
-inline void ArrayInfo::clear_used_capacity() {
-  used_capacity_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ArrayInfo::_internal_used_capacity() const {
-  return used_capacity_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 ArrayInfo::used_capacity() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayInfo.used_capacity)
-  return _internal_used_capacity();
-}
-inline void ArrayInfo::_internal_set_used_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  used_capacity_ = value;
-}
-inline void ArrayInfo::set_used_capacity(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_used_capacity(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.ArrayInfo.used_capacity)
-}
-
-// .pos_rpc.ArrayInfo.ArrayState state = 4;
-inline void ArrayInfo::clear_state() {
-  state_ = 0;
-}
-inline ::pos_rpc::ArrayInfo_ArrayState ArrayInfo::_internal_state() const {
-  return static_cast< ::pos_rpc::ArrayInfo_ArrayState >(state_);
-}
-inline ::pos_rpc::ArrayInfo_ArrayState ArrayInfo::state() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayInfo.state)
-  return _internal_state();
-}
-inline void ArrayInfo::_internal_set_state(::pos_rpc::ArrayInfo_ArrayState value) {
-  
-  state_ = value;
-}
-inline void ArrayInfo::set_state(::pos_rpc::ArrayInfo_ArrayState value) {
-  _internal_set_state(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.ArrayInfo.state)
-}
-
-// -------------------------------------------------------------------
-
-// ArrayListResponse
-
-// .pos_rpc.PosResult result = 1;
-inline void ArrayListResponse::clear_result() {
-  result_ = 0;
-}
-inline ::pos_rpc::PosResult ArrayListResponse::_internal_result() const {
-  return static_cast< ::pos_rpc::PosResult >(result_);
-}
-inline ::pos_rpc::PosResult ArrayListResponse::result() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayListResponse.result)
-  return _internal_result();
-}
-inline void ArrayListResponse::_internal_set_result(::pos_rpc::PosResult value) {
-  
-  result_ = value;
-}
-inline void ArrayListResponse::set_result(::pos_rpc::PosResult value) {
-  _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.ArrayListResponse.result)
-}
-
-// string reason = 2;
-inline bool ArrayListResponse::_internal_has_reason() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool ArrayListResponse::has_reason() const {
-  return _internal_has_reason();
-}
-inline void ArrayListResponse::clear_reason() {
-  reason_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& ArrayListResponse::reason() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayListResponse.reason)
-  return _internal_reason();
-}
-inline void ArrayListResponse::set_reason(const std::string& value) {
-  _internal_set_reason(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.ArrayListResponse.reason)
-}
-inline std::string* ArrayListResponse::mutable_reason() {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.ArrayListResponse.reason)
-  return _internal_mutable_reason();
-}
-inline const std::string& ArrayListResponse::_internal_reason() const {
-  return reason_.Get();
-}
-inline void ArrayListResponse::_internal_set_reason(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void ArrayListResponse::set_reason(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ArrayListResponse.reason)
-}
-inline void ArrayListResponse::set_reason(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:pos_rpc.ArrayListResponse.reason)
-}
-inline void ArrayListResponse::set_reason(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ArrayListResponse.reason)
-}
-inline std::string* ArrayListResponse::_internal_mutable_reason() {
-  _has_bits_[0] |= 0x00000001u;
-  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* ArrayListResponse::release_reason() {
-  // @@protoc_insertion_point(field_release:pos_rpc.ArrayListResponse.reason)
-  if (!_internal_has_reason()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void ArrayListResponse::set_allocated_reason(std::string* reason) {
-  if (reason != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ArrayListResponse.reason)
-}
-
-// repeated .pos_rpc.ArrayInfo infos = 3;
-inline int ArrayListResponse::_internal_infos_size() const {
-  return infos_.size();
-}
-inline int ArrayListResponse::infos_size() const {
-  return _internal_infos_size();
-}
-inline void ArrayListResponse::clear_infos() {
-  infos_.Clear();
-}
-inline ::pos_rpc::ArrayInfo* ArrayListResponse::mutable_infos(int index) {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.ArrayListResponse.infos)
-  return infos_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::ArrayInfo >*
-ArrayListResponse::mutable_infos() {
-  // @@protoc_insertion_point(field_mutable_list:pos_rpc.ArrayListResponse.infos)
-  return &infos_;
-}
-inline const ::pos_rpc::ArrayInfo& ArrayListResponse::_internal_infos(int index) const {
-  return infos_.Get(index);
-}
-inline const ::pos_rpc::ArrayInfo& ArrayListResponse::infos(int index) const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ArrayListResponse.infos)
-  return _internal_infos(index);
-}
-inline ::pos_rpc::ArrayInfo* ArrayListResponse::_internal_add_infos() {
-  return infos_.Add();
-}
-inline ::pos_rpc::ArrayInfo* ArrayListResponse::add_infos() {
-  // @@protoc_insertion_point(field_add:pos_rpc.ArrayListResponse.infos)
-  return _internal_add_infos();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::ArrayInfo >&
-ArrayListResponse::infos() const {
-  // @@protoc_insertion_point(field_list:pos_rpc.ArrayListResponse.infos)
-  return infos_;
 }
 
 // -------------------------------------------------------------------
@@ -8036,6 +6618,610 @@ inline void WriteBlocksResponse::set_allocated_reason(std::string* reason) {
 
 // -------------------------------------------------------------------
 
+// WriteBlocksSyncRequest
+
+// string array_name = 1;
+inline void WriteBlocksSyncRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& WriteBlocksSyncRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncRequest.array_name)
+  return _internal_array_name();
+}
+inline void WriteBlocksSyncRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteBlocksSyncRequest.array_name)
+}
+inline std::string* WriteBlocksSyncRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteBlocksSyncRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& WriteBlocksSyncRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void WriteBlocksSyncRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void WriteBlocksSyncRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.WriteBlocksSyncRequest.array_name)
+}
+inline void WriteBlocksSyncRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.WriteBlocksSyncRequest.array_name)
+}
+inline void WriteBlocksSyncRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.WriteBlocksSyncRequest.array_name)
+}
+inline std::string* WriteBlocksSyncRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* WriteBlocksSyncRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.WriteBlocksSyncRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void WriteBlocksSyncRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteBlocksSyncRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void WriteBlocksSyncRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& WriteBlocksSyncRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void WriteBlocksSyncRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteBlocksSyncRequest.volume_name)
+}
+inline std::string* WriteBlocksSyncRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteBlocksSyncRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& WriteBlocksSyncRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void WriteBlocksSyncRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void WriteBlocksSyncRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.WriteBlocksSyncRequest.volume_name)
+}
+inline void WriteBlocksSyncRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.WriteBlocksSyncRequest.volume_name)
+}
+inline void WriteBlocksSyncRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.WriteBlocksSyncRequest.volume_name)
+}
+inline std::string* WriteBlocksSyncRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* WriteBlocksSyncRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.WriteBlocksSyncRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void WriteBlocksSyncRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteBlocksSyncRequest.volume_name)
+}
+
+// uint64 rba = 3;
+inline void WriteBlocksSyncRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteBlocksSyncRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteBlocksSyncRequest::rba() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncRequest.rba)
+  return _internal_rba();
+}
+inline void WriteBlocksSyncRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void WriteBlocksSyncRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteBlocksSyncRequest.rba)
+}
+
+// uint64 num_blocks = 4;
+inline void WriteBlocksSyncRequest::clear_num_blocks() {
+  num_blocks_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteBlocksSyncRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteBlocksSyncRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void WriteBlocksSyncRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  num_blocks_ = value;
+}
+inline void WriteBlocksSyncRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteBlocksSyncRequest.num_blocks)
+}
+
+// repeated .pos_rpc.Chunk data = 5;
+inline int WriteBlocksSyncRequest::_internal_data_size() const {
+  return data_.size();
+}
+inline int WriteBlocksSyncRequest::data_size() const {
+  return _internal_data_size();
+}
+inline void WriteBlocksSyncRequest::clear_data() {
+  data_.Clear();
+}
+inline ::pos_rpc::Chunk* WriteBlocksSyncRequest::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteBlocksSyncRequest.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >*
+WriteBlocksSyncRequest::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:pos_rpc.WriteBlocksSyncRequest.data)
+  return &data_;
+}
+inline const ::pos_rpc::Chunk& WriteBlocksSyncRequest::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::pos_rpc::Chunk& WriteBlocksSyncRequest::data(int index) const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncRequest.data)
+  return _internal_data(index);
+}
+inline ::pos_rpc::Chunk* WriteBlocksSyncRequest::_internal_add_data() {
+  return data_.Add();
+}
+inline ::pos_rpc::Chunk* WriteBlocksSyncRequest::add_data() {
+  // @@protoc_insertion_point(field_add:pos_rpc.WriteBlocksSyncRequest.data)
+  return _internal_add_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >&
+WriteBlocksSyncRequest::data() const {
+  // @@protoc_insertion_point(field_list:pos_rpc.WriteBlocksSyncRequest.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
+// WriteBlocksSyncResponse
+
+// .pos_rpc.PosResult result = 1;
+inline void WriteBlocksSyncResponse::clear_result() {
+  result_ = 0;
+}
+inline ::pos_rpc::PosResult WriteBlocksSyncResponse::_internal_result() const {
+  return static_cast< ::pos_rpc::PosResult >(result_);
+}
+inline ::pos_rpc::PosResult WriteBlocksSyncResponse::result() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncResponse.result)
+  return _internal_result();
+}
+inline void WriteBlocksSyncResponse::_internal_set_result(::pos_rpc::PosResult value) {
+  
+  result_ = value;
+}
+inline void WriteBlocksSyncResponse::set_result(::pos_rpc::PosResult value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteBlocksSyncResponse.result)
+}
+
+// string reason = 2;
+inline bool WriteBlocksSyncResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool WriteBlocksSyncResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void WriteBlocksSyncResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& WriteBlocksSyncResponse::reason() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteBlocksSyncResponse.reason)
+  return _internal_reason();
+}
+inline void WriteBlocksSyncResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteBlocksSyncResponse.reason)
+}
+inline std::string* WriteBlocksSyncResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteBlocksSyncResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& WriteBlocksSyncResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void WriteBlocksSyncResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void WriteBlocksSyncResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.WriteBlocksSyncResponse.reason)
+}
+inline void WriteBlocksSyncResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.WriteBlocksSyncResponse.reason)
+}
+inline void WriteBlocksSyncResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.WriteBlocksSyncResponse.reason)
+}
+inline std::string* WriteBlocksSyncResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* WriteBlocksSyncResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:pos_rpc.WriteBlocksSyncResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void WriteBlocksSyncResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteBlocksSyncResponse.reason)
+}
+
+// -------------------------------------------------------------------
+
+// ReadBlocksSyncRequest
+
+// string array_name = 1;
+inline void ReadBlocksSyncRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& ReadBlocksSyncRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncRequest.array_name)
+  return _internal_array_name();
+}
+inline void ReadBlocksSyncRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ReadBlocksSyncRequest.array_name)
+}
+inline std::string* ReadBlocksSyncRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ReadBlocksSyncRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& ReadBlocksSyncRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void ReadBlocksSyncRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReadBlocksSyncRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ReadBlocksSyncRequest.array_name)
+}
+inline void ReadBlocksSyncRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ReadBlocksSyncRequest.array_name)
+}
+inline void ReadBlocksSyncRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ReadBlocksSyncRequest.array_name)
+}
+inline std::string* ReadBlocksSyncRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReadBlocksSyncRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ReadBlocksSyncRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReadBlocksSyncRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ReadBlocksSyncRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void ReadBlocksSyncRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& ReadBlocksSyncRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void ReadBlocksSyncRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ReadBlocksSyncRequest.volume_name)
+}
+inline std::string* ReadBlocksSyncRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ReadBlocksSyncRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& ReadBlocksSyncRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void ReadBlocksSyncRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReadBlocksSyncRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ReadBlocksSyncRequest.volume_name)
+}
+inline void ReadBlocksSyncRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ReadBlocksSyncRequest.volume_name)
+}
+inline void ReadBlocksSyncRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ReadBlocksSyncRequest.volume_name)
+}
+inline std::string* ReadBlocksSyncRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReadBlocksSyncRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ReadBlocksSyncRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReadBlocksSyncRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ReadBlocksSyncRequest.volume_name)
+}
+
+// uint64 rba = 3;
+inline void ReadBlocksSyncRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ReadBlocksSyncRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ReadBlocksSyncRequest::rba() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncRequest.rba)
+  return _internal_rba();
+}
+inline void ReadBlocksSyncRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void ReadBlocksSyncRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ReadBlocksSyncRequest.rba)
+}
+
+// uint64 num_blocks = 4;
+inline void ReadBlocksSyncRequest::clear_num_blocks() {
+  num_blocks_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ReadBlocksSyncRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 ReadBlocksSyncRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void ReadBlocksSyncRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  num_blocks_ = value;
+}
+inline void ReadBlocksSyncRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ReadBlocksSyncRequest.num_blocks)
+}
+
+// -------------------------------------------------------------------
+
+// ReadBlocksSyncResponse
+
+// .pos_rpc.PosResult result = 1;
+inline void ReadBlocksSyncResponse::clear_result() {
+  result_ = 0;
+}
+inline ::pos_rpc::PosResult ReadBlocksSyncResponse::_internal_result() const {
+  return static_cast< ::pos_rpc::PosResult >(result_);
+}
+inline ::pos_rpc::PosResult ReadBlocksSyncResponse::result() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncResponse.result)
+  return _internal_result();
+}
+inline void ReadBlocksSyncResponse::_internal_set_result(::pos_rpc::PosResult value) {
+  
+  result_ = value;
+}
+inline void ReadBlocksSyncResponse::set_result(::pos_rpc::PosResult value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ReadBlocksSyncResponse.result)
+}
+
+// string reason = 2;
+inline bool ReadBlocksSyncResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ReadBlocksSyncResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void ReadBlocksSyncResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& ReadBlocksSyncResponse::reason() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncResponse.reason)
+  return _internal_reason();
+}
+inline void ReadBlocksSyncResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ReadBlocksSyncResponse.reason)
+}
+inline std::string* ReadBlocksSyncResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ReadBlocksSyncResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& ReadBlocksSyncResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void ReadBlocksSyncResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ReadBlocksSyncResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ReadBlocksSyncResponse.reason)
+}
+inline void ReadBlocksSyncResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ReadBlocksSyncResponse.reason)
+}
+inline void ReadBlocksSyncResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ReadBlocksSyncResponse.reason)
+}
+inline std::string* ReadBlocksSyncResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ReadBlocksSyncResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ReadBlocksSyncResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ReadBlocksSyncResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ReadBlocksSyncResponse.reason)
+}
+
+// repeated .pos_rpc.Chunk data = 3;
+inline int ReadBlocksSyncResponse::_internal_data_size() const {
+  return data_.size();
+}
+inline int ReadBlocksSyncResponse::data_size() const {
+  return _internal_data_size();
+}
+inline void ReadBlocksSyncResponse::clear_data() {
+  data_.Clear();
+}
+inline ::pos_rpc::Chunk* ReadBlocksSyncResponse::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ReadBlocksSyncResponse.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >*
+ReadBlocksSyncResponse::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:pos_rpc.ReadBlocksSyncResponse.data)
+  return &data_;
+}
+inline const ::pos_rpc::Chunk& ReadBlocksSyncResponse::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::pos_rpc::Chunk& ReadBlocksSyncResponse::data(int index) const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksSyncResponse.data)
+  return _internal_data(index);
+}
+inline ::pos_rpc::Chunk* ReadBlocksSyncResponse::_internal_add_data() {
+  return data_.Add();
+}
+inline ::pos_rpc::Chunk* ReadBlocksSyncResponse::add_data() {
+  // @@protoc_insertion_point(field_add:pos_rpc.ReadBlocksSyncResponse.data)
+  return _internal_add_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >&
+ReadBlocksSyncResponse::data() const {
+  // @@protoc_insertion_point(field_list:pos_rpc.ReadBlocksSyncResponse.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
 // WriteHostBlocksRequest
 
 // string array_name = 1;
@@ -8160,47 +7346,7 @@ inline void WriteHostBlocksRequest::set_allocated_volume_name(std::string* volum
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteHostBlocksRequest.volume_name)
 }
 
-// uint64 rba = 3;
-inline void WriteHostBlocksRequest::clear_rba() {
-  rba_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteHostBlocksRequest::_internal_rba() const {
-  return rba_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteHostBlocksRequest::rba() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksRequest.rba)
-  return _internal_rba();
-}
-inline void WriteHostBlocksRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  rba_ = value;
-}
-inline void WriteHostBlocksRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_rba(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksRequest.rba)
-}
-
-// uint64 num_blocks = 4;
-inline void WriteHostBlocksRequest::clear_num_blocks() {
-  num_blocks_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteHostBlocksRequest::_internal_num_blocks() const {
-  return num_blocks_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteHostBlocksRequest::num_blocks() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksRequest.num_blocks)
-  return _internal_num_blocks();
-}
-inline void WriteHostBlocksRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  num_blocks_ = value;
-}
-inline void WriteHostBlocksRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_num_blocks(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksRequest.num_blocks)
-}
-
-// uint64 lsn = 5;
+// uint64 lsn = 3;
 inline void WriteHostBlocksRequest::clear_lsn() {
   lsn_ = PROTOBUF_ULONGLONG(0);
 }
@@ -8315,6 +7461,249 @@ inline void WriteHostBlocksResponse::set_allocated_reason(std::string* reason) {
   reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteHostBlocksResponse.reason)
+}
+
+// -------------------------------------------------------------------
+
+// WriteHostBlocksSyncRequest
+
+// string array_name = 1;
+inline void WriteHostBlocksSyncRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& WriteHostBlocksSyncRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+  return _internal_array_name();
+}
+inline void WriteHostBlocksSyncRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+}
+inline std::string* WriteHostBlocksSyncRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& WriteHostBlocksSyncRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void WriteHostBlocksSyncRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void WriteHostBlocksSyncRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+}
+inline void WriteHostBlocksSyncRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+}
+inline void WriteHostBlocksSyncRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+}
+inline std::string* WriteHostBlocksSyncRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* WriteHostBlocksSyncRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void WriteHostBlocksSyncRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteHostBlocksSyncRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void WriteHostBlocksSyncRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& WriteHostBlocksSyncRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void WriteHostBlocksSyncRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+}
+inline std::string* WriteHostBlocksSyncRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& WriteHostBlocksSyncRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void WriteHostBlocksSyncRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void WriteHostBlocksSyncRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+}
+inline void WriteHostBlocksSyncRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+}
+inline void WriteHostBlocksSyncRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+}
+inline std::string* WriteHostBlocksSyncRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* WriteHostBlocksSyncRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void WriteHostBlocksSyncRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteHostBlocksSyncRequest.volume_name)
+}
+
+// uint64 lsn = 3;
+inline void WriteHostBlocksSyncRequest::clear_lsn() {
+  lsn_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteHostBlocksSyncRequest::_internal_lsn() const {
+  return lsn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 WriteHostBlocksSyncRequest::lsn() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksSyncRequest.lsn)
+  return _internal_lsn();
+}
+inline void WriteHostBlocksSyncRequest::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  lsn_ = value;
+}
+inline void WriteHostBlocksSyncRequest::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_lsn(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksSyncRequest.lsn)
+}
+
+// -------------------------------------------------------------------
+
+// WriteHostBlocksSyncResponse
+
+// .pos_rpc.PosResult result = 1;
+inline void WriteHostBlocksSyncResponse::clear_result() {
+  result_ = 0;
+}
+inline ::pos_rpc::PosResult WriteHostBlocksSyncResponse::_internal_result() const {
+  return static_cast< ::pos_rpc::PosResult >(result_);
+}
+inline ::pos_rpc::PosResult WriteHostBlocksSyncResponse::result() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksSyncResponse.result)
+  return _internal_result();
+}
+inline void WriteHostBlocksSyncResponse::_internal_set_result(::pos_rpc::PosResult value) {
+  
+  result_ = value;
+}
+inline void WriteHostBlocksSyncResponse::set_result(::pos_rpc::PosResult value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksSyncResponse.result)
+}
+
+// string reason = 2;
+inline bool WriteHostBlocksSyncResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool WriteHostBlocksSyncResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void WriteHostBlocksSyncResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& WriteHostBlocksSyncResponse::reason() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.WriteHostBlocksSyncResponse.reason)
+  return _internal_reason();
+}
+inline void WriteHostBlocksSyncResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.WriteHostBlocksSyncResponse.reason)
+}
+inline std::string* WriteHostBlocksSyncResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.WriteHostBlocksSyncResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& WriteHostBlocksSyncResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void WriteHostBlocksSyncResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void WriteHostBlocksSyncResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.WriteHostBlocksSyncResponse.reason)
+}
+inline void WriteHostBlocksSyncResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.WriteHostBlocksSyncResponse.reason)
+}
+inline void WriteHostBlocksSyncResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.WriteHostBlocksSyncResponse.reason)
+}
+inline std::string* WriteHostBlocksSyncResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* WriteHostBlocksSyncResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:pos_rpc.WriteHostBlocksSyncResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void WriteHostBlocksSyncResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.WriteHostBlocksSyncResponse.reason)
 }
 
 // -------------------------------------------------------------------
@@ -9553,12 +8942,6 @@ inline void ResumeWriteResponse::set_allocated_reason(std::string* reason) {
 
 // -------------------------------------------------------------------
 
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
-// -------------------------------------------------------------------
-
 
 // @@protoc_insertion_point(namespace_scope)
 
@@ -9570,11 +8953,6 @@ template <> struct is_proto_enum< ::pos_rpc::HealthCheckResponse_ServingStatus> 
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::pos_rpc::HealthCheckResponse_ServingStatus>() {
   return ::pos_rpc::HealthCheckResponse_ServingStatus_descriptor();
-}
-template <> struct is_proto_enum< ::pos_rpc::ArrayInfo_ArrayState> : ::std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::pos_rpc::ArrayInfo_ArrayState>() {
-  return ::pos_rpc::ArrayInfo_ArrayState_descriptor();
 }
 template <> struct is_proto_enum< ::pos_rpc::VolumeInfo_VolumeState> : ::std::true_type {};
 template <>

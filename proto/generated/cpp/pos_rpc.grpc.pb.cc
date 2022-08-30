@@ -83,14 +83,7 @@ Health::Service::~Service() {
 
 
 static const char* PosManagement_method_names[] = {
-  "/pos_rpc.PosManagement/CreateArray",
-  "/pos_rpc.PosManagement/DeleteArray",
-  "/pos_rpc.PosManagement/CreateVolume",
-  "/pos_rpc.PosManagement/DeleteVolume",
-  "/pos_rpc.PosManagement/MountVolume",
-  "/pos_rpc.PosManagement/UnmountVolume",
   "/pos_rpc.PosManagement/UpdateVoluemMeta",
-  "/pos_rpc.PosManagement/GetArrayList",
   "/pos_rpc.PosManagement/GetVolumeList",
 };
 
@@ -101,154 +94,9 @@ std::unique_ptr< PosManagement::Stub> PosManagement::NewStub(const std::shared_p
 }
 
 PosManagement::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_CreateArray_(PosManagement_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_DeleteArray_(PosManagement_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CreateVolume_(PosManagement_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_DeleteVolume_(PosManagement_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_MountVolume_(PosManagement_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UnmountVolume_(PosManagement_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UpdateVoluemMeta_(PosManagement_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetArrayList_(PosManagement_method_names[7], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_GetVolumeList_(PosManagement_method_names[8], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  : channel_(channel), rpcmethod_UpdateVoluemMeta_(PosManagement_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_GetVolumeList_(PosManagement_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
-
-::grpc::Status PosManagement::Stub::CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::pos_rpc::PosResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateArray_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateArray_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateArray_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncCreateArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::CreateArrayRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateArray_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncCreateArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncCreateArrayRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status PosManagement::Stub::DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::pos_rpc::PosResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_DeleteArray_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeleteArray_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeleteArray_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::DeleteArrayRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_DeleteArray_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncDeleteArrayRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status PosManagement::Stub::CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::pos_rpc::PosResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateVolume_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateVolume_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateVolume_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::CreateVolumeRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateVolume_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncCreateVolumeRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status PosManagement::Stub::DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::pos_rpc::PosResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_DeleteVolume_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeleteVolume_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_DeleteVolume_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::DeleteVolumeRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_DeleteVolume_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncDeleteVolumeRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status PosManagement::Stub::MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::pos_rpc::PosResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_MountVolume_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_MountVolume_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_MountVolume_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::MountVolumeRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_MountVolume_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncMountVolumeRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status PosManagement::Stub::UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::pos_rpc::PosResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_UnmountVolume_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UnmountVolume_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_UnmountVolume_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::PosResponse, ::pos_rpc::UnmountVolumeRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_UnmountVolume_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncUnmountVolumeRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
 
 ::grpc::Status PosManagement::Stub::UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::pos_rpc::PosResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_UpdateVoluemMeta_, context, request, response);
@@ -269,29 +117,6 @@ void PosManagement::Stub::experimental_async::UpdateVoluemMeta(::grpc::ClientCon
 ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PosManagement::Stub::AsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncUpdateVoluemMetaRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status PosManagement::Stub::GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::pos_rpc::ArrayListResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_GetArrayList_, context, request, response);
-}
-
-void PosManagement::Stub::experimental_async::GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetArrayList_, context, request, response, std::move(f));
-}
-
-void PosManagement::Stub::experimental_async::GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_GetArrayList_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>* PosManagement::Stub::PrepareAsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::ArrayListResponse, ::pos_rpc::GetArrayListRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_GetArrayList_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>* PosManagement::Stub::AsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncGetArrayListRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -323,66 +148,6 @@ PosManagement::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosManagement_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::CreateArrayRequest* req,
-             ::pos_rpc::PosResponse* resp) {
-               return service->CreateArray(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[1],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::DeleteArrayRequest* req,
-             ::pos_rpc::PosResponse* resp) {
-               return service->DeleteArray(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[2],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::CreateVolumeRequest* req,
-             ::pos_rpc::PosResponse* resp) {
-               return service->CreateVolume(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[3],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::DeleteVolumeRequest* req,
-             ::pos_rpc::PosResponse* resp) {
-               return service->DeleteVolume(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[4],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::MountVolumeRequest* req,
-             ::pos_rpc::PosResponse* resp) {
-               return service->MountVolume(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[5],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::UnmountVolumeRequest* req,
-             ::pos_rpc::PosResponse* resp) {
-               return service->UnmountVolume(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[6],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosManagement::Service* service,
              ::grpc::ServerContext* ctx,
@@ -391,17 +156,7 @@ PosManagement::Service::Service() {
                return service->UpdateVoluemMeta(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[7],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosManagement::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::pos_rpc::GetArrayListRequest* req,
-             ::pos_rpc::ArrayListResponse* resp) {
-               return service->GetArrayList(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosManagement_method_names[8],
+      PosManagement_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosManagement::Service, ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosManagement::Service* service,
@@ -415,56 +170,7 @@ PosManagement::Service::Service() {
 PosManagement::Service::~Service() {
 }
 
-::grpc::Status PosManagement::Service::CreateArray(::grpc::ServerContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status PosManagement::Service::DeleteArray(::grpc::ServerContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status PosManagement::Service::CreateVolume(::grpc::ServerContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status PosManagement::Service::DeleteVolume(::grpc::ServerContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status PosManagement::Service::MountVolume(::grpc::ServerContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status PosManagement::Service::UnmountVolume(::grpc::ServerContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
 ::grpc::Status PosManagement::Service::UpdateVoluemMeta(::grpc::ServerContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status PosManagement::Service::GetArrayList(::grpc::ServerContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response) {
   (void) context;
   (void) request;
   (void) response;
@@ -483,6 +189,9 @@ static const char* PosIo_method_names[] = {
   "/pos_rpc.PosIo/ReadBlocks",
   "/pos_rpc.PosIo/WriteBlocks",
   "/pos_rpc.PosIo/WriteHostBlocks",
+  "/pos_rpc.PosIo/ReadBlocksSync",
+  "/pos_rpc.PosIo/WriteBlocksSync",
+  "/pos_rpc.PosIo/WriteHostBlocksSync",
   "/pos_rpc.PosIo/CompleteHostWrite",
 };
 
@@ -496,7 +205,10 @@ PosIo::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, con
   : channel_(channel), rpcmethod_ReadBlocks_(PosIo_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_WriteBlocks_(PosIo_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_WriteHostBlocks_(PosIo_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CompleteHostWrite_(PosIo_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ReadBlocksSync_(PosIo_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_WriteBlocksSync_(PosIo_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_WriteHostBlocksSync_(PosIo_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CompleteHostWrite_(PosIo_method_names[6], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosIo::Stub::ReadBlocks(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksRequest& request, ::pos_rpc::ReadBlocksResponse* response) {
@@ -568,6 +280,75 @@ void PosIo::Stub::experimental_async::WriteHostBlocks(::grpc::ClientContext* con
   return result;
 }
 
+::grpc::Status PosIo::Stub::ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::pos_rpc::ReadBlocksSyncResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ReadBlocksSync_, context, request, response);
+}
+
+void PosIo::Stub::experimental_async::ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ReadBlocksSync_, context, request, response, std::move(f));
+}
+
+void PosIo::Stub::experimental_async::ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ReadBlocksSync_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>* PosIo::Stub::PrepareAsyncReadBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::ReadBlocksSyncResponse, ::pos_rpc::ReadBlocksSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ReadBlocksSync_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>* PosIo::Stub::AsyncReadBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncReadBlocksSyncRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosIo::Stub::WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::pos_rpc::WriteBlocksSyncResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_WriteBlocksSync_, context, request, response);
+}
+
+void PosIo::Stub::experimental_async::WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_WriteBlocksSync_, context, request, response, std::move(f));
+}
+
+void PosIo::Stub::experimental_async::WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_WriteBlocksSync_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>* PosIo::Stub::PrepareAsyncWriteBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::WriteBlocksSyncResponse, ::pos_rpc::WriteBlocksSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_WriteBlocksSync_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>* PosIo::Stub::AsyncWriteBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncWriteBlocksSyncRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosIo::Stub::WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::pos_rpc::WriteHostBlocksSyncResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_WriteHostBlocksSync_, context, request, response);
+}
+
+void PosIo::Stub::experimental_async::WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_WriteHostBlocksSync_, context, request, response, std::move(f));
+}
+
+void PosIo::Stub::experimental_async::WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_WriteHostBlocksSync_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>* PosIo::Stub::PrepareAsyncWriteHostBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::WriteHostBlocksSyncResponse, ::pos_rpc::WriteHostBlocksSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_WriteHostBlocksSync_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>* PosIo::Stub::AsyncWriteHostBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncWriteHostBlocksSyncRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status PosIo::Stub::CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::pos_rpc::CompleteHostWriteResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::CompleteHostWriteRequest, ::pos_rpc::CompleteHostWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CompleteHostWrite_, context, request, response);
 }
@@ -625,6 +406,36 @@ PosIo::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosIo_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosIo::Service, ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosIo::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::pos_rpc::ReadBlocksSyncRequest* req,
+             ::pos_rpc::ReadBlocksSyncResponse* resp) {
+               return service->ReadBlocksSync(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosIo_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosIo::Service, ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosIo::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::pos_rpc::WriteBlocksSyncRequest* req,
+             ::pos_rpc::WriteBlocksSyncResponse* resp) {
+               return service->WriteBlocksSync(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosIo_method_names[5],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosIo::Service, ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosIo::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::pos_rpc::WriteHostBlocksSyncRequest* req,
+             ::pos_rpc::WriteHostBlocksSyncResponse* resp) {
+               return service->WriteHostBlocksSync(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosIo_method_names[6],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosIo::Service, ::pos_rpc::CompleteHostWriteRequest, ::pos_rpc::CompleteHostWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosIo::Service* service,
              ::grpc::ServerContext* ctx,
@@ -658,6 +469,27 @@ PosIo::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
+::grpc::Status PosIo::Service::ReadBlocksSync(::grpc::ServerContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosIo::Service::WriteBlocksSync(::grpc::ServerContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosIo::Service::WriteHostBlocksSync(::grpc::ServerContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
 ::grpc::Status PosIo::Service::CompleteHostWrite(::grpc::ServerContext* context, const ::pos_rpc::CompleteHostWriteRequest* request, ::pos_rpc::CompleteHostWriteResponse* response) {
   (void) context;
   (void) request;
@@ -666,154 +498,154 @@ PosIo::Service::~Service() {
 }
 
 
-static const char* PosControl_method_names[] = {
-  "/pos_rpc.PosControl/StartVolumeSync",
-  "/pos_rpc.PosControl/FinishVolumeSync",
-  "/pos_rpc.PosControl/SuspendWrite",
-  "/pos_rpc.PosControl/ResumeWrite",
+static const char* ReplicationControl_method_names[] = {
+  "/pos_rpc.ReplicationControl/StartVolumeSync",
+  "/pos_rpc.ReplicationControl/FinishVolumeSync",
+  "/pos_rpc.ReplicationControl/SuspendWrite",
+  "/pos_rpc.ReplicationControl/ResumeWrite",
 };
 
-std::unique_ptr< PosControl::Stub> PosControl::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+std::unique_ptr< ReplicationControl::Stub> ReplicationControl::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< PosControl::Stub> stub(new PosControl::Stub(channel, options));
+  std::unique_ptr< ReplicationControl::Stub> stub(new ReplicationControl::Stub(channel, options));
   return stub;
 }
 
-PosControl::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_StartVolumeSync_(PosControl_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_FinishVolumeSync_(PosControl_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SuspendWrite_(PosControl_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ResumeWrite_(PosControl_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+ReplicationControl::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
+  : channel_(channel), rpcmethod_StartVolumeSync_(ReplicationControl_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_FinishVolumeSync_(ReplicationControl_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SuspendWrite_(ReplicationControl_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ResumeWrite_(ReplicationControl_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
-::grpc::Status PosControl::Stub::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::pos_rpc::StartVolumeSyncResponse* response) {
+::grpc::Status ReplicationControl::Stub::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::pos_rpc::StartVolumeSyncResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::StartVolumeSyncRequest, ::pos_rpc::StartVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_StartVolumeSync_, context, request, response);
 }
 
-void PosControl::Stub::experimental_async::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response, std::function<void(::grpc::Status)> f) {
+void ReplicationControl::Stub::experimental_async::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response, std::function<void(::grpc::Status)> f) {
   ::grpc::internal::CallbackUnaryCall< ::pos_rpc::StartVolumeSyncRequest, ::pos_rpc::StartVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_StartVolumeSync_, context, request, response, std::move(f));
 }
 
-void PosControl::Stub::experimental_async::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ReplicationControl::Stub::experimental_async::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_StartVolumeSync_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>* PosControl::Stub::PrepareAsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>* ReplicationControl::Stub::PrepareAsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
   return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::StartVolumeSyncResponse, ::pos_rpc::StartVolumeSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_StartVolumeSync_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>* PosControl::Stub::AsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::StartVolumeSyncResponse>* ReplicationControl::Stub::AsyncStartVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncStartVolumeSyncRaw(context, request, cq);
   result->StartCall();
   return result;
 }
 
-::grpc::Status PosControl::Stub::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVolumeSyncResponse* response) {
+::grpc::Status ReplicationControl::Stub::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::pos_rpc::FinishVolumeSyncResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_FinishVolumeSync_, context, request, response);
 }
 
-void PosControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, std::function<void(::grpc::Status)> f) {
+void ReplicationControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, std::function<void(::grpc::Status)> f) {
   ::grpc::internal::CallbackUnaryCall< ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FinishVolumeSync_, context, request, response, std::move(f));
 }
 
-void PosControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ReplicationControl::Stub::experimental_async::FinishVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_FinishVolumeSync_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* PosControl::Stub::PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* ReplicationControl::Stub::PrepareAsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
   return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::FinishVolumeSyncResponse, ::pos_rpc::FinishVolumeSyncRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_FinishVolumeSync_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* PosControl::Stub::AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::FinishVolumeSyncResponse>* ReplicationControl::Stub::AsyncFinishVolumeSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::FinishVolumeSyncRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncFinishVolumeSyncRaw(context, request, cq);
   result->StartCall();
   return result;
 }
 
-::grpc::Status PosControl::Stub::SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::pos_rpc::SuspendWriteResponse* response) {
+::grpc::Status ReplicationControl::Stub::SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::pos_rpc::SuspendWriteResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::SuspendWriteRequest, ::pos_rpc::SuspendWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SuspendWrite_, context, request, response);
 }
 
-void PosControl::Stub::experimental_async::SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response, std::function<void(::grpc::Status)> f) {
+void ReplicationControl::Stub::experimental_async::SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response, std::function<void(::grpc::Status)> f) {
   ::grpc::internal::CallbackUnaryCall< ::pos_rpc::SuspendWriteRequest, ::pos_rpc::SuspendWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SuspendWrite_, context, request, response, std::move(f));
 }
 
-void PosControl::Stub::experimental_async::SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ReplicationControl::Stub::experimental_async::SuspendWrite(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_SuspendWrite_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* PosControl::Stub::PrepareAsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* ReplicationControl::Stub::PrepareAsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) {
   return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::SuspendWriteResponse, ::pos_rpc::SuspendWriteRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_SuspendWrite_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* PosControl::Stub::AsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* ReplicationControl::Stub::AsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncSuspendWriteRaw(context, request, cq);
   result->StartCall();
   return result;
 }
 
-::grpc::Status PosControl::Stub::ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::pos_rpc::ResumeWriteResponse* response) {
+::grpc::Status ReplicationControl::Stub::ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::pos_rpc::ResumeWriteResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::ResumeWriteRequest, ::pos_rpc::ResumeWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ResumeWrite_, context, request, response);
 }
 
-void PosControl::Stub::experimental_async::ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response, std::function<void(::grpc::Status)> f) {
+void ReplicationControl::Stub::experimental_async::ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response, std::function<void(::grpc::Status)> f) {
   ::grpc::internal::CallbackUnaryCall< ::pos_rpc::ResumeWriteRequest, ::pos_rpc::ResumeWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ResumeWrite_, context, request, response, std::move(f));
 }
 
-void PosControl::Stub::experimental_async::ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+void ReplicationControl::Stub::experimental_async::ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
   ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ResumeWrite_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* PosControl::Stub::PrepareAsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* ReplicationControl::Stub::PrepareAsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) {
   return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::ResumeWriteResponse, ::pos_rpc::ResumeWriteRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ResumeWrite_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* PosControl::Stub::AsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* ReplicationControl::Stub::AsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
     this->PrepareAsyncResumeWriteRaw(context, request, cq);
   result->StartCall();
   return result;
 }
 
-PosControl::Service::Service() {
+ReplicationControl::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosControl_method_names[0],
+      ReplicationControl_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosControl::Service, ::pos_rpc::StartVolumeSyncRequest, ::pos_rpc::StartVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosControl::Service* service,
+      new ::grpc::internal::RpcMethodHandler< ReplicationControl::Service, ::pos_rpc::StartVolumeSyncRequest, ::pos_rpc::StartVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicationControl::Service* service,
              ::grpc::ServerContext* ctx,
              const ::pos_rpc::StartVolumeSyncRequest* req,
              ::pos_rpc::StartVolumeSyncResponse* resp) {
                return service->StartVolumeSync(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosControl_method_names[1],
+      ReplicationControl_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosControl::Service, ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosControl::Service* service,
+      new ::grpc::internal::RpcMethodHandler< ReplicationControl::Service, ::pos_rpc::FinishVolumeSyncRequest, ::pos_rpc::FinishVolumeSyncResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicationControl::Service* service,
              ::grpc::ServerContext* ctx,
              const ::pos_rpc::FinishVolumeSyncRequest* req,
              ::pos_rpc::FinishVolumeSyncResponse* resp) {
                return service->FinishVolumeSync(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosControl_method_names[2],
+      ReplicationControl_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosControl::Service, ::pos_rpc::SuspendWriteRequest, ::pos_rpc::SuspendWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosControl::Service* service,
+      new ::grpc::internal::RpcMethodHandler< ReplicationControl::Service, ::pos_rpc::SuspendWriteRequest, ::pos_rpc::SuspendWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicationControl::Service* service,
              ::grpc::ServerContext* ctx,
              const ::pos_rpc::SuspendWriteRequest* req,
              ::pos_rpc::SuspendWriteResponse* resp) {
                return service->SuspendWrite(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosControl_method_names[3],
+      ReplicationControl_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< PosControl::Service, ::pos_rpc::ResumeWriteRequest, ::pos_rpc::ResumeWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](PosControl::Service* service,
+      new ::grpc::internal::RpcMethodHandler< ReplicationControl::Service, ::pos_rpc::ResumeWriteRequest, ::pos_rpc::ResumeWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicationControl::Service* service,
              ::grpc::ServerContext* ctx,
              const ::pos_rpc::ResumeWriteRequest* req,
              ::pos_rpc::ResumeWriteResponse* resp) {
@@ -821,31 +653,31 @@ PosControl::Service::Service() {
              }, this)));
 }
 
-PosControl::Service::~Service() {
+ReplicationControl::Service::~Service() {
 }
 
-::grpc::Status PosControl::Service::StartVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response) {
+::grpc::Status ReplicationControl::Service::StartVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::StartVolumeSyncRequest* request, ::pos_rpc::StartVolumeSyncResponse* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status PosControl::Service::FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response) {
+::grpc::Status ReplicationControl::Service::FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status PosControl::Service::SuspendWrite(::grpc::ServerContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response) {
+::grpc::Status ReplicationControl::Service::SuspendWrite(::grpc::ServerContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response) {
   (void) context;
   (void) request;
   (void) response;
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status PosControl::Service::ResumeWrite(::grpc::ServerContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response) {
+::grpc::Status ReplicationControl::Service::ResumeWrite(::grpc::ServerContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response) {
   (void) context;
   (void) request;
   (void) response;
