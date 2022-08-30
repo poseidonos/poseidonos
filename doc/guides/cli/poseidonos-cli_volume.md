@@ -49,5 +49,6 @@ poseidonos-cli volume [flags]
 * [poseidonos-cli volume mount](poseidonos-cli_volume_mount.md)	 - Mount a volume to the host.
 * [poseidonos-cli volume mount-with-subsystem](poseidonos-cli_volume_mount-with-subsystem.md)	 - Create a subsystem and add listener automatically. Mount a volume to Host.
 * [poseidonos-cli volume rename](poseidonos-cli_volume_rename.md)	 - Rename a volume of PoseidonOS.
+* [poseidonos-cli volume set-property](poseidonos-cli_volume_set-property.md)	 - Set the properties of a volume.
 * [poseidonos-cli volume unmount](poseidonos-cli_volume_unmount.md)	 - Unmount a volume to the host.
 

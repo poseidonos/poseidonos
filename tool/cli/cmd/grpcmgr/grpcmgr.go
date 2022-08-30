@@ -15,8 +15,9 @@ import (
 
 const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
 const dialTimeout = 10
+
 // TODO (mj): temporarily set the timeout for unmount array command to 30 minutes
-// because the command exceptionally takes too long. 
+// because the command exceptionally takes too long.
 // However, the timeout needs to be systemically set in the future.
 const unmountArrayCmdTimeout = 1800
 
@@ -824,6 +825,28 @@ func SendCreateVolume(req *pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, er
 	defer cancel()
 
 	res, err := c.CreateVolume(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendVolumeProperty(req *pb.SetVolumePropertyRequest) (*pb.SetVolumePropertyResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.SetVolumeProperty(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err
