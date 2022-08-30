@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "grpc_pos_controler.h"
+#include "grpc_pos_controller.h"
 
 #include <grpc/status.h>
 
@@ -40,7 +40,7 @@
 namespace pos
 {
 ::grpc::Status
-GrpcPosControler::StartVolumeSync(
+GrpcReplicationControler::StartVolumeSync(
     ::grpc::ServerContext* context,
     const pos_rpc::StartVolumeSyncRequest* request,
     pos_rpc::StartVolumeSyncResponse* response)

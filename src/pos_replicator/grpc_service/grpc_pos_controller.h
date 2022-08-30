@@ -39,13 +39,13 @@
 
 namespace pos
 {
-class GrpcPosControler final : public pos_rpc::PosControl::Service
+class GrpcReplicationControler final : public pos_rpc::ReplicationControl::Service
 {
 public:
-    GrpcPosControler(void)
+    GrpcReplicationControler(void)
     {
     }
-    ~GrpcPosControler(void)
+    ~GrpcReplicationControler(void)
     {
     }
     virtual ::grpc::Status StartVolumeSync(

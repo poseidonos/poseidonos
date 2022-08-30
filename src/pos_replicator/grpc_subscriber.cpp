@@ -42,7 +42,7 @@
 #include <thread>
 
 #include "grpc_service/grpc_health.h"
-#include "grpc_service/grpc_pos_controler.h"
+#include "grpc_service/grpc_pos_controller.h"
 #include "grpc_service/grpc_pos_management.h"
 #include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
@@ -64,7 +64,7 @@ GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
     }
 
     healthChecker = new GrpcHealth();
-    posControler = new GrpcPosControler();
+    posControler = new GrpcReplicationControler();
     posManagement = new GrpcPosManagement();
     new std::thread(&GrpcSubscriber::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator subscriber has been initialized successfully");
