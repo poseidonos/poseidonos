@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "grpc_pos_controller.h"
+#include "grpc_replication_controller.h"
 
 #include <grpc/status.h>
 

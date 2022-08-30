@@ -42,7 +42,7 @@
 #include <thread>
 
 #include "grpc_service/grpc_health.h"
-#include "grpc_service/grpc_pos_controller.h"
+#include "grpc_service/grpc_replication_controller.h"
 #include "grpc_service/grpc_pos_management.h"
 #include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
