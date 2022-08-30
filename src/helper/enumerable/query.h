@@ -126,6 +126,21 @@ auto Select(S&& s, F f)
     return result;
 }
 
+template<typename S/*Source*/, typename FS/*Selector*/, typename FW/*Where<bool>*/>
+auto SelectWhere(S&& s, FS fs, FW fw)
+{
+    using type_t = decltype(fs(*std::begin(s)));
+    std::vector<type_t> result;
+    for (auto&& i : s)
+    {
+        if (fw(i) == true)
+        {
+            result.emplace_back(fs(i));
+        }
+    }
+    return result;
+}
+
 template<typename S/*Source*/, typename F/*Sort by*/>
 auto Minimum(S&& s, F f)
 {

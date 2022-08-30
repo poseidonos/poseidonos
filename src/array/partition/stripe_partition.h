@@ -89,7 +89,7 @@ private:
     int _SetPhysicalAddress(uint64_t startLba, uint32_t segCnt);
     void _SetLogicalAddress(void);
     int _SetMethod(uint64_t totalNvmBlks);
-    list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba);
+    list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals);
     RaidTypeEnum raidType;
     Method* method = nullptr;
     vector<uint32_t> _GetAbnormalDeviceIndex(void);

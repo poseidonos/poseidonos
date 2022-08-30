@@ -614,6 +614,22 @@ class PosCliServiceImpl final : public PosCli::Service {
     
     return status;
   }
+
+  grpc::Status
+  SetVolumeProperty(ServerContext* context, const SetVolumePropertyRequest* request,
+                  SetVolumePropertyResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteSetVolumePropertyCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+    
+    return status;
+  }
 };
 
 void

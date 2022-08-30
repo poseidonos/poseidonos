@@ -378,11 +378,9 @@ StripePartition::_Pba2Fba(const PhysicalBlkAddr& pba)
 }
 
 list<PhysicalBlkAddr>
-StripePartition::_GetRebuildGroup(FtBlkAddr fba)
+StripePartition::_GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals)
 {
-    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
-
-    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba, abnormalDeviceIndex);
+    list<FtBlkAddr> ftAddrs = method->GetRebuildGroup(fba, abnormals);
     list<PhysicalBlkAddr> ret;
     for (FtBlkAddr fba : ftAddrs)
     {
@@ -435,7 +433,7 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
 {
     uint64_t lba = ubio->GetLba();
     ArrayDevice* dev = static_cast<ArrayDevice*>(ubio->GetArrayDev());
-    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
+    vector<uint32_t> abnormals = _GetAbnormalDeviceIndex();
 
     if (IsValidLba(lba))
     {
@@ -450,9 +448,8 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
             BlockAlignment blockAlignment(originPba.lba * sectorSize, ubio->GetSize());
             originPba.lba = blockAlignment.GetHeadBlock() * sectorsPerBlock;
             FtBlkAddr fba = _Pba2Fba(originPba);
-            out.srcAddr = _GetRebuildGroup(fba);
-            out.recoverFunc = method->GetRecoverFunc(devIdx, abnormalDeviceIndex);
-
+            out.srcAddr = _GetRebuildGroup(fba, abnormals);
+            out.recoverFunc = method->GetRecoverFunc(vector<uint32_t>{(uint32_t)devIdx}, abnormals);
             return EID(SUCCESS);
         }
         else
@@ -546,6 +543,7 @@ StripePartition::_SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPair
     vector<pair<vector<uint32_t>, vector<uint32_t>>> rg =
         method->GetRebuildGroupPairs(rebuildTargetIndexs);
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, count:{}, raidType:{}", rg.size(), GetRaidType());
+    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
     for (pair<vector<uint32_t>, vector<uint32_t>> group : rg)
     {
         vector<uint32_t> srcs = group.first;
@@ -562,8 +560,16 @@ StripePartition::_SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPair
         for (uint32_t i : dsts)
         {
             dstDevs.push_back(devs.at(i));
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+                "SetRebuildPair, dsts:{}", i);
         }
-        RecoverFunc func = method->GetRecoverFunc();
+        for (uint32_t i : abnormalDeviceIndex)
+        {
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
+                "SetRebuildPair, abnormals:{}", i);
+        }
+        
+        RecoverFunc func = method->GetRecoverFunc(dsts, abnormalDeviceIndex);
         rp.emplace_back(new RebuildPair(srcDevs, dstDevs, func));
     }
 }
@@ -604,21 +610,10 @@ StripePartition::_SetQuickRebuildPair(const QuickRebuildPair& quickRebuildPair, 
 vector<uint32_t>
 StripePartition::_GetAbnormalDeviceIndex(void)
 {
-    auto&& deviceStateList = Enumerable::Select(devs,
-        [](auto d) { return d->GetState(); });
+    auto&& abnormalDevIndex = Enumerable::SelectWhere(devs,
+        [](auto d) { return d->GetDataIndex(); }, [](auto i) { return i->GetState() != ArrayDeviceState::NORMAL; });
 
-    vector<uint32_t> abnormalDeviceIndex;
-    uint32_t deviceStateIdx = 0;
-    for (auto devState : deviceStateList)
-    {
-        if (devState != ArrayDeviceState::NORMAL)
-        {
-            abnormalDeviceIndex.push_back(deviceStateIdx);
-        }
-        deviceStateIdx++;
-    }
-
-    return abnormalDeviceIndex;
+    return abnormalDevIndex;
 }
 
 } // namespace pos

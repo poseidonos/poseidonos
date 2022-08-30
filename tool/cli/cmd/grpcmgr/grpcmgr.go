@@ -832,3 +832,25 @@ func SendCreateVolume(req *pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, er
 
 	return res, err
 }
+
+func SendVolumeProperty(req *pb.SetVolumePropertyRequest) (*pb.SetVolumePropertyResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.SetVolumeProperty(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}

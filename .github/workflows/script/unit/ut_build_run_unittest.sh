@@ -12,6 +12,7 @@ echo "Install library"
 cd ${pos_working_dir}/lib/; sudo ./build_lib.sh
 
 echo "Copying event file..."
+sudo mkdir -p /etc/pos
 sudo cp ${pos_working_dir}/src/event/pos_event.yaml /etc/pos/pos_event.yaml
 
 echo "Running cmake..."

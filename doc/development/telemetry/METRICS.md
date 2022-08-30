@@ -83,23 +83,35 @@
   - [_**AvailableMemorySize**_](#availablememorysize)
 
 - [**Disk**](#disk)
-  - [_**softMediaErrorLow**_](#softmediaerrorlow)
-  - [_**softMediaErrorHigh**_](#softmediaerrorhigh)
-  - [_**powerCycleLow**_](#powercyclelow)
-  - [_**powerCycleHigh**_](#powercyclehigh)
-  - [_**powerOnHourLow**_](#poweronhourlow)
-  - [_**powerOnHourHigh**_](#poweronhourhigh)
-  - [_**unsafeShutdownsLow**_](#unsafeshutdownslow)
-  - [_**unsafeShutdownsHigh**_](#unsafeshutdownshigh)
+  - [_**softMediaErrorLower**_](#softmediaerrorlower)
+  - [_**softMediaErrorUpper**_](#softmediaerrorupper)
+  - [_**powerCycleLower**_](#powercyclelower)
+  - [_**powerCycleUpper**_](#powercyclehupper)
+  - [_**powerOnHourLow**_](#poweronhourlower)
+  - [_**powerOnHourUpper**_](#poweronhourUpper)
+  - [_**unsafeShutdownsLow**_](#unsafeshutdownslower)
+  - [_**unsafeShutdownsUpper**_](#unsafeshutdownsupper)
   - [_**temperature**_](#temperature)
   - [_**availableSpare**_](#availablespare)
   - [_**availableSpareThreshold**_](#availablesparethreshold)
   - [_**percentageUsed**_](#percentageused)
-  - [_**controllerBusyTimeLow**_](#controllerbusytimelow)
-  - [_**controllerBusyTimeHigh**_](#controllerbusytimehigh)
+  - [_**controllerBusyTimeLower**_](#controllerbusytimelower)
+  - [_**controllerBusyTimeUpper**_](#controllerbusytimeupper)
   - [_**warningTemperatureTime**_](#warningtemperaturetime)
   - [_**criticalTemperatureTime**_](#criticaltemperaturetime)
-
+  - [_**lifetimeWaf**_](#lifetimewaf)
+  - [_**trailingHourWaf**_](#trailinghourwaf)
+  - [_**trimSectorCountLower**_](#trimsectorcountlower)
+  - [_**trimSectorCountUpper**_](#trimsectorcountupper)
+  - [_**hostWrittenCountLower**_](#hostwrittencountlower)
+  - [_**hostWrittenCountUpper**_](#hostwrittencountupper)
+  - [_**nandWrittenCountLower**_](#nandwrittencountlower)
+  - [_**nandWrittenCountUpper**_](#nandwrittencountupper)
+  - [_**thermalThrottleEventCount**_](#thermalthrottleeventcount)
+  - [_**highestTemperature**_](#highesttemperature)
+  - [_**lowestTemeperature**_](#lowesttemeperature)
+  - [_**overTemperatureCount**_](#overtemperaturecount)
+  - [_**underTemperatureCount**_](#undertemperaturecount)
 - [**IOCount**](#iocount)
   - [_**count_of_volume_io_constructors**_](#count_of_volume_io_constructors)
   - [_**count_of_volume_io_destructors**_](#count_of_volume_io_destructors)
@@ -1321,7 +1333,7 @@ Available memory size
 disk group contains the smart metrics.
 
 ---
-### _**softMediaErrorLow**_
+### _**softMediaErrorLower**_
 
 **ID**: 110000
 
@@ -1333,10 +1345,10 @@ disk group contains the smart metrics.
 
 **Introduced**: v0.10.0
 
-Soft Media Error Low Value
+Soft Media Error Lower Value
 
 ---
-### _**softMediaErrorHigh**_
+### _**softMediaErrorUpper**_
 
 **ID**: 110001
 
@@ -1348,10 +1360,10 @@ Soft Media Error Low Value
 
 **Introduced**: v0.10.0
 
-Soft Media Error High Value
+Soft Media Error Upper Value
 
 ---
-### _**powerCycleLow**_
+### _**powerCycleLower**_
 
 **ID**: 110002
 
@@ -1363,10 +1375,10 @@ Soft Media Error High Value
 
 **Introduced**: v0.10.0
 
-Power cycle Low Value
+Power cycle Lower Value
 
 ---
-### _**powerCycleHigh**_
+### _**powerCycleUpper**_
 
 **ID**: 110003
 
@@ -1378,10 +1390,10 @@ Power cycle Low Value
 
 **Introduced**: v0.10.0
 
-Power cycle High Value
+Power cycle Upper Value
 
 ---
-### _**powerOnHourLow**_
+### _**powerOnHourLower**_
 
 **ID**: 110004
 
@@ -1393,10 +1405,10 @@ Power cycle High Value
 
 **Introduced**: v0.10.0
 
-Power On Hour Low Value
+Power On Hour Lower Value
 
 ---
-### _**powerOnHourHigh**_
+### _**powerOnHourUpper**_
 
 **ID**: 110005
 
@@ -1408,10 +1420,10 @@ Power On Hour Low Value
 
 **Introduced**: v0.10.0
 
-Power On Hour High Value
+Power On Hour Upper Value
 
 ---
-### _**unsafeShutdownsLow**_
+### _**unsafeShutdownsLower**_
 
 **ID**: 110006
 
@@ -1423,10 +1435,10 @@ Power On Hour High Value
 
 **Introduced**: v0.10.0
 
-Unsafe Shutdowns Low Value
+Unsafe Shutdowns Lower Value
 
 ---
-### _**unsafeShutdownsHigh**_
+### _**unsafeShutdownsUpper**_
 
 **ID**: 110007
 
@@ -1438,7 +1450,7 @@ Unsafe Shutdowns Low Value
 
 **Introduced**: v0.10.0
 
-Unsafe Shutdowns High Value
+Unsafe Shutdowns Upper Value
 
 ---
 ### _**temperature**_
@@ -1501,8 +1513,7 @@ Available Spare Threshold Value
 Percentage Used Value
 
 ---
-### _**controllerBusyTimeLow**_
-
+### _**controllerBusyTimeLower**_
 
 **ID**: 110012
 
@@ -1514,10 +1525,10 @@ Percentage Used Value
 
 **Introduced**: v0.10.0
 
-Controller Busy Time Low Value
+Controller Busy Time Lower Value
 
 ---
-### _**controllerBusyTimeHigh**_
+### _**controllerBusyTimeUpper**_
 
 **ID**: 110013
 
@@ -1529,7 +1540,7 @@ Controller Busy Time Low Value
 
 **Introduced**: v0.10.0
 
-Controller Busy Time High Value
+Controller Busy Time Upper Value
 
 ---
 ### _**warningTemperatureTime**_
@@ -1560,6 +1571,201 @@ Warning Temperature Time Value
 **Introduced**: v0.10.0
 
 Critical Temperature Time Value
+
+---
+### _**lifetimeWaf**_
+
+**ID**: 110020
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Life Time Write Amplification Factor
+
+---
+### _**trailingHourWaf**_
+
+**ID**: 110021
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Trailing Hour Write Amplification Factor
+
+---
+### _**trimSectorCountLower**_
+
+**ID**: 110022
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Trim Sector Count Lower Value
+
+---
+### _**trimSectorCountUpper**_
+
+**ID**: 110023
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Trim Sector Count Upper Value
+
+---
+### _**hostWrittenCountLower**_
+
+**ID**: 110024
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Host Written Count Lower Value
+
+---
+### _**hostWrittenCountUpper**_
+
+**ID**: 110025
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Host Written Count Upper Value
+
+---
+### _**nandWrittenCountLower**_
+
+**ID**: 110026
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Nand Written Count Lower Value
+
+---
+### _**nandWrittenCountUpper**_
+
+**ID**: 110027
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Nand Written Count Upper Value
+
+---
+### _**thermalThrottleEventCount**_
+
+**ID**: 110028
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Thermal Throttle Event Count Value
+
+---
+### _**highestTemperature**_
+
+**ID**: 110029
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Highest Temperature Value
+
+---
+### _**lowestTemeperature**_
+
+**ID**: 110030
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Lowest Temperature Value
+
+---
+### _**overTemperatureCount**_
+
+**ID**: 110031
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Over Temperature Count Value
+
+---
+### _**underTemperatureCount**_
+
+**ID**: 110032
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Under Temperature Count Value
 
 ---
 

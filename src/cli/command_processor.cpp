@@ -1107,7 +1107,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
 
     struct spdk_nvme_health_information_page payload = {};
     SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
-    SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr);
+    SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr, SmartReqId::NVME_HEALTH_INFO);
     
     if (ret != SmartReturnType::SUCCESS)
     {
@@ -1123,6 +1123,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+
     return grpc::Status::OK;
 }
 
@@ -1589,6 +1590,83 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     }
 
     int eventId = EID(CREATE_VOL_INTERNAL_ERROR);
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string volumeName = "";
+    string arrayName = "";
+    string newVolumeName = "";
+    bool updatePrimaryVol = false;
+    bool isPrimaryVol = false;
+
+    volumeName = (request->param()).name();
+    arrayName = (request->param()).array();
+    newVolumeName = (request->param()).newvolumename();
+
+    updatePrimaryVol = (request->param()).updateprimaryvol();
+    isPrimaryVol = (request->param()).isprimaryvol();
+    
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(SET_VOLUME_PROPERTY_FAILURE_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(SET_VOLUME_PROPERTY_FAILURE_ARRAY_NOT_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IVolumeEventManager* volMgr =
+            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    
+    if (volMgr != nullptr)
+    {
+        if (newVolumeName != "")
+        {
+            int ret = volMgr->Rename(volumeName, newVolumeName);
+            if (ret != SUCCESS)
+            {
+                _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+                _SetPosInfo(reply->mutable_info());
+                return grpc::Status::OK;
+            }
+        }
+
+        if (updatePrimaryVol == true)
+        {
+            int ret = isPrimaryVol ?
+                volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Primary)
+                : volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Secondary);
+
+            if (ret != SUCCESS)
+            {
+                _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+                _SetPosInfo(reply->mutable_info());
+                return grpc::Status::OK;
+            }
+        }
+    }
+
+    int eventId = EID(SUCCESS);
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;

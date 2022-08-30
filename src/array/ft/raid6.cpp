@@ -40,6 +40,7 @@
 
 #include <string>
 #include <isa-l.h>
+#include <algorithm>
 
 namespace pos
 {
@@ -129,7 +130,7 @@ Raid6::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 }
 
 list<FtBlkAddr>
-Raid6::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
+Raid6::GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals)
 {
     uint32_t blksPerChunk = ftSize_.blksPerChunk;
     uint32_t offsetInChunk = fba.offset % blksPerChunk;
@@ -138,7 +139,7 @@ Raid6::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
     list<FtBlkAddr> recoveryGroup;
     for (uint32_t i = 0; i < ftSize_.chunksPerStripe; i++)
     {
-        if (i != chunkIndex && find(abnormalDeviceIndex.begin(), abnormalDeviceIndex.end(), i) == abnormalDeviceIndex.end())
+        if (i != chunkIndex && find(abnormals.begin(), abnormals.end(), i) == abnormals.end())
         {
             FtBlkAddr fsa = {.stripeId = fba.stripeId,
                 .offset = offsetInChunk + i * blksPerChunk};
@@ -146,6 +147,23 @@ Raid6::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
         }
     }
     return recoveryGroup;
+}
+
+vector<pair<vector<uint32_t>, vector<uint32_t>>>
+Raid6::GetRebuildGroupPairs(vector<uint32_t>& targetIndexs)
+{
+    assert(targetIndexs.size() <= 2);
+    vector<pair<vector<uint32_t>, vector<uint32_t>>> rgPair;
+    vector<uint32_t> srcIdx;
+    for (uint32_t i = 0; i < chunkCnt; i++)
+    {
+        if (find(targetIndexs.begin(), targetIndexs.end(), i) == targetIndexs.end())
+        {
+            srcIdx.push_back(i);
+        }
+    }
+    rgPair.emplace_back(make_pair(srcIdx, targetIndexs));
+    return rgPair;
 }
 
 RaidState
@@ -237,9 +255,14 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 }
 
 void
-Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> readDeviceIndex, vector<uint32_t> abnormalDeviceIndex)
+Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
-    uint32_t destCnt = abnormalDeviceIndex.size();
+    vector<uint32_t> merged;
+    merge(targets.begin(), targets.end(), abnormals.begin(), abnormals.end(), std::back_inserter(merged));
+    vector<uint32_t> excluded = Enumerable::Distinct(merged,
+        [](auto p) { return p; });
+    assert(excluded.size() != 0);
+    uint32_t destCnt = excluded.size();
     assert(destCnt <= parityCnt);
     uint32_t rebuildCnt = chunkCnt - destCnt;
 
@@ -261,7 +284,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        err_index[abnormalDeviceIndex[i]] = 1;
+        err_index[excluded[i]] = 1;
     }
 
     for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
@@ -280,11 +303,11 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        if (abnormalDeviceIndex[i] < dataCnt)
+        if (excluded[i] < dataCnt)
         {
             for (uint32_t j = 0; j < dataCnt; j++)
             {
-                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * abnormalDeviceIndex[i] + j];
+                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * excluded[i] + j];
             }
         }
         else
@@ -294,7 +317,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
                 unsigned char s = 0;
                 for (uint32_t j = 0; j < dataCnt; j++)
                 {
-                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * abnormalDeviceIndex[i] + j]);
+                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * excluded[i] + j]);
                 }
                 decode_matrix[dataCnt * i + pidx] = s;
             }
@@ -313,7 +336,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> rea
     // TODO return two recovered devices at the same time when two devices failure occured
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        if (find(readDeviceIndex.begin(), readDeviceIndex.end(), abnormalDeviceIndex[i]) != readDeviceIndex.end())
+        if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
         {
             memcpy(dst, recover_outp[i], dstSize);
         }
@@ -389,11 +412,9 @@ Raid6::GetParityPoolSize()
 }
 
 RecoverFunc
-Raid6::GetRecoverFunc(int devIdx, vector<uint32_t> abnormalDeviceIndex)
+Raid6::GetRecoverFunc(vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
-    vector<uint32_t> errorIndex;
-    errorIndex.push_back(devIdx);
-    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this, placeholders::_1, placeholders::_2, placeholders::_3, errorIndex, abnormalDeviceIndex);
+    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this, placeholders::_1, placeholders::_2, placeholders::_3, targets, abnormals);
     return recoverFunc;
 }
 
