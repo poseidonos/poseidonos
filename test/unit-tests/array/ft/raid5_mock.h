@@ -14,8 +14,8 @@ public:
     MOCK_METHOD(void, ClearParityPools, (), (override));
     MOCK_METHOD(list<FtEntry>, Translate, (const LogicalEntry& le), (override));
     MOCK_METHOD(int, MakeParity, (list<FtWriteEntry>& ftl, const LogicalWriteEntry& src), (override));
-    MOCK_METHOD(list<FtBlkAddr>, GetRebuildGroup, (FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex), (override));
-    MOCK_METHOD(RecoverFunc, GetRecoverFunc, (int devIdx, vector<uint32_t> abnormalDeviceIndex), (override));
+    MOCK_METHOD(list<FtBlkAddr>, GetRebuildGroup, (FtBlkAddr fba, const vector<uint32_t>& abnormals), (override));
+    MOCK_METHOD(RecoverFunc, GetRecoverFunc, (vector<uint32_t> targets, vector<uint32_t> abnormals), (override));
     MOCK_METHOD(RaidState, GetRaidState, (const vector<ArrayDeviceState>& devs), (override));
     MOCK_METHOD(vector<uint32_t>, GetParityOffset, (StripeId lsid), (override));
     MOCK_METHOD(bool, CheckNumofDevsToConfigure, (uint32_t numofDevs), (override));
