@@ -18,15 +18,3 @@ func TestSetVolumePropertyReqWithBothPrimaryAndSecondary(t *testing.T) {
 		t.Errorf("Expected: nil Output: %q", err.Error())
 	}
 }
-
-func TestSetVolumePropertyReqWithBothUserAndWal(t *testing.T) {
-
-	rootCmd := cmd.RootCmd
-
-	_, err := testmgr.ExecuteCommand(rootCmd, "volume", "set-property", "--volume-name", "vol1",
-		"--array-name", "arr1", "--user-volume", "--wal-volume")
-
-	if err != nil {
-		t.Errorf("Expected: nil Output: %q", err.Error())
-	}
-}

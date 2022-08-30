@@ -1605,17 +1605,13 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
     string volumeName = "";
     string arrayName = "";
     string newVolumeName = "";
-    bool updateWalVol = false;
     bool updatePrimaryVol = false;
-    //bool isWalVol = false;
     bool isPrimaryVol = false;
 
     volumeName = (request->param()).name();
     arrayName = (request->param()).array();
     newVolumeName = (request->param()).newvolumename();
 
-    updateWalVol = (request->param()).updatewalvol();
-    //isWalVol = (request->param()).iswalvol();
     updatePrimaryVol = (request->param()).updateprimaryvol();
     isPrimaryVol = (request->param()).isprimaryvol();
     
@@ -1653,12 +1649,6 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
                 _SetPosInfo(reply->mutable_info());
                 return grpc::Status::OK;
             }
-        }
-
-        if (updateWalVol == true)
-        {
-            // TODO: UpdateVolumeAttribute
-            //isWalVol = true;
         }
 
         if (updatePrimaryVol == true)

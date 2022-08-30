@@ -22,7 +22,7 @@ Set the properties of a volume.
 Syntax: 
 	poseidonos-cli volume set-property (--volume-name | -v) VolumeName 
 	(--array-name | -a) ArrayName (--new-volume-name | -n) VolumeName
-	[--user-volume] [--wal-volume] [--primary-volume] [--secondary-volume]
+	[--primary-volume] [--secondary-volume]
 
 Example: 
 	poseidonos-cli volume set-property --volume-name Volume0 --array-name volume0 
@@ -69,32 +69,15 @@ func buildSetVolumePropertyReq(command string) (*pb.SetVolumePropertyRequest, er
 		return nil, err
 	}
 
-	if (set_volume_property_isuservol) && (set_volume_property_iswalvol) {
-		err := errors.New("A volume must be a user volume or a wal volume.")
-		return nil, err
-	}
-
 	if (set_volume_property_isprimaryvol) && (set_volume_property_issecondaryvol) {
 		err := errors.New("A volume must be a primary volume or a secondary volume.")
 		return nil, err
 	}
 
 	var (
-		updatewalvol     = false
-		iswalvol         = false
 		updateprimaryvol = false
 		isprimaryvol     = false
 	)
-
-	if set_volume_property_isuservol {
-		updatewalvol = true
-		iswalvol = false
-	}
-
-	if set_volume_property_iswalvol {
-		updatewalvol = true
-		iswalvol = true
-	}
 
 	if set_volume_property_isprimaryvol {
 		updateprimaryvol = true
@@ -110,8 +93,6 @@ func buildSetVolumePropertyReq(command string) (*pb.SetVolumePropertyRequest, er
 		Name:             set_volume_property_volumeName,
 		Array:            set_volume_property_arrayName,
 		NewVolumeName:    set_volume_property_newVolumeName,
-		Updatewalvol:     updatewalvol,
-		Iswalvol:         iswalvol,
 		Updateprimaryvol: updateprimaryvol,
 		Isprimaryvol:     isprimaryvol,
 	}
@@ -130,8 +111,6 @@ var (
 	set_volume_property_volumeName     = ""
 	set_volume_property_arrayName      = ""
 	set_volume_property_newVolumeName  = ""
-	set_volume_property_isuservol      = false
-	set_volume_property_iswalvol       = false
 	set_volume_property_isprimaryvol   = false
 	set_volume_property_issecondaryvol = false
 )
@@ -150,14 +129,6 @@ func init() {
 	SetVolumePropertyCmd.Flags().StringVarP(&set_volume_property_newVolumeName,
 		"new-volume-name", "n", "",
 		"The new name of the volume.")
-
-	SetVolumePropertyCmd.Flags().BoolVarP(&set_volume_property_isuservol,
-		"user-volume", "", false,
-		"If specified, the volume will be set to a user voume. This flag cannot be set with --wal-volume")
-
-	SetVolumePropertyCmd.Flags().BoolVarP(&set_volume_property_iswalvol,
-		"wal-volume", "", false,
-		"If specified, the volume will be set to a wal volume for HA.")
 
 	SetVolumePropertyCmd.Flags().BoolVarP(&set_volume_property_isprimaryvol,
 		"primary-volume", "", false,

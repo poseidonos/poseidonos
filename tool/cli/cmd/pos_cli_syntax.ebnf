@@ -201,7 +201,6 @@ RenameVolumeCmd = "rename" , ( "--volume-name" | "-v" ) ,
 SetVolumePropertyCmd = "set-property" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   ( "--new-volume-name" | "-n" ) , VolumeName ,
-  [ ( "--user-volume" ) ] , [ ( "--wal-volume" ) ] ,
   [ ( "--primary-volume" ) ] , [ ( "--secondary-volume" ) ] ;
 
 DeviceCmd = "device" ,
