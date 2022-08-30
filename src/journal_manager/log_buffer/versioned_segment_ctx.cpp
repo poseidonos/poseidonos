@@ -189,7 +189,7 @@ VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
     {
         for (int id = 0; id < GetNumLogGroups(); id++)
         {
-            _UpdateSegmentContext(logGroupId);
+            _UpdateSegmentContext(id);
         }
     }
     else
