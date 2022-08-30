@@ -34,7 +34,7 @@ def start_pos_without_bringup():
         pos_proc = subprocess.Popen(pos_execution, \
                 stdout=output_file, stderr=output_file)
         isExecuted = True
-    subprocess.call(["sleep", "3"])
+    subprocess.call(["sleep", "20"])
     tryCnt = 0
     maxRetry = 20
     ret = api.check_pos_alive()
