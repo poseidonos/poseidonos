@@ -72,11 +72,11 @@ public:
     const FtSizeInfo* GetSizeInfo(void) { return &ftSize_; }
     virtual list<FtEntry> Translate(const LogicalEntry& le) = 0;
     virtual int MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src) = 0;
-    virtual RaidState GetRaidState(vector<ArrayDeviceState> devs) = 0;
+    virtual RaidState GetRaidState(const vector<ArrayDeviceState>& devs) = 0;
     virtual bool CheckNumofDevsToConfigure(uint32_t numofDevs) = 0;
     RaidTypeEnum GetRaidType(void) { return raidType; }
-    RecoverFunc& GetRecoverFunc(void) { return recoverFunc; }
-    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba) { return list<FtBlkAddr>(); }
+    virtual RecoverFunc GetRecoverFunc(vector<uint32_t> targets, vector<uint32_t> abnormals) { return nullptr; }
+    virtual list<FtBlkAddr> GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals) { return list<FtBlkAddr>(); }
     virtual vector<uint32_t> GetParityOffset(StripeId lsid) { return vector<uint32_t>(); }
     virtual bool IsRecoverable(void) { return true; }
     virtual vector<pair<vector<uint32_t>, vector<uint32_t>>> GetRebuildGroupPairs(vector<uint32_t>& targetIndexs)
@@ -89,7 +89,6 @@ protected:
         0,
     };
     RaidTypeEnum raidType;
-    RecoverFunc recoverFunc = nullptr;
 };
 
 } // namespace pos

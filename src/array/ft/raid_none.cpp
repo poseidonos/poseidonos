@@ -69,7 +69,7 @@ RaidNone::MakeParity(list<FtWriteEntry>& ftl, const LogicalWriteEntry& src)
 }
 
 RaidState
-RaidNone::GetRaidState(vector<ArrayDeviceState> devs)
+RaidNone::GetRaidState(const vector<ArrayDeviceState>& devs)
 {
     auto&& abnormalDevs = Enumerable::Where(devs,
         [](auto d) { return d != ArrayDeviceState::NORMAL; });

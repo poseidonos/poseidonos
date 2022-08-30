@@ -101,8 +101,6 @@ IODeviceChecker::IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UB
     }
 
     bool ret = devCheckers[arrayIndex]->IsRecoverable(target, uBlock);
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
-        "IsRecoverableDevice, {}", ret);
     return ret;
 }
 

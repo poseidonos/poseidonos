@@ -48,13 +48,10 @@ namespace pos
 class QuickRebuildContext : public RebuildContext
 {
 public:
-    RecoverFunc GetSecondaryRecovery(void) override { return secondaryRecovery; }
-    void GetSecondaryRebuildGroupPairs(RebuildGroupPairs& rgPairs) override
+    void GetSecondaryRebuildPairs(RebuildPairs& secondaryRp) override
     {
-        rgPairs = secondaryRgPairs;
+        secondaryRp = secondaryRp;
     }
-
-    RecoverFunc secondaryRecovery = nullptr;
-    RebuildGroupPairs secondaryRgPairs;
+    RebuildPairs secondaryRp;
 };
 } // namespace pos

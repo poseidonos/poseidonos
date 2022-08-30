@@ -158,8 +158,7 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
         metaRaidType == RaidTypeEnum::NOT_SUPPORTED)
     {
         int ret = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
-        POS_TRACE_WARN(ret, "metaFt: {}, dataFt: {}",
-            metaRaidType.ToString(), dataRaidType.ToString());
+        POS_TRACE_WARN(ret, "metaFt: {}, dataFt: {}", metaFt, dataFt);
         return ret;
     }
     bool canAddSpare = dataRaidType != RaidTypeEnum::NONE &&

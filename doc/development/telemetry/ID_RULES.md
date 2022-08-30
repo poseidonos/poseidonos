@@ -111,21 +111,21 @@ Resource monitoring ID Range : 100000 ~ 100099
 ## **Disk**
 Disk monitoring ID Range : 110000 ~ 110099
 
-110000 soft media error low
+110000 soft media error count lower
 
-110001 soft media error high
+110001 soft media error count upper
 
-110002 power cycle low
+110002 power cycle count lower
 
-110003 power cycle high
+110003 power cycle count upper
 
-110004 power on hour low
+110004 power on hour lower
 
-110005 power on hour high
+110005 power on hour upper
 
-110006 unsafe shutdowns low
+110006 unsafe shutdowns count lower
 
-110007 unsafe shutdowns high
+110007 unsafe shutdowns count upper
 
 110008 temperature
 
@@ -135,12 +135,38 @@ Disk monitoring ID Range : 110000 ~ 110099
 
 110011 percentage used
 
-110012 controller busy time low
+110012 controller busy time lower
 
-110013 controller busy time high
+110013 controller busy time upper
 
 110014 warning temperature time
 
 110015 critical temperature time
+
+110020 lifetime waf
+
+110021 trailing hour waf
+
+110022 trim sector count lower
+
+110023 trim sector count upper
+
+110024 host written count lower
+
+110025 host written count upper
+
+110026 nand written count lower
+
+110027 nand written count upper
+
+110028 thermal throttle event count
+
+110029 highest temperature
+
+110030 lowest temeperature
+
+110031 over temperature_count
+
+110032 under temperature count
 
 ---

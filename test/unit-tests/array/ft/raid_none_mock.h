@@ -2,14 +2,14 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/array/ft/raid0.h"
+#include "src/array/ft/raid_none.h"
 
 namespace pos
 {
-class MockRaid0 : public Raid0
+class MockRaidNone : public RaidNone
 {
 public:
-    using Raid0::Raid0;
+    using RaidNone::RaidNone;
     MOCK_METHOD(list<FtEntry>, Translate, (const LogicalEntry& le), (override));
     MOCK_METHOD(int, MakeParity, (list<FtWriteEntry>& ftl, const LogicalWriteEntry& src), (override));
     MOCK_METHOD(RaidState, GetRaidState, (const vector<ArrayDeviceState>& devs), (override));
