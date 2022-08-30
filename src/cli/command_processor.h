@@ -123,6 +123,8 @@ using grpc_cli::CreateTransportRequest;
 using grpc_cli::CreateTransportResponse;
 using grpc_cli::CreateVolumeRequest;
 using grpc_cli::CreateVolumeResponse;
+using grpc_cli::SetVolumePropertyRequest;
+using grpc_cli::SetVolumePropertyResponse;
 
 class CommandProcessor
 {
@@ -182,6 +184,7 @@ public:
 
     // Volume Commands
     grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);
+    grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
 
 private:
     bool _isPosTerminating;

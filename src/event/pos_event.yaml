@@ -1108,6 +1108,20 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 1876
+    Name: SET_VOLUME_PROPERTY_FAILURE_ARRAY_NAME_DOES_NOT_EXIST
+    Severity:
+    Message: Failed to set the property of a volume.
+    Cause: Could not find the input array.
+    Solution:
+  -
+    Id: 1877
+    Name: SET_VOLUME_PROPERTY_FAILURE_ARRAY_NOT_ONLINE
+    Severity:
+    Message: Failed to set the property of a volume.
+    Cause: State of the input array is not online.
+    Solution:
 
   -
     Id: 2200
