@@ -40,7 +40,7 @@
 namespace pos
 {
 ::grpc::Status
-GrpcReplicationControler::StartVolumeSync(
+GrpcReplicationController::StartVolumeSync(
     ::grpc::ServerContext* context,
     const pos_rpc::StartVolumeSyncRequest* request,
     pos_rpc::StartVolumeSyncResponse* response)
