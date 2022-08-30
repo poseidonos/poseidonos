@@ -31720,10 +31720,8 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
     kSizeFieldNumber = 4,
     kMaxiopsFieldNumber = 5,
     kMaxbwFieldNumber = 6,
-    kUpdatewalvolFieldNumber = 7,
-    kIswalvolFieldNumber = 8,
-    kUpdateprimaryvolFieldNumber = 9,
-    kIsprimaryvolFieldNumber = 10,
+    kUpdateprimaryvolFieldNumber = 7,
+    kIsprimaryvolFieldNumber = 8,
   };
   // string name = 1;
   void clear_name();
@@ -31800,25 +31798,7 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
   void _internal_set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // bool updatewalvol = 7;
-  void clear_updatewalvol();
-  bool updatewalvol() const;
-  void set_updatewalvol(bool value);
-  private:
-  bool _internal_updatewalvol() const;
-  void _internal_set_updatewalvol(bool value);
-  public:
-
-  // bool iswalvol = 8;
-  void clear_iswalvol();
-  bool iswalvol() const;
-  void set_iswalvol(bool value);
-  private:
-  bool _internal_iswalvol() const;
-  void _internal_set_iswalvol(bool value);
-  public:
-
-  // bool updateprimaryvol = 9;
+  // bool updateprimaryvol = 7;
   void clear_updateprimaryvol();
   bool updateprimaryvol() const;
   void set_updateprimaryvol(bool value);
@@ -31827,7 +31807,7 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
   void _internal_set_updateprimaryvol(bool value);
   public:
 
-  // bool isprimaryvol = 10;
+  // bool isprimaryvol = 8;
   void clear_isprimaryvol();
   bool isprimaryvol() const;
   void set_isprimaryvol(bool value);
@@ -31849,8 +31829,6 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 size_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxiops_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxbw_;
-  bool updatewalvol_;
-  bool iswalvol_;
   bool updateprimaryvol_;
   bool isprimaryvol_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -67676,47 +67654,7 @@ inline void SetVolumePropertyRequest_Param::set_maxbw(::PROTOBUF_NAMESPACE_ID::u
   // @@protoc_insertion_point(field_set:grpc_cli.SetVolumePropertyRequest.Param.maxbw)
 }
 
-// bool updatewalvol = 7;
-inline void SetVolumePropertyRequest_Param::clear_updatewalvol() {
-  updatewalvol_ = false;
-}
-inline bool SetVolumePropertyRequest_Param::_internal_updatewalvol() const {
-  return updatewalvol_;
-}
-inline bool SetVolumePropertyRequest_Param::updatewalvol() const {
-  // @@protoc_insertion_point(field_get:grpc_cli.SetVolumePropertyRequest.Param.updatewalvol)
-  return _internal_updatewalvol();
-}
-inline void SetVolumePropertyRequest_Param::_internal_set_updatewalvol(bool value) {
-  
-  updatewalvol_ = value;
-}
-inline void SetVolumePropertyRequest_Param::set_updatewalvol(bool value) {
-  _internal_set_updatewalvol(value);
-  // @@protoc_insertion_point(field_set:grpc_cli.SetVolumePropertyRequest.Param.updatewalvol)
-}
-
-// bool iswalvol = 8;
-inline void SetVolumePropertyRequest_Param::clear_iswalvol() {
-  iswalvol_ = false;
-}
-inline bool SetVolumePropertyRequest_Param::_internal_iswalvol() const {
-  return iswalvol_;
-}
-inline bool SetVolumePropertyRequest_Param::iswalvol() const {
-  // @@protoc_insertion_point(field_get:grpc_cli.SetVolumePropertyRequest.Param.iswalvol)
-  return _internal_iswalvol();
-}
-inline void SetVolumePropertyRequest_Param::_internal_set_iswalvol(bool value) {
-  
-  iswalvol_ = value;
-}
-inline void SetVolumePropertyRequest_Param::set_iswalvol(bool value) {
-  _internal_set_iswalvol(value);
-  // @@protoc_insertion_point(field_set:grpc_cli.SetVolumePropertyRequest.Param.iswalvol)
-}
-
-// bool updateprimaryvol = 9;
+// bool updateprimaryvol = 7;
 inline void SetVolumePropertyRequest_Param::clear_updateprimaryvol() {
   updateprimaryvol_ = false;
 }
@@ -67736,7 +67674,7 @@ inline void SetVolumePropertyRequest_Param::set_updateprimaryvol(bool value) {
   // @@protoc_insertion_point(field_set:grpc_cli.SetVolumePropertyRequest.Param.updateprimaryvol)
 }
 
-// bool isprimaryvol = 10;
+// bool isprimaryvol = 8;
 inline void SetVolumePropertyRequest_Param::clear_isprimaryvol() {
   isprimaryvol_ = false;
 }

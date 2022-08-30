@@ -1179,10 +1179,8 @@ message SetVolumePropertyRequest {
 		uint64 size = 4;
 		uint64 maxiops = 5;
 		uint64 maxbw = 6;
-		bool updatewalvol = 7;
-		bool iswalvol = 8;
-		bool updateprimaryvol = 9;
-		bool isprimaryvol = 10;
+		bool updateprimaryvol = 7;
+		bool isprimaryvol = 8;
 	}
 	Param param = 4;
 }

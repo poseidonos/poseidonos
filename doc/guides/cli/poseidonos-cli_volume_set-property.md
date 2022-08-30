@@ -10,7 +10,7 @@ Set the properties of a volume.
 Syntax: 
 	poseidonos-cli volume set-property (--volume-name | -v) VolumeName 
 	(--array-name | -a) ArrayName (--new-volume-name | -n) VolumeName
-	[--user-volume] [--wal-volume] [--primary-volume] [--secondary-volume]
+	[--primary-volume] [--secondary-volume]
 
 Example: 
 	poseidonos-cli volume set-property --volume-name Volume0 --array-name volume0 
@@ -29,9 +29,7 @@ poseidonos-cli volume set-property [flags]
   -n, --new-volume-name string   The new name of the volume.
       --primary-volume           If specified, the volume will be set to a primary volume. This flag cannot be set with --secondary-volume
       --secondary-volume         If specified, the volume will be set to a secondary volume for HA.
-      --user-volume              If specified, the volume will be set to a user voume. This flag cannot be set with --wal-volume
   -v, --volume-name string       The name of the volume to set the property.
-      --wal-volume               If specified, the volume will be set to a wal volume for HA.
 ```
 
 ### Options inherited from parent commands

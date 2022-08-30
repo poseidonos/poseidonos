@@ -2388,8 +2388,6 @@ constexpr SetVolumePropertyRequest_Param::SetVolumePropertyRequest_Param(
   , size_(PROTOBUF_ULONGLONG(0))
   , maxiops_(PROTOBUF_ULONGLONG(0))
   , maxbw_(PROTOBUF_ULONGLONG(0))
-  , updatewalvol_(false)
-  , iswalvol_(false)
   , updateprimaryvol_(false)
   , isprimaryvol_(false){}
 struct SetVolumePropertyRequest_ParamDefaultTypeInternal {
@@ -3834,8 +3832,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, size_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, maxiops_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, maxbw_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, updatewalvol_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, iswalvol_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, updateprimaryvol_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::SetVolumePropertyRequest_Param, isprimaryvol_),
   ~0u,  // no _has_bits_
@@ -4031,9 +4027,9 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 1359, -1, sizeof(::grpc_cli::CreateVolumeResponse_Result)},
   { 1365, -1, sizeof(::grpc_cli::CreateVolumeResponse)},
   { 1374, -1, sizeof(::grpc_cli::SetVolumePropertyRequest_Param)},
-  { 1389, -1, sizeof(::grpc_cli::SetVolumePropertyRequest)},
-  { 1398, -1, sizeof(::grpc_cli::SetVolumePropertyResponse_Result)},
-  { 1404, -1, sizeof(::grpc_cli::SetVolumePropertyResponse)},
+  { 1387, -1, sizeof(::grpc_cli::SetVolumePropertyRequest)},
+  { 1396, -1, sizeof(::grpc_cli::SetVolumePropertyResponse_Result)},
+  { 1402, -1, sizeof(::grpc_cli::SetVolumePropertyResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -4640,15 +4636,14 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "result\030\003 \001(\0132%.grpc_cli.CreateVolumeResp"
   "onse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc_cli.Pos"
   "Info\032*\n\006Result\022 \n\006status\030\001 \001(\0132\020.grpc_cl"
-  "i.Status\"\310\002\n\030SetVolumePropertyRequest\022\017\n"
+  "i.Status\"\240\002\n\030SetVolumePropertyRequest\022\017\n"
   "\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022\021\n\trequestor"
   "\030\003 \001(\t\0227\n\005param\030\004 \001(\0132(.grpc_cli.SetVolu"
-  "mePropertyRequest.Param\032\301\001\n\005Param\022\014\n\004nam"
+  "mePropertyRequest.Param\032\231\001\n\005Param\022\014\n\004nam"
   "e\030\001 \001(\t\022\r\n\005array\030\002 \001(\t\022\025\n\rnewVolumeName\030"
   "\003 \001(\t\022\014\n\004size\030\004 \001(\004\022\017\n\007maxiops\030\005 \001(\004\022\r\n\005"
-  "maxbw\030\006 \001(\004\022\024\n\014updatewalvol\030\007 \001(\010\022\020\n\010isw"
-  "alvol\030\010 \001(\010\022\030\n\020updateprimaryvol\030\t \001(\010\022\024\n"
-  "\014isprimaryvol\030\n \001(\010\"\302\001\n\031SetVolumePropert"
+  "maxbw\030\006 \001(\004\022\030\n\020updateprimaryvol\030\007 \001(\010\022\024\n"
+  "\014isprimaryvol\030\010 \001(\010\"\302\001\n\031SetVolumePropert"
   "yResponse\022\017\n\007command\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\022"
   ":\n\006result\030\003 \001(\0132*.grpc_cli.SetVolumeProp"
   "ertyResponse.Result\022\037\n\004info\030\004 \001(\0132\021.grpc"
@@ -4757,7 +4752,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_cli_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_cli_2eproto = {
-  false, false, 21613, descriptor_table_protodef_cli_2eproto, "cli.proto", 
+  false, false, 21573, descriptor_table_protodef_cli_2eproto, "cli.proto", 
   &descriptor_table_cli_2eproto_once, descriptor_table_cli_2eproto_deps, 1, 170,
   schemas, file_default_instances, TableStruct_cli_2eproto::offsets,
   file_level_metadata_cli_2eproto, file_level_enum_descriptors_cli_2eproto, file_level_service_descriptors_cli_2eproto,
@@ -52697,30 +52692,16 @@ const char* SetVolumePropertyRequest_Param::_InternalParse(const char* ptr, ::PR
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool updatewalvol = 7;
+      // bool updateprimaryvol = 7;
       case 7:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 56)) {
-          updatewalvol_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // bool iswalvol = 8;
-      case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
-          iswalvol_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // bool updateprimaryvol = 9;
-      case 9:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 72)) {
           updateprimaryvol_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // bool isprimaryvol = 10;
-      case 10:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 80)) {
+      // bool isprimaryvol = 8;
+      case 8:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
           isprimaryvol_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
@@ -52801,28 +52782,16 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(6, this->_internal_maxbw(), target);
   }
 
-  // bool updatewalvol = 7;
-  if (this->updatewalvol() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(7, this->_internal_updatewalvol(), target);
-  }
-
-  // bool iswalvol = 8;
-  if (this->iswalvol() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_iswalvol(), target);
-  }
-
-  // bool updateprimaryvol = 9;
+  // bool updateprimaryvol = 7;
   if (this->updateprimaryvol() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(9, this->_internal_updateprimaryvol(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(7, this->_internal_updateprimaryvol(), target);
   }
 
-  // bool isprimaryvol = 10;
+  // bool isprimaryvol = 8;
   if (this->isprimaryvol() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(10, this->_internal_isprimaryvol(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(8, this->_internal_isprimaryvol(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -52883,22 +52852,12 @@ size_t SetVolumePropertyRequest_Param::ByteSizeLong() const {
         this->_internal_maxbw());
   }
 
-  // bool updatewalvol = 7;
-  if (this->updatewalvol() != 0) {
-    total_size += 1 + 1;
-  }
-
-  // bool iswalvol = 8;
-  if (this->iswalvol() != 0) {
-    total_size += 1 + 1;
-  }
-
-  // bool updateprimaryvol = 9;
+  // bool updateprimaryvol = 7;
   if (this->updateprimaryvol() != 0) {
     total_size += 1 + 1;
   }
 
-  // bool isprimaryvol = 10;
+  // bool isprimaryvol = 8;
   if (this->isprimaryvol() != 0) {
     total_size += 1 + 1;
   }
@@ -52951,12 +52910,6 @@ void SetVolumePropertyRequest_Param::MergeFrom(const SetVolumePropertyRequest_Pa
   }
   if (from.maxbw() != 0) {
     _internal_set_maxbw(from._internal_maxbw());
-  }
-  if (from.updatewalvol() != 0) {
-    _internal_set_updatewalvol(from._internal_updatewalvol());
-  }
-  if (from.iswalvol() != 0) {
-    _internal_set_iswalvol(from._internal_iswalvol());
   }
   if (from.updateprimaryvol() != 0) {
     _internal_set_updateprimaryvol(from._internal_updateprimaryvol());
