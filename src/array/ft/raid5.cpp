@@ -97,7 +97,7 @@ Raid5::Translate(const LogicalEntry& le)
 }
 
 list<FtBlkAddr>
-Raid5::GetRebuildGroup(FtBlkAddr fba, vector<uint32_t> abnormalDeviceIndex)
+Raid5::GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals)
 {
     uint32_t blksPerChunk = ftSize_.blksPerChunk;
     uint32_t offsetInChunk = fba.offset % blksPerChunk;
@@ -339,7 +339,7 @@ Raid5::GetParityPoolSize()
 }
 
 RecoverFunc
-Raid5::GetRecoverFunc(int devIdx, vector<uint32_t> abnormalDeviceIndex)
+Raid5::GetRecoverFunc(vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
     return recoverFunc;
 }
