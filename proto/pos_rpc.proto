@@ -167,7 +167,7 @@ message CompleteHostWriteResponse {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-service PosControl {
+service ReplicationControl {
     rpc StartVolumeSync(StartVolumeSyncRequest) returns (StartVolumeSyncResponse) {}
     rpc FinishVolumeSync(FinishVolumeSyncRequest) returns (FinishVolumeSyncResponse) {}
     rpc SuspendWrite(SuspendWriteRequest) returns (SuspendWriteResponse) {}
