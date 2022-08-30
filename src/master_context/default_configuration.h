@@ -167,7 +167,7 @@ private:
     };
     vector<ConfigKeyValue> traceData = {
         {"enable", "false"},
-        {"collector_endpoint", "http://localhost:3418/v1/traces"}
+        {"collector_endpoint", "\"http://localhost:3418/v1/traces\""}
     };
 
     using ConfigList =

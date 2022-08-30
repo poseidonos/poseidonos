@@ -138,6 +138,7 @@ LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
 				-lopentelemetry_common \
 				-lopentelemetry_http_client_curl \
 				-lpthread -lcurl
+DEFINE += -DHAVE_ABSEIL
 
 CXXFLAGS += $(INCLUDE)
 

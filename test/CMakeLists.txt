@@ -363,6 +363,7 @@ else()
     execute_process(COMMAND make opentelemetry-cpp -j 4 -C ${PROJ_ROOT}/lib)
     POS_ASSERT_FILE_EXIST("${POS_DEP_OTLP}")
 endif()
+add_compile_options(-DHAVE_ABSEIL)
 
 #maybe we could embed likely() unlikely() macro into add_definitions() for unit-test's build context
 #commented out UNVME_BUILD since this requires rte_malloc() to function properly, which is meaningful 

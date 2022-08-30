@@ -11,6 +11,7 @@ public:
     using TraceExporter::TraceExporter;
     MOCK_METHOD(void, Init, (std::string serviceName, std::string serviceVersion, std::string endPoint), (override));
     MOCK_METHOD(bool, IsEnabled, (), (override));
+
 };
 
 }

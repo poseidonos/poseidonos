@@ -34,6 +34,7 @@
 
 #include <string>
 
+#include "src/trace/otlp_factory.h"
 #include "src/lib/singleton.h"
 
 namespace pos
@@ -42,7 +43,7 @@ namespace pos
 class TraceExporter
 {
 public:
-    TraceExporter();
+    TraceExporter(OtlpFactory *otlpFactory);
     virtual ~TraceExporter();
     virtual void Init(std::string serviceName, std::string serviceVersion, std::string endPoint);
     virtual bool IsEnabled(void);
@@ -51,6 +52,7 @@ private:
     void _Enable(void);
 
     bool enabled;
+    OtlpFactory *otlpFactory {nullptr};
 };
 
 using TraceExporterSingleton = Singleton<TraceExporter>;

@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,60 +30,45 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/trace/otlp_factory.h"
 
-#include <cstdint>
-#include <thread>
-#include <string>
-#include "src/debug/debug_info.h"
-#include "src/master_context/config_manager.h"
-#include "src/master_context/version_provider.h"
-#include "src/trace/trace_exporter.h"
+
+using namespace opentelemetry;
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
 
-class Poseidonos
+OtlpFactory::OtlpFactory()
+{}
+
+OtlpFactory::~OtlpFactory()
+{}
+
+exporter::otlp::OtlpHttpExporter *
+OtlpFactory::CreateOtlpHttpExporter(exporter::otlp::OtlpHttpExporterOptions opts)
 {
-public:
-    int Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
-    // This function should be private. But being public for only UT
-    int _InitTraceExporter(char* procFullName,
-                            ConfigManager *cm,
-                            VersionProvider *vp,
-                            TraceExporter *te);
+    return (new exporter::otlp::OtlpHttpExporter(opts));
+}
 
-private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
+sdk::trace::SimpleSpanProcessor *
+OtlpFactory::CreateSimpleSpanProcessor(exporter::otlp::OtlpHttpExporter *otlpHttpExporter)
+{
+    auto _otlpHttpExporter = std::unique_ptr<sdk::trace::SpanExporter>(otlpHttpExporter);
+    return (new sdk::trace::SimpleSpanProcessor(std::move(_otlpHttpExporter)));
 
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
+}
 
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-    void _InitResourceChecker(void);
-    void _InitReplicatorManager(void);
-    void _SetPerfImpact(void);
-    int _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
+sdk::trace::TracerProvider *
+OtlpFactory::CreateTracerProvider(sdk::trace::SimpleSpanProcessor *simpleSpanProcessor, sdk::resource::Resource resource)
+{
+    auto _simpleSpanProcessor = std::unique_ptr<sdk::trace::SpanProcessor>(simpleSpanProcessor);
+    return (new sdk::trace::TracerProvider(std::move(_simpleSpanProcessor), resource));
+}
 
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
+sdk::resource::Resource 
+OtlpFactory::CreateResource(sdk::resource::ResourceAttributes resourceAttributes)
+{
+    return sdk::resource::Resource::Create(resourceAttributes);
+}
 
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-
-    std::thread *GrpcCliServerThread;
-};
-} // namespace pos
+}
