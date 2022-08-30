@@ -39,6 +39,7 @@
 
 #include <list>
 #include <vector>
+#include <map>
 namespace pos
 {
 class PartitionPhysicalSize;
@@ -79,6 +80,9 @@ private:
     uint32_t parityCnt = 2;
     unsigned char* encode_matrix = nullptr;
     unsigned char* g_tbls = nullptr;
+    map<uint32_t, unsigned char*> g_tbls_map;
+    void _MakeEncodingGFTable();
+    void _MakeRebuildGFTable();
 };
 
 } // namespace pos
