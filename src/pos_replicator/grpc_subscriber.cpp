@@ -64,7 +64,7 @@ GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
     }
 
     healthChecker = new GrpcHealth();
-    posController = new GrpcReplicationController();
+    replicationController = new GrpcReplicationController();
     posManagement = new GrpcPosManagement();
     new std::thread(&GrpcSubscriber::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator subscriber has been initialized successfully");
@@ -77,9 +77,9 @@ GrpcSubscriber::~GrpcSubscriber(void)
     {
         delete healthChecker;
     }
-    if (posController != nullptr)
+    if (replicationController != nullptr)
     {
-        delete posController;
+        delete replicationController;
     }
     if (posManagement != nullptr)
     {
@@ -95,7 +95,7 @@ GrpcSubscriber::RunServer(std::string address)
     ::grpc::ServerBuilder builder;
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
     builder.RegisterService(healthChecker)
-        .RegisterService(posController)
+        .RegisterService(replicationController)
         .RegisterService(posManagement);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Registering HealthCheck, PosControler, PosManagement service and Starting GrpcServer at {}", address);
 

@@ -54,7 +54,7 @@ public:
 private:
     ConfigManager* configManager;
     GrpcHealth* healthChecker;
-    GrpcReplicationController* posController;
+    GrpcReplicationController* replicationController;
     GrpcPosManagement* posManagement;
 
     std::unique_ptr<::grpc::Server> haGrpcServer;
