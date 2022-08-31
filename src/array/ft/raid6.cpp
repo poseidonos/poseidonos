@@ -278,12 +278,12 @@ Raid6::_MakeKeyforGFMap(vector<uint32_t> excluded)
 }
 
 void
-Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild)
+Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
 {
     uint32_t destCnt = excluded.size();
-    unsigned char* temp_matrix = new unsigned char[rebuildCnt * dataCnt];
-    unsigned char* invert_matrix = new unsigned char[rebuildCnt * dataCnt];
-    unsigned char* decode_matrix = new unsigned char[rebuildCnt * dataCnt];
+    unsigned char* tempMatrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* invertMatrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* decodeMatrix = new unsigned char[dataCnt * dataCnt];
 
     unsigned char err_index[chunkCnt];
     memset(err_index, 0, sizeof(err_index));
@@ -301,11 +301,11 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
         }
         for (uint32_t j = 0; j < dataCnt; j++)
         {
-            temp_matrix[dataCnt * i + j] = encodeMatrix[dataCnt * r + j];
+            tempMatrix[dataCnt * i + j] = encodeMatrix[dataCnt * r + j];
         }
     }
 
-    gf_invert_matrix(temp_matrix, invert_matrix, dataCnt);
+    gf_invert_matrix(tempMatrix, invertMatrix, dataCnt);
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
@@ -313,7 +313,7 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
         {
             for (uint32_t j = 0; j < dataCnt; j++)
             {
-                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * excluded[i] + j];
+                decodeMatrix[dataCnt * i + j] = invertMatrix[dataCnt * excluded[i] + j];
             }
         }
         else
@@ -323,72 +323,91 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
                 unsigned char s = 0;
                 for (uint32_t j = 0; j < dataCnt; j++)
                 {
-                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encodeMatrix[dataCnt * excluded[i] + j]);
+                    s ^= gf_mul(invertMatrix[j * dataCnt + pidx], encodeMatrix[dataCnt * excluded[i] + j]);
                 }
-                decode_matrix[dataCnt * i + pidx] = s;
+                decodeMatrix[dataCnt * i + pidx] = s;
             }
         }
     }
 
-    ec_init_tables(dataCnt, destCnt, decode_matrix, g_tbls_rebuild);
+    ec_init_tables(dataCnt, destCnt, decodeMatrix,rebuildGaloisTable);
 
-    delete[] decode_matrix;
-    delete[] invert_matrix;
-    delete[] temp_matrix;
+    delete[] decodeMatrix;
+    delete[] invertMatrix;
+    delete[] tempMatrix;
 }
 
 void
 Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
     vector<uint32_t> merged;
-    merge(targets.begin(), targets.end(), abnormals.begin(), abnormals.end(), std::back_inserter(merged));
+    merge(targets.begin(), targets.end(), 
+        abnormals.begin(), abnormals.end(), std::back_inserter(merged));
+
     vector<uint32_t> excluded = Enumerable::Distinct(merged,
         [](auto p) { return p; });
     assert(excluded.size() != 0);
+
     uint32_t destCnt = excluded.size();
     assert(destCnt <= parityCnt);
+
     uint32_t rebuildCnt = chunkCnt - destCnt;
 
-    uint32_t key = _MakeKeyforGFMap(excluded);
-    auto iter = galoisTableMap.find(key);
-    if (iter == galoisTableMap.end())
-    {
-        POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] There is no tables in Map");
-    }
-
-    unsigned char* recover_inp[dataCnt];
-    unsigned char* recover_outp[destCnt];
-    unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * 32];
+    unsigned char* rebuildInput[dataCnt];
+    unsigned char* rebuildOutp[destCnt];
 
     unsigned char* src_ptr = (unsigned char*)src;
     for (uint32_t i = 0; i < dataCnt; i++)
     {
-        recover_inp[i] = src_ptr + (i * dstSize);
+        rebuildInput[i] = src_ptr + (i * dstSize);
     }
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        recover_outp[i] = new unsigned char[dstSize];
+        rebuildOutp[i] = new unsigned char[dstSize];
     }
 
-    _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
-    ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, recover_inp, recover_outp);
+    uint32_t key = _MakeKeyforGFMap(excluded);
+
+    auto iter = galoisTableMap.find(key);
+    if (iter != galoisTableMap.end())
+    {
+        unsigned char* rebuildGaloisTable = iter->second;
+        ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
+    }
+    else
+    {
+        unique_lock<mutex> lock(rebuildMutex);
+        uint32_t key = _MakeKeyforGFMap(excluded);
+
+        auto iter = galoisTableMap.find(key);
+        if (iter == galoisTableMap.end())
+        {
+            unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * 32];
+            _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
+            galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
+        }
+        else
+        {
+            rebuildMutex.unlock();
+            unsigned char* rebuildGaloisTable = iter->second;
+            ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
+        }
+    }
 
     // TODO return two recovered devices at the same time when two devices failure occured
     for (uint32_t i = 0; i < destCnt; i++)
     {
         if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
         {
-            memcpy(dst, recover_outp[i], dstSize);
+            memcpy(dst, rebuildOutp[i], dstSize);
         }
     }
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        delete recover_outp[i];
+        delete rebuildOutp[i];
     }
-
-    delete[] rebuildGaloisTable;
 }
 
 bool
@@ -441,6 +460,11 @@ Raid6::~Raid6()
     ClearParityPools();
     delete[] encodeMatrix;
     delete[] galoisTable;
+
+    for (auto iter = galoisTableMap.begin(); iter != galoisTableMap.end(); iter++)
+    {
+        delete[](iter->second);
+    }
 }
 
 int
