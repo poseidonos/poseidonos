@@ -58,10 +58,7 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
     chunkCnt = ftSize_.chunksPerStripe;
     dataCnt = chunkCnt - parityCnt;
     chunkSize = ArrayConfig::BLOCK_SIZE_BYTE * ftSize_.blksPerChunk;
-    encode_matrix = new unsigned char[chunkCnt * dataCnt];
-    g_tbls = new unsigned char[dataCnt * parityCnt * 32];
-    gf_gen_cauchy1_matrix(encode_matrix, chunkCnt, dataCnt);
-    ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
+    _MakeEncodingGFTable();
 }
 
 list<FtEntry>
@@ -220,6 +217,15 @@ Raid6::_AllocChunk()
 }
 
 void
+Raid6::_MakeEncodingGFTable()
+{
+    encode_matrix = new unsigned char[chunkCnt * dataCnt];
+    g_tbls = new unsigned char[dataCnt * parityCnt * 32];
+    gf_gen_cauchy1_matrix(encode_matrix, chunkCnt, dataCnt);
+    ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
+}
+
+void
 Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 {
     uint64_t* src_ptr = nullptr;
@@ -255,32 +261,15 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 }
 
 void
-Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
+Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild)
 {
-    vector<uint32_t> merged;
-    merge(targets.begin(), targets.end(), abnormals.begin(), abnormals.end(), std::back_inserter(merged));
-    vector<uint32_t> excluded = Enumerable::Distinct(merged,
-        [](auto p) { return p; });
-    assert(excluded.size() != 0);
     uint32_t destCnt = excluded.size();
-    assert(destCnt <= parityCnt);
-    uint32_t rebuildCnt = chunkCnt - destCnt;
-
-    unsigned char err_index[chunkCnt];
-    unsigned char* recover_inp[dataCnt];
-    unsigned char* recover_outp[destCnt];
-
     unsigned char* temp_matrix = new unsigned char[rebuildCnt * dataCnt];
     unsigned char* invert_matrix = new unsigned char[rebuildCnt * dataCnt];
     unsigned char* decode_matrix = new unsigned char[rebuildCnt * dataCnt];
-    unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
 
+    unsigned char err_index[chunkCnt];
     memset(err_index, 0, sizeof(err_index));
-
-    for (uint32_t i = 0; i < destCnt; i++)
-    {
-        recover_outp[i] = new unsigned char[dstSize];
-    }
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
@@ -324,13 +313,41 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         }
     }
 
+    ec_init_tables(dataCnt, destCnt, decode_matrix, g_tbls_rebuild);
+
+    delete[] decode_matrix;
+    delete[] invert_matrix;
+    delete[] temp_matrix;
+}
+
+void
+Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
+{
+    vector<uint32_t> merged;
+    merge(targets.begin(), targets.end(), abnormals.begin(), abnormals.end(), std::back_inserter(merged));
+    vector<uint32_t> excluded = Enumerable::Distinct(merged,
+        [](auto p) { return p; });
+    assert(excluded.size() != 0);
+    uint32_t destCnt = excluded.size();
+    assert(destCnt <= parityCnt);
+    uint32_t rebuildCnt = chunkCnt - destCnt;
+
+    unsigned char* recover_inp[dataCnt];
+    unsigned char* recover_outp[destCnt];
+    unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
+
     unsigned char* src_ptr = (unsigned char*)src;
     for (uint32_t i = 0; i < dataCnt; i++)
     {
         recover_inp[i] = src_ptr + (i * dstSize);
     }
 
-    ec_init_tables(dataCnt, destCnt, decode_matrix, g_tbls_rebuild);
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        recover_outp[i] = new unsigned char[dstSize];
+    }
+
+    _MakeDecodingGFTable(rebuildCnt, excluded, g_tbls_rebuild);
     ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
 
     // TODO return two recovered devices at the same time when two devices failure occured
@@ -348,9 +365,6 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     }
 
     delete[] g_tbls_rebuild;
-    delete[] decode_matrix;
-    delete[] invert_matrix;
-    delete[] temp_matrix;
 }
 
 bool

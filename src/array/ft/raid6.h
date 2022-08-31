@@ -65,6 +65,8 @@ public:
     virtual int GetParityPoolSize();
 
 private:
+    void _MakeEncodingGFTable();
+    void _MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild);
     void _RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals);
     BufferEntry _AllocChunk();
     void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
