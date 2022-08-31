@@ -45,6 +45,11 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/main/poseidonos.h"
+#include "src/master_context/config_manager.h"
+#include "src/master_context/version_provider.h"
+#include "src/trace/trace_exporter.h"
+#include "src/trace/otlp_factory.h"
+#include "src/lib/singleton.h"
 
 #if defined UNVME_BUILD
 #include "src/spdk_wrapper/spdk.h"
@@ -113,6 +118,7 @@ main(int argc, char* argv[])
     {
         return ret;
     }
+    
     _pos.Run();
     _pos.Terminate();
 
