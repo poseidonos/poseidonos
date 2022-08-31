@@ -219,10 +219,10 @@ Raid6::_AllocChunk()
 void
 Raid6::_MakeEncodingGFTable()
 {
-    encode_matrix = new unsigned char[chunkCnt * dataCnt];
-    g_tbls = new unsigned char[dataCnt * parityCnt * 32];
-    gf_gen_cauchy1_matrix(encode_matrix, chunkCnt, dataCnt);
-    ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
+    encodeMatrix = new unsigned char[chunkCnt * dataCnt];
+    galoisTable = new unsigned char[dataCnt * parityCnt * 32];
+    gf_gen_cauchy1_matrix(encodeMatrix, chunkCnt, dataCnt);
+    ec_init_tables(dataCnt, parityCnt, &encodeMatrix[dataCnt * dataCnt], galoisTable);
 }
 
 void
@@ -245,7 +245,7 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
         memcpy(sources[src_iter++], src_ptr, chunkSize);
     }
 
-    ec_encode_data(chunkSize, dataCnt, parityCnt, g_tbls, sources, &sources[dataCnt]);
+    ec_encode_data(chunkSize, dataCnt, parityCnt, galoisTable, sources, &sources[dataCnt]);
 
     int32_t dst_iter = 0;
     for (const BufferEntry& dst_buffer : dst)
@@ -258,6 +258,23 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
     {
         delete sources[i];
     }
+}
+uint32_t
+Raid6::_MakeKeyforGFMap(vector<uint32_t> excluded)
+{
+    uint32_t key;
+    sort(excluded.begin(), excluded.end());
+
+    if (excluded.size() == 1)
+    {
+        key = ArrayConfig::MAX_CHUNK_CNT * excluded[1];
+    }
+    else
+    {
+        key = ArrayConfig::MAX_CHUNK_CNT * excluded[1] + excluded[2];
+    }
+
+    return key;
 }
 
 void
@@ -284,7 +301,7 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
         }
         for (uint32_t j = 0; j < dataCnt; j++)
         {
-            temp_matrix[dataCnt * i + j] = encode_matrix[dataCnt * r + j];
+            temp_matrix[dataCnt * i + j] = encodeMatrix[dataCnt * r + j];
         }
     }
 
@@ -306,7 +323,7 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
                 unsigned char s = 0;
                 for (uint32_t j = 0; j < dataCnt; j++)
                 {
-                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * excluded[i] + j]);
+                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encodeMatrix[dataCnt * excluded[i] + j]);
                 }
                 decode_matrix[dataCnt * i + pidx] = s;
             }
@@ -332,9 +349,16 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     assert(destCnt <= parityCnt);
     uint32_t rebuildCnt = chunkCnt - destCnt;
 
+    uint32_t key = _MakeKeyforGFMap(excluded);
+    auto iter = galoisTableMap.find(key);
+    if (iter == galoisTableMap.end())
+    {
+        POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] There is no tables in Map");
+    }
+
     unsigned char* recover_inp[dataCnt];
     unsigned char* recover_outp[destCnt];
-    unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
+    unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * 32];
 
     unsigned char* src_ptr = (unsigned char*)src;
     for (uint32_t i = 0; i < dataCnt; i++)
@@ -347,8 +371,8 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         recover_outp[i] = new unsigned char[dstSize];
     }
 
-    _MakeDecodingGFTable(rebuildCnt, excluded, g_tbls_rebuild);
-    ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
+    _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
+    ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, recover_inp, recover_outp);
 
     // TODO return two recovered devices at the same time when two devices failure occured
     for (uint32_t i = 0; i < destCnt; i++)
@@ -364,7 +388,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         delete recover_outp[i];
     }
 
-    delete[] g_tbls_rebuild;
+    delete[] rebuildGaloisTable;
 }
 
 bool
@@ -415,8 +439,8 @@ Raid6::ClearParityPools()
 Raid6::~Raid6()
 {
     ClearParityPools();
-    delete[] encode_matrix;
-    delete[] g_tbls;
+    delete[] encodeMatrix;
+    delete[] galoisTable;
 }
 
 int
@@ -428,7 +452,8 @@ Raid6::GetParityPoolSize()
 RecoverFunc
 Raid6::GetRecoverFunc(vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
-    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this, placeholders::_1, placeholders::_2, placeholders::_3, targets, abnormals);
+    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this,
+        placeholders::_1, placeholders::_2, placeholders::_3, targets, abnormals);
     return recoverFunc;
 }
 

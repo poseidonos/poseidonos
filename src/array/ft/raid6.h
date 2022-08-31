@@ -30,6 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #ifndef RAID6_H_
 #define RAID6_H_
 
@@ -39,6 +40,9 @@
 
 #include <list>
 #include <vector>
+#include <map>
+#include <mutex>
+
 namespace pos
 {
 class PartitionPhysicalSize;
@@ -65,11 +69,13 @@ public:
     virtual int GetParityPoolSize();
 
 private:
-    void _MakeEncodingGFTable();
-    void _MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild);
     void _RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals);
     BufferEntry _AllocChunk();
     void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
+    void _MakeEncodingGFTable();
+    void _MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild);
+    uint32_t _MakeKeyforGFMap(vector<uint32_t> excluded);
+
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
     MemoryManager* memoryManager = nullptr;
@@ -79,8 +85,10 @@ private:
     uint32_t chunkCnt = 0;
     uint32_t dataCnt = 0;
     uint32_t parityCnt = 2;
-    unsigned char* encode_matrix = nullptr;
-    unsigned char* g_tbls = nullptr;
+    unsigned char* encodeMatrix = nullptr;
+    unsigned char* galoisTable = nullptr;
+    mutex rebuildMutex;
+    map<uint32_t, unsigned char*> galoisTableMap;
 };
 
 } // namespace pos
