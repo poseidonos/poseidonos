@@ -2,8 +2,8 @@
 name: C-Precommit_VM_Test
 
 on:
-  push:
-    branches: [ junghyun-34:feature/AWIBOF-6897-raid6-degraded-read-perf ]
+  pull_request:
+    branches: [ main ]
 
   workflow_dispatch:
     inputs:
