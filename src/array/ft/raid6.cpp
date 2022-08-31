@@ -59,7 +59,6 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
     dataCnt = chunkCnt - parityCnt;
     chunkSize = ArrayConfig::BLOCK_SIZE_BYTE * ftSize_.blksPerChunk;
     _MakeEncodingGFTable();
-    _MakeRebuildGFTable();
 }
 
 void
@@ -69,74 +68,6 @@ Raid6::_MakeEncodingGFTable()
     g_tbls = new unsigned char[dataCnt * parityCnt * 32];
     gf_gen_cauchy1_matrix(encode_matrix, chunkCnt, dataCnt);
     ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
-}
-
-void
-Raid6::_MakeRebuildGFTable()
-{
-    unsigned char err_index[chunkCnt];
-    memset(err_index, 0, sizeof(err_index));
-
-    for(uint32_t abnormalDeviceIndex = 0; abnormalDeviceIndex < chunkCnt; abnormalDeviceIndex++)
-    {
-        unsigned char* temp_matrix = new unsigned char[dataCnt * dataCnt];
-        unsigned char* invert_matrix = new unsigned char[dataCnt * dataCnt];
-        unsigned char* decode_matrix = new unsigned char[dataCnt * dataCnt];
-        unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
-
-        uint32_t destCnt = 1;
-        uint32_t rebuildCnt = chunkCnt - destCnt;
-        for (uint32_t i = 0; i < destCnt; i++)
-        {
-            err_index[abnormalDeviceIndex] = 1;
-        }
-
-        for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
-        {
-            while (err_index[r])
-            {
-                r++;
-            }
-            for (uint32_t j = 0; j < dataCnt; j++)
-            {
-                temp_matrix[dataCnt * i + j] = encode_matrix[dataCnt * r + j];
-            }
-        }
-
-        gf_invert_matrix(temp_matrix, invert_matrix, dataCnt);
-
-        for (uint32_t i = 0; i < destCnt; i++)
-        {
-            if (abnormalDeviceIndex < dataCnt)
-            {
-                for (uint32_t j = 0; j < dataCnt; j++)
-                {
-                    decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * abnormalDeviceIndex + j];
-                }
-            }
-            else
-            {
-                for (uint32_t pidx = 0; pidx < dataCnt; pidx++)
-                {
-                    unsigned char s = 0;
-                    for (uint32_t j = 0; j < dataCnt; j++)
-                    {
-                        s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * abnormalDeviceIndex + j]);
-                    }
-                    decode_matrix[dataCnt * i + pidx] = s;
-                }
-            }
-        }
-
-        ec_init_tables(dataCnt, parityCnt, decode_matrix, g_tbls_rebuild);
-
-        uint32_t KEY = ArrayConfig::MAX_CHUNK_CNT + chunkCnt + abnormalDeviceIndex;
-        g_tbls_map.insert(make_pair(KEY, g_tbls_rebuild));
-
-        delete[] decode_matrix;
-        delete[] invert_matrix;
-        delete[] temp_matrix;
-    }
 }
 
 list<FtEntry>
@@ -330,7 +261,144 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 }
 
 void
-Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
+Raid6::_DecodeData(void* dst, void* src, 
+    uint32_t key, uint32_t dstSize, uint32_t destCnt, vector<uint32_t> targetIndex)
+{
+    unsigned char* recover_inp[dataCnt];
+    unsigned char* recover_outp[destCnt];
+    unsigned char* src_ptr = (unsigned char*)src;
+    unsigned char* dst_ptr = (unsigned char*)dst;
+
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        recover_outp[i] = new unsigned char[dstSize];
+    }
+
+    auto iter = g_tbls_map.find(key);
+    if (iter != g_tbls_map.end())
+    {
+        unsigned char* g_tbls_rebuild = nullptr;
+        g_tbls_rebuild = iter->second;
+
+        for (uint32_t i = 0; i < dataCnt; i++)
+        {
+            recover_inp[i] = src_ptr + (i * dstSize);
+        }
+
+        ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
+        memcpy(dst_ptr, recover_outp[targetIndex[0]], dstSize);
+    }
+
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        delete recover_outp[i];
+    }
+}
+
+void
+Raid6::_DecodeData(void* dst, void* src, 
+    uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> excluded)
+{
+    uint32_t destCnt = excluded.size();
+    uint32_t rebuildCnt = chunkCnt - destCnt;
+
+    unsigned char err_index[chunkCnt];
+    unsigned char* recover_inp[dataCnt];
+    unsigned char* recover_outp[destCnt];
+
+    unsigned char* temp_matrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* invert_matrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* decode_matrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
+    unsigned char* src_ptr = (unsigned char*)src;
+    unsigned char* dst_ptr = (unsigned char*)dst;
+
+    memset(err_index, 0, sizeof(err_index));
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        recover_outp[i] = new unsigned char[dstSize];
+    }
+
+    for (uint32_t i = 0; i < dataCnt; i++)
+    {
+        err_index[excluded[i]] = 1;
+    }
+
+    for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
+    {
+        while (err_index[r])
+        {
+            r++;
+        }
+        for (uint32_t j = 0; j < dataCnt; j++)
+        {
+            temp_matrix[dataCnt * i + j] = encode_matrix[dataCnt * r + j];
+        }
+    }
+
+    gf_invert_matrix(temp_matrix, invert_matrix, dataCnt);
+
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        if (excluded[i] < dataCnt)
+        {
+            for (uint32_t j = 0; j < dataCnt; j++)
+            {
+                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * excluded[i] + j];
+            }
+        }
+        else
+        {
+            for (uint32_t pidx = 0; pidx < dataCnt; pidx++)
+            {
+                unsigned char s = 0;
+                for (uint32_t j = 0; j < dataCnt; j++)
+                {
+                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * excluded[i] + j]);
+                }
+                decode_matrix[dataCnt * i + pidx] = s;
+            }
+        }
+    }
+
+    uint32_t key = ArrayConfig::MAX_CHUNK_CNT;
+    for (uint32_t i = 0; i < excluded.size(); i++)
+    {
+        key += excluded[i];
+    }
+    ec_init_tables(dataCnt, destCnt, decode_matrix, g_tbls_rebuild);
+    g_tbls_map.insert(make_pair(key, g_tbls_rebuild));
+    rebuildMutex.unlock();
+
+    for (uint32_t i = 0; i < dataCnt; i++)
+    {
+        recover_inp[i] = src_ptr + (i * dstSize);
+    }
+
+    ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
+    // TODO return two recovered devices at the same time when two devices failure occure
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
+        {
+            memcpy(dst_ptr, recover_outp[i], dstSize);
+        }
+    }
+
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        delete recover_outp[i];
+    }
+
+    delete[] g_tbls_rebuild;
+    delete[] decode_matrix;
+    delete[] invert_matrix;
+    delete[] temp_matrix;
+}
+
+void
+Raid6::_RebuildData(void* dst, void* src, 
+    uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
     vector<uint32_t> merged;
     merge(targets.begin(), targets.end(), abnormals.begin(), abnormals.end(), std::back_inserter(merged));
@@ -340,114 +408,48 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     uint32_t destCnt = excluded.size();
     assert(destCnt <= parityCnt);
 
-    unsigned char* recover_inp[dataCnt];
-    unsigned char* recover_outp[destCnt];
-
+    uint32_t key = ArrayConfig::MAX_CHUNK_CNT;
+    for (uint32_t i = 0; i < excluded.size(); i++)
+    {
+        key += excluded[i];
+    }
+    POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] key 01: {} ", key);
+    vector<uint32_t> targetIndex;
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        recover_outp[i] = new unsigned char[dstSize];
+        if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
+        {
+            targetIndex.push_back(i);
+            POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] targetIndex: {} ", i);
+        }
     }
 
-    if(destCnt < 2)
+    auto iter = g_tbls_map.find(key);
+    if (iter != g_tbls_map.end())
     {
-        uint32_t KEY = ArrayConfig::MAX_CHUNK_CNT + chunkCnt + excluded[0];
-        POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "REBUILD KEY Index:{} ", KEY);
-        unsigned char* g_tbls_rebuild = nullptr;
-        auto iter = g_tbls_map.find(KEY);
-        if(iter != g_tbls_map.end())
-        {
-            g_tbls_rebuild = iter->second;
-        }
-        ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
-
-        for (uint32_t i = 0; i < destCnt; i++)
-        {
-            if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
-            {
-                memcpy(dst, recover_outp[i], dstSize);
-            }
-        }
-
-        for (uint32_t i = 0; i < destCnt; i++)
-        {
-            delete recover_outp[i];
-        }
+        POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] gtables at MAP 01");
+        _DecodeData(dst, src, key, dstSize, destCnt, targetIndex);
     }
     else
     {
-        unsigned char* temp_matrix = new unsigned char[dataCnt * dataCnt];
-        unsigned char* invert_matrix = new unsigned char[dataCnt * dataCnt];
-        unsigned char* decode_matrix = new unsigned char[dataCnt * dataCnt];
-        unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
-        uint32_t rebuildCnt = chunkCnt - destCnt;
-        unsigned char err_index[chunkCnt];
-        memset(err_index, 0, sizeof(err_index));
-        for (uint32_t i = 0; i < dataCnt; i++)
+        unique_lock<mutex> lock(rebuildMutex);
+        uint32_t key = ArrayConfig::MAX_CHUNK_CNT;
+        for (uint32_t i = 0; i < excluded.size(); i++)
         {
-            err_index[excluded[i]] = 1;
+            key += excluded[i];
         }
-        for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
+         POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] key 02: {} ", key);
+        auto iter = g_tbls_map.find(key);
+        if (iter != g_tbls_map.end())
         {
-            while (err_index[r])
-            {
-                r++;
-            }
-            for (uint32_t j = 0; j < dataCnt; j++)
-            {
-                temp_matrix[dataCnt * i + j] = encode_matrix[dataCnt * r + j];
-            }
+            POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] gtables at MAP 02");
+            _DecodeData(dst, src, key, dstSize, destCnt, targetIndex);
         }
-
-        gf_invert_matrix(temp_matrix, invert_matrix, dataCnt);
-
-        for (uint32_t i = 0; i < destCnt; i++)
+        else
         {
-            if (excluded[i] < dataCnt)
-            {
-                for (uint32_t j = 0; j < dataCnt; j++)
-                {
-                    decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * excluded[i] + j];
-                }
-            }
-            else
-            {
-                for (uint32_t pidx = 0; pidx < dataCnt; pidx++)
-                {
-                    unsigned char s = 0;
-                    for (uint32_t j = 0; j < dataCnt; j++)
-                    {
-                        s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * excluded[i] + j]);
-                    }
-                    decode_matrix[dataCnt * i + pidx] = s;
-                }
-            }
+            POS_TRACE_INFO(EID(RAID_DEBUG_MSG), "[RAID6] NO gtables at MAP");
+            _DecodeData(dst, src, dstSize, targets, excluded);
         }
-
-        unsigned char* src_ptr = (unsigned char*)src;
-        for (uint32_t i = 0; i < dataCnt; i++)
-        {
-            recover_inp[i] = src_ptr + (i * dstSize);
-        }
-
-        ec_init_tables(dataCnt, destCnt, decode_matrix, g_tbls_rebuild);
-        ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
-
-        // TODO return two recovered devices at the same time when two devices failure occured
-        for (uint32_t i = 0; i < destCnt; i++)
-        {
-            if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
-            {
-                memcpy(dst, recover_outp[i], dstSize);
-            }
-        }
-        for (uint32_t i = 0; i < destCnt; i++)
-        {
-            delete recover_outp[i];
-        }
-        delete[] g_tbls_rebuild;
-        delete[] decode_matrix;
-        delete[] invert_matrix;
-        delete[] temp_matrix;
     }
 }
 
@@ -502,9 +504,9 @@ Raid6::~Raid6()
     delete[] encode_matrix;
     delete[] g_tbls;
 
-    for(auto iter = g_tbls_map.begin(); iter != g_tbls_map.end(); iter++)
+    for (auto iter = g_tbls_map.begin(); iter != g_tbls_map.end(); iter++)
     {
-        delete[] (iter->second);
+        delete[](iter->second);
     }
 }
 

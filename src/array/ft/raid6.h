@@ -40,6 +40,8 @@
 #include <list>
 #include <vector>
 #include <map>
+#include <mutex>
+
 namespace pos
 {
 class PartitionPhysicalSize;
@@ -82,7 +84,9 @@ private:
     unsigned char* g_tbls = nullptr;
     map<uint32_t, unsigned char*> g_tbls_map;
     void _MakeEncodingGFTable();
-    void _MakeRebuildGFTable();
+    void _DecodeData(void* dst, void* src, uint32_t key, uint32_t dstSize, uint32_t destCnt, vector<uint32_t> targetIndex);
+    void _DecodeData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> excluded);
+    mutex rebuildMutex;
 };
 
 } // namespace pos
