@@ -212,51 +212,51 @@ jobs:
         path: |
           ${{github.workspace}}/tool/dump/*.tar.gz*
 
-Rebuild_RAID6_Test:
-    runs-on: VM
-    steps:
+  Rebuild_RAID6_Test:
+      runs-on: VM
+      steps:
 
-    - run: |
-        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+      - run: |
+          sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Build Setup
-      working-directory: ${{github.workspace}}
-      run: | 
-        chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+      - name: Build Setup
+        working-directory: ${{github.workspace}}
+        run: | 
+          chmod +x .github/workflows/script/build_setup.sh
+          .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
 
-    - name: Rebuild RAID6 Test 
-      id: rebuild_raid6_test
-      timeout-minutes: 8
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/rebuild_raid6/rebuild_raid6.sh
-        .github/workflows/script/rebuild_raid6/rebuild_raid6.sh ${{github.workspace}}
+      - name: Rebuild RAID6 Test 
+        id: rebuild_raid6_test
+        timeout-minutes: 8
+        working-directory: ${{github.workspace}}
+        run: |
+          chmod +x .github/workflows/script/rebuild_raid6/rebuild_raid6.sh
+          .github/workflows/script/rebuild_raid6/rebuild_raid6.sh ${{github.workspace}}
 
-    - name: Upload POS log
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: Rebuild_RAID6_LOG
-        path: |
-          /var/log/pos
+      - name: Upload POS log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: Rebuild_RAID6_LOG
+          path: |
+            /var/log/pos
 
-    - name: Clean Backup After Rebuild RAID6 Test
-      if: always() && steps.rebuild_raid6_test.outcome != 'success'
-      working-directory: ${{github.workspace}}
-      run: |
-        chmod +x .github/workflows/script/clean_backup.sh
-        .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "C-Precommit_VM_Test" -n "rebuild_raid6" -r ${{github.sha}} -d ${{github.workspace}}
+      - name: Clean Backup After Rebuild RAID6 Test
+        if: always() && steps.rebuild_raid6_test.outcome != 'success'
+        working-directory: ${{github.workspace}}
+        run: |
+          chmod +x .github/workflows/script/clean_backup.sh
+          .github/workflows/script/clean_backup.sh -i 127.0.0.1 -p "C-Precommit_VM_Test" -n "rebuild_raid6" -r ${{github.sha}} -d ${{github.workspace}}
 
-    - name: Upload POS Core Dump
-      if: always() && steps.rebuild_raid6_test.outcome != 'success'
-      uses: actions/upload-artifact@v3
-      with:
-        name: Rebuild_RAID6_CORE_DUMP
-        path: |
-          ${{github.workspace}}/tool/dump/*.tar.gz*
+      - name: Upload POS Core Dump
+        if: always() && steps.rebuild_raid6_test.outcome != 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: Rebuild_RAID6_CORE_DUMP
+          path: |
+            ${{github.workspace}}/tool/dump/*.tar.gz*
 
   Rotational_Rebuild_Test:
     runs-on: VM
