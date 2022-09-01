@@ -58,5 +58,9 @@ public:
     MOCK_METHOD(std::vector<int>, GetWrrWeight, (), (const));
     MOCK_METHOD(bool, IsRocksdbEnabled, (), (const));
     MOCK_METHOD(bool, IsSupportingNumaDedicatedScheduling, (), (const));
+    MOCK_METHOD(void, SetNumberOfScheduler, (const int count));
+    MOCK_METHOD(int, GetNumberOfScheduler, (), (const));
+    MOCK_METHOD(void, SetIgnoreNumaDedicatedScheduling, (const bool ignore));
+    MOCK_METHOD(bool, NeedToIgnoreNumaDedicatedScheduling, (), (const));
 };
 } // namespace pos

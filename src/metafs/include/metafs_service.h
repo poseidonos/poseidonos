@@ -86,6 +86,7 @@ private:
         const cpu_set_t workSet);
     uint32_t _GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId) const;
     bool _CheckIfPossibleToCreateScheduler(const int numOfSchedulersCreated);
+    bool _CheckSchedulerSettingFromConfig(const int countOfScheduler) const;
     virtual uint32_t _GetNumaId(const uint32_t coreId)
     {
         return numa_node_of_cpu(coreId);

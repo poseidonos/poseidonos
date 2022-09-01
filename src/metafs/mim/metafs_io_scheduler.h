@@ -113,6 +113,7 @@ private:
     int currentExtent_;
     MetaFileExtent* extents_;
     std::vector<int> weight_;
+    bool needToIgnoreNuma_;
 
     static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
     int64_t issueCount_[NUM_STORAGE];
