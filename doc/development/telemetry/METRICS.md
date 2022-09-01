@@ -2105,7 +2105,7 @@ The accumulated completion count of io worker
 
 ---
 
-### _**completion_count_in_io_worker**_
+### _**count_of_user_read_pending_cnt**_
 
 **ID**: 140009
 
@@ -2121,7 +2121,7 @@ The accumulated completion count of io worker
 
 ---
 
-### _**count_of_user_read_pending_cnt**_
+### _**count_of_user_write_pending_cnt**_
 
 **ID**: 140010
 
@@ -2137,25 +2137,9 @@ The accumulated completion count of io worker
 
 ---
 
-### _**count_of_user_write_pending_cn**_
-
-**ID**: 140011
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.11.0
-
-The accumulated completion count of io worker
-
----
-
 ### _**count_of_internal_io_pending_cnt**_
 
-**ID**: 140012
+**ID**: 140011
 
 **Type**: Count
 
