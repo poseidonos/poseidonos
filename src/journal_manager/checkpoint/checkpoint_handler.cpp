@@ -158,7 +158,6 @@ CheckpointHandler::FlushCompleted(int metaId, int logGroupId)
 
         allocatorMetaFlushCompleted = true;
         contextManager->ResetFlushedInfo(logGroupId);
-        logGroupIdInProgress = INT32_MAX;
     }
     else
     {

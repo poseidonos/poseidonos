@@ -126,7 +126,7 @@ ContextManager::Dispose(void)
 int
 ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
-    if ((logGroupIdInProgress != ALL_LOG_GROUP) && (logGroupIdInProgress == logGroupId))
+    if (logGroupIdInProgress == logGroupId)
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID),
             "Failed to flush contexts, log group {} is already in use",
