@@ -9,34 +9,41 @@ on:
 
   workflow_dispatch:
     inputs:
-       logLevel:
-          description: 'Log level'     
+       owner:
+          description: 'Repo owner'     
           required: true
-          default: 'warning'
-       tags:
-          description: 'Test scenario tags'
+          default: 'poseidonos'
+       sha:
+          description: 'Commit hash'
+          required: true
+          default: 'main'
+
 jobs:
   Upload_Package:
     runs-on: VM
     steps:
     - run: |
         sudo chown -R $USER:$USER $GITHUB_WORKSPACE
-
     - uses: actions/checkout@v1
+      with:
+        repository: ${{ github.event.inputs.owner }}/poseidonos
+        ref: ${{ github.event.inputs.sha }}
 
     - name: Build Setup
-      working-directory: ${{github.workspace}}
+      working-directory: ${{github.workspace}}/../poseidonos
       run: |
         sudo apt update
         chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}}
+        .github/workflows/script/build_setup.sh -r ${{ github.event.inputs.sha }} -d ${{github.workspace}}/../poseidonos -c --with-fpic
 
     - name: package build
-      working-directory: ${{github.workspace}}
+      working-directory: ${{github.workspace}}/../poseidonos
       run: |
         sudo make package -j8
+        mv package/debian/poseidonos.deb ${{github.workspace}}
 
     - name: Set ouputs
+      working-directory: ${{github.workspace}}/../poseidonos
       id: vars
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
@@ -45,5 +52,4 @@ jobs:
       with:
         name: poseidonos-${{ steps.vars.outputs.sha_short }}.deb
         path: |
-          ${{github.workspace}}/package/debian/poseidonos.deb
-
+          ${{github.workspace}}/poseidonos.deb

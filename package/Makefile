@@ -1,10 +1,5 @@
 POS_VERSION := $(shell pwd | sed -n -e '/POS_VERSION =/p' ../Makefile | cut -d 'v' -f2)
 PKG_VERSION := $(shell pwd | git rev-parse --short HEAD)
-YY := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f1)
-MM := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f2)
-DD := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f3 | cut -d ' ' -f1)
-hh := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f3 | cut -d ' ' -f2 | cut -d ':' -f1)
-mm := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f3 | cut -d ' ' -f2 | cut -d ':' -f2)
 
 all:
 	# Copy library and config files
