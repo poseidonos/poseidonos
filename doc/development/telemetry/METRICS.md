@@ -54,8 +54,6 @@
   - [_**write_avg_lat_volume**_](#write_avg_lat_volume)
   - [_**volume_satate**_](#volume_satate)
   - [_**volume_total_capacity**_](#volume_total_capacity)
-  - [_**volume_used_capacity**_](#volume_used_capacity)
-
 
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
@@ -925,22 +923,6 @@ The value of total capacity of volume.
 
 ---
 
-
-### _**volume_used_capacity**_
-
-**ID**: 50022
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"array_id": Integer, "volume_name": string}
-
-**Introduced**: v0.10.0
-
-The value of used capacity of volume.
-
----
 
 ## **Array**
 

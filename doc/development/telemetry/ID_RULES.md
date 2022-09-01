@@ -83,7 +83,6 @@ Volume ID Range : 50000 ~ 59999
 
 50021 volume_total_capacity
 
-50022 volume_used_capacity
 ---
 
 ## **Array**
