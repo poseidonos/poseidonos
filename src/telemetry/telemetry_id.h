@@ -119,7 +119,7 @@ static const std::string TEL50002_READ_AVG_LAT_VOLUME = "read_avg_lat_volume";
 static const std::string TEL50010_WRITE_IOPS_VOLUME = "write_iops_volume";
 static const std::string TEL50011_WRITE_BPS_VOLUME = "write_bps_volume";
 static const std::string TEL50012_WRITE_AVG_LAT_VOLUME = "write_avg_lat_volume";
-static const std::string TEL50020_VOL_VOLUME_STATE = "volume_satate";
+static const std::string TEL50020_VOL_VOLUME_STATE = "volume_state";
 static const std::string TEL50021_VOL_VOLUME_TOTAL_CAPACITY= "volume_total_capacity";
 static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capacity";
 

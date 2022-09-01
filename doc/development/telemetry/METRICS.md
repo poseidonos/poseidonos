@@ -52,7 +52,7 @@
   - [_**write_iops_volume**_](#write_iops_volume)
   - [_**write_bps_volume**_](#write_bps_volume)
   - [_**write_avg_lat_volume**_](#write_avg_lat_volume)
-  - [_**volume_satate**_](#volume_satate)
+  - [_**volume_state**_](#volume_state)
   - [_**volume_total_capacity**_](#volume_total_capacity)
 
 - [**Array**](#array)
@@ -890,7 +890,7 @@ The average value of write latency in a volume & an array.
 
 ---
 
-### _**volume_satate**_
+### _**volume_state**_
 
 **ID**: 50020
 
