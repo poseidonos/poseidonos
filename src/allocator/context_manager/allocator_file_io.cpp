@@ -327,7 +327,19 @@ AllocatorFileIo::GetSectionSize(int section)
 int
 AllocatorFileIo::GetDstSectionIdForExternalBufCopy(void)
 {
-    return INVALID_SECTION_ID;
+    int sectionId = INVALID_SECTION_ID;
+
+    switch (owner)
+    {
+        case SEGMENT_CTX:
+            sectionId = SC_SEGMENT_INFO;
+            break;
+
+        default:
+            sectionId = INVALID_SECTION_ID;
+            break;
+    }
+    return sectionId;
 }
 
 void

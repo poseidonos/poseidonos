@@ -21,7 +21,6 @@ public:
     MOCK_METHOD(std::string, GetFilename, (), (override));
     MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
-    MOCK_METHOD(int, GetDstSectionIdForExternalBufCopy, (), (override));
 };
 
 } // namespace pos

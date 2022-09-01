@@ -337,11 +337,4 @@ AllocatorCtx::GetNumSections(void)
 {
     return NUM_ALLOCATOR_CTX_SECTION;
 }
-
-int
-AllocatorCtx::GetDstSectionIdForExternalBufCopy(void)
-{
-    return INVALID_SECTION_ID;
-}
-
 }  // namespace pos

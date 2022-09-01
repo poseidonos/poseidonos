@@ -92,12 +92,9 @@ private:
     void _CheckLogGroupIdValidity(int logGroupId);
     void _CheckSegIdValidity(int segId);
 
-    const int INVALID_SEGMENT_CONTEXT = -1;
     JournalConfiguration* config;
     uint32_t numSegments;
-
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
-
     SegmentInfo* segmentInfos;
     const int ALL_LOG_GROUP = -1;
 };

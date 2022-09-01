@@ -57,7 +57,7 @@ public:
     virtual int FlushCompleted(int metaId, int logGroupId);
 
     virtual CheckpointStatus GetStatus(void);
-    virtual void UpdateInprogressLogGroupId(int logGroupId);
+    virtual void UpdateLogGroupInProgress(int logGroupId);
 
 private:
     void _CheckMapFlushCompleted(void);

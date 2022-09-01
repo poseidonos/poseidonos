@@ -79,7 +79,6 @@ public:
     virtual std::string GetFilename(void);
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
-    virtual int GetDstSectionIdForExternalBufCopy(void);
 
     virtual void MoveToFreeState(SegmentId segId);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
@@ -162,7 +161,6 @@ private:
     TelemetryPublisher* tp;
 
     int arrayId;
-    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos

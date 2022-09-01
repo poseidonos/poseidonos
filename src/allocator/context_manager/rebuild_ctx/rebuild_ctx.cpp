@@ -223,12 +223,6 @@ RebuildCtx::GetNumSections(void)
 }
 
 int
-RebuildCtx::GetDstSectionIdForExternalBufCopy(void)
-{
-    return INVALID_SECTION_ID;
-}
-
-int
 RebuildCtx::_FlushContext(void)
 {
     AllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion

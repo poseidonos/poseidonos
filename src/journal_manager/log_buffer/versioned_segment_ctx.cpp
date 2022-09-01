@@ -64,10 +64,6 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
         std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
         segmentInfoDiffs.push_back(segmentInfo);
     }
-
-    POS_TRACE_INFO(EID(JOURNAL_DEBUG),
-        "Versioned segment context is initialized, numLogGroups: {}, numSegments: {}",
-        config->GetNumLogGroups(), numSegments);
 }
 
 void
@@ -91,7 +87,7 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     {
         if (nullptr != loadedSegmentInfo)
         {
-            POS_TRACE_DEBUG(EID(JOURNAL_DEBUG), "VSC Init segId {}, validcnt {}, stripeCnt {}",
+            POS_TRACE_INFO(EID(JOURNAL_DEBUG), "VSC Init segId {}, validcnt {}, stripeCnt {}",
                            segId, loadedSegmentInfo[segId].GetValidBlockCount(),
                            loadedSegmentInfo[segId].GetOccupiedStripeCount());
 
@@ -109,8 +105,6 @@ VersionedSegmentCtx::Dispose(void)
         delete[] segmentInfos;
         segmentInfos = nullptr;
     }
-
-    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "Disposed versioned segment context");
 }
 
 void

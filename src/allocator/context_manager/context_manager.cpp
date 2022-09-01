@@ -57,7 +57,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
   arrayId(arrayId_),
-  segmentInfosInFlush(INVALID_SEGMENT_CONTEXT)
+  logGroupIdInProgress(INVALID_LOG_GROUP_ID)
 {
     // for UT
     ioManager = ioManager_;
@@ -90,7 +90,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
 
     rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
 
-    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
+    logGroupIdInProgress = INVALID_LOG_GROUP_ID;
 }
 
 ContextManager::~ContextManager(void)
@@ -126,15 +126,15 @@ ContextManager::Dispose(void)
 int
 ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
-    if (segmentInfosInFlush == logGroupId)
+    if ((logGroupIdInProgress != ALL_LOG_GROUP) && (logGroupIdInProgress == logGroupId))
     {
-        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+        POS_TRACE_ERROR(EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID),
             "Failed to flush contexts, log group {} is already in use",
             logGroupId);
         return EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID);
     }
 
-    segmentInfosInFlush = logGroupId;
+    logGroupIdInProgress = logGroupId;
 
     SegmentInfo* vscSegInfo = versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
     return ioManager->FlushContexts(callback, sync, reinterpret_cast<char*>(vscSegInfo));
@@ -248,7 +248,8 @@ ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSe
 void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
-    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "ContextManager::ResetFlushedInfo {}", logGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "ContextManager::ResetFlushedInfo {}", logGroupId);
+
     if (ALL_LOG_GROUP == logGroupId)
     {
         for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
@@ -261,6 +262,6 @@ ContextManager::ResetFlushedInfo(int logGroupId)
         versionedSegCtx->ResetFlushedInfo(logGroupId);
     }
 
-    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
+    logGroupIdInProgress = INVALID_LOG_GROUP_ID;
 }
 } // namespace pos

@@ -406,12 +406,6 @@ SegmentCtx::GetNumSections(void)
     return NUM_SEGMENT_CTX_SECTION;
 }
 
-int
-SegmentCtx::GetDstSectionIdForExternalBufCopy(void)
-{
-    return SC_SEGMENT_INFO;
-}
-
 SegmentState
 SegmentCtx::GetSegmentState(SegmentId segId)
 {
@@ -599,7 +593,7 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 void
 SegmentCtx::ResetSegmentsStates(void)
 {
-    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "egmentCtx::ResetSegmentsStates");
+    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "SegmentCtx::ResetSegmentsStates");
 
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {

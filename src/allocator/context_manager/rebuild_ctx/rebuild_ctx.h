@@ -70,7 +70,6 @@ public:
     virtual std::string GetFilename(void);
     virtual uint32_t GetSignature(void);
     virtual int GetNumSections(void);
-    virtual int GetDstSectionIdForExternalBufCopy(void);
 
     virtual int FlushRebuildSegmentList(std::set<SegmentId> segIdSet);
     virtual std::set<SegmentId> GetList(void);
