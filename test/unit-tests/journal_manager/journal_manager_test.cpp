@@ -342,24 +342,6 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalDisabled)
     journal->Dispose();
 }
 
-TEST_F(JournalManagerTestFixture, Dispose_testWithJournalEnabled)
-{
-    // Given: Journal config manager is configured to be enabled
-    EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
-
-    // Then: Log buffer should be disposed
-    EXPECT_CALL(*logBuffer, Dispose);
-    EXPECT_CALL(*bufferAllocator, Dispose);
-    EXPECT_CALL(*dirtyMapManager, Dispose);
-    EXPECT_CALL(*logFilledNotifier, Dispose);
-    EXPECT_CALL(*logWriteHandler, Dispose);
-    EXPECT_CALL(*replayHandler, Dispose);
-    EXPECT_CALL(*versionedSegmentCtx, Dispose);
-
-    // When: Journal is disposed
-    journal->Dispose();
-}
-
 TEST_F(JournalManagerTestFixture, Shutdown_testWithJournalDisabled)
 {
     // Given: Journal config manager is configured to be disabled

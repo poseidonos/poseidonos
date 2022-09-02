@@ -3139,6 +3139,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3143
+    Name: MAPPER_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   
   # Allocator: 3150 - 3299
