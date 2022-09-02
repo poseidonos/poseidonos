@@ -143,6 +143,12 @@ Mapper::Dispose(void)
         POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Dispose] MAPPER Disposed, init:{} arrayId:{}", isInitialized, arrayId);
         StoreAll();
         _Dispose();
+
+        isInitialized = false;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(MAPPER_DEBUG), "Mapper of arrayId {} is already disposed, so skip Dispose()", arrayId);
     }
 }
 
@@ -192,6 +198,10 @@ Mapper::Init(void)
         reverseMapManager->Init();
         _RegisterToMapperService();
         isInitialized = true;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(MAPPER_DEBUG), "Mapper of arrayId {} is already initialized, so skip Init()", arrayId);
     }
     assert(ret == 0);
     return ret;

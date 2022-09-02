@@ -80,7 +80,8 @@ JournalManager::JournalManager(void)
   logFilledNotifier(nullptr),
   replayHandler(nullptr),
   telemetryPublisher(nullptr),
-  telemetryClient(nullptr)
+  telemetryClient(nullptr),
+  isInitialized(false)
 {
 }
 
@@ -240,26 +241,36 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 {
     int result = 0;
 
-    if (config->IsEnabled() == true)
+    if (isInitialized == false)
     {
-        journalingStatus.Set(JOURNAL_INIT);
+        if (config->IsEnabled() == true)
+        {
+            journalingStatus.Set(JOURNAL_INIT);
 
-        result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
-        if (result < 0)
-        {
-            return result;
-        }
-        _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
-            wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
+            result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
+            if (result < 0)
+            {
+                return result;
+            }
+            _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
+                wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
-        if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
-        {
-            result = _DoRecovery();
+            if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
+            {
+                result = _DoRecovery();
+            }
+            else
+            {
+                result = _Reset();
+            }
         }
-        else
-        {
-            result = _Reset();
-        }
+
+        isInitialized = true;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
+            "Journal manager for array {} is already initialized, so skip Init()", arrayInfo->GetName());
     }
 
     return result;
@@ -338,14 +349,24 @@ JournalManager::_DoRecovery(void)
 void
 JournalManager::Dispose(void)
 {
-    if (config->IsEnabled() == true)
+    if (isInitialized == true)
     {
-        _Reset();
-        if ((telemetryClient != nullptr) && (telemetryPublisher != nullptr))
+        if (config->IsEnabled() == true)
         {
-            telemetryClient->DeregisterPublisher(telemetryPublisher->GetName());
+            _Reset();
+            if ((telemetryClient != nullptr) && (telemetryPublisher != nullptr))
+            {
+                telemetryClient->DeregisterPublisher(telemetryPublisher->GetName());
+            }
+            _DisposeModules();
         }
-        _DisposeModules();
+
+        isInitialized = false;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
+            "Journal manager for array {} is already disposed, so skip Dispose()", arrayInfo->GetName());
     }
 }
 

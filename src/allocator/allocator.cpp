@@ -96,6 +96,10 @@ Allocator::Init(void)
         _RegisterToAllocatorService();
         isInitialized = true;
     }
+    else
+    {
+        POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG), "Allocator of array {} is already initialized, so skip Init()", iArrayInfo->GetName());
+    }
     return 0;
 }
 
@@ -126,6 +130,10 @@ Allocator::Dispose(void)
             TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
         }
         isInitialized = false;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG), "Allocator of array {} is already disposed, so skip Dispose()", iArrayInfo->GetName());
     }
 }
 
