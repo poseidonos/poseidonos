@@ -289,7 +289,9 @@ MetaFsIoScheduler::_PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWor
     }
     metaIoWorkerList_[numaId].push_back(worker);
     mioCoreCountInTheSameNuma_[numaId]++;
-    printf("[fixfix] [%d] mio handler #%ld(id: %d)\n", numaId, metaIoWorkerList_[numaId].size(), coreId);
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+        "Create MioHandler, numaId: {}, metaIoWorkerList_[{}].size(): {}, " + worker->GetLogString(),
+        numaId, numaId, metaIoWorkerList_[numaId].size());
 }
 
 void
@@ -396,9 +398,6 @@ MetaFsIoScheduler::_CreateMioThread(void)
                 new ScalableMetaIoWorker(handlerId++, coreId, fileName, config_, nullptr);
             mioHandler->StartThread();
             _PushToMioThreadList(coreId, mioHandler);
-
-            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "Create MioHandler, " + mioHandler->GetLogString());
         }
     }
 

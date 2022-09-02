@@ -186,15 +186,14 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
-            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "MetaScheduler #{} is created, coreId: {}",
-                numOfSchedulersCreated, coreId);
-
             MetaFsIoScheduler* scheduler = factory_->CreateMetaFsIoScheduler(0, coreId, totalCoreCount,
                 threadName, mioSet, configManager_, tp_);
 
             int numaId = needToIgnoreNuma ? 0 : _GetNumaId(coreId);
-            printf("[fixfix] [%d] scheduler #%d(id: %d)\n", numaId, numOfSchedulersCreated, coreId);
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+                "MetaScheduler #{} is created, coreId: {}, numaId: [}",
+                numOfSchedulersCreated, coreId, numaId);
+
             if (ioScheduler_.find(numaId) == ioScheduler_.end())
             {
                 ioScheduler_.insert({numaId, scheduler});
