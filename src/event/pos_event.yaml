@@ -7333,7 +7333,55 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 10500
+    Name: TRACE_START
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10501
+    Name: TRACE_ENABLED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10502
+    Name: TRACE_NOT_ENABLED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10503
+    Name: TRACE_CONFIG_ERROR
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10504
+    Name: TRACE_EXPORTER_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution: 
+  -
+    Id: 10505
+    Name: TRACE_PROCESSOR_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution: 
+  -
+    Id: 10506
+    Name: TRACE_PROVIDER_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Exceptions
   -

@@ -52,6 +52,8 @@
   - [_**write_iops_volume**_](#write_iops_volume)
   - [_**write_bps_volume**_](#write_bps_volume)
   - [_**write_avg_lat_volume**_](#write_avg_lat_volume)
+  - [_**volume_state**_](#volume_state)
+  - [_**volume_total_capacity**_](#volume_total_capacity)
 
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
@@ -137,6 +139,9 @@
   - [_**count_of_user_flush_process**_](#count_of_user_flush_process)
   - [_**count_of_partial_write_process**_](#count_of_partial_write_process)
   - [_**count_of_user_fail_io**_](#count_of_user_fail_io)
+  - [_**count_of_user_read_pending_cnt**_](#count_of_user_read_pending_cnt)
+  - [_**count_of_user_write_pending_cnt**_](#count_of_user_write_pending_cnt)
+  - [_**count_of_internal_io_pending_cnt**_](#count_of_internal_io_pending_cnt)
   
 ---
 ## **Common**
@@ -885,6 +890,40 @@ The average value of write latency in a volume & an array.
 
 ---
 
+### _**volume_state**_
+
+**ID**: 50020
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_name": string}
+
+**Introduced**: v0.10.0
+
+The voluem satete. 0 : Unmounted, 1 : Mounted, 2 : Offline
+
+---
+
+
+### _**volume_total_capacity**_
+
+**ID**: 50021
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_name": string}
+
+**Introduced**: v0.10.0
+
+The value of total capacity of volume.
+
+---
+
+
 ## **Array**
 
 Array group contains the metrics of array
@@ -1212,100 +1251,6 @@ Remain Storage Size(block count) In an Array
 **Introduced**: v0.10.0
 
 Remain Storage Size(block count) In a Volume
-
----
-## **Volume**
-
-
----
-### _**CreateVolumeId**_
-
-**ID**: 90000
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The created volume id
-
----
-### _**DeleteVolumeId**_
-
-**ID**: 90001
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The deleted volume id
-
----
-### _**MountVolumeId**_
-
-**ID**: 90002
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The mounted volume id
-
----
-### _**UnmountVolumeId**_
-
-**ID**: 90003
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The unmounted volume id
-
----
-### _**QosUpdateVolumeId**_
-
-**ID**: 90004
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The updated volume id
-
----
-### _**RenameVolumeId**_
-
-**ID**: 90005
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The renamed Volume id
 
 ---
 ## **Resource**
@@ -2003,6 +1948,198 @@ The accumulated submission count of io worker
 ### _**completion_count_in_io_worker**_
 
 **ID**: 130015
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_requested_user_read**_
+
+**ID**: 140000
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_requested_user_write**_
+
+**ID**: 140001
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_requested_user_adminio**_
+
+**ID**: 140002
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_complete_user_read**_
+
+**ID**: 140003
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_complete_user_write**_
+
+**ID**: 140004
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_complete_user_adminio**_
+
+**ID**: 140005
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_flush_process**_
+
+**ID**: 140006
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_partial_write_process**_
+
+**ID**: 140007
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_fail_io**_
+
+**ID**: 140008
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_read_pending_cnt**_
+
+**ID**: 140009
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_write_pending_cnt**_
+
+**ID**: 140010
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_internal_io_pending_cnt**_
+
+**ID**: 140011
 
 **Type**: Count
 
