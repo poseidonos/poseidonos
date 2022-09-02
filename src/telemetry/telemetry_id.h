@@ -119,6 +119,9 @@ static const std::string TEL50002_READ_AVG_LAT_VOLUME = "read_avg_lat_volume";
 static const std::string TEL50010_WRITE_IOPS_VOLUME = "write_iops_volume";
 static const std::string TEL50011_WRITE_BPS_VOLUME = "write_bps_volume";
 static const std::string TEL50012_WRITE_AVG_LAT_VOLUME = "write_avg_lat_volume";
+static const std::string TEL50020_VOL_VOLUME_STATE = "volume_state";
+static const std::string TEL50021_VOL_VOLUME_TOTAL_CAPACITY= "volume_total_capacity";
+static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capacity";
 
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
@@ -130,13 +133,6 @@ static const std::string TEL70010_WRITE_IOPS_NETWORK = "write_iops_network";
 static const std::string TEL70011_WRITE_BPS_NETWORK = "write_bps_network";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
-
-static const std::string TEL90000_VOL_CREATE_VOLUME_ID = "create_volume_id";
-static const std::string TEL90001_VOL_DELETE_VOLUME_ID = "delete_volume_id";
-static const std::string TEL90002_VOL_MOUNT_VOLUME_ID = "mount_volume_id";
-static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
-static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
-static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
 
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 
@@ -191,17 +187,17 @@ static const std::string TEL130013_COUNT_OF_EVENT_DESTRUCTORS = "count_of_event_
 static const std::string TEL130014_SUBMISSION_COUNT_IN_IO_WORKER = "submission_count_in_io_worker";
 static const std::string TEL130015_COMPLETION_COUNT_IN_IO_WORKER = "completion_count_in_io_worker";
 
-static const std::string TEL140001_COUNT_OF_REQUSTED_USER_READ = "count_of_requested_user_read";
-static const std::string TEL140002_COUNT_OF_REQUSTED_USER_WRITE = "count_of_requested_user_write";
-static const std::string TEL140003_COUNT_OF_REQUSTED_USER_ADMINIO = "count_of_requested_user_adminio";
-static const std::string TEL140004_COUNT_OF_COMPLETE_USER_READ = "count_of_complete_user_read";
-static const std::string TEL140005_COUNT_OF_COMPLETE_USER_WRITE = "count_of_complete_user_write";
-static const std::string TEL140006_COUNT_OF_COMPLETE_USER_ADMINIO = "count_of_complete_user_adminio";
-static const std::string TEL140007_COUNT_OF_USER_FLUSH_PROCESS = "count_of_user_flush_process";
-static const std::string TEL140008_COUNT_OF_PARTIAL_WRITE_PROCESS = "count_of_partial_write_process";
-static const std::string TEL140009_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_io";
-static const std::string TEL140010_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
-static const std::string TEL140011_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
-static const std::string TEL140012_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
+static const std::string TEL140000_COUNT_OF_REQUSTED_USER_READ = "count_of_requested_user_read";
+static const std::string TEL140001_COUNT_OF_REQUSTED_USER_WRITE = "count_of_requested_user_write";
+static const std::string TEL140002_COUNT_OF_REQUSTED_USER_ADMINIO = "count_of_requested_user_adminio";
+static const std::string TEL140003_COUNT_OF_COMPLETE_USER_READ = "count_of_complete_user_read";
+static const std::string TEL140004_COUNT_OF_COMPLETE_USER_WRITE = "count_of_complete_user_write";
+static const std::string TEL140005_COUNT_OF_COMPLETE_USER_ADMINIO = "count_of_complete_user_adminio";
+static const std::string TEL140006_COUNT_OF_USER_FLUSH_PROCESS = "count_of_user_flush_process";
+static const std::string TEL140007_COUNT_OF_PARTIAL_WRITE_PROCESS = "count_of_partial_write_process";
+static const std::string TEL140008_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_io";
+static const std::string TEL140009_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
+static const std::string TEL140010_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
+static const std::string TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
 
 } // namespace pos

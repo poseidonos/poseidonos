@@ -55,6 +55,7 @@ enum VolumeStatus
 {
     Unmounted,
     Mounted,
+    Offline,
     MaxVolumeStatus
 };
 
