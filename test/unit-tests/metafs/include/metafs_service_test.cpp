@@ -103,7 +103,7 @@ public:
 
         tp = new NiceMock<TelemetryPublisher>;
 
-        service = new MetaFsServiceTester(&config, schedulerFactory);
+        service = new MetaFsServiceTester(&config, schedulerFactory, COUNT_OF_SCHEDULER);
     }
 
     virtual void TearDown(void)

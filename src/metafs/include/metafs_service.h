@@ -63,7 +63,7 @@ class MetaFsService
 {
 public:
     MetaFsService(void);
-    MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory);
+    MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory, const int numaCount = numa_num_configured_nodes());
     virtual ~MetaFsService(void);
     virtual void Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
         const cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
