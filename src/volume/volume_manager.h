@@ -107,8 +107,8 @@ private:
     int _LoadVolumes(void);
     int _CheckPrerequisite(void);
     void _ClearLock(void);
-    void _PublishTelemetryVolumeIdInfo(std::string id, std::string name);
-    void _PublishTelemetryVolumeIdInfo(std::string id, int volId);
+    void _PublishTelemetryVolumeState(std::string name, VolumeStatus status);
+    void _PublishTelemetryVolumeCapacity(std::string name, uint64_t size);
     void _PublishTelemetryArrayUsage(void);
 
     bool initialized = false;
