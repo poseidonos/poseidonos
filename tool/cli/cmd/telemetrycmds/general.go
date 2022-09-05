@@ -14,7 +14,7 @@ PoseidonOS will not gather the internal statistics once you execute
 the temeletry stop command.  
 
 Syntax: 
-  poseidonos-cli telemetry [start|stop]
+  poseidonos-cli telemetry [start|stop|set-property]
 
 Example (to start telemetry PoseidonOS):
   poseidonos-cli telemetry start
@@ -27,5 +27,5 @@ Example (to start telemetry PoseidonOS):
 func init() {
 	TelemetryCmd.AddCommand(StartTelemetryCmd)
 	TelemetryCmd.AddCommand(StopTelemetryCmd)
-
+	TelemetryCmd.AddCommand(SetTelemetryPropCmd)
 }

@@ -14,7 +14,7 @@ Syntax:
 
 Example: 
 	poseidonos-cli volume set-property --volume-name Volume0 --array-name volume0 
-	--new-volume-name NewVolume0 --user-volume --primary-volume
+	--new-volume-name NewVolume0 --primary-volume
 
 
 ```
