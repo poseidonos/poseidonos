@@ -560,13 +560,11 @@ StripePartition::_SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPair
         for (uint32_t i : dsts)
         {
             dstDevs.push_back(devs.at(i));
-            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-                "SetRebuildPair, dsts:{}", i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, dsts:{}", i);
         }
         for (uint32_t i : abnormalDeviceIndex)
         {
-            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-                "SetRebuildPair, abnormals:{}", i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, abnormals:{}", i);
         }
         
         RecoverFunc func = method->GetRecoverFunc(dsts, abnormalDeviceIndex);
