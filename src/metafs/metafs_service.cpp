@@ -32,6 +32,8 @@
 
 #include "metafs_service.h"
 
+#include <numa.h>
+
 #include <string>
 #include <unordered_map>
 
@@ -43,15 +45,13 @@
 namespace pos
 {
 MetaFsService::MetaFsService(void)
-: configManager_(new MetaFsConfigManager(ConfigManagerSingleton::Instance())),
-  needToRemoveConfig_(true),
-  tp_(nullptr),
-  factory_(new MetaFsIoSchedulerFactory())
+: MetaFsService(new MetaFsConfigManager(ConfigManagerSingleton::Instance()), new MetaFsIoSchedulerFactory())
 {
 }
 
 MetaFsService::MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory)
-: configManager_(configManager),
+: MAX_SCHEDULER_COUNT(numa_num_configured_nodes()),
+  configManager_(configManager),
   needToRemoveConfig_(false),
   tp_(nullptr),
   factory_(factory)

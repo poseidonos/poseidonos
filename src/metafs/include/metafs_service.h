@@ -63,7 +63,6 @@ class MetaFsService
 {
 public:
     MetaFsService(void);
-    // for test
     MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory);
     virtual ~MetaFsService(void);
     virtual void Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
@@ -92,7 +91,7 @@ private:
         return numa_node_of_cpu(coreId);
     }
 
-    const int MAX_SCHEDULER_COUNT = 2;
+    const int MAX_SCHEDULER_COUNT;
     std::unordered_map<std::string, int> arrayNameToId_;
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems_;
     SchedulerMap ioScheduler_;
