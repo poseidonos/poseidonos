@@ -173,6 +173,29 @@ func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryRespon
 	return res, err
 }
 
+func SendSetTelemetryPropertyRpc(req *pb.SetTelemetryPropertyRequest) (*pb.SetTelemetryPropertyResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.SetTelemetryProperty(ctx, req)
+
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrrResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {

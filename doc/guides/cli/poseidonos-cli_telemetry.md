@@ -11,7 +11,7 @@ PoseidonOS will not gather the internal statistics once you execute
 the temeletry stop command.  
 
 Syntax: 
-  poseidonos-cli telemetry [start|stop]
+  poseidonos-cli telemetry [start|stop|set-property]
 
 Example (to start telemetry PoseidonOS):
   poseidonos-cli telemetry start
@@ -44,6 +44,7 @@ poseidonos-cli telemetry [flags]
 ### SEE ALSO
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli telemetry set-property](poseidonos-cli_telemetry_set-property.md)	 - Set properties of telemetry.
 * [poseidonos-cli telemetry start](poseidonos-cli_telemetry_start.md)	 - Start the collection of telemetry data in PoseidonOS.
 * [poseidonos-cli telemetry stop](poseidonos-cli_telemetry_stop.md)	 - Stop the collection of telemetry data in PoseidonOS.
 
