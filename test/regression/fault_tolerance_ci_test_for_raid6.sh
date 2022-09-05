@@ -508,9 +508,9 @@ run_test()
 	waiting_for_rebuild_complete
     echo "14. Verify Pattern 0... after rebuild"
 	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
-    echo "15. Verify Pattern 0... after rebuild"
+    echo "15. Verify Pattern 1... after rebuild"
 	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
-    echo "16. Verify Pattern 0... after rebuild"
+    echo "16. Verify Pattern 2... after rebuild"
 	verify_data ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # read #2
     echo "Patterns are verified after rebuild"
 }
