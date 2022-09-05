@@ -79,6 +79,10 @@ Volume ID Range : 50000 ~ 59999
 
 50012 write_avg_lat_volume
 
+50020 volume_state
+
+50021 volume_total_capacity
+
 ---
 
 ## **Array**
@@ -168,5 +172,33 @@ Disk monitoring ID Range : 110000 ~ 110099
 110031 over temperature_count
 
 110032 under temperature count
+
+## **IOCount**
+IOCount monitoring ID Range : 130000 ~ 140099
+
+140000 count_of_requested_user_read
+
+140001 count_of_requested_user_write
+
+140002 count_of_requested_user_adminio
+
+140003 count_of_complete_user_read
+
+140004 count_of_complete_user_write
+
+140005 count_of_complete_user_adminio
+
+140006 count_of_user_flush_process
+
+140007 count_of_partial_write_process
+
+140008 count_of_user_fail_io
+
+140009 count_of_user_read_pending_cnt
+
+140010 count_of_user_write_pending_cnt
+
+140011 count_of_internal_io_pending_cnt
+
 
 ---
