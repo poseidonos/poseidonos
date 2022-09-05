@@ -50,7 +50,7 @@ GrpcPosManagement::UpdateVoluemMeta(::grpc::ServerContext* context,
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get UpdateVoluemMeta from grpc client");
     if (nullptr == volEventManger)
     {
-        const string errorMsg = "Approached ArrayName, not in use.";
+        const string errorMsg = "Approached " + arrayName + " is not in use";
         return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, errorMsg);
     }
 
@@ -58,7 +58,7 @@ GrpcPosManagement::UpdateVoluemMeta(::grpc::ServerContext* context,
 
     if (ret != EID(SUCCESS))
     {
-        const string errorMsg = "VolumeMeta Update Fail";
+        const string errorMsg = "VolumeMeta Update Fail (return code: " + std::to_string(ret) + ")";
         return ::grpc::Status(::grpc::StatusCode::UNAVAILABLE, errorMsg);
     }
 
@@ -72,10 +72,15 @@ GrpcPosManagement::GetVolumeList(::grpc::ServerContext* context,
     string arrayName = request->array_name();
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get GetVolumeList from grpc client");
 
-    IVolumeInfoManager* volMgr =
+    IVolumeInfoManager* volumeManager =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    if (nullptr == volumeManager)
+    {
+        const string errorMsg = "Approached " + arrayName + " is not in use";
+        return ::grpc::Status(::grpc::StatusCode::INVALID_ARGUMENT, errorMsg);
+    }
 
-    VolumeList* volList = volMgr->GetVolumeList();
+    VolumeList* volList = volumeManager->GetVolumeList();
 
     int idx = -1;
     while (true)

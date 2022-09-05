@@ -76,14 +76,17 @@ GrpcSubscriber::~GrpcSubscriber(void)
     if (healthChecker != nullptr)
     {
         delete healthChecker;
+        healthChecker = nullptr;
     }
     if (replicationController != nullptr)
     {
         delete replicationController;
+        replicationController = nullptr;
     }
     if (posManagement != nullptr)
     {
         delete posManagement;
+        posManagement = nullptr;
     }
 
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "POS GrpcServer has been destructed");
