@@ -41,7 +41,6 @@
 #include <string>
 #include <isa-l.h>
 #include <algorithm>
-
 namespace pos
 {
 Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
@@ -58,10 +57,7 @@ Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
     chunkCnt = ftSize_.chunksPerStripe;
     dataCnt = chunkCnt - parityCnt;
     chunkSize = ArrayConfig::BLOCK_SIZE_BYTE * ftSize_.blksPerChunk;
-    encode_matrix = new unsigned char[chunkCnt * dataCnt];
-    g_tbls = new unsigned char[dataCnt * parityCnt * 32];
-    gf_gen_cauchy1_matrix(encode_matrix, chunkCnt, dataCnt);
-    ec_init_tables(dataCnt, parityCnt, &encode_matrix[dataCnt * dataCnt], g_tbls);
+    _MakeEncodingGFTable();
 }
 
 list<FtEntry>
@@ -220,6 +216,15 @@ Raid6::_AllocChunk()
 }
 
 void
+Raid6::_MakeEncodingGFTable()
+{
+    encodeMatrix = new unsigned char[chunkCnt * dataCnt];
+    galoisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
+    gf_gen_cauchy1_matrix(encodeMatrix, chunkCnt, dataCnt);
+    ec_init_tables(dataCnt, parityCnt, &encodeMatrix[dataCnt * dataCnt], galoisTable);
+}
+
+void
 Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 {
     uint64_t* src_ptr = nullptr;
@@ -239,7 +244,8 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
         memcpy(sources[src_iter++], src_ptr, chunkSize);
     }
 
-    ec_encode_data(chunkSize, dataCnt, parityCnt, g_tbls, sources, &sources[dataCnt]);
+    // Reed-Solomon encoding using Intel ISA-L API
+    ec_encode_data(chunkSize, dataCnt, parityCnt, galoisTable, sources, &sources[dataCnt]);
 
     int32_t dst_iter = 0;
     for (const BufferEntry& dst_buffer : dst)
@@ -254,103 +260,164 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
     }
 }
 
-void
-Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
+uint32_t
+Raid6::_MakeKeyforGFMap(vector<uint32_t> excluded)
 {
-    vector<uint32_t> merged;
-    merge(targets.begin(), targets.end(), abnormals.begin(), abnormals.end(), std::back_inserter(merged));
-    vector<uint32_t> excluded = Enumerable::Distinct(merged,
-        [](auto p) { return p; });
-    assert(excluded.size() != 0);
-    uint32_t destCnt = excluded.size();
-    assert(destCnt <= parityCnt);
-    uint32_t rebuildCnt = chunkCnt - destCnt;
+    uint32_t key;
+    sort(excluded.begin(), excluded.end());
 
-    unsigned char err_index[chunkCnt];
-    unsigned char* recover_inp[dataCnt];
-    unsigned char* recover_outp[destCnt];
-
-    unsigned char* temp_matrix = new unsigned char[rebuildCnt * dataCnt];
-    unsigned char* invert_matrix = new unsigned char[rebuildCnt * dataCnt];
-    unsigned char* decode_matrix = new unsigned char[rebuildCnt * dataCnt];
-    unsigned char* g_tbls_rebuild = new unsigned char[dataCnt * parityCnt * 32];
-
-    memset(err_index, 0, sizeof(err_index));
-
-    for (uint32_t i = 0; i < destCnt; i++)
+    if (excluded.size() == 1)
     {
-        recover_outp[i] = new unsigned char[dstSize];
+        key = ArrayConfig::MAX_CHUNK_CNT * excluded[0];
+    }
+    else
+    {
+        key = ArrayConfig::MAX_CHUNK_CNT * excluded[0] + excluded[1];
     }
 
+    return key;
+}
+
+void
+Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
+{
+    uint32_t destCnt = excluded.size();
+    unsigned char* tempMatrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* invertMatrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* decodeMatrix = new unsigned char[dataCnt * dataCnt];
+
+    unsigned char err_index[chunkCnt];
+    memset(err_index, 0, sizeof(err_index));
+
+    // Order the fragments in erasure for easier sorting
     for (uint32_t i = 0; i < destCnt; i++)
     {
         err_index[excluded[i]] = 1;
     }
 
+    // Construct matrix that encoded remaining frags by removing erased rows
     for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
     {
+        //r is the index of the survived buffers
         while (err_index[r])
         {
             r++;
         }
         for (uint32_t j = 0; j < dataCnt; j++)
         {
-            temp_matrix[dataCnt * i + j] = encode_matrix[dataCnt * r + j];
+            tempMatrix[dataCnt * i + j] = encodeMatrix[dataCnt * r + j];
         }
     }
 
-    gf_invert_matrix(temp_matrix, invert_matrix, dataCnt);
+    // Invert matrix to get recovery matrix
+    gf_invert_matrix(tempMatrix, invertMatrix, dataCnt);
 
+    // Get decode matrix with only wanted recovery rows
     for (uint32_t i = 0; i < destCnt; i++)
     {
+        // We lost one of the buffers containing the data
         if (excluded[i] < dataCnt)
         {
             for (uint32_t j = 0; j < dataCnt; j++)
             {
-                decode_matrix[dataCnt * i + j] = invert_matrix[dataCnt * excluded[i] + j];
+                decodeMatrix[dataCnt * i + j] = invertMatrix[dataCnt * excluded[i] + j];
             }
         }
+        // We lost one of the parity buffers containing the error correction codes
         else
         {
+            // For parity buffers, need to multiply encode matrix * invert
             for (uint32_t pidx = 0; pidx < dataCnt; pidx++)
             {
                 unsigned char s = 0;
                 for (uint32_t j = 0; j < dataCnt; j++)
                 {
-                    s ^= gf_mul(invert_matrix[j * dataCnt + pidx], encode_matrix[dataCnt * excluded[i] + j]);
+                    s ^= gf_mul(invertMatrix[j * dataCnt + pidx], encodeMatrix[dataCnt * excluded[i] + j]);
                 }
-                decode_matrix[dataCnt * i + pidx] = s;
+                decodeMatrix[dataCnt * i + pidx] = s;
             }
         }
     }
 
+    ec_init_tables(dataCnt, destCnt, decodeMatrix, rebuildGaloisTable);
+
+    delete[] decodeMatrix;
+    delete[] invertMatrix;
+    delete[] tempMatrix;
+}
+
+void
+Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
+{
+    vector<uint32_t> merged;
+    merge(targets.begin(), targets.end(),
+        abnormals.begin(), abnormals.end(), std::back_inserter(merged));
+
+    // Make device index vector for rebuild
+    vector<uint32_t> excluded = Enumerable::Distinct(merged,
+        [](auto p) { return p; });
+    assert(excluded.size() != 0);
+
+    uint32_t destCnt = excluded.size();
+    assert(destCnt <= parityCnt);
+
+    uint32_t rebuildCnt = chunkCnt - destCnt;
+
+    unsigned char* rebuildInput[dataCnt];
+    unsigned char* rebuildOutp[destCnt];
+
     unsigned char* src_ptr = (unsigned char*)src;
     for (uint32_t i = 0; i < dataCnt; i++)
     {
-        recover_inp[i] = src_ptr + (i * dstSize);
+        rebuildInput[i] = src_ptr + (i * dstSize);
     }
 
-    ec_init_tables(dataCnt, destCnt, decode_matrix, g_tbls_rebuild);
-    ec_encode_data(dstSize, dataCnt, destCnt, g_tbls_rebuild, recover_inp, recover_outp);
+    for (uint32_t i = 0; i < destCnt; i++)
+    {
+        rebuildOutp[i] = new unsigned char[dstSize];
+    }
+
+    // Make key for Galois field table caching during rebuild
+    uint32_t key = _MakeKeyforGFMap(excluded);
+    unsigned char* rebuildGaloisTable = nullptr;
+    auto iter = galoisTableMap.find(key);
+    if (iter != galoisTableMap.end())
+    {
+        // Use Galois field table in Map for caching
+        rebuildGaloisTable = iter->second;
+    }
+    else
+    {
+        unique_lock<mutex> lock(rebuildMutex);
+        auto iter = galoisTableMap.find(key);
+        if (iter == galoisTableMap.end())
+        {
+            // Make Galois field table with given device indices and insert to Map
+            rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
+            _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
+            galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
+        }
+        else
+        {
+            // Use Galois field table in Map if the key exist within multi-thread environments
+            rebuildGaloisTable = iter->second;
+        }
+    }
+    ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
 
     // TODO return two recovered devices at the same time when two devices failure occured
     for (uint32_t i = 0; i < destCnt; i++)
     {
         if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
         {
-            memcpy(dst, recover_outp[i], dstSize);
+            memcpy(dst, rebuildOutp[i], dstSize);
         }
     }
 
     for (uint32_t i = 0; i < destCnt; i++)
     {
-        delete recover_outp[i];
+        delete rebuildOutp[i];
     }
-
-    delete[] g_tbls_rebuild;
-    delete[] decode_matrix;
-    delete[] invert_matrix;
-    delete[] temp_matrix;
 }
 
 bool
@@ -401,8 +468,13 @@ Raid6::ClearParityPools()
 Raid6::~Raid6()
 {
     ClearParityPools();
-    delete[] encode_matrix;
-    delete[] g_tbls;
+    delete[] encodeMatrix;
+    delete[] galoisTable;
+
+    for (auto iter = galoisTableMap.begin(); iter != galoisTableMap.end(); iter++)
+    {
+        delete[](iter->second);
+    }
 }
 
 int
@@ -414,7 +486,8 @@ Raid6::GetParityPoolSize()
 RecoverFunc
 Raid6::GetRecoverFunc(vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
-    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this, placeholders::_1, placeholders::_2, placeholders::_3, targets, abnormals);
+    RecoverFunc recoverFunc = bind(&Raid6::_RebuildData, this,
+        placeholders::_1, placeholders::_2, placeholders::_3, targets, abnormals);
     return recoverFunc;
 }
 
