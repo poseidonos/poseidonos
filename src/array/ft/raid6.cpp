@@ -219,7 +219,7 @@ void
 Raid6::_MakeEncodingGFTable()
 {
     encodeMatrix = new unsigned char[chunkCnt * dataCnt];
-    galoisTable = new unsigned char[dataCnt * parityCnt * 32];
+    galoisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
     gf_gen_cauchy1_matrix(encodeMatrix, chunkCnt, dataCnt);
     ec_init_tables(dataCnt, parityCnt, &encodeMatrix[dataCnt * dataCnt], galoisTable);
 }
@@ -379,34 +379,31 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
 
     // Make key for Galois field table caching during rebuild
     uint32_t key = _MakeKeyforGFMap(excluded);
-
+    unsigned char* rebuildGaloisTable = nullptr;
     auto iter = galoisTableMap.find(key);
     if (iter != galoisTableMap.end())
     {
-        // For Reed-Solomon decoding, use Galois field table in Map
-        unsigned char* rebuildGaloisTable = iter->second;
-        ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
+        // Use Galois field table in Map for caching
+        rebuildGaloisTable = iter->second;
     }
     else
     {
         unique_lock<mutex> lock(rebuildMutex);
-
         auto iter = galoisTableMap.find(key);
         if (iter == galoisTableMap.end())
         {
             // Make Galois field table with given device indices and insert to Map
-            unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * 32];
+            rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
             _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
             galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
         }
         else
         {
-            rebuildMutex.unlock();
             // Use Galois field table in Map if the key exist within multi-thread environments
-            unsigned char* rebuildGaloisTable = iter->second;
-            ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
+            rebuildGaloisTable = iter->second;
         }
     }
+    ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
 
     // TODO return two recovered devices at the same time when two devices failure occured
     for (uint32_t i = 0; i < destCnt; i++)
