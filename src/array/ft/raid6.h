@@ -85,6 +85,7 @@ private:
     uint32_t chunkCnt = 0;
     uint32_t dataCnt = 0;
     uint32_t parityCnt = 2;
+    uint32_t galoisTableSize = 32;
     unsigned char* encodeMatrix = nullptr;
     unsigned char* galoisTable = nullptr;
     mutex rebuildMutex;

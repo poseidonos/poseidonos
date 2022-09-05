@@ -219,7 +219,7 @@ void
 Raid6::_MakeEncodingGFTable()
 {
     encodeMatrix = new unsigned char[chunkCnt * dataCnt];
-    galoisTable = new unsigned char[dataCnt * parityCnt * 32];
+    galoisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
     gf_gen_cauchy1_matrix(encodeMatrix, chunkCnt, dataCnt);
     ec_init_tables(dataCnt, parityCnt, &encodeMatrix[dataCnt * dataCnt], galoisTable);
 }
@@ -383,7 +383,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     auto iter = galoisTableMap.find(key);
     if (iter != galoisTableMap.end())
     {
-        // For Reed-Solomon decoding, use Galois field table in Map
+        // Use Galois field table in Map for caching
         rebuildGaloisTable = iter->second;
     }
     else
@@ -393,7 +393,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         if (iter == galoisTableMap.end())
         {
             // Make Galois field table with given device indices and insert to Map
-            rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * 32];
+            rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
             _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
             galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
         }
