@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	pb "github.com/poseidonos/pos-exporter/api/pos.metric"
+	pb "github.com/poseidonos/pos-exporter/api"
 	"google.golang.org/grpc"
 )
 
