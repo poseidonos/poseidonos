@@ -479,7 +479,7 @@ ArrayState::_SetState(ArrayStateEnum newState)
             sub->StateChanged(oldState, state);
         }
         POS_TRACE_INFO(EID(ARRAY_EVENT_STATE_CHANGED),
-            "Array state is changed to {}", state.ToString());
+            "Array state is changed from {} to {}", oldState.ToString(), state.ToString());
     }
 }
 
