@@ -142,10 +142,6 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externa
         AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
 
         uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
-
-        POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] owner{}., dstSectionId:{}, externalBuf {}",
-                       owner, dstSectionId, externalBuf);
-
         ret = fileIo[owner]->Flush(completion, dstSectionId, externalBuf);
         if (ret != 0)
         {

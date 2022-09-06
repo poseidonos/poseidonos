@@ -101,7 +101,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         }
         POS_EVENT_ID eventId =
             EID(NFLSH_ERROR_DETECT);
-        POS_TRACE_INFO(static_cast<int>(eventId),
+        POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to proceed stripe map update request event: {}", _GetErrorCount());
         FlushCountSingleton::Instance()->pendingFlush--;
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
@@ -111,7 +111,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
     if (unlikely(false == writeBufferArea))
     {
         POS_EVENT_ID eventId = EID(NFLSH_STRIPE_NOT_IN_WRITE_BUFFER);
-        POS_TRACE_INFO(static_cast<int>(eventId),
+        POS_TRACE_ERROR(static_cast<int>(eventId),
             "Stripe #{} is not in WriteBuffer.", stripe->GetVsid());
         FlushCountSingleton::Instance()->pendingFlush--;
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
@@ -124,7 +124,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
             EID(NFLSH_EVENT_ALLOCATION_FAILED);
         std::stringstream message;
         message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
-        POS_TRACE_INFO(static_cast<int>(eventId),
+        POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to allocate event: {}", message.str());
         FlushCountSingleton::Instance()->pendingFlush--;
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
@@ -143,7 +143,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
             EID(NFLSH_EVENT_MAP_UPDATE_FAILED);
         std::stringstream message;
         message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
-        POS_TRACE_INFO(static_cast<int>(eventId),
+        POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to update map: {}", message.str());
 
         return false;
