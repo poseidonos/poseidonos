@@ -10,7 +10,7 @@ import (
 	"bytes"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	pm "github.com/poseidonos/pos-exporter/api/pos.metric"
+	pm "github.com/poseidonos/pos-exporter/api"
 )
 
 const (
