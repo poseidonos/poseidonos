@@ -52,6 +52,7 @@
 #include "src/include/array_config.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array/device/i_array_device_manager.h"
+#include "src/array/array_metrics_publisher.h"
 
 using namespace std;
 
@@ -140,6 +141,7 @@ private:
     IAbrControl* abrControl = nullptr;
     EventScheduler* eventScheduler = nullptr;
     ArrayServiceLayer* arrayService = nullptr;
+    ArrayMetricsPublisher* publisher = nullptr;
     id_t uniqueId = 0;
     bool isWTEnabled = false;
 };

@@ -30,76 +30,39 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "space_info.h"
+#pragma once
+
+#include "src/sys_event/volume_event.h"
+#include "src/sys_info/space_info_publisher.h"
+#include "src/array/state/array_state_publisher.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/array_models/interface/i_array_state_subscriber.h"
+#include "src/array_models/interface/i_array_state_subscription.h"
 
 #include <string>
-
-#include "src/array_mgmt/array_manager.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/include/array_config.h"
-#include "src/logger/logger.h"
-#include "src/volume/volume_service.h"
+using namespace std;
 
 namespace pos
 {
-bool
-SpaceInfo::IsEnough(uint32_t arrayId, uint64_t size)
+class ArrayMetricsPublisher : public VolumeEvent, public IArrayStateSubscriber
 {
-    return Remaining(arrayId) >= size;
-}
+public:
+    explicit ArrayMetricsPublisher(IArrayInfo* arrayInfo, IArrayStateSubscription* subscription);
+    virtual ~ArrayMetricsPublisher();
 
-uint64_t
-SpaceInfo::OPSize(uint32_t arrayId)
-{
-    uint64_t capa = RawCapacity(arrayId);
-    return (uint64_t)(capa * ArrayConfig::OVER_PROVISIONING_RATIO / 100);
-}
+private:
+    void StateChanged(const ArrayStateType& oldState, const ArrayStateType& newState) override;
+    int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    int VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
+    int VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    int VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
+    int VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
 
-uint64_t
-SpaceInfo::RawCapacity(uint32_t arrayId)
-{
-    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayId);
-    if (info != nullptr)
-    {
-        const PartitionLogicalSize* ptnSize =
-            info->arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-
-        if (ptnSize != nullptr)
-        {
-            uint64_t dataBlks = ptnSize->blksPerStripe;
-            return ptnSize->totalStripes * dataBlks * ArrayConfig::BLOCK_SIZE_BYTE;
-        }
-    }
-    return 0;
-}
-
-uint64_t
-SpaceInfo::TotalCapacity(uint32_t arrayId)
-{
-    uint64_t total = RawCapacity(arrayId);
-    uint64_t op = OPSize(arrayId);
-    POS_TRACE_INFO(9000, "TotalCapacity: total:{} - op:{} = sys:{} ",
-        total, op, total - op);
-    return total - op;
-}
-
-uint64_t
-SpaceInfo::Used(uint32_t arrayId)
-{
-    uint64_t usedSize = 0;
-    IVolumeInfoManager* volMgr =
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
-
-    if (volMgr != nullptr)
-    {
-        usedSize = volMgr->EntireVolumeSize();
-    }
-    return usedSize;
-}
-
-uint64_t
-SpaceInfo::Remaining(uint32_t arrayId)
-{
-    return TotalCapacity(arrayId) - Used(arrayId);
-}
+    SpaceInfoPublisher* spaceInfoPublisher = nullptr;
+    ArrayStatePublisher* arrayStatePublisher = nullptr;
+    IArrayInfo* arrayInfo;
+    IArrayStateSubscription* subscription;
+};
 } // namespace pos

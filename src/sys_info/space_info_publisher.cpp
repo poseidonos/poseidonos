@@ -30,76 +30,51 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "space_info.h"
-
-#include <string>
-
-#include "src/array_mgmt/array_manager.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/include/array_config.h"
-#include "src/logger/logger.h"
-#include "src/volume/volume_service.h"
+#include "space_info_publisher.h"
 
 namespace pos
 {
-bool
-SpaceInfo::IsEnough(uint32_t arrayId, uint64_t size)
+SpaceInfoPublisher::~SpaceInfoPublisher()
 {
-    return Remaining(arrayId) >= size;
-}
-
-uint64_t
-SpaceInfo::OPSize(uint32_t arrayId)
-{
-    uint64_t capa = RawCapacity(arrayId);
-    return (uint64_t)(capa * ArrayConfig::OVER_PROVISIONING_RATIO / 100);
-}
-
-uint64_t
-SpaceInfo::RawCapacity(uint32_t arrayId)
-{
-    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayId);
-    if (info != nullptr)
+    if (publisher != nullptr)
     {
-        const PartitionLogicalSize* ptnSize =
-            info->arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-
-        if (ptnSize != nullptr)
-        {
-            uint64_t dataBlks = ptnSize->blksPerStripe;
-            return ptnSize->totalStripes * dataBlks * ArrayConfig::BLOCK_SIZE_BYTE;
-        }
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(publisher->GetName());
     }
-    return 0;
 }
 
-uint64_t
-SpaceInfo::TotalCapacity(uint32_t arrayId)
+void
+SpaceInfoPublisher::Register(uint32_t arrayId)
 {
-    uint64_t total = RawCapacity(arrayId);
-    uint64_t op = OPSize(arrayId);
-    POS_TRACE_INFO(9000, "TotalCapacity: total:{} - op:{} = sys:{} ",
-        total, op, total - op);
-    return total - op;
+    _RegisterTelemetry(arrayId);
 }
 
-uint64_t
-SpaceInfo::Used(uint32_t arrayId)
+void
+SpaceInfoPublisher::PublishTotalCapacity(uint32_t arrayId, uint64_t totalSize)
 {
-    uint64_t usedSize = 0;
-    IVolumeInfoManager* volMgr =
-        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
+    POSMetric metric(TEL60004_ARRAY_CAPACITY_TOTAL, POSMetricTypes::MT_GAUGE);
+    metric.SetGaugeValue(totalSize);
+    metric.AddLabel("array_id", to_string(arrayId));
+    publisher->PublishMetric(metric);
+}
 
-    if (volMgr != nullptr)
+void
+SpaceInfoPublisher::PublishUsedCapacity(uint32_t arrayId, uint64_t usedSize)
+{
+    POSMetric metric(TEL60005_ARRAY_CAPACITY_USED, POSMetricTypes::MT_GAUGE);
+    metric.SetGaugeValue(usedSize);
+    metric.AddLabel("array_id", to_string(arrayId));
+    publisher->PublishMetric(metric);
+}
+
+void
+SpaceInfoPublisher::_RegisterTelemetry(uint32_t arrayId)
+{
+    if (publisher == nullptr)
     {
-        usedSize = volMgr->EntireVolumeSize();
+        publisher = new TelemetryPublisher("SpaceInfo");
+        publisher->AddDefaultLabel("array_id", to_string(arrayId));
+        TelemetryClientSingleton::Instance()->RegisterPublisher(publisher);
     }
-    return usedSize;
 }
 
-uint64_t
-SpaceInfo::Remaining(uint32_t arrayId)
-{
-    return TotalCapacity(arrayId) - Used(arrayId);
-}
 } // namespace pos
