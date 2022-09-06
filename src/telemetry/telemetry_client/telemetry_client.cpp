@@ -199,4 +199,15 @@ TelemetryClient::IsPublisherRegistered(const std::string name)
     return (ret != publisherList.end());
 }
 
+bool
+TelemetryClient::LoadPublicationList(std::string filePath)
+{
+    for (auto &p : publisherList)
+    {
+        p.second->LoadPublicationList(filePath);
+    }
+    
+    return true;
+}
+
 } // namespace pos

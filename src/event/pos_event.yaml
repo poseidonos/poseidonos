@@ -4614,6 +4614,27 @@ Root:
     Message: Only one scheduler can be created for each NUMA
     Cause: Remove core id belonging to the same NUMA
     Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4086
+    Name: MFS_SCHEDULER_COUNT_SMALLER_THAN_EXPECTED
+    Severity:
+    Message: Numa_dedicated is set but the count of metafs io scheduler is not more than one
+    Cause: When numa_dedicated is set, the count of scheduler is expected two
+    Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4087
+    Name: MFS_SCHEDULER_NONE
+    Severity:
+    Message: A scheduler needs to be created at least
+    Cause: There is no metafs io scheduler
+    Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4088
+    Name: MFS_NEED_TO_CHECK_SCHEDULER_SETTING
+    Severity:
+    Message: Need to check metafs io scheduler setting in pos.conf
+    Cause: There is some problem in scheduler setting
+    Solution: Please check meta_scheduler in pos.conf
   
   -
     Id: 4500

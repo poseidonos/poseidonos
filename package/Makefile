@@ -1,10 +1,5 @@
 POS_VERSION := $(shell pwd | sed -n -e '/POS_VERSION =/p' ../Makefile | cut -d 'v' -f2)
-PKG_VERSION := $(shell pwd | git log | grep commit | head -1 | cut -d ' ' -f2 | cut -c 1-7)
-YY := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f1)
-MM := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f2)
-DD := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f3 | cut -d ' ' -f1)
-hh := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f3 | cut -d ' ' -f2 | cut -d ':' -f1)
-mm := $(shell pwd | git log --pretty=format:%ci | head -1 | cut -d '-' -f3 | cut -d ' ' -f2 | cut -d ':' -f2)
+PKG_VERSION := $(shell pwd | git rev-parse --short HEAD)
 
 all:
 	# Copy library and config files
@@ -22,7 +17,7 @@ all:
 	@mv ../tool/cli/docs/manpage/*.gz src/etc/
 	
 	# Package Version Control
-	@sed "2s/Version:.*/Version: ${POS_VERSION}-${YY}${MM}${DD}${hh}${mm}+${PKG_VERSION}/g" src/DEBIAN/control -i
+	@sed "2s/Version:.*/Version: ${POS_VERSION}+${PKG_VERSION}/g" src/DEBIAN/control -i
 	
 	# Build Package 
 	@`[ -d debian ] || mkdir -p debian`

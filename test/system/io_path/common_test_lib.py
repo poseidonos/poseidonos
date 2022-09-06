@@ -11,7 +11,7 @@ def start_pos(log_path, pos_root):
     pos_execution = pos_root + "bin/poseidonos"
     with open(log_path, "w") as output_file:
         pos_proc = subprocess.Popen(pos_execution, stdout=output_file, stderr=output_file)
-    subprocess.call(["sleep", "10"])
+    subprocess.call(["sleep", "20"])
     print("\tPOS Started!")
 
     print("\tStarting Telemetry .. (log path: " + log_path + ")")
