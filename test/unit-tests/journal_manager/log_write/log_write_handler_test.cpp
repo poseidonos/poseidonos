@@ -61,6 +61,7 @@ public:
         logWriteHandler = new LogWriteHandler(logWriteStats, waitingList);
 
         ON_CALL(*bufferAllocator, GetLogGroupId).WillByDefault(Return(0));
+        ON_CALL(*config, GetNumLogGroups).WillByDefault(Return(2));
     }
 
     virtual void
@@ -108,7 +109,7 @@ TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessf
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
 
-    int targetLogGroupId = 2;
+    int targetLogGroupId = 1;
     EXPECT_CALL(*bufferAllocator, GetLogGroupId).WillRepeatedly(Return(targetLogGroupId));
 
     int arrayId = 2;
