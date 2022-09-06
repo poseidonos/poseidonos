@@ -126,6 +126,14 @@ public:
     {
         return supportNumaDedicatedScheduling_;
     }
+    virtual void SetIgnoreNumaDedicatedScheduling(const bool ignore)
+    {
+        needToIgnoreNumaDedicatedScheduling_ = ignore;
+    }
+    virtual bool NeedToIgnoreNumaDedicatedScheduling(void) const
+    {
+        return needToIgnoreNumaDedicatedScheduling_;
+    }
 
 protected:
     virtual bool _ValidateConfig(void) const;
@@ -173,6 +181,7 @@ private:
     bool rocksdbEnabled_;
     std::string rocksDbPath_;
     bool supportNumaDedicatedScheduling_;
+    bool needToIgnoreNumaDedicatedScheduling_;
 };
 
 } // namespace pos

@@ -63,8 +63,7 @@ class MetaFsService
 {
 public:
     MetaFsService(void);
-    // for test
-    MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory);
+    MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory, const int numaCount = numa_num_configured_nodes());
     virtual ~MetaFsService(void);
     virtual void Initialize(const uint32_t totalCoreCount, const cpu_set_t schedSet,
         const cpu_set_t workSet, TelemetryPublisher* tp = nullptr);
@@ -86,12 +85,13 @@ private:
         const cpu_set_t workSet);
     uint32_t _GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId) const;
     bool _CheckIfPossibleToCreateScheduler(const int numOfSchedulersCreated);
+    bool _CheckSchedulerSettingFromConfig(const int countOfScheduler) const;
     virtual uint32_t _GetNumaId(const uint32_t coreId)
     {
         return numa_node_of_cpu(coreId);
     }
 
-    const int MAX_SCHEDULER_COUNT = 2;
+    const int MAX_SCHEDULER_COUNT;
     std::unordered_map<std::string, int> arrayNameToId_;
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems_;
     SchedulerMap ioScheduler_;
