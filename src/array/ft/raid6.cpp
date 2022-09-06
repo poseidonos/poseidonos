@@ -405,12 +405,12 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     }
     ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
 
-    // TODO return two recovered devices at the same time when two devices failure occured
+    unsigned char* dst_ptr = (unsigned char*)dst;
     for (uint32_t i = 0; i < destCnt; i++)
     {
         if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
         {
-            memcpy(dst, rebuildOutp[i], dstSize);
+            memcpy(dst_ptr + i * dstSize, rebuildOutp[i], dstSize);
         }
     }
 
@@ -481,6 +481,18 @@ int
 Raid6::GetParityPoolSize()
 {
     return parityPools.size();
+}
+
+void
+Raid6::TestRebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
+{
+    _RebuildData(dst, src, dstSize, targets, abnormals);
+}
+
+void
+Raid6::TestParityGeneration(list<BufferEntry>& dst, const list<BufferEntry>& src)
+{
+    _ComputePQParities(dst, src);
 }
 
 RecoverFunc

@@ -30,7 +30,6 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef RAID6_H_
 #define RAID6_H_
 
@@ -65,8 +64,11 @@ public:
     virtual RaidState GetRaidState(const vector<ArrayDeviceState>& devs) override;
     vector<uint32_t> GetParityOffset(StripeId lsid) override;
     bool CheckNumofDevsToConfigure(uint32_t numofDevs) override;
-    // This function is for unit testing only
+
+    // These functions are for unit testing only
     virtual int GetParityPoolSize();
+    void TestRebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals);
+    void TestParityGeneration(list<BufferEntry>& dst, const list<BufferEntry>& src);
 
 private:
     void _RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals);
