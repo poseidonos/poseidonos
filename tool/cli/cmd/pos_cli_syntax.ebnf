@@ -323,6 +323,9 @@ TelemetryStartCmd = TelemetryCmd , ( "start" ) ;
 
 TelemetryStopCmd = TelemetryCmd , ( "stop" ) ;
 
+TelemetrySetPropertyCmd = TelemetryCmd , ( "set-property" ) ,
+[ "--publication-list-path" ] , Identifier ;
+
 DevelCmd = "devel" ,
   ( ResetMbrCmd
   | StopRebuildingCmd
