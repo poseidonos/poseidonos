@@ -259,6 +259,28 @@ StopTelemetryResponse* reply)
 }
 
 grpc::Status
+CommandProcessor::ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyRequest* request,
+SetTelemetryPropertyResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+
+    std::string publicationListPath = (request->param()).publicationlistpath();
+
+    if (publicationListPath != "")
+    {
+        tc->LoadPublicationList(publicationListPath);
+    }    
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request,
     ResetEventWrrResponse* reply)
 {
