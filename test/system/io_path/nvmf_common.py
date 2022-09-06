@@ -31,7 +31,7 @@ class Nvmf:
         command += " --json-res | jq '.Response.result.status.code' 2>/dev/null"
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "0" not in out.decode("utf-8"):
+        if 0 != int(out.decode("utf-8")):
             print("\tTransport Create Failed")
             return False
 
@@ -47,7 +47,7 @@ class Nvmf:
 
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "0" not in out.decode("utf-8"):
+        if 0 != int(out.decode("utf-8")):
             print("\tSubsystem Create Failed")
             return False
 
@@ -56,7 +56,7 @@ class Nvmf:
             print("\tSubsystem Create Done")
         return exist
 
-    def mount_volume_with_subsystem(self, stdout_type, volume_name, array_name, subnqn):
+    def mount_volume_with_subsystem(self, stdout_type, volume_name, array_name, subnqn, count):
         print("\tMount Volume with Subsystem")
         if not subnqn:
             command = [self.spdk_cmd_path, "volume", "mount", "-v", volume_name, "-a", array_name]
@@ -69,7 +69,7 @@ class Nvmf:
             if ret is False:
                 return False
         print("\tCheck volume mounted")
-        ret = self.check_volume_mounted_to_subsystem(volume_name, array_name, subnqn)
+        ret = self.check_volume_mounted_to_subsystem(volume_name, array_name, subnqn, count)
         print("\tMount Volume with Subsystem Done")
         return ret
 
@@ -78,7 +78,7 @@ class Nvmf:
         command = self.spdk_cmd_path + " subsystem delete -q " + nqn + " --force --json-res | jq '.Response.result.status.code' 2>/dev/null"
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "0" not in out.decode("utf-8"):
+        if 0 != int(out.decode("utf-8")):
             print("\tSubsystem Delete Failed")
             return False
         exist = self.check_subsystem(nqn)
@@ -92,7 +92,7 @@ class Nvmf:
             " -t " + trtype + " -i " + traddr + " -p " + trsvid + " --json-res | jq '.Response.result.status.code' 2>/dev/null"
         proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if "0" not in out.decode("utf-8"):
+        if 0 != int(out.decode("utf-8")):
             print("\tSubsystem Add Listener Failed")
             return False
 
@@ -167,12 +167,12 @@ class Nvmf:
             " '.Response.result.data.subsystemlist[] | select (.nqn == $nqn)'"
         proc = subprocess.Popen(command_line, shell=True, stdout=subprocess.PIPE)
         out, err = proc.communicate()
-        if not out.decode("utf-8"):
+        if subnqn not in out.decode("utf-8"):
             print("\tSubsystem Does not Exist: " + subnqn)
             return False
         return True
 
-    def check_volume_mounted_to_subsystem(self, volume_name, array_name, subnqn):
+    def check_volume_mounted_to_subsystem(self, volume_name, array_name, subnqn, count):
         if not subnqn:
             command_line = self.spdk_cmd_path + " volume list -a " + array_name + " --json-res | jq -c --arg vol " +\
                 volume_name + " '.Response.result.data.volumes[] | select (.name == $vol) | .status'"
@@ -186,7 +186,7 @@ class Nvmf:
                 " '.Response.result.data.subsystemlist[] | select (.nqn == $nqn) | .namespaces | length'"
             proc = subprocess.Popen(command_line, shell=True, stdout=subprocess.PIPE)
             out, err = proc.communicate()
-            if out.decode("utf-8") == "0":
+            if count != int(out.decode("utf-8")):
                 print("\t Volume(", volume_name, ") failed to Mount on Subsystem(", subnqn, ")")
                 return False
         return True

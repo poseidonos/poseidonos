@@ -50,7 +50,7 @@ def create_subsystem_test(EXPECT, nqn, serial_num, model_num, allow_any_host):
 
 
 def volume_mount_with_subsystem_create_test():
-    nvmf = nvmf_common.Nvmf("[ Mount Volume with Subsystem", True, pos_cli_path)
+    nvmf = nvmf_common.Nvmf("[ Mount Volume with Subsystem ", True, pos_cli_path)
     common_test_lib.start_pos(args.log_path, pos_root)
 
     for i in range(0, len(uram_list)):
@@ -61,28 +61,28 @@ def volume_mount_with_subsystem_create_test():
     common_test_lib.create_and_mount_array(pos_root, stdout_type, uram_list, user_devices, array_list)
 
     common_test_lib.create_volume(pos_root, stdout_type, "vol1", array_list[0])
-    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol1", array_list[0], subnqn_list[0])
+    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol1", array_list[0], subnqn_list[0], 1)
     common_test_lib.expect_true(ret, "Subsystem newly created and volume mounted on POSArray0")
     success = (ret is True)
     result = success
     common_test_lib.print_result("[ Volume Mount with Subsystem Create Test1 ]", success)
 
     common_test_lib.create_volume(pos_root, stdout_type, "vol2", array_list[0])
-    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol2", array_list[0], subnqn_list[0])
+    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol2", array_list[0], subnqn_list[0], 2)
     common_test_lib.expect_true(ret, "Volume mounted on the specified existing subsystem.")
     success = (ret is True)
     result &= success
     common_test_lib.print_result("[ Volume Mount with Existing Subsystem Test1 ]", success)
 
     common_test_lib.create_volume(pos_root, stdout_type, "vol3", array_list[0])
-    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol3", array_list[0], "")
+    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol3", array_list[0], "", 3)
     common_test_lib.expect_true(ret, "Volume mounted on the random existing subsystem.")
     success = (ret is True)
     result &= success
     common_test_lib.print_result("[ Volume Mount with Existing Subsystem Test2 ]", success)
 
     common_test_lib.create_volume(pos_root, stdout_type, "vol4", array_list[1])
-    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol4", array_list[1], "")
+    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol4", array_list[1], "", 0)
     common_test_lib.expect_false(ret, "Failed to volume mount. No subsystem exist to mount.")
     success = (ret is False)
     result &= success
@@ -90,7 +90,7 @@ def volume_mount_with_subsystem_create_test():
 
     ret = nvmf.create_subsystem(stdout_type, subnqn_list[1], "POS00001", "POS_VOLUME_EXTENSION", True)
     common_test_lib.expect_true(ret, "Subsystem Creation")
-    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol4", array_list[1], "")
+    ret = nvmf.mount_volume_with_subsystem(stdout_type, "vol4", array_list[1], "", 1)
     common_test_lib.expect_true(ret, "Subsystem newly created and volume mounted on POSArray1")
     success = (ret is True)
     result &= success
@@ -182,10 +182,10 @@ if __name__ == "__main__":
     parse_arguments()
     common_test_lib.clear_env()
     stdout_type = common_test_lib.set_stdout_type(args.print_log)
-
+    
     success = create_transport_test(True, args.transport, "64", "2048")
     success &= create_transport_test(False, "wrong_transport_type", "64",
-                                     "2048")
+                                   "2048")
     allow_any_host = True
     success &= create_subsystem_test(True, "nqn.2019-04.pos:subsystem1",
                                      "POS00000000000001", "POS_VOLUME_EXTENTION", allow_any_host)
@@ -203,7 +203,6 @@ if __name__ == "__main__":
 
     success &= subsystem_namespace_mapping_test(args.transport, args.fabric_ip,
                                                 "3", "5")
-
     success &= volume_mount_with_subsystem_create_test()
 
     if success:
