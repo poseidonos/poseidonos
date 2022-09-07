@@ -174,33 +174,6 @@ TEST(IODispatcher, Submit_Reactor_Async_NotRecovery)
 
 TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
 {
-    // Given: IODispatcher, MockEventFrameworkApi, MockUBlockDevice, MockUbio
-    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
-    ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(false));
-    NiceMock<MockEventScheduler> mockEventScheduler;
-    IODispatcher ioDispatcher{&mockEventFrameworkApi, &mockEventScheduler};
-
-    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
-    ON_CALL(*ubio.get(), SetSyncMode()).WillByDefault(Return());
-    ON_CALL(*ubio.get(), GetUBlock()).WillByDefault(Return(&mockUBlockDevice));
-    ON_CALL(*ubio.get(), WaitDone()).WillByDefault(Return());
-    EXPECT_CALL(*ubio.get(), SetSyncMode()).Times(AtLeast(1));
-    EXPECT_CALL(*ubio.get(), GetUBlock()).Times(AtLeast(1));
-    EXPECT_CALL(*ubio.get(), WaitDone()).Times(AtLeast(1));
-    int actual, expected = 0;
-
-    // When 1: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
-    // And ublock->GetDedicatedIOWorker return nullptr
-    actual = ioDispatcher.Submit(ubio, true, true);
-    // Then 1: Expect actual value and expected value should be same
-    EXPECT_EQ(actual, expected);
-
-    // When 2: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
-    // And ublock->GetDedicatedIOWorker return MockIOWorker
-    actual = ioDispatcher.Submit(ubio, true, true);
-    // Then 2: Expect actual value and expected value should be same
-    EXPECT_EQ(actual, expected);
 }
 
 } // namespace pos
