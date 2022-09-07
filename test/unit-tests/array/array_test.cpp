@@ -965,10 +965,10 @@ TEST(Array, IsRecoverable_testIfBrokenArrayIsNotRecoverable)
     Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    bool actual = array.IsRecoverable(NULL, NULL);
+    int actual = array.IsRecoverable(NULL, NULL);
 
     // Then
-    ASSERT_FALSE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::FAIL));
 }
 
 TEST(Array, IsRecoverable_testIfUnmountedArrayIsNotRecoverable)
@@ -986,10 +986,10 @@ TEST(Array, IsRecoverable_testIfUnmountedArrayIsNotRecoverable)
     Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    bool actual = array.IsRecoverable(mockArrDev, uBlockPtr);
+    int actual = array.IsRecoverable(mockArrDev, uBlockPtr);
 
     // Then
-    ASSERT_FALSE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::FAIL));
 }
 
 TEST(Array, IsRecoverable_testIfArrayFailingToTranslateIsNotRecoverable)
@@ -1010,7 +1010,7 @@ TEST(Array, IsRecoverable_testIfArrayFailingToTranslateIsNotRecoverable)
     bool actual = array.IsRecoverable(mockArrDev, uBlockPtr);
 
     // Then: TODO(hsung): please check whether "true" is intended. IsRecoverable() is returning true when uBlock is null.
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::SUCCESS));
 }
 
 TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecoverable)
@@ -1051,7 +1051,7 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
     bool actual = array.IsRecoverable(mockArrDev, mockUblockDevPtr);
 
     // Then
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::SUCCESS));
     delete mockArrDev;
 }
 

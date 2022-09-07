@@ -178,7 +178,6 @@ TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(false));
     NiceMock<MockEventScheduler> mockEventScheduler;
-    ON_CALL(mockEventScheduler, GetAllowedIoCount(_)).WillByDefault(Return(2));
     IODispatcher ioDispatcher{&mockEventFrameworkApi, &mockEventScheduler};
 
     NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};

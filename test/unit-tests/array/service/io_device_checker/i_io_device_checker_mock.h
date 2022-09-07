@@ -12,7 +12,7 @@ class MockIIODeviceChecker : public IIODeviceChecker
 {
 public:
     using IIODeviceChecker::IIODeviceChecker;
-    MOCK_METHOD(bool, IsRecoverable, (string array, IArrayDevice* target, UBlockDevice* uBlock), (override));
+    MOCK_METHOD(int, IsRecoverable, (string array, IArrayDevice* target, UBlockDevice* uBlock), (override));
     MOCK_METHOD(IArrayDevice*, FindDevice, (string array, string devSn), (override));
 };
 
