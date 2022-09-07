@@ -362,9 +362,12 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
   </header>
   <nav>
     
-    <h3>Root element:</h3>
+    <h3>Root elements:</h3>
     <ul class="nav-alphabetical">
     <li class="root-node"><a href="#Cmd">Cmd</a>
+        
+        
+      </li><li class="root-node"><a href="#TelemetrySetPropertyCmd">TelemetrySetPropertyCmd</a>
         
         
       </li>
@@ -589,9 +592,6 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
       </li><li><a href="#TargetNVMSubsystemNVMeQualifiedName">TargetNVMSubsystemNVMeQualifiedName</a>
         
         
-      </li><li><a href="#TelemetryCmd">TelemetryCmd</a>
-        <dfn title="recursive">♺</dfn>
-        
       </li><li><a href="#TelemetryStartCmd">TelemetryStartCmd</a>
         
         
@@ -645,6 +645,9 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
         
       </li><li class="common-node"><a href="#SubsystemNQN">SubsystemNQN</a>
         
+        
+      </li><li class="common-node"><a href="#TelemetryCmd">TelemetryCmd</a>
+        <dfn title="recursive">♺</dfn>
         
       </li><li class="common-node"><a href="#TransportType">TransportType</a>
         
@@ -762,7 +765,7 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
   <code class="ebnf"><span class="ebnf-identifier">Identifier</span> = <a class="ebnf-non-terminal" href="#Letter">Letter</a> , { <a class="ebnf-non-terminal" href="#Letter">Letter</a> | <a class="ebnf-non-terminal" href="#Digit">Digit</a> | <span class="ebnf-terminal">"-"</span> | <span class="ebnf-terminal">"_"</span> } <span class="ebnf-end">;</span></code>
   <p>Items referencing <strong>Identifier</strong>:<p>
 <ul>
-<li><a href="#ArrayName">ArrayName</a></li><li><a href="#DeviceName">DeviceName</a></li><li><a href="#VolumeName">VolumeName</a></li><li><a href="#TargetNVMSubsystemNVMeQualifiedName">TargetNVMSubsystemNVMeQualifiedName</a></li><li><a href="#TransportServiceId">TransportServiceId</a></li><li><a href="#TargetAddress">TargetAddress</a></li><li><a href="#SerialNumber">SerialNumber</a></li><li><a href="#ModelNumber">ModelNumber</a></li><li><a href="#TransportType">TransportType</a></li>
+<li><a href="#ArrayName">ArrayName</a></li><li><a href="#DeviceName">DeviceName</a></li><li><a href="#VolumeName">VolumeName</a></li><li><a href="#TargetNVMSubsystemNVMeQualifiedName">TargetNVMSubsystemNVMeQualifiedName</a></li><li><a href="#TransportServiceId">TransportServiceId</a></li><li><a href="#TargetAddress">TargetAddress</a></li><li><a href="#SerialNumber">SerialNumber</a></li><li><a href="#ModelNumber">ModelNumber</a></li><li><a href="#TransportType">TransportType</a></li><li><a href="#TelemetrySetPropertyCmd">TelemetrySetPropertyCmd</a></li>
 </ul>
   <p><strong>Identifier</strong> is referencing:<p>
 <ul>
@@ -1932,7 +1935,7 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
   <code class="ebnf"><span class="ebnf-identifier">TelemetryCmd</span> = <span class="ebnf-terminal">"telemetry"</span> , ( <a class="ebnf-non-terminal" href="#TelemetryStartCmd">TelemetryStartCmd</a> | <a class="ebnf-non-terminal" href="#TelemetryStopCmd">TelemetryStopCmd</a> ) <span class="ebnf-end">;</span></code>
   <p>Items referencing <strong>TelemetryCmd</strong>:<p>
 <ul>
-<li><a href="#Cmd">Cmd</a></li><li><a href="#TelemetryStartCmd">TelemetryStartCmd</a></li><li><a href="#TelemetryStopCmd">TelemetryStopCmd</a></li>
+<li><a href="#Cmd">Cmd</a></li><li><a href="#TelemetryStartCmd">TelemetryStartCmd</a></li><li><a href="#TelemetryStopCmd">TelemetryStopCmd</a></li><li><a href="#TelemetrySetPropertyCmd">TelemetrySetPropertyCmd</a></li>
 </ul>
   <p><strong>TelemetryCmd</strong> is referencing:<p>
 <ul>
@@ -1965,6 +1968,18 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
   <p><strong>TelemetryStopCmd</strong> is referencing:<p>
 <ul>
 <li><a href="#TelemetryCmd">TelemetryCmd</a></li>
+</ul>
+</section>
+<section>
+  <h4 id="TelemetrySetPropertyCmd">TelemetrySetPropertyCmd</h4>
+  <div class="diagram-container"><svg class="railroad-diagram" width="531" style="max-height: 437px;" viewBox="0 0 531 437"><g transform="translate(.5 .5)"><g><path d="M20 81v20m0 -10h20"></path></g><path d="M40 91h10"></path><g><path d="M50 91h0"></path><path d="M50 91h10"></path><g><path d="M60 91h10"></path><path d="M461 91h10"></path><g><path d="M70 91h0"></path><path d="M461 91h0"></path><rect x="70" y="42" width="391" height="144" rx="10" ry="10" class="group-box"></rect><g><path d="M70 91h10"></path><path d="M451 91h10"></path><g class="terminal"><path d="M80 91h0"></path><path d="M176.5 91h0"></path><rect x="80" y="80" width="96.5" height="22" rx="10" ry="10"></rect><text x="128.25" y="95">telemetry</text></g><path d="M176.5 91h10"></path><g><path d="M186.5 91h0"></path><path d="M451 91h0"></path><path d="M186.5 91h20"></path><g><path d="M206.5 91h0"></path><path d="M431 91h0"></path><rect x="206.5" y="72" width="224.5" height="38" rx="10" ry="10" class="group-box"></rect><g><path d="M206.5 91h10"></path><path d="M421 91h10"></path><g class="non-terminal"><path d="M216.5 91h0"></path><path d="M338.5 91h0"></path><rect x="216.5" y="80" width="122" height="22"></rect><a xlink:href="#TelemetryCmd"><text x="277.5" y="95">TelemetryCmd</text></a></g><path d="M338.5 91h10"></path><path d="M348.5 91h10"></path><g class="terminal"><path d="M358.5 91h0"></path><path d="M421 91h0"></path><rect x="358.5" y="80" width="62.5" height="22" rx="10" ry="10"></rect><text x="389.75" y="95">start</text></g></g><g><path d="M206.5 61h0"></path><path d="M335.5 61h0"></path><a xlink:href="#TelemetryStartCmd"><text x="271" y="66" class="comment">TelemetryStartCmd</text></a></g></g><path d="M431 91h20"></path><path d="M186.5 91a10 10 0 0 1 10 10v48a10 10 0 0 0 10 10"></path><g><path d="M206.5 159h4.25"></path><path d="M426.75 159h4.25"></path><rect x="210.75" y="140" width="216" height="38" rx="10" ry="10" class="group-box"></rect><g><path d="M210.75 159h10"></path><path d="M416.75 159h10"></path><g class="non-terminal"><path d="M220.75 159h0"></path><path d="M342.75 159h0"></path><rect x="220.75" y="148" width="122" height="22"></rect><a xlink:href="#TelemetryCmd"><text x="281.75" y="163">TelemetryCmd</text></a></g><path d="M342.75 159h10"></path><path d="M352.75 159h10"></path><g class="terminal"><path d="M362.75 159h0"></path><path d="M416.75 159h0"></path><rect x="362.75" y="148" width="54" height="22" rx="10" ry="10"></rect><text x="389.75" y="163">stop</text></g></g><g><path d="M210.75 129h0"></path><path d="M332.75 129h0"></path><a xlink:href="#TelemetryStopCmd"><text x="271.75" y="134" class="comment">TelemetryStopCmd</text></a></g></g><path d="M431 159a10 10 0 0 0 10 -10v-48a10 10 0 0 1 10 -10"></path></g></g><g><path d="M70 31h0"></path><path d="M164 31h0"></path><a xlink:href="#TelemetryCmd"><text x="117" y="36" class="comment">TelemetryCmd</text></a></g></g></g><path d="M471 91a10 10 0 0 1 10 10v83a10 10 0 0 1 -10 10h-411a10 10 0 0 0 -10 10v8a10 10 0 0 0 10 10"></path><g><path d="M60 222h11.75"></path><path d="M459.25 222h11.75"></path><g class="terminal"><path d="M71.75 222h0"></path><path d="M193.75 222h0"></path><rect x="71.75" y="211" width="122" height="22" rx="10" ry="10"></rect><text x="132.75" y="226">set-property</text></g><path d="M193.75 222h10"></path><g><path d="M203.75 222h0"></path><path d="M459.25 222h0"></path><path d="M203.75 222a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"></path><g><path d="M223.75 202h215.5"></path></g><path d="M439.25 202a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"></path><path d="M203.75 222h20"></path><g class="terminal"><path d="M223.75 222h0"></path><path d="M439.25 222h0"></path><rect x="223.75" y="211" width="215.5" height="22" rx="10" ry="10"></rect><text x="331.5" y="226">--publication-list-path</text></g><path d="M439.25 222h20"></path></g></g><path d="M471 222a10 10 0 0 1 10 10v0a10 10 0 0 1 -10 10h-411a10 10 0 0 0 -10 10v38a10 10 0 0 0 10 10"></path><g><path d="M60 300h69.5"></path><path d="M401.5 300h69.5"></path><g><path d="M129.5 300h0"></path><path d="M401.5 300h0"></path><rect x="129.5" y="272" width="272" height="145" rx="10" ry="10" class="group-box"></rect><g><path d="M129.5 300h10"></path><path d="M391.5 300h10"></path><g class="non-terminal"><path d="M139.5 300h0"></path><path d="M210.5 300h0"></path><rect x="139.5" y="289" width="71" height="22"></rect><a xlink:href="#Letter"><text x="175" y="304">Letter</text></a></g><path d="M210.5 300h10"></path><g><path d="M220.5 300h0"></path><path d="M391.5 300h0"></path><path d="M220.5 300a10 10 0 0 0 10 -10v0a10 10 0 0 1 10 -10"></path><g><path d="M240.5 280h131"></path></g><path d="M371.5 280a10 10 0 0 1 10 10v0a10 10 0 0 0 10 10"></path><path d="M220.5 300h20"></path><g><path d="M240.5 300h0"></path><path d="M371.5 300h0"></path><path d="M240.5 300h10"></path><g><path d="M250.5 300h0"></path><path d="M361.5 300h0"></path><path d="M250.5 300h20"></path><g class="non-terminal"><path d="M270.5 300h0"></path><path d="M341.5 300h0"></path><rect x="270.5" y="289" width="71" height="22"></rect><a xlink:href="#Letter"><text x="306" y="304">Letter</text></a></g><path d="M341.5 300h20"></path><path d="M250.5 300a10 10 0 0 1 10 10v10a10 10 0 0 0 10 10"></path><g class="non-terminal"><path d="M270.5 330h4.25"></path><path d="M337.25 330h4.25"></path><rect x="274.75" y="319" width="62.5" height="22"></rect><a xlink:href="#Digit"><text x="306" y="334">Digit</text></a></g><path d="M341.5 330a10 10 0 0 0 10 -10v-10a10 10 0 0 1 10 -10"></path><path d="M250.5 300a10 10 0 0 1 10 10v40a10 10 0 0 0 10 10"></path><g class="terminal"><path d="M270.5 360h21.25"></path><path d="M320.25 360h21.25"></path><rect x="291.75" y="349" width="28.5" height="22" rx="10" ry="10"></rect><text x="306" y="364">-</text></g><path d="M341.5 360a10 10 0 0 0 10 -10v-40a10 10 0 0 1 10 -10"></path><path d="M250.5 300a10 10 0 0 1 10 10v70a10 10 0 0 0 10 10"></path><g class="terminal"><path d="M270.5 390h21.25"></path><path d="M320.25 390h21.25"></path><rect x="291.75" y="379" width="28.5" height="22" rx="10" ry="10"></rect><text x="306" y="394">&#95;</text></g><path d="M341.5 390a10 10 0 0 0 10 -10v-70a10 10 0 0 1 10 -10"></path></g><path d="M361.5 300h10"></path><path d="M250.5 300a10 10 0 0 0 -10 10v89a10 10 0 0 0 10 10"></path><g><path d="M250.5 409h111"></path></g><path d="M361.5 409a10 10 0 0 0 10 -10v-89a10 10 0 0 0 -10 -10"></path></g><path d="M371.5 300h20"></path></g></g><g><path d="M129.5 261h0"></path><path d="M209.5 261h0"></path><a xlink:href="#Identifier"><text x="169.5" y="266" class="comment">Identifier</text></a></g></g></g><path d="M471 300h10"></path><path d="M481 300h0"></path></g><path d="M481 300h10"></path><path d="M 491 300 h 20 m 0 -10 v 20"></path></g></svg>
+</div>
+  <code class="ebnf"><span class="ebnf-identifier">TelemetrySetPropertyCmd</span> = <a class="ebnf-non-terminal" href="#TelemetryCmd">TelemetryCmd</a> ,
+  <span class="ebnf-terminal">"set-property"</span> , [ <span class="ebnf-terminal">"--publication-list-path"</span> ] ,
+  <a class="ebnf-non-terminal" href="#Identifier">Identifier</a> <span class="ebnf-end">;</span></code>
+  <p><strong>TelemetrySetPropertyCmd</strong> is referencing:<p>
+<ul>
+<li><a href="#TelemetryCmd">TelemetryCmd</a></li><li><a href="#Identifier">Identifier</a></li>
 </ul>
 </section>
 <section>
@@ -2098,7 +2113,7 @@ svg.railroad-diagram g.diagram-text:hover path.diagram-text {
 
   </article>
   <footer>
-    <p>Date: 2022-08-30T08:05 - <a href="?theme=dark" data-theme="dark">Dark</a> - <a href="?theme=light" data-theme="light">Light</a></p>
+    <p>Date: 2022-09-05T04:40 - <a href="?theme=dark" data-theme="dark">Dark</a> - <a href="?theme=light" data-theme="light">Light</a></p>
   </footer>
   </main>
   <script type="text/javascript">
