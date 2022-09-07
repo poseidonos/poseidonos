@@ -57,16 +57,18 @@ TEST(ResourceChecker, Enable)
     ResourceChecker* resChecker = new ResourceChecker();
     resChecker->SetSleepTime(0);
     resChecker->Enable();
+    uint32_t count = 0;
     do
     {
-        if (100 <= resChecker->GetIterationCount())
+        count = resChecker->GetIterationCount();
+        if (100 <= count)
         {
             break;
         }
     } while (true);
 
     // Then
-    EXPECT_EQ(100, resChecker->GetIterationCount());
+    EXPECT_EQ(count >= 100, true);
 
     delete resChecker;
     resChecker = nullptr;
@@ -121,7 +123,7 @@ TEST(ResourceChecker, forced_stop_and_reStart)
     } while (true);
 
     // Then
-    EXPECT_EQ(5, resChecker->GetIterationCount());
+    EXPECT_EQ(resChecker->GetIterationCount() >= 5, true);
 
     resChecker = nullptr;
 }
