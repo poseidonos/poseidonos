@@ -101,8 +101,6 @@ private:
 
     std::mutex allocCtxLock;
     bool initialized;
-
-    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos
