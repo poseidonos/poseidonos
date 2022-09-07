@@ -600,39 +600,23 @@ SegmentCtx::ResetSegmentsStates(void)
 
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
-        bool segmentFreed = false;
-        SegmentState state = segmentInfos[segId].GetState();
-        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
+        if ((0 == validCount) && (0 == occupiedStripeCount))
         {
-            segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
-            if (segmentFreed == true)
-            {
-                POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "segment_id:{}", segId);
-            }
+            segmentInfos[segId].SetState(SegmentState::FREE);
+        }
+        else if ((0 <= validCount) && (occupiedStripeCount == (int)addrInfo->GetstripesPerSegment()))
+        {
+            segmentInfos[segId].SetState(SegmentState::SSD);
+        }
+        else if ((0 <= validCount) && (1 <= occupiedStripeCount))
+        {
+            segmentInfos[segId].SetState(SegmentState::NVRAM);
         }
         else
         {
-            validCount = segmentInfos[segId].GetValidBlockCount();
-            occupiedStripeCount = segmentInfos[segId].GetOccupiedStripeCount();
-
-            if ((0 == validCount) && (0 == occupiedStripeCount))
-            {
-                segmentInfos[segId].SetState(SegmentState::FREE);
-            }
-            else if ((0 <= validCount) && (occupiedStripeCount == (int)addrInfo->GetstripesPerSegment()))
-            {
-                segmentInfos[segId].SetState(SegmentState::SSD);
-            }
-            else if ((0 <= validCount) && (1 <= occupiedStripeCount))
-            {
-                segmentInfos[segId].SetState(SegmentState::NVRAM);
-            }
-            else
-            {
-                POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "segment id {}, validCount {}, occupiedStripeCount {}",
-                                segId, validCount, occupiedStripeCount);
-                assert(false);
-            }
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "segment id {}, validCount {}, occupiedStripeCount {}",
+                            segId, validCount, occupiedStripeCount);
+            assert(false);
         }
     }
 
