@@ -34,7 +34,7 @@ public:
     MOCK_METHOD(ArrayStateType, GetState, (), (override));
     MOCK_METHOD(StateContext*, GetStateCtx, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildingProgress, (), (override));
-    MOCK_METHOD(bool, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
+    MOCK_METHOD(int, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
     MOCK_METHOD(IArrayDevice*, FindDevice, (string devSn), (override));
     MOCK_METHOD(bool, TriggerRebuild, (ArrayDevice * target), (override));
 };

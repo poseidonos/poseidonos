@@ -32,27 +32,13 @@
 
 #pragma once
 
-#include <string>
-
-#include "src/include/smart_ptr_type.h"
-#include "src/include/io_recovery_ret_type.h"
-
-using namespace std;
-
 namespace pos
 {
-class IArrayDevice;
-enum class ArrayDeviceState;
-
-class IDeviceChecker
+enum class IoRecoveryRetType
 {
-public:
-// LCOV_EXCL_START
-    virtual ~IDeviceChecker()
-    {
-    }
-// LCOV_EXCL_STOP
-    virtual int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) = 0;
-    virtual IArrayDevice* FindDevice(string devSn) = 0;
+    SUCCESS,
+    RETRY,
+    FAIL
 };
+
 } // namespace pos
