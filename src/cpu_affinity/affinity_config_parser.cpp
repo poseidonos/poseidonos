@@ -125,7 +125,7 @@ AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)
     {
         bool useAffinity = true;
         if (useReactorConfig == true &&
-            ((iter.type == CoreType::UDD_IO_WORKER) ||
+            ((iter.type == CoreType::UDD_IO_WORKER)||
             (iter.type == CoreType::EVENT_SCHEDULER) ||
             (iter.type == CoreType::EVENT_WORKER)))
         {

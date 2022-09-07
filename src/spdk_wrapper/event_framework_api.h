@@ -94,9 +94,9 @@ private:
     static const uint32_t MAX_NUMA_COUNT = 8;
     static const uint32_t MAX_PROCESSABLE_EVENTS;
 
-    static std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
-    static std::array<EventQueue, MAX_NUMA_COUNT> eventSingleQueue;
-    static std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
+    std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
+    std::array<EventQueue, MAX_NUMA_COUNT> eventSingleQueue;
+    std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
 
     SpdkThreadCaller* spdkThreadCaller;
     SpdkEnvCaller* spdkEnvCaller;

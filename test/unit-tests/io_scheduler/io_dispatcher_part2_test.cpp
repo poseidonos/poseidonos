@@ -193,18 +193,12 @@ TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
 
     // When 1: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
     // And ublock->GetDedicatedIOWorker return nullptr
-    ON_CALL(mockUBlockDevice, GetDedicatedIOWorker()).WillByDefault(Return(nullptr));
     actual = ioDispatcher.Submit(ubio, true, true);
-
     // Then 1: Expect actual value and expected value should be same
     EXPECT_EQ(actual, expected);
 
     // When 2: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
     // And ublock->GetDedicatedIOWorker return MockIOWorker
-    cpu_set_t cpuSet;
-    NiceMock<MockIOWorker> mockIOWorker{cpuSet, 0};
-    ON_CALL(mockIOWorker, EnqueueUbio(_)).WillByDefault(Return());
-    ON_CALL(mockUBlockDevice, GetDedicatedIOWorker()).WillByDefault(Return(&mockIOWorker));
     actual = ioDispatcher.Submit(ubio, true, true);
     // Then 2: Expect actual value and expected value should be same
     EXPECT_EQ(actual, expected);
