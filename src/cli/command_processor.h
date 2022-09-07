@@ -190,7 +190,7 @@ public:
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
 
 private:
-    bool _isPosTerminating;
+    bool _isPosTerminating {false};
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
     void _SetEventStatus(int eventId, grpc_cli::Status *status);

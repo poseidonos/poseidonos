@@ -30,9 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <unordered_map>
-
 #include "json_helper.h"
+
+#include <unordered_map>
 
 static void
 JsonFormatSubStringAddTab(JsonFormatType type, string& subString)
@@ -194,13 +194,12 @@ JsonFormat::MakeResponse(
     std::string cause = "";
     std::string solution = "";
 
-    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-                PosEventInfo.find(eventId);
+    auto it = PosEventInfo.find(eventId);
     if (it != PosEventInfo.end())
     {
-        eventName = it->second->GetEventName();
-        cause = it->second->GetCause();
-        solution = it->second->GetSolution();
+        eventName = it->second.GetEventName();
+        cause = it->second.GetCause();
+        solution = it->second.GetSolution();
     }
 
     JsonElement root("");
@@ -229,13 +228,12 @@ JsonFormat::MakeResponse(
     std::string cause = "";
     std::string solution = "";
 
-    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-                PosEventInfo.find(eventId);
+    auto it = PosEventInfo.find(eventId);
     if (it != PosEventInfo.end())
     {
-        eventName = it->second->GetEventName();
-        cause = it->second->GetCause();
-        solution = it->second->GetSolution();
+        eventName = it->second.GetEventName();
+        cause = it->second.GetCause();
+        solution = it->second.GetSolution();
     }
 
     JsonElement root("");
