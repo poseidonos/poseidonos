@@ -1,5 +1,5 @@
 {
-    "Targets": [
+    "TARGETs": [
         {
             "NAME": "Target01",
             "ID": "root",
@@ -41,6 +41,7 @@
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",
                 "CFG": "pos_multi_array_normal.conf",
+                "WAIT_AFTER_EXE": 60,
                 "TELEMETRY": false,
                 "LOGGER_LEVEL": "info",
                 "TRANSPORT": {
@@ -126,7 +127,7 @@
             }
         }
     ],
-    "Initiators": [
+    "INITIATORs": [
         {
             "NAME": "Initiator01",
             "ID": "root",
@@ -216,10 +217,10 @@
             ]
         }
     ],
-    "Scenarios": [
+    "SCENARIOs": [
         {
             "PATH": "./test/system/benchmark/scenario/fio_sustain.py",
-            "NAME": "fio_normal",
+            "NAME": "fio_sustain",
             "OUTPUT_DIR": "./output",
             "RESULT_FORMAT": "junit_xml",
             "SUBPROC_LOG": true
