@@ -207,19 +207,6 @@ QosMonitoringManagerArray::UpdateContextUserVolumePolicy(void)
  */
 /* --------------------------------------------------------------------------*/
 
-bool
-QosMonitoringManagerArray::VolParamActivities(uint32_t volId, uint32_t reactor)
-{
-    return true;
-}
-
-/* --------------------------------------------------------------------------*/
-/**
- * @Synopsis
- *
- * @Returns
- */
-/* --------------------------------------------------------------------------*/
 void
 QosMonitoringManagerArray::UpdateVolumeParameter(uint32_t volId)
 {
