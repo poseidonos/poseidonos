@@ -30,9 +30,11 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "json_helper.h"
+
 #include <unordered_map>
 
-#include "json_helper.h"
+#include "src/event/event_manager.h"
 
 static void
 JsonFormatSubStringAddTab(JsonFormatType type, string& subString)
@@ -194,16 +196,13 @@ JsonFormat::MakeResponse(
     std::string cause = "";
     std::string solution = "";
 
-    const std::unordered_map<int, EventManager::EventInfoEntry*> eventInfo =
-        eventManager.GetEventInfo();
-    std::unordered_map<int, EventManager::EventInfoEntry*>::const_iterator it =
-        eventInfo.find(eventId);
-
-    if (it != eventInfo.end())
+    auto event_info = eventManager.GetEventInfo();
+    auto it = event_info->find(eventId);
+    if (it != event_info->end())
     {
-        eventName = it->second->GetEventName();
-        cause = it->second->GetCause();
-        solution = it->second->GetSolution();
+        eventName = it->second.GetEventName();
+        cause = it->second.GetCause();
+        solution = it->second.GetSolution();
     }
 
     JsonElement root("");
@@ -232,16 +231,13 @@ JsonFormat::MakeResponse(
     std::string cause = "";
     std::string solution = "";
 
-    const std::unordered_map<int, EventManager::EventInfoEntry*> eventInfo =
-        eventManager.GetEventInfo();
-    std::unordered_map<int, EventManager::EventInfoEntry*>::const_iterator it =
-        eventInfo.find(eventId);
-
-    if (it != eventInfo.end())
+    auto event_info = eventManager.GetEventInfo();
+    auto it = event_info->find(eventId);
+    if (it != event_info->end())
     {
-        eventName = it->second->GetEventName();
-        cause = it->second->GetCause();
-        solution = it->second->GetSolution();
+        eventName = it->second.GetEventName();
+        cause = it->second.GetCause();
+        solution = it->second.GetSolution();
     }
 
     JsonElement root("");

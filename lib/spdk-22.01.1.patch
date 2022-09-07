@@ -1751,15 +1751,28 @@ index 0fdf68146..48438dc23 100644
  		return -EIO;
  	}
 diff --git mk/spdk.common.mk mk/spdk.common.mk
-index a4fd0cdd8..aeb003b3c 100644
+index a4fd0cdd8..687efa66c 100644
 --- mk/spdk.common.mk
 +++ mk/spdk.common.mk
-@@ -316,6 +316,14 @@ ifeq ($(OS).$(CC_TYPE),Windows.gcc)
+@@ -265,8 +265,8 @@ endif
+ include $(CONFIG_ENV)/env.mk
+ 
+ ifeq ($(CONFIG_ASAN),y)
+-COMMON_CFLAGS += -fsanitize=address
+-LDFLAGS += -fsanitize=address
++COMMON_CFLAGS += -fno-omit-frame-pointer -fsanitize=address
++LDFLAGS += -fno-omit-frame-pointer -fsanitize=address
+ endif
+ 
+ ifeq ($(CONFIG_UBSAN),y)
+@@ -316,6 +316,16 @@ ifeq ($(OS).$(CC_TYPE),Windows.gcc)
  SYS_LIBS += -l:libssp.a
  endif
  
 +ifeq ($(CONFIG_POS),y)
++ifneq ($(CONFIG_ASAN),y)
 +SYS_LIBS += -ltcmalloc
++endif
 +SYS_LIBS += -lnuma
 +endif
 +
