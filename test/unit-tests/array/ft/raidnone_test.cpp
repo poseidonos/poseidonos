@@ -1,7 +1,6 @@
 #include "src/array/ft/raid_none.h"
 
 #include <gtest/gtest.h>
-
 #include <cmath>
 
 #include "src/array_models/dto/partition_physical_size.h"
