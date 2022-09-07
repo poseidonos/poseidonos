@@ -42,6 +42,15 @@ endif()
 
 # Download required packages
 
+# Set ASAN(Address Sanitizer) build option for AIR
+if (${ASAN_ENABLE} STREQUAL "y")
+    message("Set AIR_ASAN_OPT TRUE")
+    set(AIR_ASAN_OPT TRUE)
+else(${ASAN_ENABLE} STREQUAL "n")
+    message("Set AIR_ASAN_OPT FALSE")
+    set(AIR_ASAN_OPT FALSE)
+endif()
+
 # Build AIR with conditional repository
 set(POS_DEP_AIR "air")
 if (${USE_LOCAL_REPO} STREQUAL "y")
@@ -59,7 +68,7 @@ ExternalProject_Add(air
     UPDATE_COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
 #---Configure step----------------
     SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_AIR}
-    CONFIGURE_COMMAND cmake .. -DCONFIG=${PROJ_ROOT}/config/air.cfg
+    CONFIGURE_COMMAND cmake .. -DCONFIG=${PROJ_ROOT}/config/air.cfg -DASAN=${AIR_ASAN_OPT}
 #---Build step--------------------
     BINARY_DIR ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
     BUILD_COMMAND make
@@ -150,6 +159,14 @@ else(${SPDK_DEBUG_ENABLE} STREQUAL "n")
     set(ENABLE_DEBUG "")
 endif()
 
+if (${ASAN_ENABLE} STREQUAL "y")
+    message("Set SPDK ASAN option: --enable-asan")
+    set(SPDK_ASAN_OPT "--enable-asan")
+else(${ASAN_ENABLE} STREQUAL "n")
+    message("Set SPDK ASAN option: --disable-asan")
+    set(SPDK_ASAN_OPT "--disable-asan")
+endif()
+
 # Build SPDK conditionally
 ExternalProject_Add(spdk
     DEPENDS dpdk fio air
@@ -167,7 +184,7 @@ ExternalProject_Add(spdk
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
     PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdk-22.01.1.patch
-    CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost ${ENABLE_DEBUG}
+    CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost ${ENABLE_DEBUG} ${SPDK_ASAN_OPT}
     BUILD_COMMAND ./scripts/pkgdep.sh
     COMMAND make -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/build/fio/spdk_nvme ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/examples/nvme/fio_plugin/fio_plugin)

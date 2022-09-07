@@ -31,14 +31,15 @@
  */
 
 #include "src/include/pos_event_id.hpp"
-#include <string>
+
 #include <yaml-cpp/yaml.h>
+
+#include <string>
 
 #include "logger.h"
 
 namespace pos
 {
-
 // LCOV_EXCL_START
 PosEventId::~PosEventId(void)
 {
@@ -56,7 +57,7 @@ GetEventIdFromMap(std::string eventName)
 
     std::unordered_map<std::string, int>::const_iterator it =
         PosEventNameToIdMap.find(eventName);
-    
+
     if (it == PosEventNameToIdMap.end())
     {
         return UNKNOWN_EVENT_ID;
@@ -65,10 +66,10 @@ GetEventIdFromMap(std::string eventName)
     return it->second;
 }
 
-std::unordered_map<int, PosEventInfoEntry*>
+std::unordered_map<int, PosEventInfoEntry>
 _LoadPosEvent()
 {
-    std::unordered_map<int, PosEventInfoEntry*> result;
+    std::unordered_map<int, PosEventInfoEntry> result;
     YAML::Node events;
     try
     {
@@ -81,15 +82,12 @@ _LoadPosEvent()
             std::string message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
             std::string cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
             std::string solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
-            
-            result.insert(
-                std::make_pair(id,
-                    new PosEventInfoEntry(name, message, cause, solution)
-                )
-            );
+
+            result.insert({id, PosEventInfoEntry{name, message, cause, solution}});
         }
     }
-    catch(const std::exception& e) {
+    catch (const std::exception& e)
+    {
         std::cerr << e.what() << std::endl;
     }
 
@@ -101,10 +99,11 @@ _LoadEventNameToIdMap()
 {
     std::unordered_map<std::string, int> result;
 
-    for (auto& it: PosEventInfo) {
+    for (auto& it : PosEventInfo)
+    {
         int id = it.first;
-        std::string name = it.second->GetEventName();
-           
+        std::string name = it.second.GetEventName();
+
         result.insert(std::make_pair(name, id));
     }
 
