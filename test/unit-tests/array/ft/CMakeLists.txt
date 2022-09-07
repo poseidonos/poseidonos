@@ -1,6 +1,6 @@
 POS_ADD_UNIT_TEST(raid6_ut raid6_test.cpp)
 POS_ADD_UNIT_TEST(raid5_ut raid5_test.cpp)
-POS_ADD_UNIT_TEST(raid_none_ut raid_none_test.cpp)
+POS_ADD_UNIT_TEST(raidnone_ut raidnone_test.cpp)
 POS_ADD_UNIT_TEST(raid0_ut raid0_test.cpp)
 POS_ADD_UNIT_TEST(method_ut method_test.cpp)
 POS_ADD_UNIT_TEST(raid10_ut raid10_test.cpp)
