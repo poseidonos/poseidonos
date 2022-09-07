@@ -12,7 +12,7 @@ class MockIDeviceChecker : public IDeviceChecker
 {
 public:
     using IDeviceChecker::IDeviceChecker;
-    MOCK_METHOD(bool, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
+    MOCK_METHOD(int, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
     MOCK_METHOD(IArrayDevice*, FindDevice, (string devSn), (override));
 };
 

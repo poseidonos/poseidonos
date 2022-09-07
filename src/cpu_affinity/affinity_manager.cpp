@@ -34,6 +34,7 @@
 
 #include <numa.h>
 #include <sched.h>
+
 #include <iomanip>
 
 #include "count_descripted_cpu_set_generator.h"
@@ -42,6 +43,7 @@
 #include "src/include/core_const.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include "src/qos/qos_common.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "string_descripted_cpu_set_generator.h"
 
@@ -107,7 +109,7 @@ AffinityManager::AffinityManager(AffinityConfigParser* parser_)
             }
         }
 
-        if (parser->IsReactorOnly())
+        if (parser->UseEventReactor())
         {
             SpdkNvmfCaller spdkNvmfCaller;
             spdkNvmfCaller.SpdkNvmfSetUseEventReactor(cpuSetArray[(static_cast<uint32_t>(CoreType::EVENT_REACTOR))]);
@@ -232,7 +234,15 @@ std::string
 AffinityManager::GetReactorCPUSetString(void)
 {
     cpu_set_t reactorCpuSet = GetCpuSet(CoreType::REACTOR);
-    string cpuString = _GetCPUSetString(reactorCpuSet);
+    cpu_set_t totalReactorCpuSet;
+    CPU_ZERO(&totalReactorCpuSet);
+    CPU_OR(&totalReactorCpuSet, &reactorCpuSet, &totalReactorCpuSet);
+    if (true == UseEventReactor())
+    {
+        cpu_set_t eventReactorCpuSet = GetCpuSet(CoreType::EVENT_REACTOR);
+        CPU_OR(&totalReactorCpuSet, &eventReactorCpuSet, &totalReactorCpuSet);
+    }
+    string cpuString = _GetCPUSetString(totalReactorCpuSet);
     return cpuString;
 }
 
@@ -315,6 +325,38 @@ uint32_t
 AffinityManager::GetNumaCount(void)
 {
     return NUMA_COUNT;
+}
+
+bool
+AffinityManager::UseEventReactor(void)
+{
+    if (parser != nullptr)
+    {
+        return parser->UseEventReactor();
+    }
+    return false;
+}
+
+bool
+AffinityManager::IsEventReactor(uint32_t reactor)
+{
+    cpu_set_t eventReactorCpuSet = GetCpuSet(CoreType::EVENT_REACTOR);
+    if (CPU_ISSET(reactor, &eventReactorCpuSet))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool
+AffinityManager::IsIoReactor(uint32_t reactor)
+{
+    cpu_set_t ioReactorCpuSet = GetCpuSet(CoreType::REACTOR);
+    if (CPU_ISSET(reactor, &ioReactorCpuSet))
+    {
+        return true;
+    }
+    return false;
 }
 
 } // namespace pos

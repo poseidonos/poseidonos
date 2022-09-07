@@ -638,28 +638,34 @@ Array::_DeletePartitions(void)
     ptnMgr->DeletePartitions();
 }
 
-bool
+int
 Array::IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock)
 {
-    pthread_rwlock_wrlock(&stateLock);
+    if (pthread_rwlock_trywrlock(&stateLock) != 0)
+    {
+        return static_cast<int>(IoRecoveryRetType::RETRY);
+    }
     if (state->IsBroken() || !state->IsMounted())
     {
         pthread_rwlock_unlock(&stateLock);
-        return false;
+        return static_cast<int>(IoRecoveryRetType::FAIL);
     }
 
     if (uBlock == nullptr                       // Translate / Covnert fail
         || target->GetUblock().get() != uBlock) // Detached device after address translation
     {
         pthread_rwlock_unlock(&stateLock);
-        return true;
+        return static_cast<int>(IoRecoveryRetType::SUCCESS);
     }
 
     _DetachData(static_cast<ArrayDevice*>(target));
     bool ret = state->IsRecoverable();
     pthread_rwlock_unlock(&stateLock);
-
-    return ret;
+    if (ret == true)
+    {
+        return static_cast<int>(IoRecoveryRetType::SUCCESS);
+    }
+    return static_cast<int>(IoRecoveryRetType::FAIL);
 }
 
 IArrayDevice*

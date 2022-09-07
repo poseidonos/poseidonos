@@ -68,7 +68,8 @@ Ubio::Ubio(void* buffer, uint32_t unitCount, int arrayID)
   lba(0),
   uBlock(nullptr),
   arrayDev(nullptr),
-  arrayId(arrayID)
+  arrayId(arrayID),
+  originCore(INVALID_CORE)
 {
     SetAsyncMode();
     airlog("Ubio_Constructor", "internal", GetEventType(), 1);
@@ -84,7 +85,8 @@ Ubio::Ubio(const Ubio& ubio)
   lba(0),
   uBlock(nullptr),
   arrayDev(nullptr),
-  arrayId(ubio.arrayId)
+  arrayId(ubio.arrayId),
+  originCore(INVALID_CORE)
 {
     dir = ubio.dir;
     SetAsyncMode();
@@ -209,7 +211,13 @@ Ubio::SetPba(PhysicalBlkAddr& pba)
 uint32_t
 Ubio::GetOriginCore(void)
 {
-    return INVALID_CORE;
+    return originCore;
+}
+
+void
+Ubio::SetOriginCore(uint32_t inputOriginCore)
+{
+    originCore = inputOriginCore;
 }
 
 void*

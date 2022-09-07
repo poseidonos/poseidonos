@@ -163,17 +163,17 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
 
     std::string level = request->param().level();
 
-    if (level.compare("highest") == 0)
+    if (level.compare("high") == 0)
         {
-            newBackendPolicy.priorityImpact = PRIORITY_HIGHEST;
+            newBackendPolicy.priorityImpact = PRIORITY_HIGH;
         }
         else if (level.compare("medium") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
-        else if (level.compare("lowest") == 0)
+        else if (level.compare("low") == 0)
         {
-            newBackendPolicy.priorityImpact = PRIORITY_LOWEST;
+            newBackendPolicy.priorityImpact = PRIORITY_LOW;
         }
         else
         {
@@ -1699,14 +1699,14 @@ CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {
     switch (impact)
     {
-        case PRIORITY_HIGHEST:
-            return "highest";
+        case PRIORITY_HIGH:
+            return "high";
 
         case PRIORITY_MEDIUM:
             return "medium";
 
-        case PRIORITY_LOWEST:
-            return "lowest";
+        case PRIORITY_LOW:
+            return "low";
 
         default:
             return "unknown";

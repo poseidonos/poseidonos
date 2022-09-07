@@ -104,7 +104,7 @@ public:
     uint32_t GetRebuildingProgress(void) override;
     IArrayDevMgr* GetArrayManager(void) override;
     bool IsWriteThroughEnabled(void) override;
-    bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
+    int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual bool TriggerRebuild(ArrayDevice* target);
     virtual void DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt);

@@ -140,9 +140,12 @@ AffinityViewer::Numa::Print(void)
     {
         sockets[socketId].Print();
     }
-    uint32_t eventWorkerSocket = affinityManager.GetEventWorkerSocket();
-    cout << "Event Worker Socket: " << eventWorkerSocket << endl;
-    cout << "===============================\n";
+    if (false == affinityManager.UseEventReactor())
+    {
+        uint32_t eventWorkerSocket = affinityManager.GetEventWorkerSocket();
+        cout << "Event Worker Socket: " << eventWorkerSocket << endl;
+        cout << "===============================\n";
+    }
 }
 
 AffinityViewer::Numa::Numa(AffinityManager* affinityManager)

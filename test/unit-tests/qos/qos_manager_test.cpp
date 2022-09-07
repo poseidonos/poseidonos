@@ -232,7 +232,7 @@ TEST(QosManager, Test_Getter_UpdateBackendPolicy)
 {
     QosManager qosManager;
     qos_backend_policy rebuildPolicy;
-    rebuildPolicy.priorityImpact = PRIORITY_HIGHEST;
+    rebuildPolicy.priorityImpact = PRIORITY_HIGH;
     std::string arrayName = "POSArray";
     qosManager.UpdateArrayMap(arrayName);
     uint32_t arrayId = 0;

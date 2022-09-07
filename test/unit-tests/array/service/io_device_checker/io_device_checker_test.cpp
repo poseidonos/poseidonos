@@ -65,15 +65,15 @@ TEST(IODeviceChecker, IsRecoverable_testIfCheckerWorks)
     UblockSharedPtr ublock = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     ArrayDeviceState state = ArrayDeviceState::NORMAL;
     MockArrayDevice* mockArrayDevice = new MockArrayDevice(ublock, state);
-    EXPECT_CALL(*mockIDeviceChecker, IsRecoverable).WillOnce(Return(true));
+    EXPECT_CALL(*mockIDeviceChecker, IsRecoverable).WillOnce(Return(static_cast<int>(IoRecoveryRetType::SUCCESS)));
     EXPECT_CALL(*mockArrayDevice, GetUblockPtr).Times(1);
     ioDeviceChecker.Register(0, mockIDeviceChecker);
 
     // When
-    bool actual = ioDeviceChecker.IsRecoverable(0 , mockArrayDevice, mockArrayDevice->GetUblockPtr());
+    int actual = ioDeviceChecker.IsRecoverable(0 , mockArrayDevice, mockArrayDevice->GetUblockPtr());
 
     // Then
-    EXPECT_TRUE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::SUCCESS));
 
     // CleanUp
     delete mockArrayDevice;

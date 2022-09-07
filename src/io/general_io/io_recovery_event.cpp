@@ -84,18 +84,22 @@ IoRecoveryEvent::Execute(void)
         }
         case UbioDir::Write:
         {
-            bool isRecoverable = false;
+            int isRecoverable = static_cast<int>(IoRecoveryRetType::SUCCESS);
             IIODeviceChecker* checker = ArrayService::Instance()->Getter()->GetDeviceChecker();
             isRecoverable = checker->IsRecoverable(ubio->GetArrayId(),
                 ubio->GetArrayDev(), ubio->GetUBlock());
-            if (isRecoverable)
+            if (isRecoverable == static_cast<int>(IoRecoveryRetType::SUCCESS))
             {
                 ubio->ResetError();
                 ioCompleter->CompleteUbioWithoutRecovery(IOErrorType::SUCCESS, true);
             }
-            else
+            else if (isRecoverable == static_cast<int>(IoRecoveryRetType::FAIL))
             {
                 ioCompleter->CompleteUbioWithoutRecovery(errorType, true);
+            }
+            else
+            {
+                return false;
             }
 
             break;

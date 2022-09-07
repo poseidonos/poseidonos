@@ -77,10 +77,10 @@ const int MAX_VOLUME_EVENT = (MAX_VOLUME_COUNT > pos::BackendEvent_Count) ? MAX_
 const int MAX_EVENTS_PER_EVENT_WORKER = 50;
 const int MAX_IO_COUNT = 512 * 8;
 
-const uint8_t PRIORITY_HIGHEST = 3;
+const uint8_t PRIORITY_HIGH = 3;
 const uint8_t PRIORITY_MEDIUM = 2;
-const uint8_t PRIORITY_LOWEST = 1;
-const uint8_t PRIORITY_DEFAULT = PRIORITY_LOWEST;
+const uint8_t PRIORITY_LOW = 1;
+const uint8_t PRIORITY_DEFAULT = PRIORITY_LOW;
 const uint8_t PRIORITY_INVALID = 0;
 
 const uint32_t WT_LEVEL1 = 2;
