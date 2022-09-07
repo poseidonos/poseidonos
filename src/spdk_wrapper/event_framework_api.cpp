@@ -50,16 +50,6 @@ namespace pos
 thread_local uint32_t EventFrameworkApi::targetReactor = UINT32_MAX;
 const uint32_t EventFrameworkApi::MAX_REACTOR_COUNT;
 const uint32_t EventFrameworkApi::MAX_PROCESSABLE_EVENTS = 16;
-std::array<EventFrameworkApi::EventQueue,
-    EventFrameworkApi::MAX_REACTOR_COUNT>
-    EventFrameworkApi::eventQueues;
-
-std::array<EventFrameworkApi::EventQueueLock,
-    EventFrameworkApi::MAX_REACTOR_COUNT>
-    EventFrameworkApi::eventQueueLocks;
-
-std::array<EventFrameworkApi::EventQueue, EventFrameworkApi::MAX_NUMA_COUNT> 
-    EventFrameworkApi::eventSingleQueue;
 
 static inline void
 EventFuncWrapper(void* ctx)

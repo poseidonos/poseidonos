@@ -264,7 +264,11 @@ IODispatcher::Submit(UbioSmartPtr ubio, bool sync, bool ioRecoveryNeeded)
 {
     bool isReactor = eventFrameworkApi->IsReactorNow();
     uint32_t currentCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    bool isEventReactor = AffinityManagerSingleton::Instance()->IsEventReactor(currentCore);
+    bool isEventReactor = false;
+    if (isReactor)
+    {
+        isEventReactor = AffinityManagerSingleton::Instance()->IsEventReactor(currentCore);
+    }
     // sync io for reactor is not allowed. (reactor should not be stuck in any point.)
     int ret = 0;
     if (unlikely(isReactor && (!isEventReactor) && sync))
