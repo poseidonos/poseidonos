@@ -121,7 +121,7 @@ ArrayCmd = "array" ,
   | ListArrayCmd          | AddSpareCmd
   | RemoveSpareCmd        | DeleteArrayCmd
   | CreateArrayCmd        | AutoCreateArrayCmd
-  | ReplaceArrayDeviceCmd
+  | ReplaceArrayDeviceCmd | RebuildArrayCmd
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
@@ -156,6 +156,9 @@ AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
   [ "--raid" , RaidType ] ;
+
+RebuildArrayCmd = "rebuild" , ( "--array-name" | "-a" ) ,
+  ArrayName ;
 
 VolumeCmd = "volume" ,
   ( CreateVolumeCmd  | DeleteVolumeCmd
@@ -323,8 +326,9 @@ TelemetryStartCmd = TelemetryCmd , ( "start" ) ;
 
 TelemetryStopCmd = TelemetryCmd , ( "stop" ) ;
 
-TelemetrySetPropertyCmd = TelemetryCmd , ( "set-property" ) ,
-[ "--publication-list-path" ] , Identifier ;
+TelemetrySetPropertyCmd = TelemetryCmd ,
+  ( "set-property" ) , [ "--publication-list-path" ] ,
+  Identifier ;
 
 DevelCmd = "devel" ,
   ( ResetMbrCmd
