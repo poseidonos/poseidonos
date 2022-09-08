@@ -869,6 +869,19 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
 }
 
 grpc::Status
+ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    // Code for REBUILDARRAY command here
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply)
 {
     reply->set_command(request->command());
