@@ -37,15 +37,17 @@
 
 #include "logger.h"
 
+std::unordered_map<int, EventManager::EventInfoEntry*> EventManager::EventInfo =
+    EventManager::_LoadPosEvent();
+std::unordered_map<std::string, int> EventManager::EventNameToIdMap =
+    EventManager::_LoadEventNameToIdMap();
+
 EventManager::EventManager()
 {
-    EventInfo = _LoadPosEvent();
-    EventNameToIdMap = _LoadEventNameToIdMap();
 }
 
 EventManager::~EventManager()
 {
-    
 }
 
 int
@@ -75,14 +77,17 @@ EventManager::_LoadPosEvent()
     try
     {
         events = YAML::LoadFile(POS_EVENT_FILE_PATH)["Root"]["Event"];
+        
+        int id;
+        std::string name, message, cause, solution;
         for (size_t i = 0; i < events.size(); ++i)
         {
             YAML::Node event = events[i];
-            int id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
-            std::string name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
-            std::string message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
-            std::string cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
-            std::string solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
+            id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
+            name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
+            message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
+            cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
+            solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
             
             result.insert(
                 std::make_pair(id,

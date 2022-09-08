@@ -30,7 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef __EVENTM_MANAGER_H__
+#define __EVENTM_MANAGER_H__
 
 #define UNKNOWN_EVENT_ID -1000
 #define STR(S) #S
@@ -72,11 +73,14 @@ public:
             std::string solution = "";
     };
     std::unordered_map<int, EventInfoEntry*> GetEventInfo();
-    std::unordered_map<int, EventInfoEntry*> EventInfo;
-    std::unordered_map<std::string, int> EventNameToIdMap;
+    static std::unordered_map<int, EventInfoEntry*> EventInfo;
+    static std::unordered_map<std::string, int> EventNameToIdMap;
+    static std::unordered_map<int, EventInfoEntry*> _LoadPosEvent();
+    static std::unordered_map<std::string, int> _LoadEventNameToIdMap();
     int GetEventIdFromMap(std::string eventName);
-private:
-    std::unordered_map<int, EventInfoEntry*> _LoadPosEvent();
-    std::unordered_map<std::string, int> _LoadEventNameToIdMap();
+private:    
 };
+
 static EventManager eventManager;
+
+#endif // __EVENTM_MANAGER_H__
