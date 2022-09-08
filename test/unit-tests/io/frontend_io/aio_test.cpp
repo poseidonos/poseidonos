@@ -7,7 +7,7 @@
 #include "spdk/pos.h"
 #include "src/bio/flush_io.h"
 #include "src/pos_replicator/posreplicator_manager.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/io/frontend_io/flush_command_handler.h"
 #include "src/spdk_wrapper/spdk.h"

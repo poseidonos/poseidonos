@@ -38,7 +38,7 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/include/meta_const.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/lib/bitmap.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"

@@ -34,7 +34,7 @@
 #include <memory>
 #include <string>
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_context.h"
 #include "src/journal_manager/log_buffer/log_write_context.h"

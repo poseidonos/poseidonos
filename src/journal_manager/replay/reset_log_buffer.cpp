@@ -33,7 +33,7 @@
 #include "reset_log_buffer.h"
 
 #include "../log_buffer/i_journal_log_buffer.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 
 namespace pos

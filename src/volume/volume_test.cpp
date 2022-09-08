@@ -33,7 +33,7 @@
 #include "volume_test.h"
 
 #include "src/array_mgmt/array_manager.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 
 
 TEST_F(VolumeTest, CreateNormalTest)

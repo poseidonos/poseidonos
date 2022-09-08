@@ -35,7 +35,7 @@
 #include <iomanip>
 #include <iostream>
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 
 namespace pos

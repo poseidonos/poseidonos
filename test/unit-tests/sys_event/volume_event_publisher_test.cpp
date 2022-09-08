@@ -1,6 +1,6 @@
 #include "src/sys_event/volume_event_publisher.h"
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "test/unit-tests/allocator/allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/journal_manager/log_write/i_journal_volume_event_handler_mock.h"

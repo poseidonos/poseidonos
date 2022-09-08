@@ -34,7 +34,7 @@
 
 #include "src/cli/cli_event_code.h"
 #include "src/helper/rpc/spdk_rpc_client.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 
 using namespace pos_cli;

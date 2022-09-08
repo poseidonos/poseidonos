@@ -34,39 +34,49 @@
 
 #define UNKNOWN_EVENT_ID -1000
 #define STR(S) #S
-#define EID(X) (GetEventIdFromMap(STR(X)))
-#define ERRID(X) (-GetEventIdFromMap(STR(X)))
+
+#define EID(X) (eventManager.GetEventIdFromMap(STR(X)))
+#define ERRID(X) (-eventManager.GetEventIdFromMap(STR(X)))
 
 #include <unordered_map>
 #include <string>
 
 typedef int POS_EVENT_ID;
 
-class PosEventInfoEntry
+class EventManager
 {
-    public:
-        PosEventInfoEntry(std::string eventName, std::string message,
-            std::string cause, std::string solution)
-        {
-            this->eventName = eventName;
-            this->message = message;
-            this->cause = cause;
-            this->solution = solution;
-        }
-        std::string GetEventName() { return eventName; }
-        std::string GetMessage() { return message; }
-        std::string GetCause() { return cause; }
-        std::string GetSolution() { return solution; }
-    private:
-        std::string eventName = "";
-        std::string message = "";
-        // mj: Fill in cause and solution for erroneous events only.
-        std::string cause = "";
-        std::string solution = "";
-};
+public:
+    EventManager();
+    ~EventManager();
 
-std::unordered_map<int, PosEventInfoEntry*> _LoadPosEvent();
-std::unordered_map<std::string, int> _LoadEventNameToIdMap();
-static std::unordered_map<int, PosEventInfoEntry*> PosEventInfo = _LoadPosEvent();
-static std::unordered_map<std::string, int> PosEventNameToIdMap = _LoadEventNameToIdMap();
-int GetEventIdFromMap(std::string eventName);
+    class EventInfoEntry
+    {
+        public:
+            EventInfoEntry(std::string eventName, std::string message,
+                std::string cause, std::string solution)
+            {
+                this->eventName = eventName;
+                this->message = message;
+                this->cause = cause;
+                this->solution = solution;
+            }
+            std::string GetEventName() { return eventName; }
+            std::string GetMessage() { return message; }
+            std::string GetCause() { return cause; }
+            std::string GetSolution() { return solution; }
+        private:
+            std::string eventName = "";
+            std::string message = "";
+            // mj: Fill in cause and solution for erroneous events only.
+            std::string cause = "";
+            std::string solution = "";
+    };
+    std::unordered_map<int, EventInfoEntry*> GetEventInfo();
+    std::unordered_map<int, EventInfoEntry*> EventInfo;
+    std::unordered_map<std::string, int> EventNameToIdMap;
+    int GetEventIdFromMap(std::string eventName);
+private:
+    std::unordered_map<int, EventInfoEntry*> _LoadPosEvent();
+    std::unordered_map<std::string, int> _LoadEventNameToIdMap();
+};
+static EventManager eventManager;

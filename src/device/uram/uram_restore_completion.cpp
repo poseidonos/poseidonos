@@ -31,7 +31,7 @@
  */
 
 #include "uram_restore_completion.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/array/array.h"
 namespace pos

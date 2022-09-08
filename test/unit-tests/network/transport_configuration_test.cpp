@@ -35,7 +35,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "test/unit-tests/helper/spdk_rpc_client_mock.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 

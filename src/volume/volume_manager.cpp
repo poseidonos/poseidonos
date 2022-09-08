@@ -38,7 +38,7 @@
 
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/sys_info/space_info.h"
 #include "src/qos/qos_manager.h"

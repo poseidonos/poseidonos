@@ -12,7 +12,7 @@
 #include "nvmf_target.hpp"
 #include "../cpp/nvmf_volume_mock.hpp"
 #include "src/device/spdk/spdk.hpp"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/network/nvmf_target_spdk.hpp"
 
 #include "gtest/gtest.h"

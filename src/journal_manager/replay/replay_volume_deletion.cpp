@@ -34,7 +34,7 @@
 #include "src/journal_manager/replay/log_delete_checker.h"
 
 #include "src/allocator/i_context_manager.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 
 #include <string>

@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_file_io_mock.h"
 

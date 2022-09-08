@@ -32,7 +32,7 @@
 
 #include "raid6.h"
 #include "src/include/array_config.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/array_models/dto/partition_physical_size.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"

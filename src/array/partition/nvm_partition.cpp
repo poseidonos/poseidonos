@@ -35,7 +35,7 @@
 #include <vector>
 
 #include "src/include/array_config.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/device/base/ublock_device.h"
 #include "src/helper/calc/calc.h"

@@ -42,7 +42,7 @@
 #include <cstring>
 #include <iostream>
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/main/poseidonos.h"
 #include "src/master_context/config_manager.h"

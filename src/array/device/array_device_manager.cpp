@@ -38,7 +38,7 @@
 #include "src/device/base/ublock_device.h"
 #include "src/device/device_manager.h"
 #include "src/include/array_config.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume_list.h"
 #include "src/helper/enumerable/query.h"

@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/bio/ubio_mock.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 
 using ::testing::Return;
 namespace pos

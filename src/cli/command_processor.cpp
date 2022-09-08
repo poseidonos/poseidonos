@@ -1721,12 +1721,14 @@ CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status *status)
     std::string cause = "";
     std::string solution = "";
     
-    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-        PosEventInfo.find(eventId);
+    const std::unordered_map<int, EventManager::EventInfoEntry*> eventInfo =
+        eventManager.GetEventInfo();
+    std::unordered_map<int, EventManager::EventInfoEntry*>::const_iterator it =
+        eventInfo.find(eventId);
        
-    if (it != PosEventInfo.end())
+    if (it != eventInfo.end())
     {
-        PosEventInfoEntry* entry = it->second;
+        EventManager::EventInfoEntry* entry = it->second;
         eventName = entry->GetEventName();
         message = entry->GetMessage();
         cause = entry->GetCause();

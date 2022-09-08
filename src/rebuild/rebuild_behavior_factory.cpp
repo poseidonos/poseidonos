@@ -32,7 +32,7 @@
 
 #include "rebuild_behavior_factory.h"
 #include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/include/partition_type.h"
 #include "src/rebuild/rebuild_methods/n_to_m_rebuild.h"
 

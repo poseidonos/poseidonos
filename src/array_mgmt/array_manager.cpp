@@ -35,7 +35,7 @@
 #include <list>
 
 #include "src/device/device_manager.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/mbr/abr_manager.h"
 

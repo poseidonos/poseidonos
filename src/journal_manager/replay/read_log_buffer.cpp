@@ -41,7 +41,7 @@
 #include "src/journal_manager/replay/replay_log_list.h"
 #include "src/journal_manager/log/log_buffer_parser.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 namespace pos
 {

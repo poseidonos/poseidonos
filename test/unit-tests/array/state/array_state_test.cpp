@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
 
 using ::testing::_;

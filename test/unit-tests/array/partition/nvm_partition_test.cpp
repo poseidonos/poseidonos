@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/include/array_config.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/helper/calc/calc.h"
 #include "test/unit-tests/array/ft/buffer_entry_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"

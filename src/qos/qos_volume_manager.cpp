@@ -38,7 +38,7 @@
 
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/array_mgmt_policy.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"

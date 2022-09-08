@@ -39,7 +39,7 @@
 #include <thread>
 
 #include "spdk/pos.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/pos_replicator/dummy_ha/dummy_ha_client.h"
 #include "src/pos_replicator/dummy_ha/dummy_ha_server.h"
 #include "test/unit-tests/bio/volume_io_mock.h"

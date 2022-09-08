@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "test/unit-tests/array_models/interface/i_mount_sequence_mock.h"
 #include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/volume/volume_manager_mock.h"

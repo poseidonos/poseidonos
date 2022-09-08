@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "src/gc/flow_control/flow_control.h"
 #include "src/array_models/dto/partition_logical_size.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 
 #include <test/unit-tests/allocator/i_context_manager_mock.h>
 #include <test/unit-tests/lib/system_timeout_checker_mock.h>

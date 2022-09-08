@@ -40,7 +40,7 @@
 #include "src/array/service/io_translator/i_io_translator.h"
 #include "src/include/address_type.h"
 #include "src/include/partition_type.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/io_submit_interface/io_submit_handler_status.h"

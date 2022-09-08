@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/include/grpc_server_socket_address.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 

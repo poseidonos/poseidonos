@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/metafs/log/metafs_log.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "mdpage.h"
 #include "mfs_async_runnable_template.h"
 #include "meta_async_cb_cxt.h"

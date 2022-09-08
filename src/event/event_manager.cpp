@@ -31,23 +31,25 @@
  */
 
 #include "src/include/pos_event_id.hpp"
+#include "src/event/event_manager.h"
 #include <string>
 #include <yaml-cpp/yaml.h>
 
 #include "logger.h"
 
-namespace pos
+EventManager::EventManager()
 {
-
-// LCOV_EXCL_START
-PosEventId::~PosEventId(void)
-{
+    EventInfo = _LoadPosEvent();
+    EventNameToIdMap = _LoadEventNameToIdMap();
 }
-// LCOV_EXCL_STOP
-} // namespace pos
+
+EventManager::~EventManager()
+{
+    
+}
 
 int
-GetEventIdFromMap(std::string eventName)
+EventManager::GetEventIdFromMap(std::string eventName)
 {
     if (eventName == "SUCCESS")
     {
@@ -55,9 +57,9 @@ GetEventIdFromMap(std::string eventName)
     }
 
     std::unordered_map<std::string, int>::const_iterator it =
-        PosEventNameToIdMap.find(eventName);
+        eventManager.EventNameToIdMap.find(eventName);
     
-    if (it == PosEventNameToIdMap.end())
+    if (it == eventManager.EventNameToIdMap.end())
     {
         return UNKNOWN_EVENT_ID;
     }
@@ -65,10 +67,10 @@ GetEventIdFromMap(std::string eventName)
     return it->second;
 }
 
-std::unordered_map<int, PosEventInfoEntry*>
-_LoadPosEvent()
+std::unordered_map<int, EventManager::EventInfoEntry*>
+EventManager::_LoadPosEvent()
 {
-    std::unordered_map<int, PosEventInfoEntry*> result;
+    std::unordered_map<int, EventInfoEntry*> result;
     YAML::Node events;
     try
     {
@@ -84,7 +86,7 @@ _LoadPosEvent()
             
             result.insert(
                 std::make_pair(id,
-                    new PosEventInfoEntry(name, message, cause, solution)
+                    new EventInfoEntry(name, message, cause, solution)
                 )
             );
         }
@@ -97,11 +99,11 @@ _LoadPosEvent()
 }
 
 std::unordered_map<std::string, int>
-_LoadEventNameToIdMap()
+EventManager::_LoadEventNameToIdMap()
 {
     std::unordered_map<std::string, int> result;
 
-    for (auto& it: PosEventInfo) {
+    for (auto& it: EventInfo) {
         int id = it.first;
         std::string name = it.second->GetEventName();
            
@@ -109,4 +111,10 @@ _LoadEventNameToIdMap()
     }
 
     return result;
+}
+
+std::unordered_map<int, EventManager::EventInfoEntry*>
+EventManager::GetEventInfo()
+{
+    return EventInfo;
 }

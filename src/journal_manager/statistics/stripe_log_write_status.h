@@ -36,7 +36,7 @@
 #include <utility>
 
 #include "src/include/address_type.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log/log_event.h"
 #include "src/journal_manager/statistics/stripe_info.h"

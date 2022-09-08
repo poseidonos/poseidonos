@@ -8,7 +8,7 @@
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/bio/ubio.h"
 #include "src/include/array_config.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/helper/calc/calc.h"
 #include "test/unit-tests/array/ft/raid5_mock.h"
 #include "test/unit-tests/array/ft/raid10_mock.h"

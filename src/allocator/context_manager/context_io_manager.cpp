@@ -35,7 +35,7 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/allocator_file_io.h"
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/include/pos_event_id.h"
+#include "src/event/event_manager.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
