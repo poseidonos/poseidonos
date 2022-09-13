@@ -3,6 +3,7 @@ include(ExternalProject)
 
 set(SPDK_DEBUG_ENABLE "n" CACHE STRING "Specify enablement of SPDK debug build, y or n")
 set(USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
+set(ASAN_ENABLE "n" CACHE STRING "Specify enablement of ASAN build, y or n")
 set(NUM_BUILD_CORE "4" CACHE STRING "Specify numboer of cpu core being used for build")
 #set(LOCAL_REPOSITORY_ADDRESS "example.repo.com" CACHE STRING "Specify address of local repository")
 set(LOCAL_REPO_ADDRESS "https://10.227.30.174:7990" CACHE STRING "Specify address of local repository")
