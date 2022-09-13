@@ -869,14 +869,15 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
 }
 
 grpc::Status
-ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply)
+CommandProcessor::ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply)
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    // Code for REBUILDARRAY command here
-
-    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    string arrayName = (request->param()).name();
+    IArrayMgmt* array =  ArrayMgr();
+    int ret = array->Rebuild(arrayName);
+    _SetEventStatus(ret, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }

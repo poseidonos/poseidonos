@@ -410,7 +410,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     {
         if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
         {
-            memcpy(dst, rebuildOutp[i], dstSize);
+            memcpy((unsigned char*)dst + i * dstSize, rebuildOutp[i], dstSize);
         }
     }
 
