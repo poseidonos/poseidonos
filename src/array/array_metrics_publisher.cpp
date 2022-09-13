@@ -33,6 +33,7 @@
 #include "array_metrics_publisher.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/sys_info/space_info.h"
+#include "src/include/pos_event_id.h"
 
 using namespace std;
 
@@ -75,41 +76,41 @@ int ArrayMetricsPublisher::VolumeCreated(VolumeEventBase* volEventBase, VolumeEv
 {
     uint32_t arrayIndex = arrayInfo->GetIndex();
     spaceInfoPublisher->PublishUsedCapacity(arrayIndex, SpaceInfo::Used(arrayIndex));
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 int ArrayMetricsPublisher::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     uint32_t arrayIndex = arrayInfo->GetIndex();
     spaceInfoPublisher->PublishUsedCapacity(arrayIndex, SpaceInfo::Used(arrayIndex));
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 int ArrayMetricsPublisher::VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 int ArrayMetricsPublisher::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 int ArrayMetricsPublisher::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     uint32_t arrayIndex = arrayInfo->GetIndex();
     spaceInfoPublisher->PublishUsedCapacity(arrayIndex, SpaceInfo::Used(arrayIndex));
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 int ArrayMetricsPublisher::VolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 int ArrayMetricsPublisher::VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
-    return 0;
+    return EID(VOL_EVENT_OK);
 }
 
 } // namespace pos
