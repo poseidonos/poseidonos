@@ -93,7 +93,7 @@ tool/pkg/
 tool/cli/lib/pnconnector/src/util/resource.go
 package/poseidon-deployment/
 package/src/DEBIAN/control
-package/src/etc/pos/*
+package/src/etc/pos/prometheus-data/*
 package/usr/local/bin/*
 package/usr/local/etc/*
 package/usr/local/lib/*

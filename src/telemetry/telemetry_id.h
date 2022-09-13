@@ -126,6 +126,8 @@ static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capaci
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
 static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_cnt";
+static const std::string TEL60004_ARRAY_CAPACITY_TOTAL = "array_capacity_total";
+static const std::string TEL60005_ARRAY_CAPACITY_USED = "array_capacity_used";
 
 static const std::string TEL70000_READ_IOPS_NETWORK = "read_iops_network";
 static const std::string TEL70001_READ_BPS_NETWORK = "read_bps_network";
