@@ -31,7 +31,7 @@ function usage()
 	echo ""
 	echo "Address Sanitizer Setting:"
 	echo "--with-asan                Build IBOF with ASAN"
-	echo "--without-asan             Build IBOF withtou ASAN"
+	echo "--without-asan             Build IBOF without ASAN"
     #Just another example 
     #echo " mbr-mock                  Build IBOF with mock mbr."
 	echo ""
