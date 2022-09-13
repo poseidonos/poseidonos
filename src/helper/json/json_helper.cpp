@@ -194,9 +194,12 @@ JsonFormat::MakeResponse(
     std::string cause = "";
     std::string solution = "";
 
-    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-                PosEventInfo.find(eventId);
-    if (it != PosEventInfo.end())
+    const std::unordered_map<int, EventManager::EventInfoEntry*> eventInfo =
+        eventManager.GetEventInfo();
+    std::unordered_map<int, EventManager::EventInfoEntry*>::const_iterator it =
+        eventInfo.find(eventId);
+
+    if (it != eventInfo.end())
     {
         eventName = it->second->GetEventName();
         cause = it->second->GetCause();
@@ -229,9 +232,12 @@ JsonFormat::MakeResponse(
     std::string cause = "";
     std::string solution = "";
 
-    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-                PosEventInfo.find(eventId);
-    if (it != PosEventInfo.end())
+    const std::unordered_map<int, EventManager::EventInfoEntry*> eventInfo =
+        eventManager.GetEventInfo();
+    std::unordered_map<int, EventManager::EventInfoEntry*>::const_iterator it =
+        eventInfo.find(eventId);
+
+    if (it != eventInfo.end())
     {
         eventName = it->second->GetEventName();
         cause = it->second->GetCause();

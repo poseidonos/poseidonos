@@ -104,11 +104,13 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldLog(lvl, eventId))
         {
-            std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-                PosEventInfo.find(eventId);
+            const std::unordered_map<int, EventManager::EventInfoEntry*> eventInfo =
+                eventManager.GetEventInfo();
+            std::unordered_map<int, EventManager::EventInfoEntry*>::const_iterator it =
+                eventInfo.find(eventId);
             try
             {            
-                if (it == PosEventInfo.end())
+                if (it == eventInfo.end())
                 {
                     // TODO (mj): currently, we print raw message
                     // when there is no information about the event in PosEventInfo.
@@ -124,7 +126,7 @@ public:
                 }
                 else
                 {
-                    PosEventInfoEntry* entry = it->second;
+                    EventManager::EventInfoEntry* entry = it->second;
                     logger->iboflog_sink(loc, lvl, eventId,
                         fmt::format(
                             preferences.IsStrLoggingEnabled() ?

@@ -39,7 +39,6 @@
 #include <vector>
 #include <sstream>
 
-#include "src/include/pos_event_id.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
 #include "src/cli/grpc_cli_server.h"

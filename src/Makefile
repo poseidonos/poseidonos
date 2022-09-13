@@ -86,6 +86,7 @@ SUBDIRS = allocator \
         dpdk_wrapper \
         memory_checker \
         resource_checker \
+        event \
         trace 
 
 .PHONY: $(SUBDIRS)

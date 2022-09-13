@@ -31,23 +31,27 @@
  */
 
 #include "src/include/pos_event_id.hpp"
+#include "src/include/pos_event_id.h"
 #include <string>
 #include <yaml-cpp/yaml.h>
 
-#include "logger.h"
+#include "src/logger/logger.h"
 
-namespace pos
-{
+std::unordered_map<int, EventManager::EventInfoEntry*> EventManager::EventInfo =
+    EventManager::_LoadPosEvent();
+std::unordered_map<std::string, int> EventManager::EventNameToIdMap =
+    EventManager::_LoadEventNameToIdMap();
 
-// LCOV_EXCL_START
-PosEventId::~PosEventId(void)
+EventManager::EventManager()
 {
 }
-// LCOV_EXCL_STOP
-} // namespace pos
+
+EventManager::~EventManager()
+{
+}
 
 int
-GetEventIdFromMap(std::string eventName)
+EventManager::GetEventIdFromMap(std::string eventName)
 {
     if (eventName == "SUCCESS")
     {
@@ -55,9 +59,9 @@ GetEventIdFromMap(std::string eventName)
     }
 
     std::unordered_map<std::string, int>::const_iterator it =
-        PosEventNameToIdMap.find(eventName);
+        eventManager.EventNameToIdMap.find(eventName);
     
-    if (it == PosEventNameToIdMap.end())
+    if (it == eventManager.EventNameToIdMap.end())
     {
         return UNKNOWN_EVENT_ID;
     }
@@ -65,26 +69,29 @@ GetEventIdFromMap(std::string eventName)
     return it->second;
 }
 
-std::unordered_map<int, PosEventInfoEntry*>
-_LoadPosEvent()
+std::unordered_map<int, EventManager::EventInfoEntry*>
+EventManager::_LoadPosEvent()
 {
-    std::unordered_map<int, PosEventInfoEntry*> result;
+    std::unordered_map<int, EventInfoEntry*> result;
     YAML::Node events;
     try
     {
         events = YAML::LoadFile(POS_EVENT_FILE_PATH)["Root"]["Event"];
+        
+        int id;
+        std::string name, message, cause, solution;
         for (size_t i = 0; i < events.size(); ++i)
         {
             YAML::Node event = events[i];
-            int id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
-            std::string name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
-            std::string message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
-            std::string cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
-            std::string solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
+            id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
+            name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
+            message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
+            cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
+            solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
             
             result.insert(
                 std::make_pair(id,
-                    new PosEventInfoEntry(name, message, cause, solution)
+                    new EventInfoEntry(name, message, cause, solution)
                 )
             );
         }
@@ -97,11 +104,11 @@ _LoadPosEvent()
 }
 
 std::unordered_map<std::string, int>
-_LoadEventNameToIdMap()
+EventManager::_LoadEventNameToIdMap()
 {
     std::unordered_map<std::string, int> result;
 
-    for (auto& it: PosEventInfo) {
+    for (auto& it: EventInfo) {
         int id = it.first;
         std::string name = it.second->GetEventName();
            
@@ -109,4 +116,10 @@ _LoadEventNameToIdMap()
     }
 
     return result;
+}
+
+std::unordered_map<int, EventManager::EventInfoEntry*>
+EventManager::GetEventInfo()
+{
+    return EventInfo;
 }

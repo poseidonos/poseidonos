@@ -30,50 +30,51 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef __IBOF_EVENT_ID_HPP__
-#define __IBOF_EVENT_ID_HPP__
+#ifndef __EVENTM_MANAGER_H__
+#define __EVENTM_MANAGER_H__
 
+#include <unordered_map>
 #include <string>
 
-#include "src/include/pos_event_id.h"
+typedef int POS_EVENT_ID;
 
-namespace pos
-{
-enum class EventLevel
-{
-    CRITICAL,
-    ERROR,
-    WARNING,
-    INFO,
-    DEBUG,
-};
-
-class PosEventId
+class EventManager
 {
 public:
-    static const char*& GetString(POS_EVENT_ID eventId);
-    static void Print(POS_EVENT_ID id, EventLevel level);
-    static void Print(POS_EVENT_ID id, EventLevel level,
-        std::string& additionalMessage);
+    EventManager();
+    ~EventManager();
 
-private:
-    struct PosEventIdEntry
+    class EventInfoEntry
     {
-        POS_EVENT_ID eventId;
-        const char* message = "";
-        const char* cause = "";
+        public:
+            EventInfoEntry(std::string eventName, std::string message,
+                std::string cause, std::string solution)
+            {
+                this->eventName = eventName;
+                this->message = message;
+                this->cause = cause;
+                this->solution = solution;
+            }
+            std::string GetEventName() { return eventName; }
+            std::string GetMessage() { return message; }
+            std::string GetCause() { return cause; }
+            std::string GetSolution() { return solution; }
+        private:
+            std::string eventName = "";
+            std::string message = "";
+            // mj: Fill in cause and solution for erroneous events only.
+            std::string cause = "";
+            std::string solution = "";
     };
-
-    static PosEventIdEntry RESERVED_EVENT_ENTRY;
-    static PosEventIdEntry SYSTEM_EVENT_ENTRY[2];
-    static PosEventIdEntry QOS_EVENT_ENTRY[13];
-    static PosEventIdEntry IOPATH_NVMF_EVENT_ENTRY[33];
-    static PosEventIdEntry IOPATH_FRONTEND_EVENT_ENTRY[140];
-    static PosEventIdEntry IOPATH_BACKEND_EVENT_ENTRY[73];
-
-    PosEventId(void) = delete;
-    ~PosEventId(void);
+    std::unordered_map<int, EventInfoEntry*> GetEventInfo();
+    static std::unordered_map<int, EventInfoEntry*> EventInfo;
+    static std::unordered_map<std::string, int> EventNameToIdMap;
+    static std::unordered_map<int, EventInfoEntry*> _LoadPosEvent();
+    static std::unordered_map<std::string, int> _LoadEventNameToIdMap();
+    int GetEventIdFromMap(std::string eventName);
+private:    
 };
 
-} // namespace pos
-#endif // __IBOF_EVENT_ID_HPP__
+static EventManager eventManager;
+
+#endif // __EVENTM_MANAGER_H__
