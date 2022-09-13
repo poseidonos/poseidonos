@@ -14,7 +14,7 @@ TEST(RebuildHandler, RebuildHandler_testConstructor)
     // Given: nothing
 
     // When
-    RebuildHandler rh(nullptr, nullptr);
+    RebuildHandler rh(nullptr, vector<IArrayDevice*>{}, false);
 
     // Then
 }
@@ -24,9 +24,8 @@ TEST(RebuildHandler, Execute_testIfTrueIsReturnedWhenTriggerRebuildFails)
     // Given
     MockArray mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     MockArrayDevice mockArrayDevice(nullptr);
-    RebuildHandler rh(&mockArray, &mockArrayDevice);
+    RebuildHandler rh(&mockArray, vector<IArrayDevice*>{&mockArrayDevice}, false);
 
-    EXPECT_CALL(mockArrayDevice, GetState).WillOnce(Return(ArrayDeviceState::FAULT));
     EXPECT_CALL(mockArray, TriggerRebuild).WillOnce(Return(false));
 
     // When
@@ -41,9 +40,8 @@ TEST(RebuildHandler, Execute_testIfFalseIsReturnedWhenTriggerRebuildSucceeds)
     // Given
     MockArray mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     MockArrayDevice mockArrayDevice(nullptr);
-    RebuildHandler rh(&mockArray, &mockArrayDevice);
+    RebuildHandler rh(&mockArray, vector<IArrayDevice*>{&mockArrayDevice}, false);
 
-    EXPECT_CALL(mockArrayDevice, GetState).WillOnce(Return(ArrayDeviceState::FAULT));
     EXPECT_CALL(mockArray, TriggerRebuild).WillOnce(Return(true));
 
     // When

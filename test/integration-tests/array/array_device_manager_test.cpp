@@ -1001,14 +1001,14 @@ TEST(ArrayDeviceManager, GetFaulty_testIfFaultyArrayDeviceIsReturned)
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
 
     // When
-    ArrayDevice* actual = arrDevMgr.GetFaulty();
+    vector<IArrayDevice*> actual = arrDevMgr.GetFaulty();
 
     // Then
-    ASSERT_TRUE(actual != nullptr);
-    ASSERT_EQ(&dataFaulty, actual);
+    ASSERT_TRUE(actual.size() > 0);
+    ASSERT_EQ(&dataFaulty, actual.front());
 }
 
-TEST(ArrayDeviceManager, GetFaulty_testIfNullptrIsReturnedWhenThereIsNoFaultyDevice)
+TEST(ArrayDeviceManager, GetFaulty_testIfEmptyListIsReturnedWhenThereIsNoFaultyDevice)
 {
     // Given
     ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
@@ -1026,10 +1026,10 @@ TEST(ArrayDeviceManager, GetFaulty_testIfNullptrIsReturnedWhenThereIsNoFaultyDev
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
 
     // When
-    ArrayDevice* actual = arrDevMgr.GetFaulty();
+    vector<IArrayDevice*> actual = arrDevMgr.GetFaulty();
 
     // Then
-    ASSERT_EQ(nullptr, actual);
+    ASSERT_EQ(0, actual.size());
 }
 
 TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
@@ -1049,10 +1049,10 @@ TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
 
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
     // When
-    ArrayDevice* actual = arrDevMgr.GetRebuilding();
+    vector<IArrayDevice*> actual = arrDevMgr.GetRebuilding();
 
     // Then
-    ASSERT_EQ(&rebuildDev, actual);
+    ASSERT_EQ(&rebuildDev, actual.front());
 }
 
 TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsNotRebuildState)
@@ -1073,10 +1073,10 @@ TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsNotRebuildState)
 
     EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
     // When
-    ArrayDevice* actual = arrDevMgr.GetRebuilding();
+    vector<IArrayDevice*> actual = arrDevMgr.GetRebuilding();
 
     // Then
-    ASSERT_EQ(nullptr, actual);
+    ASSERT_EQ(0, actual.size());
 }
 
 } // namespace pos

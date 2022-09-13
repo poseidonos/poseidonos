@@ -108,7 +108,11 @@ RebuildState PartitionRebuild::GetResult(void)
 
 void PartitionRebuild::_Complete(RebuildResult res)
 {
-    string partition = PARTITION_TYPE_STR[bhvr->GetContext()->part];
+    string partition = "";
+    if (bhvr != nullptr)
+    {
+        partition = PARTITION_TYPE_STR[bhvr->GetContext()->part];
+    }
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
         "PartitionRebuild completed, array:{}, partition:{}, result:{}", res.array, partition, REBUILD_STATE_STR[(int)res.result]);
     if (completeCb != nullptr)
