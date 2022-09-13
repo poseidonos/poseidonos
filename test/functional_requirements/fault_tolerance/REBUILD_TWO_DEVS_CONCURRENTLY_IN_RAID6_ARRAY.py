@@ -26,14 +26,17 @@ SPARE_DEV_2 = "unvme-ns-5"
 def execute():
     MOUNT_VOL_ON_RAID6_ARRAY.execute()
     fio_proc = fio.start_fio(0, 30)
-    fio.wait_fio(fio_proc)
+    time.sleep(10)
+    print (cli.list_device())
     api.detach_ssd_and_attach(DETACH_TARGET_DEV1)
-    time.sleep(1)
+    time.sleep(5)
+    print (cli.add_device(SPARE_DEV_1, ARRAYNAME))
     api.detach_ssd_and_attach(DETACH_TARGET_DEV2)
+    fio.wait_fio(fio_proc)
+    time.sleep(5)
+    print (cli.list_device())
+    print (cli.add_device(SPARE_DEV_2, ARRAYNAME))
     if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
-        time.sleep(2)
-        cli.add_device(SPARE_DEV_1, ARRAYNAME)
-        cli.add_device(SPARE_DEV_2, ARRAYNAME)
         out = cli.rebuild_array(ARRAYNAME)
         print (out)
         timeout = 80000 #80s

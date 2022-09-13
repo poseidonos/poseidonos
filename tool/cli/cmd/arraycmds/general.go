@@ -38,6 +38,7 @@ func init() {
 	ArrayCmd.AddCommand(RemoveSpareCmd)
 	ArrayCmd.AddCommand(ReplaceArrayDeviceCmd)
 	ArrayCmd.AddCommand(AutocreateArrayCmd)
+	ArrayCmd.AddCommand(RebuildArrayCmd)
 }
 
 func isRAIDConstMet(numOfDataDevs int, raid string) bool {

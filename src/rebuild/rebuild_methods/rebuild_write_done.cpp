@@ -38,11 +38,10 @@
 
 namespace pos
 {
-RebuildWriteDone::RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback, BufferPool* dstBufferPool)
+RebuildWriteDone::RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback)
 : Callback(false, CallbackType_RebuildReadCompleteHandler),
   ubio(ubio),
-  writeDoneCallback(writeDoneCallback),
-  bufferPool(dstBufferPool)
+  writeDoneCallback(writeDoneCallback)
 {
 }
 
@@ -56,11 +55,9 @@ RebuildWriteDone::_DoSpecificJob(void)
         POS_TRACE_WARN(ret, "rebuild write done with errors");
     }
 
-    bufferPool->ReturnBuffer(ubio->GetWholeBuffer());
     writeDoneCallback(ret);
     ubio = nullptr;
     return true;
 }
 
 } // namespace pos
-
