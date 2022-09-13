@@ -45,3 +45,6 @@ metrics_to_publish:
   iops_read:
   iops_write:
   iops:
+  array_status:
+  array_capacity_total:
+  array_capacity_used:

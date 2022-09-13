@@ -94,6 +94,9 @@ VolumeEventPublisher::NotifyVolumeCreated(VolumeEventBase* volEventBase, VolumeE
             int res = it->second->VolumeCreated(volEventBase, volEventPerf, volArrayInfo);
             if (res != EID(VOL_EVENT_OK))
             {
+                POS_TRACE_WARN(EID(VOLUME_EVENT),
+                    "Failure returned during volume event(CREATE) notification to {}, res:{}",
+                    it->second->Tag(), res);
                 ret = false;
             }
 
@@ -125,6 +128,9 @@ VolumeEventPublisher::NotifyVolumeUpdated(VolumeEventBase* volEventBase, VolumeE
             int res = it->second->VolumeUpdated(volEventBase, volEventPerf, volArrayInfo);
             if (res != EID(VOL_EVENT_OK))
             {
+                POS_TRACE_WARN(EID(VOLUME_EVENT),
+                    "Failure returned during volume event(UPDATE) notification to {}, res:{}",
+                    it->second->Tag(), res);
                 ret = false;
             }
 
@@ -155,6 +161,9 @@ VolumeEventPublisher::NotifyVolumeDeleted(VolumeEventBase* volEventBase, VolumeA
             int res = it->second->VolumeDeleted(volEventBase, volArrayInfo);
             if (res != EID(VOL_EVENT_OK))
             {
+                POS_TRACE_WARN(EID(VOLUME_EVENT),
+                    "Failure returned during volume event(DELETE) notification to {}, res:{}",
+                    it->second->Tag(), res);
                 ret = false;
             }
 
@@ -186,11 +195,17 @@ VolumeEventPublisher::NotifyVolumeMounted(VolumeEventBase* volEventBase, VolumeE
             int res = it->second->VolumeMounted(volEventBase, volEventPerf, volArrayInfo);
             if (res != EID(VOL_EVENT_OK))
             {
+                POS_TRACE_WARN(EID(VOLUME_EVENT),
+                    "Failure returned during volume event(MOUNT) notification to {}, res:{}",
+                    it->second->Tag(), res);
                 ret = false;
             }
-            POS_TRACE_DEBUG(EID(VOLUME_EVENT),
-                "NotifyVolumeMounted to {} done, res: {}",
-                it->second->Tag(), res);
+            else
+            {
+                POS_TRACE_INFO(EID(VOLUME_EVENT),
+                    "NotifyVolumeMounted to {} done, res: {}",
+                    it->second->Tag(), res);
+            }
         }
     }
 
@@ -215,6 +230,9 @@ VolumeEventPublisher::NotifyVolumeUnmounted(VolumeEventBase* volEventBase, Volum
             int res = it->second->VolumeUnmounted(volEventBase, volArrayInfo);
             if (res != EID(VOL_EVENT_OK))
             {
+                POS_TRACE_WARN(EID(VOLUME_EVENT),
+                    "Failure returned during volume event(UNMOUNT) notification to {}, res:{}",
+                    it->second->Tag(), res);
                 ret = false;
             }
 
@@ -246,6 +264,9 @@ VolumeEventPublisher::NotifyVolumeLoaded(VolumeEventBase* volEventBase, VolumeEv
             int res = it->second->VolumeLoaded(volEventBase, volEventPerf, volArrayInfo);
             if (res != EID(VOL_EVENT_OK))
             {
+                POS_TRACE_WARN(EID(VOLUME_EVENT),
+                    "Failure returned during volume event(LOAD) notification to {}, res:{}",
+                    it->second->Tag(), res);
                 ret = false;
             }
 

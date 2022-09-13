@@ -12,6 +12,8 @@ class MockArrayState : public ArrayState
 {
 public:
     using ArrayState::ArrayState;
+    MOCK_METHOD(void, Register, (IArrayStateSubscriber* subscriber), (override));
+    MOCK_METHOD(void, Unregister, (IArrayStateSubscriber* subscriber), (override));
     MOCK_METHOD(void, SetState, (ArrayStateEnum nextState), (override));
     MOCK_METHOD(void, SetLoad, (RaidState rs), (override));
     MOCK_METHOD(void, SetCreate, (), (override));

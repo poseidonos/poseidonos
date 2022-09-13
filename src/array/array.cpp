@@ -78,6 +78,7 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
 
 Array::~Array(void)
 {
+    delete publisher;
     delete svc;
     delete ptnMgr;
     delete state;
@@ -140,8 +141,8 @@ Array::_LoadImpl(void)
         return ret;
     }
 
+    publisher = new ArrayMetricsPublisher(this, state);
     RaidState rs = ptnMgr->GetRaidState();
-    state->EnableStatePublisher(uniqueId);
     state->SetLoad(rs);
     return ret;
 }
@@ -189,8 +190,6 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     }
 
     uniqueId = uIdGen.GenerateUniqueId();
-    state->EnableStatePublisher(uniqueId);
-
     meta.arrayName = name_;
     meta.devs = devMgr_->ExportToMeta();
     meta.metaRaidType = metaFt;
@@ -219,9 +218,9 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
         abrControl->DeleteAbr(name_);
         goto error;
     }
-
     ptnMgr->FormatPartition(PartitionType::META_SSD, index_, IODispatcherSingleton::Instance());
 
+    publisher = new ArrayMetricsPublisher(this, state);
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_CREATED), "{}", Serialize());
