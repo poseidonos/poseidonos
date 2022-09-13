@@ -204,12 +204,6 @@ Uram::GetByteAddress(void)
 void
 Uram::_InitByteAddress(void)
 {
-    static bool initialized = false;
-    if (initialized == true)
-    {
-        return;
-    }
-    initialized = true;
     std::string backupDir = "/tmp/";
     std::string backupFilePostfix = ".uram.info";
     std::string uramName = this->GetName();
