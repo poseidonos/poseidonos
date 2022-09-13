@@ -35,7 +35,7 @@
 #include <functional>
 
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/checkpoint/checkpoint_manager.h"
 #include "src/journal_manager/checkpoint/checkpoint_submission.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"

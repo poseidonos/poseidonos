@@ -33,7 +33,7 @@
 #include <string>
 #include "src/volume/volume_interface.h"
 #include "src/include/memory.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/sys_info/space_info.h"

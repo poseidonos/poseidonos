@@ -33,7 +33,7 @@
 #pragma once
 
 #include "src/metafs/include/metafs_control_request.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/metafs/common/metafs_type.h"
 #include "src/metafs/mvm/volume/mf_inode.h"
 

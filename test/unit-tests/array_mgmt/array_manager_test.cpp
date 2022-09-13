@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/gc/garbage_collector_mock.h"
 #include "test/unit-tests/state/state_control_mock.h"
 #include "test/unit-tests/array_components/array_components_mock.h"

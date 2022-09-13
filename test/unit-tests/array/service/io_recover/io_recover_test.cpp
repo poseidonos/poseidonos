@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/array/ft/raid10.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/array/partition/stripe_partition_mock.h"
 
 using ::testing::Return;

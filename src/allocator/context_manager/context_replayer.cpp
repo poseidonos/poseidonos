@@ -39,7 +39,7 @@
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos

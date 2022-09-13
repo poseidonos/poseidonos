@@ -33,7 +33,7 @@
 #pragma once
 
 #include <atomic>
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/lib/atomic_count.h"
 #include "src/lib/singleton.h"
 #include "src/logger/logger.h"

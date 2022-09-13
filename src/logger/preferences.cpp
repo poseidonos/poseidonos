@@ -34,7 +34,7 @@
 
 #include "configuration.h"
 #include "src/dump/dump_shared_ptr.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/event_scheduler/callback.h"
 
 namespace pos_logger

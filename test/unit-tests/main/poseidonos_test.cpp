@@ -2,7 +2,7 @@
 
 #include "src/main/poseidonos.h"
 #include "src/trace/otlp_factory.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/master_context/version_provider_mock.h"
 #include "test/unit-tests/trace/trace_exporter_mock.h"

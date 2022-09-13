@@ -34,7 +34,7 @@
 
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 

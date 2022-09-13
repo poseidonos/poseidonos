@@ -35,7 +35,7 @@
 #include <iostream>
 
 #include "spdlog/spdlog.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 using namespace pos;
 namespace pos_logger
 {

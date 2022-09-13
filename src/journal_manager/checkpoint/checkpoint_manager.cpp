@@ -35,7 +35,7 @@
 #include <cassert>
 
 #include "src/event_scheduler/event_scheduler.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/checkpoint/checkpoint_completion.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/logger/logger.h"

@@ -5,7 +5,7 @@
 #include "src/device/unvme/unvme_ssd.h"
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/utils/spdk_util.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::Return;
 namespace pos

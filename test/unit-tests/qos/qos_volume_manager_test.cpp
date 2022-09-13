@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "spdk/pos.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "test/unit-tests/qos/qos_array_manager_mock.h"
 #include "test/unit-tests/qos/qos_context_mock.h"

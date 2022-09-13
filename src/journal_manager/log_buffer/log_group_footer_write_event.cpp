@@ -33,7 +33,7 @@
 
 #include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 #include "src/logger/logger.h"

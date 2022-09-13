@@ -43,7 +43,7 @@
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/sys_event/volume_event_publisher.h"

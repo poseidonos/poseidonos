@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_data_pool.h"
 #include "src/telemetry/telemetry_client/pos_metric.h"

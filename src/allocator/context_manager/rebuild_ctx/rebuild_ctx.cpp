@@ -37,7 +37,7 @@
 
 #include "src/allocator/context_manager/allocator_file_io.h"
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 

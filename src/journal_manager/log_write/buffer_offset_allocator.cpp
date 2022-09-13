@@ -34,7 +34,7 @@
 
 #include <functional>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/config/log_buffer_layout.h"

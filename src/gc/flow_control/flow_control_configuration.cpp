@@ -31,7 +31,7 @@
  */
 
 #include "src/master_context/config_manager.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/lib/system_timeout_checker.h"
 #include "src/gc/flow_control/flow_control_configuration.h"
 #include "src/array_models/interface/i_array_info.h"

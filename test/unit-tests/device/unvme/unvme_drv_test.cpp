@@ -34,7 +34,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/bio/ubio_mock.h"
 #include "test/unit-tests/device/unvme/unvme_cmd_mock.h"
 #include "test/unit-tests/device/unvme/unvme_device_context_mock.h"

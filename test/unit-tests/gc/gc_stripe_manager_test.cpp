@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 #include <src/include/address_type.h>
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>

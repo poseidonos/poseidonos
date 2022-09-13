@@ -33,7 +33,7 @@
 #include "state_control.h"
 #include "state_list.h"
 #include "state_publisher.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 #include <algorithm>

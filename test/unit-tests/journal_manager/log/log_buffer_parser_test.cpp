@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "test/unit-tests/journal_manager/log/log_list_mock.h"
 

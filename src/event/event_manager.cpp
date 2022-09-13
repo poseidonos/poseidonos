@@ -31,11 +31,11 @@
  */
 
 #include "src/include/pos_event_id.hpp"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include <string>
 #include <yaml-cpp/yaml.h>
 
-#include "logger.h"
+#include "src/logger/logger.h"
 
 std::unordered_map<int, EventManager::EventInfoEntry*> EventManager::EventInfo =
     EventManager::_LoadPosEvent();

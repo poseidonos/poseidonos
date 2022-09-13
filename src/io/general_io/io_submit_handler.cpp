@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/include/branch_prediction.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/io/general_io/io_submit_handler_count.h"
 #include "src/io/general_io/submit_async_byte_io.h"
 #include "src/io/general_io/submit_async_read.h"

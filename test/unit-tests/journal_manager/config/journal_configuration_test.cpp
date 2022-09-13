@@ -36,7 +36,7 @@
 #include <gtest/gtest.h>
 
 #include "src/include/memory.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 

@@ -1,7 +1,7 @@
 #include "src/trace/otlp_factory.h"
 #include "src/trace/trace_exporter.h"
 #include "src/logger/logger.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "opentelemetry/trace/provider.h"
 
 using namespace opentelemetry;

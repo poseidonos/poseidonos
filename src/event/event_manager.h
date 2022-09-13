@@ -33,12 +33,6 @@
 #ifndef __EVENTM_MANAGER_H__
 #define __EVENTM_MANAGER_H__
 
-#define UNKNOWN_EVENT_ID -1000
-#define STR(S) #S
-
-#define EID(X) (eventManager.GetEventIdFromMap(STR(X)))
-#define ERRID(X) (-eventManager.GetEventIdFromMap(STR(X)))
-
 #include <unordered_map>
 #include <string>
 

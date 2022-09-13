@@ -36,7 +36,7 @@
 #include "spdk/event.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 

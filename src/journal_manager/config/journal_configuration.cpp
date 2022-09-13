@@ -39,7 +39,7 @@
 #include "src/master_context/config_manager.h"
 #include "src/metafs/include/metafs_service.h"
 #include "mk/ibof_config.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/include/memory.h"
 #include "src/logger/logger.h"
 #include "src/metafs/metafs_file_intf.h"

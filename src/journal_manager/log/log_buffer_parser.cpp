@@ -34,7 +34,7 @@
 
 #include <unordered_set>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"

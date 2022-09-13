@@ -35,7 +35,7 @@
 #include "src/device/base/ublock_device.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {

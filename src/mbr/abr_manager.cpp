@@ -37,7 +37,7 @@
 #include "src/array/device/array_device_list.h"
 #include "src/helper/time/time_helper.h"
 #include "src/include/array_device_state.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/mbr/mbr_manager.h"
 #include "src/mbr/mbr_util.h"

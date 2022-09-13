@@ -35,7 +35,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos

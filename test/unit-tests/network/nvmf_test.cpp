@@ -4,7 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "lib/spdk/include/spdk/pos_volume.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/sys_event/volume_event.h"
 #include "test/unit-tests/network/nvmf_volume_pos_mock.h"

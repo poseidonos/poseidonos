@@ -32,7 +32,7 @@
 
 #include "replicator_volume_subscriber.h"
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/pos_replicator/posreplicator_manager.h"
 #include "src/sys_event/volume_event_publisher.h"

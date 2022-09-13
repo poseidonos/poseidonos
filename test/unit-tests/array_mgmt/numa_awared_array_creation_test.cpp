@@ -3,7 +3,7 @@
 #include "src/array_mgmt/numa_awared_array_creation.h"
 #include "test/unit-tests/device/device_manager_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::_;
 using ::testing::Return;

@@ -43,7 +43,7 @@
 #include <iostream>
 #include <string>
 
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
 #define gettid() syscall(SYS_gettid)

@@ -36,7 +36,7 @@
 #include "ssd_partition_builder.h"
 #include "nvm_partition_builder.h"
 #include "src/include/array_config.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {

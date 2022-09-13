@@ -33,7 +33,7 @@
 #include "get_partition_size_wbt_command.h"
 
 #include "src/array_mgmt/array_manager.h"
-#include "src/event/event_manager.h"
+#include "src/include/pos_event_id.h"
 
 #include <string>
 
