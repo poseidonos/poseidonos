@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,31 +30,65 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "map_flush_event.h"
+#include "src/metafs/storage/pstore/issue_write_event.h"
 
-#include "src/mapper/map/map.h"
-#include "src/mapper/map/map_header.h"
-#include "src/mapper/map/map_io_handler.h"
-#include "src/meta_file_intf/meta_file_intf.h"
+#include <gtest/gtest.h>
+
+#include <functional>
+
+#include "test/unit-tests/metafs/storage/pstore/mss_on_disk_mock.h"
 
 namespace pos
 {
-MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet)
-: Event(false, BackendEvent::BackendEvent_CreateMapIO),
-  handler(handler),
-  mpageSet(mpageSet)
+class MssAioCbCxt;
+
+using MssRequestFunction = std::function<POS_EVENT_ID(const IODirection, MssAioCbCxt*)>;
+
+class IssueWriteEventTester
 {
+public:
+    IssueWriteEventTester(void)
+    : result(false)
+    {
+    }
+    ~IssueWriteEventTester(void) = default;
+    POS_EVENT_ID RequestFunction(const IODirection direction, MssAioCbCxt* cxt)
+    {
+        if (result)
+            return EID(SUCCESS);
+        else
+            return EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
+    }
+    void SetExpectedResult(const bool expected)
+    {
+        result = expected;
+    }
+
+private:
+    bool result;
+};
+
+TEST(IssueWriteEvent, Execute_testIfExecutionResultIsTrueAsExpected)
+{
+    IssueWriteEventTester tester;
+    MssRequestFunction handler = std::bind(&IssueWriteEventTester::RequestFunction, &tester, std::placeholders::_1, std::placeholders::_2);
+    IssueWriteEvent event(handler, nullptr);
+
+    bool expected = true;
+    tester.SetExpectedResult(expected);
+
+    EXPECT_EQ(event.Execute(), expected);
 }
 
-// LCOV_EXCL_START
-MapFlushEvent::~MapFlushEvent(void)
+TEST(IssueWriteEvent, Execute_testIfExecutionResultIsFalseAsExpected)
 {
-}
-// LCOV_EXCL_STOP
+    IssueWriteEventTester tester;
+    MssRequestFunction handler = std::bind(&IssueWriteEventTester::RequestFunction, &tester, std::placeholders::_1, std::placeholders::_2);
+    IssueWriteEvent event(handler, nullptr);
 
-bool
-MapFlushEvent::Execute(void)
-{
-    return (0 == handler->CreateFlushRequestFor(mpageSet));
+    bool expected = false;
+    tester.SetExpectedResult(expected);
+
+    EXPECT_EQ(event.Execute(), expected);
 }
 } // namespace pos

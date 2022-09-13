@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,31 +30,41 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "map_flush_event.h"
+#ifndef _INCLUDE_ISSUE_WRITE_EVENT_INCLUDE_H
+#define _INCLUDE_ISSUE_WRITE_EVENT_INCLUDE_H
 
-#include "src/mapper/map/map.h"
-#include "src/mapper/map/map_header.h"
-#include "src/mapper/map/map_io_handler.h"
-#include "src/meta_file_intf/meta_file_intf.h"
+#include <functional>
+
+#include "src/event_scheduler/event.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
 
 namespace pos
 {
-MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet)
-: Event(false, BackendEvent::BackendEvent_CreateMapIO),
-  handler(handler),
-  mpageSet(mpageSet)
-{
-}
+class MssAioCbCxt;
 
-// LCOV_EXCL_START
-MapFlushEvent::~MapFlushEvent(void)
-{
-}
-// LCOV_EXCL_STOP
+using MssRequestFunction = std::function<POS_EVENT_ID(const IODirection, MssAioCbCxt*)>;
 
-bool
-MapFlushEvent::Execute(void)
+class IssueWriteEvent : public Event
 {
-    return (0 == handler->CreateFlushRequestFor(mpageSet));
-}
+public:
+    IssueWriteEvent(MssRequestFunction handler, MssAioCbCxt* cb)
+    : handler(handler),
+      cb(cb)
+    {
+        SetEventType(BackendEvent_MetaIO);
+    }
+    virtual ~IssueWriteEvent(void)
+    {
+    }
+    virtual bool Execute(void) override
+    {
+        return (EID(SUCCESS) == handler(IODirection::WRITE, cb));
+    }
+
+private:
+    MssRequestFunction handler;
+    MssAioCbCxt* cb;
+};
 } // namespace pos
+
+#endif // _INCLUDE_ISSUE_WRITE_EVENT_INCLUDE_H

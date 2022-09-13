@@ -39,6 +39,7 @@
 #include "src/include/array_config.h"
 #include "src/metafs/config/metafs_config.h"
 #include "src/metafs/log/metafs_log.h"
+#include "src/metafs/storage/pstore/issue_write_event.h"
 #include "src/metafs/storage/pstore/mss_disk_inplace.h"
 
 namespace pos
@@ -392,7 +393,18 @@ MssOnDisk::ReadPageAsync(MssAioCbCxt* cb)
 POS_EVENT_ID
 MssOnDisk::WritePageAsync(MssAioCbCxt* cb)
 {
-    return _SendAsyncRequest(IODirection::WRITE, cb);
+    MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
+    if (aioData->GetStorageType() == MetaStorageType::SSD)
+    {
+        MssRequestFunction handler = std::bind(&MssOnDisk::_SendAsyncRequest, this, std::placeholders::_1, std::placeholders::_2);
+        EventSmartPtr event = std::make_shared<IssueWriteEvent>(handler, cb);
+        EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+        return EID(SUCCESS);
+    }
+    else
+    {
+        return _SendAsyncRequest(IODirection::WRITE, cb);
+    }
 }
 
 POS_EVENT_ID

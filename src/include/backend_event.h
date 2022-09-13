@@ -44,6 +44,7 @@ enum BackendEvent
     BackendEvent_MetadataRebuild = BackendEvent_UserdataRebuild,
     BackendEvent_JournalIO,
     BackendEvent_MetaIO,
+    BackendEvent_CreateMapIO,
     BackendEvent_Unknown,
     BackendEvent_End,
     BackendEvent_Count = BackendEvent_End - BackendEvent_Start,

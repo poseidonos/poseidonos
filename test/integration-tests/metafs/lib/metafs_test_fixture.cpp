@@ -65,6 +65,7 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     EXPECT_CALL(*config, GetWrrCountMap).WillRepeatedly(Return(5));
     EXPECT_CALL(*config, GetWrrCountGeneral).WillRepeatedly(Return(1));
     EXPECT_CALL(*config, GetWrrWeight).WillRepeatedly(Return(std::vector<int>{2, 3, 5, 1}));
+    EXPECT_CALL(*config, NeedToIgnoreNumaDedicatedScheduling).WillRepeatedly(Return(true));
 
     _SetThreadModel();
 

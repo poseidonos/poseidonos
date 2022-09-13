@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,31 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "map_flush_event.h"
+#include <gmock/gmock.h>
 
-#include "src/mapper/map/map.h"
-#include "src/mapper/map/map_header.h"
-#include "src/mapper/map/map_io_handler.h"
-#include "src/meta_file_intf/meta_file_intf.h"
+#include "src/metafs/storage/pstore/issue_write_event.h"
 
 namespace pos
 {
-MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet)
-: Event(false, BackendEvent::BackendEvent_CreateMapIO),
-  handler(handler),
-  mpageSet(mpageSet)
+class MockIssueWriteEvent : public IssueWriteEvent
 {
-}
+public:
+    using IssueWriteEvent::IssueWriteEvent;
+    MOCK_METHOD(bool, Execute, (void), (override));
+};
 
-// LCOV_EXCL_START
-MapFlushEvent::~MapFlushEvent(void)
-{
-}
-// LCOV_EXCL_STOP
-
-bool
-MapFlushEvent::Execute(void)
-{
-    return (0 == handler->CreateFlushRequestFor(mpageSet));
-}
 } // namespace pos

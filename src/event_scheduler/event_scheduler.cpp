@@ -190,7 +190,7 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
         static std::atomic<uint32_t> lastReactorIndex;
         uint32_t type = static_cast<uint32_t>(input->GetEventType());
         if (type == BackendEvent_UserdataRebuild || type == BackendEvent_MetadataRebuild ||
-            type == BackendEvent_MetaIO || type == BackendEvent_GC || type == BackendEvent_Unknown)
+            type == BackendEvent_CreateMapIO || type == BackendEvent_GC || type == BackendEvent_Unknown)
         {
             type = ReactorType_SpecialEvent;
         }
