@@ -527,6 +527,7 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
     ioDispatcher->AddDeviceForReactor(dev);
     cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
     ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
+    dev->WrapupOpenDeviceSpecific();
 }
 
 } // namespace pos

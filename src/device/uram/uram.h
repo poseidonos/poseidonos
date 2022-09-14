@@ -53,6 +53,7 @@ public:
     ~Uram(void) override;
     int SubmitAsyncIO(UbioSmartPtr ubio) override;
     void* GetByteAddress(void) override;
+    bool WrapupOpenDeviceSpecific(void) override;
 
 private:
     static const uint32_t MAX_THREAD_COUNT = 128;
@@ -63,10 +64,9 @@ private:
     std::atomic<uint32_t> requestCount;
     DeviceContext* _AllocateDeviceContext(void) override;
     void _ReleaseDeviceContext(DeviceContext* deviceContextToRelease) override;
-    bool _WrapupOpenDeviceSpecific(DeviceContext* deviceContext) override;
     void _InitByteAddress(void);
     static void _RequestAsyncIo(void* arg1);
-    bool _RecoverBackup(DeviceContext* deviceContext);
+    bool _RecoverBackup(void);
     void *baseByteAddress;
 };
 
