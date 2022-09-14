@@ -34,9 +34,10 @@
 
 namespace pos
 {
-RebuildHandler::RebuildHandler(Array* array, ArrayDevice* dev)
+RebuildHandler::RebuildHandler(Array* array, vector<IArrayDevice*> devs, bool isResume)
 : targetArray(array),
-  targetDev(dev)
+  targetDevs(devs),
+  isResume(isResume)
 {
 }
 
@@ -44,13 +45,13 @@ bool
 RebuildHandler::Execute(void)
 {
     bool retry;
-    if (targetDev != nullptr && targetDev->GetState() == ArrayDeviceState::REBUILD)
+    if (isResume == true)
     {
-        retry = targetArray->ResumeRebuild(targetDev);
+        retry = targetArray->ResumeRebuild(targetDevs);
     }
     else
     {
-        retry = targetArray->TriggerRebuild(targetDev);
+        retry = targetArray->TriggerRebuild(targetDevs);
     }
     return retry == false;
 }

@@ -36,7 +36,7 @@ public:
     MOCK_METHOD(uint32_t, GetRebuildingProgress, (), (override));
     MOCK_METHOD(int, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
     MOCK_METHOD(IArrayDevice*, FindDevice, (string devSn), (override));
-    MOCK_METHOD(bool, TriggerRebuild, (ArrayDevice * target), (override));
+    MOCK_METHOD(bool, TriggerRebuild, (vector<IArrayDevice *> targets), (override));
 };
 
 } // namespace pos

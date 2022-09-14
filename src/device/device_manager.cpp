@@ -276,12 +276,12 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
         return static_cast<int>(EID(DEVICEMGR_REMOVE_DEV));
     }
 
+    DeviceType type = (*iter)->GetType();
     ioDispatcher->RemoveDeviceForReactor(dev);
     ioDispatcher->RemoveDeviceForIOWorker(dev);
     devices.erase(iter);
 
     UnvmeSsdSharedPtr ssd = nullptr;
-    DeviceType type = (*iter)->GetType();
     if (type == DeviceType::SSD)
     {
         ssd = dynamic_pointer_cast<UnvmeSsd>(dev);
@@ -294,7 +294,7 @@ DeviceManager::RemoveDevice(UblockSharedPtr dev)
     }
 
     POS_TRACE_WARN(EID(DEVICEMGR_REMOVE_DEV),
-        "device removed successfully {}", dev->GetName());
+        "device removed successfully name:{}, type:{}", dev->GetName(), type);
     dev = nullptr;
 
     return 0;

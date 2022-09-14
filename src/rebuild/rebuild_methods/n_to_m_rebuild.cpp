@@ -51,8 +51,19 @@ NToMRebuild::NToMRebuild(vector<IArrayDevice*> src, vector<IArrayDevice*> dst, R
   dst(dst),
   recoverFunc(recoverFunc)
 {
+    string srcList = "";
+    for (IArrayDevice* dev : src)
+    {
+        srcList += dev->GetName();
+    }
+    string dstList = "";
+    for (IArrayDevice* dev : dst)
+    {
+        dstList += dev->GetName();
+    }
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "NToMRebuild constructor, srcCnt:{}, dstCnt:{}", src.size(), dst.size());
+        "NToMRebuild constructor, src:{}, dst:{}", srcList, dstList);
+
     airKey = (uint64_t)this;
 }
 
@@ -214,6 +225,7 @@ NToMRebuild::_RecoverDone(int arrayIndex, StripeId stripeId, const PartitionPhys
     {
         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
             "NToMRebuild, error occured during recover, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        dstBuffer->ReturnBuffer(mem);
         callback(result);
         return;
     }
@@ -240,8 +252,8 @@ NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSi
     }
 
     WriteDoneCallback writeDoneCallback = bind(&NToMRebuild::_WriteDone, this,
-        arrayIndex, stripeId, callback, placeholders::_1);
-    CallbackSmartPtr writeCompletion(new RebuildWriteDone(writeUbio, writeDoneCallback, dstBuffer));
+        arrayIndex, stripeId, callback, mem, placeholders::_1);
+    CallbackSmartPtr writeCompletion(new RebuildWriteDone(writeUbio, writeDoneCallback));
     writeUbio->SetCallback(writeCompletion);
     vector<UbioSmartPtr> splitList;
     for (auto pba : dstAddr)
@@ -270,11 +282,12 @@ NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSi
 }
 
 void
-NToMRebuild::_WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCallback callback, int result)
+NToMRebuild::_WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCallback callback, void* mem, int result)
 {
     airlog("LAT_SegmentRebuildWrite", "end", 0, airKey);
     POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
         "NToMRebuild, writedone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+    dstBuffer->ReturnBuffer(mem);
     if (result != 0)
     {
         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),

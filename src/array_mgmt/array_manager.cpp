@@ -222,6 +222,15 @@ ArrayManager::ReplaceDevice(string name, string dev)
 }
 
 int
+ArrayManager::Rebuild(string name)
+{
+    return _ExecuteOrHandleErrors([&](ArrayComponents* array)
+    {
+        return array->GetArray()->Rebuild();
+    }, name, EID(REBUILD_ARRAY_NAME_DOES_NOT_EXIST));
+}
+
+int
 ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, string name, int eid)
 {
     ArrayComponents* array = _FindArray(name);

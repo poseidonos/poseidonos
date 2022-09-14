@@ -362,6 +362,23 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  RebuildArray(ServerContext* context, const RebuildArrayRequest* request,
+                  RebuildArrayResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteRebuildArrayCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
   SetLogLevel(ServerContext* context, const SetLogLevelRequest* request,
                   SetLogLevelResponse* reply) override
   {

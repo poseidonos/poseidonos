@@ -83,9 +83,11 @@ SegmentBasedRebuild::_Init(void)
 {
     if (isInitialized == false)
     {
+        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Trying to initialize SegmentBasedRebuild, {}", PARTITION_TYPE_STR[ctx->part]);
+        uint32_t idx = 1;
         for (RebuildMethod* rm : ctx->rm)
         {
-            bool ret = rm->Init("SegmentBasedRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part]);
+            bool ret = rm->Init("SegmentBasedRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part] + "_" + to_string(idx));
             if (ret == false)
             {
                 if (initRetryCnt >= INIT_REBUILD_MAX_RETRY)
@@ -105,6 +107,7 @@ SegmentBasedRebuild::_Init(void)
                 initRetryCnt++;
                 return false;
             }
+            idx++;
         }
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild Initialized successfully, {}", PARTITION_TYPE_STR[ctx->part]);
         isInitialized = true;
@@ -132,10 +135,11 @@ SegmentBasedRebuild::_Recover(void)
     }
 
     uint32_t strCnt = ctx->size->stripesPerSegment;
-    ctx->taskCnt = strCnt;
+    uint32_t callbackCnt = ctx->rm.size();
+    ctx->taskCnt = strCnt * callbackCnt;
     StripeId baseStripe = segId * strCnt;
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Trying to recover, segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
+        "Trying to recover, segID:{}, from:{}, taskCnt:{}", segId, baseStripe, ctx->taskCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;

@@ -24,8 +24,8 @@ public:
     MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDev, (UblockSharedPtr uBlock), (override));
     MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDevBySn, (string sn), (override));
     MOCK_METHOD((tuple<ArrayDevice*, ArrayDeviceType>), GetDevByName, (string devName), (override));
-    MOCK_METHOD(ArrayDevice*, GetFaulty, (), (override));
-    MOCK_METHOD(ArrayDevice*, GetRebuilding, (), (override));
+    MOCK_METHOD(vector<IArrayDevice*>, GetFaulty, (), (override));
+    MOCK_METHOD(vector<IArrayDevice*>, GetRebuilding, (), (override));
     MOCK_METHOD(vector<ArrayDevice*>, GetDataDevices, (), (override));
 };
 

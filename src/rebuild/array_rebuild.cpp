@@ -205,8 +205,6 @@ ArrayRebuild::_RebuildNext(void)
 void
 ArrayRebuild::_RebuildDone(RebuildResult res)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::_RebuildDone array {} rebuild done with result {} ", arrayName, REBUILD_STATE_STR[(int)res.result]);
     RebuildState taskResult = res.result;
     state = taskResult;
 

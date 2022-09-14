@@ -306,38 +306,44 @@ ArrayDeviceManager::ReplaceWithSpare(ArrayDevice* target, ArrayDevice*& swapOut)
     return devs_->SpareToData(target, swapOut);
 }
 
-ArrayDevice*
+vector<IArrayDevice*>
 ArrayDeviceManager::GetFaulty(void)
 {
+    vector<IArrayDevice*> devs;
     for (ArrayDevice* dev : devs_->GetDevs().data)
     {
         if (ArrayDeviceState::FAULT == dev->GetState())
         {
-            return dev;
+            devs.push_back(dev);
         }
     }
-
-    return nullptr;
+    return devs;
 }
 
-ArrayDevice*
+vector<IArrayDevice*>
 ArrayDeviceManager::GetRebuilding(void)
 {
+    vector<IArrayDevice*> devs;
     for (ArrayDevice* dev : devs_->GetDevs().data)
     {
         if (ArrayDeviceState::REBUILD == dev->GetState())
         {
-            return dev;
+            devs.push_back(dev);
         }
     }
-
-    return nullptr;
+    return devs;
 }
 
 vector<ArrayDevice*>
 ArrayDeviceManager::GetDataDevices(void)
 {
     return devs_->GetDevs().data;
+}
+
+vector<ArrayDevice*>
+ArrayDeviceManager::GetSpareDevices(void)
+{
+    return devs_->GetDevs().spares;
 }
 
 vector<ArrayDevice*>

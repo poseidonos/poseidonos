@@ -489,6 +489,28 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 	return res, err
 }
 
+func SendRebuildArray(req *pb.RebuildArrayRequest) (*pb.RebuildArrayResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.RebuildArray(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {

@@ -869,6 +869,20 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
 }
 
 grpc::Status
+CommandProcessor::ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string arrayName = (request->param()).name();
+    IArrayMgmt* array =  ArrayMgr();
+    int ret = array->Rebuild(arrayName);
+    _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply)
 {
     reply->set_command(request->command());

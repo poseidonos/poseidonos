@@ -47,7 +47,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[174]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[178]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -344,6 +344,18 @@ extern MountArrayResponse_ResultDefaultTypeInternal _MountArrayResponse_Result_d
 class PosInfo;
 struct PosInfoDefaultTypeInternal;
 extern PosInfoDefaultTypeInternal _PosInfo_default_instance_;
+class RebuildArrayRequest;
+struct RebuildArrayRequestDefaultTypeInternal;
+extern RebuildArrayRequestDefaultTypeInternal _RebuildArrayRequest_default_instance_;
+class RebuildArrayRequest_Param;
+struct RebuildArrayRequest_ParamDefaultTypeInternal;
+extern RebuildArrayRequest_ParamDefaultTypeInternal _RebuildArrayRequest_Param_default_instance_;
+class RebuildArrayResponse;
+struct RebuildArrayResponseDefaultTypeInternal;
+extern RebuildArrayResponseDefaultTypeInternal _RebuildArrayResponse_default_instance_;
+class RebuildArrayResponse_Result;
+struct RebuildArrayResponse_ResultDefaultTypeInternal;
+extern RebuildArrayResponse_ResultDefaultTypeInternal _RebuildArrayResponse_Result_default_instance_;
 class RemoveSpareRequest;
 struct RemoveSpareRequestDefaultTypeInternal;
 extern RemoveSpareRequestDefaultTypeInternal _RemoveSpareRequest_default_instance_;
@@ -676,6 +688,10 @@ template<> ::grpc_cli::MountArrayRequest_Param* Arena::CreateMaybeMessage<::grpc
 template<> ::grpc_cli::MountArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::MountArrayResponse>(Arena*);
 template<> ::grpc_cli::MountArrayResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::MountArrayResponse_Result>(Arena*);
 template<> ::grpc_cli::PosInfo* Arena::CreateMaybeMessage<::grpc_cli::PosInfo>(Arena*);
+template<> ::grpc_cli::RebuildArrayRequest* Arena::CreateMaybeMessage<::grpc_cli::RebuildArrayRequest>(Arena*);
+template<> ::grpc_cli::RebuildArrayRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::RebuildArrayRequest_Param>(Arena*);
+template<> ::grpc_cli::RebuildArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::RebuildArrayResponse>(Arena*);
+template<> ::grpc_cli::RebuildArrayResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::RebuildArrayResponse_Result>(Arena*);
 template<> ::grpc_cli::RemoveSpareRequest* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareRequest>(Arena*);
 template<> ::grpc_cli::RemoveSpareRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareRequest_Param>(Arena*);
 template<> ::grpc_cli::RemoveSpareRequest_SpareDeviceName* Arena::CreateMaybeMessage<::grpc_cli::RemoveSpareRequest_SpareDeviceName>(Arena*);
@@ -16231,6 +16247,702 @@ class ArrayInfoResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class RebuildArrayRequest_Param PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RebuildArrayRequest.Param) */ {
+ public:
+  inline RebuildArrayRequest_Param() : RebuildArrayRequest_Param(nullptr) {}
+  virtual ~RebuildArrayRequest_Param();
+  explicit constexpr RebuildArrayRequest_Param(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RebuildArrayRequest_Param(const RebuildArrayRequest_Param& from);
+  RebuildArrayRequest_Param(RebuildArrayRequest_Param&& from) noexcept
+    : RebuildArrayRequest_Param() {
+    *this = ::std::move(from);
+  }
+
+  inline RebuildArrayRequest_Param& operator=(const RebuildArrayRequest_Param& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RebuildArrayRequest_Param& operator=(RebuildArrayRequest_Param&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RebuildArrayRequest_Param& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RebuildArrayRequest_Param* internal_default_instance() {
+    return reinterpret_cast<const RebuildArrayRequest_Param*>(
+               &_RebuildArrayRequest_Param_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    85;
+
+  friend void swap(RebuildArrayRequest_Param& a, RebuildArrayRequest_Param& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RebuildArrayRequest_Param* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RebuildArrayRequest_Param* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RebuildArrayRequest_Param* New() const final {
+    return CreateMaybeMessage<RebuildArrayRequest_Param>(nullptr);
+  }
+
+  RebuildArrayRequest_Param* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RebuildArrayRequest_Param>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RebuildArrayRequest_Param& from);
+  void MergeFrom(const RebuildArrayRequest_Param& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RebuildArrayRequest_Param* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RebuildArrayRequest.Param";
+  }
+  protected:
+  explicit RebuildArrayRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name();
+  const std::string& name() const;
+  void set_name(const std::string& value);
+  void set_name(std::string&& value);
+  void set_name(const char* value);
+  void set_name(const char* value, size_t size);
+  std::string* mutable_name();
+  std::string* release_name();
+  void set_allocated_name(std::string* name);
+  private:
+  const std::string& _internal_name() const;
+  void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RebuildArrayRequest.Param)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RebuildArrayRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RebuildArrayRequest) */ {
+ public:
+  inline RebuildArrayRequest() : RebuildArrayRequest(nullptr) {}
+  virtual ~RebuildArrayRequest();
+  explicit constexpr RebuildArrayRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RebuildArrayRequest(const RebuildArrayRequest& from);
+  RebuildArrayRequest(RebuildArrayRequest&& from) noexcept
+    : RebuildArrayRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline RebuildArrayRequest& operator=(const RebuildArrayRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RebuildArrayRequest& operator=(RebuildArrayRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RebuildArrayRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RebuildArrayRequest* internal_default_instance() {
+    return reinterpret_cast<const RebuildArrayRequest*>(
+               &_RebuildArrayRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    86;
+
+  friend void swap(RebuildArrayRequest& a, RebuildArrayRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RebuildArrayRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RebuildArrayRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RebuildArrayRequest* New() const final {
+    return CreateMaybeMessage<RebuildArrayRequest>(nullptr);
+  }
+
+  RebuildArrayRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RebuildArrayRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RebuildArrayRequest& from);
+  void MergeFrom(const RebuildArrayRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RebuildArrayRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RebuildArrayRequest";
+  }
+  protected:
+  explicit RebuildArrayRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef RebuildArrayRequest_Param Param;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+    kParamFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // .grpc_cli.RebuildArrayRequest.Param param = 4;
+  bool has_param() const;
+  private:
+  bool _internal_has_param() const;
+  public:
+  void clear_param();
+  const ::grpc_cli::RebuildArrayRequest_Param& param() const;
+  ::grpc_cli::RebuildArrayRequest_Param* release_param();
+  ::grpc_cli::RebuildArrayRequest_Param* mutable_param();
+  void set_allocated_param(::grpc_cli::RebuildArrayRequest_Param* param);
+  private:
+  const ::grpc_cli::RebuildArrayRequest_Param& _internal_param() const;
+  ::grpc_cli::RebuildArrayRequest_Param* _internal_mutable_param();
+  public:
+  void unsafe_arena_set_allocated_param(
+      ::grpc_cli::RebuildArrayRequest_Param* param);
+  ::grpc_cli::RebuildArrayRequest_Param* unsafe_arena_release_param();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RebuildArrayRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  ::grpc_cli::RebuildArrayRequest_Param* param_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RebuildArrayResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RebuildArrayResponse.Result) */ {
+ public:
+  inline RebuildArrayResponse_Result() : RebuildArrayResponse_Result(nullptr) {}
+  virtual ~RebuildArrayResponse_Result();
+  explicit constexpr RebuildArrayResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RebuildArrayResponse_Result(const RebuildArrayResponse_Result& from);
+  RebuildArrayResponse_Result(RebuildArrayResponse_Result&& from) noexcept
+    : RebuildArrayResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline RebuildArrayResponse_Result& operator=(const RebuildArrayResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RebuildArrayResponse_Result& operator=(RebuildArrayResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RebuildArrayResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RebuildArrayResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const RebuildArrayResponse_Result*>(
+               &_RebuildArrayResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    87;
+
+  friend void swap(RebuildArrayResponse_Result& a, RebuildArrayResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RebuildArrayResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RebuildArrayResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RebuildArrayResponse_Result* New() const final {
+    return CreateMaybeMessage<RebuildArrayResponse_Result>(nullptr);
+  }
+
+  RebuildArrayResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RebuildArrayResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RebuildArrayResponse_Result& from);
+  void MergeFrom(const RebuildArrayResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RebuildArrayResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RebuildArrayResponse.Result";
+  }
+  protected:
+  explicit RebuildArrayResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RebuildArrayResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RebuildArrayResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.RebuildArrayResponse) */ {
+ public:
+  inline RebuildArrayResponse() : RebuildArrayResponse(nullptr) {}
+  virtual ~RebuildArrayResponse();
+  explicit constexpr RebuildArrayResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RebuildArrayResponse(const RebuildArrayResponse& from);
+  RebuildArrayResponse(RebuildArrayResponse&& from) noexcept
+    : RebuildArrayResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline RebuildArrayResponse& operator=(const RebuildArrayResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RebuildArrayResponse& operator=(RebuildArrayResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RebuildArrayResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RebuildArrayResponse* internal_default_instance() {
+    return reinterpret_cast<const RebuildArrayResponse*>(
+               &_RebuildArrayResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    88;
+
+  friend void swap(RebuildArrayResponse& a, RebuildArrayResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RebuildArrayResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RebuildArrayResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RebuildArrayResponse* New() const final {
+    return CreateMaybeMessage<RebuildArrayResponse>(nullptr);
+  }
+
+  RebuildArrayResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RebuildArrayResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RebuildArrayResponse& from);
+  void MergeFrom(const RebuildArrayResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RebuildArrayResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.RebuildArrayResponse";
+  }
+  protected:
+  explicit RebuildArrayResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef RebuildArrayResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.RebuildArrayResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::RebuildArrayResponse_Result& result() const;
+  ::grpc_cli::RebuildArrayResponse_Result* release_result();
+  ::grpc_cli::RebuildArrayResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::RebuildArrayResponse_Result* result);
+  private:
+  const ::grpc_cli::RebuildArrayResponse_Result& _internal_result() const;
+  ::grpc_cli::RebuildArrayResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::RebuildArrayResponse_Result* result);
+  ::grpc_cli::RebuildArrayResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.RebuildArrayResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::RebuildArrayResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
 class ListNodeRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListNodeRequest) */ {
  public:
@@ -16274,7 +16986,7 @@ class ListNodeRequest PROTOBUF_FINAL :
                &_ListNodeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    85;
+    89;
 
   friend void swap(ListNodeRequest& a, ListNodeRequest& b) {
     a.Swap(&b);
@@ -16454,7 +17166,7 @@ class ListNodeResponse_Result_Node PROTOBUF_FINAL :
                &_ListNodeResponse_Result_Node_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    86;
+    90;
 
   friend void swap(ListNodeResponse_Result_Node& a, ListNodeResponse_Result_Node& b) {
     a.Swap(&b);
@@ -16634,7 +17346,7 @@ class ListNodeResponse_Result PROTOBUF_FINAL :
                &_ListNodeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    87;
+    91;
 
   friend void swap(ListNodeResponse_Result& a, ListNodeResponse_Result& b) {
     a.Swap(&b);
@@ -16802,7 +17514,7 @@ class ListNodeResponse PROTOBUF_FINAL :
                &_ListNodeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    88;
+    92;
 
   friend void swap(ListNodeResponse& a, ListNodeResponse& b) {
     a.Swap(&b);
@@ -17006,7 +17718,7 @@ class ListHaVolumeRequest PROTOBUF_FINAL :
                &_ListHaVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    89;
+    93;
 
   friend void swap(ListHaVolumeRequest& a, ListHaVolumeRequest& b) {
     a.Swap(&b);
@@ -17186,7 +17898,7 @@ class ListHaVolumeResponse_Result_Volume PROTOBUF_FINAL :
                &_ListHaVolumeResponse_Result_Volume_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    90;
+    94;
 
   friend void swap(ListHaVolumeResponse_Result_Volume& a, ListHaVolumeResponse_Result_Volume& b) {
     a.Swap(&b);
@@ -17406,7 +18118,7 @@ class ListHaVolumeResponse_Result PROTOBUF_FINAL :
                &_ListHaVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    91;
+    95;
 
   friend void swap(ListHaVolumeResponse_Result& a, ListHaVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -17574,7 +18286,7 @@ class ListHaVolumeResponse PROTOBUF_FINAL :
                &_ListHaVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    92;
+    96;
 
   friend void swap(ListHaVolumeResponse& a, ListHaVolumeResponse& b) {
     a.Swap(&b);
@@ -17778,7 +18490,7 @@ class ListHaReplicationRequest PROTOBUF_FINAL :
                &_ListHaReplicationRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    93;
+    97;
 
   friend void swap(ListHaReplicationRequest& a, ListHaReplicationRequest& b) {
     a.Swap(&b);
@@ -17958,7 +18670,7 @@ class ListHaReplicationResponse_Result_Replication PROTOBUF_FINAL :
                &_ListHaReplicationResponse_Result_Replication_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    94;
+    98;
 
   friend void swap(ListHaReplicationResponse_Result_Replication& a, ListHaReplicationResponse_Result_Replication& b) {
     a.Swap(&b);
@@ -18139,7 +18851,7 @@ class ListHaReplicationResponse_Result PROTOBUF_FINAL :
                &_ListHaReplicationResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    95;
+    99;
 
   friend void swap(ListHaReplicationResponse_Result& a, ListHaReplicationResponse_Result& b) {
     a.Swap(&b);
@@ -18307,7 +19019,7 @@ class ListHaReplicationResponse PROTOBUF_FINAL :
                &_ListHaReplicationResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    96;
+    100;
 
   friend void swap(ListHaReplicationResponse& a, ListHaReplicationResponse& b) {
     a.Swap(&b);
@@ -18511,7 +19223,7 @@ class StartHaReplicationRequest_Param PROTOBUF_FINAL :
                &_StartHaReplicationRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    97;
+    101;
 
   friend void swap(StartHaReplicationRequest_Param& a, StartHaReplicationRequest_Param& b) {
     a.Swap(&b);
@@ -18817,7 +19529,7 @@ class StartHaReplicationRequest PROTOBUF_FINAL :
                &_StartHaReplicationRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    98;
+    102;
 
   friend void swap(StartHaReplicationRequest& a, StartHaReplicationRequest& b) {
     a.Swap(&b);
@@ -19019,7 +19731,7 @@ class StartHaReplicationResponse_Result PROTOBUF_FINAL :
                &_StartHaReplicationResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    99;
+    103;
 
   friend void swap(StartHaReplicationResponse_Result& a, StartHaReplicationResponse_Result& b) {
     a.Swap(&b);
@@ -19165,7 +19877,7 @@ class StartHaReplicationResponse PROTOBUF_FINAL :
                &_StartHaReplicationResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    100;
+    104;
 
   friend void swap(StartHaReplicationResponse& a, StartHaReplicationResponse& b) {
     a.Swap(&b);
@@ -19369,7 +20081,7 @@ class SetLogLevelRequest_Param PROTOBUF_FINAL :
                &_SetLogLevelRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    101;
+    105;
 
   friend void swap(SetLogLevelRequest_Param& a, SetLogLevelRequest_Param& b) {
     a.Swap(&b);
@@ -19513,7 +20225,7 @@ class SetLogLevelRequest PROTOBUF_FINAL :
                &_SetLogLevelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    102;
+    106;
 
   friend void swap(SetLogLevelRequest& a, SetLogLevelRequest& b) {
     a.Swap(&b);
@@ -19715,7 +20427,7 @@ class SetLogLevelResponse_Result PROTOBUF_FINAL :
                &_SetLogLevelResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    103;
+    107;
 
   friend void swap(SetLogLevelResponse_Result& a, SetLogLevelResponse_Result& b) {
     a.Swap(&b);
@@ -19861,7 +20573,7 @@ class SetLogLevelResponse PROTOBUF_FINAL :
                &_SetLogLevelResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    104;
+    108;
 
   friend void swap(SetLogLevelResponse& a, SetLogLevelResponse& b) {
     a.Swap(&b);
@@ -20065,7 +20777,7 @@ class SetLogPreferenceRequest_Param PROTOBUF_FINAL :
                &_SetLogPreferenceRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    105;
+    109;
 
   friend void swap(SetLogPreferenceRequest_Param& a, SetLogPreferenceRequest_Param& b) {
     a.Swap(&b);
@@ -20209,7 +20921,7 @@ class SetLogPreferenceRequest PROTOBUF_FINAL :
                &_SetLogPreferenceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    106;
+    110;
 
   friend void swap(SetLogPreferenceRequest& a, SetLogPreferenceRequest& b) {
     a.Swap(&b);
@@ -20411,7 +21123,7 @@ class SetLogPreferenceResponse_Result PROTOBUF_FINAL :
                &_SetLogPreferenceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    107;
+    111;
 
   friend void swap(SetLogPreferenceResponse_Result& a, SetLogPreferenceResponse_Result& b) {
     a.Swap(&b);
@@ -20557,7 +21269,7 @@ class SetLogPreferenceResponse PROTOBUF_FINAL :
                &_SetLogPreferenceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    108;
+    112;
 
   friend void swap(SetLogPreferenceResponse& a, SetLogPreferenceResponse& b) {
     a.Swap(&b);
@@ -20761,7 +21473,7 @@ class LoggerInfoRequest PROTOBUF_FINAL :
                &_LoggerInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    109;
+    113;
 
   friend void swap(LoggerInfoRequest& a, LoggerInfoRequest& b) {
     a.Swap(&b);
@@ -20941,7 +21653,7 @@ class LoggerInfoResponse_Result_LoggerInfo PROTOBUF_FINAL :
                &_LoggerInfoResponse_Result_LoggerInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    110;
+    114;
 
   friend void swap(LoggerInfoResponse_Result_LoggerInfo& a, LoggerInfoResponse_Result_LoggerInfo& b) {
     a.Swap(&b);
@@ -21208,7 +21920,7 @@ class LoggerInfoResponse_Result PROTOBUF_FINAL :
                &_LoggerInfoResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    111;
+    115;
 
   friend void swap(LoggerInfoResponse_Result& a, LoggerInfoResponse_Result& b) {
     a.Swap(&b);
@@ -21376,7 +22088,7 @@ class LoggerInfoResponse PROTOBUF_FINAL :
                &_LoggerInfoResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    112;
+    116;
 
   friend void swap(LoggerInfoResponse& a, LoggerInfoResponse& b) {
     a.Swap(&b);
@@ -21580,7 +22292,7 @@ class GetLogLevelRequest PROTOBUF_FINAL :
                &_GetLogLevelRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    113;
+    117;
 
   friend void swap(GetLogLevelRequest& a, GetLogLevelRequest& b) {
     a.Swap(&b);
@@ -21760,7 +22472,7 @@ class GetLogLevelResponse_Result_LogLevel PROTOBUF_FINAL :
                &_GetLogLevelResponse_Result_LogLevel_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    114;
+    118;
 
   friend void swap(GetLogLevelResponse_Result_LogLevel& a, GetLogLevelResponse_Result_LogLevel& b) {
     a.Swap(&b);
@@ -21904,7 +22616,7 @@ class GetLogLevelResponse_Result PROTOBUF_FINAL :
                &_GetLogLevelResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    115;
+    119;
 
   friend void swap(GetLogLevelResponse_Result& a, GetLogLevelResponse_Result& b) {
     a.Swap(&b);
@@ -22072,7 +22784,7 @@ class GetLogLevelResponse PROTOBUF_FINAL :
                &_GetLogLevelResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    116;
+    120;
 
   friend void swap(GetLogLevelResponse& a, GetLogLevelResponse& b) {
     a.Swap(&b);
@@ -22276,7 +22988,7 @@ class ApplyLogFilterRequest PROTOBUF_FINAL :
                &_ApplyLogFilterRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    117;
+    121;
 
   friend void swap(ApplyLogFilterRequest& a, ApplyLogFilterRequest& b) {
     a.Swap(&b);
@@ -22456,7 +23168,7 @@ class ApplyLogFilterResponse_Result PROTOBUF_FINAL :
                &_ApplyLogFilterResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    118;
+    122;
 
   friend void swap(ApplyLogFilterResponse_Result& a, ApplyLogFilterResponse_Result& b) {
     a.Swap(&b);
@@ -22602,7 +23314,7 @@ class ApplyLogFilterResponse PROTOBUF_FINAL :
                &_ApplyLogFilterResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    119;
+    123;
 
   friend void swap(ApplyLogFilterResponse& a, ApplyLogFilterResponse& b) {
     a.Swap(&b);
@@ -22806,7 +23518,7 @@ class CreateDeviceRequest_Param PROTOBUF_FINAL :
                &_CreateDeviceRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    120;
+    124;
 
   friend void swap(CreateDeviceRequest_Param& a, CreateDeviceRequest_Param& b) {
     a.Swap(&b);
@@ -23001,7 +23713,7 @@ class CreateDeviceRequest PROTOBUF_FINAL :
                &_CreateDeviceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    121;
+    125;
 
   friend void swap(CreateDeviceRequest& a, CreateDeviceRequest& b) {
     a.Swap(&b);
@@ -23203,7 +23915,7 @@ class CreateDeviceResponse_Result PROTOBUF_FINAL :
                &_CreateDeviceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    122;
+    126;
 
   friend void swap(CreateDeviceResponse_Result& a, CreateDeviceResponse_Result& b) {
     a.Swap(&b);
@@ -23349,7 +24061,7 @@ class CreateDeviceResponse PROTOBUF_FINAL :
                &_CreateDeviceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    123;
+    127;
 
   friend void swap(CreateDeviceResponse& a, CreateDeviceResponse& b) {
     a.Swap(&b);
@@ -23553,7 +24265,7 @@ class ScanDeviceRequest PROTOBUF_FINAL :
                &_ScanDeviceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    124;
+    128;
 
   friend void swap(ScanDeviceRequest& a, ScanDeviceRequest& b) {
     a.Swap(&b);
@@ -23733,7 +24445,7 @@ class ScanDeviceResponse_Result PROTOBUF_FINAL :
                &_ScanDeviceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    125;
+    129;
 
   friend void swap(ScanDeviceResponse_Result& a, ScanDeviceResponse_Result& b) {
     a.Swap(&b);
@@ -23879,7 +24591,7 @@ class ScanDeviceResponse PROTOBUF_FINAL :
                &_ScanDeviceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    126;
+    130;
 
   friend void swap(ScanDeviceResponse& a, ScanDeviceResponse& b) {
     a.Swap(&b);
@@ -24083,7 +24795,7 @@ class Device PROTOBUF_FINAL :
                &_Device_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    127;
+    131;
 
   friend void swap(Device& a, Device& b) {
     a.Swap(&b);
@@ -24346,7 +25058,7 @@ class ListDeviceRequest PROTOBUF_FINAL :
                &_ListDeviceRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    128;
+    132;
 
   friend void swap(ListDeviceRequest& a, ListDeviceRequest& b) {
     a.Swap(&b);
@@ -24526,7 +25238,7 @@ class ListDeviceResponse_Result_DeviceList PROTOBUF_FINAL :
                &_ListDeviceResponse_Result_DeviceList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    129;
+    133;
 
   friend void swap(ListDeviceResponse_Result_DeviceList& a, ListDeviceResponse_Result_DeviceList& b) {
     a.Swap(&b);
@@ -24672,7 +25384,7 @@ class ListDeviceResponse_Result PROTOBUF_FINAL :
                &_ListDeviceResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    130;
+    134;
 
   friend void swap(ListDeviceResponse_Result& a, ListDeviceResponse_Result& b) {
     a.Swap(&b);
@@ -24840,7 +25552,7 @@ class ListDeviceResponse PROTOBUF_FINAL :
                &_ListDeviceResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    131;
+    135;
 
   friend void swap(ListDeviceResponse& a, ListDeviceResponse& b) {
     a.Swap(&b);
@@ -25044,7 +25756,7 @@ class SmartLog PROTOBUF_FINAL :
                &_SmartLog_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    132;
+    136;
 
   friend void swap(SmartLog& a, SmartLog& b) {
     a.Swap(&b);
@@ -25574,7 +26286,7 @@ class GetSmartLogRequest_Param PROTOBUF_FINAL :
                &_GetSmartLogRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    133;
+    137;
 
   friend void swap(GetSmartLogRequest_Param& a, GetSmartLogRequest_Param& b) {
     a.Swap(&b);
@@ -25718,7 +26430,7 @@ class GetSmartLogRequest PROTOBUF_FINAL :
                &_GetSmartLogRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    134;
+    138;
 
   friend void swap(GetSmartLogRequest& a, GetSmartLogRequest& b) {
     a.Swap(&b);
@@ -25920,7 +26632,7 @@ class GetSmartLogResponse_Result PROTOBUF_FINAL :
                &_GetSmartLogResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    135;
+    139;
 
   friend void swap(GetSmartLogResponse_Result& a, GetSmartLogResponse_Result& b) {
     a.Swap(&b);
@@ -26086,7 +26798,7 @@ class GetSmartLogResponse PROTOBUF_FINAL :
                &_GetSmartLogResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    136;
+    140;
 
   friend void swap(GetSmartLogResponse& a, GetSmartLogResponse& b) {
     a.Swap(&b);
@@ -26290,7 +27002,7 @@ class CreateSubsystemRequest_Param PROTOBUF_FINAL :
                &_CreateSubsystemRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    137;
+    141;
 
   friend void swap(CreateSubsystemRequest_Param& a, CreateSubsystemRequest_Param& b) {
     a.Swap(&b);
@@ -26503,7 +27215,7 @@ class CreateSubsystemRequest PROTOBUF_FINAL :
                &_CreateSubsystemRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    138;
+    142;
 
   friend void swap(CreateSubsystemRequest& a, CreateSubsystemRequest& b) {
     a.Swap(&b);
@@ -26705,7 +27417,7 @@ class CreateSubsystemResponse_Result PROTOBUF_FINAL :
                &_CreateSubsystemResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    139;
+    143;
 
   friend void swap(CreateSubsystemResponse_Result& a, CreateSubsystemResponse_Result& b) {
     a.Swap(&b);
@@ -26851,7 +27563,7 @@ class CreateSubsystemResponse PROTOBUF_FINAL :
                &_CreateSubsystemResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    140;
+    144;
 
   friend void swap(CreateSubsystemResponse& a, CreateSubsystemResponse& b) {
     a.Swap(&b);
@@ -27055,7 +27767,7 @@ class DeleteSubsystemRequest_Param PROTOBUF_FINAL :
                &_DeleteSubsystemRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    141;
+    145;
 
   friend void swap(DeleteSubsystemRequest_Param& a, DeleteSubsystemRequest_Param& b) {
     a.Swap(&b);
@@ -27199,7 +27911,7 @@ class DeleteSubsystemRequest PROTOBUF_FINAL :
                &_DeleteSubsystemRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    142;
+    146;
 
   friend void swap(DeleteSubsystemRequest& a, DeleteSubsystemRequest& b) {
     a.Swap(&b);
@@ -27401,7 +28113,7 @@ class DeleteSubsystemResponse_Result PROTOBUF_FINAL :
                &_DeleteSubsystemResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    143;
+    147;
 
   friend void swap(DeleteSubsystemResponse_Result& a, DeleteSubsystemResponse_Result& b) {
     a.Swap(&b);
@@ -27547,7 +28259,7 @@ class DeleteSubsystemResponse PROTOBUF_FINAL :
                &_DeleteSubsystemResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    144;
+    148;
 
   friend void swap(DeleteSubsystemResponse& a, DeleteSubsystemResponse& b) {
     a.Swap(&b);
@@ -27751,7 +28463,7 @@ class AddListenerRequest_Param PROTOBUF_FINAL :
                &_AddListenerRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    145;
+    149;
 
   friend void swap(AddListenerRequest_Param& a, AddListenerRequest_Param& b) {
     a.Swap(&b);
@@ -27949,7 +28661,7 @@ class AddListenerRequest PROTOBUF_FINAL :
                &_AddListenerRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    146;
+    150;
 
   friend void swap(AddListenerRequest& a, AddListenerRequest& b) {
     a.Swap(&b);
@@ -28151,7 +28863,7 @@ class AddListenerResponse_Result PROTOBUF_FINAL :
                &_AddListenerResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    147;
+    151;
 
   friend void swap(AddListenerResponse_Result& a, AddListenerResponse_Result& b) {
     a.Swap(&b);
@@ -28297,7 +29009,7 @@ class AddListenerResponse PROTOBUF_FINAL :
                &_AddListenerResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    148;
+    152;
 
   friend void swap(AddListenerResponse& a, AddListenerResponse& b) {
     a.Swap(&b);
@@ -28501,7 +29213,7 @@ class Subsystem_AddressInfo PROTOBUF_FINAL :
                &_Subsystem_AddressInfo_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    149;
+    153;
 
   friend void swap(Subsystem_AddressInfo& a, Subsystem_AddressInfo& b) {
     a.Swap(&b);
@@ -28699,7 +29411,7 @@ class Subsystem_Host PROTOBUF_FINAL :
                &_Subsystem_Host_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    150;
+    154;
 
   friend void swap(Subsystem_Host& a, Subsystem_Host& b) {
     a.Swap(&b);
@@ -28843,7 +29555,7 @@ class Subsystem_Namespace PROTOBUF_FINAL :
                &_Subsystem_Namespace_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    151;
+    155;
 
   friend void swap(Subsystem_Namespace& a, Subsystem_Namespace& b) {
     a.Swap(&b);
@@ -29016,7 +29728,7 @@ class Subsystem PROTOBUF_FINAL :
                &_Subsystem_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    152;
+    156;
 
   friend void swap(Subsystem& a, Subsystem& b) {
     a.Swap(&b);
@@ -29300,7 +30012,7 @@ class ListSubsystemRequest PROTOBUF_FINAL :
                &_ListSubsystemRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    153;
+    157;
 
   friend void swap(ListSubsystemRequest& a, ListSubsystemRequest& b) {
     a.Swap(&b);
@@ -29480,7 +30192,7 @@ class ListSubsystemResponse_Result_SubsystemList PROTOBUF_FINAL :
                &_ListSubsystemResponse_Result_SubsystemList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    154;
+    158;
 
   friend void swap(ListSubsystemResponse_Result_SubsystemList& a, ListSubsystemResponse_Result_SubsystemList& b) {
     a.Swap(&b);
@@ -29626,7 +30338,7 @@ class ListSubsystemResponse_Result PROTOBUF_FINAL :
                &_ListSubsystemResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    155;
+    159;
 
   friend void swap(ListSubsystemResponse_Result& a, ListSubsystemResponse_Result& b) {
     a.Swap(&b);
@@ -29794,7 +30506,7 @@ class ListSubsystemResponse PROTOBUF_FINAL :
                &_ListSubsystemResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    156;
+    160;
 
   friend void swap(ListSubsystemResponse& a, ListSubsystemResponse& b) {
     a.Swap(&b);
@@ -29998,7 +30710,7 @@ class SubsystemInfoRequest_Param PROTOBUF_FINAL :
                &_SubsystemInfoRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    157;
+    161;
 
   friend void swap(SubsystemInfoRequest_Param& a, SubsystemInfoRequest_Param& b) {
     a.Swap(&b);
@@ -30142,7 +30854,7 @@ class SubsystemInfoRequest PROTOBUF_FINAL :
                &_SubsystemInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    158;
+    162;
 
   friend void swap(SubsystemInfoRequest& a, SubsystemInfoRequest& b) {
     a.Swap(&b);
@@ -30344,7 +31056,7 @@ class SubsystemInfoResponse_Result_SubsystemList PROTOBUF_FINAL :
                &_SubsystemInfoResponse_Result_SubsystemList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    159;
+    163;
 
   friend void swap(SubsystemInfoResponse_Result_SubsystemList& a, SubsystemInfoResponse_Result_SubsystemList& b) {
     a.Swap(&b);
@@ -30490,7 +31202,7 @@ class SubsystemInfoResponse_Result PROTOBUF_FINAL :
                &_SubsystemInfoResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    160;
+    164;
 
   friend void swap(SubsystemInfoResponse_Result& a, SubsystemInfoResponse_Result& b) {
     a.Swap(&b);
@@ -30658,7 +31370,7 @@ class SubsystemInfoResponse PROTOBUF_FINAL :
                &_SubsystemInfoResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    161;
+    165;
 
   friend void swap(SubsystemInfoResponse& a, SubsystemInfoResponse& b) {
     a.Swap(&b);
@@ -30862,7 +31574,7 @@ class CreateTransportRequest_Param PROTOBUF_FINAL :
                &_CreateTransportRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    162;
+    166;
 
   friend void swap(CreateTransportRequest_Param& a, CreateTransportRequest_Param& b) {
     a.Swap(&b);
@@ -31028,7 +31740,7 @@ class CreateTransportRequest PROTOBUF_FINAL :
                &_CreateTransportRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    163;
+    167;
 
   friend void swap(CreateTransportRequest& a, CreateTransportRequest& b) {
     a.Swap(&b);
@@ -31230,7 +31942,7 @@ class CreateTransportResponse_Result PROTOBUF_FINAL :
                &_CreateTransportResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    164;
+    168;
 
   friend void swap(CreateTransportResponse_Result& a, CreateTransportResponse_Result& b) {
     a.Swap(&b);
@@ -31376,7 +32088,7 @@ class CreateTransportResponse PROTOBUF_FINAL :
                &_CreateTransportResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    165;
+    169;
 
   friend void swap(CreateTransportResponse& a, CreateTransportResponse& b) {
     a.Swap(&b);
@@ -31580,7 +32292,7 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
                &_CreateVolumeRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    166;
+    170;
 
   friend void swap(CreateVolumeRequest_Param& a, CreateVolumeRequest_Param& b) {
     a.Swap(&b);
@@ -31804,7 +32516,7 @@ class CreateVolumeRequest PROTOBUF_FINAL :
                &_CreateVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    167;
+    171;
 
   friend void swap(CreateVolumeRequest& a, CreateVolumeRequest& b) {
     a.Swap(&b);
@@ -32006,7 +32718,7 @@ class CreateVolumeResponse_Result PROTOBUF_FINAL :
                &_CreateVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    168;
+    172;
 
   friend void swap(CreateVolumeResponse_Result& a, CreateVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -32152,7 +32864,7 @@ class CreateVolumeResponse PROTOBUF_FINAL :
                &_CreateVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    169;
+    173;
 
   friend void swap(CreateVolumeResponse& a, CreateVolumeResponse& b) {
     a.Swap(&b);
@@ -32356,7 +33068,7 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
                &_SetVolumePropertyRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    170;
+    174;
 
   friend void swap(SetVolumePropertyRequest_Param& a, SetVolumePropertyRequest_Param& b) {
     a.Swap(&b);
@@ -32591,7 +33303,7 @@ class SetVolumePropertyRequest PROTOBUF_FINAL :
                &_SetVolumePropertyRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    171;
+    175;
 
   friend void swap(SetVolumePropertyRequest& a, SetVolumePropertyRequest& b) {
     a.Swap(&b);
@@ -32793,7 +33505,7 @@ class SetVolumePropertyResponse_Result PROTOBUF_FINAL :
                &_SetVolumePropertyResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    172;
+    176;
 
   friend void swap(SetVolumePropertyResponse_Result& a, SetVolumePropertyResponse_Result& b) {
     a.Swap(&b);
@@ -32939,7 +33651,7 @@ class SetVolumePropertyResponse PROTOBUF_FINAL :
                &_SetVolumePropertyResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    173;
+    177;
 
   friend void swap(SetVolumePropertyResponse& a, SetVolumePropertyResponse& b) {
     a.Swap(&b);
@@ -50114,6 +50826,720 @@ inline void ArrayInfoResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
   }
   info_ = info;
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.ArrayInfoResponse.info)
+}
+
+// -------------------------------------------------------------------
+
+// RebuildArrayRequest_Param
+
+// string name = 1;
+inline void RebuildArrayRequest_Param::clear_name() {
+  name_.ClearToEmpty();
+}
+inline const std::string& RebuildArrayRequest_Param::name() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayRequest.Param.name)
+  return _internal_name();
+}
+inline void RebuildArrayRequest_Param::set_name(const std::string& value) {
+  _internal_set_name(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RebuildArrayRequest.Param.name)
+}
+inline std::string* RebuildArrayRequest_Param::mutable_name() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayRequest.Param.name)
+  return _internal_mutable_name();
+}
+inline const std::string& RebuildArrayRequest_Param::_internal_name() const {
+  return name_.Get();
+}
+inline void RebuildArrayRequest_Param::_internal_set_name(const std::string& value) {
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RebuildArrayRequest_Param::set_name(std::string&& value) {
+  
+  name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RebuildArrayRequest.Param.name)
+}
+inline void RebuildArrayRequest_Param::set_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RebuildArrayRequest.Param.name)
+}
+inline void RebuildArrayRequest_Param::set_name(const char* value,
+    size_t size) {
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RebuildArrayRequest.Param.name)
+}
+inline std::string* RebuildArrayRequest_Param::_internal_mutable_name() {
+  
+  return name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RebuildArrayRequest_Param::release_name() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayRequest.Param.name)
+  return name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RebuildArrayRequest_Param::set_allocated_name(std::string* name) {
+  if (name != nullptr) {
+    
+  } else {
+    
+  }
+  name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayRequest.Param.name)
+}
+
+// -------------------------------------------------------------------
+
+// RebuildArrayRequest
+
+// string command = 1;
+inline void RebuildArrayRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& RebuildArrayRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayRequest.command)
+  return _internal_command();
+}
+inline void RebuildArrayRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RebuildArrayRequest.command)
+}
+inline std::string* RebuildArrayRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& RebuildArrayRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void RebuildArrayRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RebuildArrayRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RebuildArrayRequest.command)
+}
+inline void RebuildArrayRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RebuildArrayRequest.command)
+}
+inline void RebuildArrayRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RebuildArrayRequest.command)
+}
+inline std::string* RebuildArrayRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RebuildArrayRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RebuildArrayRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayRequest.command)
+}
+
+// string rid = 2;
+inline void RebuildArrayRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& RebuildArrayRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayRequest.rid)
+  return _internal_rid();
+}
+inline void RebuildArrayRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RebuildArrayRequest.rid)
+}
+inline std::string* RebuildArrayRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& RebuildArrayRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void RebuildArrayRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RebuildArrayRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RebuildArrayRequest.rid)
+}
+inline void RebuildArrayRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RebuildArrayRequest.rid)
+}
+inline void RebuildArrayRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RebuildArrayRequest.rid)
+}
+inline std::string* RebuildArrayRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RebuildArrayRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RebuildArrayRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayRequest.rid)
+}
+
+// string requestor = 3;
+inline void RebuildArrayRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& RebuildArrayRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayRequest.requestor)
+  return _internal_requestor();
+}
+inline void RebuildArrayRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RebuildArrayRequest.requestor)
+}
+inline std::string* RebuildArrayRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& RebuildArrayRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void RebuildArrayRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RebuildArrayRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RebuildArrayRequest.requestor)
+}
+inline void RebuildArrayRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RebuildArrayRequest.requestor)
+}
+inline void RebuildArrayRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RebuildArrayRequest.requestor)
+}
+inline std::string* RebuildArrayRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RebuildArrayRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RebuildArrayRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayRequest.requestor)
+}
+
+// .grpc_cli.RebuildArrayRequest.Param param = 4;
+inline bool RebuildArrayRequest::_internal_has_param() const {
+  return this != internal_default_instance() && param_ != nullptr;
+}
+inline bool RebuildArrayRequest::has_param() const {
+  return _internal_has_param();
+}
+inline void RebuildArrayRequest::clear_param() {
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+}
+inline const ::grpc_cli::RebuildArrayRequest_Param& RebuildArrayRequest::_internal_param() const {
+  const ::grpc_cli::RebuildArrayRequest_Param* p = param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::RebuildArrayRequest_Param&>(
+      ::grpc_cli::_RebuildArrayRequest_Param_default_instance_);
+}
+inline const ::grpc_cli::RebuildArrayRequest_Param& RebuildArrayRequest::param() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayRequest.param)
+  return _internal_param();
+}
+inline void RebuildArrayRequest::unsafe_arena_set_allocated_param(
+    ::grpc_cli::RebuildArrayRequest_Param* param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(param_);
+  }
+  param_ = param;
+  if (param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RebuildArrayRequest.param)
+}
+inline ::grpc_cli::RebuildArrayRequest_Param* RebuildArrayRequest::release_param() {
+  
+  ::grpc_cli::RebuildArrayRequest_Param* temp = param_;
+  param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::RebuildArrayRequest_Param* RebuildArrayRequest::unsafe_arena_release_param() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayRequest.param)
+  
+  ::grpc_cli::RebuildArrayRequest_Param* temp = param_;
+  param_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::RebuildArrayRequest_Param* RebuildArrayRequest::_internal_mutable_param() {
+  
+  if (param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::RebuildArrayRequest_Param>(GetArena());
+    param_ = p;
+  }
+  return param_;
+}
+inline ::grpc_cli::RebuildArrayRequest_Param* RebuildArrayRequest::mutable_param() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayRequest.param)
+  return _internal_mutable_param();
+}
+inline void RebuildArrayRequest::set_allocated_param(::grpc_cli::RebuildArrayRequest_Param* param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete param_;
+  }
+  if (param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(param);
+    if (message_arena != submessage_arena) {
+      param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  param_ = param;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayRequest.param)
+}
+
+// -------------------------------------------------------------------
+
+// RebuildArrayResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool RebuildArrayResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool RebuildArrayResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void RebuildArrayResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& RebuildArrayResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& RebuildArrayResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayResponse.Result.status)
+  return _internal_status();
+}
+inline void RebuildArrayResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RebuildArrayResponse.Result.status)
+}
+inline ::grpc_cli::Status* RebuildArrayResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* RebuildArrayResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* RebuildArrayResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* RebuildArrayResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void RebuildArrayResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// RebuildArrayResponse
+
+// string command = 1;
+inline void RebuildArrayResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& RebuildArrayResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayResponse.command)
+  return _internal_command();
+}
+inline void RebuildArrayResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RebuildArrayResponse.command)
+}
+inline std::string* RebuildArrayResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& RebuildArrayResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void RebuildArrayResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RebuildArrayResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RebuildArrayResponse.command)
+}
+inline void RebuildArrayResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RebuildArrayResponse.command)
+}
+inline void RebuildArrayResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RebuildArrayResponse.command)
+}
+inline std::string* RebuildArrayResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RebuildArrayResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RebuildArrayResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayResponse.command)
+}
+
+// string rid = 2;
+inline void RebuildArrayResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& RebuildArrayResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayResponse.rid)
+  return _internal_rid();
+}
+inline void RebuildArrayResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.RebuildArrayResponse.rid)
+}
+inline std::string* RebuildArrayResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& RebuildArrayResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void RebuildArrayResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void RebuildArrayResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.RebuildArrayResponse.rid)
+}
+inline void RebuildArrayResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.RebuildArrayResponse.rid)
+}
+inline void RebuildArrayResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.RebuildArrayResponse.rid)
+}
+inline std::string* RebuildArrayResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* RebuildArrayResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void RebuildArrayResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayResponse.rid)
+}
+
+// .grpc_cli.RebuildArrayResponse.Result result = 3;
+inline bool RebuildArrayResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool RebuildArrayResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void RebuildArrayResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::RebuildArrayResponse_Result& RebuildArrayResponse::_internal_result() const {
+  const ::grpc_cli::RebuildArrayResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::RebuildArrayResponse_Result&>(
+      ::grpc_cli::_RebuildArrayResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::RebuildArrayResponse_Result& RebuildArrayResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayResponse.result)
+  return _internal_result();
+}
+inline void RebuildArrayResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::RebuildArrayResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RebuildArrayResponse.result)
+}
+inline ::grpc_cli::RebuildArrayResponse_Result* RebuildArrayResponse::release_result() {
+  
+  ::grpc_cli::RebuildArrayResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::RebuildArrayResponse_Result* RebuildArrayResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayResponse.result)
+  
+  ::grpc_cli::RebuildArrayResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::RebuildArrayResponse_Result* RebuildArrayResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::RebuildArrayResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::RebuildArrayResponse_Result* RebuildArrayResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayResponse.result)
+  return _internal_mutable_result();
+}
+inline void RebuildArrayResponse::set_allocated_result(::grpc_cli::RebuildArrayResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool RebuildArrayResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool RebuildArrayResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void RebuildArrayResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& RebuildArrayResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& RebuildArrayResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.RebuildArrayResponse.info)
+  return _internal_info();
+}
+inline void RebuildArrayResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.RebuildArrayResponse.info)
+}
+inline ::grpc_cli::PosInfo* RebuildArrayResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* RebuildArrayResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.RebuildArrayResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* RebuildArrayResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* RebuildArrayResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.RebuildArrayResponse.info)
+  return _internal_mutable_info();
+}
+inline void RebuildArrayResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.RebuildArrayResponse.info)
 }
 
 // -------------------------------------------------------------------
@@ -69772,6 +71198,14 @@ inline void SetVolumePropertyResponse::set_allocated_info(::grpc_cli::PosInfo* i
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

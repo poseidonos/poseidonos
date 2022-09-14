@@ -20,12 +20,12 @@ ARRAYNAME = MOUNT_VOL_ON_RAID6_ARRAY.ARRAYNAME
 
 # DETACH_TARGET must be a device that is not mirror-related to each other since META partition still in RAID10
 DETACH_TARGET1 = "unvme-ns-0"
-DETACH_TARGET2 = "unvme-ns-3"
+DETACH_TARGET2 = "unvme-ns-1"
 
 
 def execute():
     MOUNT_VOL_ON_RAID6_ARRAY.execute()
-    fio_proc = fio.start_fio(0, 40)
+    fio_proc = fio.start_fio(0, 50)
     time.sleep(10)
     print("detach device: " + DETACH_TARGET1)
     api.detach_ssd(DETACH_TARGET1)

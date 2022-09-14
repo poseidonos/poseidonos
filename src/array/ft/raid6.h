@@ -74,7 +74,7 @@ private:
     void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
     void _MakeEncodingGFTable();
     void _MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild);
-    uint32_t _MakeKeyforGFMap(vector<uint32_t> excluded);
+    uint32_t _MakeKeyforGFMap(vector<uint32_t>& excluded);
 
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
