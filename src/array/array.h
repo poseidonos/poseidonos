@@ -111,6 +111,8 @@ public:
     virtual void DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt);
     virtual bool ResumeRebuild(ArrayDevice* target);
     virtual void SetPreferences(bool isWT);
+    virtual void SetTargetAddress(string targetAddress);
+    virtual string GetTargetAddress();
 
 private:
     int _LoadImpl(void);
@@ -144,6 +146,7 @@ private:
     ArrayMetricsPublisher* publisher = nullptr;
     id_t uniqueId = 0;
     bool isWTEnabled = false;
+    string targetAddress;
 };
 } // namespace pos
 #endif // ARRAY_H_

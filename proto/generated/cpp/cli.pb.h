@@ -13142,6 +13142,7 @@ class MountArrayRequest_Param PROTOBUF_FINAL :
 
   enum : int {
     kNameFieldNumber = 1,
+    kTargetAddressFieldNumber = 3,
     kEnableWriteThroughFieldNumber = 2,
   };
   // string name = 1;
@@ -13158,6 +13159,26 @@ class MountArrayRequest_Param PROTOBUF_FINAL :
   const std::string& _internal_name() const;
   void _internal_set_name(const std::string& value);
   std::string* _internal_mutable_name();
+  public:
+
+  // string targetAddress = 3;
+  bool has_targetaddress() const;
+  private:
+  bool _internal_has_targetaddress() const;
+  public:
+  void clear_targetaddress();
+  const std::string& targetaddress() const;
+  void set_targetaddress(const std::string& value);
+  void set_targetaddress(std::string&& value);
+  void set_targetaddress(const char* value);
+  void set_targetaddress(const char* value, size_t size);
+  std::string* mutable_targetaddress();
+  std::string* release_targetaddress();
+  void set_allocated_targetaddress(std::string* targetaddress);
+  private:
+  const std::string& _internal_targetaddress() const;
+  void _internal_set_targetaddress(const std::string& value);
+  std::string* _internal_mutable_targetaddress();
   public:
 
   // bool enableWriteThrough = 2;
@@ -13183,6 +13204,7 @@ class MountArrayRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr targetaddress_;
   bool enablewritethrough_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -46485,7 +46507,7 @@ inline void MountArrayRequest_Param::set_allocated_name(std::string* name) {
 
 // bool enableWriteThrough = 2;
 inline bool MountArrayRequest_Param::_internal_has_enablewritethrough() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  bool value = (_has_bits_[0] & 0x00000002u) != 0;
   return value;
 }
 inline bool MountArrayRequest_Param::has_enablewritethrough() const {
@@ -46493,7 +46515,7 @@ inline bool MountArrayRequest_Param::has_enablewritethrough() const {
 }
 inline void MountArrayRequest_Param::clear_enablewritethrough() {
   enablewritethrough_ = false;
-  _has_bits_[0] &= ~0x00000001u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline bool MountArrayRequest_Param::_internal_enablewritethrough() const {
   return enablewritethrough_;
@@ -46503,12 +46525,85 @@ inline bool MountArrayRequest_Param::enablewritethrough() const {
   return _internal_enablewritethrough();
 }
 inline void MountArrayRequest_Param::_internal_set_enablewritethrough(bool value) {
-  _has_bits_[0] |= 0x00000001u;
+  _has_bits_[0] |= 0x00000002u;
   enablewritethrough_ = value;
 }
 inline void MountArrayRequest_Param::set_enablewritethrough(bool value) {
   _internal_set_enablewritethrough(value);
   // @@protoc_insertion_point(field_set:grpc_cli.MountArrayRequest.Param.enableWriteThrough)
+}
+
+// string targetAddress = 3;
+inline bool MountArrayRequest_Param::_internal_has_targetaddress() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool MountArrayRequest_Param::has_targetaddress() const {
+  return _internal_has_targetaddress();
+}
+inline void MountArrayRequest_Param::clear_targetaddress() {
+  targetaddress_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& MountArrayRequest_Param::targetaddress() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.MountArrayRequest.Param.targetAddress)
+  return _internal_targetaddress();
+}
+inline void MountArrayRequest_Param::set_targetaddress(const std::string& value) {
+  _internal_set_targetaddress(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.MountArrayRequest.Param.targetAddress)
+}
+inline std::string* MountArrayRequest_Param::mutable_targetaddress() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.MountArrayRequest.Param.targetAddress)
+  return _internal_mutable_targetaddress();
+}
+inline const std::string& MountArrayRequest_Param::_internal_targetaddress() const {
+  return targetaddress_.Get();
+}
+inline void MountArrayRequest_Param::_internal_set_targetaddress(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  targetaddress_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void MountArrayRequest_Param::set_targetaddress(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  targetaddress_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.MountArrayRequest.Param.targetAddress)
+}
+inline void MountArrayRequest_Param::set_targetaddress(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  targetaddress_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.MountArrayRequest.Param.targetAddress)
+}
+inline void MountArrayRequest_Param::set_targetaddress(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  targetaddress_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.MountArrayRequest.Param.targetAddress)
+}
+inline std::string* MountArrayRequest_Param::_internal_mutable_targetaddress() {
+  _has_bits_[0] |= 0x00000001u;
+  return targetaddress_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* MountArrayRequest_Param::release_targetaddress() {
+  // @@protoc_insertion_point(field_release:grpc_cli.MountArrayRequest.Param.targetAddress)
+  if (!_internal_has_targetaddress()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return targetaddress_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void MountArrayRequest_Param::set_allocated_targetaddress(std::string* targetaddress) {
+  if (targetaddress != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  targetaddress_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), targetaddress,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.MountArrayRequest.Param.targetAddress)
 }
 
 // -------------------------------------------------------------------

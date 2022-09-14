@@ -594,6 +594,7 @@ message MountArrayRequest {
 	message Param {
 			string name = 1;
 			optional bool enableWriteThrough = 2;
+			optional string targetAddress = 3;
 	}
 	Param param = 4;
 }

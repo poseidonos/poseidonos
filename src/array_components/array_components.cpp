@@ -371,4 +371,16 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
     }
 }
 
+void
+ArrayComponents::SetTargetAddress(string targetAddress)
+{
+    array->SetTargetAddress(targetAddress);
+}
+
+string
+ArrayComponents::GetTargetAddress(void)
+{
+    return array->GetTargetAddress();
+}
+
 } // namespace pos

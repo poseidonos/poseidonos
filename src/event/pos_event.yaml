@@ -1865,13 +1865,6 @@ Root:
     Cause: There is no available spare device to replace the data device.
     Solution: Please add spare devices and try again.
   -
-    Id: 2568
-    Name: UPDATE_ABR_DEBUG_MSG
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
     Id: 2569
     Name: ARRAY_INFO_DEBUG_MSG
     Severity:
@@ -2102,6 +2095,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 2602
+    Name: MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID
+    Severity:
+    Message: Failed to mount array.
+    Cause: Input target address is invalid.
+    Solution: Please check the format of the target address.
 
   -
   # Rebuild: 2800 - 2899
@@ -2306,6 +2306,13 @@ Root:
   -
     Id: 2910
     Name: CONFIG_VALUE_TYPE_ERROR
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2911
+    Name: UPDATE_ABR_DEBUG_MSG
     Severity:
     Message:
     Cause:

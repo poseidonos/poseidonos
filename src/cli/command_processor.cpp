@@ -640,6 +640,7 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
 {
     string arrayName = (request->param()).name();
     bool isWTenabled = (request->param()).enablewritethrough();
+    string targetAddress = (request->param()).targetaddress();
     
     if (isWTenabled == false)
     {
@@ -657,6 +658,16 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
     }
 
     IArrayMgmt* array = ArrayMgr();
+
+    if (_IsValidIpAddress(targetAddress))
+    {
+        int eventId = EID(MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID);
+        POS_TRACE_WARN(eventId, "targetAddress:{}", targetAddress);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
     int ret = array->Mount(arrayName, isWTenabled);
     if (0 != ret)
     {
@@ -664,6 +675,8 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
+
+    array->SetTargetAddress(arrayName,targetAddress);
 
     QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
@@ -2010,4 +2023,12 @@ CommandProcessor::_ExecuteLinuxCmd(std::string command)
     pclose(pipe);
 
     return result;
+}
+
+bool
+CommandProcessor::_IsValidIpAddress(const std::string &ipAddress)
+{
+    struct sockaddr_in sa;
+    int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+    return result != 0;
 }

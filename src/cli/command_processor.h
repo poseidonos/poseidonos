@@ -232,5 +232,6 @@ private:
     SystemInfo _GetSystemInfo();
     BaseboardInfo _GetBaseboardInfo();
     ProcessorInfo _GetProcessorInfo();
-    std::string _ExecuteLinuxCmd(std::string command);    
+    std::string _ExecuteLinuxCmd(std::string command);
+    bool _IsValidIpAddress(const std::string &ipAddress);
 };
