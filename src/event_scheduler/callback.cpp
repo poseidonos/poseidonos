@@ -215,12 +215,12 @@ Callback::_InvokeCallee(void)
     if (isOkToCall == true)
     {
         _PreCallExecuteCallee();
-        bool done = callee->Execute();
+       /* bool done = callee->Execute();
 
         if (likely(done))
         {
             return;
-        }
+        }*/
 
         eventScheduler->EnqueueEvent(callee);
     }

@@ -50,6 +50,7 @@ class FlushCmdManager;
 class FlushCount;
 class GarbageCollector;
 class IODispatcher;
+class IODispatcherSubmission;
 class IOSubmitHandlerCount;
 class Logger;
 class MapperService;
@@ -97,6 +98,7 @@ private:
     FlushCount* flushCount;
     GarbageCollector* garbageCollector;
     IODispatcher* ioDispatcher;
+    IODispatcherSubmission* ioDispatcherSubmission;
     IOSubmitHandlerCount* ioSubmitHandlerCount;
     Logger* logger;
     MapperService* mapperService;

@@ -16,6 +16,7 @@
 #include "src/event/event_manager.h"
 #include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/include/nvmf_const.h"
+#include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
 #include "src/logger/preferences.h"
 #include "src/master_context/version_provider.h"
@@ -164,18 +165,21 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
     qos_backend_policy newBackendPolicy;
 
     std::string level = request->param().level();
-
+    IODispatcherSubmission* ioDispatcherSubmission = IODispatcherSubmissionSingleton::Instance();
     if (level.compare("high") == 0)
     {
         newBackendPolicy.priorityImpact = PRIORITY_HIGH;
+        ioDispatcherSubmission->SetRebuildImpact(RebuildImpact::High);
     }
     else if (level.compare("medium") == 0)
     {
         newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
+        ioDispatcherSubmission->SetRebuildImpact(RebuildImpact::Medium);
     }
     else if (level.compare("low") == 0)
     {
         newBackendPolicy.priorityImpact = PRIORITY_LOW;
+        ioDispatcherSubmission->SetRebuildImpact(RebuildImpact::Low);
     }
     else
     {
