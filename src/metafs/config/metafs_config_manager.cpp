@@ -62,6 +62,7 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
 
 MetaFsConfigManager::~MetaFsConfigManager(void)
 {
+    configMap_.clear();
 }
 
 bool

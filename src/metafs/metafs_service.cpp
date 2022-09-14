@@ -50,7 +50,6 @@ MetaFsService::MetaFsService(void)
 MetaFsService::MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory, const int numaCount)
 : MAX_SCHEDULER_COUNT(numaCount),
   configManager_(configManager),
-  needToRemoveConfig_(false),
   tp_(nullptr),
   factory_(factory)
 {
@@ -81,7 +80,7 @@ MetaFsService::~MetaFsService(void)
         tp_ = nullptr;
     }
 
-    if (needToRemoveConfig_)
+    if (configManager_)
     {
         POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "Delete MetaFsConfigManager");
@@ -93,6 +92,7 @@ MetaFsService::~MetaFsService(void)
     if (factory_)
     {
         delete factory_;
+        factory_ = nullptr;
     }
 }
 
