@@ -33,8 +33,8 @@
 #ifndef __EVENTM_MANAGER_H__
 #define __EVENTM_MANAGER_H__
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 
 typedef int POS_EVENT_ID;
 
@@ -46,33 +46,47 @@ public:
 
     class EventInfoEntry
     {
-        public:
-            EventInfoEntry(std::string eventName, std::string message,
-                std::string cause, std::string solution)
-            {
-                this->eventName = eventName;
-                this->message = message;
-                this->cause = cause;
-                this->solution = solution;
-            }
-            std::string GetEventName() { return eventName; }
-            std::string GetMessage() { return message; }
-            std::string GetCause() { return cause; }
-            std::string GetSolution() { return solution; }
-        private:
-            std::string eventName = "";
-            std::string message = "";
-            // mj: Fill in cause and solution for erroneous events only.
-            std::string cause = "";
-            std::string solution = "";
+    public:
+        EventInfoEntry(std::string eventName, std::string message,
+            std::string cause, std::string solution)
+        {
+            this->eventName = eventName;
+            this->message = message;
+            this->cause = cause;
+            this->solution = solution;
+        }
+        std::string GetEventName()
+        {
+            return eventName;
+        }
+        std::string GetMessage()
+        {
+            return message;
+        }
+        std::string GetCause()
+        {
+            return cause;
+        }
+        std::string GetSolution()
+        {
+            return solution;
+        }
+
+    private:
+        std::string eventName = "";
+        std::string message = "";
+        // mj: Fill in cause and solution for erroneous events only.
+        std::string cause = "";
+        std::string solution = "";
     };
-    std::unordered_map<int, EventInfoEntry*> GetEventInfo();
-    static std::unordered_map<int, EventInfoEntry*> EventInfo;
+    std::unordered_map<int, EventInfoEntry>* GetEventInfo();
+    static std::unordered_map<int, EventInfoEntry> EventInfo;
     static std::unordered_map<std::string, int> EventNameToIdMap;
-    static std::unordered_map<int, EventInfoEntry*> _LoadPosEvent();
+    static std::unordered_map<int, EventInfoEntry> _LoadPosEvent();
     static std::unordered_map<std::string, int> _LoadEventNameToIdMap();
     int GetEventIdFromMap(std::string eventName);
-private:    
+
+private:
 };
 
 static EventManager eventManager;
