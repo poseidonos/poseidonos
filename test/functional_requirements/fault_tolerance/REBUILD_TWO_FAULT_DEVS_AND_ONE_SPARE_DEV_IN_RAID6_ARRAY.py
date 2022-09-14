@@ -25,6 +25,7 @@ SPARE_DEV_2 = "unvme-ns-5"
 
 def execute():
     MOUNT_VOL_ON_RAID6_ARRAY.execute()
+    print (api.set_rebuild_autostart("false"))
     fio_proc = fio.start_fio(0, 30)
     fio.wait_fio(fio_proc)
     api.detach_ssd_and_attach(DETACH_TARGET_DEV1)

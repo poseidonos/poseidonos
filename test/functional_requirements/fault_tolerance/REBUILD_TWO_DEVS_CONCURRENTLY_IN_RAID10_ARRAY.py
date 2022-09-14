@@ -26,6 +26,7 @@ SPARE_DEV_2 = "unvme-ns-5"
 
 def execute():
     MOUNT_VOL_ON_RAID10_ARRAY.execute()
+    print (api.set_rebuild_autostart("false"))
     fio_proc = fio.start_fio(0, 30)
     time.sleep(10)
     print (cli.list_device())

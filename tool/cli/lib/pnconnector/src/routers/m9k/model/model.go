@@ -133,6 +133,10 @@ type WBTArgv struct {
 	Ses       string `json:"ses,omitempty"`
 	Array     string `json:"array,omitempty"`
 	Volume    string `json:"volume,omitempty"`
+	Module    string `json:"module,omitempty"`
+	Key       string `json:"key,omitempty"`
+	Value     string `json:"value,omitempty"`
+	Type      string `json:"type,omitempty"`
 }
 
 type BuildInfo struct {
