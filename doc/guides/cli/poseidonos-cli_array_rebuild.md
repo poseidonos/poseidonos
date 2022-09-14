@@ -5,8 +5,8 @@ Instantly trigger the rebuild for an array.
 ### Synopsis
 
 
-Instantly trigger the rebuild for an array. Use this command when you would like
-to start array rebuild.
+If there is a pending rebuild operation, immediately execute the rebuild.
+Use this command when you would like to start array rebuild.
 
 Syntax:
 	rebuild (--array-name | -a) ArrayName
