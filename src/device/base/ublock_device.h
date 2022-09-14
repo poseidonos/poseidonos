@@ -79,6 +79,7 @@ public:
 
     virtual void SetDedicatedIOWorker(IOWorker* ioWorker);
     virtual IOWorker* GetDedicatedIOWorker(void);
+    virtual bool WrapupOpenDeviceSpecific(void);
 
 protected:
     virtual DeviceContext* _AllocateDeviceContext(void) = 0;
@@ -91,8 +92,6 @@ protected:
     DeviceProperty* property;
 
 private:
-    virtual bool _WrapupOpenDeviceSpecific(DeviceContext* devicecontext);
-
     bool _RegisterContextToCurrentCore(DeviceContext* devCtx);
     bool _RegisterThread(void);
     void _UnRegisterContextToCurrentCore(void);

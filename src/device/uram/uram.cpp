@@ -92,7 +92,7 @@ Uram::~Uram(void)
 // LCOV_EXCL_STOP
 
 bool
-Uram::_RecoverBackup(DeviceContext* deviceContext)
+Uram::_RecoverBackup(void)
 {
     bool restoreSuccessful = true;
 
@@ -147,16 +147,8 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
             rc = read(fd, ubio->GetBuffer(), ubio->GetSize());
             if (bytesPerHugepage == rc)
             {
-                bool isReactor = EventFrameworkApiSingleton::Instance()->IsReactorNow();
                 UramRestoreCompletion::IncreasePendingUbio();
-                if (isReactor)
-                {
-                    IODispatcherSingleton::Instance()->Submit(ubio);
-                }
-                else
-                {
-                    SubmitAsyncIO(ubio);
-                }
+                IODispatcherSingleton::Instance()->Submit(ubio);   
             }
             else
             {
@@ -223,23 +215,13 @@ Uram::_InitByteAddress(void)
     }
     baseByteAddress = reinterpret_cast<void*>(byteAddressInt);
 }
+
 bool
-Uram::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
+Uram::WrapupOpenDeviceSpecific(void)
 {
     // Reactor cannot handle Async operation for Uram in current implementation.
     // ioat poll cannot be called in Empty(), so, we restore the contents by IO worker.
-    uint32_t reactorCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    bool isReactor = EventFrameworkApiSingleton::Instance()->IsReactorNow();
-
-    if (isReactor == true)
-    {
-        bool isEventReactor = AffinityManagerSingleton::Instance()->IsEventReactor(reactorCore);
-        if (isEventReactor == false)
-        {
-            return true;
-        }
-    }
-    bool restoreSuccessful = _RecoverBackup(deviceContext);
+    bool restoreSuccessful = _RecoverBackup();
     _InitByteAddress();
     return restoreSuccessful;
 }
