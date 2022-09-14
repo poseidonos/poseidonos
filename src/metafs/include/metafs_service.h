@@ -96,7 +96,6 @@ private:
     std::array<MetaFs*, MetaFsConfig::MAX_ARRAY_CNT> fileSystems_;
     SchedulerMap ioScheduler_;
     MetaFsConfigManager* configManager_;
-    bool needToRemoveConfig_;
     TelemetryPublisher* tp_;
     MetaFsIoSchedulerFactory* factory_;
 };
