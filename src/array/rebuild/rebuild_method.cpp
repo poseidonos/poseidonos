@@ -62,7 +62,7 @@ RebuildMethod::~RebuildMethod(void)
         {
             POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
                 "Some buffers in dstBuffer were not returned but deleted.");
-    }
+        }
         mm->DeleteBufferPool(dstBuffer);
         dstBuffer = nullptr;
     }

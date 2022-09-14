@@ -15,11 +15,11 @@ cd ..
 
 case "$1" in
 internal)
-    cmake . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y
+    cmake . -DSPDK_DEBUG_ENABLE=y -DUSE_LOCAL_REPO=y -DASAN_ENABLE=n
     make -j 4 dpdk
     ;;
 *)
-    cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n
+    cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n -DASAN_ENABLE=n
     make -j 4 dpdk
     ;;
 esac

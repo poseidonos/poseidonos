@@ -93,6 +93,8 @@ using grpc_cli::ListArrayRequest;
 using grpc_cli::ListArrayResponse;
 using grpc_cli::ArrayInfoRequest;
 using grpc_cli::ArrayInfoResponse;
+using grpc_cli::RebuildArrayRequest;
+using grpc_cli::RebuildArrayResponse;
 using grpc_cli::SetLogLevelRequest;
 using grpc_cli::SetLogLevelResponse;
 using grpc_cli::SetLogPreferenceRequest;
@@ -163,6 +165,7 @@ public:
     grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
     grpc::Status ExecuteListArrayCommand(const ListArrayRequest* request, ListArrayResponse* reply);
     grpc::Status ExecuteArrayInfoCommand(const ArrayInfoRequest* request, ArrayInfoResponse* reply);
+    grpc::Status ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply);
     
     // Logger Commands
     grpc::Status ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply);
@@ -190,7 +193,7 @@ public:
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
 
 private:
-    bool _isPosTerminating;
+    bool _isPosTerminating {false};
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
     void _SetEventStatus(int eventId, grpc_cli::Status *status);

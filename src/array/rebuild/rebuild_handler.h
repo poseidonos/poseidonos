@@ -43,7 +43,7 @@ class ArrayDevice;
 class RebuildHandler : public Event
 {
 public:
-    RebuildHandler(Array* array, ArrayDevice* dev);
+    RebuildHandler(Array* array, vector<IArrayDevice*> devs, bool isResume);
     ~RebuildHandler(void) override
     {
     }
@@ -51,7 +51,8 @@ public:
 
 private:
     Array* targetArray;
-    ArrayDevice* targetDev;
+    vector<IArrayDevice*> targetDevs;
+    bool isResume = false;
 };
 
 } // namespace pos

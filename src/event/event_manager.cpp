@@ -30,14 +30,15 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/include/pos_event_id.hpp"
-#include "src/include/pos_event_id.h"
-#include <string>
 #include <yaml-cpp/yaml.h>
 
+#include <string>
+
+#include "src/include/pos_event_id.h"
+#include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 
-std::unordered_map<int, EventManager::EventInfoEntry*> EventManager::EventInfo =
+std::unordered_map<int, EventManager::EventInfoEntry> EventManager::EventInfo =
     EventManager::_LoadPosEvent();
 std::unordered_map<std::string, int> EventManager::EventNameToIdMap =
     EventManager::_LoadEventNameToIdMap();
@@ -60,7 +61,7 @@ EventManager::GetEventIdFromMap(std::string eventName)
 
     std::unordered_map<std::string, int>::const_iterator it =
         eventManager.EventNameToIdMap.find(eventName);
-    
+
     if (it == eventManager.EventNameToIdMap.end())
     {
         return UNKNOWN_EVENT_ID;
@@ -69,15 +70,15 @@ EventManager::GetEventIdFromMap(std::string eventName)
     return it->second;
 }
 
-std::unordered_map<int, EventManager::EventInfoEntry*>
+std::unordered_map<int, EventManager::EventInfoEntry>
 EventManager::_LoadPosEvent()
 {
-    std::unordered_map<int, EventInfoEntry*> result;
+    std::unordered_map<int, EventInfoEntry> result;
     YAML::Node events;
     try
     {
         events = YAML::LoadFile(POS_EVENT_FILE_PATH)["Root"]["Event"];
-        
+
         int id;
         std::string name, message, cause, solution;
         for (size_t i = 0; i < events.size(); ++i)
@@ -88,15 +89,12 @@ EventManager::_LoadPosEvent()
             message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
             cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
             solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
-            
-            result.insert(
-                std::make_pair(id,
-                    new EventInfoEntry(name, message, cause, solution)
-                )
-            );
+
+            result.insert({id, EventInfoEntry{name, message, cause, solution}});
         }
     }
-    catch(const std::exception& e) {
+    catch (const std::exception& e)
+    {
         std::cerr << e.what() << std::endl;
     }
 
@@ -108,18 +106,19 @@ EventManager::_LoadEventNameToIdMap()
 {
     std::unordered_map<std::string, int> result;
 
-    for (auto& it: EventInfo) {
+    for (auto& it : EventInfo)
+    {
         int id = it.first;
-        std::string name = it.second->GetEventName();
-           
+        std::string name = it.second.GetEventName();
+
         result.insert(std::make_pair(name, id));
     }
 
     return result;
 }
 
-std::unordered_map<int, EventManager::EventInfoEntry*>
+std::unordered_map<int, EventManager::EventInfoEntry>*
 EventManager::GetEventInfo()
 {
-    return EventInfo;
+    return &EventInfo;
 }

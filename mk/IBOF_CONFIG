@@ -32,3 +32,6 @@ CONFIG_LIBRARY_BUILD=n
 
 #Build PoseidonOS with -FPIC option
 CONFIG_FPIC=n
+
+# Build with Address Sanitizer enabled
+CONFIG_ASAN=n

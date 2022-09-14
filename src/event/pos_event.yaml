@@ -1865,15 +1865,8 @@ Root:
     Cause: There is no available spare device to replace the data device.
     Solution: Please add spare devices and try again.
   -
-    Id: 2568
-    Name: UPDATE_ABR_DEBUG_MSG
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
     Id: 2569
-    Name: ARRAY_INFO_DEBUG_MSG
+    Name: UPDATE_ABR_DEBUG_MSG
     Severity:
     Message:
     Cause:
@@ -2237,7 +2230,48 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 2820
+    Name: REBUILD_ARRAY_NAME_DOES_NOT_EXIST
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: Array of the requested name could not be found.
+    Solution: Please check the array's name to rebuild and try again.
+  -
+    Id: 2821
+    Name: REBUILD_ARRAY_SPARE_DOES_NOT_EXIST
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: There is no spare device.
+    Solution: Please add spare devices and try again.
+  -
+    Id: 2822
+    Name: REBUILD_ARRAY_OFFLINED
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: Rebuild requests are not allowed in array that is not mounted.
+    Solution: Please retry after array mount.
+  -
+    Id: 2823
+    Name: REBUILD_ARRAY_ALREADY_IN_PROGRESS
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: The requested array is already in the process of rebuilding.
+    Solution: Please try again after completing the rebuilding process.
+  -
+    Id: 2824
+    Name: REBUILD_ARRAY_IS_NORMAL
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: There is no device to rebuild in array.
+    Solution: Please check the state of array.
+  -
+    Id: 2825
+    Name: REBUILD_ARRAY_RAID_NOT_SUPPORTED
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: The RAID of array does not support rebuild .
+    Solution: Please check the RAID type of array.
 
   # Config: 2900 - 2950
   -

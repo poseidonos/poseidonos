@@ -28,6 +28,10 @@ function usage()
 	echo " fpic                      Build IBOF with fpic option"	
 	echo " gcov                      Build IBOF with gcov"	
     echo " fe-qos                    Build IBOF with FE QoS"
+	echo ""
+	echo "Address Sanitizer Setting:"
+	echo "--with-asan                Build IBOF with ASAN"
+	echo "--without-asan             Build IBOF without ASAN"
     #Just another example 
     #echo " mbr-mock                  Build IBOF with mock mbr."
 	echo ""
@@ -92,6 +96,12 @@ for i in "$@"; do
         --without-fe-qos)
             CONFIG[FE_QOS]=n
             ;;
+		--with-asan)
+			CONFIG[ASAN]=y
+			;;
+		--without-asan)
+			CONFIG[ASAN]=n
+			;;
 		--)
 			break
 			;;

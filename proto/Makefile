@@ -12,7 +12,7 @@ all : $(OBJECTS)
 
 .PHONY:clean
 clean:
-	@rm -rf generated/src/cpp/*.o
+	@rm -rf generated/cpp/*.o
 
 -include $(OBJECTS:.o=.d)
 

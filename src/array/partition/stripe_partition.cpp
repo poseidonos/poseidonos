@@ -540,33 +540,31 @@ StripePartition::_SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPair
         return;
     }
 
+    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
     vector<pair<vector<uint32_t>, vector<uint32_t>>> rg =
         method->GetRebuildGroupPairs(rebuildTargetIndexs);
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, count:{}, raidType:{}", rg.size(), GetRaidType());
-    vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
     for (pair<vector<uint32_t>, vector<uint32_t>> group : rg)
     {
         vector<uint32_t> srcs = group.first;
         vector<uint32_t> dsts = group.second;
-         POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-            "SetRebuildPair, srcCnt:{}, dstCnt:{}", srcs.size(), dsts.size());
-
         vector<IArrayDevice*> srcDevs;
         vector<IArrayDevice*> dstDevs;
         for (uint32_t i : srcs)
         {
             srcDevs.push_back(devs.at(i));
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, src:{}", PARTITION_TYPE_STR[type], i);
         }
         for (uint32_t i : dsts)
         {
             dstDevs.push_back(devs.at(i));
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, dsts:{}", i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, dsts:{}", PARTITION_TYPE_STR[type], i);
         }
         for (uint32_t i : abnormalDeviceIndex)
         {
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, abnormals:{}", i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, abnormals:{}", PARTITION_TYPE_STR[type], i);
         }
-        
+
         RecoverFunc func = method->GetRecoverFunc(dsts, abnormalDeviceIndex);
         rp.emplace_back(new RebuildPair(srcDevs, dstDevs, func));
     }
