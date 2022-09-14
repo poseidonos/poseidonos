@@ -1218,4 +1218,17 @@ Array::_UnregisterService(void)
         ArrayService::Instance()->Setter()->ExcludeDevicesFromLocker(devMgr_->GetDataDevices());
     }
 }
+
+void
+Array::SetTargetAddress(string targetAddress)
+{
+    this->targetAddress = targetAddress;
+}
+
+string
+Array::GetTargetAddress()
+{
+    return targetAddress;
+}
+
 } // namespace pos

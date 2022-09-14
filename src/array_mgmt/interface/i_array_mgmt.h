@@ -51,6 +51,8 @@ public:
     virtual int RemoveDevice(string name, string dev) = 0;
     virtual int ReplaceDevice(string name, string dev) = 0;
     virtual int Rebuild(string name) = 0;
+    virtual void SetTargetAddress(string name, string targetAddress) = 0;
+    virtual string GetTargetAddress(string name) = 0;
     virtual ComponentsInfo* GetInfo(string name) = 0;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) = 0;
 };

@@ -484,4 +484,18 @@ ArrayManager::GetArrayComponentMap(void)
     return arrayList;
 }
 
+void
+ArrayManager::SetTargetAddress(string name, string targetAddress)
+{
+    ArrayComponents* array = _FindArray(name);
+    array->SetTargetAddress(targetAddress);
+}
+
+string
+ArrayManager::GetTargetAddress(string name)
+{
+    ArrayComponents* array = _FindArray(name);
+    return array->GetTargetAddress();    
+}
+
 } // namespace pos

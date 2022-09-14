@@ -26,6 +26,7 @@ poseidonos-cli array mount [flags]
   -a, --array-name string      The name of the array to mount
   -w, --enable-write-through   When specified, the array to be mounted will work with write through mode.
   -h, --help                   help for mount
+  -i, --traddr string          Default target IP address for the array.
 ```
 
 ### Options inherited from parent commands

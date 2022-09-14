@@ -125,7 +125,8 @@ ArrayCmd = "array" ,
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
-  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ;
+  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ,
+  [ ( "--traddr" | "-i" ) , TargetAddress ] ;
 
 UnmountArrayCmd = "unmount" , ( "--array-name" | "-a" ) ,
   ArrayName , [ "--force" ] ;
