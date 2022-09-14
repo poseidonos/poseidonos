@@ -599,7 +599,7 @@ CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* re
     else
     {
         QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
-        POS_TRACE_INFO(EID(CLI_AUTOCREATE_ARRAY_SUCCESS), "");
+        POS_TRACE_INFO(EID(SUCCESS), "");
         _SetEventStatus(ret, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
