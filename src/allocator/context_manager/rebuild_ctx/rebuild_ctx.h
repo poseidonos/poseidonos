@@ -94,6 +94,8 @@ private:
     TelemetryPublisher* tp;
     AllocatorFileIo* fileIo;
     bool initialized;
+
+    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos

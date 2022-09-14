@@ -653,7 +653,7 @@ TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsNotFound)
     delete tp;
 }
 
-TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
+TEST(SegmentCtx, DISABLED_ResetSegmentState_testIfSegmentStateChangedAsIntended)
 {
     // given
     NiceMock<MockAllocatorAddressInfo> addrInfo;

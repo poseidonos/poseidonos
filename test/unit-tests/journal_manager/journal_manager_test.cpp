@@ -123,8 +123,7 @@ public:
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
-            versionedSegmentCtx, dirtyMapManager, logFilledNotifier,
-            replayHandler, arrayInfo, tp);
+            versionedSegmentCtx, dirtyMapManager, logFilledNotifier, replayHandler, arrayInfo, tp);
     }
 
     virtual void
@@ -304,9 +303,8 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
 {
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
-    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr);
+    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization

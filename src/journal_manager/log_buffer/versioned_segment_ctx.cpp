@@ -45,7 +45,6 @@ namespace pos
 VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
   numSegments(0),
-  segmentInfosInFlush(INVALID_SEGMENT_CONTEXT),
   segmentInfos(nullptr)
 {
 }
@@ -65,10 +64,6 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
         std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
         segmentInfoDiffs.push_back(segmentInfo);
     }
-
-    POS_TRACE_INFO(EID(JOURNAL_DEBUG),
-        "Versioned segment context is initialized, numLogGroups: {}, numSegments: {}",
-        config->GetNumLogGroups(), numSegments);
 }
 
 void
@@ -92,8 +87,12 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     {
         if (nullptr != loadedSegmentInfo)
         {
-            segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
-            segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
+            POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
+                           segId, loadedSegmentInfo[segId].GetValidBlockCount(),
+                           loadedSegmentInfo[segId].GetOccupiedStripeCount(),
+                           loadedSegmentInfo[segId].GetState());
+
+            memcpy(segmentInfos, loadedSegmentInfo, sizeof(SegmentInfo) * numSegments);
         }
     }
 }
@@ -106,8 +105,6 @@ VersionedSegmentCtx::Dispose(void)
         delete[] segmentInfos;
         segmentInfos = nullptr;
     }
-
-    POS_TRACE_INFO(EID(JOURNAL_DEBUG), "Disposed versioned segment context");
 }
 
 void
@@ -149,7 +146,22 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         auto segmentId = it->first;
         auto validBlockCountDiff = it->second;
 
-        segmentInfos[segmentId].SetValidBlockCount(segmentInfos[segmentId].GetValidBlockCount() + validBlockCountDiff);
+        uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
+        uint32_t result = getValidCount + validBlockCountDiff;
+
+        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
+           "Before _UpdateSegmentContext, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
+            logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
+
+        segmentInfos[segmentId].SetValidBlockCount(result);
+
+        if (0 > (int)getValidCount)
+        {
+            POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+                "After update underflow occurred, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
+                logGroupId, segmentId, getValidCount, validBlockCountDiff);
+            assert(false);
+        }
     }
 
     tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
@@ -167,17 +179,19 @@ VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
 {
     _CheckLogGroupIdValidity(logGroupId);
 
-    if (segmentInfosInFlush == logGroupId)
+    if (ALL_LOG_GROUP == logGroupId)
     {
-        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
-            "Failed to get versioned segment context, log group {} is already in use", logGroupId);
-        return nullptr;
+        for (int id = 0; id < GetNumLogGroups(); id++)
+        {
+            _UpdateSegmentContext(id);
+        }
+    }
+    else
+    {
+        _UpdateSegmentContext(logGroupId);
     }
 
-    segmentInfosInFlush = logGroupId;
-    _UpdateSegmentContext(logGroupId);
-
-    POS_TRACE_DEBUG(EID(JOURNAL_DEBUG), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_IN_PROGRESS), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
 
     return segmentInfos;
 }
@@ -186,12 +200,9 @@ void
 VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
 {
     _CheckLogGroupIdValidity(logGroupId);
-
     segmentInfoDiffs[logGroupId]->Reset();
 
-    segmentInfosInFlush = INVALID_SEGMENT_CONTEXT;
-
-    POS_TRACE_DEBUG(EID(JOURNAL_DEBUG), "Versioned segment info is flushed, logGroup {}", logGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
 int

@@ -230,6 +230,13 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
 {
     auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, allowVictimSegRelease);
 
+    if (result.second == SegmentState::ERROR)
+    {
+        POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
+            "segId{} cnt:{} , allow {}", segId, cnt, allowVictimSegRelease);
+        assert(false);
+    }
+
     bool segmentFreed = result.first;
     if (segmentFreed == true)
     {
@@ -586,18 +593,30 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 void
 SegmentCtx::ResetSegmentsStates(void)
 {
+    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "SegmentCtx::ResetSegmentsStates");
+
+    int validCount = 0;
+    int occupiedStripeCount = 0;
+
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
-        bool segmentFreed = false;
-        SegmentState state = segmentInfos[segId].GetState();
-        if ((state == SegmentState::SSD) || (state == SegmentState::VICTIM))
+        if ((0 == validCount) && (0 == occupiedStripeCount))
         {
-            segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+            segmentInfos[segId].SetState(SegmentState::FREE);
         }
-
-        if (segmentFreed == true)
+        else if ((0 <= validCount) && (occupiedStripeCount == (int)addrInfo->GetstripesPerSegment()))
         {
-            POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "segment_id:{}", segId);
+            segmentInfos[segId].SetState(SegmentState::SSD);
+        }
+        else if ((0 <= validCount) && (1 <= occupiedStripeCount))
+        {
+            segmentInfos[segId].SetState(SegmentState::NVRAM);
+        }
+        else
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "segment id {}, validCount {}, occupiedStripeCount {}",
+                            segId, validCount, occupiedStripeCount);
+            assert(false);
         }
     }
 
@@ -826,19 +845,6 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
         else
         {
             segmentInfos[segId].SetOccupiedStripeCount(src[segId]);
-        }
-    }
-}
-
-void
-SegmentCtx::CopySegInfoFromVersionedSegInfo(SegmentInfo* vscSegInfo, int numSegments)
-{
-    if (nullptr != vscSegInfo)
-    {
-        for (int segId = 0; segId < numSegments; segId++)
-        {
-            segmentInfos[segId].SetValidBlockCount(vscSegInfo[segId].GetValidBlockCount());
-            segmentInfos[segId].SetOccupiedStripeCount(vscSegInfo[segId].GetOccupiedStripeCount());
         }
     }
 }

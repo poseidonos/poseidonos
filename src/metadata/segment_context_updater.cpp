@@ -31,7 +31,6 @@
 */
 
 #include "src/metadata/segment_context_updater.h"
-
 #include "src/array_models/dto/partition_logical_size.h"
 
 namespace pos
@@ -42,6 +41,12 @@ SegmentContextUpdater::SegmentContextUpdater(ISegmentCtx* segmentCtx_, IVersione
   activeSegmentCtx(segmentCtx_),
   versionedContext(versionedContext_)
 {
+    pthread_rwlock_init(&lock, nullptr);
+}
+
+SegmentContextUpdater::~SegmentContextUpdater(void)
+{
+    pthread_rwlock_destroy(&lock);
 }
 
 void
@@ -65,26 +70,32 @@ SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
 void
 SegmentContextUpdater::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
+    pthread_rwlock_wrlock(&lock);
+    activeSegmentCtx->ValidateBlks(blks);
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
     versionedContext->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-
-    activeSegmentCtx->ValidateBlks(blks);
+    pthread_rwlock_unlock(&lock);
 }
 
 bool
 SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
 {
+    pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
+    bool ret = activeSegmentCtx->InvalidateBlks(blks, isForced);
     versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-
-    return activeSegmentCtx->InvalidateBlks(blks, isForced);
+    pthread_rwlock_unlock(&lock);
+    return ret;
 }
 
 bool
 SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
 {
+    pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
     versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
-    return activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
+    bool ret = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
+    pthread_rwlock_unlock(&lock);
+    return ret;
 }
 } // namespace pos

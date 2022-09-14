@@ -17,6 +17,7 @@
 #include "src/journal_manager/journal_manager.h"
 #include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -85,7 +86,8 @@ TEST(ContextManager, FlushContexts_testFlushStarted)
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
     NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, nullptr, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
+    NiceMock<MockVersionedSegmentCtx>* vscCtx = new NiceMock<MockVersionedSegmentCtx>();
+    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, vscCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     EXPECT_CALL(*ioManager, FlushContexts).WillOnce(Return(0));
 
