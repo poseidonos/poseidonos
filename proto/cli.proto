@@ -1190,6 +1190,10 @@ message CreateVolumeResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+		message CreateVolumeData {
+			string targetAddress = 1;
+		}
+		CreateVolumeData data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
