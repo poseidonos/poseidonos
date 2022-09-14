@@ -1626,6 +1626,9 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
         int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, uuid);
         if (ret == SUCCESS)
         {
+            string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);
+            reply->mutable_result()->mutable_data()->set_targetaddress(targetAddress);
+            
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
