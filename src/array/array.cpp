@@ -974,10 +974,13 @@ Array::_DetachData(ArrayDevice* target)
         return;
     }
 
-    bool needStopRebuild = target->GetState() == ArrayDeviceState::REBUILD;
+    bool needStopRebuild = target->GetState() == ArrayDeviceState::REBUILD && state->IsRebuilding() == true;
     target->SetState(ArrayDeviceState::FAULT);
     RaidState rs = ptnMgr->GetRaidState();
-    state->RaidStateUpdated(rs);
+    if (rs == RaidState::FAILURE || state->IsRebuilding() == false)
+    {
+        state->RaidStateUpdated(rs);
+    }
     sysDevMgr->RemoveDevice(target->GetUblock());
     target->SetUblock(nullptr);
 
@@ -992,7 +995,7 @@ Array::_DetachData(ArrayDevice* target)
 
     if (needStopRebuild)
     {
-        POS_TRACE_INFO(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
+        POS_TRACE_WARN(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
             "Stop the rebuild due to detachment of the rebuild target device or Array broken");
         rebuilder->StopRebuild(name_);
     }
@@ -1056,7 +1059,8 @@ Array::RequestRebuild(vector<IArrayDevice*> targets, bool isResume, bool force)
             &isAutoRebuild, ConfigType::CONFIG_TYPE_BOOL);
         if (isAutoRebuild == false)
         {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Rebuild auto start is off, rebuild has not started, array:{}", name_);
+            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Rebuild auto start is off, rebuild has not started, array_name:{}", name_);
+            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Array rebuild is required. array_name:{}", name_);
             return;
         }
     }

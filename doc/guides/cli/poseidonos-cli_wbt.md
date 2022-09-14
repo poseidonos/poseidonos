@@ -37,10 +37,12 @@ poseidonos-cli wbt [testname] [flags]
   -h, --help               help for wbt
   -i, --input string       set input
       --integrity string   set integrity
+      --key string         set key
       --lba string         set lba
       --lbaf string        set lbaf
       --loc string         set loc
       --lsid string        set lsid
+      --module string      set module
       --ms string          set ms
       --name string        set name
       --normal string      set normal
@@ -54,7 +56,9 @@ poseidonos-cli wbt [testname] [flags]
       --rba string         set rba
       --ses string         set ses
       --size string        set size
+      --type string        set type
       --urgent string      set urgent
+      --value string       set value
       --volume string      set volume
       --vsid string        set vsid
 ```

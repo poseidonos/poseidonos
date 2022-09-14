@@ -73,6 +73,7 @@ public:
     virtual int IsUnmountable(void);
     virtual int IsDeletable(void);
     virtual bool IsRebuildable(void);
+    virtual bool IsRebuilding(void);
     virtual bool IsRecoverable(void);
     virtual void RaidStateUpdated(RaidState rs);
     virtual bool Exists(void);
