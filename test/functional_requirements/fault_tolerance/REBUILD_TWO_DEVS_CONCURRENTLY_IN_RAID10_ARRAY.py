@@ -13,32 +13,37 @@ import pos_util
 import cli
 import api
 import json
-import MOUNT_VOL_ON_RAID6_ARRAY
+import MOUNT_VOL_ON_RAID10_ARRAY
 import fio
 import time
+
 DETACH_TARGET_DEV1 = "unvme-ns-0"
 DETACH_TARGET_DEV2 = "unvme-ns-1"
-ARRAYNAME = MOUNT_VOL_ON_RAID6_ARRAY.ARRAYNAME
+ARRAYNAME = MOUNT_VOL_ON_RAID10_ARRAY.ARRAYNAME
 SPARE_DEV_1 = "unvme-ns-4"
 SPARE_DEV_2 = "unvme-ns-5"
 
 
 def execute():
-    MOUNT_VOL_ON_RAID6_ARRAY.execute()
+    MOUNT_VOL_ON_RAID10_ARRAY.execute()
     print (api.set_rebuild_autostart("false"))
     fio_proc = fio.start_fio(0, 30)
-    fio.wait_fio(fio_proc)
+    time.sleep(10)
+    print (cli.list_device())
     api.detach_ssd_and_attach(DETACH_TARGET_DEV1)
-    time.sleep(1)
+    time.sleep(5)
+    print (cli.add_device(SPARE_DEV_1, ARRAYNAME))
     api.detach_ssd_and_attach(DETACH_TARGET_DEV2)
+    fio.wait_fio(fio_proc)
+    time.sleep(5)
+    print (cli.list_device())
+    print (cli.add_device(SPARE_DEV_2, ARRAYNAME))
     if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
-        time.sleep(2)
-        cli.add_device(SPARE_DEV_1, ARRAYNAME)
         out = cli.rebuild_array(ARRAYNAME)
         print (out)
         timeout = 80000 #80s
         if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
-            if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
+            if api.wait_situation(ARRAYNAME, "NORMAL") == True:
                 return "pass"
     return "fail"
 

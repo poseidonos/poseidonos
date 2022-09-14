@@ -175,4 +175,88 @@ ConfigManager::GetValue(string module, string key,
             break;
     }
 }
+
+int
+ConfigManager::_SetValue(string module, string key,
+    void* value, ConfigType type)
+{
+    if (read == false)
+    {
+        int ret = ReadFile();
+        if (EID(CONFIG_FILE_READ_DONE) != ret)
+        {
+            return ret;
+        }
+    }
+
+    if (!doc.IsObject())
+    {
+        return EID(CONFIG_JSON_DOC_IS_NOT_OBJECT);
+    }
+
+    if (false == doc.HasMember(module.c_str()))
+    {
+        return EID(CONFIG_REQUEST_MODULE_ERROR);
+    }
+
+    if (false == doc[module.c_str()].HasMember(key.c_str()))
+    {
+        return EID(CONFIG_REQUEST_KEY_ERROR);
+    }
+
+    bool result = false;
+    switch (type)
+    {
+        case CONFIG_TYPE_STRING:
+            if (doc[module.c_str()][key.c_str()].IsString() == true)
+            {
+                string str = *(string*)value;
+                doc[module.c_str()][key.c_str()].SetString(str.data(), str.size(), doc.GetAllocator());
+                result = true;
+            }
+            break;
+
+        case CONFIG_TYPE_INT:
+            if (doc[module.c_str()][key.c_str()].IsInt() == true)
+            {
+                doc[module.c_str()][key.c_str()].SetInt(*(int*)value);
+                result = true;
+            }
+            break;
+
+        case CONFIG_TYPE_UINT32:
+            if (doc[module.c_str()][key.c_str()].IsUint() == true)
+            {
+                doc[module.c_str()][key.c_str()].SetUint(*(uint32_t*)value);
+                result = true;
+            }
+            break;
+
+        case CONFIG_TYPE_UINT64:
+            if (doc[module.c_str()][key.c_str()].IsUint64() == true)
+            {
+                doc[module.c_str()][key.c_str()].SetUint64(*(uint64_t*)value);
+                result = true;
+            }
+            break;
+
+        case CONFIG_TYPE_BOOL:
+            if (doc[module.c_str()][key.c_str()].IsBool() == true)
+            {
+                doc[module.c_str()][key.c_str()].SetBool(*(bool*)value);
+                result = true;
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    if (result == false)
+    {
+        return EID(CONFIG_VALUE_TYPE_ERROR);
+    }
+
+    return 0;
+}
 } // namespace pos

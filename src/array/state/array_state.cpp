@@ -337,6 +337,12 @@ ArrayState::IsRebuildable(void)
 }
 
 bool
+ArrayState::IsRebuilding(void)
+{
+    return state == ArrayStateEnum::REBUILD;
+}
+
+bool
 ArrayState::IsBroken(void)
 {
     return state == ArrayStateEnum::BROKEN;

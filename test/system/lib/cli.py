@@ -285,3 +285,15 @@ def start_telemetry():
 
 def stop_telemetry():
     return send_request("telemetry stop ")
+
+def update_config(module, key, value, type):
+    param_str = ""
+    if (module != ""):
+        param_str += "--module " + module
+    if (key != ""):
+        param_str += " --key " + key
+    if value != "":
+        param_str += " --value " + value
+    if type != "":
+        param_str += " --type " + type
+    return send_request("wbt update_config " + param_str)
