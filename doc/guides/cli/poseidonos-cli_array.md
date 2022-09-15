@@ -46,6 +46,7 @@ poseidonos-cli array [flags]
 * [poseidonos-cli array delete](poseidonos-cli_array_delete.md)	 - Delete an array from PoseidonOS.
 * [poseidonos-cli array list](poseidonos-cli_array_list.md)	 - List arrays of PoseidonOS or display information of an array.
 * [poseidonos-cli array mount](poseidonos-cli_array_mount.md)	 - Mount an array to PoseidonOS.
+* [poseidonos-cli array rebuild](poseidonos-cli_array_rebuild.md)	 - Instantly trigger the rebuild for an array.
 * [poseidonos-cli array replace](poseidonos-cli_array_replace.md)	 - Replace a data device with an available spare device in array.
 * [poseidonos-cli array rmspare](poseidonos-cli_array_rmspare.md)	 - Remove a spare device from an array of PoseidonOS.
 * [poseidonos-cli array unmount](poseidonos-cli_array_unmount.md)	 - Unmount an array from PoseidonOS.

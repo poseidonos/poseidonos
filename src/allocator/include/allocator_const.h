@@ -59,7 +59,7 @@ enum SegmentCtxSection
 {
     SC_HEADER = 0,
     SC_SEGMENT_INFO,
-    NUM_SEGMENT_CTX_SECTION
+    NUM_SEGMENT_CTX_SECTION,
 };
 
 enum AllocatorCtxSection
@@ -69,7 +69,7 @@ enum AllocatorCtxSection
     NUM_ALLOCATION_INFO,
     AC_ALLOCATE_WBLSID_BITMAP = NUM_ALLOCATION_INFO,
     AC_ACTIVE_STRIPE_TAIL,
-    NUM_ALLOCATOR_CTX_SECTION
+    NUM_ALLOCATOR_CTX_SECTION,
 };
 
 enum RebuildCtxSection

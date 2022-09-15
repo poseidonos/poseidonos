@@ -37,20 +37,23 @@
 #include "src/include/raid_state.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
-#include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/array_models/interface/i_array_state_subscription.h"
 
 #include <condition_variable>
 #include <mutex>
 #include <string>
+#include <vector>
 
 namespace pos
 {
-class ArrayState : public IStateObserver
+class ArrayState : public IStateObserver, public IArrayStateSubscription
 {
 public:
-    ArrayState(IStateControl* iState,
-        TelemetryClient* telemetryClient = TelemetryClientSingleton::Instance());
+    ArrayState(IStateControl* iState);
     virtual ~ArrayState(void);
+
+    virtual void Register(IArrayStateSubscriber* subscriber) override;
+    virtual void Unregister(IArrayStateSubscriber* subscriber) override;
 
     virtual void SetState(ArrayStateEnum nextState);
     virtual void SetLoad(RaidState rs);
@@ -70,6 +73,7 @@ public:
     virtual int IsUnmountable(void);
     virtual int IsDeletable(void);
     virtual bool IsRebuildable(void);
+    virtual bool IsRebuilding(void);
     virtual bool IsRecoverable(void);
     virtual void RaidStateUpdated(RaidState rs);
     virtual bool Exists(void);
@@ -78,17 +82,13 @@ public:
     virtual int WaitShutdownDone(void);
     virtual ArrayStateType GetState(void);
     virtual StateContext* GetSysState(void);
-
     virtual void StateChanged(StateContext* prev, StateContext* next) override;
-    virtual void EnableStatePublisher(id_t arrayUniqueId);
 
 private:
     void _SetState(ArrayStateEnum newState);
     bool _WaitState(StateContext* goal);
-    void _PublishCurrentState();
 
     IStateControl* iStateControl;
-
     StateContext* degradedState = nullptr;
     StateContext* rebuildingState = nullptr;
     StateContext* stopState = nullptr;
@@ -96,11 +96,8 @@ private:
     std::mutex mtx;
     std::condition_variable cv;
 
+    vector<IArrayStateSubscriber*> stateSubscribers;
     ArrayStateType state = ArrayStateEnum::NOT_EXIST;
-    string arrayUniqueId;
-    bool publisherEnabled = false;
-    TelemetryPublisher* publisher = nullptr;
-    TelemetryClient* telemetryClient = nullptr;
     bool checkShutdown = false;
 };
 

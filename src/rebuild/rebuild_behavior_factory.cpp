@@ -48,31 +48,25 @@ RebuildBehavior*
 RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 {
     vector<NToMRebuild*> rm;
-    for (auto pair : ctx->rgPairs)
+    for (auto rp : ctx->rp)
     {
-        auto src = pair.first;
-        auto dst = pair.second;
-        rm.emplace_back(new NToMRebuild(src, dst, ctx->recovery));
+        rm.emplace_back(new NToMRebuild(rp->srcs, rp->dsts, rp->recovery));
     }
 
-    RebuildGroupPairs backupRgPairs;
-    ctx->GetSecondaryRebuildGroupPairs(backupRgPairs);
-    if (backupRgPairs.size() > 0)
+    RebuildPairs backupRp;
+    ctx->GetSecondaryRebuildPairs(backupRp);
+    if (backupRp.size() > 0)
     {
-        assert(backupRgPairs.size() == rm.size());
-        RecoverFunc backupRecovery = ctx->GetSecondaryRecovery();
-        assert(backupRecovery != nullptr);
+        assert(backupRp.size() == rm.size());
         uint32_t index = 0;
-        for (auto pair : backupRgPairs)
+        for (auto rp : backupRp)
         {
-            auto src = pair.first;
-            auto dst = pair.second;
-            NToMRebuild* backupRm = new NToMRebuild(src, dst, backupRecovery);
+            NToMRebuild* backupRm = new NToMRebuild(rp->srcs, rp->dsts, rp->recovery);
             rm.at(index)->SetBackupMethod(backupRm);
             index++;
         }
         POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Backup RMs are registered, count:{}, part:{}",
-            backupRgPairs.size(), PARTITION_TYPE_STR[ctx->part]);
+            backupRp.size(), PARTITION_TYPE_STR[ctx->part]);
     }
     for (auto item : rm)
     {

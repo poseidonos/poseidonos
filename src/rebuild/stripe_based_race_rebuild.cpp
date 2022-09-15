@@ -79,9 +79,10 @@ StripeBasedRaceRebuild::_Init(void)
 {
     if (isInitialized == false)
     {
+        uint32_t idx = 1;
         for (RebuildMethod* rm : ctx->rm)
         {
-            bool ret = rm->Init("StripeBasedRaceRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part]);
+            bool ret = rm->Init("StripeBasedRaceRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part] + "_" + to_string(idx));
             if (ret == false)
             {
                 if (initRetryCnt >= INIT_REBUILD_MAX_RETRY)
@@ -100,10 +101,11 @@ StripeBasedRaceRebuild::_Init(void)
                 initRetryCnt++;
                 return false;
             }
+            idx++;
         }
-        for (auto rg : ctx->rgPairs)
+        for (auto rp : ctx->rp)
         {
-            for (IArrayDevice* dev : rg.second)
+            for (IArrayDevice* dev : rp->dsts)
             {
                 targetDevs.insert(dev);
             }
@@ -148,9 +150,10 @@ StripeBasedRaceRebuild::_Recover(void)
     }
 
     uint32_t currWorkload = to - from + 1;
-    ctx->taskCnt = currWorkload;
+    uint32_t callbackCnt = ctx->rm.size();
+    ctx->taskCnt = currWorkload * callbackCnt;
     POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Trying to recover in rebuild - from:{}, to:{}", from, to);
+        "Trying to recover in rebuild - from:{}, to:{}, taskCnt:{}", from, to, ctx->taskCnt);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;

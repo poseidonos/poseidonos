@@ -51,10 +51,10 @@ TEST(QosUserPolicy, EqualOperator_Test_rebuild_user_policy_equal)
 {
     QosUserPolicy qosUserPolicy1;
     RebuildUserPolicy& rebuildUserPolicy1 = qosUserPolicy1.GetRebuildUserPolicy();
-    rebuildUserPolicy1.SetRebuildImpact(PRIORITY_HIGHEST);
+    rebuildUserPolicy1.SetRebuildImpact(PRIORITY_HIGH);
     QosUserPolicy qosUserPolicy2;
     RebuildUserPolicy& rebuildUserPolicy2 = qosUserPolicy2.GetRebuildUserPolicy();
-    rebuildUserPolicy2.SetRebuildImpact(PRIORITY_HIGHEST);
+    rebuildUserPolicy2.SetRebuildImpact(PRIORITY_HIGH);
     bool equal = (qosUserPolicy1 == qosUserPolicy2);
     ASSERT_EQ(equal, true);
 }

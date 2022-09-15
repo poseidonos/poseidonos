@@ -58,7 +58,7 @@ private:
     void _Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src);
     void _RecoverDone(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem, int recoverResult);
     void _Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem);
-    void _WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCallback callback, int writeResult);
+    void _WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCallback callback, void* mem, int writeResult);
     vector<IArrayDevice*> src;
     vector<IArrayDevice*> dst;
     RecoverFunc recoverFunc = nullptr;

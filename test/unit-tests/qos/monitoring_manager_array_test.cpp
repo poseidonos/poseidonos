@@ -81,22 +81,4 @@ TEST(QosMonitoringManagerArray, UpdateContextUserRebuildPolicy_Test_Run)
     qosMonitoringManagerArray.UpdateContextUserRebuildPolicy();
 }
 
-TEST(QosMonitoringManagerArray, VolParamActivities_TestRun)
-{
-    uint32_t arrayIndex = 1;
-    NiceMock<MockQosContext> mockQoscontext;
-    NiceMock<MockQosManager> mockQosManager;
-    uint32_t volId = 0;
-    uint32_t reactor = 0;
-    QosParameters parameters;
-    AllVolumeParameter& allVolumeParam = parameters.GetAllVolumeParameter();
-    ON_CALL(mockQoscontext, GetQosParameters()).WillByDefault(ReturnRef(parameters));
-    bw_iops_parameter volParam;
-    volParam.valid = M_VALID_ENTRY;
-    QosMonitoringManagerArray qosMonitoringManagerArray(arrayIndex, &mockQoscontext, &mockQosManager);
-    bool expected = true, actual;
-    actual = qosMonitoringManagerArray.VolParamActivities(volId, reactor);
-    ASSERT_EQ(expected, actual);
-}
-
 } // namespace pos

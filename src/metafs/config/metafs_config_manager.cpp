@@ -54,13 +54,15 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   wrrCountGeneral_(0),
   rocksdbEnabled_(false),
   rocksDbPath_(""),
-  supportNumaDedicatedScheduling_(false)
+  supportNumaDedicatedScheduling_(false),
+  needToIgnoreNumaDedicatedScheduling_(false)
 {
     _BuildConfigMap();
 }
 
 MetaFsConfigManager::~MetaFsConfigManager(void)
 {
+    configMap_.clear();
 }
 
 bool
@@ -82,6 +84,7 @@ MetaFsConfigManager::Init(void)
         rocksDbPath_ = _GetRocksDbPath();
     }
     supportNumaDedicatedScheduling_ = _IsSupportingNumaDedicatedScheduling();
+    needToIgnoreNumaDedicatedScheduling_ = false;
 
     if (!_ValidateConfig())
     {

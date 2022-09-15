@@ -118,8 +118,7 @@ string AutocreateArrayCommand::Execute(json& doc, string rid)
     else
     {
         QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
-        int event = EID(CLI_AUTOCREATE_ARRAY_SUCCESS);
-        POS_TRACE_INFO(event, "");
+        POS_TRACE_INFO(EID(CLI_AUTOCREATE_ARRAY_SUCCESS), "");
         return jFormat.MakeResponse("AUTOCREATEARRAY", rid, SUCCESS,
             arrayName + " has been created successfully", GetPosInfo());
     }

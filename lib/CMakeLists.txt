@@ -3,6 +3,7 @@ include(ExternalProject)
 
 set(SPDK_DEBUG_ENABLE "n" CACHE STRING "Specify enablement of SPDK debug build, y or n")
 set(USE_LOCAL_REPO "n" CACHE STRING "Specify use of local repository, y or n")
+set(ASAN_ENABLE "n" CACHE STRING "Specify enablement of ASAN build, y or n")
 set(NUM_BUILD_CORE "4" CACHE STRING "Specify numboer of cpu core being used for build")
 #set(LOCAL_REPOSITORY_ADDRESS "example.repo.com" CACHE STRING "Specify address of local repository")
 set(LOCAL_REPO_ADDRESS "https://10.227.30.174:7990" CACHE STRING "Specify address of local repository")
@@ -42,6 +43,15 @@ endif()
 
 # Download required packages
 
+# Set ASAN(Address Sanitizer) build option for AIR
+if (${ASAN_ENABLE} STREQUAL "y")
+    message("Set AIR_ASAN_OPT TRUE")
+    set(AIR_ASAN_OPT TRUE)
+else(${ASAN_ENABLE} STREQUAL "n")
+    message("Set AIR_ASAN_OPT FALSE")
+    set(AIR_ASAN_OPT FALSE)
+endif()
+
 # Build AIR with conditional repository
 set(POS_DEP_AIR "air")
 if (${USE_LOCAL_REPO} STREQUAL "y")
@@ -59,7 +69,7 @@ ExternalProject_Add(air
     UPDATE_COMMAND mkdir -p ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
 #---Configure step----------------
     SOURCE_DIR ${PROJ_ROOT}/lib/${POS_DEP_AIR}
-    CONFIGURE_COMMAND cmake .. -DCONFIG=${PROJ_ROOT}/config/air.cfg
+    CONFIGURE_COMMAND cmake .. -DCONFIG=${PROJ_ROOT}/config/air.cfg -DASAN=${AIR_ASAN_OPT}
 #---Build step--------------------
     BINARY_DIR ${PROJ_ROOT}/lib/${POS_DEP_AIR}/build
     BUILD_COMMAND make
@@ -150,6 +160,14 @@ else(${SPDK_DEBUG_ENABLE} STREQUAL "n")
     set(ENABLE_DEBUG "")
 endif()
 
+if (${ASAN_ENABLE} STREQUAL "y")
+    message("Set SPDK ASAN option: --enable-asan")
+    set(SPDK_ASAN_OPT "--enable-asan")
+else(${ASAN_ENABLE} STREQUAL "n")
+    message("Set SPDK ASAN option: --disable-asan")
+    set(SPDK_ASAN_OPT "--disable-asan")
+endif()
+
 # Build SPDK conditionally
 ExternalProject_Add(spdk
     DEPENDS dpdk fio air
@@ -167,7 +185,7 @@ ExternalProject_Add(spdk
     LOG_OUTPUT_ON_FAILURE ON
     LOG_MERGED_STDOUTERR ON
     PATCH_COMMAND patch -t -p0 -i ${PROJ_ROOT}/lib/spdk-22.01.1.patch
-    CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost ${ENABLE_DEBUG}
+    CONFIGURE_COMMAND ./configure --with-dpdk=${PROJ_ROOT}/lib/${POS_DEP_DPDK} --with-rdma --with-fio=${PROJ_ROOT}/lib/${POS_DEP_FIO} --with-pos --without-isal --without-vhost ${ENABLE_DEBUG} ${SPDK_ASAN_OPT}
     BUILD_COMMAND ./scripts/pkgdep.sh
     COMMAND make -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND cp ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/build/fio/spdk_nvme ${PROJ_ROOT}/lib/${POS_DEP_SPDK}/examples/nvme/fio_plugin/fio_plugin)
@@ -322,8 +340,8 @@ ExternalProject_Add(opentelemetry-cpp
     LOG_CONFIGURE ON
     LOG_BUILD ON
     LOG_INSTALL ON
-    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DWITH_OTLP=ON -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL}
-    BUILD_COMMAND make -j ${NUM_BUILD_CORE} all
+    CONFIGURE_COMMAND cmake ${PROJ_ROOT}/lib/${POS_DEP_OTEL} -DBUILD_TESTING=OFF -DWITH_OTLP=ON -DWITH_ABSEIL=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX:PATH=${PROJ_ROOT}/lib/${POS_DEP_OTEL}
+    BUILD_COMMAND cmake --build ${PROJ_ROOT}/lib/${POS_DEP_OTEL} --target all -- -j ${NUM_BUILD_CORE}
     INSTALL_COMMAND make install
 )
 

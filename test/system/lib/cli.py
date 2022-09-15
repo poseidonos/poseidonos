@@ -7,11 +7,13 @@ import sys
 POS_ROOT = '../../../'
 POS_CLI = POS_ROOT + "bin/poseidonos-cli"
 
-
 def send_request(msg):
     cli_req = POS_CLI + " --json-res "
-    out = subprocess.check_output(cli_req + msg, universal_newlines=True, shell=True)
-    return out
+    try:
+        out = subprocess.check_output(cli_req + msg, universal_newlines=True, shell=True)
+        return out
+    except subprocess.CalledProcessError as e:
+        return ("cli request error")
 
 
 def exit_pos():
@@ -104,6 +106,11 @@ def replace_device(dev, array):
     return send_request("array replace " + param_str)
 
 
+def rebuild_array(array):
+    param_str = "--array-name " + array
+    return send_request("array rebuild " + param_str)
+
+
 def create_volume(vol_name, size, iops, bw, array):
     param_str = "--volume-name " + vol_name + " --size " + size + "B"
     if iops != "":
@@ -111,7 +118,6 @@ def create_volume(vol_name, size, iops, bw, array):
     if bw != "":
         param_str += " --maxbw " + bw
     param_str += " --array-name " + array
-
     return send_request("volume create " + param_str)
 
 
@@ -161,7 +167,6 @@ def update_volume_qos(vol_name, iops, bw, array):
 def rename_volume(vol_name, new_name, array):
     param_str = "--volume-name " + vol_name + " --new-volume-name " + new_name
     param_str += " --array-name " + array
-
     return send_request("volume rename " + param_str)
 
 
@@ -280,3 +285,15 @@ def start_telemetry():
 
 def stop_telemetry():
     return send_request("telemetry stop ")
+
+def update_config(module, key, value, type):
+    param_str = ""
+    if (module != ""):
+        param_str += "--module " + module
+    if (key != ""):
+        param_str += " --key " + key
+    if value != "":
+        param_str += " --value " + value
+    if type != "":
+        param_str += " --type " + type
+    return send_request("wbt update_config " + param_str)

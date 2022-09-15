@@ -130,7 +130,7 @@ buildTest()
 
     texecc ./configure $config_option
     cwd=""
-    cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n
+    cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n -DASAN_ENABLE=n
     texecc make -j ${job_number} clean
 
     if [ $target_type == "VM" ]

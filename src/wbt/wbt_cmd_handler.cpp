@@ -86,6 +86,7 @@
 #include "write_vsa_map_entry_wbt_command.h"
 #include "write_vsa_map_wbt_command.h"
 #include "write_whole_reverse_map_wbt_command.h"
+#include "update_config_wbt_command.h"
 namespace pos
 {
 WbtCommandMap WbtCmdHandler::wbtCommandMap;
@@ -164,6 +165,9 @@ WbtCmdHandler::PrepareWbtCommands(void)
     // NVMe Cli
     wbtCommandMap["nvme_cli"] = std::make_unique<NvmeCliCommand>();
     wbtCommandMap["admin-passthru"] = std::make_unique<AdminPassThrough>();
+
+    // Config
+    wbtCommandMap["update_config"] = std::make_unique<UpdateConfigWbtCommand>();
 }
 
 WbtCmdHandler::WbtCmdHandler(std::string const& commandName)

@@ -40,7 +40,7 @@ func TestExpiry(t *testing.T) {
 
 	for i := 0; i < expiry_counter_metric_cnt; i++ {
 		counterMetric[i].name = expiry_metric_name_prefix + strconv.Itoa(i)
-		counterMetric[i].labels = &map[string]string{"k": "v"}
+		counterMetric[i].labels = &map[string]string{"k": "v", "publisher_name": "air_delegator"}
 		counterMetric[i].value = 1
 
 		addCounter(&(counterMetric[i]))
@@ -53,7 +53,7 @@ func TestExpiry(t *testing.T) {
 
 	for i := 0; i < expiry_gauge_metric_cnt; i++ {
 		gaugeMetric[i].name = expiry_metric_name_prefix + strconv.Itoa(i+expiry_counter_metric_cnt)
-		gaugeMetric[i].labels = &map[string]string{"k": "v"}
+		gaugeMetric[i].labels = &map[string]string{"k": "v", "publisher_name": "air_delegator"}
 		gaugeMetric[i].value = 1
 
 		addGauge(&(gaugeMetric[i]))
@@ -65,7 +65,7 @@ func TestExpiry(t *testing.T) {
 	histogramMetric := make([]HistogramMetric, expiry_poshistogram_metric_cnt)
 	for i := 0; i < expiry_poshistogram_metric_cnt; i++ {
 		histogramMetric[i].name = expiry_metric_name_prefix + strconv.Itoa(i+expiry_counter_metric_cnt+expiry_gauge_metric_cnt)
-		histogramMetric[i].labels = &map[string]string{"k": "v"}
+		histogramMetric[i].labels = &map[string]string{"k": "v", "publisher_name": "air_delegator"}
 		histogramMetric[i].bucketRange = []int64{0, 10, 20, 30}
 		histogramMetric[i].bucketCount = []uint64{0, 0, 0, 0}
 		histogramMetric[i].sum = 0

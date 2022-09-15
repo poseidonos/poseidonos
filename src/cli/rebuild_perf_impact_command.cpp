@@ -60,7 +60,7 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         qos_backend_policy newBackendPolicy;
         if (level.compare("highest") == 0)
         {
-            newBackendPolicy.priorityImpact = PRIORITY_HIGHEST;
+            newBackendPolicy.priorityImpact = PRIORITY_HIGH;
         }
         else if (level.compare("medium") == 0)
         {
@@ -68,7 +68,7 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         }
         else if (level.compare("lowest") == 0)
         {
-            newBackendPolicy.priorityImpact = PRIORITY_LOWEST;
+            newBackendPolicy.priorityImpact = PRIORITY_LOW;
         }
         else
         {

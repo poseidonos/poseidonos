@@ -34,7 +34,11 @@
 
 #include <cstdint>
 #include <thread>
+#include <string>
 #include "src/debug/debug_info.h"
+#include "src/master_context/config_manager.h"
+#include "src/master_context/version_provider.h"
+#include "src/trace/trace_exporter.h"
 
 namespace pos
 {
@@ -49,6 +53,11 @@ public:
     int Init(int argc, char** argv);
     void Run(void);
     void Terminate(void);
+    // This function should be private. But being public for only UT
+    int _InitTraceExporter(char* procFullName,
+                            ConfigManager *cm,
+                            VersionProvider *vp,
+                            TraceExporter *te);
 
 private:
     void _InitDebugInfo(void);
@@ -67,6 +76,7 @@ private:
     int _LoadConfiguration(void);
     void _RunCLIService(void);
     void _SetupThreadModel(void);
+
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
 
     IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;

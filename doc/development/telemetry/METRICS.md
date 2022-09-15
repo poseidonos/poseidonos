@@ -52,6 +52,8 @@
   - [_**write_iops_volume**_](#write_iops_volume)
   - [_**write_bps_volume**_](#write_bps_volume)
   - [_**write_avg_lat_volume**_](#write_avg_lat_volume)
+  - [_**volume_state**_](#volume_state)
+  - [_**volume_total_capacity**_](#volume_total_capacity)
 
 - [**Array**](#array)
   - [_**ArrayStatus**_](#arraystatus)
@@ -83,23 +85,35 @@
   - [_**AvailableMemorySize**_](#availablememorysize)
 
 - [**Disk**](#disk)
-  - [_**softMediaErrorLow**_](#softmediaerrorlow)
-  - [_**softMediaErrorHigh**_](#softmediaerrorhigh)
-  - [_**powerCycleLow**_](#powercyclelow)
-  - [_**powerCycleHigh**_](#powercyclehigh)
-  - [_**powerOnHourLow**_](#poweronhourlow)
-  - [_**powerOnHourHigh**_](#poweronhourhigh)
-  - [_**unsafeShutdownsLow**_](#unsafeshutdownslow)
-  - [_**unsafeShutdownsHigh**_](#unsafeshutdownshigh)
+  - [_**softMediaErrorLower**_](#softmediaerrorlower)
+  - [_**softMediaErrorUpper**_](#softmediaerrorupper)
+  - [_**powerCycleLower**_](#powercyclelower)
+  - [_**powerCycleUpper**_](#powercyclehupper)
+  - [_**powerOnHourLow**_](#poweronhourlower)
+  - [_**powerOnHourUpper**_](#poweronhourUpper)
+  - [_**unsafeShutdownsLow**_](#unsafeshutdownslower)
+  - [_**unsafeShutdownsUpper**_](#unsafeshutdownsupper)
   - [_**temperature**_](#temperature)
   - [_**availableSpare**_](#availablespare)
   - [_**availableSpareThreshold**_](#availablesparethreshold)
   - [_**percentageUsed**_](#percentageused)
-  - [_**controllerBusyTimeLow**_](#controllerbusytimelow)
-  - [_**controllerBusyTimeHigh**_](#controllerbusytimehigh)
+  - [_**controllerBusyTimeLower**_](#controllerbusytimelower)
+  - [_**controllerBusyTimeUpper**_](#controllerbusytimeupper)
   - [_**warningTemperatureTime**_](#warningtemperaturetime)
   - [_**criticalTemperatureTime**_](#criticaltemperaturetime)
-
+  - [_**lifetimeWaf**_](#lifetimewaf)
+  - [_**trailingHourWaf**_](#trailinghourwaf)
+  - [_**trimSectorCountLower**_](#trimsectorcountlower)
+  - [_**trimSectorCountUpper**_](#trimsectorcountupper)
+  - [_**hostWrittenCountLower**_](#hostwrittencountlower)
+  - [_**hostWrittenCountUpper**_](#hostwrittencountupper)
+  - [_**nandWrittenCountLower**_](#nandwrittencountlower)
+  - [_**nandWrittenCountUpper**_](#nandwrittencountupper)
+  - [_**thermalThrottleEventCount**_](#thermalthrottleeventcount)
+  - [_**highestTemperature**_](#highesttemperature)
+  - [_**lowestTemeperature**_](#lowesttemeperature)
+  - [_**overTemperatureCount**_](#overtemperaturecount)
+  - [_**underTemperatureCount**_](#undertemperaturecount)
 - [**IOCount**](#iocount)
   - [_**count_of_volume_io_constructors**_](#count_of_volume_io_constructors)
   - [_**count_of_volume_io_destructors**_](#count_of_volume_io_destructors)
@@ -125,6 +139,9 @@
   - [_**count_of_user_flush_process**_](#count_of_user_flush_process)
   - [_**count_of_partial_write_process**_](#count_of_partial_write_process)
   - [_**count_of_user_fail_io**_](#count_of_user_fail_io)
+  - [_**count_of_user_read_pending_cnt**_](#count_of_user_read_pending_cnt)
+  - [_**count_of_user_write_pending_cnt**_](#count_of_user_write_pending_cnt)
+  - [_**count_of_internal_io_pending_cnt**_](#count_of_internal_io_pending_cnt)
   
 ---
 ## **Common**
@@ -873,6 +890,40 @@ The average value of write latency in a volume & an array.
 
 ---
 
+### _**volume_state**_
+
+**ID**: 50020
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_name": string}
+
+**Introduced**: v0.10.0
+
+The voluem satete. 0 : Unmounted, 1 : Mounted, 2 : Offline
+
+---
+
+
+### _**volume_total_capacity**_
+
+**ID**: 50021
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "volume_name": string}
+
+**Introduced**: v0.10.0
+
+The value of total capacity of volume.
+
+---
+
+
 ## **Array**
 
 Array group contains the metrics of array
@@ -1202,100 +1253,6 @@ Remain Storage Size(block count) In an Array
 Remain Storage Size(block count) In a Volume
 
 ---
-## **Volume**
-
-
----
-### _**CreateVolumeId**_
-
-**ID**: 90000
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The created volume id
-
----
-### _**DeleteVolumeId**_
-
-**ID**: 90001
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The deleted volume id
-
----
-### _**MountVolumeId**_
-
-**ID**: 90002
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The mounted volume id
-
----
-### _**UnmountVolumeId**_
-
-**ID**: 90003
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The unmounted volume id
-
----
-### _**QosUpdateVolumeId**_
-
-**ID**: 90004
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The updated volume id
-
----
-### _**RenameVolumeId**_
-
-**ID**: 90005
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {"publisher_name", "array_name", "run_id"}
-
-**Introduced**: v0.10.0
-
-The renamed Volume id
-
----
 ## **Resource**
 
 Resource group contains the metrics of the pos resource.
@@ -1321,7 +1278,7 @@ Available memory size
 disk group contains the smart metrics.
 
 ---
-### _**softMediaErrorLow**_
+### _**softMediaErrorLower**_
 
 **ID**: 110000
 
@@ -1333,10 +1290,10 @@ disk group contains the smart metrics.
 
 **Introduced**: v0.10.0
 
-Soft Media Error Low Value
+Soft Media Error Lower Value
 
 ---
-### _**softMediaErrorHigh**_
+### _**softMediaErrorUpper**_
 
 **ID**: 110001
 
@@ -1348,10 +1305,10 @@ Soft Media Error Low Value
 
 **Introduced**: v0.10.0
 
-Soft Media Error High Value
+Soft Media Error Upper Value
 
 ---
-### _**powerCycleLow**_
+### _**powerCycleLower**_
 
 **ID**: 110002
 
@@ -1363,10 +1320,10 @@ Soft Media Error High Value
 
 **Introduced**: v0.10.0
 
-Power cycle Low Value
+Power cycle Lower Value
 
 ---
-### _**powerCycleHigh**_
+### _**powerCycleUpper**_
 
 **ID**: 110003
 
@@ -1378,10 +1335,10 @@ Power cycle Low Value
 
 **Introduced**: v0.10.0
 
-Power cycle High Value
+Power cycle Upper Value
 
 ---
-### _**powerOnHourLow**_
+### _**powerOnHourLower**_
 
 **ID**: 110004
 
@@ -1393,10 +1350,10 @@ Power cycle High Value
 
 **Introduced**: v0.10.0
 
-Power On Hour Low Value
+Power On Hour Lower Value
 
 ---
-### _**powerOnHourHigh**_
+### _**powerOnHourUpper**_
 
 **ID**: 110005
 
@@ -1408,10 +1365,10 @@ Power On Hour Low Value
 
 **Introduced**: v0.10.0
 
-Power On Hour High Value
+Power On Hour Upper Value
 
 ---
-### _**unsafeShutdownsLow**_
+### _**unsafeShutdownsLower**_
 
 **ID**: 110006
 
@@ -1423,10 +1380,10 @@ Power On Hour High Value
 
 **Introduced**: v0.10.0
 
-Unsafe Shutdowns Low Value
+Unsafe Shutdowns Lower Value
 
 ---
-### _**unsafeShutdownsHigh**_
+### _**unsafeShutdownsUpper**_
 
 **ID**: 110007
 
@@ -1438,7 +1395,7 @@ Unsafe Shutdowns Low Value
 
 **Introduced**: v0.10.0
 
-Unsafe Shutdowns High Value
+Unsafe Shutdowns Upper Value
 
 ---
 ### _**temperature**_
@@ -1501,8 +1458,7 @@ Available Spare Threshold Value
 Percentage Used Value
 
 ---
-### _**controllerBusyTimeLow**_
-
+### _**controllerBusyTimeLower**_
 
 **ID**: 110012
 
@@ -1514,10 +1470,10 @@ Percentage Used Value
 
 **Introduced**: v0.10.0
 
-Controller Busy Time Low Value
+Controller Busy Time Lower Value
 
 ---
-### _**controllerBusyTimeHigh**_
+### _**controllerBusyTimeUpper**_
 
 **ID**: 110013
 
@@ -1529,7 +1485,7 @@ Controller Busy Time Low Value
 
 **Introduced**: v0.10.0
 
-Controller Busy Time High Value
+Controller Busy Time Upper Value
 
 ---
 ### _**warningTemperatureTime**_
@@ -1560,6 +1516,201 @@ Warning Temperature Time Value
 **Introduced**: v0.10.0
 
 Critical Temperature Time Value
+
+---
+### _**lifetimeWaf**_
+
+**ID**: 110020
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Life Time Write Amplification Factor
+
+---
+### _**trailingHourWaf**_
+
+**ID**: 110021
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Trailing Hour Write Amplification Factor
+
+---
+### _**trimSectorCountLower**_
+
+**ID**: 110022
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Trim Sector Count Lower Value
+
+---
+### _**trimSectorCountUpper**_
+
+**ID**: 110023
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Trim Sector Count Upper Value
+
+---
+### _**hostWrittenCountLower**_
+
+**ID**: 110024
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Host Written Count Lower Value
+
+---
+### _**hostWrittenCountUpper**_
+
+**ID**: 110025
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Host Written Count Upper Value
+
+---
+### _**nandWrittenCountLower**_
+
+**ID**: 110026
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Nand Written Count Lower Value
+
+---
+### _**nandWrittenCountUpper**_
+
+**ID**: 110027
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Nand Written Count Upper Value
+
+---
+### _**thermalThrottleEventCount**_
+
+**ID**: 110028
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Thermal Throttle Event Count Value
+
+---
+### _**highestTemperature**_
+
+**ID**: 110029
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Highest Temperature Value
+
+---
+### _**lowestTemeperature**_
+
+**ID**: 110030
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Lowest Temperature Value
+
+---
+### _**overTemperatureCount**_
+
+**ID**: 110031
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Over Temperature Count Value
+
+---
+### _**underTemperatureCount**_
+
+**ID**: 110032
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"nvme_ctrl_id": String}
+
+**Introduced**: v0.10.0
+
+Under Temperature Count Value
 
 ---
 
@@ -1797,6 +1948,198 @@ The accumulated submission count of io worker
 ### _**completion_count_in_io_worker**_
 
 **ID**: 130015
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_requested_user_read**_
+
+**ID**: 140000
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_requested_user_write**_
+
+**ID**: 140001
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_requested_user_adminio**_
+
+**ID**: 140002
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_complete_user_read**_
+
+**ID**: 140003
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_complete_user_write**_
+
+**ID**: 140004
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_complete_user_adminio**_
+
+**ID**: 140005
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_flush_process**_
+
+**ID**: 140006
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_partial_write_process**_
+
+**ID**: 140007
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_fail_io**_
+
+**ID**: 140008
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_read_pending_cnt**_
+
+**ID**: 140009
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_user_write_pending_cnt**_
+
+**ID**: 140010
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated completion count of io worker
+
+---
+
+### _**count_of_internal_io_pending_cnt**_
+
+**ID**: 140011
 
 **Type**: Count
 

@@ -105,7 +105,7 @@ SMARTLOGCommand::Execute(json& doc, string rid)
         }
 
         SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
-        SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr);
+        SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr, SmartReqId::NVME_HEALTH_INFO);
         switch (ret)
         {
             case SmartReturnType::SEND_ERR:

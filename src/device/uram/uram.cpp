@@ -92,7 +92,7 @@ Uram::~Uram(void)
 // LCOV_EXCL_STOP
 
 bool
-Uram::_RecoverBackup(DeviceContext* deviceContext)
+Uram::_RecoverBackup(void)
 {
     bool restoreSuccessful = true;
 
@@ -148,7 +148,7 @@ Uram::_RecoverBackup(DeviceContext* deviceContext)
             if (bytesPerHugepage == rc)
             {
                 UramRestoreCompletion::IncreasePendingUbio();
-                SubmitAsyncIO(ubio);
+                IODispatcherSingleton::Instance()->Submit(ubio);   
             }
             else
             {
@@ -215,17 +215,13 @@ Uram::_InitByteAddress(void)
     }
     baseByteAddress = reinterpret_cast<void*>(byteAddressInt);
 }
+
 bool
-Uram::_WrapupOpenDeviceSpecific(DeviceContext* deviceContext)
+Uram::WrapupOpenDeviceSpecific(void)
 {
     // Reactor cannot handle Async operation for Uram in current implementation.
     // ioat poll cannot be called in Empty(), so, we restore the contents by IO worker.
-    if (EventFrameworkApiSingleton::Instance()->IsReactorNow())
-    {
-        return true;
-    }
-
-    bool restoreSuccessful = _RecoverBackup(deviceContext);
+    bool restoreSuccessful = _RecoverBackup();
     _InitByteAddress();
     return restoreSuccessful;
 }

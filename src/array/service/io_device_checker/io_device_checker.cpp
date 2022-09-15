@@ -90,7 +90,7 @@ IODeviceChecker::Unregister(unsigned int arrayIndex)
     devCheckers[arrayIndex] = nullptr;
 }
 
-bool
+int
 IODeviceChecker::IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock)
 {
     if (devCheckers[arrayIndex] == nullptr)
@@ -100,9 +100,7 @@ IODeviceChecker::IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UB
         return false;
     }
 
-    bool ret = devCheckers[arrayIndex]->IsRecoverable(target, uBlock);
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
-        "IsRecoverableDevice, {}", ret);
+    int ret = devCheckers[arrayIndex]->IsRecoverable(target, uBlock);
     return ret;
 }
 

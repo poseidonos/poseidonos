@@ -162,6 +162,23 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  SetTelemetryProperty(ServerContext* context, const SetTelemetryPropertyRequest* request,
+                  SetTelemetryPropertyResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteSetTelemetryPropertyCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
   UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
                   UpdateEventWrrResponse* reply) override
   {
@@ -334,6 +351,23 @@ class PosCliServiceImpl final : public PosCli::Service {
     _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteArrayInfoCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  RebuildArray(ServerContext* context, const RebuildArrayRequest* request,
+                  RebuildArrayResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteRebuildArrayCommand(request, reply);
     if (context->IsCancelled()) {
       _LogGrpcTimeout(request, reply);
       return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
@@ -606,6 +640,22 @@ class PosCliServiceImpl final : public PosCli::Service {
     _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteCreateVolumeCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+    
+    return status;
+  }
+
+  grpc::Status
+  SetVolumeProperty(ServerContext* context, const SetVolumePropertyRequest* request,
+                  SetVolumePropertyResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteSetVolumePropertyCommand(request, reply);
     if (context->IsCancelled()) {
       _LogGrpcTimeout(request, reply);
       return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);

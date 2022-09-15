@@ -85,7 +85,9 @@ SUBDIRS = allocator \
         telemetry/telemetry_config/configs \
         dpdk_wrapper \
         memory_checker \
-        resource_checker
+        resource_checker \
+        event \
+        trace 
 
 .PHONY: $(SUBDIRS)
 

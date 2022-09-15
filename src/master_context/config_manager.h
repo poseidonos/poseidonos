@@ -47,19 +47,28 @@ namespace pos
 enum ConfigType
 {
     CONFIG_TYPE_START = 0,
-
-    CONFIG_TYPE_STRING,
+    CONFIG_TYPE_STRING = CONFIG_TYPE_START,
     CONFIG_TYPE_INT,
     CONFIG_TYPE_UINT32,
     CONFIG_TYPE_UINT64,
     CONFIG_TYPE_BOOL,
-
     CONFIG_TYPE_END,
     CONFIG_TYPE_COUNT = CONFIG_TYPE_END - CONFIG_TYPE_START
 };
 
+static const string CONFIG_TYPE_STR[(int)ConfigType::CONFIG_TYPE_COUNT]
+{
+    "STRING",
+    "INT",
+    "UINT32",
+    "UINT64",
+    "BOOL"
+};
+
 class ConfigManager
 {
+friend class UpdateConfigWbtCommand;
+
 public:
     ConfigManager(void);
     virtual ~ConfigManager(void)
@@ -71,6 +80,9 @@ public:
     string RawData() { return configData; }
 
 private:
+    //for wbt only
+    virtual int _SetValue(string module, string key, void* value, ConfigType type);
+
     bool read = false;
     string configData = "";
     rapidjson::Document doc;

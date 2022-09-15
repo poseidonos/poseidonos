@@ -56,7 +56,7 @@ public:
     virtual void Dispose(void);
 
     virtual int LoadContext(void);
-    virtual int Flush(AllocatorCtxIoCompletion clientCallback);
+    virtual int Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf = nullptr);
 
     virtual uint64_t GetStoredVersion(void);
     virtual char* GetSectionAddr(int section);
@@ -64,6 +64,7 @@ public:
 
     virtual int GetNumFilesReading(void);
     virtual int GetNumFilesFlushing(void);
+    virtual int GetDstSectionIdForExternalBufCopy(void);
 
 private:
     class ContextSection
@@ -109,6 +110,8 @@ private:
 
     bool initialized;
     bool rocksDbEnabled;
+
+    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos

@@ -2,6 +2,7 @@ package grpcmgr
 
 import (
 	"cli/cmd/globals"
+	"cli/cmd/otelmgr"
 	"context"
 	"errors"
 	"fmt"
@@ -15,8 +16,9 @@ import (
 
 const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
 const dialTimeout = 10
+
 // TODO (mj): temporarily set the timeout for unmount array command to 30 minutes
-// because the command exceptionally takes too long. 
+// because the command exceptionally takes too long.
 // However, the timeout needs to be systemically set in the future.
 const unmountArrayCmdTimeout = 1800
 
@@ -36,11 +38,16 @@ func dialToCliServer() (*grpc.ClientConn, error) {
 	return conn, err
 }
 
-func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
+func SendSystemInfo(ctx context.Context, req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
+	t := otelmgr.NewTracer()
+	t.SetTrace(ctx, globals.GRPC_MGR_APP_NAME, globals.GRPC_SYSTEM_INFO_FUNC_NAME)
+	defer t.Release()
+
 	conn, err := dialToCliServer()
 	if err != nil {
 		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
 			dialErrorMsg, err.Error()))
+		t.RecordError(err)
 		return nil, err
 	}
 	defer conn.Close()
@@ -52,6 +59,7 @@ func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 	res, err := c.SystemInfo(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
+		t.RecordError(err)
 		return nil, err
 	}
 
@@ -61,9 +69,9 @@ func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -84,9 +92,9 @@ func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
 func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPropertyResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -107,9 +115,9 @@ func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPrope
 func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPropertyResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -129,9 +137,9 @@ func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPrope
 func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -152,9 +160,9 @@ func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryRes
 func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -172,12 +180,35 @@ func SendStopTelemetryRpc(req *pb.StopTelemetryRequest) (*pb.StopTelemetryRespon
 	return res, err
 }
 
+func SendSetTelemetryPropertyRpc(req *pb.SetTelemetryPropertyRequest) (*pb.SetTelemetryPropertyResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.SetTelemetryProperty(ctx, req)
+
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrrResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -197,9 +228,9 @@ func SendResetEventWrrPolicyRpc(req *pb.ResetEventWrrRequest) (*pb.ResetEventWrr
 func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -219,9 +250,9 @@ func SendResetMbrRpc(req *pb.ResetMbrRequest) (*pb.ResetMbrResponse, error) {
 func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -241,9 +272,9 @@ func SendStopRebuildingRpc(req *pb.StopRebuildingRequest) (*pb.StopRebuildingRes
 func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -263,9 +294,9 @@ func SendUpdatEventWrr(req *pb.UpdateEventWrrRequest) (*pb.UpdateEventWrrRespons
 func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -285,9 +316,9 @@ func SendAddSpare(req *pb.AddSpareRequest) (*pb.AddSpareResponse, error) {
 func SendRemoveSpare(req *pb.RemoveSpareRequest) (*pb.RemoveSpareResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -329,9 +360,9 @@ func SendReplaceArrayDevice(req *pb.ReplaceArrayDeviceRequest) (*pb.ReplaceArray
 func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -351,9 +382,9 @@ func SendCreateArray(req *pb.CreateArrayRequest) (*pb.CreateArrayResponse, error
 func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -373,9 +404,9 @@ func SendAutocreateArray(req *pb.AutocreateArrayRequest) (*pb.AutocreateArrayRes
 func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -395,9 +426,9 @@ func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error
 func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -417,9 +448,9 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -439,9 +470,9 @@ func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, er
 func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -458,12 +489,34 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 	return res, err
 }
 
+func SendRebuildArray(req *pb.RebuildArrayRequest) (*pb.RebuildArrayResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.RebuildArray(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -483,9 +536,9 @@ func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
 func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreferenceResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -505,9 +558,9 @@ func SendSetLogPreference(req *pb.SetLogPreferenceRequest) (*pb.SetLogPreference
 func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -527,9 +580,9 @@ func SendSetLogLevel(req *pb.SetLogLevelRequest) (*pb.SetLogLevelResponse, error
 func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -549,9 +602,9 @@ func SendLoggerInfo(req *pb.LoggerInfoRequest) (*pb.LoggerInfoResponse, error) {
 func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -571,9 +624,9 @@ func SendGetLogLevel(req *pb.GetLogLevelRequest) (*pb.GetLogLevelResponse, error
 func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -593,9 +646,9 @@ func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterRespon
 func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -615,9 +668,9 @@ func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, er
 func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -637,9 +690,9 @@ func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
 func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -659,9 +712,9 @@ func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
 func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -681,9 +734,9 @@ func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error
 func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -703,9 +756,9 @@ func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemRes
 func SendDeleteSubsystem(req *pb.DeleteSubsystemRequest) (*pb.DeleteSubsystemResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -725,9 +778,9 @@ func SendDeleteSubsystem(req *pb.DeleteSubsystemRequest) (*pb.DeleteSubsystemRes
 func SendAddListener(req *pb.AddListenerRequest) (*pb.AddListenerResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -747,9 +800,9 @@ func SendAddListener(req *pb.AddListenerRequest) (*pb.AddListenerResponse, error
 func SendListSubsystem(req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -769,9 +822,9 @@ func SendListSubsystem(req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse,
 func SendSubsystemInfo(req *pb.SubsystemInfoRequest) (*pb.SubsystemInfoResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -791,9 +844,9 @@ func SendSubsystemInfo(req *pb.SubsystemInfoRequest) (*pb.SubsystemInfoResponse,
 func SendCreateTransport(req *pb.CreateTransportRequest) (*pb.CreateTransportResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -813,6 +866,28 @@ func SendCreateTransport(req *pb.CreateTransportRequest) (*pb.CreateTransportRes
 func SendCreateVolume(req *pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.CreateVolume(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendVolumeProperty(req *pb.SetVolumePropertyRequest) (*pb.SetVolumePropertyResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
 		log.Error(err)
 		errToReturn := errors.New(dialErrorMsg)
 		return nil, errToReturn
@@ -823,7 +898,7 @@ func SendCreateVolume(req *pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, er
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 
-	res, err := c.CreateVolume(ctx, req)
+	res, err := c.SetVolumeProperty(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err

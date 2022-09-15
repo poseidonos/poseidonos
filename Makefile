@@ -129,7 +129,6 @@ LDFLAGS += -L./lib/$(SPDLOG_SOURCE)/lib -lspdlog
 
 INCLUDE += -I$(OTEL_ROOT_DIR)/include
 LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
-				-lopentelemetry_common \
 				-lopentelemetry_trace \
 				-lopentelemetry_exporter_otlp_http \
 				-lopentelemetry_exporter_otlp_http_client \
@@ -139,17 +138,25 @@ LDFLAGS += -L$(OTEL_ROOT_DIR)/lib \
 				-lopentelemetry_common \
 				-lopentelemetry_http_client_curl \
 				-lpthread -lcurl
+DEFINE += -DHAVE_ABSEIL
 
 CXXFLAGS += $(INCLUDE)
 
 LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
-LDFLAGS += -no-pie -laio -ltcmalloc
+LDFLAGS += -no-pie -laio
 LDFLAGS += -lnuma
 LDFLAGS += -lyaml-cpp
 LDFLAGS += -ltbb
 LDFLAGS += -lrocksdb
 LDFLAGS += -lstdc++fs
 LDFLAGS += -lisal
+
+ifeq ($(CONFIG_ASAN), y)
+CPPFLAGS += -fno-omit-frame-pointer -fsanitize=address
+LDFLAGS += -fno-omit-frame-pointer -fsanitize=address
+else
+LDFLAGS += -ltcmalloc
+endif
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli

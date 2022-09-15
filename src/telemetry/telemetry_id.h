@@ -119,10 +119,15 @@ static const std::string TEL50002_READ_AVG_LAT_VOLUME = "read_avg_lat_volume";
 static const std::string TEL50010_WRITE_IOPS_VOLUME = "write_iops_volume";
 static const std::string TEL50011_WRITE_BPS_VOLUME = "write_bps_volume";
 static const std::string TEL50012_WRITE_AVG_LAT_VOLUME = "write_avg_lat_volume";
+static const std::string TEL50020_VOL_VOLUME_STATE = "volume_state";
+static const std::string TEL50021_VOL_VOLUME_TOTAL_CAPACITY= "volume_total_capacity";
+static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capacity";
 
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
 static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_cnt";
+static const std::string TEL60004_ARRAY_CAPACITY_TOTAL = "array_capacity_total";
+static const std::string TEL60005_ARRAY_CAPACITY_USED = "array_capacity_used";
 
 static const std::string TEL70000_READ_IOPS_NETWORK = "read_iops_network";
 static const std::string TEL70001_READ_BPS_NETWORK = "read_bps_network";
@@ -131,31 +136,37 @@ static const std::string TEL70011_WRITE_BPS_NETWORK = "write_bps_network";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
 
-static const std::string TEL90000_VOL_CREATE_VOLUME_ID = "create_volume_id";
-static const std::string TEL90001_VOL_DELETE_VOLUME_ID = "delete_volume_id";
-static const std::string TEL90002_VOL_MOUNT_VOLUME_ID = "mount_volume_id";
-static const std::string TEL90003_VOL_UNMOUNT_VOLUME_ID = "unmount_volume_id";
-static const std::string TEL90004_VOL_QOS_UPDATE_VOLUME_ID = "update_qos_info_for_volume_id";
-static const std::string TEL90005_VOL_RENAME_VOLUME_ID = "rename_volume_id";
-
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 
-static const std::string TEL110000_MEDIA_ERROR_COUNT_LOW = "soft_media_error_low";
-static const std::string TEL110001_MEDIA_ERROR_COUNT_HIGH = "soft_media_error_high";
-static const std::string TEL110002_POWER_CYCLE_LOW = "power_cycle_low";
-static const std::string TEL110003_POWER_CYCLE_HIGH = "power_cycle_high";
-static const std::string TEL110004_POWER_ON_HOUR_LOW = "power_on_hour_low";
-static const std::string TEL110005_POWER_ON_HOUR_HIGH = "power_on_hour_high";
-static const std::string TEL110006_UNSAFE_SHUTDOWNS_LOW = "unsafe_shutdowns_low";
-static const std::string TEL110007_UNSAFE_SHUTDOWNS_HIGH = "unsafe_shutdowns_high";
+static const std::string TEL110000_MEDIA_ERROR_COUNT_LOWER = "soft_media_error_lower";
+static const std::string TEL110001_MEDIA_ERROR_COUNT_UPPER = "soft_media_error_upper";
+static const std::string TEL110002_POWER_CYCLE_LOWER = "power_cycle_lower";
+static const std::string TEL110003_POWER_CYCLE_UPPER = "power_cycle_upper";
+static const std::string TEL110004_POWER_ON_HOUR_LOWER = "power_on_hour_lower";
+static const std::string TEL110005_POWER_ON_HOUR_UPPER = "power_on_hour_upper";
+static const std::string TEL110006_UNSAFE_SHUTDOWNS_LOWER = "unsafe_shutdowns_lower";
+static const std::string TEL110007_UNSAFE_SHUTDOWNS_UPPER = "unsafe_shutdowns_upper";
 static const std::string TEL110008_TEMPERATURE = "temperature";
 static const std::string TEL110009_AVAILABLE_SPARE = "available_spare";
 static const std::string TEL110010_AVAILABLE_SPARE_THRESHOLD = "available_spare_threshold";
 static const std::string TEL110011_PERCENTAGE_USED = "percentage_used";
-static const std::string TEL110012_CONTROLLER_BUSY_TIME_LOW = "controller_busy_time_low";
-static const std::string TEL110013_CONTROLLER_BUSY_TIME_HIGH = "controller_busy_time_high";
+static const std::string TEL110012_CONTROLLER_BUSY_TIME_LOWER = "controller_busy_time_lower";
+static const std::string TEL110013_CONTROLLER_BUSY_TIME_UPPER = "controller_busy_time_upper";
 static const std::string TEL110014_WARNING_TEMP_TIME = "warning_temperature_time";
 static const std::string TEL110015_CRITICAL_TEMP_TIME = "critical_temperature_time";
+static const std::string TEL110020_LIFETIME_WAF = "lifetime_waf";
+static const std::string TEL110021_HOUR_WAF = "trailing_hour_waf";
+static const std::string TEL110022_TRIM_SECTOR_COUNT_LOWER = "trim_sector_count_lower";
+static const std::string TEL110023_TRIM_SECTOR_COUNT_UPPER = "trim_sector_count_upper";
+static const std::string TEL110024_HOST_WRITTEN_COUNT_LOWER = "host_written_count_lower";
+static const std::string TEL110025_HOST_WRITTEN_COUNT_UPPER = "host_written_count_upper";
+static const std::string TEL110026_NAND_WRITTEN_COUNT_LOWER = "nand_written_count_lower";
+static const std::string TEL110027_NAND_WRITTEN_COUNT_UPPER = "nand_written_count_upper";
+static const std::string TEL110028_THERMAL_THROTTLE_EVNET_COUNT = "thermal_throttle_event_count";
+static const std::string TEL110029_HIGHEST_TEMPERATURE = "highest_temperature";
+static const std::string TEL110030_LOWEST_TEMPERATURE = "lowest_temeperature";
+static const std::string TEL110031_OVER_TEMPERATURE_COUNT = "over_temperature_count";
+static const std::string TEL110032_UNDER_TEMPERATURE_COUNT = "under_temperature_count";
 
 static const std::string TEL120001_READ_IOPS_PER_PORT = "read_iops_per_port";
 static const std::string TEL120002_READ_RATE_BYTES_PER_SECOND_PER_PORT = "read_rate_bytes_per_second_per_port";
@@ -178,17 +189,17 @@ static const std::string TEL130013_COUNT_OF_EVENT_DESTRUCTORS = "count_of_event_
 static const std::string TEL130014_SUBMISSION_COUNT_IN_IO_WORKER = "submission_count_in_io_worker";
 static const std::string TEL130015_COMPLETION_COUNT_IN_IO_WORKER = "completion_count_in_io_worker";
 
-static const std::string TEL140001_COUNT_OF_REQUSTED_USER_READ = "count_of_requested_user_read";
-static const std::string TEL140002_COUNT_OF_REQUSTED_USER_WRITE = "count_of_requested_user_write";
-static const std::string TEL140003_COUNT_OF_REQUSTED_USER_ADMINIO = "count_of_requested_user_adminio";
-static const std::string TEL140004_COUNT_OF_COMPLETE_USER_READ = "count_of_complete_user_read";
-static const std::string TEL140005_COUNT_OF_COMPLETE_USER_WRITE = "count_of_complete_user_write";
-static const std::string TEL140006_COUNT_OF_COMPLETE_USER_ADMINIO = "count_of_complete_user_adminio";
-static const std::string TEL140007_COUNT_OF_USER_FLUSH_PROCESS = "count_of_user_flush_process";
-static const std::string TEL140008_COUNT_OF_PARTIAL_WRITE_PROCESS = "count_of_partial_write_process";
-static const std::string TEL140009_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_io";
-static const std::string TEL140010_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
-static const std::string TEL140011_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
-static const std::string TEL140012_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
+static const std::string TEL140000_COUNT_OF_REQUSTED_USER_READ = "count_of_requested_user_read";
+static const std::string TEL140001_COUNT_OF_REQUSTED_USER_WRITE = "count_of_requested_user_write";
+static const std::string TEL140002_COUNT_OF_REQUSTED_USER_ADMINIO = "count_of_requested_user_adminio";
+static const std::string TEL140003_COUNT_OF_COMPLETE_USER_READ = "count_of_complete_user_read";
+static const std::string TEL140004_COUNT_OF_COMPLETE_USER_WRITE = "count_of_complete_user_write";
+static const std::string TEL140005_COUNT_OF_COMPLETE_USER_ADMINIO = "count_of_complete_user_adminio";
+static const std::string TEL140006_COUNT_OF_USER_FLUSH_PROCESS = "count_of_user_flush_process";
+static const std::string TEL140007_COUNT_OF_PARTIAL_WRITE_PROCESS = "count_of_partial_write_process";
+static const std::string TEL140008_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_io";
+static const std::string TEL140009_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
+static const std::string TEL140010_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
+static const std::string TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
 
 } // namespace pos

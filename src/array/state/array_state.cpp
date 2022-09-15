@@ -36,15 +36,12 @@
 
 #include "src/include/raid_state.h"
 #include "src/include/pos_event_id.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/telemetry/telemetry_id.h"
 #include "src/logger/logger.h"
 
 using namespace pos;
 
-ArrayState::ArrayState(IStateControl* iState, TelemetryClient* telemetryClient)
-: iStateControl(iState),
-  telemetryClient(telemetryClient)
+ArrayState::ArrayState(IStateControl* iState)
+: iStateControl(iState)
 {
     string sender = typeid(*this).name();
     degradedState = new StateContext(sender, SituationEnum::DEGRADED);
@@ -59,10 +56,24 @@ ArrayState::~ArrayState(void)
     delete stopState;
     delete rebuildingState;
     delete degradedState;
-    if (publisher != nullptr)
+}
+
+void
+ArrayState::Register(IArrayStateSubscriber* subscriber)
+{
+    stateSubscribers.push_back(subscriber);
+}
+
+void
+ArrayState::Unregister(IArrayStateSubscriber* subscriber)
+{
+    for (auto it = stateSubscribers.begin(); it != stateSubscribers.end(); ++it)
     {
-        telemetryClient->DeregisterPublisher(publisher->GetName());
-        delete publisher;
+        if (*it == subscriber)
+        {
+            stateSubscribers.erase(it);
+            break;
+        }
     }
 }
 
@@ -326,6 +337,12 @@ ArrayState::IsRebuildable(void)
 }
 
 bool
+ArrayState::IsRebuilding(void)
+{
+    return state == ArrayStateEnum::REBUILD;
+}
+
+bool
 ArrayState::IsBroken(void)
 {
     return state == ArrayStateEnum::BROKEN;
@@ -461,12 +478,15 @@ ArrayState::_SetState(ArrayStateEnum newState)
             }
             iStateControl->Invoke(stopState);
         }
-
+        ArrayStateType oldState = state;
         state = newState;
+        for (auto sub : stateSubscribers)
+        {
+            sub->StateChanged(oldState, state);
+        }
         POS_TRACE_INFO(EID(ARRAY_EVENT_STATE_CHANGED),
-            "Array state is changed to {}", state.ToString());
+            "Array state is changed from {} to {}", oldState.ToString(), state.ToString());
     }
-    _PublishCurrentState();
 }
 
 bool
@@ -482,37 +502,4 @@ ArrayState::_WaitState(StateContext* goal)
         }
     }
     return true;
-}
-
-void
-ArrayState::EnableStatePublisher(id_t arrayUniqueId)
-{
-    if (publisherEnabled == true)
-    {
-        POS_TRACE_WARN(EID(ARRAY_TELEMETRY_DEBUG_MSG),
-            "Failed to enable array state publisher. Already enabled");
-        return;
-    }
-
-    const string PUBLISHER_NAME = "ArrayStatePublisher";
-    const string ARRAY_UID_LABEL = "array_unique_id";
-
-    publisher = new TelemetryPublisher(PUBLISHER_NAME);
-    publisher->AddDefaultLabel(ARRAY_UID_LABEL, to_string(arrayUniqueId));
-    telemetryClient->RegisterPublisher(publisher);
-
-    publisherEnabled = true;
-}
-
-void
-ArrayState::_PublishCurrentState(void)
-{
-    if (publisherEnabled == false)
-    {
-        return;
-    }
-
-    POSMetricValue v;
-    v.gauge = static_cast<uint64_t>(state.ToEnum());
-    publisher->PublishData(TEL60001_ARRAY_STATUS, v, POSMetricTypes::MT_GAUGE);
 }

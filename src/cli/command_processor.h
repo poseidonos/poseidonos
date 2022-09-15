@@ -61,6 +61,8 @@ using grpc_cli::SetSystemPropertyRequest;
 using grpc_cli::SetSystemPropertyResponse;
 using grpc_cli::StartTelemetryRequest;
 using grpc_cli::StartTelemetryResponse;
+using grpc_cli::SetTelemetryPropertyRequest;
+using grpc_cli::SetTelemetryPropertyResponse;
 using grpc_cli::StopTelemetryRequest;
 using grpc_cli::StopTelemetryResponse;
 using grpc_cli::ResetEventWrrRequest;
@@ -91,6 +93,8 @@ using grpc_cli::ListArrayRequest;
 using grpc_cli::ListArrayResponse;
 using grpc_cli::ArrayInfoRequest;
 using grpc_cli::ArrayInfoResponse;
+using grpc_cli::RebuildArrayRequest;
+using grpc_cli::RebuildArrayResponse;
 using grpc_cli::SetLogLevelRequest;
 using grpc_cli::SetLogLevelResponse;
 using grpc_cli::SetLogPreferenceRequest;
@@ -123,6 +127,8 @@ using grpc_cli::CreateTransportRequest;
 using grpc_cli::CreateTransportResponse;
 using grpc_cli::CreateVolumeRequest;
 using grpc_cli::CreateVolumeResponse;
+using grpc_cli::SetVolumePropertyRequest;
+using grpc_cli::SetVolumePropertyResponse;
 
 class CommandProcessor
 {
@@ -140,6 +146,7 @@ public:
     // Telemetry Commands
     grpc::Status ExecuteStartTelemetryCommand(const StartTelemetryRequest* request, StartTelemetryResponse* reply);
     grpc::Status ExecuteStopTelemetryCommand(const StopTelemetryRequest* request, StopTelemetryResponse* reply);
+    grpc::Status ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyRequest* request, SetTelemetryPropertyResponse* reply);
 
     // Developer COmmands
     grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
@@ -158,6 +165,7 @@ public:
     grpc::Status ExecuteUnmountArrayCommand(const UnmountArrayRequest* request, UnmountArrayResponse* reply);
     grpc::Status ExecuteListArrayCommand(const ListArrayRequest* request, ListArrayResponse* reply);
     grpc::Status ExecuteArrayInfoCommand(const ArrayInfoRequest* request, ArrayInfoResponse* reply);
+    grpc::Status ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply);
     
     // Logger Commands
     grpc::Status ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply);
@@ -182,9 +190,10 @@ public:
 
     // Volume Commands
     grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);
+    grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
 
 private:
-    bool _isPosTerminating;
+    bool _isPosTerminating {false};
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
     void _SetEventStatus(int eventId, grpc_cli::Status *status);
@@ -195,6 +204,7 @@ private:
     void _FillSmartData(struct spdk_nvme_health_information_page payload, grpc_cli::SmartLog* data);
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
+    bool _IsValidIpAddress(const std::string &ipAddress);
 
     typedef struct BiosInfo {
         std::string vendor;

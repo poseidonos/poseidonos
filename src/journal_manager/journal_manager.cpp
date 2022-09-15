@@ -122,6 +122,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     checkpointManager = cpManager;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
+
     replayHandler = replay;
     arrayInfo = info;
 
@@ -219,9 +220,9 @@ JournalManager::~JournalManager(void)
 IVersionedSegmentContext*
 JournalManager::_CreateVersionedSegmentCtx(void)
 {
-    if (config->IsEnabled() == true)
+    if ((true == config->IsEnabled()) && (true == config->IsVscEnabled()))
     {
-        return new DummyVersionedSegmentCtx();
+        return new VersionedSegmentCtx();
     }
     else
     {

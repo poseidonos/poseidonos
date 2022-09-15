@@ -1108,6 +1108,20 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 1876
+    Name: SET_VOLUME_PROPERTY_FAILURE_ARRAY_NAME_DOES_NOT_EXIST
+    Severity:
+    Message: Failed to set the property of a volume.
+    Cause: Could not find the input array.
+    Solution:
+  -
+    Id: 1877
+    Name: SET_VOLUME_PROPERTY_FAILURE_ARRAY_NOT_ONLINE
+    Severity:
+    Message: Failed to set the property of a volume.
+    Cause: State of the input array is not online.
+    Solution:
 
   -
     Id: 2200
@@ -1851,15 +1865,8 @@ Root:
     Cause: There is no available spare device to replace the data device.
     Solution: Please add spare devices and try again.
   -
-    Id: 2568
-    Name: UPDATE_ABR_DEBUG_MSG
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
     Id: 2569
-    Name: ARRAY_INFO_DEBUG_MSG
+    Name: UPDATE_ABR_DEBUG_MSG
     Severity:
     Message:
     Cause:
@@ -2088,6 +2095,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 2602
+    Name: MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID
+    Severity:
+    Message: Failed to mount array.
+    Cause: Input target address is invalid.
+    Solution: Please check the format of the target address.
 
   -
   # Rebuild: 2800 - 2899
@@ -2223,7 +2237,48 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 2820
+    Name: REBUILD_ARRAY_NAME_DOES_NOT_EXIST
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: Array of the requested name could not be found.
+    Solution: Please check the array's name to rebuild and try again.
+  -
+    Id: 2821
+    Name: REBUILD_ARRAY_SPARE_DOES_NOT_EXIST
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: There is no spare device.
+    Solution: Please add spare devices and try again.
+  -
+    Id: 2822
+    Name: REBUILD_ARRAY_OFFLINED
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: Rebuild requests are not allowed in array that is not mounted.
+    Solution: Please retry after array mount.
+  -
+    Id: 2823
+    Name: REBUILD_ARRAY_ALREADY_IN_PROGRESS
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: The requested array is already in the process of rebuilding.
+    Solution: Please try again after completing the rebuilding process.
+  -
+    Id: 2824
+    Name: REBUILD_ARRAY_IS_NORMAL
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: There is no device to rebuild in array.
+    Solution: Please check the state of array.
+  -
+    Id: 2825
+    Name: REBUILD_ARRAY_RAID_NOT_SUPPORTED
+    Severity:
+    Message: Failed to rebuild an array.
+    Cause: The RAID of array does not support rebuild .
+    Solution: Please check the RAID type of array.
 
   # Config: 2900 - 2950
   -
@@ -2296,7 +2351,6 @@ Root:
     Message:
     Cause:
     Solution:
-
 
   # Journal: 3000 - 3099
   -
@@ -4599,6 +4653,27 @@ Root:
     Severity:
     Message: Only one scheduler can be created for each NUMA
     Cause: Remove core id belonging to the same NUMA
+    Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4086
+    Name: MFS_SCHEDULER_COUNT_SMALLER_THAN_EXPECTED
+    Severity:
+    Message: Numa_dedicated is set but the count of metafs io scheduler is not more than one
+    Cause: When numa_dedicated is set, the count of scheduler is expected two
+    Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4087
+    Name: MFS_SCHEDULER_NONE
+    Severity:
+    Message: A scheduler needs to be created at least
+    Cause: There is no metafs io scheduler
+    Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4088
+    Name: MFS_NEED_TO_CHECK_SCHEDULER_SETTING
+    Severity:
+    Message: Need to check metafs io scheduler setting in pos.conf
+    Cause: There is some problem in scheduler setting
     Solution: Please check meta_scheduler in pos.conf
   
   -
@@ -7319,7 +7394,55 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 10500
+    Name: TRACE_START
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10501
+    Name: TRACE_ENABLED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10502
+    Name: TRACE_NOT_ENABLED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10503
+    Name: TRACE_CONFIG_ERROR
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 10504
+    Name: TRACE_EXPORTER_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution: 
+  -
+    Id: 10505
+    Name: TRACE_PROCESSOR_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution: 
+  -
+    Id: 10506
+    Name: TRACE_PROVIDER_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Exceptions
   -

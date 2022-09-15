@@ -23,6 +23,8 @@ public:
     MOCK_METHOD(int, DetachDevice, (UblockSharedPtr uBlock), (override));
     MOCK_METHOD(void, MountDone, (), (override));
     MOCK_METHOD(void, SetPreferences, (bool isWT), (override));
+    MOCK_METHOD(void, SetTargetAddress, (string targetAddress), (override));
+    MOCK_METHOD(string, GetTargetAddress, (), (override));
     MOCK_METHOD(int, CheckUnmountable, (), (override));
     MOCK_METHOD(const PartitionLogicalSize*, GetSizeInfo, (PartitionType type), (override));
     MOCK_METHOD(DeviceSet<string>, GetDevNames, (), (override));
@@ -34,9 +36,9 @@ public:
     MOCK_METHOD(ArrayStateType, GetState, (), (override));
     MOCK_METHOD(StateContext*, GetStateCtx, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildingProgress, (), (override));
-    MOCK_METHOD(bool, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
+    MOCK_METHOD(int, IsRecoverable, (IArrayDevice * target, UBlockDevice* uBlock), (override));
     MOCK_METHOD(IArrayDevice*, FindDevice, (string devSn), (override));
-    MOCK_METHOD(bool, TriggerRebuild, (ArrayDevice * target), (override));
+    MOCK_METHOD(bool, TriggerRebuild, (vector<IArrayDevice *> targets), (override));
 };
 
 } // namespace pos

@@ -93,6 +93,7 @@ TEST(AffinityManager, GetReactorCPUSetString_ReturnReactorBitString)
     // Given : Set CpuSet(reactor : 0x2)
     CpuSetArray cpuArray;
     CPU_ZERO(&cpuArray[static_cast<uint32_t>(CoreType::REACTOR)]);
+    CPU_ZERO(&cpuArray[static_cast<uint32_t>(CoreType::EVENT_REACTOR)]);
     CPU_SET(0, &cpuArray[static_cast<uint32_t>(CoreType::REACTOR)]);
     CPU_SET(1, &cpuArray[static_cast<uint32_t>(CoreType::REACTOR)]);
     AffinityManager affinityManager(8, cpuArray);

@@ -85,7 +85,6 @@ TEST(IoRecoveryEvent, Execute_WriteWithoutRecovery)
 
     // Then: return value(actual) should be true, ubio error type should not be reset
     ASSERT_EQ(actual, expected);
-    ASSERT_EQ(ubio->GetError(), IOErrorType::TRANSPORT_FAIL);
 }
 
 TEST(IoRecoveryEvent, Execute_WriteUncorWithoutRecovery)

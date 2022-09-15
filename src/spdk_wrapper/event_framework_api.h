@@ -72,7 +72,9 @@ public:
     virtual bool SendSpdkEvent(uint32_t core, EventFuncFourParams func, void* arg1,
             void* arg2);
     virtual bool SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* arg1);
+    virtual bool SendSpdkEvent(EventFuncOneParam func, void* arg1);
     void CompleteEvents(void);
+    void CompleteSingleQueueEvents(void);
 
     virtual uint32_t GetFirstReactor(void);
     virtual uint32_t GetCurrentReactor(void);
@@ -89,14 +91,18 @@ private:
     using EventQueueLock = std::recursive_mutex;
 
     static const uint32_t MAX_REACTOR_COUNT = 256;
+    static const uint32_t MAX_NUMA_COUNT = 8;
     static const uint32_t MAX_PROCESSABLE_EVENTS;
 
-    static std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
-    static std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
+    std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
+    std::array<EventQueue, MAX_NUMA_COUNT> eventSingleQueue;
+    std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
 
     SpdkThreadCaller* spdkThreadCaller;
     SpdkEnvCaller* spdkEnvCaller;
     void _SendEventToSpareQueue(uint32_t core, EventFuncOneParam func, void* arg1);
+    void _SendEventToSingleQueue(EventFuncOneParam func, void* arg1);
+    bool numaDedicatedSchedulingPolicy;
 };
 
 using EventFrameworkApiSingleton = Singleton<EventFrameworkApi>;

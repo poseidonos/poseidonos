@@ -260,7 +260,7 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
         dirtyMaps = dirtyMapManager->GetDirtyList(request.groupId);
     }
 
-    checkpointHandler->SyncContext(request.groupId);
+    checkpointHandler->UpdateLogGroupInProgress(request.groupId);
     int ret = checkpointHandler->Start(dirtyMaps, completionEvent);
     if (ret != 0)
     {

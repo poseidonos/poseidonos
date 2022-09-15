@@ -103,7 +103,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;
             POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Try to create PartitionRebuild for {}, pairCnt:{}", PARTITION_TYPE_STR[ctx->part], ctx->rgPairs.size());
+                "Try to create PartitionRebuild for {}, pairCnt:{}", PARTITION_TYPE_STR[ctx->part], ctx->rp.size());
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {
@@ -205,8 +205,6 @@ ArrayRebuild::_RebuildNext(void)
 void
 ArrayRebuild::_RebuildDone(RebuildResult res)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::_RebuildDone array {} rebuild done with result {} ", arrayName, REBUILD_STATE_STR[(int)res.result]);
     RebuildState taskResult = res.result;
     state = taskResult;
 

@@ -54,10 +54,10 @@ public:
     virtual void Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler);
 
     virtual int Start(MapList pendingDirtyMaps, EventSmartPtr callback);
-    virtual int FlushCompleted(int metaId);
+    virtual int FlushCompleted(int metaId, int logGroupId);
 
     virtual CheckpointStatus GetStatus(void);
-    virtual void SyncContext(int logGroupId);
+    virtual void UpdateLogGroupInProgress(int logGroupId);
 
 private:
     void _CheckMapFlushCompleted(void);

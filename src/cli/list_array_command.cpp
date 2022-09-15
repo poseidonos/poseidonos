@@ -124,7 +124,7 @@ ListArrayCommand::Execute(json& doc, string rid)
 
             arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
             arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
-            arrayElement.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::SystemCapacity(info->GetIndex())) + "\""));
+            arrayElement.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::TotalCapacity(info->GetIndex())) + "\""));
             arrayElement.SetAttribute(JsonAttribute("used", "\"" + to_string(SpaceInfo::Used(info->GetIndex())) + "\""));
             jsonArrayList.AddElement(arrayElement);
         }

@@ -43,6 +43,12 @@ service PosCli {
     	};
 	}
 
+	rpc SetTelemetryProperty (SetTelemetryPropertyRequest) returns (SetTelemetryPropertyResponse) {
+		option (google.api.http) = {
+      		get: "/v1/set_telemetry_property"
+    	};
+	}
+
 	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
 	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
 	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
@@ -106,6 +112,12 @@ service PosCli {
 	rpc ArrayInfo (ArrayInfoRequest) returns (ArrayInfoResponse) {
 		option (google.api.http) = {
       		post: "/v1/arrayinfo"
+    	};
+	}
+	
+	rpc RebuildArray (RebuildArrayRequest) returns (RebuildArrayResponse) {
+		option (google.api.http) = {
+      		post: "/v1/rebuildarray"
     	};
 	}
 
@@ -202,6 +214,12 @@ service PosCli {
 	rpc CreateVolume (CreateVolumeRequest) returns (CreateVolumeResponse) {
 		option (google.api.http) = {
       		post: "/v1/createvolume"
+    	};
+	}
+
+	rpc SetVolumeProperty (SetVolumePropertyRequest) returns (SetVolumePropertyResponse) {
+		option (google.api.http) = {
+      		post: "/v1/setvolumeproperty"
     	};
 	}
 }
@@ -332,6 +350,26 @@ message StopTelemetryRequest {
 }
 
 message StopTelemetryResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetTelemetryPropertyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string publicationListPath = 1;
+	}
+	Param param = 4;
+}
+
+message SetTelemetryPropertyResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
@@ -562,6 +600,7 @@ message MountArrayRequest {
 	message Param {
 			string name = 1;
 			optional bool enableWriteThrough = 2;
+			optional string targetAddress = 3;
 	}
 	Param param = 4;
 }
@@ -575,6 +614,7 @@ message MountArrayResponse {
 	Result result = 3;
 	PosInfo info = 4;
 }
+
 message UnmountArrayRequest {
 	string command = 1;
 	string rid = 2;
@@ -650,6 +690,26 @@ message ArrayInfoResponse {
 	message Result {
 		Status status = 1;
 		Array data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message RebuildArrayRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+			string name = 1;
+	}
+	Param param = 4;
+}
+
+message RebuildArrayResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
 	}
 	Result result = 3;
 	PosInfo info = 4;
@@ -1153,6 +1213,37 @@ message CreateVolumeRequest {
 }
 
 message CreateVolumeResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message CreateVolumeData {
+			string targetAddress = 1;
+		}
+		CreateVolumeData data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetVolumePropertyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+		string array = 2;
+		string newVolumeName = 3;
+		uint64 size = 4;
+		uint64 maxiops = 5;
+		uint64 maxbw = 6;
+		bool updateprimaryvol = 7;
+		bool isprimaryvol = 8;
+	}
+	Param param = 4;
+}
+
+message SetVolumePropertyResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

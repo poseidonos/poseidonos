@@ -180,4 +180,20 @@ TEST(Query, Query_testMaximum)
     // Then
     ASSERT_EQ(maxVal, personNameisbar->GetID());
 }
+
+TEST(Query, Query_testSelectWhere)
+{
+    // Given
+    std::vector<Person*> v1;
+    v1.push_back(new Person("bar", 10));
+    v1.push_back(new Person("foo", 20));
+    v1.push_back(new Person("foo", 30));
+
+    // When
+    auto&& idListOfPersonNameisfoo = Enumerable::SelectWhere(v1,
+        [](auto p) { return p->GetID(); }, [](auto i) { return i->GetName() == "foo"; });
+
+    // Then
+    ASSERT_EQ(20, idListOfPersonNameisfoo.front());
+}
 }  // namespace Enumerable

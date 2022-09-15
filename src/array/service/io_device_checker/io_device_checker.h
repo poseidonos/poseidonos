@@ -37,6 +37,7 @@
 
 #include "i_io_device_checker.h"
 #include "i_device_checker.h"
+#include "src/include/io_recovery_ret_type.h"
 
 using namespace std;
 
@@ -49,7 +50,7 @@ public:
     virtual ~IODeviceChecker(void);
     bool Register(unsigned int arrayIndex, IDeviceChecker* checker);
     void Unregister(unsigned int arrayIndex);
-    bool IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock) override;
+    int IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(unsigned int arrayIndex, string devSn) override;
 
 private:

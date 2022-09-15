@@ -777,16 +777,16 @@ QosManager::UpdateBackendPolicy(BackendEvent eventType, qos_backend_policy backe
 {
     std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
     backendPolicyCli[eventType] = backendPolicy;
-    if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_LOWEST)
+    if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_LOW)
     {
         qos_backend_policy policy;
-        policy.priorityImpact = PRIORITY_HIGHEST;
+        policy.priorityImpact = PRIORITY_HIGH;
         backendPolicyCli[BackendEvent_FrontendIO] = policy;
     }
-    else if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_HIGHEST)
+    else if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_HIGH)
     {
         qos_backend_policy policy;
-        policy.priorityImpact = PRIORITY_LOWEST;
+        policy.priorityImpact = PRIORITY_LOW;
         backendPolicyCli[BackendEvent_FrontendIO] = policy;
     }
     return QosReturnCode::SUCCESS;

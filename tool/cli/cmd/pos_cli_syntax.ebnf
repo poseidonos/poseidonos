@@ -17,8 +17,9 @@ Digit
 Hex
   = "0" | "1" | "2" | "3" | "4" | "5" | "6"
   | "7" | "8" | "9" | "A" | "B" | "C" | "D"
-  | "E" | "F"
-  ; 
+  | "E" | "F" | "a" | "b" | "c" | "d" | "e"
+  | "f"
+  ;
 
 Number = Digit , { Digit } ;
 
@@ -31,12 +32,10 @@ Identifier = Letter , { Letter | Digit | "-" | "_" } ;
 
 BooleanValue = "true" | "false" ;
 
-Uuid = Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , "-" ,
-      Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex
-;
+Uuid = Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex ,
+  "-" , Hex , Hex , Hex , Hex , "-" , Hex , Hex , Hex ,
+  Hex , "-" , Hex , Hex , Hex , Hex , "-" , Hex , Hex ,
+  Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex , Hex ;
 
 ArrayName = Identifier ;
 
@@ -118,15 +117,16 @@ Cmd = ApplicationName , GlobalFlagList ,
   ) ;
 
 ArrayCmd = "array" ,
-  ( MountArrayCmd  | UnmountArrayCmd
-  | ListArrayCmd   | AddSpareCmd
-  | RemoveSpareCmd | DeleteArrayCmd
-  | CreateArrayCmd | AutoCreateArrayCmd
-  | ReplaceArrayDeviceCmd
+  ( MountArrayCmd         | UnmountArrayCmd
+  | ListArrayCmd          | AddSpareCmd
+  | RemoveSpareCmd        | DeleteArrayCmd
+  | CreateArrayCmd        | AutoCreateArrayCmd
+  | ReplaceArrayDeviceCmd | RebuildArrayCmd
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
-  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ;
+  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ,
+  [ ( "--traddr" | "-i" ) , TargetAddress ] ;
 
 UnmountArrayCmd = "unmount" , ( "--array-name" | "-a" ) ,
   ArrayName , [ "--force" ] ;
@@ -158,17 +158,21 @@ AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
   [ "--raid" , RaidType ] ;
 
+RebuildArrayCmd = "rebuild" , ( "--array-name" | "-a" ) ,
+  ArrayName ;
+
 VolumeCmd = "volume" ,
   ( CreateVolumeCmd  | DeleteVolumeCmd
   | MountVolumeCmd   | MountVolumeWithSubsystemCmd
   | UnmountVolumeCmd | ListVolumeCmd
-  | RenameVolumeCmd
+  | RenameVolumeCmd  | SetVolumePropertyCmd
   ) ;
 
 CreateVolumeCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
-  [ "--maxbw" , Bandwidth ] , [ "--iswalvol" ] , [ "--uuid" Uuid];
+  [ "--maxbw" , Bandwidth ] , [ "--wal-volume" ] ,
+  [ "--uuid" , Uuid ] ;
 
 DeleteVolumeCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
@@ -198,6 +202,11 @@ ListVolumeCmd = "list" , ( "--array-name" | "-a" ) ,
 RenameVolumeCmd = "rename" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--new-volume-name" | "-n" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ;
+
+SetVolumePropertyCmd = "set-property" , ( "--volume-name" | "-v" ) ,
+  VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
+  ( "--new-volume-name" | "-n" ) , VolumeName ,
+  [ ( "--primary-volume" ) ] , [ ( "--secondary-volume" ) ] ;
 
 DeviceCmd = "device" ,
   ( CreateDeviceCmd
@@ -317,6 +326,10 @@ TelemetryCmd = "telemetry" , ( TelemetryStartCmd | TelemetryStopCmd ) ;
 TelemetryStartCmd = TelemetryCmd , ( "start" ) ;
 
 TelemetryStopCmd = TelemetryCmd , ( "stop" ) ;
+
+TelemetrySetPropertyCmd = TelemetryCmd ,
+  ( "set-property" ) , [ "--publication-list-path" ] ,
+  Identifier ;
 
 DevelCmd = "devel" ,
   ( ResetMbrCmd

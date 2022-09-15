@@ -109,7 +109,7 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
             "Valid block count decreasedCount:{} total validCount:{} : UNDERFLOWED", dec, decreased);
-        assert(false);
+        return {false, SegmentState::ERROR};
     }
 
     return {false, state};
@@ -132,6 +132,13 @@ SegmentInfo::IncreaseOccupiedStripeCount(void)
 {
     // ++ is equivalent to fetch_add(1) + 1
     return ++occupiedStripeCount;
+}
+
+void
+SegmentInfo::SetState(SegmentState newState)
+{
+    std::lock_guard<std::mutex> lock(seglock);
+    state = newState;
 }
 
 SegmentState

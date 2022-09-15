@@ -165,6 +165,13 @@ private:
     vector<ConfigKeyValue> wtData = {
         {"enable", "false"}
     };
+    vector<ConfigKeyValue> traceData = {
+        {"enable", "false"},
+        {"collector_endpoint", "\"http://localhost:3418/v1/traces\""}
+    };
+    vector<ConfigKeyValue> rebuildData = {
+        {"auto_start", "true"}
+    };
 
     using ConfigList =
         std::vector<ConfigModuleData>;
@@ -183,7 +190,9 @@ private:
         {"flow_control", flowControlData},
         {"transport", transportData},
         {"metafs", metaFsData},
-        {"write_through", wtData}
+        {"write_through", wtData},
+        {"trace", traceData},
+        {"rebuild", rebuildData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";

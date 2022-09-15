@@ -128,7 +128,7 @@ buildTest()
 
     texecc ./configure $config_option
     cwd=""
-    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
+    sshpass -p bamboo ssh -q -tt root@${target_ip} "cd ${pos_working_dir}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y -DASAN_ENABLE=n"
     texecc make -j ${job_number} clean
 
     if [ $target_type == "VM" ]

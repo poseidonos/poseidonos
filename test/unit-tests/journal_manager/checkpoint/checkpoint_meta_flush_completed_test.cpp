@@ -14,11 +14,12 @@ TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteSuccessfully)
     // Given: Map flush completed event with mapId
     NiceMock<MockCheckpointHandler> checkpointHandler(0);
     int mapId = 0;
-    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId);
+    int logGroupId = 0;
+    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId, logGroupId);
 
     // Then: Checkpoint handler should be notified with the mapId
     EXPECT_CALL(checkpointHandler,
-        FlushCompleted(mapId))
+        FlushCompleted(mapId, logGroupId))
         .Times(1)
         .WillOnce(Return(0));
 
@@ -34,11 +35,12 @@ TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteFails)
     // Given: Map flush completed event with mapId
     NiceMock<MockCheckpointHandler> checkpointHandler(0);
     int mapId = 0;
-    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId);
+    int logGroupId = 0;
+    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId, logGroupId);
 
     // Then: Checkpoint handler should be notified with the mapId
     EXPECT_CALL(checkpointHandler,
-        FlushCompleted(mapId))
+        FlushCompleted(mapId, logGroupId))
         .Times(1)
         .WillOnce(Return(-1));
 

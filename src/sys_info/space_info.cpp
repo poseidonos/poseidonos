@@ -51,12 +51,12 @@ SpaceInfo::IsEnough(uint32_t arrayId, uint64_t size)
 uint64_t
 SpaceInfo::OPSize(uint32_t arrayId)
 {
-    uint64_t capa = TotalCapacity(arrayId);
+    uint64_t capa = RawCapacity(arrayId);
     return (uint64_t)(capa * ArrayConfig::OVER_PROVISIONING_RATIO / 100);
 }
 
 uint64_t
-SpaceInfo::TotalCapacity(uint32_t arrayId)
+SpaceInfo::RawCapacity(uint32_t arrayId)
 {
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayId);
     if (info != nullptr)
@@ -74,11 +74,11 @@ SpaceInfo::TotalCapacity(uint32_t arrayId)
 }
 
 uint64_t
-SpaceInfo::SystemCapacity(uint32_t arrayId)
+SpaceInfo::TotalCapacity(uint32_t arrayId)
 {
-    uint64_t total = TotalCapacity(arrayId);
+    uint64_t total = RawCapacity(arrayId);
     uint64_t op = OPSize(arrayId);
-    POS_TRACE_INFO(9000, "SystemCapacity: total:{} - op:{} = sys:{} ",
+    POS_TRACE_INFO(9000, "TotalCapacity: total:{} - op:{} = sys:{} ",
         total, op, total - op);
     return total - op;
 }
@@ -94,14 +94,12 @@ SpaceInfo::Used(uint32_t arrayId)
     {
         usedSize = volMgr->EntireVolumeSize();
     }
-
     return usedSize;
 }
 
 uint64_t
 SpaceInfo::Remaining(uint32_t arrayId)
 {
-    return SystemCapacity(arrayId) - Used(arrayId);
+    return TotalCapacity(arrayId) - Used(arrayId);
 }
-
 } // namespace pos

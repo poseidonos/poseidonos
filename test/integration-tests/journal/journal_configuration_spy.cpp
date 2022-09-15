@@ -2,7 +2,8 @@
 
 namespace pos
 {
-JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize, uint64_t partitionSize, bool isRocksDBEnabled, std::string rocksDBBasePath)
+JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t logBufferSize, uint64_t pageSize,
+    uint64_t partitionSize, bool isRocksDBEnabled, std::string rocksDBBasePath, bool isVscEnabled)
 : JournalConfiguration()
 {
     journalEnabled = isJournalEnabled;
@@ -12,6 +13,7 @@ JournalConfigurationSpy::JournalConfigurationSpy(bool isJournalEnabled, uint64_t
     maxPartitionSize = partitionSize;
     rocksdbEnabled = isRocksDBEnabled;
     rocksdbPath = rocksDBBasePath;
+    vscEnabled = isVscEnabled;
 }
 
 JournalConfigurationSpy::~JournalConfigurationSpy(void)

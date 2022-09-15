@@ -95,15 +95,16 @@ public:
             ON_CALL(*scheduler[i], ExitThread).WillByDefault(Return());
         }
 
+        config = new NiceMock<MockMetaFsConfigManager>;
         schedulerFactory = new NiceMock<MockMetaFsIoSchedulerFactory>;
 
-        ON_CALL(config, Init).WillByDefault(Return(true));
-        ON_CALL(config, GetTimeIntervalInMillisecondsForMetric).WillByDefault(Return(0));
-        ON_CALL(config, GetWrrWeight).WillByDefault(Return(weight));
+        ON_CALL(*config, Init).WillByDefault(Return(true));
+        ON_CALL(*config, GetTimeIntervalInMillisecondsForMetric).WillByDefault(Return(0));
+        ON_CALL(*config, GetWrrWeight).WillByDefault(Return(weight));
 
         tp = new NiceMock<TelemetryPublisher>;
 
-        service = new MetaFsServiceTester(&config, schedulerFactory);
+        service = new MetaFsServiceTester(config, schedulerFactory, COUNT_OF_SCHEDULER);
     }
 
     virtual void TearDown(void)
@@ -120,7 +121,7 @@ protected:
     static const int COUNT_OF_SCHEDULER = 2;
     NiceMock<MockMetaFsIoScheduler>* scheduler[COUNT_OF_SCHEDULER];
     NiceMock<MockMetaFsIoSchedulerFactory>* schedulerFactory;
-    NiceMock<MockMetaFsConfigManager> config;
+    NiceMock<MockMetaFsConfigManager>* config;
     NiceMock<TelemetryPublisher>* tp;
     std::vector<int> weight;
 
@@ -134,7 +135,7 @@ protected:
 TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerWithNuma0CanBeCreatedWhenSchedulerCoreSettingIsSetToACoreAndNumaDedicatedSchedulingIsOff)
 {
     EXPECT_CALL(*schedulerFactory, CreateMetaFsIoScheduler).WillOnce(Return(scheduler[0]));
-    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
+    ON_CALL(*config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
 
     CPU_SET(1, &schedSet);
 
@@ -154,7 +155,7 @@ TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerWithNuma0CanBeCreatedW
 TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerWithNuma1CanBeCreatedWhenSchedulerCoreSettingIsSetToACoreAndNumaDedicatedSchedulingIsOff)
 {
     EXPECT_CALL(*schedulerFactory, CreateMetaFsIoScheduler).WillOnce(Return(scheduler[0]));
-    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
+    ON_CALL(*config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
 
     CPU_SET(1, &schedSet);
 
@@ -173,7 +174,7 @@ TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerWithNuma1CanBeCreatedW
 
 TEST_F(MetaFsServiceFixture, Initialize_testIfAnySchedulerCannotBeCreatedWhenSchedulerCoreSettingIsSetToTwoCoresNumaDedicatedSchedulingIsOff)
 {
-    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
+    ON_CALL(*config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(false));
 
     CPU_SET(1, &schedSet);
     CPU_SET(2, &schedSet);
@@ -190,7 +191,7 @@ TEST_F(MetaFsServiceFixture, Initialize_testIfAnySchedulerCannotBeCreatedWhenSch
 TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerCanBeCreatedWhenSchedulerCoreSettingIsSetToACoreInTheSameNumaAndNumaDedicatedSchedulingIsOn)
 {
     EXPECT_CALL(*schedulerFactory, CreateMetaFsIoScheduler).WillOnce(Return(scheduler[0]));
-    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(true));
+    ON_CALL(*config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(true));
 
     CPU_SET(1, &schedSet);
 
@@ -209,7 +210,7 @@ TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerCanBeCreatedWhenSchedu
 
 TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerCannotBeCreatedMoreThenOneNumaEachNumaWhenNumaDedicatedSchedulingIsOn)
 {
-    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(true));
+    ON_CALL(*config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(true));
 
     CPU_SET(1, &schedSet);
     CPU_SET(2, &schedSet);
@@ -227,7 +228,7 @@ TEST_F(MetaFsServiceFixture, Initialize_testIfOneSchedulerCanBeCreatedEachNumaWh
 {
     EXPECT_CALL(*schedulerFactory, CreateMetaFsIoScheduler).WillOnce(Return(scheduler[0]))
         .WillOnce(Return(scheduler[1]));
-    ON_CALL(config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(true));
+    ON_CALL(*config, IsSupportingNumaDedicatedScheduling).WillByDefault(Return(true));
 
     CPU_SET(1, &schedSet);
     CPU_SET(2, &schedSet);

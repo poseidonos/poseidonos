@@ -38,8 +38,9 @@
 #include "src/lib/singleton.h"
 
 struct spdk_nvme_cpl;
-struct spdk_nvme_health_information_page;
 struct spdk_nvme_ctrlr;
+struct spdk_nvme_health_information_page;
+struct spdk_nvme_log_samsung_extended_information_entry;
 
 namespace pos
 {
@@ -51,7 +52,15 @@ enum class SmartReturnType
     SUCCESS = 0,
     SEND_ERR,
     RESPONSE_ERR,
-    CTRL_NOT_EXIST
+    CTRL_NOT_EXIST,
+    LID_NOT_SUPPORTED
+};
+
+enum class SmartReqId
+{
+    NVME_HEALTH_INFO = 0,
+    EXTENDED_SMART_INFO,
+    OCP_INFO
 };
 
 class SmartCollector
@@ -60,14 +69,26 @@ public:
     SmartCollector(void);
     virtual ~SmartCollector(void);
     void PublishSmartDataToTelemetryAllCtrl(void);
-    SmartReturnType CollectPerCtrl(spdk_nvme_health_information_page* payload, spdk_nvme_ctrlr* ctrlr);
+    SmartReturnType CollectPerCtrl(void* payload, spdk_nvme_ctrlr* ctrlr, SmartReqId reqId);
 
 private:
+    int CollectGetLogPage(void* payload, spdk_nvme_ctrlr* ctrlr, std::string deviceName, SmartReqId reqId);
+
+    void PublishSmartTelemetry(spdk_nvme_health_information_page* payload, std::string deviceName);
+    void PublishExtSmartTelemetry(spdk_nvme_log_samsung_extended_information_entry* payload, std::string deviceName);
+
     static void CompleteSmartLogPage(void* arg, const spdk_nvme_cpl* cpl);
-    void PublishTelemetry(spdk_nvme_health_information_page* payload, std::string deviceName);
+
+    // A 128-bit value is expressed as 126 bits. The most significant 2 bits will be truncated.
+    // Since the gauge is expressed as int64, the lower 64th bit is shifted to upper.
+    // Therefore, the maximum value of lower and upper has a value from 0 to 2^63 - 1.
+    void ConvertMaxInt64Value(uint64_t* upper, uint64_t* lower);
 
     TelemetryClient* telemetryClient = nullptr;
     TelemetryPublisher* publisher = nullptr;
+
+    const uint64_t SIGN_BIT_INT_64_MASK = (1ull << 63);
+    const uint64_t INT_64_MAX_VALUE = (1ull << 63) - 1;
 };
 using SmartCollectorSingleton = Singleton<SmartCollector>;
 } // namespace pos

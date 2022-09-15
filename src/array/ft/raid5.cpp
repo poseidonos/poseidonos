@@ -97,7 +97,7 @@ Raid5::Translate(const LogicalEntry& le)
 }
 
 list<FtBlkAddr>
-Raid5::GetRebuildGroup(FtBlkAddr fba)
+Raid5::GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals)
 {
     uint32_t blksPerChunk = ftSize_.blksPerChunk;
     uint32_t offsetInChunk = fba.offset % blksPerChunk;
@@ -118,7 +118,7 @@ Raid5::GetRebuildGroup(FtBlkAddr fba)
 }
 
 RaidState
-Raid5::GetRaidState(vector<ArrayDeviceState> devs)
+Raid5::GetRaidState(const vector<ArrayDeviceState>& devs)
 {
     auto&& abnormalDevs = Enumerable::Where(devs,
         [](auto d) { return d != ArrayDeviceState::NORMAL; });
@@ -338,6 +338,10 @@ Raid5::GetParityPoolSize()
     return parityPools.size();
 }
 
-
+RecoverFunc
+Raid5::GetRecoverFunc(vector<uint32_t> targets, vector<uint32_t> abnormals)
+{
+    return recoverFunc;
+}
 } // namespace pos
 

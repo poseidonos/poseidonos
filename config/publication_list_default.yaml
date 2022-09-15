@@ -3,20 +3,20 @@ metrics_to_publish:
   bandwidth_device:
   capacity_device:
   uptime_sec:
-  soft_media_error_low:
-  soft_media_error_high:
-  power_cycle_low:
-  power_cycle_high:
-  power_on_hour_low:
-  power_on_hour_high:
-  unsafe_shutdowns_low:
-  unsafe_shutdowns_high:
+  soft_media_error_lower:
+  soft_media_error_upper:
+  power_cycle_lower:
+  power_cycle_upper:
+  power_on_hour_lower:
+  power_on_hour_upper:
+  unsafe_shutdowns_lower:
+  unsafe_shutdowns_upper:
   temperature:
   available_spare:
   available_spare_threshold:
   percentage_used:
-  controller_busy_time_low:
-  controller_busy_time_high:
+  controller_busy_time_lower:
+  controller_busy_time_upper:
   warning_temperature_time:
   critical_temperature_time:
   read_iops_host:
@@ -45,3 +45,6 @@ metrics_to_publish:
   iops_read:
   iops_write:
   iops:
+  array_status:
+  array_capacity_total:
+  array_capacity_used:

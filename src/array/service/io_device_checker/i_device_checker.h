@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/include/smart_ptr_type.h"
+#include "src/include/io_recovery_ret_type.h"
 
 using namespace std;
 
@@ -51,7 +52,7 @@ public:
     {
     }
 // LCOV_EXCL_STOP
-    virtual bool IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) = 0;
+    virtual int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) = 0;
     virtual IArrayDevice* FindDevice(string devSn) = 0;
 };
 } // namespace pos

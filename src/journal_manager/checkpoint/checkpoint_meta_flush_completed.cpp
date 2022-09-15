@@ -36,9 +36,10 @@
 
 namespace pos
 {
-CheckpointMetaFlushCompleted::CheckpointMetaFlushCompleted(CheckpointHandler* cpHandler, int mapId)
+CheckpointMetaFlushCompleted::CheckpointMetaFlushCompleted(CheckpointHandler* cpHandler, int mapId, int logGroupId_)
 : cpHandler(cpHandler),
-  mapId(mapId)
+  mapId(mapId),
+  logGroupId(logGroupId_)
 {
 }
 
@@ -49,7 +50,7 @@ CheckpointMetaFlushCompleted::~CheckpointMetaFlushCompleted(void)
 bool
 CheckpointMetaFlushCompleted::Execute(void)
 {
-    int result = cpHandler->FlushCompleted(mapId);
+    int result = cpHandler->FlushCompleted(mapId, logGroupId);
     return (result == 0);
 }
 
