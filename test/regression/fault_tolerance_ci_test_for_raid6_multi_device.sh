@@ -52,12 +52,14 @@ test_volume_size_mb=51200
 max_io_range_mb=512
 dummy_size_mb=$((${max_io_range_mb}*2))
 cwd=`pwd`
-target_fabric_ip="10.100.11.21"
+target_fabric_ip="10.100.11.40"
 trtype=tcp
 port="1158"
 target_dev_list="unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3"
-detach_dev="unvme-ns-0"
-target_spare_dev="unvme-ns-4"
+detach_dev1="unvme-ns-0"
+detach_dev2="unvme-ns-1"
+target_spare_dev1="unvme-ns-4"
+target_spare_dev2="unvme-ns-5"
 nvme_cli="nvme"
 root_dir="../../"
 ibof_cli="${root_dir}bin/poseidonos-cli "
@@ -111,6 +113,7 @@ print_test_configuration()
     echo "  - Please make sure that manual configuration in this script has been properly edited"
     echo "  - Please make sure that fabric connection before running test..."
     echo "------------------------------------------"
+
 }
 
 network_module_check()
@@ -208,6 +211,7 @@ establish_nvmef_target()
     fi
 
     ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
+
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
 }
 
@@ -240,7 +244,6 @@ disconnect_nvmf_contollers()
 
 prepare_write_file()
 {
-
     if [ ! -s ${write_file} ]; then
         touch ${write_file}
         parallel_dd /dev/urandom ${write_file} 1024 ${dummy_size_mb} 0 0
@@ -374,11 +377,14 @@ bringup_ibofos()
     discover_n_connect_nvme_from_initiator;
 
     notice "Bring-up PoseidonOS done!"
+
+    notice "Update PoseidonOS configuration..rebuild auto start: true -> false "
+    ${ibof_cli} wbt update_config --module rebuild --key auto_start --value false --type BOOL
+    notice "Update PoseidonOS configuration done!: rebuild auto start "
 }
 
 verify_data()
 {
-
     local blk_offset=$1
     local io_blk_cnt=$2
     local blk_unit_size=$3
@@ -411,17 +417,22 @@ verify_data()
 
 detach_device()
 {
-    local dev_name=${detach_dev}
-    ${root_dir}/test/script/detach_device.sh ${dev_name} 1
+    local dev_name1=${detach_dev1}
+    local dev_name2=${detach_dev2}
+    ${root_dir}/test/script/detach_device.sh ${dev_name1} 1
     sleep 0.1
-    notice "${dev_name} is detached."
+    ${root_dir}/test/script/detach_device.sh ${dev_name2} 1
+    sleep 0.1
+    notice "${dev_name1} and ${dev_name2} are detached."
 }
 
 add_spare()
 {
-    notice "add spare device ${dev_name}"
-    local dev_name=${target_spare_dev}
-    ${ibof_cli} array addspare --spare ${dev_name} --array-name $array_name
+    notice "add spare devices "
+    local spare_name1=${target_spare_dev1}
+    local spare_name2=${target_spare_dev2}
+    ${ibof_cli} array addspare --spare ${spare_name1} --array-name $array_name
+    ${ibof_cli} array addspare --spare ${spare_name2} --array-name $array_name
 }
 
 waiting_for_rebuild_complete()
@@ -439,6 +450,12 @@ waiting_for_rebuild_complete()
         fi
     done
 
+}
+
+run_rebuild()
+{
+    notice "manual rebuild start"
+    ${ibof_cli} array rebuild --array-name $array_name
 }
 
 run_test()
@@ -476,38 +493,26 @@ run_test()
     write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
     echo "3. Detach a device.."
     detach_device
-    sleep 1
-    echo "4. Write Pattern 1 in degraded..."
-    write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
-    echo "5. Verify Pattern 0... in degraded"
-    verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
-    echo "6. Verify Pattern 1... in degraded"
-    verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
-    echo "Patterns are verified in degraded"
-    echo "7. Waiting for device re-attached ..."
+    sleep 8
+    echo "4. Add spare device"
+    add_spare
     sleep 5
-    echo "8. Add spare device"
-    add_spare &
-    echo "9. Rebuilding..."
+    echo "5. Start rebuild"
+    run_rebuild
     sleep 2
-    echo "10. Write Pattern 2 during Rebuilding..."
-    write_pattern ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # write #2    
-    #rebuilding
-    echo "11. Verify Pattern 0... during rebuilding"
-    verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} 0 # read #0
-    echo "12. Verify Pattern 1... during rebuilding"
-    verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} 1 # read #1
-    echo "13. Verify Pattern 2... during rebuilding"
-    verify_data ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} 2 # read #2
+    echo "6. Write Pattern 1 during Rebuilding..."
+    write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
+    echo "7. Verify Pattern 0 during Rebuilding..."
+    verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
+    echo "8. Verify Pattern 1 during Rebuilding..."
+    verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
     echo "Patterns are verified during rebuild"
     #rebuild done
     waiting_for_rebuild_complete
-    echo "14. Verify Pattern 0... after rebuild"
+    echo "9. Verify Pattern 0... after rebuild"
     verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
-    echo "15. Verify Pattern 1... after rebuild"
+    echo "10. Verify Pattern 1... after rebuild"
     verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
-    echo "16. Verify Pattern 2... after rebuild"
-    verify_data ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # read #2
     echo "Patterns are verified after rebuild"
 }
 
