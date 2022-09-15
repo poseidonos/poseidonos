@@ -28,4 +28,5 @@ func init() {
 	TelemetryCmd.AddCommand(StartTelemetryCmd)
 	TelemetryCmd.AddCommand(StopTelemetryCmd)
 	TelemetryCmd.AddCommand(SetTelemetryPropCmd)
+	TelemetryCmd.AddCommand(GetTelemetryPropCmd)
 }
