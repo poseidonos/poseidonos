@@ -84,6 +84,8 @@ MetaFsWBTApi::GetMetaFileInode(std::string& fileName,
 
     result.inodeInfo = *info;
 
+    delete info;
+
     return true;
 }
 

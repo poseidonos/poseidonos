@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <cstring>
+
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mim/meta_io_manager_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
@@ -147,8 +149,8 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
 
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    fileCtx.extents = &extent;
     fileCtx.extentsCount = 1;
+    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
@@ -189,8 +191,8 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
 
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    fileCtx.extents = &extent;
     fileCtx.extentsCount = 1;
+    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
@@ -311,8 +313,8 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
 
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    fileCtx.extents = &extent;
     fileCtx.extentsCount = 1;
+    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
@@ -353,8 +355,8 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
 
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    fileCtx.extents = &extent;
     fileCtx.extentsCount = 1;
+    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;

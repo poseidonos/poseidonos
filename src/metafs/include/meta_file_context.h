@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include "src/metafs/common/metafs_type.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/include/meta_storage_specific.h"
@@ -57,7 +59,7 @@ public:
         fileBaseLpn = 0;
         chunkSize = 0;
         extentsCount = 0;
-        extents = nullptr;
+        memset(&extents, 0x0, sizeof(MetaFileExtent) * MetaFsConfig::MAX_PAGE_MAP_CNT);
         signature = 0;
         storage = nullptr;
     }
@@ -70,7 +72,7 @@ public:
     MetaLpnType fileBaseLpn;
     FileSizeType chunkSize;
     int extentsCount;
-    MetaFileExtent* extents;
+    MetaFileExtent extents[MetaFsConfig::MAX_PAGE_MAP_CNT];
     uint64_t signature;
     MetaStorageSubsystem* storage;
 };
