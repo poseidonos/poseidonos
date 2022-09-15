@@ -2095,6 +2095,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 2602
+    Name: MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID
+    Severity:
+    Message: Failed to mount array.
+    Cause: Input target address is invalid.
+    Solution: Please check the format of the target address.
 
   -
   # Rebuild: 2800 - 2899
@@ -2344,7 +2351,6 @@ Root:
     Message:
     Cause:
     Solution:
-
 
   # Journal: 3000 - 3099
   -

@@ -600,6 +600,7 @@ message MountArrayRequest {
 	message Param {
 			string name = 1;
 			optional bool enableWriteThrough = 2;
+			optional string targetAddress = 3;
 	}
 	Param param = 4;
 }
@@ -1216,6 +1217,10 @@ message CreateVolumeResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+		message CreateVolumeData {
+			string targetAddress = 1;
+		}
+		CreateVolumeData data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
