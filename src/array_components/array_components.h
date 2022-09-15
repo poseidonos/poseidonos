@@ -90,6 +90,8 @@ public:
     virtual void RebuildDone(void);
     virtual Array* GetArray(void) { return array; }
     virtual TelemetryPublisher* GetTelemetryPublisher(void) { return telPublisher; }
+    virtual void SetTargetAddress(string targetAddress);
+    virtual string GetTargetAddress(void);
 
 private:
     void _SetMountSequence(void);

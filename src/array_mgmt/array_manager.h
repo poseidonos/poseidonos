@@ -81,6 +81,8 @@ public:
     virtual int RemoveDevice(string name, string dev) override;
     virtual int ReplaceDevice(string name, string dev) override;
     virtual int Rebuild(string name) override;
+    virtual void SetTargetAddress(string name, string targetAddress) override;
+    virtual string GetTargetAddress(string name) override;
     virtual ComponentsInfo* GetInfo(string name) override;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) override;
 
