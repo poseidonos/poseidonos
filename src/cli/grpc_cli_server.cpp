@@ -179,6 +179,23 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  GetTelemetryProperty(ServerContext* context, const GetTelemetryPropertyRequest* request,
+                  GetTelemetryPropertyResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteGetTelemetryPropertyCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
   UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
                   UpdateEventWrrResponse* reply) override
   {
