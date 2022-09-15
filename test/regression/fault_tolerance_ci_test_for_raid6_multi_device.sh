@@ -494,10 +494,10 @@ run_test()
     write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
     echo "3. Detach a device.."
     detach_device
-    sleep 1
+    sleep 8
     echo "4. Add spare device"
     add_spare
-    sleep 2
+    sleep 5
     echo "5. Start rebuild"
     run_rebuild
     sleep 2
