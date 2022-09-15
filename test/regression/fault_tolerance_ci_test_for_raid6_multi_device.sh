@@ -506,16 +506,16 @@ run_test()
     sleep 2
     echo "6. Write Pattern 1 during Rebuilding..."
 	write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
-    echo "5. Verify Pattern 0 during Rebuilding..."
+    echo "7. Verify Pattern 0 during Rebuilding..."
 	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
-    echo "6. Verify Pattern 1 during Rebuilding..."
+    echo "8. Verify Pattern 1 during Rebuilding..."
 	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
     echo "Patterns are verified during rebuild"
 	#rebuild done
 	waiting_for_rebuild_complete
-    echo "14. Verify Pattern 0... after rebuild"
+    echo "9. Verify Pattern 0... after rebuild"
 	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
-    echo "15. Verify Pattern 1... after rebuild"
+    echo "10. Verify Pattern 1... after rebuild"
 	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
     echo "Patterns are verified after rebuild"
 }
