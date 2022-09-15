@@ -6045,7 +6045,6 @@ Root:
     Cause:
     Solution:
 
-
   # IOPath Backend: 5300 - 5499
   -
     Id: 5300
@@ -6561,6 +6560,12 @@ Root:
     Cause:
     Solution:
 
+    Id: 5373
+    Name: IODISPATCHER_STATE_CHANGE
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 5500
     Name: UNVME_DAEMON_START

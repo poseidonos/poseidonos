@@ -114,7 +114,7 @@ QosManager::QosManager(SpdkEnvCaller* spdkEnvCaller,
     {
         previousDelay[reactor] = 0;
     }
-    
+
     currentNumberOfArrays = 0;
     systemMinPolicy = false;
     affinityManager = AffinityManagerSingleton::Instance();

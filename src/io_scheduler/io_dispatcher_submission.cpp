@@ -40,6 +40,7 @@
 #include "src/device/base/ublock_device.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/array_mgmt_policy.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/i_array_device.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io_scheduler/dispatcher_policy.h"
@@ -52,6 +53,7 @@ namespace pos
 {
 
 SchedulingInIODispatcher IODispatcherSubmission::scheduler[BackendEvent_Count];
+std::atomic<int64_t> StateObserverForIO::countOfRebuildingArrays;
 
 IODispatcherSubmission::IODispatcherSubmission(void)
 {
@@ -88,7 +90,7 @@ IODispatcherSubmission::~IODispatcherSubmission(void)
 }
 
 bool
-IODispatcherSubmission::CheckThrottledAndConsumeRemaining(UbioSmartPtr ubio)
+IODispatcherSubmission::_CheckThrottledAndConsumeRemaining(UbioSmartPtr ubio)
 {
     uint32_t eventType = ubio->GetEventType();
     UbioDir dir = ubio->dir;
@@ -119,7 +121,7 @@ IODispatcherSubmission::_SubmitIOInReactor(void* ptr1, void* ptr2)
 {
     UBlockDevice* ublock = (UBlockDevice*)ptr1;
     UbioSmartPtr* ubio = (UbioSmartPtr*)ptr2;
-    bool ret = CheckThrottledAndConsumeRemaining(*ubio);
+    bool ret = _CheckThrottledAndConsumeRemaining(*ubio);
     if (ret)
     {
         ublock->SubmitAsyncIO(*ubio);
@@ -204,11 +206,22 @@ IODispatcherSubmission::SubmitIOInReactor(UBlockDevice* ublock, UbioSmartPtr ubi
 }
 
 void
+IODispatcherSubmission::_SetSchedType(BackendEvent event, SchedulingType schedType)
+{
+    if (scheduler[event].reactorCount != 0)
+    {
+        scheduler[event].schedType = schedType;
+    }
+    else
+    {
+        scheduler[event].schedType = SchedulingType::NoMatter;
+    }
+}
+
+void
 IODispatcherSubmission::UpdateReactorRatio(void)
 {
     uint32_t totalReactorRatio = 0;
-    scheduler[BackendEvent_FrontendIO].schedType = SchedulingType::NoMatter;
-    scheduler[BackendEvent_UserdataRebuild].schedType = SchedulingType::NoMatter;
     for (uint32_t event = 0; event < BackendEvent_Count; event++)
     {
         totalReactorRatio += scheduler[event].reactorRatio;
@@ -219,6 +232,8 @@ IODispatcherSubmission::UpdateReactorRatio(void)
     {
         if (scheduler[event].reactorRatio != 0)
         {
+            // To avoid reactor Count is zero, We need to set sched type as "no matter".
+            _SetSchedType((BackendEvent)event, SchedulingType::NoMatter);
             scheduler[event].reactorStart = currentStartReactor;
             uint32_t reactorCountForEvent = scheduler[event].reactorRatio * ioReactorCount / totalReactorRatio;
             scheduler[event].reactorCount = reactorCountForEvent;
@@ -227,8 +242,8 @@ IODispatcherSubmission::UpdateReactorRatio(void)
         }
     }
     scheduler[lastEventWithRatioSet].reactorCount = ioReactorCount - scheduler[lastEventWithRatioSet].reactorStart;
-    scheduler[BackendEvent_FrontendIO].schedType = SchedulingType::ReactorRatio;
-    scheduler[BackendEvent_UserdataRebuild].schedType = SchedulingType::ReactorRatioAndThrottling;
+    _SetSchedType(BackendEvent_FrontendIO, SchedulingType::ReactorRatio);
+    _SetSchedType(BackendEvent_UserdataRebuild, SchedulingType::ReactorRatioAndThrottling);
 }
 
 void
@@ -245,26 +260,14 @@ IODispatcherSubmission::RefillRemaining(uint64_t scale)
 }
 
 void
+IODispatcherSubmission::ChangeScheduleMode(bool enabled)
+{
+    schedulingOn = enabled;
+}
+
+void
 IODispatcherSubmission::CheckAndSetBusyMode(void)
 {
-    bool busyLocal = false;
-    for (uint32_t arrayId = 0; arrayId < ArrayMgmtPolicy::MAX_ARRAY_CNT; arrayId++)
-    {
-        ComponentsInfo* compInfo = ArrayMgr()->GetInfo(arrayId);
-        if (unlikely(compInfo == nullptr))
-        {
-            continue;
-        }
-        IArrayInfo* info = compInfo->arrayInfo;
-        if (unlikely(info == nullptr))
-        {
-            continue;
-        }
-        IStateControl* stateControl = StateManagerSingleton::Instance()->GetStateControl(info->GetName());
-        bool isBusyState = (stateControl->GetState()->ToStateType() == StateEnum::BUSY);
-        busyLocal = (busyLocal || isBusyState);
-    }
-    schedulingOn = busyLocal;
     if (scheduler[BackendEvent_FrontendIO].busyDetector == 0)
     {
         scheduler[BackendEvent_FrontendIO].schedType = SchedulingType::NoMatter;
@@ -291,21 +294,21 @@ IODispatcherSubmission::_SetRebuildImpact(RebuildImpact rebuildImpact)
         {
             SetReactorRatio(BackendEvent_FrontendIO, 15);
             SetReactorRatio(BackendEvent_UserdataRebuild, 35);
-            SetMaxBw(BackendEvent_UserdataRebuild, false, SSD_REBUILD_WRITE_MAX_BW * 1024 * 1024);
+            SetMaxBw(BackendEvent_UserdataRebuild, false, SSD_REBUILD_WRITE_MAX_BW);
             break;
         }
         case RebuildImpact::Medium:
         {
             SetReactorRatio(BackendEvent_FrontendIO, 25);
             SetReactorRatio(BackendEvent_UserdataRebuild, 25);
-            SetMaxBw(BackendEvent_UserdataRebuild, false, SSD_REBUILD_WRITE_MAX_BW / 3 * 1024 * 1024);
+            SetMaxBw(BackendEvent_UserdataRebuild, false, SSD_REBUILD_WRITE_MAX_BW / 3);
             break;
         }
         default:
         {
             SetReactorRatio(BackendEvent_FrontendIO, 49);
             SetReactorRatio(BackendEvent_UserdataRebuild, 1);
-            SetMaxBw(BackendEvent_UserdataRebuild, false, SSD_REBUILD_WRITE_MAX_BW / 35 * 1024 * 1024);
+            SetMaxBw(BackendEvent_UserdataRebuild, false, SSD_REBUILD_WRITE_MAX_BW / 35);
             break;
         }
     }
@@ -348,4 +351,45 @@ IODispatcherSubmission::SubmitIO(UBlockDevice* ublock,
     }
     return ret;
 }
+
+StateObserverForIO::StateObserverForIO(IStateControl* state)
+:state(state)
+{
+    POS_TRACE_INFO(EID(IODISPATCHER_STATE_CHANGE),
+        "Subscribe IO");
+    state->Subscribe(this, typeid(*this).name());
+    countOfRebuildingArrays = 0;
+}
+
+void
+StateObserverForIO::StateChanged(StateContext* prev, StateContext* next)
+{
+    bool isRebuilding = (countOfRebuildingArrays > 0);
+    POS_TRACE_INFO(EID(IODISPATCHER_STATE_CHANGE),
+        "Prev rebuilding count : {} state : {}", countOfRebuildingArrays, isRebuilding);
+    if (next->GetSituation() == SituationEnum::REBUILDING)
+    {
+        countOfRebuildingArrays++;
+    }
+    if (prev->GetSituation() == SituationEnum::REBUILDING)
+    {
+        countOfRebuildingArrays--;
+    }
+    isRebuilding = (countOfRebuildingArrays > 0);
+    POS_TRACE_INFO(EID(IODISPATCHER_STATE_CHANGE),
+        "Next rebuilding count : {} state : {}", countOfRebuildingArrays, isRebuilding);
+    IODispatcherSubmissionSingleton::Instance()->ChangeScheduleMode(isRebuilding);
+
+    if (unlikely(countOfRebuildingArrays < 0))
+    {
+        POS_TRACE_ERROR(EID(IODISPATCHER_STATE_CHANGE),
+            "UnderFlow Incurred in state change {}", countOfRebuildingArrays);
+    }
+}
+
+StateObserverForIO::~StateObserverForIO(void)
+{
+    state->Unsubscribe(this);
+}
+
 } // namespace pos

@@ -33,6 +33,8 @@
 #pragma once
 
 #include "src/include/backend_event.h"
+#include "src/state/interface/i_state_control.h"
+#include "src/state/interface/i_state_observer.h"
 
 class UbioSmartPtr;
 class UBlockDevice;
@@ -61,18 +63,29 @@ struct SchedulingInIODispatcher
     uint64_t writeMaxBw;
     std::atomic<int64_t> remainingRead;
     std::atomic<int64_t> remainingWrite;
-    uint64_t reactorRatio;  // CLI Set
-    uint64_t reactorStart; // internal used;
-    uint64_t reactorCount; // internal used;
+    uint32_t reactorRatio;  // CLI Set
+    uint32_t reactorStart; // internal used;
+    uint32_t reactorCount; // internal used;
     uint64_t busyDetector;
     std::atomic<uint32_t> lastIndex;
+};
+
+class StateObserverForIO : public IStateObserver
+{
+public:
+    explicit StateObserverForIO(IStateControl* state);
+    virtual ~StateObserverForIO(void);
+    void StateChanged(StateContext* prev, StateContext* next) override;
+private:
+    static std::atomic<int64_t> countOfRebuildingArrays;
+    IStateControl* state;
 };
 
 class IODispatcherSubmission
 {
 public:
     explicit IODispatcherSubmission(void);
-    ~IODispatcherSubmission(void);
+    virtual ~IODispatcherSubmission(void);
 
     void SetMaxBw(BackendEvent event, bool read, uint64_t max);
     void SetRebuildImpact(RebuildImpact rebuildImpact);
@@ -80,18 +93,21 @@ public:
     void SetReactorRatio(BackendEvent event, uint32_t ratio);
     void RefillRemaining(uint64_t scale);
     int SubmitIO(UBlockDevice* ublock, UbioSmartPtr ubio, DispatcherPolicyI* dispatcherPolicy);
+    void RebuildMode(void);
+    void ChangeScheduleMode(bool enabled);
     void CheckAndSetBusyMode(void);
 
 private:
     int SubmitIOInReactor(UBlockDevice* ublock, UbioSmartPtr ubio);
     bool _IsReactorScheduledNeeded(SchedulingType schedType);
-    static bool CheckThrottledAndConsumeRemaining(UbioSmartPtr ubio);
+    static bool _CheckThrottledAndConsumeRemaining(UbioSmartPtr ubio);
     static void _SubmitIOInReactor(void* ptr1, void* ptr2);
     void _SetRebuildImpact(RebuildImpact rebuildImpact);
+    void _SetSchedType(BackendEvent event, SchedulingType schedType);
     static const uint32_t MAX_CORE = 128;
     uint32_t ioReactorCore[MAX_CORE], ioReactorCount = 0;
     static const uint64_t NO_THROTTLING_VALUE = 64 * 1024ULL * 1024ULL * 1024ULL; // 64G
-    static const uint64_t SSD_REBUILD_WRITE_MAX_BW = 3500ULL;
+    static const uint64_t SSD_REBUILD_WRITE_MAX_BW = 3500ULL * 1024ULL * 1024ULL;
     static SchedulingInIODispatcher scheduler[BackendEvent_Count];
     bool schedulingOn;
 };
