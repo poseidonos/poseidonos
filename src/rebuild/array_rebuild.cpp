@@ -89,7 +89,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
 : arrayName(arrayName),
   rebuildComplete(cb)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+    POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG),
         "ArrayRebuild(Quick) begin, array {} with total {} tasks, pairCnt:{}",
         arrayName, tgt.size(), rebuildPair.size());
     RebuildProgress* prog = new RebuildProgress(arrayName);
@@ -102,7 +102,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
         {
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+            POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG),
                 "Try to create PartitionRebuild for {}, pairCnt:{}", PARTITION_TYPE_STR[ctx->part], ctx->rp.size());
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
@@ -238,19 +238,29 @@ void
 ArrayRebuild::_RebuildCompleted(RebuildResult res)
 {
     state = res.result;
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild completed, array:{}, result:{}", arrayName, REBUILD_STATE_STR[(int)state]);
     switch (state)
     {
         case RebuildState::PASS:
-            rebuildLogger->SetResult("PASS");
+        {
+            POS_TRACE_INFO(EID(REBUILD_RESULT_PASS),
+                "array:{}", arrayName);
+            rebuildLogger->SetResult(REBUILD_STATE_STR[(int)state]);
             break;
+        }
         case RebuildState::FAIL:
-            rebuildLogger->SetResult("FAIL");
+        {
+            POS_TRACE_INFO(EID(REBUILD_RESULT_FAILED),
+                "array:{}", arrayName);
+            rebuildLogger->SetResult(REBUILD_STATE_STR[(int)state]);
             break;
+        }
         case RebuildState::CANCELLED:
-            rebuildLogger->SetResult("CANCELLED");
+        {
+            POS_TRACE_INFO(EID(REBUILD_RESULT_CANCELLED),
+                "array:{}", arrayName);
+            rebuildLogger->SetResult(REBUILD_STATE_STR[(int)state]);
             break;
+        }
         default:
             break;
     }

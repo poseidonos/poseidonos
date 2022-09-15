@@ -15,7 +15,7 @@ import START_POS_BASIC
 def check_result(out):
     data = json.loads(out)
     description = data['Response']['result']['status']['description']
-    if "no any" in description:
+    if "No device" in description:
         return "pass"
     return "fail"
 

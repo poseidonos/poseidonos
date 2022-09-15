@@ -2105,22 +2105,29 @@ Root:
 
   -
   # Rebuild: 2800 - 2899
-    Id: 2801
+    Id: 2800
     Name: REBUILD_DEBUG_MSG
     Severity:
     Message:
     Cause:
     Solution:
   -
+    Id: 2801
+    Name: N_TO_M_REBUILD_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
     Id: 2802
-    Name: REBUILD_STOPPED
+    Name: QUICK_REBUILD_DEBUG
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2803
-    Name: REBUILD_FAILED
+    Name: REBUILD_FAIL_OVER
     Severity:
     Message:
     Cause:

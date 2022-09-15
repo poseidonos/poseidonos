@@ -50,7 +50,7 @@ class QuickRebuildContext : public RebuildContext
 public:
     void GetSecondaryRebuildPairs(RebuildPairs& secondaryRp) override
     {
-        secondaryRp = secondaryRp;
+        secondaryRp = this->secondaryRp;
     }
     RebuildPairs secondaryRp;
 };
