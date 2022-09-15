@@ -716,6 +716,7 @@ TEST(Array, DetachDevice_testIfSpareDeviceIsSuccessfullyDetachedFromUnmountedArr
     // Then: the operation should be successful
     ASSERT_EQ(0, actual);
     DestroyFakeNvmeNamespace(fakeNs); // just for cleanup
+    delete mockArrDev;
 }
 
 TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArray)
