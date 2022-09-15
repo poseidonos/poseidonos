@@ -641,6 +641,7 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
 {
     string arrayName = (request->param()).name();
     bool isWTenabled = (request->param()).enablewritethrough();
+    string targetAddress = (request->param()).targetaddress();
 
     if (isWTenabled == false)
     {
@@ -658,12 +659,27 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
     }
 
     IArrayMgmt* array = ArrayMgr();
+
     int ret = array->Mount(arrayName, isWTenabled);
     if (0 != ret)
     {
         _SetEventStatus(ret, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
+    }
+
+    if (targetAddress != "")
+    {
+        if (_IsValidIpAddress(targetAddress))
+        {
+            int eventId = EID(MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID);
+            POS_TRACE_WARN(eventId, "targetAddress:{}", targetAddress);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+
+        array->SetTargetAddress(arrayName,targetAddress);
     }
 
     QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
@@ -1609,6 +1625,9 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
         int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, uuid);
         if (ret == SUCCESS)
         {
+            string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);
+            reply->mutable_result()->mutable_data()->set_targetaddress(targetAddress);
+            
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
@@ -2018,4 +2037,12 @@ CommandProcessor::_ExecuteLinuxCmd(std::string command)
     pclose(pipe);
 
     return result;
+}
+
+bool
+CommandProcessor::_IsValidIpAddress(const std::string &ipAddress)
+{
+    struct sockaddr_in sa;
+    int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+    return result != 0;
 }

@@ -204,6 +204,7 @@ private:
     void _FillSmartData(struct spdk_nvme_health_information_page payload, grpc_cli::SmartLog* data);
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
+    bool _IsValidIpAddress(const std::string &ipAddress);
 
     typedef struct BiosInfo {
         std::string vendor;

@@ -21,6 +21,8 @@ public:
     MOCK_METHOD(void, RebuildDone, (), (override));
     MOCK_METHOD(Array*, GetArray, (), (override));
     MOCK_METHOD(ComponentsInfo*, GetInfo, (), (override));
+    MOCK_METHOD(void, SetTargetAddress, (string targetAddress), (override));
+    MOCK_METHOD(string, GetTargetAddress, (), (override));
 };
 
 } // namespace pos
