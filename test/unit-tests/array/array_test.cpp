@@ -857,6 +857,7 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(4);
     EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(1);
     EXPECT_CALL(*mockState, GetSysState).Times(1);
+    EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(true));
     EXPECT_CALL(*mockArrayDeviceManager, ExportToName).Times(1);
     EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(3);
     EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(3);
