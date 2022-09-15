@@ -11,16 +11,16 @@ cd $(dirname $0)
 print_help()
 {
 cat << EOF
-fault-tolerance test with spor script for ci
+fault-tolerance test (RAID6) script for ci
 
 Synopsis
-    ./fault_tolerance_spor_ci_test.sh [OPTION]
+    ./fault_tolerance_ci_test_for_raid6.sh [OPTION]
 
 Prerequisite
     1. please make sure that file below is properly configured according to your env.
         {IBOFOS_ROOT}/test/system/network/network_config.sh
     2. please make sure that poseidonos binary exists on top of ${IBOFOS_ROOT}
-    3. please configure your ip address, volume size, etc. propertly by editing fault_tolerance_test.sh
+    3. please configure your ip address, volume size, etc. propertly by editing fault_tolerance_ci_test_for_raid6.sh
 
 Description
     -i [test_iteration_cnt]
@@ -36,7 +36,7 @@ Description
         Show script usage
 
 Default configuration (if specific option not given)
-    ./fault_tolerance_spor_ci_test.sh -i 10 -f ${fabric_ip}
+    ./fault_tolerance_ci_test_for_raid6.sh -i 10
 
 EOF
     exit 0
@@ -52,12 +52,12 @@ test_volume_size_mb=51200
 max_io_range_mb=512
 dummy_size_mb=$((${max_io_range_mb}*2))
 cwd=`pwd`
-target_fabric_ip="10.100.1.25"
+target_fabric_ip="10.100.11.40"
 trtype=tcp
 port="1158"
-target_dev_list="unvme-ns-0,unvme-ns-1,unvme-ns-2"
+target_dev_list="unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3"
 detach_dev="unvme-ns-0"
-target_spare_dev="unvme-ns-3"
+target_spare_dev="unvme-ns-4"
 nvme_cli="nvme"
 root_dir="../../"
 ibof_cli="${root_dir}bin/poseidonos-cli "
@@ -91,7 +91,7 @@ max_io_boundary_byte=$((${test_volume_size_byte} - ${max_io_range_byte}))
 print_test_configuration()
 {
     echo "------------------------------------------"
-    echo "[Fault-Tolerance Test With SPOR Information]"
+    echo "[Fault-Tolerance CI Test Information]"
     echo "> Test environment:"
     echo "  - Target ${trtype} IP:  ${target_fabric_ip}"
     echo "  - Port:                 ${port}"
@@ -149,7 +149,7 @@ setup_prerequisite()
     ifconfig >> ${logfile}
 }
 
-kill_poseidonos()
+kill_ibofos()
 {
     pkill -9 poseidonos
     echo ""
@@ -158,8 +158,7 @@ kill_poseidonos()
 clean_up()
 {
     disconnect_nvmf_contollers;
-
-    kill_poseidonos;
+    kill_ibofos;
 
     rm -rf *${file_postfix}
     rm -rf ${logfile}
@@ -188,6 +187,12 @@ start_ibofos()
     done
 
     notice "Now poseidonos is running..."
+
+    sleep 10
+    
+    echo "Telemetry starting..."
+    ${root_dir}/bin/poseidonos-cli telemetry start
+    notice "Now telemetry is available"
 }
 
 establish_nvmef_target()
@@ -203,6 +208,7 @@ establish_nvmef_target()
         ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -b 64 -n 4096 #>> ${logfile}
     fi
 
+    
     ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
 
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
@@ -213,7 +219,7 @@ discover_n_connect_nvme_from_initiator()
     notice "Discovering remote NVMe drives..."
     ${nvme_cli} discover -t ${trtype} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
     notice "Discovery has been finished!"
-
+    
     notice "Connecting remote NVMe drives..."
     ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
 
@@ -310,16 +316,16 @@ write_pattern()
     notice "Data write has been finished!"
 }
 
-shutdown_poseidonos()
+shutdown_ibofos()
 {
-    notice "Shutting down poseidonos..."
+    notice "Trying to stop POS..."
     ${ibof_cli} array unmount --array-name $array_name --force
     ${ibof_cli} system stop --force
-    notice "Shutdown has been completed!"
+    notice "POS has been stopped"
 
     disconnect_nvmf_contollers;
 
-    notice "poseidonos is stopped"
+    notice "Waiting for POS terminated"
     wait_ibofos
 }
 
@@ -331,6 +337,7 @@ wait_ibofos()
         sleep 0.5
         ps -C poseidonos > /dev/null
     done
+    notice "Poseidonos is terminated"
 }
 
 bringup_ibofos()
@@ -343,7 +350,6 @@ bringup_ibofos()
     fi
 
     start_ibofos;
-    disconnect_nvmf_contollers
 
     ${spdk_rpc_script} nvmf_create_subsystem ${nss} -a -s POS00000000000001  -d POS_VOLUME #>> ${logfile}
     ${spdk_rpc_script} bdev_malloc_create -b uram0 1024 512
@@ -354,7 +360,7 @@ bringup_ibofos()
     if [ $create_array -eq 1 ]; then
         ${root_dir}bin/poseidonos-cli devel resetmbr
         info "Target device list=${target_dev_list}"
-        ${ibof_cli} array create -b uram0 -d ${target_dev_list} --array-name $array_name
+        ${ibof_cli} array create -b uram0 -d ${target_dev_list} --array-name $array_name --raid RAID6
     fi
     
     ${ibof_cli} array mount --array-name $array_name
@@ -368,7 +374,6 @@ bringup_ibofos()
         info "Mount volume....${volname}"
         ${ibof_cli} volume mount --volume-name ${volname} --array-name $array_name >> ${logfile};
     fi
-
     establish_nvmef_target;
     discover_n_connect_nvme_from_initiator;
     
@@ -454,10 +459,10 @@ run_test()
     local io_boundary_blk=$((${max_io_boundary_blk}/${boundary_cnt}))
     local max_io_range_blk=$((${max_io_range_byte}/1024/${blk_size_kb}))
     local dummy_range_blk=$((${dummy_size_mb}*1024/${blk_size_kb}))
-
+    
     local blk_offset=()
     local io_blk_cnt=()
-
+    
     local iter=0
     local cnt=2
     while [ ${iter} -le ${cnt} ]; do
@@ -468,41 +473,46 @@ run_test()
         ((iter++))
     done
 
+    echo "1. Start POS..."
     bringup_ibofos create
+    echo "2. Write Pattern 0... in normal"
     write_pattern 0 ${dummy_range_blk} ${blk_size_kb} #dummy write
     write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
+    echo "3. Detach a device.."
     detach_device
+    sleep 1
+    echo "4. Write Pattern 1 in degraded..."
     write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
-    shutdown_poseidonos
-    bringup_ibofos 0
+    echo "5. Verify Pattern 0... in degraded"
     verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
+    echo "6. Verify Pattern 1... in degraded"
     verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
-
+    echo "Patterns are verified in degraded"
+    echo "7. Waiting for device re-attached ..."
+    sleep 5
+    echo "8. Add spare device"
     add_spare &
-    write_pattern ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # write #2
-
+    echo "9. Rebuilding..."
+    sleep 2
+    echo "10. Write Pattern 2 during Rebuilding..."
+    write_pattern ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # write #2    
     #rebuilding
+    echo "11. Verify Pattern 0... during rebuilding"
     verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} 0 # read #0
-    trigger_spor
-    backup_nvram
-    bringup_ibofos 0
+    echo "12. Verify Pattern 1... during rebuilding"
     verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} 1 # read #1
+    echo "13. Verify Pattern 2... during rebuilding"
     verify_data ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} 2 # read #2
+    echo "Patterns are verified during rebuild"
     #rebuild done
     waiting_for_rebuild_complete
+    echo "14. Verify Pattern 0... after rebuild"
     verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
+    echo "15. Verify Pattern 1... after rebuild"
     verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
+    echo "16. Verify Pattern 2... after rebuild"
     verify_data ${blk_offset[2]} ${io_blk_cnt[2]} ${blk_size_kb} # read #2
-}
-
-trigger_spor()
-{
-    kill_poseidonos
-}
-
-backup_nvram()
-{
-    $root_dir/script/backup_latest_hugepages_for_uram.sh
+    echo "Patterns are verified after rebuild"
 }
 
 date=
@@ -549,7 +559,7 @@ run_iter()
         echo -e "\n\033[1;32mStarting new iteration...[${curr_iter}/${total_iter}]..................................\033[0m"
         run_test
         disconnect_nvmf_contollers;
-        shutdown_poseidonos
+        shutdown_ibofos;
         ((curr_iter++))
     done
 }
