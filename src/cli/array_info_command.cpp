@@ -82,7 +82,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     string state = array->GetStateCtx()->ToStateType().ToString();
     string situ = array->GetStateCtx()->GetSituation().ToString();
     data.SetAttribute(JsonAttribute("index", to_string(array->GetIndex())));
-    data.SetAttribute(JsonAttribute("unique_id", to_string(array->GetUniqueId())));
+    data.SetAttribute(JsonAttribute("uniqueId", to_string(array->GetUniqueId())));
     data.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
     data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));

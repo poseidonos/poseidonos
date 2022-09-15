@@ -149,7 +149,7 @@ SegmentBasedRebuild::_Recover(void)
             int ret = rm->Recover(ctx->arrayIndex, stripeId, ctx->size, callback);
             if (ret != 0)
             {
-                POS_TRACE_ERROR(EID(REBUILD_FAILED),
+                POS_TRACE_ERROR(EID(REBUILD_RESULT_FAILED),
                     "Failed to recover stripe {} in Partition {} ({})",
                     stripeId, PARTITION_TYPE_STR[ctx->part]);
                 ctx->SetResult(RebuildState::FAIL);
@@ -186,19 +186,19 @@ SegmentBasedRebuild::_Finish(RebuildState state)
 {
     if (state == RebuildState::CANCELLED)
     {
-        POS_TRACE_WARN(EID(REBUILD_STOPPED),
+        POS_TRACE_WARN(EID(REBUILD_RESULT_CANCELLED),
             "Partition {} ({}) rebuilding stopped",
             PARTITION_TYPE_STR[ctx->part]);
     }
     else if (state == RebuildState::FAIL)
     {
-        POS_TRACE_WARN(EID(REBUILD_FAILED),
+        POS_TRACE_WARN(EID(REBUILD_RESULT_FAILED),
             "Partition {} ({}) rebuilding failed",
             PARTITION_TYPE_STR[ctx->part]);
     }
     else
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        POS_TRACE_INFO(EID(REBUILD_RESULT_PASS),
             "Partition {} ({}) rebuilding complete successfully",
             PARTITION_TYPE_STR[ctx->part]);
         ctx->SetResult(RebuildState::PASS);

@@ -210,6 +210,7 @@ def rescan_ssd():
 
 def get_used_size(arrayname):
     arrayinfo = cli.array_info(arrayname)
+    print (arrayinfo)
     data = json.loads(arrayinfo)
     return data['Response']['result']['data']['used']
 

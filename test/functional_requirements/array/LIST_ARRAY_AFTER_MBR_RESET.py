@@ -17,7 +17,7 @@ POS_ROOT = '../../../'
 
 def check_result(out):
     ret = json_parser.get_response_code(out)
-    if ret == 1224: #CLI_LIST_ARRAY_NO_ARRAY_EXISTS = 1224
+    if ret == 1225: #CLI_LIST_ARRAY_NO_ARRAY_EXISTS = 1225
         return "pass"
     return "fail"
 

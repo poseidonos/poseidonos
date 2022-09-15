@@ -184,7 +184,8 @@ ArrayDeviceList::RemoveSpare(ArrayDevice* target)
     {
         (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
     }
-    delete *it;
+    delete target;
+    target = nullptr;
     devSet_.spares.erase(it);
     return 0;
 }
