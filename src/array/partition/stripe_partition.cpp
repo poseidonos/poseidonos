@@ -477,11 +477,11 @@ StripePartition::GetRebuildCtx(const vector<IArrayDevice*>& fault)
         ctx.reset();
         return nullptr;
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "GetRebuildCtx, pairCnt:{}, part:{}", ctx->rp.size(), PARTITION_TYPE_STR[type]);
     ctx->part = type;
     ctx->stripeCnt = logicalSize.totalStripes;
     ctx->size = GetPhysicalSize();
+    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        "GetRebuildCtx, part:{}, rpCnt:{}", PARTITION_TYPE_STR[type], ctx->rp.size());
     return ctx;
 }
 
@@ -493,7 +493,7 @@ StripePartition::GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair)
     _SetQuickRebuildPair(rebuildPair, ctx->rp, ctx->secondaryRp);
     if (ctx->rp.size() == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "GetQuickRebuildCtx returns nullptr, part:{}", PARTITION_TYPE_STR[type]);
+        POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG), "GetQuickRebuildCtx returns nullptr, part:{}", PARTITION_TYPE_STR[type]);
         ctx.reset();
         return nullptr;
     }
@@ -501,6 +501,8 @@ StripePartition::GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair)
     ctx->part = type;
     ctx->stripeCnt = logicalSize.totalStripes;
     ctx->size = GetPhysicalSize();
+    POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG), "GetQuickRebuildCtx, part:{}, rpCnt:{}, backupRpCnt:{}",
+        PARTITION_TYPE_STR[type], ctx->rp.size(), ctx->secondaryRp.size());
     return ctx;
 }
 
@@ -553,16 +555,16 @@ StripePartition::_SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPair
         for (uint32_t i : srcs)
         {
             srcDevs.push_back(devs.at(i));
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, src:{}", PARTITION_TYPE_STR[type], i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, srcidx:{}", PARTITION_TYPE_STR[type], i);
         }
         for (uint32_t i : dsts)
         {
             dstDevs.push_back(devs.at(i));
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, dsts:{}", PARTITION_TYPE_STR[type], i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, dstidx:{}", PARTITION_TYPE_STR[type], i);
         }
         for (uint32_t i : abnormalDeviceIndex)
         {
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, abnormals:{}", PARTITION_TYPE_STR[type], i);
+            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuildPair, part:{}, abnormalidx:{}", PARTITION_TYPE_STR[type], i);
         }
 
         RecoverFunc func = method->GetRecoverFunc(dsts, abnormalDeviceIndex);
@@ -578,12 +580,12 @@ StripePartition::_SetQuickRebuildPair(const QuickRebuildPair& quickRebuildPair, 
     for (auto qrp : quickRebuildPair)
     {
         IArrayDevice* dst = qrp.second;
-        POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetQuickRebuildPair, dev:{}", qrp.second->GetName());
+        POS_TRACE_DEBUG(EID(QUICK_REBUILD_DEBUG), "SetQuickRebuildPair, dev:{}", qrp.second->GetName());
         int index = FindDevice(dst);
         if (index >= 0)
         {
             fault.push_back(dst);
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetQuickRebuildPair, device {} is included in this partition {}",
+            POS_TRACE_DEBUG(EID(QUICK_REBUILD_DEBUG), "SetQuickRebuildPair, device {} is included in this partition {}",
                 dst->GetName(), PARTITION_TYPE_STR[type]);
             RecoverFunc func = bind(memcpy, placeholders::_1, placeholders::_2, placeholders::_3);
             rp.emplace_back(new RebuildPair(vector<IArrayDevice*>{qrp.first}, vector<IArrayDevice*>{qrp.second}, func));
@@ -591,15 +593,15 @@ StripePartition::_SetQuickRebuildPair(const QuickRebuildPair& quickRebuildPair, 
     }
     if (rp.size() == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SetQuickRebuildPair, no target found at this partition {}",
+        POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG), "SetQuickRebuildPair, no target found at this partition {}",
             PARTITION_TYPE_STR[type]);
         return;
     }
 
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+    POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG),
         "QuickRebuildPairs, pairCnt:{}, part:{}", rp.size(), PARTITION_TYPE_STR[type]);
     _SetRebuildPair(fault, backupRp);
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+    POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG),
         "QuickRebuildPairsBackup, pairCnt:{}, part:{}", backupRp.size(), PARTITION_TYPE_STR[type]);
 }
 

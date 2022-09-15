@@ -18,6 +18,7 @@ import START_POS_BASIC
 def execute():
     START_POS_BASIC.execute()
     out = cli.apply_log_filter()
+    print (out)
     return out
 
 
