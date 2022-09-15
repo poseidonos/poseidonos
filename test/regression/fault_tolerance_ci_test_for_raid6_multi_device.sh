@@ -153,7 +153,7 @@ setup_prerequisite()
 
 kill_ibofos()
 {
-	pkill -9 poseidonos
+    pkill -9 poseidonos
     echo ""
 }
 
@@ -169,8 +169,8 @@ clean_up()
 
 start_ibofos()
 {
-	rm -rf /dev/shm/ibof_nvmf_trace.pid*
-	echo "PoseidonOS starting..."
+    rm -rf /dev/shm/ibof_nvmf_trace.pid*
+    echo "PoseidonOS starting..."
 
     if [ ${manual_ibofos_run_mode} -eq 1 ]; then
         notice "Please start PoseidonOS application now..."
@@ -180,18 +180,18 @@ start_ibofos()
         ${root_dir}/test/regression/start_poseidonos.sh
     fi
 
-	result=`${root_dir}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
-	while [ -z ${result} ];
-	do
-		echo "Wait PoseidonOS..."
-		result=`${root_dir}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
-		sleep 0.5
-	done
+    result=`${root_dir}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
+    while [ -z ${result} ];
+    do
+        echo "Wait PoseidonOS..."
+        result=`${root_dir}/bin/poseidonos-cli system info --json-res | jq '.Response.info.version' 2>/dev/null`
+        sleep 0.5
+    done
 
     notice "Now poseidonos is running..."
 
     sleep 10
-    
+
     echo "Telemetry starting..."
     ${root_dir}/bin/poseidonos-cli telemetry start
     notice "Now telemetry is available"
@@ -210,7 +210,6 @@ establish_nvmef_target()
         ${spdk_rpc_script} nvmf_create_transport -t ${create_trtype} -b 64 -n 4096 #>> ${logfile}
     fi
 
-    
     ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss} -t ${trtype} -a ${target_fabric_ip} -s ${port} #>> ${logfile}
 
     notice "New NVMe subsystem accessiable via Fabric has been added successfully to target!"
@@ -221,7 +220,7 @@ discover_n_connect_nvme_from_initiator()
     notice "Discovering remote NVMe drives..."
     ${nvme_cli} discover -t ${trtype} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
     notice "Discovery has been finished!"
-    
+
     notice "Connecting remote NVMe drives..."
     ${nvme_cli} connect -t ${trtype} -n ${nss} -a ${target_fabric_ip} -s ${port}  #>> ${logfile};
 
@@ -246,11 +245,11 @@ disconnect_nvmf_contollers()
 prepare_write_file()
 {
 
-	if [ ! -s ${write_file} ]; then
-    	touch ${write_file}
-		parallel_dd /dev/urandom ${write_file} 1024 ${dummy_size_mb} 0 0
-		info "Test file (${write_file}) has been prepared..."
-	fi
+    if [ ! -s ${write_file} ]; then
+        touch ${write_file}
+        parallel_dd /dev/urandom ${write_file} 1024 ${dummy_size_mb} 0 0
+        info "Test file (${write_file}) has been prepared..."
+    fi
 }
 
 parallel_dd()
@@ -306,7 +305,6 @@ check_result_err_from_logfile()
 
 write_pattern()
 {
-
     local blk_offset=$1
     local io_blk_cnt=$2
     local blk_unit_size=$3
@@ -321,8 +319,8 @@ write_pattern()
 shutdown_ibofos()
 {
     notice "Trying to stop POS..."
-	${ibof_cli} array unmount --array-name $array_name --force
-	${ibof_cli} system stop --force
+    ${ibof_cli} array unmount --array-name $array_name --force
+    ${ibof_cli} system stop --force
     notice "POS has been stopped"
 
     disconnect_nvmf_contollers;
@@ -359,13 +357,13 @@ bringup_ibofos()
     ${ibof_cli} device scan >> ${logfile}
     ${ibof_cli} device list >> ${logfile}
 
-	if [ $create_array -eq 1 ]; then
+    if [ $create_array -eq 1 ]; then
         ${root_dir}bin/poseidonos-cli devel resetmbr
-		info "Target device list=${target_dev_list}"
-		${ibof_cli} array create -b uram0 -d ${target_dev_list} --array-name $array_name --raid RAID6
-	fi
-	
-	${ibof_cli} array mount --array-name $array_name
+        info "Target device list=${target_dev_list}"
+        ${ibof_cli} array create -b uram0 -d ${target_dev_list} --array-name $array_name --raid RAID6
+    fi
+
+    ${ibof_cli} array mount --array-name $array_name
 
     if [ ${ibofos_volume_required} -eq 1 ] && [ ${create_array} -eq 1 ]; then
         info "Create volume....${volname}"
@@ -388,7 +386,6 @@ bringup_ibofos()
 
 verify_data()
 {
-
     local blk_offset=$1
     local io_blk_cnt=$2
     local blk_unit_size=$3
@@ -404,7 +401,7 @@ verify_data()
     notice "Verifying..."
     rm -rf ${cmp_file}
     parallel_dd ${write_file} ${cmp_file} ${blk_unit_size} ${io_blk_cnt} 0 0
-    
+
     cmp -b ${cmp_file} ${read_file} -n $((${blk_unit_size}*${io_blk_cnt}*1024))
     res=$?
     if [ ${res} -eq 0 ]; then
@@ -421,7 +418,7 @@ verify_data()
 
 detach_device()
 {
-	local dev_name1=${detach_dev1}
+    local dev_name1=${detach_dev1}
     local dev_name2=${detach_dev2}
     ${root_dir}/test/script/detach_device.sh ${dev_name1} 1
     sleep 0.1
@@ -433,26 +430,26 @@ detach_device()
 add_spare()
 {
     notice "add spare devices "
-	local spare_name1=${target_spare_dev1}
+    local spare_name1=${target_spare_dev1}
     local spare_name2=${target_spare_dev2}
-	${ibof_cli} array addspare --spare ${spare_name1} --array-name $array_name
+    ${ibof_cli} array addspare --spare ${spare_name1} --array-name $array_name
     ${ibof_cli} array addspare --spare ${spare_name2} --array-name $array_name
 }
 
 waiting_for_rebuild_complete()
 {
-	notice "waiting for rebuild complete"
-	while :
-	do
-		state=$(${ibof_cli} array list --array-name $array_name --json-res | jq '.Response.result.data.state')
-		if [ $state = "\"NORMAL\"" ]; then
-			break;
-		else
+    notice "waiting for rebuild complete"
+    while :
+    do
+        state=$(${ibof_cli} array list --array-name $array_name --json-res | jq '.Response.result.data.state')
+        if [ $state = "\"NORMAL\"" ]; then
+            break;
+        else
             rebuild_progress=$(${ibof_cli} array list --array-name $array_name --json-res | jq '.Response.result.data.rebuildingProgress')
             info "Rebuilding Progress [${rebuild_progress}]"
-			sleep 3
-		fi
-	done
+            sleep 3
+        fi
+    done
 
 }
 
@@ -465,58 +462,58 @@ run_rebuild()
 run_test()
 {
     echo ""
-	echo -e "\n\033[1;32mStarting..................................\033[0m"
+    echo -e "\n\033[1;32mStarting..................................\033[0m"
 
-	local max_idx_num_of_list=$((${#io_size_kb_list[@]} - 1))
-	local idx=`shuf -i 0-${max_idx_num_of_list} -n 1`
-	local blk_size_kb=${io_size_kb_list[${idx}]}
-	local blk_size_byte=$((${blk_size_kb}*1024))
-	local max_io_boundary_blk=$((${max_io_boundary_byte}/1024/${blk_size_kb}))
-	local boundary_cnt=3
-	local io_boundary_blk=$((${max_io_boundary_blk}/${boundary_cnt}))
-	local max_io_range_blk=$((${max_io_range_byte}/1024/${blk_size_kb}))
-	local dummy_range_blk=$((${dummy_size_mb}*1024/${blk_size_kb}))
-	
-	local blk_offset=()
-	local io_blk_cnt=()
-	
-	local iter=0
-	local cnt=2
-	while [ ${iter} -le ${cnt} ]; do
-		boundary_start=$((${iter}*${io_boundary_blk}+1))
-		boundary_end=$((${boundary_start}+${io_boundary_blk}-${max_io_range_blk}-2))
-		blk_offset[${iter}]=`shuf -i ${boundary_start}-${boundary_end} -n 1`
-		io_blk_cnt[${iter}]=`shuf -i 1-$((${max_io_range_blk}-2)) -n 1`
-		((iter++))
-	done
+    local max_idx_num_of_list=$((${#io_size_kb_list[@]} - 1))
+    local idx=`shuf -i 0-${max_idx_num_of_list} -n 1`
+    local blk_size_kb=${io_size_kb_list[${idx}]}
+    local blk_size_byte=$((${blk_size_kb}*1024))
+    local max_io_boundary_blk=$((${max_io_boundary_byte}/1024/${blk_size_kb}))
+    local boundary_cnt=3
+    local io_boundary_blk=$((${max_io_boundary_blk}/${boundary_cnt}))
+    local max_io_range_blk=$((${max_io_range_byte}/1024/${blk_size_kb}))
+    local dummy_range_blk=$((${dummy_size_mb}*1024/${blk_size_kb}))
+    
+    local blk_offset=()
+    local io_blk_cnt=()
+    
+    local iter=0
+    local cnt=2
+    while [ ${iter} -le ${cnt} ]; do
+        boundary_start=$((${iter}*${io_boundary_blk}+1))
+        boundary_end=$((${boundary_start}+${io_boundary_blk}-${max_io_range_blk}-2))
+        blk_offset[${iter}]=`shuf -i ${boundary_start}-${boundary_end} -n 1`
+        io_blk_cnt[${iter}]=`shuf -i 1-$((${max_io_range_blk}-2)) -n 1`
+        ((iter++))
+    done
 
     echo "1. Start POS..."
-	bringup_ibofos create
-	echo "2. Write Pattern 0... in normal"
+    bringup_ibofos create
+    echo "2. Write Pattern 0... in normal"
     write_pattern 0 ${dummy_range_blk} ${blk_size_kb} #dummy write
-	write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
-	echo "3. Detach a device.."
+    write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
+    echo "3. Detach a device.."
     detach_device
     sleep 1
     echo "4. Add spare device"
-	add_spare
+    add_spare
     sleep 2
     echo "5. Start rebuild"
     run_rebuild
     sleep 2
     echo "6. Write Pattern 1 during Rebuilding..."
-	write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
+    write_pattern ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # write #1
     echo "7. Verify Pattern 0 during Rebuilding..."
-	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
+    verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
     echo "8. Verify Pattern 1 during Rebuilding..."
-	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
+    verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
     echo "Patterns are verified during rebuild"
-	#rebuild done
-	waiting_for_rebuild_complete
+    #rebuild done
+    waiting_for_rebuild_complete
     echo "9. Verify Pattern 0... after rebuild"
-	verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
+    verify_data ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # read #0
     echo "10. Verify Pattern 1... after rebuild"
-	verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
+    verify_data ${blk_offset[1]} ${io_blk_cnt[1]} ${blk_size_kb} # read #1
     echo "Patterns are verified after rebuild"
 }
 
@@ -559,14 +556,14 @@ check_permission()
 
 run_iter()
 {
-	local curr_iter=1
-	while [ ${curr_iter} -le ${total_iter} ]; do
-		echo -e "\n\033[1;32mStarting new iteration...[${curr_iter}/${total_iter}]..................................\033[0m"
-		run_test
-		disconnect_nvmf_contollers;
-		shutdown_ibofos;
-		((curr_iter++))
-	done
+    local curr_iter=1
+    while [ ${curr_iter} -le ${total_iter} ]; do
+        echo -e "\n\033[1;32mStarting new iteration...[${curr_iter}/${total_iter}]..................................\033[0m"
+        run_test
+        disconnect_nvmf_contollers;
+        shutdown_ibofos;
+        ((curr_iter++))
+    done
 }
 
 check_permission
