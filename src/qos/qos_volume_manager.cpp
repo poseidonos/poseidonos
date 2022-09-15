@@ -466,6 +466,10 @@ bool
 QosVolumeManager::_SpecialRateLimit(uint32_t volId)
 {
     bool results = false;
+    if (QosManager::needThrottling == false)
+    {
+        return results;
+    }
     if (minVolumeBw[volId] == 0 && minVolumeIops[volId] == 0 &&
         (remainingNotThrottledVolumesBw < 0 || remainingNotThrottledVolumesIops < 0))
     {
@@ -935,7 +939,11 @@ int
 QosVolumeManager::VolumeQosPoller(IbofIoSubmissionAdapter* aioSubmission, double offset)
 {
     uint32_t retVal = 0;
-
+    uint32_t currentReactor = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
+    if (AffinityManagerSingleton::Instance()->IsEventReactor(currentReactor))
+    {
+        return retVal;
+    }
     for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
     {
         while (!IsExitQosSet())
