@@ -321,7 +321,12 @@ CreateTransportCmd = "create-transport" ,
   ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,
   BufCacheSize ] , [ "--num-shared-buf" , NumSharedBuffers ] ;
 
-TelemetryCmd = "telemetry" , ( TelemetryStartCmd | TelemetryStopCmd ) ;
+TelemetryCmd = "telemetry" ,
+  ( TelemetryStartCmd
+  | TelemetryStopCmd
+  | TelemetrySetPropertyCmd
+  | TelemetryGetPropertyCmd
+  ) ;
 
 TelemetryStartCmd = TelemetryCmd , ( "start" ) ;
 
@@ -330,6 +335,9 @@ TelemetryStopCmd = TelemetryCmd , ( "stop" ) ;
 TelemetrySetPropertyCmd = TelemetryCmd ,
   ( "set-property" ) , [ "--publication-list-path" ] ,
   Identifier ;
+
+TelemetryGetPropertyCmd = TelemetryCmd ,
+  ( "get-property" ) ;
 
 DevelCmd = "devel" ,
   ( ResetMbrCmd
