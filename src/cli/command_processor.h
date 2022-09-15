@@ -63,6 +63,8 @@ using grpc_cli::StartTelemetryRequest;
 using grpc_cli::StartTelemetryResponse;
 using grpc_cli::SetTelemetryPropertyRequest;
 using grpc_cli::SetTelemetryPropertyResponse;
+using grpc_cli::GetTelemetryPropertyRequest;
+using grpc_cli::GetTelemetryPropertyResponse;
 using grpc_cli::StopTelemetryRequest;
 using grpc_cli::StopTelemetryResponse;
 using grpc_cli::ResetEventWrrRequest;
@@ -147,6 +149,7 @@ public:
     grpc::Status ExecuteStartTelemetryCommand(const StartTelemetryRequest* request, StartTelemetryResponse* reply);
     grpc::Status ExecuteStopTelemetryCommand(const StopTelemetryRequest* request, StopTelemetryResponse* reply);
     grpc::Status ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyRequest* request, SetTelemetryPropertyResponse* reply);
+    grpc::Status ExecuteGetTelemetryPropertyCommand(const GetTelemetryPropertyRequest* request, GetTelemetryPropertyResponse* reply);
 
     // Developer COmmands
     grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);

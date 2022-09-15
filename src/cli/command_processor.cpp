@@ -283,6 +283,26 @@ CommandProcessor::ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyR
 }
 
 grpc::Status
+CommandProcessor::ExecuteGetTelemetryPropertyCommand(const GetTelemetryPropertyRequest* request, GetTelemetryPropertyResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+
+    bool isRunning = tc->IsRunning();
+    std::string publicationListPath = tc->GetPublicationList();    
+
+    reply->mutable_result()->mutable_data()->set_status(isRunning);
+    reply->mutable_result()->mutable_data()->set_publicationlistpath(publicationListPath);
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request,
     ResetEventWrrResponse* reply)
 {

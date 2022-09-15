@@ -49,6 +49,12 @@ service PosCli {
     	};
 	}
 
+	rpc GetTelemetryProperty (GetTelemetryPropertyRequest) returns (GetTelemetryPropertyResponse) {
+		option (google.api.http) = {
+      		get: "/v1/get_telemetry_property"
+    	};
+	}
+
 	rpc ResetEventWrr (ResetEventWrrRequest) returns (ResetEventWrrResponse);
 	rpc ResetMbr (ResetMbrRequest) returns (ResetMbrResponse);
 	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
@@ -374,6 +380,27 @@ message SetTelemetryPropertyResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message GetTelemetryPropertyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message GetTelemetryPropertyResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message TelemetryProperty {
+			bool status = 1;
+			string publicationListPath = 2;
+		}
+		TelemetryProperty data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
