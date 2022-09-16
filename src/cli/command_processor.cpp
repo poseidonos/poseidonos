@@ -1669,6 +1669,66 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
 }
 
 grpc::Status
+CommandProcessor::ExecuteDeleteVolumeCommand(const DeleteVolumeRequest* request, DeleteVolumeResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string volumeName = "";
+    string arrayName = "";
+
+    volumeName = (request->param()).name();
+    arrayName = (request->param()).array();
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(DELETE_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(DELETE_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IVolumeEventManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+    if (volMgr != nullptr)
+    {
+        int ret = volMgr->Delete(volumeName);
+        if (ret == SUCCESS)
+        {
+            int eventId = EID(SUCCESS);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            int eventId = ret;
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+
+    int eventId = EID(DELETE_VOL_INTERNAL_ERROR);
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply)
 {
     string command = request->command();

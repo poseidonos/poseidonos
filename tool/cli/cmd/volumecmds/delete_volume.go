@@ -1,16 +1,16 @@
 package volumecmds
 
 import (
-	"encoding/json"
+	"fmt"
 	"os"
-	"pnconnector/src/log"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
+	"cli/cmd/grpcmgr"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var DeleteVolumeCmd = &cobra.Command{
@@ -26,7 +26,7 @@ Example:
 	poseidonos-cli volume delete --volume-name Volume0 --array=name Array0
 	
           `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var warningMsg = "WARNING: After deleting volume" + " " +
 			delete_volume_volumeName + "," + " " +
@@ -46,28 +46,47 @@ Example:
 
 		var command = "DELETEVOLUME"
 
-		param := messages.DeleteVolumeParam{
-			VOLUMENAME: delete_volume_volumeName,
-			ARRAYNAME:  delete_volume_arrayName,
+		req, buildErr := buildDeleteVolumeReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
 		}
 
-		uuid := globals.GenerateUUID()
-
-		deleteVolumeReq := messages.BuildReqWithParam(command, uuid, param)
-
-		reqJSON, err := json.Marshal(deleteVolumeReq)
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendDeleteVolume(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
 		}
+
+		return nil
 	},
+}
+
+func buildDeleteVolumeReq(command string) (*pb.DeleteVolumeRequest, error) {
+
+	param := &pb.DeleteVolumeRequest_Param{
+		Name:  delete_volume_volumeName,
+		Array: delete_volume_arrayName,
+	}
+
+	uuid := globals.GenerateUUID()
+
+	req := &pb.DeleteVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
