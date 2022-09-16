@@ -73,6 +73,7 @@ IODispatcherSubmission::IODispatcherSubmission(void)
     for (uint32_t event = 0; event < BackendEvent_Count; event++)
     {
         scheduler[event].schedType = SchedulingType::NoMatter;
+        scheduler[event].schedTypeCLI = SchedulingType::NoMatter;
         scheduler[event].readMaxBw = NO_THROTTLING_VALUE;
         scheduler[event].writeMaxBw = NO_THROTTLING_VALUE;
         scheduler[event].remainingRead = scheduler[event].readMaxBw;
@@ -211,10 +212,12 @@ IODispatcherSubmission::_SetSchedType(BackendEvent event, SchedulingType schedTy
     if (scheduler[event].reactorCount != 0)
     {
         scheduler[event].schedType = schedType;
+        scheduler[event].schedTypeCLI = schedType;
     }
     else
     {
         scheduler[event].schedType = SchedulingType::NoMatter;
+        scheduler[event].schedTypeCLI = SchedulingType::NoMatter;
     }
 }
 
@@ -270,11 +273,12 @@ IODispatcherSubmission::CheckAndSetBusyMode(void)
 {
     if (scheduler[BackendEvent_FrontendIO].busyDetector == 0)
     {
-        scheduler[BackendEvent_FrontendIO].schedType = SchedulingType::NoMatter;
+        scheduler[BackendEvent_UserdataRebuild].schedType = SchedulingType::NoMatter;
     }
     else
     {
-        scheduler[BackendEvent_FrontendIO].schedType = SchedulingType::ReactorRatioAndThrottling;
+        scheduler[BackendEvent_UserdataRebuild].schedType
+            = scheduler[BackendEvent_UserdataRebuild].schedTypeCLI;
     }
     scheduler[BackendEvent_FrontendIO].busyDetector = 0;
 }

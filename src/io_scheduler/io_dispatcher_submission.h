@@ -59,6 +59,7 @@ enum class RebuildImpact
 struct SchedulingInIODispatcher
 {
     SchedulingType schedType;
+    SchedulingType schedTypeCLI;
     uint64_t readMaxBw;
     uint64_t writeMaxBw;
     std::atomic<int64_t> remainingRead;
