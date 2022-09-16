@@ -142,12 +142,12 @@ EventFrameworkApi::SendSpdkEvent(EventFuncOneParam func, void* arg1)
     return true;
 }
 
-void
+bool
 EventFrameworkApi::CompleteEvents(void)
 {
     if (IsReactorNow() == false)
     {
-        return;
+        return false;
     }
 
     uint32_t core = GetCurrentReactor();
@@ -165,14 +165,19 @@ EventFrameworkApi::CompleteEvents(void)
             break;
         }
     }
+    if (eventQueue.empty() == true)
+    {
+	    return true;
+    }
+    return false;
 }
 
-void
+bool
 EventFrameworkApi::CompleteSingleQueueEvents(void)
 {
     if (IsReactorNow() == false)
     {
-        return;
+        return false;
     }
     uint32_t numaIndex = 0;
     if (numaDedicatedSchedulingPolicy)
@@ -193,6 +198,11 @@ EventFrameworkApi::CompleteSingleQueueEvents(void)
             break;
         }
     }
+    if (eventQueue.empty() == true)
+    {
+        return true;
+    }
+    return false;
 }
 
 uint32_t
