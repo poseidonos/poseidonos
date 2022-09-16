@@ -9,7 +9,6 @@ Unmount a volume to the host.
 
 Syntax:
 	unmount (--volume-name | -v) VolumeName (--array-name | -a) ArrayName 
-	[--subnqn TargetNVMSubsystemNVMeQualifiedName]
 
 Example: 
 	poseidonos-cli volume unmount --volume-name Volume0 --array-name Volume0

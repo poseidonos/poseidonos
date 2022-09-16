@@ -317,6 +317,13 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::DeleteVolumeResponse>> PrepareAsyncDeleteVolume(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::DeleteVolumeResponse>>(PrepareAsyncDeleteVolumeRaw(context, request, cq));
     }
+    virtual ::grpc::Status UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc_cli::UnmountVolumeResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountVolumeResponse>> AsyncUnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountVolumeResponse>>(AsyncUnmountVolumeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountVolumeResponse>> PrepareAsyncUnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountVolumeResponse>>(PrepareAsyncUnmountVolumeRaw(context, request, cq));
+    }
     virtual ::grpc::Status SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc_cli::SetVolumePropertyResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetVolumePropertyResponse>> AsyncSetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetVolumePropertyResponse>>(AsyncSetVolumePropertyRaw(context, request, cq));
@@ -568,6 +575,12 @@ class PosCli final {
       #else
       virtual void DeleteVolume(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest* request, ::grpc_cli::DeleteVolumeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       virtual void SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest* request, ::grpc_cli::SetVolumePropertyResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest* request, ::grpc_cli::SetVolumePropertyResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
@@ -663,6 +676,8 @@ class PosCli final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::CreateVolumeResponse>* PrepareAsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::DeleteVolumeResponse>* AsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::DeleteVolumeResponse>* PrepareAsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountVolumeResponse>* AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::UnmountVolumeResponse>* PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetVolumePropertyResponse>* AsyncSetVolumePropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::grpc_cli::SetVolumePropertyResponse>* PrepareAsyncSetVolumePropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
@@ -949,6 +964,13 @@ class PosCli final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteVolumeResponse>> PrepareAsyncDeleteVolume(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteVolumeResponse>>(PrepareAsyncDeleteVolumeRaw(context, request, cq));
     }
+    ::grpc::Status UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc_cli::UnmountVolumeResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountVolumeResponse>> AsyncUnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountVolumeResponse>>(AsyncUnmountVolumeRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountVolumeResponse>> PrepareAsyncUnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountVolumeResponse>>(PrepareAsyncUnmountVolumeRaw(context, request, cq));
+    }
     ::grpc::Status SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc_cli::SetVolumePropertyResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetVolumePropertyResponse>> AsyncSetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetVolumePropertyResponse>>(AsyncSetVolumePropertyRaw(context, request, cq));
@@ -1199,6 +1221,12 @@ class PosCli final {
       #else
       void DeleteVolume(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest* request, ::grpc_cli::DeleteVolumeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void UnmountVolume(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest* request, ::grpc_cli::SetVolumePropertyResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest* request, ::grpc_cli::SetVolumePropertyResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
@@ -1296,6 +1324,8 @@ class PosCli final {
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::CreateVolumeResponse>* PrepareAsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteVolumeResponse>* AsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::DeleteVolumeResponse>* PrepareAsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountVolumeResponse>* AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::grpc_cli::UnmountVolumeResponse>* PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetVolumePropertyResponse>* AsyncSetVolumePropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::grpc_cli::SetVolumePropertyResponse>* PrepareAsyncSetVolumePropertyRaw(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_SystemInfo_;
@@ -1338,6 +1368,7 @@ class PosCli final {
     const ::grpc::internal::RpcMethod rpcmethod_CreateTransport_;
     const ::grpc::internal::RpcMethod rpcmethod_CreateVolume_;
     const ::grpc::internal::RpcMethod rpcmethod_DeleteVolume_;
+    const ::grpc::internal::RpcMethod rpcmethod_UnmountVolume_;
     const ::grpc::internal::RpcMethod rpcmethod_SetVolumeProperty_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
@@ -1387,6 +1418,7 @@ class PosCli final {
     virtual ::grpc::Status CreateTransport(::grpc::ServerContext* context, const ::grpc_cli::CreateTransportRequest* request, ::grpc_cli::CreateTransportResponse* response);
     virtual ::grpc::Status CreateVolume(::grpc::ServerContext* context, const ::grpc_cli::CreateVolumeRequest* request, ::grpc_cli::CreateVolumeResponse* response);
     virtual ::grpc::Status DeleteVolume(::grpc::ServerContext* context, const ::grpc_cli::DeleteVolumeRequest* request, ::grpc_cli::DeleteVolumeResponse* response);
+    virtual ::grpc::Status UnmountVolume(::grpc::ServerContext* context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response);
     virtual ::grpc::Status SetVolumeProperty(::grpc::ServerContext* context, const ::grpc_cli::SetVolumePropertyRequest* request, ::grpc_cli::SetVolumePropertyResponse* response);
   };
   template <class BaseClass>
@@ -2190,12 +2222,32 @@ class PosCli final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_UnmountVolume : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_UnmountVolume() {
+      ::grpc::Service::MarkMethodAsync(40);
+    }
+    ~WithAsyncMethod_UnmountVolume() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUnmountVolume(::grpc::ServerContext* context, ::grpc_cli::UnmountVolumeRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::UnmountVolumeResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(40, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_SetVolumeProperty : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_SetVolumeProperty() {
-      ::grpc::Service::MarkMethodAsync(40);
+      ::grpc::Service::MarkMethodAsync(41);
     }
     ~WithAsyncMethod_SetVolumeProperty() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2206,10 +2258,10 @@ class PosCli final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetVolumeProperty(::grpc::ServerContext* context, ::grpc_cli::SetVolumePropertyRequest* request, ::grpc::ServerAsyncResponseWriter< ::grpc_cli::SetVolumePropertyResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(40, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(41, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_StopSystem<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_SetTelemetryProperty<WithAsyncMethod_GetTelemetryProperty<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_ReplaceArrayDevice<WithAsyncMethod_CreateArray<WithAsyncMethod_AutocreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<WithAsyncMethod_RebuildArray<WithAsyncMethod_SetLogPreference<WithAsyncMethod_SetLogLevel<WithAsyncMethod_LoggerInfo<WithAsyncMethod_GetLogLevel<WithAsyncMethod_ApplyLogFilter<WithAsyncMethod_CreateDevice<WithAsyncMethod_ScanDevice<WithAsyncMethod_ListDevice<WithAsyncMethod_GetSmartLog<WithAsyncMethod_CreateSubsystem<WithAsyncMethod_DeleteSubsystem<WithAsyncMethod_AddListener<WithAsyncMethod_ListSubsystem<WithAsyncMethod_SubsystemInfo<WithAsyncMethod_CreateTransport<WithAsyncMethod_CreateVolume<WithAsyncMethod_DeleteVolume<WithAsyncMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > AsyncService;
+  typedef WithAsyncMethod_SystemInfo<WithAsyncMethod_StopSystem<WithAsyncMethod_GetSystemProperty<WithAsyncMethod_SetSystemProperty<WithAsyncMethod_StartTelemetry<WithAsyncMethod_StopTelemetry<WithAsyncMethod_SetTelemetryProperty<WithAsyncMethod_GetTelemetryProperty<WithAsyncMethod_ResetEventWrr<WithAsyncMethod_ResetMbr<WithAsyncMethod_StopRebuilding<WithAsyncMethod_UpdateEventWrr<WithAsyncMethod_AddSpare<WithAsyncMethod_RemoveSpare<WithAsyncMethod_ReplaceArrayDevice<WithAsyncMethod_CreateArray<WithAsyncMethod_AutocreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_MountArray<WithAsyncMethod_UnmountArray<WithAsyncMethod_ListArray<WithAsyncMethod_ArrayInfo<WithAsyncMethod_RebuildArray<WithAsyncMethod_SetLogPreference<WithAsyncMethod_SetLogLevel<WithAsyncMethod_LoggerInfo<WithAsyncMethod_GetLogLevel<WithAsyncMethod_ApplyLogFilter<WithAsyncMethod_CreateDevice<WithAsyncMethod_ScanDevice<WithAsyncMethod_ListDevice<WithAsyncMethod_GetSmartLog<WithAsyncMethod_CreateSubsystem<WithAsyncMethod_DeleteSubsystem<WithAsyncMethod_AddListener<WithAsyncMethod_ListSubsystem<WithAsyncMethod_SubsystemInfo<WithAsyncMethod_CreateTransport<WithAsyncMethod_CreateVolume<WithAsyncMethod_DeleteVolume<WithAsyncMethod_UnmountVolume<WithAsyncMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_SystemInfo : public BaseClass {
    private:
@@ -4091,6 +4143,53 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithCallbackMethod_UnmountVolume : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_UnmountVolume() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(40,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::UnmountVolumeRequest, ::grpc_cli::UnmountVolumeResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc_cli::UnmountVolumeRequest* request, ::grpc_cli::UnmountVolumeResponse* response) { return this->UnmountVolume(context, request, response); }));}
+    void SetMessageAllocatorFor_UnmountVolume(
+        ::grpc::experimental::MessageAllocator< ::grpc_cli::UnmountVolumeRequest, ::grpc_cli::UnmountVolumeResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(40);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(40);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::UnmountVolumeRequest, ::grpc_cli::UnmountVolumeResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_UnmountVolume() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UnmountVolume(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UnmountVolume(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithCallbackMethod_SetVolumeProperty : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -4101,7 +4200,7 @@ class PosCli final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(40,
+        MarkMethodCallback(41,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -4113,9 +4212,9 @@ class PosCli final {
     void SetMessageAllocatorFor_SetVolumeProperty(
         ::grpc::experimental::MessageAllocator< ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(40);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(41);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(40);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(41);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -4138,10 +4237,10 @@ class PosCli final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_StopSystem<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_SetTelemetryProperty<ExperimentalWithCallbackMethod_GetTelemetryProperty<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_ReplaceArrayDevice<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_RebuildArray<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_StopSystem<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_SetTelemetryProperty<ExperimentalWithCallbackMethod_GetTelemetryProperty<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_ReplaceArrayDevice<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_RebuildArray<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_StopSystem<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_SetTelemetryProperty<ExperimentalWithCallbackMethod_GetTelemetryProperty<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_ReplaceArrayDevice<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_RebuildArray<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_SystemInfo<ExperimentalWithCallbackMethod_StopSystem<ExperimentalWithCallbackMethod_GetSystemProperty<ExperimentalWithCallbackMethod_SetSystemProperty<ExperimentalWithCallbackMethod_StartTelemetry<ExperimentalWithCallbackMethod_StopTelemetry<ExperimentalWithCallbackMethod_SetTelemetryProperty<ExperimentalWithCallbackMethod_GetTelemetryProperty<ExperimentalWithCallbackMethod_ResetEventWrr<ExperimentalWithCallbackMethod_ResetMbr<ExperimentalWithCallbackMethod_StopRebuilding<ExperimentalWithCallbackMethod_UpdateEventWrr<ExperimentalWithCallbackMethod_AddSpare<ExperimentalWithCallbackMethod_RemoveSpare<ExperimentalWithCallbackMethod_ReplaceArrayDevice<ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_AutocreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_MountArray<ExperimentalWithCallbackMethod_UnmountArray<ExperimentalWithCallbackMethod_ListArray<ExperimentalWithCallbackMethod_ArrayInfo<ExperimentalWithCallbackMethod_RebuildArray<ExperimentalWithCallbackMethod_SetLogPreference<ExperimentalWithCallbackMethod_SetLogLevel<ExperimentalWithCallbackMethod_LoggerInfo<ExperimentalWithCallbackMethod_GetLogLevel<ExperimentalWithCallbackMethod_ApplyLogFilter<ExperimentalWithCallbackMethod_CreateDevice<ExperimentalWithCallbackMethod_ScanDevice<ExperimentalWithCallbackMethod_ListDevice<ExperimentalWithCallbackMethod_GetSmartLog<ExperimentalWithCallbackMethod_CreateSubsystem<ExperimentalWithCallbackMethod_DeleteSubsystem<ExperimentalWithCallbackMethod_AddListener<ExperimentalWithCallbackMethod_ListSubsystem<ExperimentalWithCallbackMethod_SubsystemInfo<ExperimentalWithCallbackMethod_CreateTransport<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_SystemInfo : public BaseClass {
    private:
@@ -4823,12 +4922,29 @@ class PosCli final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_UnmountVolume : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_UnmountVolume() {
+      ::grpc::Service::MarkMethodGeneric(40);
+    }
+    ~WithGenericMethod_UnmountVolume() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_SetVolumeProperty : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_SetVolumeProperty() {
-      ::grpc::Service::MarkMethodGeneric(40);
+      ::grpc::Service::MarkMethodGeneric(41);
     }
     ~WithGenericMethod_SetVolumeProperty() override {
       BaseClassMustBeDerivedFromService(this);
@@ -5640,12 +5756,32 @@ class PosCli final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_UnmountVolume : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_UnmountVolume() {
+      ::grpc::Service::MarkMethodRaw(40);
+    }
+    ~WithRawMethod_UnmountVolume() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestUnmountVolume(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(40, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawMethod_SetVolumeProperty : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_SetVolumeProperty() {
-      ::grpc::Service::MarkMethodRaw(40);
+      ::grpc::Service::MarkMethodRaw(41);
     }
     ~WithRawMethod_SetVolumeProperty() override {
       BaseClassMustBeDerivedFromService(this);
@@ -5656,7 +5792,7 @@ class PosCli final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestSetVolumeProperty(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(40, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(41, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -7180,6 +7316,44 @@ class PosCli final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_UnmountVolume : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_UnmountVolume() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(40,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UnmountVolume(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_UnmountVolume() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* UnmountVolume(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* UnmountVolume(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_SetVolumeProperty : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -7190,7 +7364,7 @@ class PosCli final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(40,
+        MarkMethodRawCallback(41,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -8298,12 +8472,39 @@ class PosCli final {
     virtual ::grpc::Status StreamedDeleteVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::DeleteVolumeRequest,::grpc_cli::DeleteVolumeResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_UnmountVolume : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_UnmountVolume() {
+      ::grpc::Service::MarkMethodStreamed(40,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::grpc_cli::UnmountVolumeRequest, ::grpc_cli::UnmountVolumeResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::grpc_cli::UnmountVolumeRequest, ::grpc_cli::UnmountVolumeResponse>* streamer) {
+                       return this->StreamedUnmountVolume(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_UnmountVolume() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::grpc_cli::UnmountVolumeRequest* /*request*/, ::grpc_cli::UnmountVolumeResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedUnmountVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::UnmountVolumeRequest,::grpc_cli::UnmountVolumeResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_SetVolumeProperty : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_SetVolumeProperty() {
-      ::grpc::Service::MarkMethodStreamed(40,
+      ::grpc::Service::MarkMethodStreamed(41,
         new ::grpc::internal::StreamedUnaryHandler<
           ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse>(
             [this](::grpc::ServerContext* context,
@@ -8324,9 +8525,9 @@ class PosCli final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedSetVolumeProperty(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::grpc_cli::SetVolumePropertyRequest,::grpc_cli::SetVolumePropertyResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_StopSystem<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_SetTelemetryProperty<WithStreamedUnaryMethod_GetTelemetryProperty<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_ReplaceArrayDevice<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_RebuildArray<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_StopSystem<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_SetTelemetryProperty<WithStreamedUnaryMethod_GetTelemetryProperty<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_ReplaceArrayDevice<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_RebuildArray<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_StopSystem<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_SetTelemetryProperty<WithStreamedUnaryMethod_GetTelemetryProperty<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_ReplaceArrayDevice<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_RebuildArray<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_SystemInfo<WithStreamedUnaryMethod_StopSystem<WithStreamedUnaryMethod_GetSystemProperty<WithStreamedUnaryMethod_SetSystemProperty<WithStreamedUnaryMethod_StartTelemetry<WithStreamedUnaryMethod_StopTelemetry<WithStreamedUnaryMethod_SetTelemetryProperty<WithStreamedUnaryMethod_GetTelemetryProperty<WithStreamedUnaryMethod_ResetEventWrr<WithStreamedUnaryMethod_ResetMbr<WithStreamedUnaryMethod_StopRebuilding<WithStreamedUnaryMethod_UpdateEventWrr<WithStreamedUnaryMethod_AddSpare<WithStreamedUnaryMethod_RemoveSpare<WithStreamedUnaryMethod_ReplaceArrayDevice<WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_AutocreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_MountArray<WithStreamedUnaryMethod_UnmountArray<WithStreamedUnaryMethod_ListArray<WithStreamedUnaryMethod_ArrayInfo<WithStreamedUnaryMethod_RebuildArray<WithStreamedUnaryMethod_SetLogPreference<WithStreamedUnaryMethod_SetLogLevel<WithStreamedUnaryMethod_LoggerInfo<WithStreamedUnaryMethod_GetLogLevel<WithStreamedUnaryMethod_ApplyLogFilter<WithStreamedUnaryMethod_CreateDevice<WithStreamedUnaryMethod_ScanDevice<WithStreamedUnaryMethod_ListDevice<WithStreamedUnaryMethod_GetSmartLog<WithStreamedUnaryMethod_CreateSubsystem<WithStreamedUnaryMethod_DeleteSubsystem<WithStreamedUnaryMethod_AddListener<WithStreamedUnaryMethod_ListSubsystem<WithStreamedUnaryMethod_SubsystemInfo<WithStreamedUnaryMethod_CreateTransport<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_SetVolumeProperty<Service > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > > StreamedService;
 };
 
 }  // namespace grpc_cli

@@ -229,6 +229,12 @@ service PosCli {
     	};
 	}
 
+	rpc UnmountVolume (UnmountVolumeRequest) returns (UnmountVolumeResponse) {
+		option (google.api.http) = {
+      		post: "/v1/unmountvolume"
+    	};
+	}
+
 	rpc SetVolumeProperty (SetVolumePropertyRequest) returns (SetVolumePropertyResponse) {
 		option (google.api.http) = {
       		post: "/v1/setvolumeproperty"
@@ -1271,6 +1277,27 @@ message DeleteVolumeRequest {
 }
 
 message DeleteVolumeResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message UnmountVolumeRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+		string array = 2;
+	}
+	Param param = 4;
+}
+
+message UnmountVolumeResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

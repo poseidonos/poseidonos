@@ -47,7 +47,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[187]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[191]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -605,6 +605,18 @@ extern UnmountArrayResponseDefaultTypeInternal _UnmountArrayResponse_default_ins
 class UnmountArrayResponse_Result;
 struct UnmountArrayResponse_ResultDefaultTypeInternal;
 extern UnmountArrayResponse_ResultDefaultTypeInternal _UnmountArrayResponse_Result_default_instance_;
+class UnmountVolumeRequest;
+struct UnmountVolumeRequestDefaultTypeInternal;
+extern UnmountVolumeRequestDefaultTypeInternal _UnmountVolumeRequest_default_instance_;
+class UnmountVolumeRequest_Param;
+struct UnmountVolumeRequest_ParamDefaultTypeInternal;
+extern UnmountVolumeRequest_ParamDefaultTypeInternal _UnmountVolumeRequest_Param_default_instance_;
+class UnmountVolumeResponse;
+struct UnmountVolumeResponseDefaultTypeInternal;
+extern UnmountVolumeResponseDefaultTypeInternal _UnmountVolumeResponse_default_instance_;
+class UnmountVolumeResponse_Result;
+struct UnmountVolumeResponse_ResultDefaultTypeInternal;
+extern UnmountVolumeResponse_ResultDefaultTypeInternal _UnmountVolumeResponse_Result_default_instance_;
 class UpdateEventWrrRequest;
 struct UpdateEventWrrRequestDefaultTypeInternal;
 extern UpdateEventWrrRequestDefaultTypeInternal _UpdateEventWrrRequest_default_instance_;
@@ -802,6 +814,10 @@ template<> ::grpc_cli::UnmountArrayRequest* Arena::CreateMaybeMessage<::grpc_cli
 template<> ::grpc_cli::UnmountArrayRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::UnmountArrayRequest_Param>(Arena*);
 template<> ::grpc_cli::UnmountArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::UnmountArrayResponse>(Arena*);
 template<> ::grpc_cli::UnmountArrayResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::UnmountArrayResponse_Result>(Arena*);
+template<> ::grpc_cli::UnmountVolumeRequest* Arena::CreateMaybeMessage<::grpc_cli::UnmountVolumeRequest>(Arena*);
+template<> ::grpc_cli::UnmountVolumeRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::UnmountVolumeRequest_Param>(Arena*);
+template<> ::grpc_cli::UnmountVolumeResponse* Arena::CreateMaybeMessage<::grpc_cli::UnmountVolumeResponse>(Arena*);
+template<> ::grpc_cli::UnmountVolumeResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::UnmountVolumeResponse_Result>(Arena*);
 template<> ::grpc_cli::UpdateEventWrrRequest* Arena::CreateMaybeMessage<::grpc_cli::UpdateEventWrrRequest>(Arena*);
 template<> ::grpc_cli::UpdateEventWrrRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::UpdateEventWrrRequest_Param>(Arena*);
 template<> ::grpc_cli::UpdateEventWrrResponse* Arena::CreateMaybeMessage<::grpc_cli::UpdateEventWrrResponse>(Arena*);
@@ -34670,6 +34686,720 @@ class DeleteVolumeResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class UnmountVolumeRequest_Param PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.UnmountVolumeRequest.Param) */ {
+ public:
+  inline UnmountVolumeRequest_Param() : UnmountVolumeRequest_Param(nullptr) {}
+  virtual ~UnmountVolumeRequest_Param();
+  explicit constexpr UnmountVolumeRequest_Param(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UnmountVolumeRequest_Param(const UnmountVolumeRequest_Param& from);
+  UnmountVolumeRequest_Param(UnmountVolumeRequest_Param&& from) noexcept
+    : UnmountVolumeRequest_Param() {
+    *this = ::std::move(from);
+  }
+
+  inline UnmountVolumeRequest_Param& operator=(const UnmountVolumeRequest_Param& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UnmountVolumeRequest_Param& operator=(UnmountVolumeRequest_Param&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const UnmountVolumeRequest_Param& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UnmountVolumeRequest_Param* internal_default_instance() {
+    return reinterpret_cast<const UnmountVolumeRequest_Param*>(
+               &_UnmountVolumeRequest_Param_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    183;
+
+  friend void swap(UnmountVolumeRequest_Param& a, UnmountVolumeRequest_Param& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UnmountVolumeRequest_Param* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UnmountVolumeRequest_Param* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UnmountVolumeRequest_Param* New() const final {
+    return CreateMaybeMessage<UnmountVolumeRequest_Param>(nullptr);
+  }
+
+  UnmountVolumeRequest_Param* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UnmountVolumeRequest_Param>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const UnmountVolumeRequest_Param& from);
+  void MergeFrom(const UnmountVolumeRequest_Param& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UnmountVolumeRequest_Param* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.UnmountVolumeRequest.Param";
+  }
+  protected:
+  explicit UnmountVolumeRequest_Param(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kNameFieldNumber = 1,
+    kArrayFieldNumber = 2,
+  };
+  // string name = 1;
+  void clear_name();
+  const std::string& name() const;
+  void set_name(const std::string& value);
+  void set_name(std::string&& value);
+  void set_name(const char* value);
+  void set_name(const char* value, size_t size);
+  std::string* mutable_name();
+  std::string* release_name();
+  void set_allocated_name(std::string* name);
+  private:
+  const std::string& _internal_name() const;
+  void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+  public:
+
+  // string array = 2;
+  void clear_array();
+  const std::string& array() const;
+  void set_array(const std::string& value);
+  void set_array(std::string&& value);
+  void set_array(const char* value);
+  void set_array(const char* value, size_t size);
+  std::string* mutable_array();
+  std::string* release_array();
+  void set_allocated_array(std::string* array);
+  private:
+  const std::string& _internal_array() const;
+  void _internal_set_array(const std::string& value);
+  std::string* _internal_mutable_array();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.UnmountVolumeRequest.Param)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class UnmountVolumeRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.UnmountVolumeRequest) */ {
+ public:
+  inline UnmountVolumeRequest() : UnmountVolumeRequest(nullptr) {}
+  virtual ~UnmountVolumeRequest();
+  explicit constexpr UnmountVolumeRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UnmountVolumeRequest(const UnmountVolumeRequest& from);
+  UnmountVolumeRequest(UnmountVolumeRequest&& from) noexcept
+    : UnmountVolumeRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline UnmountVolumeRequest& operator=(const UnmountVolumeRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UnmountVolumeRequest& operator=(UnmountVolumeRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const UnmountVolumeRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UnmountVolumeRequest* internal_default_instance() {
+    return reinterpret_cast<const UnmountVolumeRequest*>(
+               &_UnmountVolumeRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    184;
+
+  friend void swap(UnmountVolumeRequest& a, UnmountVolumeRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UnmountVolumeRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UnmountVolumeRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UnmountVolumeRequest* New() const final {
+    return CreateMaybeMessage<UnmountVolumeRequest>(nullptr);
+  }
+
+  UnmountVolumeRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UnmountVolumeRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const UnmountVolumeRequest& from);
+  void MergeFrom(const UnmountVolumeRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UnmountVolumeRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.UnmountVolumeRequest";
+  }
+  protected:
+  explicit UnmountVolumeRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef UnmountVolumeRequest_Param Param;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+    kParamFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // .grpc_cli.UnmountVolumeRequest.Param param = 4;
+  bool has_param() const;
+  private:
+  bool _internal_has_param() const;
+  public:
+  void clear_param();
+  const ::grpc_cli::UnmountVolumeRequest_Param& param() const;
+  ::grpc_cli::UnmountVolumeRequest_Param* release_param();
+  ::grpc_cli::UnmountVolumeRequest_Param* mutable_param();
+  void set_allocated_param(::grpc_cli::UnmountVolumeRequest_Param* param);
+  private:
+  const ::grpc_cli::UnmountVolumeRequest_Param& _internal_param() const;
+  ::grpc_cli::UnmountVolumeRequest_Param* _internal_mutable_param();
+  public:
+  void unsafe_arena_set_allocated_param(
+      ::grpc_cli::UnmountVolumeRequest_Param* param);
+  ::grpc_cli::UnmountVolumeRequest_Param* unsafe_arena_release_param();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.UnmountVolumeRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  ::grpc_cli::UnmountVolumeRequest_Param* param_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class UnmountVolumeResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.UnmountVolumeResponse.Result) */ {
+ public:
+  inline UnmountVolumeResponse_Result() : UnmountVolumeResponse_Result(nullptr) {}
+  virtual ~UnmountVolumeResponse_Result();
+  explicit constexpr UnmountVolumeResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UnmountVolumeResponse_Result(const UnmountVolumeResponse_Result& from);
+  UnmountVolumeResponse_Result(UnmountVolumeResponse_Result&& from) noexcept
+    : UnmountVolumeResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline UnmountVolumeResponse_Result& operator=(const UnmountVolumeResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UnmountVolumeResponse_Result& operator=(UnmountVolumeResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const UnmountVolumeResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UnmountVolumeResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const UnmountVolumeResponse_Result*>(
+               &_UnmountVolumeResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    185;
+
+  friend void swap(UnmountVolumeResponse_Result& a, UnmountVolumeResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UnmountVolumeResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UnmountVolumeResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UnmountVolumeResponse_Result* New() const final {
+    return CreateMaybeMessage<UnmountVolumeResponse_Result>(nullptr);
+  }
+
+  UnmountVolumeResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UnmountVolumeResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const UnmountVolumeResponse_Result& from);
+  void MergeFrom(const UnmountVolumeResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UnmountVolumeResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.UnmountVolumeResponse.Result";
+  }
+  protected:
+  explicit UnmountVolumeResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.UnmountVolumeResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class UnmountVolumeResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.UnmountVolumeResponse) */ {
+ public:
+  inline UnmountVolumeResponse() : UnmountVolumeResponse(nullptr) {}
+  virtual ~UnmountVolumeResponse();
+  explicit constexpr UnmountVolumeResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  UnmountVolumeResponse(const UnmountVolumeResponse& from);
+  UnmountVolumeResponse(UnmountVolumeResponse&& from) noexcept
+    : UnmountVolumeResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline UnmountVolumeResponse& operator=(const UnmountVolumeResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline UnmountVolumeResponse& operator=(UnmountVolumeResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const UnmountVolumeResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const UnmountVolumeResponse* internal_default_instance() {
+    return reinterpret_cast<const UnmountVolumeResponse*>(
+               &_UnmountVolumeResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    186;
+
+  friend void swap(UnmountVolumeResponse& a, UnmountVolumeResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(UnmountVolumeResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(UnmountVolumeResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline UnmountVolumeResponse* New() const final {
+    return CreateMaybeMessage<UnmountVolumeResponse>(nullptr);
+  }
+
+  UnmountVolumeResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<UnmountVolumeResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const UnmountVolumeResponse& from);
+  void MergeFrom(const UnmountVolumeResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(UnmountVolumeResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.UnmountVolumeResponse";
+  }
+  protected:
+  explicit UnmountVolumeResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef UnmountVolumeResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.UnmountVolumeResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::UnmountVolumeResponse_Result& result() const;
+  ::grpc_cli::UnmountVolumeResponse_Result* release_result();
+  ::grpc_cli::UnmountVolumeResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::UnmountVolumeResponse_Result* result);
+  private:
+  const ::grpc_cli::UnmountVolumeResponse_Result& _internal_result() const;
+  ::grpc_cli::UnmountVolumeResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::UnmountVolumeResponse_Result* result);
+  ::grpc_cli::UnmountVolumeResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.UnmountVolumeResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::UnmountVolumeResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
 class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.SetVolumePropertyRequest.Param) */ {
  public:
@@ -34713,7 +35443,7 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
                &_SetVolumePropertyRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    183;
+    187;
 
   friend void swap(SetVolumePropertyRequest_Param& a, SetVolumePropertyRequest_Param& b) {
     a.Swap(&b);
@@ -34948,7 +35678,7 @@ class SetVolumePropertyRequest PROTOBUF_FINAL :
                &_SetVolumePropertyRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    184;
+    188;
 
   friend void swap(SetVolumePropertyRequest& a, SetVolumePropertyRequest& b) {
     a.Swap(&b);
@@ -35150,7 +35880,7 @@ class SetVolumePropertyResponse_Result PROTOBUF_FINAL :
                &_SetVolumePropertyResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    185;
+    189;
 
   friend void swap(SetVolumePropertyResponse_Result& a, SetVolumePropertyResponse_Result& b) {
     a.Swap(&b);
@@ -35296,7 +36026,7 @@ class SetVolumePropertyResponse PROTOBUF_FINAL :
                &_SetVolumePropertyResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    186;
+    190;
 
   friend void swap(SetVolumePropertyResponse& a, SetVolumePropertyResponse& b) {
     a.Swap(&b);
@@ -73636,6 +74366,781 @@ inline void DeleteVolumeResponse::set_allocated_info(::grpc_cli::PosInfo* info) 
 
 // -------------------------------------------------------------------
 
+// UnmountVolumeRequest_Param
+
+// string name = 1;
+inline void UnmountVolumeRequest_Param::clear_name() {
+  name_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeRequest_Param::name() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeRequest.Param.name)
+  return _internal_name();
+}
+inline void UnmountVolumeRequest_Param::set_name(const std::string& value) {
+  _internal_set_name(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeRequest.Param.name)
+}
+inline std::string* UnmountVolumeRequest_Param::mutable_name() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeRequest.Param.name)
+  return _internal_mutable_name();
+}
+inline const std::string& UnmountVolumeRequest_Param::_internal_name() const {
+  return name_.Get();
+}
+inline void UnmountVolumeRequest_Param::_internal_set_name(const std::string& value) {
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeRequest_Param::set_name(std::string&& value) {
+  
+  name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeRequest.Param.name)
+}
+inline void UnmountVolumeRequest_Param::set_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeRequest.Param.name)
+}
+inline void UnmountVolumeRequest_Param::set_name(const char* value,
+    size_t size) {
+  
+  name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeRequest.Param.name)
+}
+inline std::string* UnmountVolumeRequest_Param::_internal_mutable_name() {
+  
+  return name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeRequest_Param::release_name() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeRequest.Param.name)
+  return name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeRequest_Param::set_allocated_name(std::string* name) {
+  if (name != nullptr) {
+    
+  } else {
+    
+  }
+  name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeRequest.Param.name)
+}
+
+// string array = 2;
+inline void UnmountVolumeRequest_Param::clear_array() {
+  array_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeRequest_Param::array() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeRequest.Param.array)
+  return _internal_array();
+}
+inline void UnmountVolumeRequest_Param::set_array(const std::string& value) {
+  _internal_set_array(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeRequest.Param.array)
+}
+inline std::string* UnmountVolumeRequest_Param::mutable_array() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeRequest.Param.array)
+  return _internal_mutable_array();
+}
+inline const std::string& UnmountVolumeRequest_Param::_internal_array() const {
+  return array_.Get();
+}
+inline void UnmountVolumeRequest_Param::_internal_set_array(const std::string& value) {
+  
+  array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeRequest_Param::set_array(std::string&& value) {
+  
+  array_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeRequest.Param.array)
+}
+inline void UnmountVolumeRequest_Param::set_array(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeRequest.Param.array)
+}
+inline void UnmountVolumeRequest_Param::set_array(const char* value,
+    size_t size) {
+  
+  array_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeRequest.Param.array)
+}
+inline std::string* UnmountVolumeRequest_Param::_internal_mutable_array() {
+  
+  return array_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeRequest_Param::release_array() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeRequest.Param.array)
+  return array_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeRequest_Param::set_allocated_array(std::string* array) {
+  if (array != nullptr) {
+    
+  } else {
+    
+  }
+  array_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeRequest.Param.array)
+}
+
+// -------------------------------------------------------------------
+
+// UnmountVolumeRequest
+
+// string command = 1;
+inline void UnmountVolumeRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeRequest.command)
+  return _internal_command();
+}
+inline void UnmountVolumeRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeRequest.command)
+}
+inline std::string* UnmountVolumeRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& UnmountVolumeRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void UnmountVolumeRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeRequest.command)
+}
+inline void UnmountVolumeRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeRequest.command)
+}
+inline void UnmountVolumeRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeRequest.command)
+}
+inline std::string* UnmountVolumeRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeRequest.command)
+}
+
+// string rid = 2;
+inline void UnmountVolumeRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeRequest.rid)
+  return _internal_rid();
+}
+inline void UnmountVolumeRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeRequest.rid)
+}
+inline std::string* UnmountVolumeRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& UnmountVolumeRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void UnmountVolumeRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeRequest.rid)
+}
+inline void UnmountVolumeRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeRequest.rid)
+}
+inline void UnmountVolumeRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeRequest.rid)
+}
+inline std::string* UnmountVolumeRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeRequest.rid)
+}
+
+// string requestor = 3;
+inline void UnmountVolumeRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeRequest.requestor)
+  return _internal_requestor();
+}
+inline void UnmountVolumeRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeRequest.requestor)
+}
+inline std::string* UnmountVolumeRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& UnmountVolumeRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void UnmountVolumeRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeRequest.requestor)
+}
+inline void UnmountVolumeRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeRequest.requestor)
+}
+inline void UnmountVolumeRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeRequest.requestor)
+}
+inline std::string* UnmountVolumeRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeRequest.requestor)
+}
+
+// .grpc_cli.UnmountVolumeRequest.Param param = 4;
+inline bool UnmountVolumeRequest::_internal_has_param() const {
+  return this != internal_default_instance() && param_ != nullptr;
+}
+inline bool UnmountVolumeRequest::has_param() const {
+  return _internal_has_param();
+}
+inline void UnmountVolumeRequest::clear_param() {
+  if (GetArena() == nullptr && param_ != nullptr) {
+    delete param_;
+  }
+  param_ = nullptr;
+}
+inline const ::grpc_cli::UnmountVolumeRequest_Param& UnmountVolumeRequest::_internal_param() const {
+  const ::grpc_cli::UnmountVolumeRequest_Param* p = param_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::UnmountVolumeRequest_Param&>(
+      ::grpc_cli::_UnmountVolumeRequest_Param_default_instance_);
+}
+inline const ::grpc_cli::UnmountVolumeRequest_Param& UnmountVolumeRequest::param() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeRequest.param)
+  return _internal_param();
+}
+inline void UnmountVolumeRequest::unsafe_arena_set_allocated_param(
+    ::grpc_cli::UnmountVolumeRequest_Param* param) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(param_);
+  }
+  param_ = param;
+  if (param) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.UnmountVolumeRequest.param)
+}
+inline ::grpc_cli::UnmountVolumeRequest_Param* UnmountVolumeRequest::release_param() {
+  
+  ::grpc_cli::UnmountVolumeRequest_Param* temp = param_;
+  param_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::UnmountVolumeRequest_Param* UnmountVolumeRequest::unsafe_arena_release_param() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeRequest.param)
+  
+  ::grpc_cli::UnmountVolumeRequest_Param* temp = param_;
+  param_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::UnmountVolumeRequest_Param* UnmountVolumeRequest::_internal_mutable_param() {
+  
+  if (param_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::UnmountVolumeRequest_Param>(GetArena());
+    param_ = p;
+  }
+  return param_;
+}
+inline ::grpc_cli::UnmountVolumeRequest_Param* UnmountVolumeRequest::mutable_param() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeRequest.param)
+  return _internal_mutable_param();
+}
+inline void UnmountVolumeRequest::set_allocated_param(::grpc_cli::UnmountVolumeRequest_Param* param) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete param_;
+  }
+  if (param) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(param);
+    if (message_arena != submessage_arena) {
+      param = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, param, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  param_ = param;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeRequest.param)
+}
+
+// -------------------------------------------------------------------
+
+// UnmountVolumeResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool UnmountVolumeResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool UnmountVolumeResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void UnmountVolumeResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& UnmountVolumeResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& UnmountVolumeResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeResponse.Result.status)
+  return _internal_status();
+}
+inline void UnmountVolumeResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.UnmountVolumeResponse.Result.status)
+}
+inline ::grpc_cli::Status* UnmountVolumeResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* UnmountVolumeResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* UnmountVolumeResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* UnmountVolumeResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void UnmountVolumeResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeResponse.Result.status)
+}
+
+// -------------------------------------------------------------------
+
+// UnmountVolumeResponse
+
+// string command = 1;
+inline void UnmountVolumeResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeResponse.command)
+  return _internal_command();
+}
+inline void UnmountVolumeResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeResponse.command)
+}
+inline std::string* UnmountVolumeResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& UnmountVolumeResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void UnmountVolumeResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeResponse.command)
+}
+inline void UnmountVolumeResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeResponse.command)
+}
+inline void UnmountVolumeResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeResponse.command)
+}
+inline std::string* UnmountVolumeResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeResponse.command)
+}
+
+// string rid = 2;
+inline void UnmountVolumeResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& UnmountVolumeResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeResponse.rid)
+  return _internal_rid();
+}
+inline void UnmountVolumeResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.UnmountVolumeResponse.rid)
+}
+inline std::string* UnmountVolumeResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& UnmountVolumeResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void UnmountVolumeResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void UnmountVolumeResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.UnmountVolumeResponse.rid)
+}
+inline void UnmountVolumeResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.UnmountVolumeResponse.rid)
+}
+inline void UnmountVolumeResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.UnmountVolumeResponse.rid)
+}
+inline std::string* UnmountVolumeResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* UnmountVolumeResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void UnmountVolumeResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeResponse.rid)
+}
+
+// .grpc_cli.UnmountVolumeResponse.Result result = 3;
+inline bool UnmountVolumeResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool UnmountVolumeResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void UnmountVolumeResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::UnmountVolumeResponse_Result& UnmountVolumeResponse::_internal_result() const {
+  const ::grpc_cli::UnmountVolumeResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::UnmountVolumeResponse_Result&>(
+      ::grpc_cli::_UnmountVolumeResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::UnmountVolumeResponse_Result& UnmountVolumeResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeResponse.result)
+  return _internal_result();
+}
+inline void UnmountVolumeResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::UnmountVolumeResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.UnmountVolumeResponse.result)
+}
+inline ::grpc_cli::UnmountVolumeResponse_Result* UnmountVolumeResponse::release_result() {
+  
+  ::grpc_cli::UnmountVolumeResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::UnmountVolumeResponse_Result* UnmountVolumeResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeResponse.result)
+  
+  ::grpc_cli::UnmountVolumeResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::UnmountVolumeResponse_Result* UnmountVolumeResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::UnmountVolumeResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::UnmountVolumeResponse_Result* UnmountVolumeResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeResponse.result)
+  return _internal_mutable_result();
+}
+inline void UnmountVolumeResponse::set_allocated_result(::grpc_cli::UnmountVolumeResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool UnmountVolumeResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool UnmountVolumeResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void UnmountVolumeResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& UnmountVolumeResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& UnmountVolumeResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.UnmountVolumeResponse.info)
+  return _internal_info();
+}
+inline void UnmountVolumeResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.UnmountVolumeResponse.info)
+}
+inline ::grpc_cli::PosInfo* UnmountVolumeResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* UnmountVolumeResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.UnmountVolumeResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* UnmountVolumeResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* UnmountVolumeResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.UnmountVolumeResponse.info)
+  return _internal_mutable_info();
+}
+inline void UnmountVolumeResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.UnmountVolumeResponse.info)
+}
+
+// -------------------------------------------------------------------
+
 // SetVolumePropertyRequest_Param
 
 // string name = 1;
@@ -74573,6 +76078,14 @@ inline void SetVolumePropertyResponse::set_allocated_info(::grpc_cli::PosInfo* i
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
