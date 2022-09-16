@@ -39,6 +39,7 @@
 #include "src/dump/dump_module.hpp"
 #include "src/dump/dump_shared_ptr.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/lib/system_timeout_checker.h"
@@ -215,11 +216,14 @@ Callback::_InvokeCallee(void)
     if (isOkToCall == true)
     {
         _PreCallExecuteCallee();
-        bool done = callee->Execute();
-
-        if (likely(done))
+        bool done = false;
+        if (GetEventType() != BackendEvent_UserdataRebuild)
         {
-            return;
+            done = callee->Execute();
+            if (likely(done))
+            {
+                return;
+            }
         }
 
         eventScheduler->EnqueueEvent(callee);

@@ -41,6 +41,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio.h"
+#include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/io_scheduler/io_worker.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
@@ -295,6 +296,9 @@ QosManager::PeriodicalJob(uint64_t* nextTick)
             *nextTick = now;
         }
         *nextTick = *nextTick + IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+        IODispatcherSubmissionSingleton::Instance()->CheckAndSetBusyMode();
+        IODispatcherSubmissionSingleton::Instance()->RefillRemaining(SPDK_SEC_TO_USEC
+            / IBOF_QOS_TIMESLICE_IN_USEC);
         _ControlThrottling();
     }
 }
