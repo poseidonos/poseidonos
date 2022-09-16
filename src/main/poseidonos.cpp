@@ -187,6 +187,10 @@ Poseidonos::Terminate(void)
     SmartCollectorSingleton::ResetInstance();
 
     TraceExporterSingleton::ResetInstance();
+    ConfigManagerSingleton::ResetInstance();
+    VersionProviderSingleton::ResetInstance();
+
+    free(GrpcCliServerThread);
 
     POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
 }
