@@ -17,7 +17,6 @@ public:
     MOCK_METHOD(bool, StartPublisher, (std::string name), (override));
     MOCK_METHOD(bool, StopPublisher, (std::string name), (override));
     MOCK_METHOD(bool, IsPublisherRunning, (std::string name), (override));
-    MOCK_METHOD(bool, IsRunning, (), (override));
     MOCK_METHOD(bool, StartAllPublisher, (), (override));
     MOCK_METHOD(bool, StopAllPublisher, (), (override));
     MOCK_METHOD(bool, StartUsingDataPool, (std::string name), (override));
