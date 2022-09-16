@@ -33,7 +33,6 @@
 #include "io_recover.h"
 
 #include "src/bio/ubio.h"
-#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
@@ -41,7 +40,6 @@ namespace pos
 {
 IORecover::IORecover(void)
 {
-    recoveries = new ArrayRecover[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 }
 
 IORecover::~IORecover(void)
@@ -54,7 +52,6 @@ IORecover::~IORecover(void)
         }
         recoveries[i].clear();
     }
-    delete recoveries;
 }
 
 bool
