@@ -129,6 +129,10 @@ using grpc_cli::CreateTransportRequest;
 using grpc_cli::CreateTransportResponse;
 using grpc_cli::CreateVolumeRequest;
 using grpc_cli::CreateVolumeResponse;
+using grpc_cli::DeleteVolumeRequest;
+using grpc_cli::DeleteVolumeResponse;
+using grpc_cli::UnmountVolumeRequest;
+using grpc_cli::UnmountVolumeResponse;
 using grpc_cli::SetVolumePropertyRequest;
 using grpc_cli::SetVolumePropertyResponse;
 
@@ -193,6 +197,8 @@ public:
 
     // Volume Commands
     grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);
+    grpc::Status ExecuteDeleteVolumeCommand(const DeleteVolumeRequest* request, DeleteVolumeResponse* reply);
+    grpc::Status ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* request, UnmountVolumeResponse* reply);
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
 
 private:

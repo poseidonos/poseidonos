@@ -667,6 +667,38 @@ class PosCliServiceImpl final : public PosCli::Service {
   }
 
   grpc::Status
+  UnmountVolume(ServerContext* context, const UnmountVolumeRequest* request,
+                  UnmountVolumeResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteUnmountVolumeCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+    
+    return status;
+  }
+
+  grpc::Status
+  DeleteVolume(ServerContext* context, const DeleteVolumeRequest* request,
+                  DeleteVolumeResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteDeleteVolumeCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+    
+    return status;
+  }
+
+  grpc::Status
   SetVolumeProperty(ServerContext* context, const SetVolumePropertyRequest* request,
                   SetVolumePropertyResponse* reply) override
   {
