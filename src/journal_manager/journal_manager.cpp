@@ -266,11 +266,14 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         }
 
         isInitialized = true;
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZE), "Journal manager for array {} is initialized", arrayInfo->GetName());
     }
     else
     {
-        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "Journal manager for array {} is already initialized, so skip Init()", arrayInfo->GetName());
+        POS_TRACE_WARN(EID(JOURNAL_MANAGER_INITIALIZE),
+            "Journal manager for array {} is already initialized, so skip Init(). \
+            Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            arrayInfo->GetName());
     }
 
     return result;
@@ -362,11 +365,14 @@ JournalManager::Dispose(void)
         }
 
         isInitialized = false;
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_DISPOSE), "Journal manager for array {} is disposed", arrayInfo->GetName());
     }
     else
     {
-        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "Journal manager for array {} is already disposed, so skip Dispose()", arrayInfo->GetName());
+        POS_TRACE_WARN(EID(JOURNAL_MANAGER_DISPOSE),
+            "Journal manager for array {} is already disposed, so skip Dispose(). \
+            Dispose() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            arrayInfo->GetName());
     }
 }
 
