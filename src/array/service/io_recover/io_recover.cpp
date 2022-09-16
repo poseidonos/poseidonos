@@ -54,6 +54,7 @@ IORecover::~IORecover(void)
         }
         recoveries[i].clear();
     }
+    delete recoveries;
 }
 
 bool

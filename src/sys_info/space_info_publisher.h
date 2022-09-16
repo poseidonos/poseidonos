@@ -50,7 +50,7 @@ public:
 
 private:
     void _RegisterTelemetry(uint32_t arrayId);
-    TelemetryPublisher* publisher;
+    TelemetryPublisher* publisher = nullptr;
 
 };
 } // namespace pos

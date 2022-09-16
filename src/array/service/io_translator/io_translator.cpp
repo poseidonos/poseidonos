@@ -52,6 +52,7 @@ IOTranslator::~IOTranslator(void)
         }
         translators[i].clear();
     }
+    delete translators;
 }
 
 bool
