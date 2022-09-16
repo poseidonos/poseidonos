@@ -77,8 +77,6 @@ public:
     static void RegisterRecoveryEventFactory(EventFactory* recoveryEventFactory);
     static void SetFrontendDone(bool value);
 
-    int SubmitIOInReactor(UBlockDevice* uBlock, UbioSmartPtr ubio);
-
     std::queue<std::pair<IOWorker*, UbioSmartPtr>> ioQueue[BackendEvent_Count];
     std::mutex ioQueueLock[BackendEvent_Count];
 
@@ -117,8 +115,6 @@ private:
 
     static const int DEVICE_FAILED = -1;
     static const int PARAM_FAILED = -2;
-    static const uint32_t MAX_CORE = 128;
-    uint32_t ioReactorCore[MAX_CORE], ioReactorCount = 0;
 };
 
 using IODispatcherSingleton = Singleton<IODispatcher>;

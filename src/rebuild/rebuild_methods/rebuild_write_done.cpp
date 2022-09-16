@@ -39,7 +39,7 @@
 namespace pos
 {
 RebuildWriteDone::RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback)
-: Callback(false, CallbackType_RebuildReadCompleteHandler),
+: Callback(false, CallbackType_UpdateDataCompleteHandler),
   ubio(ubio),
   writeDoneCallback(writeDoneCallback)
 {
