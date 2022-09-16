@@ -76,7 +76,7 @@ PublishPendingIo::Run(void)
 
         IoTimeoutCheckerSingleton::Instance()->MoveCurrentIdx(count);
 
-        if ((count % 10) == 0)
+        if ((count % CHECK_TIMEOUT_THRESHOLD) == 0)
         {
             _PublishMetric();
         }

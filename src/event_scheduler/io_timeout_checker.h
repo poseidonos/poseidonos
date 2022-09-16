@@ -41,7 +41,7 @@
 namespace pos
 {
 
-const uint32_t CHECK_RESOLUSTION_RANGE = 36000; // 1 hout
+const uint32_t CHECK_RESOLUSTION_RANGE = 36000; // 1 hour
 const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
 const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
 
