@@ -496,6 +496,7 @@ CLIServer()
 #endif
     shutdown(sock_fd, SHUT_RDWR);
     close(sock_fd);
+    free(event);
 }
 
 void
