@@ -179,7 +179,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should be initialized with INVALID state
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNAL_INVALID);

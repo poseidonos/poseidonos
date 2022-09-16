@@ -33,6 +33,7 @@ public:
     virtual GcCtx* GetGcCtx(void) { return nullptr; }
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx) { return; }
     virtual void ResetFlushedInfo(int logGroupId) { return; }
+    virtual void SetAllocateDuplicatedFlush(bool flag) { return; }
 
     IContextManagerMock(void)
     {
