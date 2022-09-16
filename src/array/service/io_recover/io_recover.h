@@ -38,6 +38,7 @@
 #include "i_io_recover.h"
 #include "i_recover.h"
 #include "src/include/partition_type.h"
+#include "src/include/array_mgmt_policy.h"
 
 using namespace std;
 
@@ -56,6 +57,6 @@ public:
     void Unregister(unsigned int arrayIndex);
 
 private:
-    ArrayRecover* recoveries;
+    ArrayRecover recoveries[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 };
 } // namespace pos

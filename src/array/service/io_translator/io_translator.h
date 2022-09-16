@@ -38,6 +38,7 @@
 
 #include "i_io_translator.h"
 #include "i_translator.h"
+#include "src/include/array_mgmt_policy.h"
 
 using namespace std;
 
@@ -61,6 +62,6 @@ public:
     void Unregister(unsigned int arrayIndex);
 
 private:
-    ArrayTranslator* translators;
+    ArrayTranslator translators[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 };
 } // namespace pos
