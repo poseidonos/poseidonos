@@ -50,6 +50,7 @@
 #include "src/io/general_io/rba_state_service.h"
 #include "src/pos_replicator/posreplicator_manager.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/master_context/config_manager.h"
@@ -133,6 +134,7 @@ DebugInfo::Update(void)
     volumeEventPublisher = VolumeEventPublisherSingleton::Instance();
     eventScheduler = EventSchedulerSingleton::Instance();
     ioDispatcher = IODispatcherSingleton::Instance();
+    ioDispatcherSubmission = IODispatcherSubmissionSingleton::Instance();
     qosManager = QosManagerSingleton::Instance();
     flushCmdManager = FlushCmdManagerSingleton::Instance();
     versionProvider = VersionProviderSingleton::Instance();
