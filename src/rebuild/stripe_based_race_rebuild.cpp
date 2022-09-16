@@ -163,7 +163,7 @@ StripeBasedRaceRebuild::_Recover(void)
             int ret = rm->Recover(ctx->arrayIndex, stripeId, ctx->size, callback);
             if (ret != 0)
             {
-                POS_TRACE_ERROR(EID(REBUILD_FAILED),
+                POS_TRACE_ERROR(EID(REBUILD_RESULT_FAILED),
                     "Failed to recover stripe {} in Partition {}, maxStripes:{}",
                     stripeId, PARTITION_TYPE_STR[ctx->part], maxStripeId);
                 ctx->SetResult(RebuildState::FAIL);
@@ -240,19 +240,19 @@ StripeBasedRaceRebuild::_Finish(void)
     }
     if (ctx->GetResult() == RebuildState::CANCELLED)
     {
-        POS_TRACE_WARN(EID(REBUILD_STOPPED),
+        POS_TRACE_WARN(EID(REBUILD_RESULT_CANCELLED),
             "Partition {} ({}) rebuilding stopped",
             PARTITION_TYPE_STR[ctx->part]);
     }
     else if (ctx->GetResult() == RebuildState::FAIL)
     {
-        POS_TRACE_WARN(EID(REBUILD_FAILED),
+        POS_TRACE_WARN(EID(REBUILD_RESULT_FAILED),
             "Partition {} ({}) rebuilding failed",
             PARTITION_TYPE_STR[ctx->part]);
     }
     else
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        POS_TRACE_INFO(EID(REBUILD_RESULT_PASS),
             "Partition {} ({}) rebuilding complete successfully",
             PARTITION_TYPE_STR[ctx->part]);
         ctx->SetResult(RebuildState::PASS);
