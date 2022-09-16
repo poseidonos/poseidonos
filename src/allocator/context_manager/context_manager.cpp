@@ -57,7 +57,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
   arrayId(arrayId_),
-  logGroupIdInProgress(INVALID_LOG_GROUP_ID)
+  logGroupIdInProgress(INVALID_LOG_GROUP_ID),
+  allowDuplicatedFlush(true)
 {
     // for UT
     ioManager = ioManager_;
@@ -89,8 +90,6 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
 
     rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
-
-    logGroupIdInProgress = INVALID_LOG_GROUP_ID;
 }
 
 ContextManager::~ContextManager(void)
@@ -123,10 +122,16 @@ ContextManager::Dispose(void)
     ioManager->Dispose();
 }
 
+void
+ContextManager::SetAllocateDuplicatedFlush(bool flag)
+{
+    allowDuplicatedFlush = flag;
+}
+
 int
 ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
-    if (logGroupIdInProgress == logGroupId)
+    if ((false == allowDuplicatedFlush) && (logGroupIdInProgress == logGroupId))
     {
         POS_TRACE_ERROR(EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID),
             "Failed to flush contexts, log group {} is already in use",

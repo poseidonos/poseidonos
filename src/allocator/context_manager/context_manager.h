@@ -103,6 +103,7 @@ public:
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
     virtual void ResetFlushedInfo(int logGroupId);
+    virtual void SetAllocateDuplicatedFlush(bool flag);
 
 private:
     ContextIoManager* ioManager;
@@ -121,6 +122,7 @@ private:
     TelemetryPublisher* telPublisher;
 
     int logGroupIdInProgress;
+    bool allowDuplicatedFlush;
     const int INVALID_LOG_GROUP_ID = 0xFFFF;
     static const int ALL_LOG_GROUP = -1;
 };

@@ -255,6 +255,8 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
             _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
                 wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
+            ctxManager->SetAllocateDuplicatedFlush(false);
+
             if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
             {
                 result = _DoRecovery();
