@@ -40,6 +40,7 @@ SpaceInfoPublisher::~SpaceInfoPublisher()
     {
         TelemetryClientSingleton::Instance()->DeregisterPublisher(publisher->GetName());
     }
+    delete publisher;
 }
 
 void

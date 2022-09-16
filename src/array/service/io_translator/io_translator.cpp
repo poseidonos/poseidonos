@@ -32,14 +32,12 @@
 
 #include "io_translator.h"
 
-#include "src/include/array_mgmt_policy.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 namespace pos
 {
 IOTranslator::IOTranslator(void)
 {
-    translators = new ArrayTranslator[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 }
 
 IOTranslator::~IOTranslator(void)

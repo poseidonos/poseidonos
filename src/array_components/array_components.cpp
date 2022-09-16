@@ -327,6 +327,12 @@ void
 ArrayComponents::_DestructMetaComponentsInOrder(void)
 {
     // Please note that the order of creation should be like the following:
+    if (smartLogMetaIo != nullptr)
+    {
+        delete smartLogMetaIo;
+        smartLogMetaIo = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "SmartLogMetaIo for {} has been deleted.", arrayName);
+    }
     if (gc != nullptr)
     {
         delete gc;
@@ -360,6 +366,13 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         delete nvmf;
         nvmf = nullptr;
         POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Nvmf for {} has been deleted.", arrayName);
+    }
+
+    if (replicatorVolumeSubscriber != nullptr)
+    {
+        delete replicatorVolumeSubscriber;
+        replicatorVolumeSubscriber = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "ReplicatorVolumeSubscriber for {} has been deleted.", arrayName);
     }
 
     if (volMgr != nullptr)
