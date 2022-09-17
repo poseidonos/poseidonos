@@ -73,8 +73,8 @@ public:
             void* arg2);
     virtual bool SendSpdkEvent(uint32_t core, EventFuncOneParam func, void* arg1);
     virtual bool SendSpdkEvent(EventFuncOneParam func, void* arg1);
-    void CompleteEvents(void);
-    void CompleteSingleQueueEvents(void);
+    bool CompleteEvents(void);
+    bool CompleteSingleQueueEvents(void);
 
     virtual uint32_t GetFirstReactor(void);
     virtual uint32_t GetCurrentReactor(void);

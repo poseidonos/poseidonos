@@ -57,6 +57,7 @@
 
 namespace pos
 {
+bool QosManager::needThrottling;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -312,6 +313,14 @@ QosManager::_ControlThrottling(void)
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
     std::vector<std::pair<uint32_t, uint32_t>> minVols = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    if (minVols.empty())
+    {
+        needThrottling = false;
+    }
+    else
+    {
+        needThrottling = true;
+    }
     for (auto iter : minVols)
     {
         uint32_t arrayId = iter.first;

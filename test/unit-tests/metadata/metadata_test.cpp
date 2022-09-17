@@ -14,6 +14,7 @@
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
 
 using ::testing::_;
+using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 
@@ -88,11 +89,10 @@ TEST(Metadata, Init_testIfEverySequenceIsInitialized)
 
     Metadata meta(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
 
+    InSequence s;
     EXPECT_CALL(*mapper, Init).WillOnce(Return(0));
     EXPECT_CALL(*allocator, Init).WillOnce(Return(0));
     EXPECT_CALL(*journal, Init).WillOnce(Return(0));
-
-    EXPECT_CALL(metaService, Register("POSArray", 0, _, _));
 
     // When
     int actual = meta.Init();
@@ -101,7 +101,7 @@ TEST(Metadata, Init_testIfEverySequenceIsInitialized)
     ASSERT_EQ(0, actual);
 }
 
-TEST(Metadata, Init_testIfMapperIsRolledBack)
+TEST(Metadata, Init_testIfDoNothingWhenInitFailed)
 {
     // Given
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -112,77 +112,23 @@ TEST(Metadata, Init_testIfMapperIsRolledBack)
     NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
     NiceMock<MockMetaService> metaService;
 
+    ON_CALL(arrayInfo, GetName).WillByDefault(Return("POSArray"));
+    ON_CALL(arrayInfo, GetIndex).WillByDefault(Return(0));
+
     Metadata meta(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
 
-    int MAPPER_FAILURE = 123;
-    EXPECT_CALL(*mapper, Init).WillOnce(Return(MAPPER_FAILURE));
-    EXPECT_CALL(*mapper, Dispose).Times(1);
+    InSequence s;
+    EXPECT_CALL(*mapper, Init).WillOnce(Return(-1));
 
-    EXPECT_CALL(metaService, Register).Times(0);
+    EXPECT_CALL(*mapper, Dispose).Times(0);
+    EXPECT_CALL(*allocator, Dispose).Times(0);
+    EXPECT_CALL(*journal, Dispose).Times(0);
 
     // When
     int actual = meta.Init();
 
     // Then
-    ASSERT_EQ(MAPPER_FAILURE, actual);
-}
-
-TEST(Metadata, Init_testIfMapperAndAllocatorAreRolledBack)
-{
-    // Given
-    NiceMock<MockIArrayInfo> arrayInfo;
-    NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
-    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
-    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
-    NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
-    NiceMock<MockMetaService> metaService;
-
-    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
-
-    int ALLOCATOR_FAILURE = 456;
-    EXPECT_CALL(*mapper, Init).WillOnce(Return(0));
-    EXPECT_CALL(*allocator, Init).WillOnce(Return(ALLOCATOR_FAILURE));
-    EXPECT_CALL(*allocator, Dispose).Times(1);
-    EXPECT_CALL(*mapper, Dispose).Times(1);
-
-    EXPECT_CALL(metaService, Register).Times(0);
-
-    // When
-    int actual = meta.Init();
-
-    // Then
-    ASSERT_EQ(ALLOCATOR_FAILURE, actual);
-}
-
-TEST(Metadata, Init_testIfMapperAndAllocatorAndJournalAreRolledBack)
-{
-    // Given
-    NiceMock<MockIArrayInfo> arrayInfo;
-    NiceMock<MockIStateControl> stateControl;
-    NiceMock<MockMapper>* mapper = new NiceMock<MockMapper>(&arrayInfo, nullptr);
-    NiceMock<MockAllocator>* allocator = new NiceMock<MockAllocator>(&arrayInfo, &stateControl);
-    NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
-    NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
-    NiceMock<MockMetaService> metaService;
-
-    Metadata meta(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
-
-    int JOURNAL_FAILURE = 456;
-    EXPECT_CALL(*mapper, Init).WillOnce(Return(0));
-    EXPECT_CALL(*allocator, Init).WillOnce(Return(0));
-    EXPECT_CALL(metaService, Register).Times(1);
-    EXPECT_CALL(*journal, Init).WillOnce(Return(JOURNAL_FAILURE));
-    EXPECT_CALL(*journal, Dispose).Times(1);
-    EXPECT_CALL(*allocator, Dispose).Times(1);
-    EXPECT_CALL(*mapper, Dispose).Times(1);
-    EXPECT_CALL(metaService, Unregister).Times(1);
-
-    // When
-    int actual = meta.Init();
-
-    // Then
-    ASSERT_EQ(JOURNAL_FAILURE, actual);
+    ASSERT_TRUE(actual < 0);
 }
 
 TEST(Metadata, Dispose_testIfAllSequenceInvokeDispose)
@@ -198,8 +144,9 @@ TEST(Metadata, Dispose_testIfAllSequenceInvokeDispose)
 
     Metadata meta(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
 
-    EXPECT_CALL(*mapper, Dispose).Times(1);
+    InSequence s;
     EXPECT_CALL(*allocator, Dispose).Times(1);
+    EXPECT_CALL(*mapper, Dispose).Times(1);
     EXPECT_CALL(*journal, Dispose).Times(1);
     EXPECT_CALL(metaService, Unregister).Times(1);
 

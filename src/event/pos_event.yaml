@@ -2659,6 +2659,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3066
+    Name: JOURNAL_MANAGER_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   -
     Id: 3070
@@ -3139,6 +3146,27 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3143
+    Name: MAPPER_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3144
+    Name: MAPPER_INITIALIZE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3145
+    Name: MAPPER_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   
   # Allocator: 3150 - 3299
@@ -3569,7 +3597,20 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3211
+    Name: ALLOCATOR_INITIALIZE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3212
+    Name: ALLOCATOR_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Metadata: 3300 - 3399
   -
