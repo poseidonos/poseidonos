@@ -39,7 +39,7 @@ namespace pos
 {
 IoTimeoutChecker::IoTimeoutChecker(void)
 : initialize(false),
-publisher(nullptr)
+publisher(nullptr),
 currentIdx(0)
 {
 }
