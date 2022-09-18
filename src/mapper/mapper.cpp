@@ -140,16 +140,26 @@ Mapper::Dispose(void)
 {
     if (isInitialized == true)
     {
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Dispose] MAPPER Disposed, init:{} arrayId:{}", isInitialized, arrayId);
         StoreAll();
         _Dispose();
+
+        isInitialized = false;
+
+        POS_TRACE_INFO(EID(MAPPER_DISPOSE), "[Mapper Dispose] MAPPER Disposed, arrayId:{}", arrayId);
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(MAPPER_DISPOSE),
+            "Mapper of arrayId {} is already disposed, so skip Dispose(). \
+            Dispose() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            arrayId);
     }
 }
 
 void
 Mapper::Shutdown(void)
 {
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Shutdown] MAPPER Shutdown, init:{} arrayId:{}", isInitialized, arrayId);
+    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper Shutdown] MAPPER Shutdown, init:{} arrayId:{}", isInitialized, arrayId);
     _Dispose();
 }
 
@@ -159,7 +169,6 @@ Mapper::Init(void)
     int ret = 0;
     if (isInitialized == false)
     {
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] arrayId:{}", arrayId);
         if (metaFs == nullptr)
         {
             metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(addrInfo->GetArrayId());
@@ -170,7 +179,7 @@ Mapper::Init(void)
         }
         int mpageSize = _GetMpageSize();
         addrInfo->SetupAddressInfo(mpageSize);
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] VsaMap Init, arrayId:{}", arrayId);
+        POS_TRACE_INFO(EID(MAPPER_INITIALIZE), "[Mapper Init] VsaMap Init, arrayId:{}", arrayId);
         ret = vsaMapManager->Init();
         if (ret < 0)
         {
@@ -179,7 +188,7 @@ Mapper::Init(void)
             return ret;
         }
         vsaMapManager->WaitAllPendingIoDone();
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] StripeMap Init, arrayId:{}", arrayId);
+        POS_TRACE_INFO(EID(MAPPER_INITIALIZE), "[Mapper Init] StripeMap Init, arrayId:{}", arrayId);
         ret = stripeMapManager->Init();
         if (ret < 0)
         {
@@ -188,10 +197,20 @@ Mapper::Init(void)
             return ret;
         }
         stripeMapManager->WaitAllPendingIoDone();
-        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper Init] ReverseMap Init, arrayId:{}", arrayId);
+        POS_TRACE_INFO(EID(MAPPER_INITIALIZE), "[Mapper Init] ReverseMap Init, arrayId:{}", arrayId);
         reverseMapManager->Init();
         _RegisterToMapperService();
+
         isInitialized = true;
+
+        POS_TRACE_INFO(EID(MAPPER_INITIALIZE), "[Mapper Init] MAPPER Initialized, arrayId:{}", arrayId);
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(MAPPER_INITIALIZE),
+            "Mapper of arrayId {} is already initialized, so skip Init(). \
+            Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            arrayId);
     }
     assert(ret == 0);
     return ret;

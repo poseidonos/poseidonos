@@ -146,8 +146,12 @@ ReplayHandler::_ExecuteReplayTasks(void)
             if (result > 0)
             {
                 reporter->CompleteAll();
+                return EID(SUCCESS);
             }
-            return result;
+            else
+            {
+                return result;
+            }
         }
     }
     return result;
