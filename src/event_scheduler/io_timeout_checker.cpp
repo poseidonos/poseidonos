@@ -38,14 +38,10 @@
 namespace pos
 {
 IoTimeoutChecker::IoTimeoutChecker(void)
-: currentIdx(0)
+: initialize(false),
+publisher(nullptr)
+currentIdx(0)
 {
-    publisher = new PublishPendingIo(TIMER_RESOLUTION_MS, CHECK_RESOLUSTION_RANGE);
-
-    for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
-    {
-        pendingIoCnt[idx].oldestIdx = 0;        
-    }
 }
 
 IoTimeoutChecker::~IoTimeoutChecker(void)
@@ -58,8 +54,26 @@ IoTimeoutChecker::~IoTimeoutChecker(void)
 }
 
 void
+IoTimeoutChecker::Initialize(void)
+{
+    initialize = true;
+
+    publisher = new PublishPendingIo(TIMER_RESOLUTION_MS, CHECK_RESOLUSTION_RANGE);
+
+    for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
+    {
+        pendingIoCnt[idx].oldestIdx = 0;        
+    }
+}
+
+void
 IoTimeoutChecker::MoveOldestIdx(CallbackType callbackType)
 {
+    if (false == initialize)
+    {
+        return;
+    }
+
     uint32_t newPosition = pendingIoCnt[callbackType].oldestIdx;
     while(pendingIoCnt[callbackType].pendingIoCnt[newPosition] == 0)
     {
@@ -79,6 +93,11 @@ IoTimeoutChecker::MoveOldestIdx(CallbackType callbackType)
 void
 IoTimeoutChecker::MoveCurrentIdx(uint64_t pendingTime)
 {
+    if (false == initialize)
+    {
+        return;
+    }
+
     currentIdx = pendingTime;
 
     for (int idx = 0 ; idx < CallbackType::Total_CallbackType_Cnt; idx++)
@@ -93,12 +112,22 @@ IoTimeoutChecker::MoveCurrentIdx(uint64_t pendingTime)
 void
 IoTimeoutChecker::IncreasePendingCnt(CallbackType callbackType, uint64_t pendingTime)
 {
+    if (false == initialize)
+    {
+        return;
+    }
+
     pendingIoCnt[callbackType].pendingIoCnt[pendingTime]++;
 }
 
 void
 IoTimeoutChecker::DecreasePendingCnt(CallbackType callbackType, uint64_t pendingTime)
 {
+    if (false == initialize)
+    {
+        return;
+    }
+
     pendingIoCnt[callbackType].pendingIoCnt[pendingTime]--;
 
     if (pendingIoCnt[callbackType].pendingIoCnt[pendingTime] < 0)
@@ -109,7 +138,12 @@ IoTimeoutChecker::DecreasePendingCnt(CallbackType callbackType, uint64_t pending
 
 bool
 IoTimeoutChecker::_CheckPeningOverTime(CallbackType callbackType)
-{
+{    
+    if (false == initialize)
+    {
+        return false;
+    }
+
     uint32_t calPendingTime = 0;
     bool ret = false;
 
@@ -136,19 +170,34 @@ IoTimeoutChecker::_CheckPeningOverTime(CallbackType callbackType)
 
 bool 
 IoTimeoutChecker::FindPendingIo(CallbackType callbackType)
-{
+{    
+    if (false == initialize)
+    {
+        return false;
+    }
+ 
     return _CheckPeningOverTime(callbackType);
 }
 
 uint64_t
 IoTimeoutChecker::GetCurrentRoughTime(void)
-{
+{    
+    if (false == initialize)
+    {
+        return 0;
+    }
+
     return publisher->GetCurrentRoughTime();
 }
 
 void
 IoTimeoutChecker::GetPendingIoCount(CallbackType callbackType, std::vector<int> &pendingIoCntList)
 {
+    if (false == initialize)
+    {
+        return;
+    }
+
     POS_TRACE_INFO(EID(PENDING_IO_TIMEOUT), "currentIdx : {} oldestidx: {}", currentIdx, pendingIoCnt[callbackType].oldestIdx);
 
     if (currentIdx >= pendingIoCnt[callbackType].oldestIdx)

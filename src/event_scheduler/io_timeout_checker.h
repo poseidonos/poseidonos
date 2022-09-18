@@ -58,6 +58,8 @@ public:
     IoTimeoutChecker(void);
     ~IoTimeoutChecker(void);
 
+    void Initialize(void);
+
     void IncreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
     void DecreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
 
@@ -73,10 +75,11 @@ private:
 
     bool _CheckPeningOverTime(CallbackType callbackType);
 
-    PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
+    bool initialize;
     PublishPendingIo* publisher;
-
     std::atomic<std::uint64_t> currentIdx;
+
+    PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
 };
 
 using IoTimeoutCheckerSingleton = Singleton<IoTimeoutChecker>;

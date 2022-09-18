@@ -48,6 +48,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
+#include "src/event_scheduler/io_timeout_checker.h"
 #include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/flush_command_manager.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
@@ -312,6 +313,8 @@ Poseidonos::_SetupThreadModel(void)
     MetaFsServiceSingleton::Instance()->Initialize(coreCount,
         schedulerCPUSet, workerCPUSet);
     FlushCmdManagerSingleton::Instance();
+
+    IoTimeoutCheckerSingleton::Instance()->Initialize();
 }
 
 void
