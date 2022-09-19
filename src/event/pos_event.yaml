@@ -7162,6 +7162,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 8008
+    Name: HA_VOLUME_SUBSCRIBER_UNREGISTER
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
 
   # SmartLog: 8500 - 8599
