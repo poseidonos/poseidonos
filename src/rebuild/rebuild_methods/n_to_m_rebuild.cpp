@@ -61,8 +61,8 @@ NToMRebuild::NToMRebuild(vector<IArrayDevice*> src, vector<IArrayDevice*> dst, R
     {
         dstList += dev->GetName();
     }
-    POS_TRACE_INFO(EID(N_TO_M_REBUILD_DEBUG),
-        "NToMRebuild constructor, src:{}, dst:{}", srcList, dstList);
+    POS_TRACE_INFO(EID(REBUILD_METHOD_INIT),
+        "src:{}, dst:{}", srcList, dstList);
 
     airKey = (uint64_t)this;
 }
@@ -76,7 +76,7 @@ NToMRebuild::~NToMRebuild()
 void
 NToMRebuild::SetBackupMethod(NToMRebuild* backup)
 {
-    POS_TRACE_INFO(EID(N_TO_M_REBUILD_DEBUG), "backup method is set.");
+    POS_TRACE_INFO(EID(REBUILD_FAILOVER), "Backup method is set.");
     backupMethod = backup;
 }
 
@@ -85,7 +85,7 @@ NToMRebuild::SetFailOver(void)
 {
     if (backupMethod != nullptr)
     {
-        POS_TRACE_WARN(EID(REBUILD_FAIL_OVER), "A failure occurs during the rebuild and is replaced with a backup method.");
+        POS_TRACE_WARN(EID(REBUILD_FAILOVER), "Rebuild method is replaced to backup");
         isFailOver = true;
     }
 }
@@ -102,8 +102,6 @@ NToMRebuild::Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalS
     {
         return backupMethod->Recover(arrayIndex, stripeId, pSize, callback);
     }
-    POS_TRACE_DEBUG(EID(N_TO_M_REBUILD_DEBUG),
-        "Trying to read, array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
     _Read(arrayIndex, stripeId, pSize, callback);
     return EID(SUCCESS);
 }
@@ -111,14 +109,16 @@ NToMRebuild::Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalS
 void
 NToMRebuild::_Read(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback)
 {
+    POS_TRACE_DEBUG(EID(REBUILD_READ_BEGIN),
+        "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
     airlog("LAT_SegmentRebuildRead", "begin", 0, airKey);
     uint32_t sectorCnt = srcSize / ArrayConfig::SECTOR_SIZE_BYTE;
     void* mem = nullptr;
     mem = srcBuffer->TryGetBuffer();
     if (nullptr == mem)
     {
-        POS_TRACE_WARN(EID(RESOURCE_BUFFER_POOL_EMPTY),
-            "Failed to get buffer during recoverchunk. {} Pool is empty", srcBuffer->GetOwner());
+        POS_TRACE_WARN(EID(REBUILD_GET_BUFFER_FAIL),
+            "For read, owner:{}", srcBuffer->GetOwner());
         // mem = Memory<ArrayConfig::SECTOR_SIZE_BYTE>::Alloc(sectorCnt);
     }
     assert(mem != nullptr);
@@ -167,12 +167,10 @@ void
 NToMRebuild::_ReadDone(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src, int result)
 {
     airlog("LAT_SegmentRebuildRead", "end", 0, airKey);
-    POS_TRACE_DEBUG(EID(N_TO_M_REBUILD_DEBUG),
-        "ReadDone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
     if (result != 0)
     {
-        POS_TRACE_WARN(EID(N_TO_M_REBUILD_DEBUG),
-            "Error occured during read, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        POS_TRACE_WARN(EID(REBUILD_READ_FAIL),
+            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
         srcBuffer->ReturnBuffer(src);
         if (backupMethod != nullptr)
         {
@@ -181,7 +179,7 @@ NToMRebuild::_ReadDone(int arrayIndex, StripeId stripeId, const PartitionPhysica
                 bool ret = backupMethod->Init(owner + "_backup");
                 if (ret == false)
                 {
-                    POS_TRACE_ERROR(EID(REBUILD_FAIL_OVER), "Initialization error occurs while switching to backup method");
+                    POS_TRACE_ERROR(EID(REBUILD_FAILOVER), "Initialization error occurs while switching to backup method");
                     callback(result);
                 }
             }
@@ -192,22 +190,28 @@ NToMRebuild::_ReadDone(int arrayIndex, StripeId stripeId, const PartitionPhysica
         {
             callback(result);
         }
-        
         return;
     }
-    _Recover(arrayIndex, stripeId, pSize, callback, src);
+    else
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_READ_DONE),
+            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        _Recover(arrayIndex, stripeId, pSize, callback, src);
+    }
 }
 
 void
 NToMRebuild::_Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src)
 {
+    POS_TRACE_DEBUG(EID(REBUILD_RECOVER_BEGIN),
+        "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
     airlog("LAT_SegmentRebuildRecover", "begin", 0, airKey);
     void* mem = nullptr;
     mem = dstBuffer->TryGetBuffer();
     if (nullptr == mem)
     {
-        POS_TRACE_WARN(EID(RESOURCE_BUFFER_POOL_EMPTY),
-            "Failed to get buffer during recover write. {} Pool is empty", dstBuffer->GetOwner());
+        POS_TRACE_WARN(EID(REBUILD_GET_BUFFER_FAIL),
+            "For write, owner:{}", srcBuffer->GetOwner());
         // uint32_t sectorCnt = dstSize / ArrayConfig::SECTOR_SIZE_BYTE;
         // mem = Memory<ArrayConfig::SECTOR_SIZE_BYTE>::Alloc(sectorCnt);
     }
@@ -221,23 +225,28 @@ void
 NToMRebuild::_RecoverDone(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem, int result)
 {
     airlog("LAT_SegmentRebuildRecover", "end", 0, airKey);
-    POS_TRACE_DEBUG(EID(N_TO_M_REBUILD_DEBUG),
-        "RecoverDone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
     if (result != 0)
     {
-        POS_TRACE_WARN(EID(N_TO_M_REBUILD_DEBUG),
-            "Error occured during recover, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        POS_TRACE_WARN(EID(REBUILD_RECOVER_FAIL),
+            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
         dstBuffer->ReturnBuffer(mem);
         callback(result);
         return;
     }
-    _Write(arrayIndex, stripeId, pSize, callback, mem);
+    else
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_RECOVER_DONE),
+            "RecoverDone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        _Write(arrayIndex, stripeId, pSize, callback, mem);
+    }
 }
 
 
 void
 NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem)
 {
+    POS_TRACE_DEBUG(EID(REBUILD_WRITE_BEGIN),
+        "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
     uint32_t sectorCnt = dstSize / ArrayConfig::SECTOR_SIZE_BYTE;
     airlog("LAT_SegmentRebuildWrite", "begin", 0, airKey);
     UbioSmartPtr writeUbio(new Ubio(mem, sectorCnt, arrayIndex));
@@ -287,13 +296,16 @@ void
 NToMRebuild::_WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCallback callback, void* mem, int result)
 {
     airlog("LAT_SegmentRebuildWrite", "end", 0, airKey);
-    POS_TRACE_DEBUG(EID(N_TO_M_REBUILD_DEBUG),
-        "Writedone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
     dstBuffer->ReturnBuffer(mem);
     if (result != 0)
     {
-        POS_TRACE_WARN(EID(N_TO_M_REBUILD_DEBUG),
-            "Error occured during write, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        POS_TRACE_WARN(EID(REBUILD_WRITE_FAIL),
+            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_WRITE_FAIL),
+            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
     }
     callback(result);
 }
