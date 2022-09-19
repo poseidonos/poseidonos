@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,17 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "create_map_flush_event.h"
+#include <gmock/gmock.h>
 
-#include <utility>
-
-#include "src/mapper/map/map_io_handler.h"
+#include "src/metafs/storage/pstore/issue_write_event.h"
 
 namespace pos
 {
-CreateMapFlushEvent::CreateMapFlushEvent(MapIoHandler* handler, std::unique_ptr<SequentialPageFinder> finder)
-: Event(false, BackendEvent::BackendEvent_FlushMap),
-  handler(handler),
-  finder(std::move(finder))
+class MockIssueWriteEvent : public IssueWriteEvent
 {
-}
+public:
+    using IssueWriteEvent::IssueWriteEvent;
+    MOCK_METHOD(bool, Execute, (void), (override));
+};
 
-// LCOV_EXCL_START
-CreateMapFlushEvent::~CreateMapFlushEvent(void)
-{
-}
-// LCOV_EXCL_STOP
-
-bool
-CreateMapFlushEvent::Execute(void)
-{
-    handler->CreateFlushEvents(std::move(finder));
-
-    return true;
-}
 } // namespace pos

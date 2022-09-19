@@ -40,7 +40,7 @@
 namespace pos
 {
 MapFlushEvent::MapFlushEvent(MapIoHandler* handler, MpageSet mpageSet)
-: Event(false, BackendEvent::BackendEvent_MetaIO),
+: Event(false, BackendEvent::BackendEvent_FlushMap),
   handler(handler),
   mpageSet(mpageSet)
 {

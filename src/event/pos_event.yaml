@@ -4723,6 +4723,20 @@ Root:
     Message: Need to check metafs io scheduler setting in pos.conf
     Cause: There is some problem in scheduler setting
     Solution: Please check meta_scheduler in pos.conf
+  -
+    Id: 4089
+    Name: MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL
+    Severity:
+    Message: Waiting for lock resource
+    Cause: Write operation has been failed due to IOSubmitHandlerStatus::TRYLOCK_FAIL
+    Solution: MetaFs will try again
+  -
+    Id: 4090
+    Name: MFS_IO_FAILED_DUE_TO_BUSY
+    Severity:
+    Message: Waiting for io resource
+    Cause: Write operation has been failed due to IOSubmitHandlerStatus::FAIL
+    Solution: MetaFs will try again
   
   -
     Id: 4500

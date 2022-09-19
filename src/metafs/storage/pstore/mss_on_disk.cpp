@@ -39,6 +39,7 @@
 #include "src/include/array_config.h"
 #include "src/metafs/config/metafs_config.h"
 #include "src/metafs/log/metafs_log.h"
+#include "src/metafs/storage/pstore/issue_write_event.h"
 #include "src/metafs/storage/pstore/mss_disk_inplace.h"
 
 namespace pos
@@ -129,8 +130,6 @@ MssOnDisk::CreateMetaStore(const int arrayId, const MetaStorageType mediaType,
     }
 
     Open();
-
-    retryIoCnt = 0;
 
     return EID(SUCCESS);
 }
@@ -341,37 +340,32 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
         (int)direction, aioData->GetTagId(), aioData->GetMpioId(),
         blkAddr.stripeId, blkAddr.offset, *(uint32_t*)buffer);
 
-    retryIoCnt = 0;
-    IOSubmitHandlerStatus ioStatus;
-    do
-    {
-        ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
+    IOSubmitHandlerStatus ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
             blkAddr, requestLpnCount, storagelld->GetPartitionType(), callback, arrayId);
-
-        if (ioStatus == IOSubmitHandlerStatus::SUCCESS ||
-            ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
-        {
-            retryIoCnt = 0;
-            break;
-        }
-
-        if (ioStatus == IOSubmitHandlerStatus::TRYLOCK_FAIL ||
-            ioStatus == IOSubmitHandlerStatus::FAIL)
-        {
-            MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-                "[AsyncReq] Retry I/O Submit Hanlder... Cnt={}",
-                retryIoCnt);
-            retryIoCnt++;
-        }
-    } while (1);
 
     if (ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
     {
-        MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-            "[MFS IO FAIL] Fail I/O Dut to System Stop State, type={}, req.tagId={}, mpio_id={}",
+        MFS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_STOP_STATE),
+            "[MFS IO FAIL] Fail I/O Due to System Stop State, type={}, req.tagId={}, mpio_id={}",
             (int)direction, aioData->GetTagId(), aioData->GetMpioId());
 
         status = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
+    }
+    else if (ioStatus == IOSubmitHandlerStatus::TRYLOCK_FAIL)
+    {
+        MFS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL),
+            "[MFS IO FAIL] Trylock failed, type={}, req.tagId={}, mpio_id={}",
+            (int)direction, aioData->GetTagId(), aioData->GetMpioId());
+
+        status = EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL);
+    }
+    else if (ioStatus == IOSubmitHandlerStatus::FAIL)
+    {
+        POS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_BUSY),
+            "[MFS IO FAIL] Submission failed, type={}, req.tagId={}, mpio_id={}",
+            (int)direction, aioData->GetTagId(), aioData->GetMpioId());
+
+        status = EID(MFS_IO_FAILED_DUE_TO_BUSY);
     }
 
     return status;
@@ -392,7 +386,18 @@ MssOnDisk::ReadPageAsync(MssAioCbCxt* cb)
 POS_EVENT_ID
 MssOnDisk::WritePageAsync(MssAioCbCxt* cb)
 {
-    return _SendAsyncRequest(IODirection::WRITE, cb);
+    MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
+    if (aioData->GetStorageType() == MetaStorageType::SSD)
+    {
+        MssRequestFunction handler = std::bind(&MssOnDisk::_SendAsyncRequest, this, std::placeholders::_1, std::placeholders::_2);
+        EventSmartPtr event = std::make_shared<IssueWriteEvent>(handler, cb);
+        EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+        return EID(SUCCESS);
+    }
+    else
+    {
+        return _SendAsyncRequest(IODirection::WRITE, cb);
+    }
 }
 
 POS_EVENT_ID
