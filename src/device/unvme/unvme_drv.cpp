@@ -231,6 +231,7 @@ UnvmeDrv::~UnvmeDrv(void)
     if (nullptr != nvmeSsd)
     {
         nvmeSsd->Stop();
+        delete nvmeSsd;
     }
     if (nullptr != unvmeCmd)
     {

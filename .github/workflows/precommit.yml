@@ -235,6 +235,14 @@ jobs:
           chmod +x .github/workflows/script/rebuild_raid6/rebuild_raid6.sh
           .github/workflows/script/rebuild_raid6/rebuild_raid6.sh ${{github.workspace}}
 
+      - name: Multi-device Rebuild RAID6 Test 
+        id: multi_device_rebuild_raid6_test
+        timeout-minutes: 8
+        working-directory: ${{github.workspace}}
+        run: |
+          chmod +x .github/workflows/script/rebuild_raid6/multi_device_rebuild_raid6_test.sh
+          .github/workflows/script/rebuild_raid6/multi_device_rebuild_raid6_test.sh ${{github.workspace}}
+
       - name: Upload POS log
         if: always()
         uses: actions/upload-artifact@v3

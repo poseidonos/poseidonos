@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-    "os/exec"
+	"os/exec"
 	"path/filepath"
 
 	"cli/cmd/displaymgr"
@@ -37,7 +37,7 @@ Syntax:
 			log.Error("error:", err)
 		}
 
-		if globals.IsJSONReq != true {
+		if !(globals.IsJSONReq || globals.IsJSONRes) {
 			fmt.Println("Launching PoseidonOS...")
 		}
 

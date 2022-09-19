@@ -337,7 +337,7 @@ TelemetryAirDelegator::RegisterAirEvent(void)
             "RequestedUserRead", "RequestedUserWrite", "RequestedUserAdminIo",
             "CompleteUserRead", "CompleteUserWrite", "CompleteUserAdminIo",
             "UserFlushProcess", "PartialWriteProcess", "UserFailIo",
-            "UserReadPendingCnt", "UserWritePendingCnt", "InternalIoPendingCnt"},
+            "UserReadPendingCnt", "UserWritePendingCnt", "InternalIoPendingCnt", "TimeOutIoCnt"},
         std::move(dataHandler));
 }
 

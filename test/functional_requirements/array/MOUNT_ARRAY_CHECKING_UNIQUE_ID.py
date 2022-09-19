@@ -22,14 +22,14 @@ ARRAYNAME = CREATE_ARRAY_BASIC.ARRAYNAME
 def execute():
     CREATE_ARRAY_BASIC.execute()
     result = cli.array_info(ARRAYNAME)
+    print (result)
+    uniqueId = json.loads(result)['Response']['result']['data']['uniqueId']
+    print("uniqueId Before NPOR : " + str(uniqueId))
 
     pos.exit_pos()
     SCAN_DEV_BASIC.execute()
     result_npor = cli.array_info(ARRAYNAME)
-
-    uniqueId = json.loads(result)['Response']['result']['data']['unique_id']
-    print("uniqueId Before NPOR : " + str(uniqueId))
-    uniqueId_npor = json.loads(result_npor)['Response']['result']['data']['unique_id']
+    uniqueId_npor = json.loads(result_npor)['Response']['result']['data']['uniqueId']
     print("uniqueId After NPOR : " + str(uniqueId_npor))
     if uniqueId == uniqueId_npor:
         out = json_parser.make_result_code(0)

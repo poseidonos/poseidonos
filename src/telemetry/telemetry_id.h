@@ -201,5 +201,6 @@ static const std::string TEL140008_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_i
 static const std::string TEL140009_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
 static const std::string TEL140010_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
 static const std::string TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
+static const std::string TEL140012_COUNT_OF_TIMEOUT_IO_CNT = "count_of_timeout_io_cnt";
 
 } // namespace pos

@@ -58,6 +58,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*metaFsFactory*/,
     nullptr /*nvmf*/,
     nullptr /*smartLogMetaIo*/,
+    nullptr /*stateObserverForIo*/,
     nullptr /*arrayMountSequence*/
     )
 {
@@ -93,6 +94,7 @@ ArrayComponents::ArrayComponents(string arrayName,
     function<MetaFs* (Array*, bool)> metaFsFactory,
     Nvmf* nvmf,
     SmartLogMetaIo* smartLogMetaIo,
+    StateObserverForIO* stateObserverForIO,
     ArrayMountSequence* arrayMountSequence)
 : arrayName(arrayName),
   state(state),
@@ -108,7 +110,8 @@ ArrayComponents::ArrayComponents(string arrayName,
   nvmf(nvmf),
   smartLogMetaIo(smartLogMetaIo),
   arrayMountSequence(arrayMountSequence),
-  metaFsFactory(metaFsFactory)
+  metaFsFactory(metaFsFactory),
+  stateObserverForIO(stateObserverForIO)
 {
     // dependency injection for ut
 }
@@ -278,6 +281,7 @@ ArrayComponents::_SetMountSequence(void)
     mountSequence.push_back(flowControl);
     mountSequence.push_back(gc);
     mountSequence.push_back(smartLogMetaIo);
+
     IStateControl* state = stateMgr->GetStateControl(arrayName);
     if (arrayMountSequence != nullptr)
     {
@@ -298,7 +302,8 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
         || flowControl != nullptr
         || gc != nullptr
         || info != nullptr
-        || smartLogMetaIo != nullptr)
+        || smartLogMetaIo != nullptr
+        || stateObserverForIO != nullptr)
     {
         POS_TRACE_WARN(EID(ARRAY_COMPO_DEBUG_MSG), "Meta Components exist already. Possible memory leak (or is it a mock?). Skipping.");
         return;
@@ -315,12 +320,19 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     gc = new GarbageCollector(array, state);
     smartLogMetaIo = new SmartLogMetaIo(array->GetIndex(), SmartLogMgrSingleton::Instance());
     info = new ComponentsInfo(array, gc);
+    stateObserverForIO = new StateObserverForIO(state);
 }
 
 void
 ArrayComponents::_DestructMetaComponentsInOrder(void)
 {
     // Please note that the order of creation should be like the following:
+    if (smartLogMetaIo != nullptr)
+    {
+        delete smartLogMetaIo;
+        smartLogMetaIo = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "SmartLogMetaIo for {} has been deleted.", arrayName);
+    }
     if (gc != nullptr)
     {
         delete gc;
@@ -356,6 +368,13 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Nvmf for {} has been deleted.", arrayName);
     }
 
+    if (replicatorVolumeSubscriber != nullptr)
+    {
+        delete replicatorVolumeSubscriber;
+        replicatorVolumeSubscriber = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "ReplicatorVolumeSubscriber for {} has been deleted.", arrayName);
+    }
+
     if (volMgr != nullptr)
     {
         delete volMgr;
@@ -368,6 +387,13 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         delete metafs;
         metafs = nullptr;
         POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "MetaFs for {} has been deleted.", arrayName);
+    }
+
+    if (stateObserverForIO != nullptr)
+    {
+        delete stateObserverForIO;
+        metafs = nullptr;
+        POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "stateObserverForIO for {} has been deleted.", arrayName);
     }
 }
 

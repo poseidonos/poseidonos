@@ -63,6 +63,8 @@ using grpc_cli::StartTelemetryRequest;
 using grpc_cli::StartTelemetryResponse;
 using grpc_cli::SetTelemetryPropertyRequest;
 using grpc_cli::SetTelemetryPropertyResponse;
+using grpc_cli::GetTelemetryPropertyRequest;
+using grpc_cli::GetTelemetryPropertyResponse;
 using grpc_cli::StopTelemetryRequest;
 using grpc_cli::StopTelemetryResponse;
 using grpc_cli::ResetEventWrrRequest;
@@ -127,6 +129,10 @@ using grpc_cli::CreateTransportRequest;
 using grpc_cli::CreateTransportResponse;
 using grpc_cli::CreateVolumeRequest;
 using grpc_cli::CreateVolumeResponse;
+using grpc_cli::DeleteVolumeRequest;
+using grpc_cli::DeleteVolumeResponse;
+using grpc_cli::UnmountVolumeRequest;
+using grpc_cli::UnmountVolumeResponse;
 using grpc_cli::SetVolumePropertyRequest;
 using grpc_cli::SetVolumePropertyResponse;
 
@@ -147,6 +153,7 @@ public:
     grpc::Status ExecuteStartTelemetryCommand(const StartTelemetryRequest* request, StartTelemetryResponse* reply);
     grpc::Status ExecuteStopTelemetryCommand(const StopTelemetryRequest* request, StopTelemetryResponse* reply);
     grpc::Status ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyRequest* request, SetTelemetryPropertyResponse* reply);
+    grpc::Status ExecuteGetTelemetryPropertyCommand(const GetTelemetryPropertyRequest* request, GetTelemetryPropertyResponse* reply);
 
     // Developer COmmands
     grpc::Status ExecuteResetEventWrrCommand(const ResetEventWrrRequest* request, ResetEventWrrResponse* reply);
@@ -190,6 +197,8 @@ public:
 
     // Volume Commands
     grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);
+    grpc::Status ExecuteDeleteVolumeCommand(const DeleteVolumeRequest* request, DeleteVolumeResponse* reply);
+    grpc::Status ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* request, UnmountVolumeResponse* reply);
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
 
 private:

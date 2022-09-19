@@ -2105,22 +2105,29 @@ Root:
 
   -
   # Rebuild: 2800 - 2899
-    Id: 2801
+    Id: 2800
     Name: REBUILD_DEBUG_MSG
     Severity:
     Message:
     Cause:
     Solution:
   -
+    Id: 2801
+    Name: N_TO_M_REBUILD_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
     Id: 2802
-    Name: REBUILD_STOPPED
+    Name: QUICK_REBUILD_DEBUG
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2803
-    Name: REBUILD_FAILED
+    Name: REBUILD_FAIL_OVER
     Severity:
     Message:
     Cause:
@@ -2652,6 +2659,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3066
+    Name: JOURNAL_MANAGER_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   -
     Id: 3070
@@ -3132,6 +3146,27 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3143
+    Name: MAPPER_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3144
+    Name: MAPPER_INITIALIZE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3145
+    Name: MAPPER_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   
   # Allocator: 3150 - 3299
@@ -3562,7 +3597,20 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3211
+    Name: ALLOCATOR_INITIALIZE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3212
+    Name: ALLOCATOR_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Metadata: 3300 - 3399
   -
@@ -6037,7 +6085,20 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 5240
+    Name: PENDING_IO_TIMEOUT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 5241
+    Name: INVALID_RANGE_OF_PENDING_IO_CHECKING
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # IOPath Backend: 5300 - 5499
   -
@@ -6554,6 +6615,12 @@ Root:
     Cause:
     Solution:
 
+    Id: 5373
+    Name: IODISPATCHER_STATE_CHANGE
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 5500
     Name: UNVME_DAEMON_START

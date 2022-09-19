@@ -559,7 +559,7 @@ Array::Rebuild(void)
     bool forceRebuild = true;
     RequestRebuild(targets, isResume, forceRebuild);
     pthread_rwlock_unlock(&stateLock);
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Rebuild requested, array:{}", name_);
+    POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG), "Rebuild requested, array:{}", name_);
     return 0;
 }
 
@@ -803,11 +803,20 @@ void
 Array::MountDone(void)
 {
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_MOUNTED), "{}", Serialize());
-    vector<IArrayDevice*> targets = devMgr_->GetRebuilding();
-    if (targets.size() > 0)
+    vector<IArrayDevice*> suspendedTargets = devMgr_->GetRebuilding();
+    if (suspendedTargets.size() > 0 && state->IsRebuildable())
     {
         bool isResume = true;
-        RequestRebuild(targets, isResume);
+        RequestRebuild(suspendedTargets, isResume);
+    }
+    else
+    {
+        vector<IArrayDevice*> targets = devMgr_->GetFaulty();
+        if (targets.size() > 0 && state->IsRebuildable())
+        {
+            bool isResume = false;
+            RequestRebuild(targets, isResume);
+        }
     }
     int ret = _Flush();
     assert(ret == 0);
@@ -951,7 +960,6 @@ Array::_DetachSpare(ArrayDevice* target)
     }
 
     sysDevMgr->RemoveDevice(uBlock);
-    delete (target);
     if (state->IsMounted())
     {
         ret = _Flush();
@@ -1059,8 +1067,7 @@ Array::RequestRebuild(vector<IArrayDevice*> targets, bool isResume, bool force)
             &isAutoRebuild, ConfigType::CONFIG_TYPE_BOOL);
         if (isAutoRebuild == false)
         {
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Rebuild auto start is off, rebuild has not started, array_name:{}", name_);
-            POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Array rebuild is required. array_name:{}", name_);
+            POS_TRACE_WARN(EID(REBUILD_ARRAY_DEBUG_MSG), "Array rebuild is required(auto_start is disabled in pos.conf), array_name:{}", name_);
             return;
         }
     }
@@ -1080,7 +1087,7 @@ Array::TriggerRebuild(vector<IArrayDevice*> targets)
     {
         if (target->GetState() != ArrayDeviceState::FAULT || target->GetUblock() != nullptr)
         {
-            POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
+            POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG),
                 "Rebuild target device is not removed yet");
             pthread_rwlock_unlock(&stateLock);
             retry = true;
@@ -1134,23 +1141,23 @@ Array::ResumeRebuild(vector<IArrayDevice*> targets)
 {
     POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Resume Rebuild Start");
     pthread_rwlock_wrlock(&stateLock);
+    bool retry = false;
     if (state->SetRebuild() == false)
     {
         POS_TRACE_WARN(EID(REBUILD_TRIGGER_FAIL),
             "Failed to resume rebuild. Array({})'s state is not rebuildable", name_);
         pthread_rwlock_unlock(&stateLock);
-        return false;
+        return retry;
     }
     pthread_rwlock_unlock(&stateLock);
 
     DoRebuildAsync(targets, vector<IArrayDevice*>(), RebuildTypeEnum::BASIC);
-    return true;
+    return retry;
 }
 
 void
 Array::DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt)
 {
-    POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG), "DoRebuildAsync, type:{}, dstCnt:{}, srcCnt:{}", rt, dst.size(), src.size());
     IArrayRebuilder* arrRebuilder = rebuilder;
     string arrName = name_;
     uint32_t arrId = index_;
@@ -1159,6 +1166,7 @@ Array::DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, Rebu
 
     if (rt == RebuildTypeEnum::BASIC)
     {
+        POS_TRACE_INFO(EID(REBUILD_ARRAY_DEBUG_MSG), "DoRebuildAsync, type:{}, dstCnt:{}, srcCnt:{}", rt, dst.size(), src.size());
         thread t([arrRebuilder, arrName, arrId, dst, cb, tasks]()
         {
             list<RebuildTarget*> targets = tasks;
@@ -1168,6 +1176,7 @@ Array::DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, Rebu
     }
     else
     {
+        POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG), "DoRebuildAsync, type:{}, dstCnt:{}, srcCnt:{}", rt, dst.size(), src.size());
         vector<pair<IArrayDevice*, IArrayDevice*>> quickPair;
         assert(dst.size() == src.size());
         uint32_t idx = 0;

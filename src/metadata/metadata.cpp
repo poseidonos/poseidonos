@@ -155,7 +155,6 @@ Metadata::Init(void)
     if (result != 0)
     {
         POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Mapper, array {}", arrayName);
-        mapper->Dispose();
         return result;
     }
 
@@ -164,8 +163,6 @@ Metadata::Init(void)
     if (result != 0)
     {
         POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Allocator, array {}", arrayName);
-        allocator->Dispose();
-        mapper->Dispose();
         return result;
     }
 
@@ -195,12 +192,6 @@ Metadata::Init(void)
     if (result != 0)
     {
         POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Journal, array {}", arrayName);
-        journal->Dispose();
-        allocator->Dispose();
-        mapper->Dispose();
-
-        metaService->Unregister(arrayInfo->GetName());
-
         return result;
     }
 

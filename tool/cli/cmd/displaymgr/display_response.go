@@ -714,6 +714,22 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		fmt.Fprintln(w, "RebuildPerfImpact\t: "+res.RESULT.DATA.REBUILDPOLICY)
 
 		w.Flush()
+	case "GETTELEMETRYPROPERTY":
+		res := &pb.GetTelemetryPropertyResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w, "Status\t: "+strconv.FormatBool(res.GetResult().GetData().Status))
+		fmt.Fprintln(w, "PublicationListPath\t: "+res.GetResult().GetData().PublicationListPath)
+
+		w.Flush()
 
 	case "STARTPOS":
 		res := messages.Response{}

@@ -138,6 +138,8 @@ public:
     void SetMinimumVolume(uint32_t arrayId, uint32_t volId, uint64_t value, bool iops);
     void PeriodicalJob(uint64_t* nextTick);
 
+    static bool needThrottling;
+
 private:
     virtual void _Finalize(void);
     void _QosWorker(void);

@@ -50,6 +50,6 @@ public:
 
 private:
     void _RegisterTelemetry(string uuid);
-    TelemetryPublisher* publisher;
+    TelemetryPublisher* publisher = nullptr;
 };
 } // namespace pos

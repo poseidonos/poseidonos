@@ -41,6 +41,7 @@ ArrayStatePublisher::~ArrayStatePublisher()
     {
         TelemetryClientSingleton::Instance()->DeregisterPublisher(publisher->GetName());
     }
+    delete publisher;
 }
 
 void

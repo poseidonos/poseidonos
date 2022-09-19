@@ -181,6 +181,8 @@ protected:
     ReplayHandler* replayHandler;
     TelemetryPublisher* telemetryPublisher;
     TelemetryClient* telemetryClient;
+
+    bool isInitialized;
 };
 
 } // namespace pos
