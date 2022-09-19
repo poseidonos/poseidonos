@@ -493,10 +493,10 @@ run_test()
     write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
     echo "3. Detach a device.."
     detach_device
-    sleep 8
+    sleep 20
     echo "4. Add spare device"
     add_spare
-    sleep 5
+    sleep 20
     echo "5. Start rebuild"
     run_rebuild
     sleep 2
@@ -541,7 +541,6 @@ notice()
     get_date;
     echo -e "\033[1;36m${date} [Notice] $@ \033[0m" 1>&2;
     echo -e "${date} [Notice] $@" >> ${logfile}
-
 }
 
 check_permission()
