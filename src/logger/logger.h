@@ -323,7 +323,7 @@ public:
     virtual ~ChangeLogger(void)
     {
     }
-    virtual bool LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
+    virtual void LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, StateT currentState, std::string msg)
     {
         logging_ = false;
