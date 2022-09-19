@@ -1141,17 +1141,18 @@ Array::ResumeRebuild(vector<IArrayDevice*> targets)
 {
     POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Resume Rebuild Start");
     pthread_rwlock_wrlock(&stateLock);
+    bool retry = false;
     if (state->SetRebuild() == false)
     {
         POS_TRACE_WARN(EID(REBUILD_TRIGGER_FAIL),
             "Failed to resume rebuild. Array({})'s state is not rebuildable", name_);
         pthread_rwlock_unlock(&stateLock);
-        return false;
+        return retry;
     }
     pthread_rwlock_unlock(&stateLock);
 
     DoRebuildAsync(targets, vector<IArrayDevice*>(), RebuildTypeEnum::BASIC);
-    return true;
+    return retry;
 }
 
 void
