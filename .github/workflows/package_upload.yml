@@ -24,10 +24,17 @@ jobs:
     steps:
     - run: |
         sudo chown -R $USER:$USER $GITHUB_WORKSPACE
-    - uses: actions/checkout@v1
+
+    - name: Personal repo checkout
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      uses: actions/checkout@v1
       with:
         repository: ${{ github.event.inputs.owner }}/poseidonos
         ref: ${{ github.event.inputs.sha }}
+
+    - name: Release branch checkout
+      if: ${{ github.event_name == 'push' || github.event_name == 'workflow_call'}}
+      uses: actions/checkout@v1
 
     - name: Build Setup
       working-directory: ${{github.workspace}}/../poseidonos
