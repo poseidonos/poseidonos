@@ -149,6 +149,7 @@ private:
         {"UserReadPendingCnt", "", false, "count", TEL140009_COUNT_OF_USER_READ_PENDING_CNT, POSMetricTypes::MT_GAUGE},
         {"UserWritePendingCnt", "", false, "count", TEL140010_COUNT_OF_USER_WRITE_PENDING_CNT, POSMetricTypes::MT_GAUGE},
         {"InternalIoPendingCnt", "", false, "count", TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT, POSMetricTypes::MT_GAUGE},
+        {"TimeOutIoCnt", "", false, "count", TEL140012_COUNT_OF_TIMEOUT_IO_CNT, POSMetricTypes::MT_GAUGE},
     };
 };
 } // namespace pos
