@@ -39,7 +39,7 @@
 namespace pos
 {
 CreateMapFlushEvent::CreateMapFlushEvent(MapIoHandler* handler, std::unique_ptr<SequentialPageFinder> finder)
-: Event(false, BackendEvent::BackendEvent_CreateMapIO),
+: Event(false, BackendEvent::BackendEvent_FlushMap),
   handler(handler),
   finder(std::move(finder))
 {

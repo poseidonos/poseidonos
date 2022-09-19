@@ -361,11 +361,11 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     }
     else if (ioStatus == IOSubmitHandlerStatus::FAIL)
     {
-        POS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_FAIL),
+        POS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_BUSY),
             "[MFS IO FAIL] Submission failed, type={}, req.tagId={}, mpio_id={}",
             (int)direction, aioData->GetTagId(), aioData->GetMpioId());
 
-        status = EID(MFS_IO_FAILED_DUE_TO_FAIL);
+        status = EID(MFS_IO_FAILED_DUE_TO_BUSY);
     }
 
     return status;

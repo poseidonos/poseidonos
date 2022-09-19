@@ -65,37 +65,38 @@ public:
         {
             if (EID(SUCCESS) != result)
             {
-                POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "result of handling: ");
-            }
+                if (POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "result of handling: "))
+                {
+                    if (EID(MFS_IO_FAILED_DUE_TO_STOP_STATE) == result)
+                    {
+                        MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
+                        aioData->SetError((int)result);
+                        aioData->SetErrorStopState(true);
+                        cb->InvokeCallback();
 
-            if (EID(MFS_IO_FAILED_DUE_TO_STOP_STATE) == result)
-            {
-                MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
-                aioData->SetError((int)result);
-                aioData->SetErrorStopState(true);
-                cb->InvokeCallback();
-
-                POS_TRACE_ERROR(result,
-                    "arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
-                    aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
-                    aioData->GetMpioId(), aioData->GetTagId());
-            }
-            else if (EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL) == result ||
-                EID(MFS_IO_FAILED_DUE_TO_FAIL) == result)
-            {
-                MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
-                POS_TRACE_DEBUG(result,
-                    "retry, arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
-                    aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
-                    aioData->GetMpioId(), aioData->GetTagId());
+                        POS_TRACE_ERROR(result,
+                            "arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
+                            aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
+                            aioData->GetMpioId(), aioData->GetTagId());
+                    }
+                    else if (EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL) == result ||
+                        EID(MFS_IO_FAILED_DUE_TO_BUSY) == result)
+                    {
+                        MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
+                        POS_TRACE_DEBUG(result,
+                            "retry, arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
+                            aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
+                            aioData->GetMpioId(), aioData->GetTagId());
+                    }
+                }
             }
         }
 
-        return _ChangeReturnValueToTryAgain(result);
+        return _ShouldRetry(result);
     }
 
 private:
-    bool _ChangeReturnValueToTryAgain(const POS_EVENT_ID eventId) const
+    bool _ShouldRetry(const POS_EVENT_ID eventId) const
     {
         if (eventId == EID(SUCCESS) ||
             eventId == EID(MFS_IO_FAILED_DUE_TO_STOP_STATE))

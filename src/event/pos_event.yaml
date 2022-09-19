@@ -4727,15 +4727,15 @@ Root:
     Id: 4089
     Name: MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL
     Severity:
-    Message: internal error state
+    Message: Waiting for lock resource
     Cause: Write operation has been failed due to IOSubmitHandlerStatus::TRYLOCK_FAIL
     Solution: MetaFs will try again
   -
     Id: 4090
-    Name: MFS_IO_FAILED_DUE_TO_FAIL
+    Name: MFS_IO_FAILED_DUE_TO_BUSY
     Severity:
-    Message: internal error state
-    Cause: Write operation has been failed due to IOSubmitHandlerStatus::TRYLOCK_FAIL
+    Message: Waiting for io resource
+    Cause: Write operation has been failed due to IOSubmitHandlerStatus::FAIL
     Solution: MetaFs will try again
   
   -

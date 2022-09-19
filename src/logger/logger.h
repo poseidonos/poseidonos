@@ -322,9 +322,11 @@ public:
     virtual ~ChangeLogger(void)
     {
     }
-    virtual void LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
+    virtual bool LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, StateT currentState, std::string msg)
     {
+        bool logging = false;
+
         if (prev_ == currentState)
         {
             count_++;
@@ -334,9 +336,12 @@ public:
         if (logger_)
         {
             logger_->Poslog(loc, lvl, id, msg + " current_state:{}, prev_state:{}, prev_state_repeat_count:{} times", prev_, currentState, count_);
+            logging = true;
         }
         count_ = 0;
         prev_ = currentState;
+
+        return logging;
     }
     virtual uint64_t GetCount(void)
     {
