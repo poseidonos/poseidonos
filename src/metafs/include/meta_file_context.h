@@ -46,6 +46,7 @@ class MetaFileContext
 {
 public:
     MetaFileContext(void)
+    : extents(nullptr)
     {
         Reset();
     }
@@ -59,9 +60,21 @@ public:
         fileBaseLpn = 0;
         chunkSize = 0;
         extentsCount = 0;
-        memset(&extents, 0x0, sizeof(MetaFileExtent) * MetaFsConfig::MAX_PAGE_MAP_CNT);
         signature = 0;
         storage = nullptr;
+        if (extents)
+        {
+            delete[] extents;
+            extents = nullptr;
+        }
+    }
+
+    void CopyExtentsFrom(const MetaFileExtent* const list, const int count)
+    {
+        assert(extents == nullptr);
+        assert(list != nullptr);
+        extents = new MetaFileExtent[count];
+        memcpy(extents, list, sizeof(MetaFileExtent) * count);
     }
 
     // from MetaFileManager::CheckFileInActive()
@@ -72,7 +85,7 @@ public:
     MetaLpnType fileBaseLpn;
     FileSizeType chunkSize;
     int extentsCount;
-    MetaFileExtent extents[MetaFsConfig::MAX_PAGE_MAP_CNT];
+    MetaFileExtent* extents;
     uint64_t signature;
     MetaStorageSubsystem* storage;
 };

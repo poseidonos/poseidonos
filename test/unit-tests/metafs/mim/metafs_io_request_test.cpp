@@ -284,7 +284,7 @@ TEST(MetaFsIoRequest, GetStartLpn_testIfTheStartIsReturnedAccordingToByteOffset)
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 0;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extents, fileCtx.extentsCount);
     MetaFsIoRequest* req = new MetaFsIoRequest;
     req->fileCtx = &fileCtx;
     req->extents = req->fileCtx->extents;
@@ -331,7 +331,7 @@ TEST(MetaFsIoRequest, GetStartLpn_testIfTheStartIsReturnedNotAccordingToByteSize
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 0;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extents, fileCtx.extentsCount);
     MetaFsIoRequest* req = new MetaFsIoRequest;
     req->fileCtx = &fileCtx;
     req->extents = req->fileCtx->extents;
@@ -396,7 +396,7 @@ TEST(MetaFsIoRequest, GetStartLpn_testIfTheStartIsReturnedAccordingToByteOffsetI
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 43082495;
     fileCtx.extentsCount = 3;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(extents, fileCtx.extentsCount);
     MetaFsIoRequest* req = new MetaFsIoRequest;
     req->fileCtx = &fileCtx;
     req->extents = req->fileCtx->extents;

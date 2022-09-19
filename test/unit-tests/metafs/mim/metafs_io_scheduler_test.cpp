@@ -131,7 +131,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnAlignedRequestCreatesOneRe
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 0;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extents, fileCtx.extentsCount);
     MetaFsIoRequest originReq;
     MetaFsIoRequest* req;
 
@@ -202,7 +202,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnUnalignedRequestCreatesTwo
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 0;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extents, fileCtx.extentsCount);
     MetaFsIoRequest originReq;
     MetaFsIoRequest* req;
 
@@ -273,7 +273,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfABigAlignedRequestCreatesMan
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 43082495;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extents, fileCtx.extentsCount);
     MetaFsIoRequest originReq;
     MetaFsIoRequest* req;
 
@@ -310,7 +310,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 5;
     fileCtx.extentsCount = 3;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(extents, fileCtx.extentsCount);
     MetaFsIoRequest originReq;
     MetaFsIoRequest* req;
 
@@ -385,7 +385,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     fileCtx.chunkSize = 4032;
     fileCtx.fileBaseLpn = 43082495;
     fileCtx.extentsCount = 3;
-    memcpy(&fileCtx.extents, &extents, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(extents, fileCtx.extentsCount);
     MetaFsIoRequest originReq;
     MetaFsIoRequest* req;
 

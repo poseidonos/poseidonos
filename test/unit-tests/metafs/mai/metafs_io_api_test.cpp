@@ -150,7 +150,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Fully)
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extent, fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
@@ -192,7 +192,7 @@ TEST(MetaFsIoApi, Read_testIfDataWillBeReturned_Partially)
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extent, fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
@@ -314,7 +314,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Fully)
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extent, fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
@@ -356,7 +356,7 @@ TEST(MetaFsIoApi, Write_testIfDataWillBeStored_Partially)
     MetaFileContext fileCtx;
     fileCtx.chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     fileCtx.extentsCount = 1;
-    memcpy(&fileCtx.extents, &extent, sizeof(MetaFileExtent) * fileCtx.extentsCount);
+    fileCtx.CopyExtentsFrom(&extent, fileCtx.extentsCount);
     fileCtx.fileBaseLpn = 0;
     fileCtx.isActivated = true;
     fileCtx.sizeInByte = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE * lpnSize;
