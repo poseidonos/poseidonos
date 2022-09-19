@@ -316,7 +316,8 @@ public:
     ChangeLogger(Logger* logger, StateT initState)
     : logger_(logger),
       prev_(initState),
-      count_(0)
+      count_(0),
+      logging_(false)
     {
     }
     virtual ~ChangeLogger(void)
@@ -325,8 +326,7 @@ public:
     virtual bool LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, StateT currentState, std::string msg)
     {
-        bool logging = false;
-
+        logging_ = false;
         if (prev_ == currentState)
         {
             count_++;
@@ -336,22 +336,25 @@ public:
         if (logger_)
         {
             logger_->Poslog(loc, lvl, id, msg + " current_state:{}, prev_state:{}, prev_state_repeat_count:{} times", prev_, currentState, count_);
-            logging = true;
+            logging_ = true;
         }
         count_ = 0;
         prev_ = currentState;
-
-        return logging;
     }
     virtual uint64_t GetCount(void)
     {
         return count_;
+    }
+    virtual bool IsLoggingStateChanged(void)
+    {
+        return logging_;
     }
 
 private:
     pos::Logger* logger_;
     StateT prev_;
     std::atomic<uint64_t> count_;
+    bool logging_;
 };
 } // namespace pos
 

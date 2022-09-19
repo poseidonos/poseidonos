@@ -65,7 +65,8 @@ public:
         {
             if (EID(SUCCESS) != result)
             {
-                if (POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "result of handling: "))
+                POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "result of handling: ");
+                if (changeLogger.IsLoggingStateChanged())
                 {
                     if (EID(MFS_IO_FAILED_DUE_TO_STOP_STATE) == result)
                     {
