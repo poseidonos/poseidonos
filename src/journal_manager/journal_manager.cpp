@@ -194,7 +194,10 @@ JournalManager::~JournalManager(void)
         {
             telemetryClient->DeregisterPublisher(name);
         }
+    }
 
+    if (telemetryPublisher != nullptr)
+    {
         delete telemetryPublisher;
     }
     delete replayHandler;

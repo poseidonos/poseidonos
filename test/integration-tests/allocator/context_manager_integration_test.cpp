@@ -207,11 +207,6 @@ ContextManagerIntegrationTest::TearDown(void)
         delete arrayInfo;
     }
 
-    if (nullptr != tp)
-    {
-        delete tp;
-    }
-
     if (nullptr != tc)
     {
         delete tc;

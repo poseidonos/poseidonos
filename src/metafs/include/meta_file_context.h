@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <cstring>
+
 #include "src/metafs/common/metafs_type.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/include/meta_storage_specific.h"
@@ -44,6 +46,7 @@ class MetaFileContext
 {
 public:
     MetaFileContext(void)
+    : extents(nullptr)
     {
         Reset();
     }
@@ -57,9 +60,21 @@ public:
         fileBaseLpn = 0;
         chunkSize = 0;
         extentsCount = 0;
-        extents = nullptr;
         signature = 0;
         storage = nullptr;
+        if (extents)
+        {
+            delete[] extents;
+            extents = nullptr;
+        }
+    }
+
+    void CopyExtentsFrom(const MetaFileExtent* const list, const int count)
+    {
+        assert(extents == nullptr);
+        assert(list != nullptr);
+        extents = new MetaFileExtent[count];
+        memcpy(extents, list, sizeof(MetaFileExtent) * count);
     }
 
     // from MetaFileManager::CheckFileInActive()
