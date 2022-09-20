@@ -311,7 +311,7 @@ ArrayManager::PrepareRebuild(string name, bool& resume)
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
     {
-        return EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME);
+        return EID(REBUILD_JOB_PREPARE_FAIL);
     }
 
     return array->PrepareRebuild(resume);
