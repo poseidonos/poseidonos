@@ -57,7 +57,7 @@ RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
     ctx->GetSecondaryRebuildPairs(backupRp);
     if (backupRp.size() > 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Backup rebuild method found, count:{}, part:{}",
+        POS_TRACE_INFO(EID(REBUILD_BEHAVIOR_CREATE), "Backup rebuild method found, count:{}, part:{}",
             backupRp.size(), PARTITION_TYPE_STR[ctx->part]);
         assert(backupRp.size() == rm.size());
         uint32_t index = 0;
@@ -70,7 +70,7 @@ RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
     }
     else
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "No backup rebuild method, part:{}",
+        POS_TRACE_INFO(EID(REBUILD_BEHAVIOR_CREATE), "No backup rebuild method, part:{}",
             PARTITION_TYPE_STR[ctx->part]);
     }
     for (auto item : rm)
@@ -80,24 +80,24 @@ RebuildBehaviorFactory::CreateRebuildBehavior(unique_ptr<RebuildContext> ctx)
 
     if (ctx->part == PartitionType::JOURNAL_SSD)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild for {} partition is created",
+        POS_TRACE_INFO(EID(REBUILD_BEHAVIOR_CREATE), "StripeBasedRaceRebuild for {} partition is created",
             PARTITION_TYPE_STR[ctx->part]);
         return new StripeBasedRaceRebuild(move(ctx));
     }
     else if (ctx->part == PartitionType::META_SSD)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild for {} partition is created",
+        POS_TRACE_INFO(EID(REBUILD_BEHAVIOR_CREATE), "StripeBasedRaceRebuild for {} partition is created",
             PARTITION_TYPE_STR[ctx->part]);
         return new StripeBasedRaceRebuild(move(ctx));
     }
     else if (ctx->part == PartitionType::USER_DATA)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild for {} partition is created",
+        POS_TRACE_INFO(EID(REBUILD_BEHAVIOR_CREATE), "SegmentBasedRebuild for {} partition is created",
             PARTITION_TYPE_STR[ctx->part]);
         return new SegmentBasedRebuild(move(ctx), allocatorSvc);
     }
 
-    POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "{} partition does not support rebuild", PARTITION_TYPE_STR[ctx->part]);
+    POS_TRACE_ERROR(EID(REBUILD_BEHAVIOR_CREATE), "{} partition does not support rebuild", PARTITION_TYPE_STR[ctx->part]);
     return nullptr;
 }
 } // namespace pos

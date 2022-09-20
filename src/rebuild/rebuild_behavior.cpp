@@ -40,7 +40,7 @@ RebuildBehavior::RebuildBehavior(unique_ptr<RebuildContext> c)
 {
     if (ctx == nullptr)
     {
-        POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to initialize rebuild, ctx is null");
+        POS_TRACE_WARN(EID(REBUILD_CTX_DEBUG), "Failed to initialize rebuild, ctx is null");
         return;
     }
 }
