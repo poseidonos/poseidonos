@@ -162,6 +162,7 @@ Poseidonos::Terminate(void)
     SpdkCallerSingleton::Instance()->SpdkBdevPosUnRegisterPoller(UNVMfCompleteHandler);
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
+    IoTimeoutCheckerSingleton::ResetInstance();
 
     IoTimeoutCheckerSingleton::ResetInstance();
 
