@@ -304,7 +304,7 @@ NToMRebuild::_WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCall
     }
     else
     {
-        POS_TRACE_DEBUG(EID(REBUILD_WRITE_FAIL),
+        POS_TRACE_DEBUG(EID(REBUILD_WRITE_DONE),
             "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
     }
     callback(result);

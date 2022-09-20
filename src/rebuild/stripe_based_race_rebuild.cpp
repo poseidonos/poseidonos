@@ -121,7 +121,6 @@ StripeBasedRaceRebuild::_Init(void)
 bool
 StripeBasedRaceRebuild::_Recover(void)
 {
-    UpdateProgress(baseStripe);
     uint32_t strPerSeg = ctx->size->stripesPerSegment;
     uint32_t maxStripeId = ctx->size->totalSegments * strPerSeg - 1;
     if (baseStripe >= maxStripeId ||
@@ -144,7 +143,6 @@ StripeBasedRaceRebuild::_Recover(void)
         }
         return false;
     }
-
     uint32_t currWorkload = to - from + 1;
     uint32_t callbackCnt = ctx->rm.size();
     ctx->taskCnt = currWorkload * callbackCnt;
@@ -167,6 +165,7 @@ StripeBasedRaceRebuild::_Recover(void)
             }
         }
     }
+    UpdateProgress(baseStripe);
     baseStripe += currWorkload;
     return true;
 }
@@ -200,6 +199,7 @@ StripeBasedRaceRebuild::_RecoverCompleted(uint32_t targetId, int result)
 bool
 StripeBasedRaceRebuild::_Finish(void)
 {
+    UpdateProgress(baseStripe);
     POS_TRACE_DEBUG(EID(STRIPES_REBUILD_FINISH), "part:{}", PARTITION_TYPE_STR[ctx->part]);
     for (IArrayDevice* targetDev : targetDevs)
     {
