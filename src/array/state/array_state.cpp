@@ -371,7 +371,6 @@ ArrayState::WaitShutdownDone(void)
 bool
 ArrayState::SetRebuild(void)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SetRebuild, CurrState:{}", state.ToString());
     if (IsRebuildable() == false)
     {
         return false;

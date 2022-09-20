@@ -44,7 +44,6 @@ RebuildCompleted::Execute()
     res.array = ctx->array;
     res.result = ctx->GetResult();
     ctx->rebuildComplete(res);
-
     return true;
 }
 

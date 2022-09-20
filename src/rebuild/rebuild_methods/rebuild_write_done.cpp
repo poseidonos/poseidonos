@@ -51,8 +51,7 @@ RebuildWriteDone::_DoSpecificJob(void)
     int ret = 0;
     if (_GetErrorCount() > 0)
     {
-        ret = EID(IO_RECOVER_DEBUG_MSG);
-        POS_TRACE_WARN(ret, "rebuild write done with errors");
+        ret = EID(REBUILD_WRITE_FAIL);
     }
 
     writeDoneCallback(ret);
