@@ -230,15 +230,9 @@ TelemetryPublisher::_LoadPublicationList(std::string filePath)
 void
 TelemetryPublisher::_RemoveMetricNotToPublish(POSMetricVector* metricList)
 {
-    POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
-            "list_size:{}", metricList->size());
-
     auto it = metricList->begin();
     while(it != metricList->end())
     {
-        POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
-            "name:{}, _ShouldPublish():{}", it->GetName(), _ShouldPublish(it->GetName()));
-
         if (_ShouldPublish(it->GetName()) == false)
         {
             it = metricList->erase(it);
@@ -248,9 +242,6 @@ TelemetryPublisher::_RemoveMetricNotToPublish(POSMetricVector* metricList)
             ++it;
         }
     }
-
-    POS_TRACE_DEBUG(EID(TELEMETRY_DEBUG_MSG),
-            "list_size:{}", metricList->size());   
 }
 
 bool
