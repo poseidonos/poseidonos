@@ -163,6 +163,8 @@ Poseidonos::Terminate(void)
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
 
+    IoTimeoutCheckerSingleton::ResetInstance();
+
     air_deactivate();
     air_finalize();
     if (nullptr != telemetryAirDelegator)
