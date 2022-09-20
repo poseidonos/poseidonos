@@ -38,8 +38,14 @@
 
 namespace pos
 {
+GcLogWriteCompleted::GcLogWriteCompleted(void)
+: GcLogWriteCompleted(nullptr, nullptr)
+{
+}
+
 GcLogWriteCompleted::GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPtr callback)
-: numLogs(-1),
+: Callback(false, CallbackType_BackendLogWriteDone),
+  numLogs(-1),
   numCompletedLogs(0),
   eventScheduler(scheduler),
   callback(callback)
@@ -47,7 +53,7 @@ GcLogWriteCompleted::GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPt
 }
 
 bool
-GcLogWriteCompleted::Execute(void)
+GcLogWriteCompleted::_DoSpecificJob(void)
 {
     assert(numLogs > 0);
 

@@ -44,8 +44,8 @@
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/journal_manager/log_write/log_write_request.h"
 #include "src/journal_manager/log_write/volume_deleted_log_write_callback.h"
-#include "src/journal_manager/log_write/volume_deleted_log_write_request_callback.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -103,16 +103,7 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
     POS_TRACE_INFO(EID(JOURNAL_HANDLE_VOLUME_DELETION),
         "Write volume deleted log, volume id {} segInfo version is {}", volumeId, segCtxVersion);
 
-    int ret = _WriteVolumeDeletedLog(volumeId, segCtxVersion);
-    if (EID(SUCCESS) > ret)
-    {
-        POS_TRACE_DEBUG(EID(JOURNAL_HANDLE_VOLUME_DELETION),
-            "Writing volume deleted log failed (volume id {})", volumeId);
-
-        checkpointManager->UnblockCheckpoint();
-        return ret;
-    }
-
+    _WriteVolumeDeletedLog(volumeId, segCtxVersion);
     _WaitForLogWriteDone(volumeId);
 
     dirtyMapManager->DeleteDirtyList(volumeId);
@@ -123,29 +114,17 @@ JournalVolumeEventHandler::WriteVolumeDeletedLog(int volumeId)
     return 0;
 }
 
-int
+void
 JournalVolumeEventHandler::_WriteVolumeDeletedLog(int volumeId, uint64_t segCtxVersion)
 {
     EventSmartPtr callback(new VolumeDeletedLogWriteCallback(this, volumeId));
-
     LogWriteContext* logWriteContext =
         logFactory->CreateVolumeDeletedLogWriteContext(volumeId, segCtxVersion, callback);
 
     logWriteInProgress = true;
-    int ret = logWriteHandler->AddLog(logWriteContext);
 
-    if (EID(SUCCESS) < ret)
-    {
-        EventSmartPtr volumeDeleteLogWriteRequest(new VolumeDeletedLogWriteRequestCallback(this, volumeId, segCtxVersion));
-        eventScheduler->EnqueueEvent(volumeDeleteLogWriteRequest);
-    }
-
-    return ret;
-}
-
-void JournalVolumeEventHandler::RetryVolumeDeletedLogWrite(int volumeId, uint64_t segCtxVersion)
-{
-    _WriteVolumeDeletedLog(volumeId, segCtxVersion);
+    EventSmartPtr logWriteRequest(new LogWriteRequest(logWriteHandler, logWriteContext));
+    eventScheduler->EnqueueEvent(logWriteRequest);
 }
 
 int

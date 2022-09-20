@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -32,29 +32,26 @@
 
 #pragma once
 
-#include <functional>
-
-#include "src/event_scheduler/event.h"
-#include "src/include/smart_ptr_type.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
 class LogWriteContext;
+class LogWriteHandler;
 
-using GcStripeLogWriteCallback = std::function<int(LogWriteContext*)>;
-
-class GcStripeLogWriteRequest : public Event
+class LogWriteRequest : public Callback
 {
 public:
-    GcStripeLogWriteRequest(void) = default;
-    GcStripeLogWriteRequest(GcStripeLogWriteCallback callback, LogWriteContext* context);
-    virtual ~GcStripeLogWriteRequest(void) = default;
+    LogWriteRequest(void) = default;
+    LogWriteRequest(LogWriteHandler* logWrite, LogWriteContext* context);
+    virtual ~LogWriteRequest(void) = default;
 
-    virtual bool Execute(void) override;
+protected:
+    virtual bool _DoSpecificJob(void) override;
 
 private:
-    GcStripeLogWriteCallback callbackFunc;
-    LogWriteContext* context;
+    LogWriteHandler* logWriteHandler;
+    LogWriteContext* logWriteContext;
 };
 
 } // namespace pos

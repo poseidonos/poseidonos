@@ -2666,6 +2666,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3067
+    Name: JOURNAL_WRITE_FAILED
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   -
     Id: 3070
