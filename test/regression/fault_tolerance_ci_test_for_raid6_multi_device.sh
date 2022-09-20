@@ -434,6 +434,7 @@ add_spare()
     ${ibof_cli} array addspare --spare ${spare_name1} --array-name $array_name
     sleep 10
     ${ibof_cli} array addspare --spare ${spare_name2} --array-name $array_name
+    sleep 10
 }
 
 waiting_for_rebuild_complete()
@@ -494,10 +495,10 @@ run_test()
     write_pattern ${blk_offset[0]} ${io_blk_cnt[0]} ${blk_size_kb} # write #0
     echo "3. Detach a device.."
     detach_device
-    sleep 20
+    sleep 10
     echo "4. Add spare device"
     add_spare
-    sleep 20
+    sleep 10
     echo "5. Start rebuild"
     run_rebuild
     sleep 2
