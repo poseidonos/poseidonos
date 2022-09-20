@@ -44,8 +44,8 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, vector<IArrayDevi
 : arrayName(arrayName),
   rebuildComplete(cb)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild(Basic), array {} with total {} tasks, dstCnt:{}",
+    POS_TRACE_INFO(EID(ARRAY_REBUILD_INIT),
+        "array_name:{}, taskCnt:{}, dstCnt:{}",
         arrayName, tgt.size(), dst.size());
 
     RebuildProgress* prog = new RebuildProgress(arrayName);
@@ -58,8 +58,8 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, vector<IArrayDevi
         {
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-                "Try to create PartitionRebuild for {}", PARTITION_TYPE_STR[ctx->part]);
+            POS_TRACE_INFO(EID(ARRAY_REBUILD_INIT),
+                "Trying to create partition rebuild, part:{}", PARTITION_TYPE_STR[ctx->part]);
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {
@@ -81,7 +81,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, vector<IArrayDevi
     progress = prog;
     rebuildLogger = rLogger;
     rebuildLogger->SetArrayRebuildStart();
-    rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
+    rebuildDoneCb = bind(&ArrayRebuild::_PartitionRebuildDone, this, placeholders::_1);
 }
 
 ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair& rebuildPair,
@@ -89,8 +89,8 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
 : arrayName(arrayName),
   rebuildComplete(cb)
 {
-    POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG),
-        "ArrayRebuild(Quick) begin, array {} with total {} tasks, pairCnt:{}",
+    POS_TRACE_INFO(EID(ARRAY_REBUILD_INIT),
+        "QuickRebuild, array_name:{}, taskCnt:{}, pairCnt:{}",
         arrayName, tgt.size(), rebuildPair.size());
     RebuildProgress* prog = new RebuildProgress(arrayName);
     RebuildLogger* rLogger = new RebuildLogger(arrayName);
@@ -102,8 +102,8 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
         {
             ctx->array = arrayName;
             ctx->arrayIndex = arrayId;
-            POS_TRACE_INFO(EID(QUICK_REBUILD_DEBUG),
-                "Try to create PartitionRebuild for {}, pairCnt:{}", PARTITION_TYPE_STR[ctx->part], ctx->rp.size());
+            POS_TRACE_INFO(EID(ARRAY_REBUILD_INIT),
+                "Trying to create partition rebuild, part:{}, pairCnt:{}", PARTITION_TYPE_STR[ctx->part], ctx->rp.size());
             RebuildBehavior* bhvr = factory->CreateRebuildBehavior(move(ctx));
             if (bhvr != nullptr)
             {
@@ -125,7 +125,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
     progress = prog;
     rebuildLogger = rLogger;
     rebuildLogger->SetArrayRebuildStart();
-    rebuildDoneCb = bind(&ArrayRebuild::_RebuildDone, this, placeholders::_1);
+    rebuildDoneCb = bind(&ArrayRebuild::_PartitionRebuildDone, this, placeholders::_1);
 }
 
 ArrayRebuild::~ArrayRebuild(void)
@@ -137,8 +137,8 @@ ArrayRebuild::~ArrayRebuild(void)
 void
 ArrayRebuild::Start(void)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::Start() array {} with total {} tasks", arrayName, tasks.size());
+    POS_TRACE_INFO(EID(ARRAY_REBUILD_START),
+        "array_name:{}, taskCnt:{}", arrayName, tasks.size());
 
     if (tasks.empty())
     {
@@ -149,14 +149,14 @@ ArrayRebuild::Start(void)
     }
     else
     {
-        _RebuildNext();
+        _RebuildNextPartition();
     }
 }
 
 void
 ArrayRebuild::Discard(void)
 {
-    POS_TRACE_ERROR(EID(REBUILD_DISCARDED), "Rebuild discarded, array_name:{}", arrayName);
+    POS_TRACE_ERROR(EID(ARRAY_REBUILD_DISCARD), "array_name:{}", arrayName);
     tasks.clear();
     RebuildResult res;
     res.array = arrayName;
@@ -190,10 +190,10 @@ ArrayRebuild::GetProgress(void)
 }
 
 void
-ArrayRebuild::_RebuildNext(void)
+ArrayRebuild::_RebuildNextPartition(void)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuild::_RebuildNext() array {} has remaining {} tasks", arrayName, tasks.size());
+    POS_TRACE_INFO(EID(REBUILD_NEXT_PARTITION),
+        "array_name:{}, remainingTaskCnt:{}", arrayName, tasks.size());
     if (tasks.empty() == false)
     {
         PartitionRebuild* task = tasks.front();
@@ -203,8 +203,10 @@ ArrayRebuild::_RebuildNext(void)
 }
 
 void
-ArrayRebuild::_RebuildDone(RebuildResult res)
+ArrayRebuild::_PartitionRebuildDone(RebuildResult res)
 {
+    POS_TRACE_INFO(EID(PARTITION_REBUILD_END),
+        "array_name:{}, remainingTaskCnt:{}", arrayName, tasks.size());
     RebuildState taskResult = res.result;
     state = taskResult;
 
@@ -230,34 +232,36 @@ ArrayRebuild::_RebuildDone(RebuildResult res)
     }
     else
     {
-        _RebuildNext();
+        _RebuildNextPartition();
     }
 }
 
 void
 ArrayRebuild::_RebuildCompleted(RebuildResult res)
 {
+    POS_TRACE_INFO(EID(ARRAY_REBUILD_END),
+        "array_name:{}, result:{}", arrayName,res.result);
     state = res.result;
     switch (state)
     {
         case RebuildState::PASS:
         {
             POS_TRACE_INFO(EID(REBUILD_RESULT_PASS),
-                "array:{}", arrayName);
+                "array_name:{}", arrayName);
             rebuildLogger->SetResult(REBUILD_STATE_STR[(int)state]);
             break;
         }
         case RebuildState::FAIL:
         {
             POS_TRACE_INFO(EID(REBUILD_RESULT_FAILED),
-                "array:{}", arrayName);
+                "array_name:{}", arrayName);
             rebuildLogger->SetResult(REBUILD_STATE_STR[(int)state]);
             break;
         }
         case RebuildState::CANCELLED:
         {
             POS_TRACE_INFO(EID(REBUILD_RESULT_CANCELLED),
-                "array:{}", arrayName);
+                "array_name:{}", arrayName);
             rebuildLogger->SetResult(REBUILD_STATE_STR[(int)state]);
             break;
         }

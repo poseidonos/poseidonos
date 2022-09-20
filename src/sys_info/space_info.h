@@ -36,8 +36,6 @@
 #include <string>
 #include <map>
 
-#include "space_info_publisher.h"
-
 using namespace std;
 
 namespace pos
