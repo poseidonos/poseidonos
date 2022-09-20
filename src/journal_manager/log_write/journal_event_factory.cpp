@@ -35,31 +35,40 @@
 #include <functional>
 
 #include "src/event_scheduler/event.h"
-#include "src/event_scheduler/event_scheduler.h"
+#include "src/journal_manager/log_write/gc_log_write.h"
 #include "src/journal_manager/log_write/gc_log_write_completed.h"
-#include "src/journal_manager/log_write/gc_stripe_log_write_request.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/journal_manager/log_write/log_write_request.h"
 
 namespace pos
 {
 void
-JournalEventFactory::Init(EventScheduler* scheduler, LogWriteHandler* logWriteHandler)
+JournalEventFactory::Init(EventScheduler* scheduler, LogWriteHandler* logWrite)
 {
     eventScheduler = scheduler;
-    gcCallbackFunc = std::bind(&LogWriteHandler::AddLog, logWriteHandler, std::placeholders::_1);
+    logWriteHandler = logWrite;
 }
 
 EventSmartPtr
-JournalEventFactory::CreateGcLogWriteCompletedEvent(EventSmartPtr callback)
+JournalEventFactory::CreateGcBlockLogWriteCompletedEvent(EventSmartPtr callback)
 {
     EventSmartPtr event(new GcLogWriteCompleted(eventScheduler, callback));
     return event;
 }
 
 EventSmartPtr
-JournalEventFactory::CreateGcStripeLogWriteRequestEvent(LogWriteContext* callbackContext)
+JournalEventFactory::CreateLogWriteEvent(LogWriteContext* callbackContext)
 {
-    EventSmartPtr event(new GcStripeLogWriteRequest(gcCallbackFunc, callbackContext));
+    EventSmartPtr event(new LogWriteRequest(logWriteHandler, callbackContext));
     return event;
 }
+
+EventSmartPtr
+JournalEventFactory::CreateGcLogWriteEvent(std::vector<LogWriteContext*> blockContexts,
+    EventSmartPtr gcLogWriteCompleted)
+{
+    EventSmartPtr event(new GcLogWrite(blockContexts, gcLogWriteCompleted, logWriteHandler));
+    return event;
+}
+
 } // namespace pos
