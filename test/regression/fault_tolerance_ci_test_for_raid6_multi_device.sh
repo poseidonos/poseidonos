@@ -432,8 +432,9 @@ add_spare()
     local spare_name1=${target_spare_dev1}
     local spare_name2=${target_spare_dev2}
     ${ibof_cli} array addspare --spare ${spare_name1} --array-name $array_name
-    sleep 10
+    sleep 8
     ${ibof_cli} array addspare --spare ${spare_name2} --array-name $array_name
+    sleep 8
 }
 
 waiting_for_rebuild_complete()
