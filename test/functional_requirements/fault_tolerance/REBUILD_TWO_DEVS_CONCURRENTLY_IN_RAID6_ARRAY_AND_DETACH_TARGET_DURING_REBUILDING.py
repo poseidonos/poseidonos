@@ -37,19 +37,12 @@ def execute():
     print (cli.list_device())
     print (cli.add_device(SPARE_DEV_2, ARRAYNAME))
     if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
-        if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
-            pos.kill_pos()
-            print("SPOR")
-            uram_backup = "../../../script/backup_latest_hugepages_for_uram.sh"
-            subprocess.call([uram_backup])
+        timeout = 80000 #80s
+        if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
+            api.detach_ssd_and_attach(SPARE_DEV_1)
             time.sleep(5)
-            pos.start_pos()
-            cli.scan_device()
-            cli.mount_array(ARRAYNAME)
-            timeout = 80000 #80s
-            if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
-                if api.wait_situation(ARRAYNAME, "NORMAL") == True:
-                    return "pass"
+            if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
+                return "pass"
     return "fail"
 
 
