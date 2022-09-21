@@ -3,7 +3,7 @@ name: M1-PostVM_Test
 
 on:
   push:
-    branches: [ main release/v0.12.0 ] 
+    branches: [ main, release/v0.12.0 ] 
 
   workflow_dispatch:
     inputs:
