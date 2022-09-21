@@ -45,7 +45,7 @@ namespace pos
 StripeBasedRaceRebuild::StripeBasedRaceRebuild(unique_ptr<RebuildContext> c)
 : RebuildBehavior(move(c))
 {
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild");
+    POS_TRACE_DEBUG(EID(STRIPES_REBUILD_INIT), "StripeBasedRaceRebuild");
     locker = ArrayService::Instance()->Getter()->GetIOLocker(ctx->part);
     assert(locker != nullptr);
 }
@@ -87,7 +87,7 @@ StripeBasedRaceRebuild::_Init(void)
             {
                 if (initRetryCnt >= INIT_REBUILD_MAX_RETRY)
                 {
-                    POS_TRACE_ERROR(EID(REBUILD_INIT_FAILED), "part_type:{}, retried:{}",
+                    POS_TRACE_ERROR(EID(REBUILD_BUFFER_INIT_FAIL), "part_type:{}, retried:{}",
                         PARTITION_TYPE_STR[ctx->part], initRetryCnt);
                     ctx->SetResult(RebuildState::FAIL);
                     return _Finish();
@@ -95,7 +95,7 @@ StripeBasedRaceRebuild::_Init(void)
                 int logInterval = INIT_REBUILD_MAX_RETRY / 10;
                 if (initRetryCnt % logInterval == 0)
                 {
-                    POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to initialize buffers for stripe based rebuild, array:{}, part:{}, retried:{}",
+                    POS_TRACE_WARN(EID(REBUILD_BUFFER_INIT_RETRY), "array:{}, part:{}, retried:{}",
                         ctx->array, PARTITION_TYPE_STR[ctx->part], initRetryCnt);
                 }
                 initRetryCnt++;
@@ -110,7 +110,7 @@ StripeBasedRaceRebuild::_Init(void)
                 targetDevs.insert(dev);
             }
         }
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "StripeBasedRaceRebuild Initialized successfully {}, targetDevsCnt:{}, rmCnt:{}",
+        POS_TRACE_INFO(EID(REBUILD_BUFFER_INIT_OK), "part:{}, targetDevsCnt:{}, rmCnt:{}",
             PARTITION_TYPE_STR[ctx->part], targetDevs.size(), ctx->rm.size());
         isInitialized = true;
         initRetryCnt = 0;
@@ -121,13 +121,8 @@ StripeBasedRaceRebuild::_Init(void)
 bool
 StripeBasedRaceRebuild::_Recover(void)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "StripeBasedRaceRebuild begin");
-    UpdateProgress(baseStripe);
-
     uint32_t strPerSeg = ctx->size->stripesPerSegment;
     uint32_t maxStripeId = ctx->size->totalSegments * strPerSeg - 1;
-
     if (baseStripe >= maxStripeId ||
         ctx->GetResult() >= RebuildState::CANCELLED)
     {
@@ -148,12 +143,11 @@ StripeBasedRaceRebuild::_Recover(void)
         }
         return false;
     }
-
     uint32_t currWorkload = to - from + 1;
     uint32_t callbackCnt = ctx->rm.size();
     ctx->taskCnt = currWorkload * callbackCnt;
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Trying to recover in rebuild - from:{}, to:{}, taskCnt:{}", from, to, ctx->taskCnt);
+    POS_TRACE_INFO(EID(STRIPES_REBUILD_BEGIN),
+        "from:{}, to:{}, taskCnt:{}", from, to, ctx->taskCnt);
     for (uint32_t offset = 0; offset < currWorkload; offset++)
     {
         uint32_t stripeId = baseStripe + offset;
@@ -163,14 +157,15 @@ StripeBasedRaceRebuild::_Recover(void)
             int ret = rm->Recover(ctx->arrayIndex, stripeId, ctx->size, callback);
             if (ret != 0)
             {
-                POS_TRACE_ERROR(EID(REBUILD_RESULT_FAILED),
-                    "Failed to recover stripe {} in Partition {}, maxStripes:{}",
+                POS_TRACE_WARN(ret,
+                    "stripeId:{} part:{}, maxStripes:{}",
                     stripeId, PARTITION_TYPE_STR[ctx->part], maxStripeId);
                 ctx->SetResult(RebuildState::FAIL);
                 return _Finish();
             }
         }
     }
+    UpdateProgress(baseStripe);
     baseStripe += currWorkload;
     return true;
 }
@@ -186,15 +181,15 @@ StripeBasedRaceRebuild::_RecoverCompleted(uint32_t targetId, int result)
     if (result != 0)
     {
         ctx->SetResult(RebuildState::FAIL);
-        POS_TRACE_ERROR(result,
-            "Error during rebuild, stripeID:{}, result:{}", targetId, result);
+        POS_TRACE_WARN(result,
+            "stripeId:{}, result:{}", targetId, result);
     }
 
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
     if (currentTaskCnt == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "_RecoverCompleted, result:{}", (int)(ctx->GetResult()));
+        POS_TRACE_INFO(EID(STRIPES_REBUILD_DONE),
+            "result:{}", (int)(ctx->GetResult()));
         EventSmartPtr nextEvent(new Rebuilder(this));
         nextEvent->SetEventType(BackendEvent_MetadataRebuild);
         EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
@@ -204,7 +199,8 @@ StripeBasedRaceRebuild::_RecoverCompleted(uint32_t targetId, int result)
 bool
 StripeBasedRaceRebuild::_Finish(void)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "trying to finish rebuild, part:{}", PARTITION_TYPE_STR[ctx->part]);
+    UpdateProgress(baseStripe);
+    POS_TRACE_DEBUG(EID(STRIPES_REBUILD_FINISH), "part:{}", PARTITION_TYPE_STR[ctx->part]);
     for (IArrayDevice* targetDev : targetDevs)
     {
         if (locker->ResetBusyLock(targetDev) == false)
@@ -213,8 +209,8 @@ StripeBasedRaceRebuild::_Finish(void)
             if (resetLockRetryCnt % logInterval == 0)
             {
                 locker->WriteBusyLog(targetDev);
-                POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-                    "Partition {} rebuild done, but waiting lock release, retried:{}, target:{}",
+                POS_TRACE_WARN(EID(REBUILD_RESET_LOCK_RETRY),
+                    "part:{}, retried:{}, target:{}",
                     PARTITION_TYPE_STR[ctx->part], resetLockRetryCnt, targetDev->GetName());
                 int sleep = resetLockRetryCnt * 10;
                 usleep(sleep);
@@ -222,7 +218,7 @@ StripeBasedRaceRebuild::_Finish(void)
             resetLockRetryCnt++;
             if (resetLockRetryCnt >= TRY_LOCK_MAX_RETRY)
             {
-                POS_TRACE_ERROR(EID(REBUILD_FORCED_RESET_LOCK), "part:{}, retried:{}, target:{}",
+                POS_TRACE_WARN(EID(REBUILD_FORCED_RESET_LOCK), "part:{}, retried:{}, target:{}",
                     PARTITION_TYPE_STR[ctx->part], resetLockRetryCnt, targetDev->GetName());
                 bool forceReset = true;
                 locker->ResetBusyLock(targetDev, forceReset);
@@ -234,8 +230,8 @@ StripeBasedRaceRebuild::_Finish(void)
         else
         {
             resetLockRetryCnt = 0;
-            POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "Busy lock successfully reset, rebuild_result:{}, target:{}",
-                ctx->GetResult(), targetDev->GetName());
+            POS_TRACE_INFO(EID(REBUILD_RESET_LOCK_OK), "target:{}",
+                targetDev->GetName());
         }
     }
     if (ctx->GetResult() == RebuildState::CANCELLED)
@@ -277,7 +273,7 @@ StripeBasedRaceRebuild::_TryLock(uint32_t from, uint32_t to)
         {
             locker->WriteBusyLog(failedDev);
             POS_TRACE_WARN(EID(REBUILD_TRY_LOCK_RETRY),
-                "Failed to acquire rebuild lock, array_name:{}, part:{}, dev_name:{}, stripe_from:{}, stripe_to:{}, retried:{}",
+                "array_name:{}, part:{}, dev_name:{}, stripe_from:{}, stripe_to:{}, retried:{}",
                 ctx->array, PARTITION_TYPE_STR[ctx->part], failedDev->GetName(), from, to, tryLockRetryCnt);
             int sleep = tryLockRetryCnt * 10;
             usleep(sleep);

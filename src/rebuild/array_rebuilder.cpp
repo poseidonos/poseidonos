@@ -47,14 +47,14 @@ void
 ArrayRebuilder::Rebuild(string array, uint32_t arrayId, vector<IArrayDevice*> dst,
     RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Rebuild requested, array:{}, dstCnt:{}, targetPartCnt:{}", array, dst.size(), tgt.size());
+    POS_TRACE_INFO(EID(REBUILD_JOB_REQUEST),
+        "array:{}, dstCnt:{}, targetPartCnt:{}", array, dst.size(), tgt.size());
 
     mtxStart.lock();
     if (_Find(array) != nullptr)
     {
-        POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
-            "The rebuild is already in progress, array:{}", array);
+        POS_TRACE_ERROR(EID(REBUILD_JOB_REJECT),
+            "Already in progress, array:{}", array);
         mtxStart.unlock();
         return;
     }
@@ -79,14 +79,14 @@ ArrayRebuilder::QuickRebuild(string array, uint32_t arrayId, QuickRebuildPair re
     RebuildComplete cb, list<RebuildTarget*>& tgt)
 {
     // todo quick rebuild implementation
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "QuickRebuild requested, array:{}, pair_cnt:{}, targetPartCnt:{}", array, rebuildPair.size(), tgt.size());
+    POS_TRACE_INFO(EID(REBUILD_JOB_REQUEST),
+        "QuickRebuild, array:{}, pair_cnt:{}, targetPartCnt:{}", array, rebuildPair.size(), tgt.size());
 
     mtxStart.lock();
     if (_Find(array) != nullptr)
     {
-        POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
-            "The rebuild is already in progress, array:{}", array);
+        POS_TRACE_ERROR(EID(REBUILD_JOB_REJECT),
+            "Already in progress, array:{}", array);
         mtxStart.unlock();
         return;
     }
@@ -111,14 +111,12 @@ void
 ArrayRebuilder::StopRebuild(string array)
 {
     mtxStart.lock();
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::StopRebuild, Try");
     ArrayRebuild* jobInProg = _Find(array);
     if (jobInProg != nullptr)
     {
         jobInProg->Stop();
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "ArrayRebuilder::StopRebuild, {}", array);
+        POS_TRACE_INFO(EID(REBUILD_JOB_STOP),
+            "array_name:{}", array);
     }
     mtxStart.unlock();
 }
@@ -135,8 +133,8 @@ ArrayRebuilder::RebuildDone(RebuildResult result)
         delete job;
         jobsInProgress.erase(array);
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "ArrayRebuilder::RebuildDone {}, inProgressCnt:{}",
+    POS_TRACE_INFO(EID(REBUILD_JOB_DISPOSE),
+        "array_name:{}, remaining_jobs:{}",
         array, jobsInProgress.size());
     cv.notify_all();
 }
@@ -176,18 +174,17 @@ ArrayRebuilder::GetRebuildProgress(string array)
 int
 ArrayRebuilder::_PrepareRebuild(string arrayname, list<RebuildTarget*>& tgt)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "{} is preparing rebuild", arrayname);
     bool resume = false;
     int ret = iRebuildNoti->PrepareRebuild(arrayname, resume);
     if (ret == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "{} is ready to rebuild. isResume: {}", arrayname, resume);
+        POS_TRACE_INFO(EID(REBUILD_JOB_PREPARE),
+            "Rebuild prepared successfully, array_name:{}, resume:{}", arrayname, resume);
     }
     else
     {
-         POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG),
-            "{} is failed to prepare rebuild and will be discarded, isResume: {}, prepare_result: {}",
+         POS_TRACE_WARN(EID(REBUILD_JOB_PREPARE_FAIL),
+            "Rebuild prepare failed, array:{}, resume:{}, ret:{}",
             arrayname, resume, ret);
     }
     if (resume)
