@@ -164,6 +164,8 @@ Poseidonos::Terminate(void)
     SpdkSingleton::ResetInstance();
     IoTimeoutCheckerSingleton::ResetInstance();
 
+    IoTimeoutCheckerSingleton::ResetInstance();
+
     air_deactivate();
     air_finalize();
     if (nullptr != telemetryAirDelegator)
