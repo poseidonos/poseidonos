@@ -1,5 +1,5 @@
 
-name: M9-LongTerm_VM_Test
+name: R9-LongTerm_VM_Test
 
 on:
   schedule:
