@@ -103,8 +103,8 @@ jobs:
       if: always()
       working-directory: ${{github.workspace}}
       run: |
-        chmod +x .github/workflows/script/volume/volume.sh
-        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+        chmod +x .github/workflows/script/volume/volume_postcommit.sh
+        .github/workflows/script/volume/volume_postcommit.sh ${{github.workspace}}
 
     - name: Normal IO Test
       id: normal_io_test

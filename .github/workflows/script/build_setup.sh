@@ -36,8 +36,6 @@ printVariable()
     echo "PoseidonOS Root : $pos_working_dir"
     echo "Target Type : $target_type"
     echo "Config Option : $config_option"
-    echo "Test Revision : $test_rev"
-    echo "Master Bin Path: ${master_bin_path}"  
     echo "*****************************************************************"
     echo "*****************************************************************"
 }
