@@ -121,10 +121,10 @@ private:
 
     TelemetryPublisher* telPublisher;
 
-    int logGroupIdInProgress;
-    bool allowDuplicatedFlush;
     const int INVALID_LOG_GROUP_ID = 0xFFFF;
     static const int ALL_LOG_GROUP = -1;
+    int logGroupIdInProgress;
+    bool allowDuplicatedFlush;
 };
 
 } // namespace pos
