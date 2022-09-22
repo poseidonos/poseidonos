@@ -28,7 +28,7 @@ def execute():
     api.detach_ssd_and_attach(DETACH_TARGET_DEV)
     if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
         time.sleep(5)
-        print(add_device(SPARENAME, ARRAYNAME)
+        print(cli.add_device(SPARENAME, ARRAYNAME))
         timeout = 80000 #80s
         if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
             api.detach_ssd_and_attach(SPARENAME)
