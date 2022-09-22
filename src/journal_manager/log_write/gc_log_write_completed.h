@@ -34,7 +34,7 @@
 
 #include <atomic>
 
-#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/mapper/include/mpage_info.h"
 
@@ -42,16 +42,17 @@ namespace pos
 {
 class LogWriteContext;
 class EventScheduler;
-class GcLogWriteCompleted : public Event
+class GcLogWriteCompleted : public Callback
 {
 public:
-    GcLogWriteCompleted(void) = default;
+    GcLogWriteCompleted(void);
     GcLogWriteCompleted(EventScheduler* scheduler, EventSmartPtr callback);
     virtual ~GcLogWriteCompleted(void) = default;
 
-    virtual bool Execute(void) override;
-
     virtual void SetNumLogs(uint64_t val);
+
+protected:
+    virtual bool _DoSpecificJob(void) override;
 
 private:
     std::atomic<uint64_t> numLogs;

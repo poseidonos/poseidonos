@@ -32,6 +32,7 @@
 
 #include "src/journal_manager/journal_writer.h"
 
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/journaling_status.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_write/gc_log_write_completed.h"
@@ -54,13 +55,15 @@ JournalWriter::~JournalWriter(void)
 
 int
 JournalWriter::Init(LogWriteHandler* writeHandler, LogWriteContextFactory* logWriteEventFactory,
-    JournalEventFactory* journalEventFactory, JournalingStatus* journalingStatus)
+    JournalEventFactory* journalEventFactory, JournalingStatus* journalingStatus, EventScheduler* scheduler)
 {
     logWriteHandler = writeHandler;
     logFactory = logWriteEventFactory;
     eventFactory = journalEventFactory;
 
     status = journalingStatus;
+
+    eventScheduler = scheduler;
 
     return 0;
 }
@@ -106,7 +109,13 @@ JournalWriter::AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr ca
     {
         LogWriteContext* logWriteContext =
             logFactory->CreateBlockMapLogWriteContext(volumeIo, callbackEvent);
-        return logWriteHandler->AddLog(logWriteContext);
+        result = logWriteHandler->AddLog(logWriteContext);
+        if (result != 0)
+        {
+            delete logWriteContext;
+        }
+
+        return result;
     }
     else
     {
@@ -122,7 +131,13 @@ JournalWriter::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventS
     {
         LogWriteContext* logWriteContext =
             logFactory->CreateStripeMapLogWriteContext(stripe, oldAddr, callbackEvent);
-        return logWriteHandler->AddLog(logWriteContext);
+        result = logWriteHandler->AddLog(logWriteContext);
+        if (result != 0)
+        {
+            delete logWriteContext;
+        }
+
+        return result;
     }
     else
     {
@@ -147,47 +162,23 @@ JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmar
 int
 JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent)
 {
-    int result = 0;
-
     LogWriteContext* stripeFlushedLogWriteContext =
         logFactory->CreateGcStripeFlushedLogWriteContext(mapUpdates, callbackEvent);
 
-    // TODO (huijeong.kim) change GcLogWriteCompleted to inherit Callback instead of Event
-    EventSmartPtr gcStripeLogWriteRequest = eventFactory->CreateGcStripeLogWriteRequestEvent(stripeFlushedLogWriteContext);
-    EventSmartPtr gcLogWriteCompleted = eventFactory->CreateGcLogWriteCompletedEvent(gcStripeLogWriteRequest);
+    EventSmartPtr gcStripeLogWriteRequest = eventFactory->CreateLogWriteEvent(stripeFlushedLogWriteContext);
+    EventSmartPtr gcLogWriteCompleted = eventFactory->CreateGcBlockLogWriteCompletedEvent(gcStripeLogWriteRequest);
+
+    auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, gcLogWriteCompleted);
 
     GcLogWriteCompleted* gcLogCallback = dynamic_cast<GcLogWriteCompleted*>(gcLogWriteCompleted.get());
     assert(gcLogCallback != nullptr);
 
-    if (mapUpdates.blockMapUpdateList.size() == 0)
-    {
-        // Write stripe flushed log right away when there's no block map udpates
-        gcLogCallback->SetNumLogs(1);
-        gcLogCallback->Execute();
-    }
-    else
-    {
-        auto blockContexts = logFactory->CreateGcBlockMapLogWriteContexts(mapUpdates, gcLogWriteCompleted);
-        gcLogCallback->SetNumLogs(blockContexts.size());
+    uint64_t numLogs = (blockContexts.size() == 0) ? 1 : blockContexts.size();
+    gcLogCallback->SetNumLogs(numLogs);
 
-        for (auto it = blockContexts.begin(); it != blockContexts.end(); it++)
-        {
-            result = logWriteHandler->AddLog(*it);
-            if (result < 0)
-            {
-                for (auto delIt = it + 1; delIt != blockContexts.end(); delIt++)
-                {
-                    delete *delIt;
-                }
-                blockContexts.clear();
+    EventSmartPtr gcJournalWrite = eventFactory->CreateGcLogWriteEvent(blockContexts, gcLogWriteCompleted);
+    eventScheduler->EnqueueEvent(gcJournalWrite);
 
-                delete stripeFlushedLogWriteContext;
-
-                return result;
-            }
-        }
-    }
-
-    return result;
+    return EID(SUCCESS);
 }
 } // namespace pos
