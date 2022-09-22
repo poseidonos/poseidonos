@@ -67,8 +67,8 @@ public:
     {
         return true;
     }
-    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) override;
-    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) override;
+    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* ctx) override;
+    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* ctx) override;
 
     virtual POS_EVENT_ID TrimFileData(const MetaStorageType mediaType, const MetaLpnType startLpn,
         void* buffer, const MetaLpnType numPages) override;
@@ -84,11 +84,23 @@ private:
     bool _CheckSanityErr(const MetaLpnType pageNumber, const uint64_t arrayCapacity);
     POS_EVENT_ID _SendSyncRequest(const IODirection direction, const MetaStorageType mediaType,
         const MetaLpnType pageNumber, const MetaLpnType numPages, void* buffer);
-    POS_EVENT_ID _SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb);
+    POS_EVENT_ID _SendAsyncRequest(const IODirection direction, MssAioCbCxt* ctx,
+        CallbackSmartPtr callback, const bool waitUntilSuccessToSubmit);
     void _AdjustPageIoToFitTargetPartition(const MetaStorageType mediaType, MetaLpnType& targetPage,
         MetaLpnType& targetNumPages);
     void _Finalize(void);
-    std::list<BufferEntry> _GetBufferList(const MetaStorageType mediaType, const uint64_t offset, const uint64_t count, uint8_t* buffer);
+    std::list<BufferEntry> _GetBufferList(const MetaStorageType mediaType, const uint64_t offset,
+        const uint64_t count, uint8_t* buffer);
+    bool _ShouldRetry(const POS_EVENT_ID submitResult) const;
+    POS_EVENT_ID _SubmitToIoSubmitHandler(const IODirection direction, std::list<BufferEntry>& bufferList,
+        LogicalBlkAddr& startLSA, const uint64_t blockCount, const PartitionType partitionToIO,
+        CallbackSmartPtr callback, const int arrayId, const bool waitUntilSuccessToSubmit) const;
+    void _SubmitToEventHandler(MssAioCbCxt* ctx, CallbackSmartPtr callback);
+    CallbackSmartPtr _CreateCompletionCallback(MssAioCbCxt* ctx) const;
+    bool _IsRequestToJournal(const MetaStorageType mediaType) const
+    {
+        return (mediaType != MetaStorageType::SSD) ? true : false;
+    }
 
     std::vector<MssDiskPlace*> mssDiskPlace;
     std::vector<uint64_t> metaCapacity;
