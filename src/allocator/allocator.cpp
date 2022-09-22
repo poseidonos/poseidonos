@@ -70,13 +70,13 @@ Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     _CreateSubmodules();
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
+    POS_TRACE_INFO(EID(ALLOCATOR_INFO), "Allocator in Array:{} was Created", arrayName);
 }
 
 Allocator::~Allocator(void)
 {
     _DeleteSubmodules();
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Destroyed", arrayName);
+    POS_TRACE_INFO(EID(ALLOCATOR_INFO), "Allocator in Array:{} was Destroyed", arrayName);
 }
 
 int
@@ -298,8 +298,8 @@ Allocator::GetMeta(WBTAllocatorMetaType type, std::string fname, MetaFileIntf* f
     int ret = dumpFile->Create(0);
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_START), "WBT failed to open output file {}", fname);
-        return ERRID(ALLOCATOR_START);
+        POS_TRACE_ERROR(EID(ALLOCATOR_FAILED_TO_CREATE_FILE), "WBT failed to open output file {}", fname);
+        return ERRID(ALLOCATOR_FAILED_TO_CREATE_FILE);
     }
 
     dumpFile->Open();
