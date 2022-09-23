@@ -69,7 +69,9 @@ RocksDBMetaFsIntf::RocksDBMetaFsIntf(std::string fileName, int arrayId, MetaFs* 
   metaFs(metafs),
   blksPerStripe(0),
   baseLpn(UINT64_MAX),
-  BYTE_ACCESS_ENABLED(false)
+  BYTE_ACCESS_ENABLED(false),
+  rocksMeta(nullptr),
+  fileDescriptorAllocator(nullptr)
 {
 }
 
