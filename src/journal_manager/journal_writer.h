@@ -54,7 +54,7 @@ public:
     virtual ~JournalWriter(void);
 
     virtual int Init(LogWriteHandler* writeHandler, LogWriteContextFactory* logWriteEventFactory,
-        JournalEventFactory* journalEventFactory, JournalingStatus* status);
+        JournalEventFactory* journalEventFactory, JournalingStatus* status, EventScheduler* scheduler);
 
     virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
     virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent);
@@ -69,6 +69,8 @@ private:
     JournalEventFactory* eventFactory;
     JournalingStatus* status;
     ChangeLogger<JournalManagerStatus> changeLogger;
+
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -30,56 +30,61 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/journal_manager/log_write/gc_stripe_log_write_request.h"
+#include "src/journal_manager/log_write/gc_log_write.h"
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
-#include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
-
-using ::testing::NiceMock;
-using ::testing::Return;
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/journal_manager/log_write/gc_log_write_completed.h"
+#include "src/journal_manager/log_write/log_write_handler.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-int
-TestCallback(LogWriteContext* context)
+GcLogWrite::GcLogWrite()
+: GcLogWrite({}, nullptr, nullptr)
 {
-    int result = context->GetError();
-
-    delete context;
-    return result;
 }
 
-TEST(GcStripeLogWriteRequest, Execute_testIfExecutedSuccessfully)
+GcLogWrite::GcLogWrite(std::vector<LogWriteContext*> blockContexts_,
+    EventSmartPtr gcLogWriteCompleted_,
+    LogWriteHandler* logWrite)
+: Callback(false, CallbackType_GcLogWrite),
+  blockContexts(blockContexts_),
+  gcLogWriteCompleted(gcLogWriteCompleted_),
+  logWriteHandler(logWrite),
+  totalNumBlockLogs(blockContexts_.size())
 {
-    // Given
-    GcStripeLogWriteCallback callbackFunc = std::bind(&TestCallback, std::placeholders::_1);
-    NiceMock<MockLogWriteContext>* logWriteContext = new NiceMock<MockLogWriteContext>;
-
-    GcStripeLogWriteRequest gcStripeLogWriteRequest(callbackFunc, logWriteContext);
-
-    // When
-    EXPECT_CALL(*logWriteContext, GetError).WillOnce(Return(0));
-    bool actual = gcStripeLogWriteRequest.Execute();
-
-    // Then
-    EXPECT_EQ(actual, true);
 }
 
-TEST(GcStripeLogWriteRequest, Execute_testIfExecutedWithCallbackReturnErrorCode)
+bool
+GcLogWrite::_DoSpecificJob(void)
 {
-    // Given
-    GcStripeLogWriteCallback callbackFunc = std::bind(&TestCallback, std::placeholders::_1);
-    NiceMock<MockLogWriteContext>* logWriteContext = new NiceMock<MockLogWriteContext>;
+    if (totalNumBlockLogs == 0)
+    {
+        return gcLogWriteCompleted->Execute();
+    }
+    else
+    {
+        for (auto it = blockContexts.begin(); it != blockContexts.end();)
+        {
+            int result = logWriteHandler->AddLog(*it);
+            if (result == 0)
+            {
+                it = blockContexts.erase(it);
+            }
+            else if (result < 0)
+            {
+                POS_TRACE_ERROR(EID(JOURNAL_WRITE_FAILED), "GC log write failed, will be re-tried, reason: {}", result);
+                break;
+            }
+            else
+            {
+                it++;
+            }
+        }
 
-    GcStripeLogWriteRequest gcStripeLogWriteRequest(callbackFunc, logWriteContext);
-
-    // When
-    EXPECT_CALL(*logWriteContext, GetError).WillOnce(Return(-1));
-    bool actual = gcStripeLogWriteRequest.Execute();
-
-    // Then
-    EXPECT_EQ(actual, true);
+        // GC journal write should be re-tried when there's pending journal
+        return (blockContexts.size() == 0);
+    }
 }
+
 } // namespace pos

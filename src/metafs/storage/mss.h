@@ -63,8 +63,8 @@ public:
     virtual POS_EVENT_ID WritePage(const MetaStorageType mediaType, const MetaLpnType metaLpn,
         void* buffer, const MetaLpnType numPages) = 0;
     virtual bool IsAIOSupport(void) = 0; // Asynchronos API's used with pstore
-    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* cb) = 0;
-    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* cb) = 0;
+    virtual POS_EVENT_ID ReadPageAsync(MssAioCbCxt* ctx) = 0;
+    virtual POS_EVENT_ID WritePageAsync(MssAioCbCxt* ctx) = 0;
 
     virtual POS_EVENT_ID TrimFileData(const MetaStorageType mediaType, const MetaLpnType startLpn,
         void* buffer, const MetaLpnType numPages) = 0;
@@ -73,7 +73,7 @@ public:
     virtual POS_EVENT_ID DoPageIO(const MssOpcode opcode, const MetaStorageType mediaType,
         const MetaLpnType metaLpn, void* buffer, const MetaLpnType numPages,
         const uint32_t mpio_id, const uint32_t tagid);
-    virtual POS_EVENT_ID DoPageIOAsync(const MssOpcode opcode, MssAioCbCxt* cb);
+    virtual POS_EVENT_ID DoPageIOAsync(const MssOpcode opcode, MssAioCbCxt* ctx);
 
 protected:
     int arrayId;

@@ -72,11 +72,7 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogWritten)
     EXPECT_CALL(factory, CreateVolumeDeletedLogWriteContext(volumeId, segVersion, _));
     EXPECT_CALL(dirtyMapManager, DeleteDirtyList(volumeId));
 
-    {
-        InSequence s;
-        EXPECT_CALL(checkpointManager, BlockCheckpointAndWaitToBeIdle).Times(1);
-        EXPECT_CALL(logWriteHandler, AddLog).Times(1).WillOnce(Return(0));
-    }
+    EXPECT_CALL(checkpointManager, BlockCheckpointAndWaitToBeIdle).Times(1);
 
     // When
     std::thread writeLogSync(&JournalVolumeEventHandler::WriteVolumeDeletedLog, &handler, volumeId);
@@ -84,42 +80,6 @@ TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testIfLogWritten)
     std::this_thread::sleep_for(1s);
     handler.VolumeDeletedLogWriteDone(volumeId);
     writeLogSync.join();
-}
-
-TEST(JournalVolumeEventHandler, WriteVolumeDeletedLog_testLogWriteFail)
-{
-    // Given
-    NiceMock<MockLogWriteContextFactory> factory;
-    NiceMock<MockCheckpointManager> checkpointManager;
-    NiceMock<MockDirtyMapManager> dirtyMapManager;
-    NiceMock<MockLogWriteHandler> logWriteHandler;
-    NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockEventScheduler> eventScheduler;
-    NiceMock<MockJournalConfiguration> config;
-    ON_CALL(config, IsEnabled).WillByDefault(Return(true));
-
-    JournalVolumeEventHandler handler;
-    handler.Init(&factory, &checkpointManager, &dirtyMapManager, &logWriteHandler, &config, &contextManager, &eventScheduler);
-
-    int volumeId = 4;
-    uint64_t segVersion = 10;
-
-    // Then
-    EXPECT_CALL(contextManager, GetStoredContextVersion(SEGMENT_CTX)).WillOnce(Return(segVersion));
-    EXPECT_CALL(factory, CreateVolumeDeletedLogWriteContext(volumeId, segVersion, _));
-
-    {
-        InSequence s;
-        EXPECT_CALL(checkpointManager, BlockCheckpointAndWaitToBeIdle).Times(1);
-        EXPECT_CALL(logWriteHandler, AddLog).Times(1).WillOnce(Return(-300));
-        EXPECT_CALL(checkpointManager, UnblockCheckpoint).Times(1);
-    }
-
-    // When
-    int ret = handler.WriteVolumeDeletedLog(volumeId);
-
-    // Then
-    EXPECT_TRUE(ret < 0);
 }
 
 TEST(JournalVolumeEventHandler, TriggerMetadataFlush_testIfNotFlushedWhenJournalDisabled)

@@ -1218,6 +1218,7 @@ CommandProcessor::_GetEventId(std::string eventName)
         {"meta_rebuild", pos::BackendEvent_MetadataRebuild},
         {"journalio", pos::BackendEvent_JournalIO},
         {"metaio", pos::BackendEvent_MetaIO},
+        {"flushmap", pos::BackendEvent_FlushMap},
         {"fe_rebuild", pos::BackendEvent_FrontendIO}};
 
     auto search = eventDict.find(eventName);

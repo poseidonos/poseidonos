@@ -66,8 +66,8 @@ public:
     virtual uint64_t GetProgress(void);
 
 private:
-    void _RebuildNext(void);
-    void _RebuildDone(RebuildResult res);
+    void _RebuildNextPartition(void);
+    void _PartitionRebuildDone(RebuildResult res);
     void _RebuildCompleted(RebuildResult res);
     string arrayName = "";
     RebuildComplete rebuildComplete;

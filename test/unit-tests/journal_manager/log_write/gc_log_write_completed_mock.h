@@ -10,8 +10,8 @@ class MockGcLogWriteCompleted : public GcLogWriteCompleted
 {
 public:
     using GcLogWriteCompleted::GcLogWriteCompleted;
-    MOCK_METHOD(bool, Execute, (), (override));
     MOCK_METHOD(void, SetNumLogs, (uint64_t val), (override));
+    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
 
 } // namespace pos

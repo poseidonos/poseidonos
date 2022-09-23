@@ -48,16 +48,6 @@ processKill()
     texecc $pos_working_dir/test/script/kill_poseidonos.sh
 }
 
-repositorySetup()
-{
-    echo "Setting git repository..."
-    texecc git fetch -p
-    texecc git clean -dff
-    texecc rm -rf *
-    texecc git reset --hard $test_rev
-    echo "Setting git repository done"
-}
-
 setJobNumber()
 {
     if [ $target_type == "PM" ] || [ $target_type == "PSD" ]
@@ -243,7 +233,6 @@ done
 
 printVariable
 processKill
-#repositorySetup
 setJobNumber
 buildTest
 setupTest
