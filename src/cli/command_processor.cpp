@@ -1195,7 +1195,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
         return grpc::Status::OK;
     }
 
-    _FillSmartData(payload, reply->mutable_result()->mutable_data());
+    _FillSmartData(&payload, reply->mutable_result()->mutable_data());
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -1965,72 +1965,72 @@ CommandProcessor::_GetGCMode(pos::IGCInfo* gc, std::string arrayName)
 
 void
 CommandProcessor::_FillSmartData(
-    struct spdk_nvme_health_information_page payload,
+    struct spdk_nvme_health_information_page *payload,
     grpc_cli::SmartLog* data)
 {
     char cString[128];
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.available_spare ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.available_spare ? "WARNING" : "OK");
     string availableSpareSpace(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.device_reliability ? "WARNING" : "OK");
     string temperature(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.device_reliability ? "WARNING" : "OK");
     string deviceReliability(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.read_only ? "Yes" : "No");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.read_only ? "Yes" : "No");
     string readOnly(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.volatile_memory_backup ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.volatile_memory_backup ? "WARNING" : "OK");
     string volatileMemoryBackup(cString);
 
-    snprintf(cString, sizeof(cString), "%dC", (int)payload.temperature - 273);
+    snprintf(cString, sizeof(cString), "%dC", (int)payload->temperature - 273);
     string currentTemperature(cString);
 
-    snprintf(cString, sizeof(cString), "%u%%", payload.available_spare);
+    snprintf(cString, sizeof(cString), "%u%%", payload->available_spare);
     string availableSpare(cString);
 
-    snprintf(cString, sizeof(cString), "%u%%", payload.available_spare_threshold);
+    snprintf(cString, sizeof(cString), "%u%%", payload->available_spare_threshold);
     string availableSpareThreshold(cString);
 
-    snprintf(cString, sizeof(cString), "%u%%", payload.percentage_used);
+    snprintf(cString, sizeof(cString), "%u%%", payload->percentage_used);
     string lifePercentageUsed(cString);
 
-    _PrintUint128Dec(payload.data_units_read, cString, sizeof(cString));
+    _PrintUint128Dec(payload->data_units_read, cString, sizeof(cString));
     string dataUnitsRead(cString);
 
-    _PrintUint128Dec(payload.data_units_written, cString, sizeof(cString));
+    _PrintUint128Dec(payload->data_units_written, cString, sizeof(cString));
     string dataUnitsWritten(cString);
 
-    _PrintUint128Dec(payload.host_read_commands, cString, sizeof(cString));
+    _PrintUint128Dec(payload->host_read_commands, cString, sizeof(cString));
     string hostReadCommands(cString);
 
-    _PrintUint128Dec(payload.host_write_commands, cString, sizeof(cString));
+    _PrintUint128Dec(payload->host_write_commands, cString, sizeof(cString));
     string hostWriteCommands(cString);
 
-    _PrintUint128Dec(payload.controller_busy_time, cString, sizeof(cString));
+    _PrintUint128Dec(payload->controller_busy_time, cString, sizeof(cString));
     string controllerBusyTime(cString);
 
-    _PrintUint128Dec(payload.power_cycles, cString, sizeof(cString));
+    _PrintUint128Dec(payload->power_cycles, cString, sizeof(cString));
     string powerCycles(cString);
 
-    _PrintUint128Dec(payload.power_on_hours, cString, sizeof(cString));
+    _PrintUint128Dec(payload->power_on_hours, cString, sizeof(cString));
     string powerOnHours(cString);
 
-    _PrintUint128Dec(payload.unsafe_shutdowns, cString, sizeof(cString));
+    _PrintUint128Dec(payload->unsafe_shutdowns, cString, sizeof(cString));
     string unsafeShutdowns(cString);
 
-    _PrintUint128Dec(payload.media_errors, cString, sizeof(cString));
+    _PrintUint128Dec(payload->media_errors, cString, sizeof(cString));
     string unrecoverableMediaErrors(cString);
 
-    _PrintUint128Dec(payload.num_error_info_log_entries, cString, sizeof(cString));
+    _PrintUint128Dec(payload->num_error_info_log_entries, cString, sizeof(cString));
     string lifetimeErrorLogEntries(cString);
 
-    snprintf(cString, sizeof(cString), "%um", payload.warning_temp_time);
+    snprintf(cString, sizeof(cString), "%um", payload->warning_temp_time);
     string warningTemperatureTime(cString);
 
-    snprintf(cString, sizeof(cString), "%um", payload.critical_temp_time);
+    snprintf(cString, sizeof(cString), "%um", payload->critical_temp_time);
     string criticalTemperatureTime(cString);
 
     data->set_availablesparespace(availableSpareSpace);
@@ -2057,9 +2057,9 @@ CommandProcessor::_FillSmartData(
 
     for (int i = 0; i < 8; i++)
     {
-        if (payload.temp_sensor[i] != 0)
+        if (payload->temp_sensor[i] != 0)
         {
-            snprintf(cString, sizeof(cString), "%dC", (int)payload.temp_sensor[i] - 273);
+            snprintf(cString, sizeof(cString), "%dC", (int)payload->temp_sensor[i] - 273);
             string* temperature = data->add_temperaturesensor();
             *temperature = cString;
         }
