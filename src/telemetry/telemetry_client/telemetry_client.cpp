@@ -143,6 +143,8 @@ TelemetryClient::StopAllPublisher(void)
         p.second->StopPublishing();
         POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_STOP), "publisher:{}", p.first);
     }
+
+    isRunning = false;
     return true;
 }
 
