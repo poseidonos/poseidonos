@@ -1893,13 +1893,6 @@ Root:
     Cause:
     Solution:
   -
-    Id: 2573
-    Name: REBUILD_ARRAY_DEBUG_MSG
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
     Id: 2574
     Name: IO_RECOVER_DEBUG_MSG
     Severity:
@@ -2106,28 +2099,21 @@ Root:
   -
   # Rebuild: 2800 - 2899
     Id: 2800
-    Name: REBUILD_DEBUG_MSG
+    Name: REBUILD_REQUEST
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2801
-    Name: N_TO_M_REBUILD_DEBUG
+    Name: REBUILD_DONE
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2802
-    Name: QUICK_REBUILD_DEBUG
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
-    Id: 2803
-    Name: REBUILD_FAIL_OVER
+    Name: REBUILD_BEHAVIOR_CREATE
     Severity:
     Message:
     Cause:
@@ -2148,98 +2134,84 @@ Root:
     Solution:
   -
     Id: 2806
-    Name: REBUILD_STRIPE_LOCK
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
-    Id: 2807
-    Name: REBUILD_STRIPE_UNLOCK
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
-    Id: 2808
-    Name: REBUILD_INIT_FAILED
-    Severity:
-    Message: Rebuild cannot be performed due to initialization failure.
-    Cause: There are not enough buffers for rebuild.
-    Solution: Please request technical support for error.
-  -
-    Id: 2809
-    Name: REBUILD_DISCARDED
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
-    Id: 2810
     Name: REBUILD_RESULT_PASS
     Severity:
     Message:
     Cause:
     Solution:
   -
-    Id: 2811
+    Id: 2807
     Name: REBUILD_RESULT_FAILED
     Severity:
     Message:
     Cause:
     Solution:
   -
-    Id: 2812
+    Id: 2808
     Name: REBUILD_RESULT_CANCELLED
     Severity:
     Message:
     Cause:
     Solution:
   -
+    Id: 2809
+    Name: TRIGGER_REBUILD_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2810
+    Name: INVOKE_REBUILD_DUE_TO_SPARE_ADDED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2811
+    Name: INVOKE_REBUILD_DUE_TO_DEVICE_DETACHED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2812
+    Name: INVOKE_REBUILD_DUE_TO_ARRAY_MOUNTED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
     Id: 2813
-    Name: REBUILD_TRIGGER_FAIL
+    Name: INVOKE_RESUME_REBUILD
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2814
-    Name: REBUILD_INVALIDATED
+    Name: INVOKE_REBUILD_DUE_TO_USER_REQUEST
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2815
-    Name: REBUILD_TRY_LOCK_RETRY
+    Name: INVOKE_REBUILD_AFTER_REBUILD_DONE
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 2816
-    Name: REBUILD_TRY_LOCK_FAILED
-    Severity:
-    Message: Rebuild is stopped due to failure of continuous lock acquisition.
-    Cause: Maybe Meta I/O is busy or deadlock.
-    Solution: Please request technical support for error.
-  -
-    Id: 2817
-    Name: REBUILD_FORCED_RESET_LOCK
-    Severity:
-    Message: The maximum number of retry attempts is exceeded to reset the busy lock range.
-    Cause: Maybe Meta I/O is busy or deadlock.
-    Solution: Please request technical support for error.
-  -
-    Id: 2818
-    Name: BUSY_LOCKER_WARN
+    Name: REBUILD_CTX_DEBUG
     Severity:
     Message:
     Cause:
     Solution:
   -
-    Id: 2819
-    Name: REBUILD_RECORD
+    Id: 2817
+    Name: REBUILD_PAIR_DEBUG
     Severity:
     Message:
     Cause:
@@ -2286,7 +2258,307 @@ Root:
     Message: Failed to rebuild an array.
     Cause: The RAID of array does not support rebuild .
     Solution: Please check the RAID type of array.
-
+  -
+    Id: 2826
+    Name: RECOMMEND_PERFORM_REBUILD
+    Severity:
+    Message: There is a rebuild operation to be performed, but it has been suspended.
+    Cause: Rebuild auto start option is turned off in settings.
+    Solution: If you want to start rebuild operation immediately, issue a rebuild command.
+  -
+    Id: 2840
+    Name: REBUILD_INVALIDATED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2841
+    Name: REBUILD_JOB_REQUEST
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2842
+    Name: REBUILD_JOB_REJECT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2843
+    Name: REBUILD_JOB_STOP
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2844
+    Name: REBUILD_JOB_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2845
+    Name: REBUILD_JOB_PREPARE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2846
+    Name: REBUILD_JOB_PREPARE_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2851
+    Name: ARRAY_REBUILD_INIT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2852
+    Name: ARRAY_REBUILD_START
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2853
+    Name: ARRAY_REBUILD_END
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2854
+    Name: ARRAY_REBUILD_DISCARD
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2855
+    Name: PARTITION_REBUILD_START
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2856
+    Name: PARTITION_REBUILD_STOP
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2857
+    Name: REBUILD_NEXT_PARTITION
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2858
+    Name: PARTITION_REBUILD_END
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2859
+    Name: PARTITION_REBUILD_SKIP
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2860
+    Name: STRIPES_REBUILD_INIT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2861
+    Name: STRIPES_REBUILD_BEGIN
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2862
+    Name: STRIPES_REBUILD_DONE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2863
+    Name: STRIPES_REBUILD_FINISH
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2864
+    Name: REBUILD_BUFFER_INIT_OK
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2865
+    Name: REBUILD_BUFFER_INIT_FAIL
+    Severity:
+    Message: Rebuild cannot be performed due to initialization failure.
+    Cause: There are not enough buffers for rebuild.
+    Solution: Please request technical support for error.
+  -
+    Id: 2866
+    Name: REBUILD_BUFFER_INIT_RETRY
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2867
+    Name: REBUILD_GET_BUFFER_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2868
+    Name: REBUILD_BUFFER_WARN
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2870
+    Name: REBUILD_METHOD_INIT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2871
+    Name: REBUILD_READ_BEGIN
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2872
+    Name: REBUILD_READ_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2873
+    Name: REBUILD_READ_DONE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2874
+    Name: REBUILD_RECOVER_BEGIN
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2875
+    Name: REBUILD_RECOVER_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2876
+    Name: REBUILD_RECOVER_DONE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2877
+    Name: REBUILD_WRITE_BEGIN
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2878
+    Name: REBUILD_WRITE_FAIL
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2879
+    Name: REBUILD_WRITE_DONE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2880
+    Name: REBUILD_FAILOVER
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2890
+    Name: REBUILD_TRY_LOCK_RETRY
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2891
+    Name: REBUILD_TRY_LOCK_FAILED
+    Severity:
+    Message: Rebuild is stopped due to failure of continuous lock acquisition.
+    Cause: Maybe Meta I/O is busy or deadlock.
+    Solution: Please request technical support for error.
+  -
+    Id: 2892
+    Name: REBUILD_FORCED_RESET_LOCK
+    Severity:
+    Message: The maximum number of retry attempts is exceeded to reset the busy lock range.
+    Cause: Maybe Meta I/O is busy or deadlock.
+    Solution: Please request technical support for error.
+  -
+    Id: 2893
+    Name: REBUILD_RESET_LOCK_RETRY
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2894
+    Name: REBUILD_RESET_LOCK_OK
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2895
+    Name: BUSY_LOCKER_WARN
+    Severity:
+    Message:
+    Cause:
+    Solution:
   # Config: 2900 - 2950
   -
     Id: 2901

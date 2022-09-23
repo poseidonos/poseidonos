@@ -432,7 +432,7 @@ TEST(ArrayManager, PrepareRebuild_testIfFailToPrepareRebuildWhenWrongNameIsGiven
     int actual = arrayMgr->PrepareRebuild("array2" /* != array1 */, boolOutParam /* don't care */);
 
     // Then
-    ASSERT_EQ(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), actual);
+    ASSERT_EQ(EID(REBUILD_JOB_PREPARE_FAIL), actual);
 }
 
 TEST(ArrayManager, RebuildDone_testIfTargetArrayCallsRebuildDone)
