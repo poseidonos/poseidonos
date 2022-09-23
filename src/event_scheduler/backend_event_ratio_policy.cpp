@@ -109,6 +109,9 @@ BackendEventRatioPolicy::EnqueueEvent(EventSmartPtr input)
             case BackendEvent_MetaIO:
                 eventQueue[BackendEvent_MetaIO]->EnqueueEvent(input);
                 break;
+            case BackendEvent_FlushMap:
+                eventQueue[BackendEvent_FlushMap]->EnqueueEvent(input);
+                break;
             case BackendEvent_Unknown:
                 eventQueue[BackendEvent_Unknown]->EnqueueEvent(input);
                 break;
