@@ -108,7 +108,7 @@ public:
     bool IsWriteThroughEnabled(void) override;
     int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
-    virtual void RequestRebuild(vector<IArrayDevice*> targets, bool isResume, bool force = false);
+    virtual void InvokeRebuild(vector<IArrayDevice*> targets, bool isResume, bool force = false);
     virtual bool TriggerRebuild(vector<IArrayDevice*> targets);
     virtual bool ResumeRebuild(vector<IArrayDevice*> targets);
     virtual void DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt);

@@ -67,15 +67,15 @@ MetaStorageSubsystem::DoPageIO(const MssOpcode opcode, const MetaStorageType med
 }
 
 POS_EVENT_ID
-MetaStorageSubsystem::DoPageIOAsync(const MssOpcode opcode, MssAioCbCxt* cb)
+MetaStorageSubsystem::DoPageIOAsync(const MssOpcode opcode, MssAioCbCxt* ctx)
 {
     switch (opcode)
     {
         case MssOpcode::Read:
-            return ReadPageAsync(cb);
+            return ReadPageAsync(ctx);
 
         case MssOpcode::Write:
-            return WritePageAsync(cb);
+            return WritePageAsync(ctx);
 
         case MssOpcode::Trim:
             // fall-through

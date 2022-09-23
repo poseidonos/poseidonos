@@ -164,6 +164,7 @@ DeviceManager::_ClearDevices()
     {
         ioDispatcher->RemoveDeviceForReactor(dev);
         ioDispatcher->RemoveDeviceForIOWorker(dev);
+        dev.reset();
     }
     POS_TRACE_INFO(EID(DEVICEMGR_CLEAR_DEVICE), "devices has been cleared sucessfully");
     devices.clear();
