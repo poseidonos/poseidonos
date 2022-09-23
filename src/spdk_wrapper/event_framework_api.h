@@ -95,7 +95,9 @@ private:
     static const uint32_t MAX_PROCESSABLE_EVENTS;
 
     std::array<EventQueue, MAX_REACTOR_COUNT> eventQueues;
+    std::array<std::atomic<uint32_t>, MAX_REACTOR_COUNT> countOfeventQueues;
     std::array<EventQueue, MAX_NUMA_COUNT> eventSingleQueue;
+    std::array<std::atomic<uint32_t>, MAX_NUMA_COUNT> countOfeventSingleQueues;
     std::array<EventQueueLock, MAX_REACTOR_COUNT> eventQueueLocks;
 
     SpdkThreadCaller* spdkThreadCaller;
