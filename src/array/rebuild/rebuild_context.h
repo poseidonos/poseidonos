@@ -72,7 +72,7 @@ public:
     vector<RebuildMethod*> rm;
 
     // from partitions' via GetRebuildCtx
-    PartitionType part;
+    PartitionType part = PartitionType::USER_DATA;
     uint64_t stripeCnt = 0;
     const PartitionPhysicalSize* size = nullptr;
     RebuildPairs rp;

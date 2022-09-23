@@ -145,12 +145,15 @@ ArrayMountSequence::Mount(void)
 error:
     while (true)
     {
-        (*it)->Dispose();
-        if (it == sequence.begin())
+        if (it != sequence.end())
         {
-            break;
+            (*it)->Dispose();
+            if (it == sequence.begin())
+            {
+                break;
+            }
+            --it;
         }
-        --it;
     }
     state->Remove(mountState);
     return ret;
