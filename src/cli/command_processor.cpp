@@ -1045,6 +1045,11 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
     uint32_t numaCount = affinityManager->GetNumaCount();
     if (numa >= numaCount)
     {
+        if (spdkRpcClient != nullptr)
+        {
+            delete spdkRpcClient;
+        }
+        
         int eventId = EID(CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL);
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
