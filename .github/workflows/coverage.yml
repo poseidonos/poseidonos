@@ -3,7 +3,7 @@ name: M4-Coverage_VM_Test
 
 on:
   schedule:
-    - cron: '0 4-21/3 * * MON-FRI'
+    - cron: '0 4-21/4 * * MON-FRI'
 
   workflow_dispatch:
     inputs:
@@ -14,46 +14,8 @@ on:
        tags:
           description: 'Test scenario tags'
 
-jobs:
-  check_date:
-    runs-on: VM
-    name: Check latest commit
-    outputs:
-      should_run: ${{ steps.should_run.outputs.should_run }}
-    steps:
-    - run: |
-        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
-    - uses: actions/checkout@v2
-    - id: should_run
-      name: check latest commit is less than 3 hours
-      if: ${{ github.event_name == 'schedule' }}
-      working-directory: ${{github.workspace}}
-      run: 
-        date=`date -d "-3 hours" "+%s"`; result=`git rev-list -1 --after=$date main`
-        test -z $result && echo "::set-output name=should_run::false"
-  
-  Prepare_Dashboard_Link:
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Make Monitoring Dashboard Link
-      uses: ./.github/actions/make-monitoring-dashboard-link
-      with:
-        GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
-        ESTIMATED_EXECUTION_TIME: 3600
-
-    - name: Upload Dashboard Link
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{github.workflow}}-Dashboard
-        path: |
-          ${{github.workspace}}/Dashboard.html
-
+jobs: 
   Coverage_Test:
-    needs: check_date
-    if: ${{ needs.check_date.outputs.should_run != 'false' }}
     runs-on: VM
     timeout-minutes: 5000
     steps:
@@ -98,8 +60,8 @@ jobs:
       if: always()
       working-directory: ${{github.workspace}}
       run: |
-        chmod +x .github/workflows/script/volume/volume.sh
-        .github/workflows/script/volume/volume.sh ${{github.workspace}}
+        chmod +x .github/workflows/script/volume/volume_postcommit.sh
+        .github/workflows/script/volume/volume_postcommit.sh ${{github.workspace}}
 
     - name: Normal IO Test
       id: normal_io_test
@@ -196,3 +158,12 @@ jobs:
         name: Coverage_LOG
         path: |
           /var/log/pos
+
+    - name: Upload Gcov Result
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Coverage_Gcov_Result
+        path: |
+          /opt/actions-runner/_work/poseidonos/poseidonos/GcovResult
+          /opt/actions-runner/_work/poseidonos/poseidonos/GcovResult-UT
