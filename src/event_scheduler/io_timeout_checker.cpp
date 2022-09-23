@@ -42,6 +42,10 @@ IoTimeoutChecker::IoTimeoutChecker(void)
 publisher(nullptr),
 currentIdx(0)
 {
+    for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
+    {
+        pendingIoCnt[idx].oldestIdx = 0;        
+    }
 }
 
 IoTimeoutChecker::~IoTimeoutChecker(void)
@@ -59,11 +63,6 @@ IoTimeoutChecker::Initialize(void)
     initialize = true;
 
     publisher = new PublishPendingIo(TIMER_RESOLUTION_MS, CHECK_RESOLUSTION_RANGE);
-
-    for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
-    {
-        pendingIoCnt[idx].oldestIdx = 0;        
-    }
 }
 
 void

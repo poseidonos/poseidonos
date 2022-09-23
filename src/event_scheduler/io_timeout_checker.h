@@ -73,7 +73,7 @@ public:
 
 private:
 
-    bool _CheckPeningOverTime(CallbackType callbackType);
+    bool _CheckPeningOverTime(CallbackType callbackType);    
 
     bool initialize;
     PublishPendingIo* publisher;
