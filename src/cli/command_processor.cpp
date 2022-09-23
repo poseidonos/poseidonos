@@ -805,14 +805,13 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
                 array->set_index(info->GetIndex());
                 array->set_dataraid(info->GetDataRaidType());
                 array->set_writethroughenabled(info->IsWriteThroughEnabled());
+                array->set_name(arrayName);
+                array->set_status(arrayStatus);
+                array->set_createdatetime(createDatetime);
+                array->set_updatedatetime(updateDatetime);
+                array->set_capacity(SpaceInfo::TotalCapacity(info->GetIndex()));
+                array->set_used(SpaceInfo::Used(info->GetIndex()));
             }
-
-            array->set_name(arrayName);
-            array->set_status(arrayStatus);
-            array->set_createdatetime(createDatetime);
-            array->set_updatedatetime(updateDatetime);
-            array->set_capacity(SpaceInfo::TotalCapacity(info->GetIndex()));
-            array->set_used(SpaceInfo::Used(info->GetIndex()));
         }
     }
 
