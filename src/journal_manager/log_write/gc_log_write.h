@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -30,21 +30,34 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <gmock/gmock.h>
+#pragma once
 
-#include <list>
-#include <string>
-#include <vector>
-
-#include "src/journal_manager/log_write/gc_stripe_log_write_request.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
-class MockGcStripeLogWriteRequest : public GcStripeLogWriteRequest
+class LogWriteContext;
+class LogWriteHandler;
+class GcLogWriteCompleted;
+
+class GcLogWrite : public Callback
 {
 public:
-    using GcStripeLogWriteRequest::GcStripeLogWriteRequest;
-    MOCK_METHOD(bool, Execute, (), (override));
+    GcLogWrite(void);
+    GcLogWrite(
+        std::vector<LogWriteContext*> blockContexts,
+        EventSmartPtr gcLogWriteCompleted,
+        LogWriteHandler* logWrite);
+    virtual ~GcLogWrite(void) = default;
+
+protected:
+    virtual bool _DoSpecificJob(void) override;
+
+    std::vector<LogWriteContext*> blockContexts;
+    EventSmartPtr gcLogWriteCompleted;
+
+    LogWriteHandler* logWriteHandler;
+    int totalNumBlockLogs;
 };
 
 } // namespace pos

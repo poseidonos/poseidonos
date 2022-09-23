@@ -226,7 +226,8 @@ MssOnDisk::_SendSyncRequest(const IODirection direction, const MetaStorageType m
 }
 
 std::list<BufferEntry>
-MssOnDisk::_GetBufferList(const MetaStorageType mediaType, const uint64_t offset, const uint64_t count, uint8_t* buffer)
+MssOnDisk::_GetBufferList(const MetaStorageType mediaType, const uint64_t offset,
+    const uint64_t count, uint8_t* buffer)
 {
     std::list<BufferEntry> list;
     const uint64_t BLOCKS_PER_CHUNK = mssDiskPlace[(int)mediaType]->GetLpnCntPerChunk();
@@ -296,7 +297,8 @@ MssOnDisk::_CheckSanityErr(const MetaLpnType pageNumber, const uint64_t arrayCap
 }
 
 POS_EVENT_ID
-MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
+MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb, CallbackSmartPtr callback,
+    const bool waitUntilSuccessToSubmit)
 {
     MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
 
@@ -304,8 +306,6 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
     MetaLpnType startLpn = aioData->GetMetaLpn();
     MetaLpnType requestLpnCount = aioData->GetLpnCount();
     MetaStorageType mediaType = aioData->GetStorageType();
-    POS_EVENT_ID status = EID(SUCCESS);
-    const bool isJournal = (mediaType != MetaStorageType::SSD) ? true : false;
 
     assert(pos::BLOCK_SIZE == MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
 
@@ -326,8 +326,6 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
 
     MssDiskPlace* storagelld = mssDiskPlace[(int)mediaType];
 
-    CallbackSmartPtr callback(new MssIoCompletion(cb, isJournal));
-
     BufferEntry buffEntry(buffer, 1 /*4KB*/);
     std::list<BufferEntry> bufferList;
     bufferList.push_back(buffEntry);
@@ -336,39 +334,86 @@ MssOnDisk::_SendAsyncRequest(const IODirection direction, MssAioCbCxt* cb)
         storagelld->CalculateOnDiskAddress(startLpn); // get physical address
 
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "[MssDisk][SendReq ] type={}, req.tagId={}, mpio_id={}, stripe={}, offsetInDisk={}, buf[0]={}",
+        "[MssDisk][SendReq ] type:{}, req.tagId:{}, mpio_id:{}, stripe:{}, offsetInDisk:{}, buf[0]:{}",
         (int)direction, aioData->GetTagId(), aioData->GetMpioId(),
         blkAddr.stripeId, blkAddr.offset, *(uint32_t*)buffer);
 
-    IOSubmitHandlerStatus ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
-            blkAddr, requestLpnCount, storagelld->GetPartitionType(), callback, arrayId);
+    return _SubmitToIoSubmitHandler(direction, bufferList,
+        blkAddr, requestLpnCount, storagelld->GetPartitionType(), callback, arrayId, waitUntilSuccessToSubmit);
+}
 
-    if (ioStatus == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
+bool
+MssOnDisk::_ShouldRetry(const POS_EVENT_ID submitResult) const
+{
+    if (submitResult == EID(SUCCESS) ||
+        submitResult == EID(MFS_IO_FAILED_DUE_TO_STOP_STATE))
     {
-        MFS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_STOP_STATE),
-            "[MFS IO FAIL] Fail I/O Due to System Stop State, type={}, req.tagId={}, mpio_id={}",
-            (int)direction, aioData->GetTagId(), aioData->GetMpioId());
-
-        status = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
+        return false;
     }
-    else if (ioStatus == IOSubmitHandlerStatus::TRYLOCK_FAIL)
+
+    return true;
+}
+
+POS_EVENT_ID
+MssOnDisk::_SubmitToIoSubmitHandler(const IODirection direction, std::list<BufferEntry>& bufferList,
+    LogicalBlkAddr& startLSA, const uint64_t blockCount, const PartitionType partitionToIO,
+    CallbackSmartPtr callback, const int arrayId, const bool waitUntilSuccessToSubmit) const
+{
+    POS_EVENT_ID status = EID(SUCCESS);
+
+    do
     {
-        MFS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL),
-            "[MFS IO FAIL] Trylock failed, type={}, req.tagId={}, mpio_id={}",
-            (int)direction, aioData->GetTagId(), aioData->GetMpioId());
+        IOSubmitHandlerStatus ioStatus = IIOSubmitHandler::GetInstance()->SubmitAsyncIO(direction, bufferList,
+            startLSA, blockCount, partitionToIO, callback, arrayId);
 
-        status = EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL);
-    }
-    else if (ioStatus == IOSubmitHandlerStatus::FAIL)
-    {
-        POS_TRACE_DEBUG(EID(MFS_IO_FAILED_DUE_TO_BUSY),
-            "[MFS IO FAIL] Submission failed, type={}, req.tagId={}, mpio_id={}",
-            (int)direction, aioData->GetTagId(), aioData->GetMpioId());
+        switch (ioStatus)
+        {
+            case IOSubmitHandlerStatus::SUCCESS:
+                status = EID(SUCCESS);
+                break;
 
-        status = EID(MFS_IO_FAILED_DUE_TO_BUSY);
-    }
+            case IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP:
+                status = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
+                break;
+
+            case IOSubmitHandlerStatus::TRYLOCK_FAIL:
+                status = EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL);
+                break;
+
+            // IOSubmitHandlerStatus::FAIL
+            default:
+                status = EID(MFS_IO_FAILED_DUE_TO_BUSY);
+                break;
+        }
+
+        if (status != EID(SUCCESS))
+        {
+            MFS_TRACE_DEBUG(status,
+                "[MFS IO FAIL] type: {}, arrayId: {}, partitionToIO: {}, stripeId: {}, offset: {}, blockCount: {}",
+                (int)direction, arrayId, (int)partitionToIO, startLSA.stripeId, startLSA.offset, blockCount);
+        }
+    } while (waitUntilSuccessToSubmit && _ShouldRetry(status));
 
     return status;
+}
+
+void
+MssOnDisk::_SubmitToEventHandler(MssAioCbCxt* ctx, CallbackSmartPtr callback)
+{
+    MssRequestFunction handler = std::bind(&MssOnDisk::_SendAsyncRequest, this,
+        std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
+        std::placeholders::_4);
+    EventSmartPtr event = std::make_shared<IssueWriteEvent>(handler, ctx, callback);
+    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+}
+
+CallbackSmartPtr
+MssOnDisk::_CreateCompletionCallback(MssAioCbCxt* ctx) const
+{
+    MssAioData* aioData = reinterpret_cast<MssAioData*>(ctx->GetAsycCbCxt());
+    CallbackSmartPtr callback(new MssIoCompletion(ctx, _IsRequestToJournal(aioData->GetStorageType())));
+
+    return callback;
 }
 
 LogicalBlkAddr
@@ -378,25 +423,25 @@ MssOnDisk::TranslateAddress(const MetaStorageType type, const MetaLpnType theLpn
 }
 
 POS_EVENT_ID
-MssOnDisk::ReadPageAsync(MssAioCbCxt* cb)
+MssOnDisk::ReadPageAsync(MssAioCbCxt* ctx)
 {
-    return _SendAsyncRequest(IODirection::READ, cb);
+    return _SendAsyncRequest(IODirection::READ, ctx, _CreateCompletionCallback(ctx), true);
 }
 
 POS_EVENT_ID
-MssOnDisk::WritePageAsync(MssAioCbCxt* cb)
+MssOnDisk::WritePageAsync(MssAioCbCxt* ctx)
 {
-    MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
+    MssAioData* aioData = reinterpret_cast<MssAioData*>(ctx->GetAsycCbCxt());
+    CallbackSmartPtr callback = _CreateCompletionCallback(ctx);
+
     if (aioData->GetStorageType() == MetaStorageType::SSD)
     {
-        MssRequestFunction handler = std::bind(&MssOnDisk::_SendAsyncRequest, this, std::placeholders::_1, std::placeholders::_2);
-        EventSmartPtr event = std::make_shared<IssueWriteEvent>(handler, cb);
-        EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+        _SubmitToEventHandler(ctx, callback);
         return EID(SUCCESS);
     }
     else
     {
-        return _SendAsyncRequest(IODirection::WRITE, cb);
+        return _SendAsyncRequest(IODirection::WRITE, ctx, callback, true);
     }
 }
 
