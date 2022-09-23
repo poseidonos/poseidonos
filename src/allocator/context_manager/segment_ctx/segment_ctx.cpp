@@ -553,7 +553,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     if (rebuildingSegment != segmentId)
     {
         if (true == rebuildList->RemoveFromList(segmentId))
-        {    
+        {
             _FlushRebuildSegmentList();
             POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
             "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
@@ -600,6 +600,9 @@ SegmentCtx::ResetSegmentsStates(void)
 
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
+        validCount = GetValidBlockCount(segId);
+        occupiedStripeCount = GetOccupiedStripeCount(segId);
+
         if ((0 == validCount) && (0 == occupiedStripeCount))
         {
             segmentInfos[segId].SetState(SegmentState::FREE);
