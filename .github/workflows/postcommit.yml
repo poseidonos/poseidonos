@@ -1,5 +1,5 @@
 
-name: M1-PostVM_Test
+name: C1-PostVM_Test
 
 on:
   push:
