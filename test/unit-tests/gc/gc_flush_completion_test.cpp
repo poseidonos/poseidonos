@@ -142,6 +142,7 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testgcFlushExecuteWhenAcquireOwners
     std::pair<uint32_t, uint32_t> revMapEntry = {0, testVolumeId};
     EXPECT_CALL(*stripe, GetReverseMapEntry(0)).WillOnce(Return(revMapEntry)).WillOnce(Return(revMapEntry));
     EXPECT_CALL(*rbaStateManager, AcquireOwnershipRbaList(testVolumeId, _)).WillOnce(Return(true));
+    EXPECT_CALL(*stripe, Clear()).WillOnce(Return(true));
     EXPECT_CALL(*stripe, Flush(inputEvent)).Times(1);
     // when gc flush completion
     // then return true and stripe flushed

@@ -35,6 +35,7 @@ public:
     MOCK_METHOD(void, UpdateFlushIo, (FlushIoSmartPtr flushIo), (override));
     MOCK_METHOD(bool, IsActiveFlushTarget, (), (override));
     MOCK_METHOD(void, SetActiveFlushTarget, (), (override));
+    MOCK_METHOD(int, Clear, (), (override));
 };
 
 } // namespace pos
