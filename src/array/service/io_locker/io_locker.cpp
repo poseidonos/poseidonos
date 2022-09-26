@@ -134,9 +134,12 @@ IOLocker::TryBusyLock(set<IArrayDevice*>& devs, StripeId from, StripeId to, IArr
         for (IArrayDevice* dev : lockedDevs)
         {
             StripeLocker* locker = _Find(dev);
-            for (StripeId id = from; id <= to; id++)
+            if (locker != nullptr)
             {
-                locker->Unlock(id);
+                for (StripeId id = from; id <= to; id++)
+                {
+                    locker->Unlock(id);
+                }
             }
         }
     }

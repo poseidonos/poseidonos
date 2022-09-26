@@ -33,7 +33,6 @@
 #include "publish_pending_io.h"
 
 #include <air/Air.h>
-#include <thread>
 
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/event_scheduler/callback_type.h"
@@ -52,11 +51,13 @@ PublishPendingIo::PublishPendingIo(int periodTime_, int durationCnt_)
     cpu_set_t cpuSet = AffinityManagerSingleton::Instance()->GetCpuSet(CoreType::GENERAL_USAGE);
     sched_setaffinity(0, sizeof(cpuSet), &cpuSet);
 
-    new std::thread(&PublishPendingIo::Run, this);
+    thread = new std::thread(&PublishPendingIo::Run, this);
 }
 
 PublishPendingIo::~PublishPendingIo(void)
-{    
+{
+    thread->join();
+    delete thread;
 }
 
 

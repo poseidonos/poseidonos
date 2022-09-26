@@ -33,6 +33,7 @@
 #pragma once
 
 #include <atomic>
+#include <thread>
 
 namespace pos
 {
@@ -56,6 +57,8 @@ private:
     uint64_t periodTime;
     uint64_t durationCnt;
     std::atomic<uint64_t> count;
+
+    std::thread* thread;
 };
 
 } // namespace pos

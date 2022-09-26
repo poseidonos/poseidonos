@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,25 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/journal_manager/log_write/gc_stripe_log_write_request.h"
+#include "src/journal_manager/log_write/log_write_request.h"
 
-#include <assert.h>
+#include "src/journal_manager/log_write/log_write_handler.h"
 
 namespace pos
 {
-GcStripeLogWriteRequest::GcStripeLogWriteRequest(GcStripeLogWriteCallback func, LogWriteContext* context)
-: callbackFunc(func),
-  context(context)
+// This event is only used for backend event - gc journal, volume delete journal
+LogWriteRequest::LogWriteRequest(LogWriteHandler* logWrite, LogWriteContext* context)
+: Callback(false, CallbackType_BackendLogWriteDone),
+  logWriteHandler(logWrite),
+  logWriteContext(context)
 {
 }
 
 bool
-GcStripeLogWriteRequest::Execute(void)
+LogWriteRequest::_DoSpecificJob(void)
 {
-    int result = callbackFunc(context);
-    if (result < 0)
-    {
-        // TODO (cheolho.kang): Should handle the error case
-    }
-    return true;
+    int result = logWriteHandler->AddLog(logWriteContext);
+    return (result == 0); // re-try log write when result is not zero
 }
 
 } // namespace pos

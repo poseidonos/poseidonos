@@ -37,13 +37,14 @@
 namespace pos
 {
 VolumeDeletedLogWriteCallback::VolumeDeletedLogWriteCallback(JournalVolumeEventHandler* volumeEventHandler, int volumeId)
-: volumeEventHandler(volumeEventHandler),
+: Callback(false, CallbackType_BackendLogWriteDone),
+  volumeEventHandler(volumeEventHandler),
   volumeId(volumeId)
 {
 }
 
 bool
-VolumeDeletedLogWriteCallback::Execute(void)
+VolumeDeletedLogWriteCallback::_DoSpecificJob(void)
 {
     volumeEventHandler->VolumeDeletedLogWriteDone(volumeId);
     return true;

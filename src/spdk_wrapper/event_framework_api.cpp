@@ -132,6 +132,7 @@ EventFrameworkApi::_SendEventToSingleQueue(EventFuncOneParam func, void* arg1)
     {
         numaIndex = AffinityManagerSingleton::Instance()->GetNumaIdFromCurrentThread();
     }
+    countOfeventSingleQueues[numaIndex]++;
     eventSingleQueue[numaIndex].push(eventArgument);
 }
 
@@ -158,6 +159,7 @@ EventFrameworkApi::CompleteEvents(void)
     {
         EventFuncOneParam func = std::get<0>(eventArgument);
         void* arg1 = std::get<1>(eventArgument);
+        countOfeventQueues[core]--;
         func(arg1);
         processedEvents++;
         if (processedEvents >= MAX_PROCESSABLE_EVENTS)
@@ -191,6 +193,7 @@ EventFrameworkApi::CompleteSingleQueueEvents(void)
     {
         EventFuncOneParam func = std::get<0>(eventArgument);
         void* arg1 = std::get<1>(eventArgument);
+        countOfeventSingleQueues[numaIndex]--;
         func(arg1);
         processedEvents++;
         if (processedEvents >= MAX_PROCESSABLE_EVENTS)
@@ -247,6 +250,7 @@ EventFrameworkApi::_SendEventToSpareQueue(uint32_t core, EventFuncOneParam func,
     void* arg1)
 {
     EventArgument eventArgument = std::make_tuple(func, arg1);
+    countOfeventQueues[core]++;
     eventQueues[core].push(eventArgument);
 }
 } // namespace pos

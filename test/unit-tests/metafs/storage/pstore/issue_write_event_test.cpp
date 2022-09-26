@@ -42,8 +42,6 @@ namespace pos
 {
 class MssAioCbCxt;
 
-using MssRequestFunction = std::function<POS_EVENT_ID(const IODirection, MssAioCbCxt*)>;
-
 class IssueWriteEventTester
 {
 public:
@@ -69,7 +67,7 @@ TEST(IssueWriteEvent, Execute_testIfExecutionResultIsTrueWhenSUCCESS)
 {
     IssueWriteEventTester tester;
     MssRequestFunction handler = std::bind(&IssueWriteEventTester::RequestFunction, &tester, std::placeholders::_1, std::placeholders::_2);
-    IssueWriteEvent event(handler, nullptr);
+    IssueWriteEvent event(handler, nullptr, nullptr);
 
     bool expected = true;
     tester.SetExpectedResult(EID(SUCCESS));
@@ -81,7 +79,7 @@ TEST(IssueWriteEvent, Execute_testIfExecutionResultIsTrueWhenMFS_IO_FAILED_DUE_T
 {
     IssueWriteEventTester tester;
     MssRequestFunction handler = std::bind(&IssueWriteEventTester::RequestFunction, &tester, std::placeholders::_1, std::placeholders::_2);
-    IssueWriteEvent event(handler, nullptr);
+    IssueWriteEvent event(handler, nullptr, nullptr);
 
     bool expected = true;
     tester.SetExpectedResult(EID(MFS_IO_FAILED_DUE_TO_STOP_STATE));
@@ -93,7 +91,7 @@ TEST(IssueWriteEvent, Execute_testIfExecutionResultIsFalseWhenMFS_IO_FAILED_DUE_
 {
     IssueWriteEventTester tester;
     MssRequestFunction handler = std::bind(&IssueWriteEventTester::RequestFunction, &tester, std::placeholders::_1, std::placeholders::_2);
-    IssueWriteEvent event(handler, nullptr);
+    IssueWriteEvent event(handler, nullptr, nullptr);
 
     bool expected = false;
     tester.SetExpectedResult(EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL));
@@ -105,7 +103,7 @@ TEST(IssueWriteEvent, Execute_testIfExecutionResultIsFalseWhenMFS_IO_FAILED_DUE_
 {
     IssueWriteEventTester tester;
     MssRequestFunction handler = std::bind(&IssueWriteEventTester::RequestFunction, &tester, std::placeholders::_1, std::placeholders::_2);
-    IssueWriteEvent event(handler, nullptr);
+    IssueWriteEvent event(handler, nullptr, nullptr);
 
     bool expected = false;
     tester.SetExpectedResult(EID(MFS_IO_FAILED_DUE_TO_FAIL));

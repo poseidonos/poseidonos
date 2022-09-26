@@ -2630,6 +2630,34 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 2996
+    Name: CONFIG_UPDATED_VIA_WBT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2997
+    Name: WBT_UPDATE_CONFIG_CONVERT_ERROR
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2998
+    Name: WBT_UPDATE_CONFIG_MISSING_ARGS
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 2999
+    Name: WBT_UPDATE_CONFIG_UNKNOWN_TYPE
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Journal: 3000 - 3099
   -
@@ -2934,6 +2962,13 @@ Root:
   -
     Id: 3066
     Name: JOURNAL_MANAGER_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3067
+    Name: JOURNAL_WRITE_FAILED
     Severity:
     Message:
     Cause:

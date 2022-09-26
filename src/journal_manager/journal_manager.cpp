@@ -499,7 +499,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
     volumeEventHandler->Init(logFactory, checkpointManager, dirtyMapManager, logWriteHandler,
         config, contextManager, eventScheduler);
-    journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus);
+    journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus, eventScheduler);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
