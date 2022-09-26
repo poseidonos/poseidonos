@@ -1089,11 +1089,14 @@ Array::InvokeRebuild(vector<IArrayDevice*> targets, bool isResume, bool force)
 bool
 Array::TriggerRebuild(vector<IArrayDevice*> targets)
 {
-    POS_TRACE_DEBUG(EID(TRIGGER_REBUILD_DEBUG), "Trigger rebuild invoked, targetCnt:{}", targets.size());
     bool retry = false;
-
+    if (targets.size() == 0)
+    {
+        POS_TRACE_WARN(EID(REBUILD_ARRAY_DEBUG_MSG), "Rebuild triggered but no targets exist, ignored");
+        return retry;
+    }
+    POS_TRACE_DEBUG(EID(REBUILD_ARRAY_DEBUG_MSG), "Rebuild triggered, targetSize:{}", targets.size());
     pthread_rwlock_wrlock(&stateLock);
-    
     for (auto target : targets)
     {
         if (target->GetState() != ArrayDeviceState::FAULT || target->GetUblock() != nullptr)

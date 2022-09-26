@@ -210,7 +210,7 @@ private:
     std::string _GetRebuildImpactString(uint8_t impact);
     pos::BackendEvent _GetEventId(std::string eventName);
     std::string _GetGCMode(pos::IGCInfo* gc, std::string arrayName);
-    void _FillSmartData(struct spdk_nvme_health_information_page payload, grpc_cli::SmartLog* data);
+    void _FillSmartData(struct spdk_nvme_health_information_page *payload, grpc_cli::SmartLog* data);
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
     bool _IsValidIpAddress(const std::string &ipAddress);

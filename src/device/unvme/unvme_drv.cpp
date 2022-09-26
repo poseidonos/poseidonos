@@ -142,6 +142,9 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
                     case BackendEvent::BackendEvent_MetaIO:
                         airlog("PERF_SSD_Read", "meta", ssdId, size);
                         break;
+                    case BackendEvent::BackendEvent_FlushMap:
+                        airlog("PERF_SSD_Read", "flushmap", ssdId, size);
+                        break;
                     case BackendEvent::BackendEvent_GC:
                         airlog("PERF_SSD_Read", "gc", ssdId, size);
                         break;
@@ -171,6 +174,9 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
                         break;
                     case BackendEvent::BackendEvent_MetaIO:
                         airlog("PERF_SSD_Write", "meta", ssdId, size);
+                        break;
+                    case BackendEvent::BackendEvent_FlushMap:
+                        airlog("PERF_SSD_Write", "flushmap", ssdId, size);
                         break;
                     case BackendEvent::BackendEvent_GC:
                         airlog("PERF_SSD_Write", "gc", ssdId, size);

@@ -53,6 +53,22 @@ MetaFsIoScheduler::MetaFsIoScheduler(void)
   TOTAL_CORE_COUNT(0),
   MIO_CORE_SET()
 {
+    mioCoreCount_ = 0;
+    config_ = nullptr;
+    tp_ = nullptr;
+    cpuStallCnt_ = 0;
+    timeInterval_ = 0;
+    currentReqMsg_ = nullptr;
+    chunkSize_ = 0;
+    fileBaseLpn_ = 0;
+    startLpn_ = 0;
+    currentLpn_ = 0;
+    requestCount_ = 0;
+    remainCount_ = 0;
+    extentsCount_ = 0;
+    currentExtent_ = 0;
+    extents_ = nullptr;
+    needToIgnoreNuma_ = false;
 }
 
 MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,

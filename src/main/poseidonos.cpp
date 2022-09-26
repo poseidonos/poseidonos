@@ -166,6 +166,8 @@ Poseidonos::Terminate(void)
 
     IoTimeoutCheckerSingleton::ResetInstance();
 
+    IoTimeoutCheckerSingleton::ResetInstance();
+
     air_deactivate();
     air_finalize();
     if (nullptr != telemetryAirDelegator)

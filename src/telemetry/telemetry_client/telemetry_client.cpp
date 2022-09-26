@@ -43,6 +43,7 @@ TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
     globalPublisher = new GrpcGlobalPublisher(channel_);
     publisherId = 0;
     defaultEnable = false;
+    isRunning = false;
 }
 
 TelemetryClient::TelemetryClient(void)
@@ -143,6 +144,8 @@ TelemetryClient::StopAllPublisher(void)
         p.second->StopPublishing();
         POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_STOP), "publisher:{}", p.first);
     }
+
+    isRunning = false;
     return true;
 }
 
