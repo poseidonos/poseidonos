@@ -77,6 +77,7 @@ Stripe::~Stripe(void)
             revMapPack = nullptr;
         }
     }
+    oldVsaList.clear();
 }
 // LCOV_EXCL_STOP
 void
@@ -127,6 +128,13 @@ Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, ASTailArray
         revMapPack = iReverseMap->Assign(wbLsid, vsid);
     }
     return true;
+}
+
+int
+Stripe::Clear(void)
+{
+    oldVsaList.clear();
+    return revMapPack->Clear();
 }
 
 bool

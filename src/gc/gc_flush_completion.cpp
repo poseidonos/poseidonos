@@ -144,6 +144,8 @@ GcFlushCompletion::_DoSpecificJob(void)
         "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
         arrayName, userLsid);
 
+    stripe->Clear();
+
     return true;
 }
 

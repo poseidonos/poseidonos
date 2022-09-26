@@ -97,6 +97,18 @@ ReverseMapPack::Init(MetaFileIntf* file, StripeId wbLsid_, StripeId vsid_, uint3
     _SetHeader(wbLsid, vsid);
 }
 
+int
+ReverseMapPack::Clear(void)
+{
+    for (auto map : revMaps)
+    {
+        delete map;
+    }
+    revMaps.clear();
+
+    return 0;
+}
+
 void
 ReverseMapPack::Assign(StripeId vsid_)
 {

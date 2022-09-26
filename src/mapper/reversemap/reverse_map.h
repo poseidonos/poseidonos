@@ -150,6 +150,7 @@ public:
 
     virtual int Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid);
     virtual int Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid);
+    virtual int Clear(void);
 
     virtual int SetReverseMapEntry(uint64_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint64_t offset);
