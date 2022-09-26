@@ -69,7 +69,8 @@ SmartLogMetaIo::SmartLogMetaIo(uint32_t arrayIndex, SmartLogMgr* smartLogMgr, Me
   smartLogFile(metaFile),
   arrayId(arrayIndex),
   smartLogMgr(smartLogMgr),
-  fileIoDone(ioDone)
+  fileIoDone(ioDone),
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 

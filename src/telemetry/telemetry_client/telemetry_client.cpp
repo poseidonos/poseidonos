@@ -43,6 +43,7 @@ TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
     globalPublisher = new GrpcGlobalPublisher(channel_);
     publisherId = 0;
     defaultEnable = false;
+    isRunning = false;
 }
 
 TelemetryClient::TelemetryClient(void)
