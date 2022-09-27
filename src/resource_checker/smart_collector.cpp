@@ -213,9 +213,13 @@ SmartCollector::PublishSmartTelemetry(spdk_nvme_health_information_page* payload
         metricList->push_back(metric);
     }
 
-    if (!metricList->empty() && nullptr != publisher)
+    if (nullptr != publisher)
     {
         publisher->PublishMetricList(metricList);
+    }
+    else
+    {
+        delete metricList;
     }
 }
 
@@ -253,9 +257,13 @@ SmartCollector::PublishExtSmartTelemetry(spdk_nvme_log_samsung_extended_informat
         metricList->push_back(metric);
     }
 
-    if (!metricList->empty() && nullptr != publisher)
+    if (nullptr != publisher)
     {
         publisher->PublishMetricList(metricList);
+    }
+    else
+    {
+        delete metricList;
     }
 }
 
