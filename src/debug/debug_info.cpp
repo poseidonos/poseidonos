@@ -87,6 +87,7 @@ DebugInfo::DebugInfo(void)
   flushCount(nullptr),
   garbageCollector(nullptr),
   ioDispatcher(nullptr),
+  ioDispatcherSubmission(nullptr),
   ioSubmitHandlerCount(nullptr),
   logger(nullptr),
   mapperService(nullptr),

@@ -72,6 +72,14 @@ EventFrameworkApi::EventFrameworkApi(SpdkThreadCaller* spdkThreadCaller,
     {
         numaDedicatedSchedulingPolicy = enable;
     }
+    for (uint32_t core = 0; core < MAX_REACTOR_COUNT; core++)
+    {
+        countOfeventQueues[core] = 0;
+    }
+    for (uint32_t numa = 0; numa < MAX_NUMA_COUNT; numa++)
+    {
+        countOfeventSingleQueues[numa] = 0;
+    }
 }
 
 EventFrameworkApi::~EventFrameworkApi(void)
