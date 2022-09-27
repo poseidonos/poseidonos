@@ -45,7 +45,7 @@ currentIdx(0)
     for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
     {
         pendingIoCnt[idx].oldestIdx = 0;
-        for (int timeResolution = 0; timeResolution < CHECK_RESOLUTION_RANGE; timeResolution++)
+        for (uint32_t timeResolution = 0; timeResolution < CHECK_RESOLUTION_RANGE; timeResolution++)
         {
             pendingIoCnt[idx].pendingIoCnt[timeResolution] = 0;
         }
