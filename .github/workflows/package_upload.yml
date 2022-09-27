@@ -25,6 +25,10 @@ jobs:
     - run: |
         sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
+    - name: Release branch checkout
+      if: ${{ github.event_name != 'workflow_dispatch' }}
+      uses: actions/checkout@v1
+
     - name: Personal repo checkout
       if: ${{ github.event_name == 'workflow_dispatch' }}
       uses: actions/checkout@v1
@@ -32,12 +36,8 @@ jobs:
         repository: ${{ github.event.inputs.owner }}/poseidonos
         ref: ${{ github.event.inputs.sha }}
 
-    - name: Release branch checkout
-      if: ${{ github.event_name == 'push' || github.event_name == 'workflow_call'}}
-      uses: actions/checkout@v1
-
     - name: Build Setup on push or call
-      if: ${{ github.event_name == 'push' || github.event_name == 'workflow_call'}}
+      if: ${{ github.event_name != 'workflow_dispatch'}}
       working-directory: ${{github.workspace}}/../poseidonos
       run: |
         sudo apt update
