@@ -30,9 +30,9 @@ def execute():
     cli.add_device(NEW_SPARE_DEV, ARRAYNAME)
     time.sleep(1)
     timeout = 10000 #10secs
-    if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
+    if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
         print ("now rebuilding...")
-        if api.wait_situation(ARRAYNAME, "NORMAL") == True:
+        if api.wait_situation(ARRAYNAME, "NORMAL", timeout) == True:
              return "pass"
     return "fail"
 

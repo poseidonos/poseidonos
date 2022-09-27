@@ -47,6 +47,7 @@ def execute():
             cli.scan_device()
             cli.mount_array(ARRAYNAME)
             if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
+                print ("now rebuilding...")
                 return "pass"
     return "fail"
 

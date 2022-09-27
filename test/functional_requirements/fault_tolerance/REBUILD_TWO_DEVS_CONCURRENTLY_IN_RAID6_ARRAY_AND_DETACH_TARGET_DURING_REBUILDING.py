@@ -38,9 +38,10 @@ def execute():
         print(cli.add_device(SPARE_DEV_2, ARRAYNAME))
         timeout = 80000 #80s
         if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
+            print ("now rebuilding...")
             api.detach_ssd_and_attach(SPARE_DEV_1)
             time.sleep(5)
-            if api.wait_situation(ARRAYNAME, "DEGRADED") == True:
+            if api.wait_situation(ARRAYNAME, "DEGRADED", timeout) == True:
                 return "pass"
     return "fail"
 
