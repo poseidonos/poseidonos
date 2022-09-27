@@ -3918,6 +3918,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3213
+    Name: ALLOCATOR_RESET_SEGMENTS
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Metadata: 3300 - 3399
   -
