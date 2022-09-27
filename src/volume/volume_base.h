@@ -61,9 +61,9 @@ enum VolumeStatus
 
 enum VolumeReplicationState
 {
+    StandAloneState,
     VolumeCopyState,
     LiveReplicationState,
-    StandAloneState,
     MaxVolumeReplicationState
 };
 
