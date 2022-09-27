@@ -45,7 +45,8 @@ JournalWriter::JournalWriter(void)
 : logWriteHandler(nullptr),
   logFactory(nullptr),
   eventFactory(nullptr),
-  status(nullptr)
+  status(nullptr),
+  eventScheduler(nullptr)
 {
 }
 
