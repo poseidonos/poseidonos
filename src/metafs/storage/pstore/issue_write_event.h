@@ -37,20 +37,22 @@
 
 #include "src/event_scheduler/event.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/logger/logger.h"
+#include "src/metafs/log/metafs_log.h"
 #include "src/metafs/storage/pstore/mss_aio_cb_cxt.h"
 #include "src/metafs/storage/pstore/mss_aio_data.h"
 
 namespace pos
 {
-using MssRequestFunction = std::function<POS_EVENT_ID(const IODirection, MssAioCbCxt*)>;
+using MssRequestFunction = std::function<POS_EVENT_ID(const IODirection, MssAioCbCxt*, CallbackSmartPtr, const bool)>;
 
 class IssueWriteEvent : public Event
 {
 public:
-    IssueWriteEvent(MssRequestFunction handler, MssAioCbCxt* cb)
+    IssueWriteEvent(MssRequestFunction handler, MssAioCbCxt* cb, CallbackSmartPtr callback)
     : handler(handler),
-      cb(cb)
+      cb(cb),
+      callback(callback),
+      lastResult(EID(SUCCESS))
     {
         SetEventType(BackendEvent_MetaIO);
     }
@@ -59,37 +61,26 @@ public:
     }
     virtual bool Execute(void) override
     {
-        POS_EVENT_ID result = handler(IODirection::WRITE, cb);
+        POS_EVENT_ID result = handler(IODirection::WRITE, cb, callback, false);
 
-        if (cb)
+        if (cb && result != EID(SUCCESS))
         {
-            if (EID(SUCCESS) != result)
+            if (result != lastResult)
             {
-                POS_TRACE_ERROR_CONDITIONALLY(&changeLogger, result, result, "result of handling: ");
-                if (changeLogger.IsLoggingStateChanged())
+                MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
+                if (EID(MFS_IO_FAILED_DUE_TO_STOP_STATE) == result)
                 {
-                    if (EID(MFS_IO_FAILED_DUE_TO_STOP_STATE) == result)
-                    {
-                        MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
-                        aioData->SetError((int)result);
-                        aioData->SetErrorStopState(true);
-                        cb->InvokeCallback();
-
-                        POS_TRACE_ERROR(result,
-                            "arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
-                            aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
-                            aioData->GetMpioId(), aioData->GetTagId());
-                    }
-                    else if (EID(MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL) == result ||
-                        EID(MFS_IO_FAILED_DUE_TO_BUSY) == result)
-                    {
-                        MssAioData* aioData = reinterpret_cast<MssAioData*>(cb->GetAsycCbCxt());
-                        POS_TRACE_DEBUG(result,
-                            "retry, arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
-                            aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
-                            aioData->GetMpioId(), aioData->GetTagId());
-                    }
+                    aioData->SetError((int)result);
+                    aioData->SetErrorStopState(true);
+                    cb->InvokeCallback();
                 }
+
+                MFS_TRACE_DEBUG(result,
+                    "arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
+                    aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
+                    aioData->GetMpioId(), aioData->GetTagId());
+
+                lastResult = result;
             }
         }
 
@@ -111,6 +102,8 @@ private:
     ChangeLogger<int> changeLogger;
     MssRequestFunction handler;
     MssAioCbCxt* cb;
+    CallbackSmartPtr callback;
+    POS_EVENT_ID lastResult;
 };
 } // namespace pos
 

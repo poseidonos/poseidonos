@@ -41,14 +41,14 @@
 namespace pos
 {
 
-const uint32_t CHECK_RESOLUSTION_RANGE = 36000; // 1 hour
+const uint32_t CHECK_RESOLUTION_RANGE = 36000; // 1 hour
 const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
 const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
 
 
 struct PendingIo
 {
-    std::atomic<std::int64_t> pendingIoCnt[CHECK_RESOLUSTION_RANGE];
+    std::atomic<std::int64_t> pendingIoCnt[CHECK_RESOLUTION_RANGE];
     std::atomic<std::uint64_t> oldestIdx;
 };
 
@@ -73,7 +73,7 @@ public:
 
 private:
 
-    bool _CheckPeningOverTime(CallbackType callbackType);
+    bool _CheckPeningOverTime(CallbackType callbackType);    
 
     bool initialize;
     PublishPendingIo* publisher;

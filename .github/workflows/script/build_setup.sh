@@ -36,8 +36,6 @@ printVariable()
     echo "PoseidonOS Root : $pos_working_dir"
     echo "Target Type : $target_type"
     echo "Config Option : $config_option"
-    echo "Test Revision : $test_rev"
-    echo "Master Bin Path: ${master_bin_path}"  
     echo "*****************************************************************"
     echo "*****************************************************************"
 }
@@ -46,16 +44,6 @@ processKill()
 {
     echo "Killing previously-running poseidonos..."
     texecc $pos_working_dir/test/script/kill_poseidonos.sh
-}
-
-repositorySetup()
-{
-    echo "Setting git repository..."
-    texecc git fetch -p
-    texecc git clean -dff
-    texecc rm -rf *
-    texecc git reset --hard $test_rev
-    echo "Setting git repository done"
 }
 
 setJobNumber()
@@ -243,7 +231,6 @@ done
 
 printVariable
 processKill
-#repositorySetup
 setJobNumber
 buildTest
 setupTest

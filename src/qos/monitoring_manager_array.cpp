@@ -330,18 +330,6 @@ QosMonitoringManagerArray::_UpdateVolumeReactorParameter(uint32_t volId, uint32_
 void
 QosMonitoringManagerArray::UpdateContextUserRebuildPolicy(void)
 {
-    string arrName = qosManager->GetArrayNameFromMap(arrayId);
-    QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
-    RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    qos_backend_policy rebuildPolicy = qosManager->GetBackendPolicy(BackendEvent_UserdataRebuild);
-    if (rebuildPolicy.priorityImpact != PRIORITY_INVALID)
-    {
-        if (rebuildUserPolicy.GetRebuildImpact() != rebuildPolicy.priorityImpact)
-        {
-            rebuildUserPolicy.SetRebuildImpact(rebuildPolicy.priorityImpact);
-            rebuildUserPolicy.SetPolicyChange(true);
-        }
-    }
 }
 
 } // namespace pos

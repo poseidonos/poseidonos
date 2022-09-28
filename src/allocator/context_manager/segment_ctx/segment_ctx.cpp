@@ -553,7 +553,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     if (rebuildingSegment != segmentId)
     {
         if (true == rebuildList->RemoveFromList(segmentId))
-        {    
+        {
             _FlushRebuildSegmentList();
             POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
             "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
@@ -593,13 +593,16 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 void
 SegmentCtx::ResetSegmentsStates(void)
 {
-    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "SegmentCtx::ResetSegmentsStates");
+    POS_TRACE_INFO(EID(ALLOCATOR_RESET_SEGMENTS), "SegmentCtx::ResetSegmentsStates");
 
     int validCount = 0;
     int occupiedStripeCount = 0;
 
     for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); ++segId)
     {
+        validCount = GetValidBlockCount(segId);
+        occupiedStripeCount = GetOccupiedStripeCount(segId);
+
         if ((0 == validCount) && (0 == occupiedStripeCount))
         {
             segmentInfos[segId].SetState(SegmentState::FREE);
@@ -608,7 +611,7 @@ SegmentCtx::ResetSegmentsStates(void)
         {
             segmentInfos[segId].SetState(SegmentState::SSD);
         }
-        else if ((0 <= validCount) && (1 <= occupiedStripeCount))
+        else if ((0 <= validCount) && (0 <= occupiedStripeCount))
         {
             segmentInfos[segId].SetState(SegmentState::NVRAM);
         }

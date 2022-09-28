@@ -42,6 +42,14 @@ IoTimeoutChecker::IoTimeoutChecker(void)
 publisher(nullptr),
 currentIdx(0)
 {
+    for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
+    {
+        pendingIoCnt[idx].oldestIdx = 0;
+        for (uint32_t timeResolution = 0; timeResolution < CHECK_RESOLUTION_RANGE; timeResolution++)
+        {
+            pendingIoCnt[idx].pendingIoCnt[timeResolution] = 0;
+        }
+    }
 }
 
 IoTimeoutChecker::~IoTimeoutChecker(void)
@@ -58,12 +66,7 @@ IoTimeoutChecker::Initialize(void)
 {
     initialize = true;
 
-    publisher = new PublishPendingIo(TIMER_RESOLUTION_MS, CHECK_RESOLUSTION_RANGE);
-
-    for (int idx = 0; idx < CallbackType::Total_CallbackType_Cnt; idx++)
-    {
-        pendingIoCnt[idx].oldestIdx = 0;        
-    }
+    publisher = new PublishPendingIo(TIMER_RESOLUTION_MS, CHECK_RESOLUTION_RANGE);
 }
 
 void
@@ -82,7 +85,7 @@ IoTimeoutChecker::MoveOldestIdx(CallbackType callbackType)
             break;
         }
         newPosition++;
-        if (newPosition >= CHECK_RESOLUSTION_RANGE)
+        if (newPosition >= CHECK_RESOLUTION_RANGE)
         {
             newPosition = 0;
         }
@@ -153,7 +156,7 @@ IoTimeoutChecker::_CheckPeningOverTime(CallbackType callbackType)
     }
     else
     {
-        calPendingTime = currentIdx + CHECK_RESOLUSTION_RANGE
+        calPendingTime = currentIdx + CHECK_RESOLUTION_RANGE
                             - pendingIoCnt[callbackType].oldestIdx;
     }
 
@@ -209,7 +212,7 @@ IoTimeoutChecker::GetPendingIoCount(CallbackType callbackType, std::vector<int> 
     }
     else
     {
-        for (uint32_t idx = pendingIoCnt[callbackType].oldestIdx ; idx < CHECK_RESOLUSTION_RANGE; idx++)
+        for (uint32_t idx = pendingIoCnt[callbackType].oldestIdx ; idx < CHECK_RESOLUTION_RANGE; idx++)
         {
             pendingIoCntList.push_back(pendingIoCnt[callbackType].pendingIoCnt[idx]);
         }

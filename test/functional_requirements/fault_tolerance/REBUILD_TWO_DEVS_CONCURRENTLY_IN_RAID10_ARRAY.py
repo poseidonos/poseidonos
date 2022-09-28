@@ -43,7 +43,7 @@ def execute():
         print (out)
         timeout = 80000 #80s
         if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True:
-            if api.wait_situation(ARRAYNAME, "NORMAL") == True:
+            if api.wait_situation(ARRAYNAME, "NORMAL", timeout) == True:
                 return "pass"
     return "fail"
 

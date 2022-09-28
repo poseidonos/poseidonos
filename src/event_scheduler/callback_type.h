@@ -72,7 +72,8 @@ enum CallbackType
     CallbackType_FlushCompletion = 30,
     CallbackType_WriteThroughStripeLoad,
     CallbackType_PosReplicatorIOCompletion,
+    CallbackType_GcLogWrite,
+    CallbackType_BackendLogWriteDone,
     Total_CallbackType_Cnt
 };
-
 }

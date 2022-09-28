@@ -851,4 +851,45 @@ TEST(SegmentCtx, SetRebuildCompleted_testIfSegmentIsRemovedFromTheList)
     delete[] segInfos;
 }
 
+TEST(SegmentCtx, ResetSegmentsState_testIfSegmentStateBecomesNVRAMWhenOccupiedStripeCountIsZeroDuringLogReplay)
+{
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(10));
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(4));
+
+    NiceMock<MockRebuildCtx> rebuildCtx;
+    NiceMock<MockSegmentList> rebuildSegmentList;
+    NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
+    SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::SSD);
+
+    NiceMock<MockGcCtx> gcCtx;
+    SegmentCtx segmentCtx(tp, nullptr, segInfos, &rebuildSegmentList, &rebuildCtx, &addrInfo, &gcCtx, 0);
+
+    NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
+    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
+    {
+        segmentCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
+    }
+
+    segInfos[0].SetValidBlockCount(10);
+    segInfos[0].SetOccupiedStripeCount(0);
+
+    segInfos[1].SetValidBlockCount(10);
+    segInfos[1].SetOccupiedStripeCount(1);
+
+    segInfos[2].SetValidBlockCount(10);
+    segInfos[2].SetOccupiedStripeCount(addrInfo.GetstripesPerSegment());
+
+    segInfos[3].SetValidBlockCount(0);
+    segInfos[3].SetOccupiedStripeCount(0);
+
+    segmentCtx.ResetSegmentsStates();
+
+    EXPECT_EQ(SegmentState::NVRAM, segInfos[0].GetState());
+    EXPECT_EQ(SegmentState::NVRAM, segInfos[1].GetState());
+    EXPECT_EQ(SegmentState::SSD, segInfos[2].GetState());
+    EXPECT_EQ(SegmentState::FREE, segInfos[3].GetState());
+
+    delete[] segInfos;
+}
 } // namespace pos

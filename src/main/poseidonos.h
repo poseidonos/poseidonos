@@ -84,6 +84,6 @@ private:
     TelemetryPublisher* telemtryPublisherForAir = nullptr;
     SignalHandler* signalHandler = nullptr;
 
-    std::thread *GrpcCliServerThread;
+    std::thread *GrpcCliServerThread = nullptr;
 };
 } // namespace pos

@@ -32,19 +32,20 @@
 
 #pragma once
 
-#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
 
 namespace pos
 {
 class JournalVolumeEventHandler;
 
-class VolumeDeletedLogWriteCallback : public Event
+class VolumeDeletedLogWriteCallback : public Callback
 {
 public:
     VolumeDeletedLogWriteCallback(JournalVolumeEventHandler* volumeEventHandler, int volId);
     virtual ~VolumeDeletedLogWriteCallback(void) = default;
 
-    virtual bool Execute(void);
+protected:
+    virtual bool _DoSpecificJob(void);
 
 private:
     JournalVolumeEventHandler* volumeEventHandler;

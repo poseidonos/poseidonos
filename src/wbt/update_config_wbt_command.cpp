@@ -49,10 +49,7 @@ UpdateConfigWbtCommand::~UpdateConfigWbtCommand(void)
 int
 UpdateConfigWbtCommand::Execute(Args &argv, JsonElement &elem)
 {
-    int ARGS_MISSING_ERROR = -2;
-    int TYPE_ERROR = -3;
-    int CONVERT_ERROR = -4;
-    int ret = ARGS_MISSING_ERROR;
+    int ret = EID(WBT_UPDATE_CONFIG_MISSING_ARGS);
     string module = _GetParameter(argv, "module");
     if (module.empty())
     {
@@ -76,7 +73,7 @@ UpdateConfigWbtCommand::Execute(Args &argv, JsonElement &elem)
 
     std::transform(typeStr.begin(), typeStr.end(),typeStr.begin(), ::toupper);
 
-    ret = TYPE_ERROR;
+    ret = EID(WBT_UPDATE_CONFIG_UNKNOWN_TYPE);
     int typeIdx = -1;
     for (int i = 0; i < (int)ConfigType::CONFIG_TYPE_COUNT; i++)
     {
@@ -137,17 +134,16 @@ UpdateConfigWbtCommand::Execute(Args &argv, JsonElement &elem)
         }
         default:
         {
+            POS_TRACE_WARN(EID(WBT_UPDATE_CONFIG_CONVERT_ERROR),
+                "module:{}, key:{}, value:{}", module, key, valueStr);
             break;
         }
     }
 
-    if (value == nullptr)
-    {
-        return CONVERT_ERROR;
-    }
     if (ret == 0)
     {
-        POS_TRACE_WARN(9999, "Config has been updated via WBT, {}-{}, value:{}", module, key, valueStr);
+        POS_TRACE_WARN(EID(CONFIG_UPDATED_VIA_WBT),
+            "Config has been updated via WBT, {}-{}, value:{}", module, key, valueStr);
     }
     return ret;
 }

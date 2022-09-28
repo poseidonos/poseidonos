@@ -1,0 +1,100 @@
+
+name: R9-LongTerm_VM_Test
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+
+  workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
+
+jobs:
+  Prepare_Dashboard_Link:
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+         ref: release/v0.12.0    
+    - name: Make Monitoring Dashboard Link 
+      uses: ./.github/actions/make-monitoring-dashboard-link
+      with:
+        GRAFANA_DASHBOARD: ${{secrets.GRAFANA_GITHUB_ACTION_DASHBAORD_LINK}}
+        ESTIMATED_EXECUTION_TIME: 36000
+
+    - name: Upload Dashboard Link
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{github.workflow}}-Dashboard
+        path: |
+          ${{github.workspace}}/Dashboard.html
+
+  longterm_test:
+    runs-on: VM
+    timeout-minutes: 5000
+    steps:
+    
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+      with:
+         ref: release/v0.12.0
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic
+
+    - name: Setup Monitoring Stack
+      uses: ./.github/actions/setup-monitoring-stack
+      with:
+        GA_DETAIL: "NULL"
+        
+        POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
+
+        AMP_REMOTE_WRITE_URL: ${{secrets.AMP_REMOTE_WRITE_URL}}
+        AMP_SIGV4_REGION: ${{secrets.AMP_SIGV4_REGION}}
+        AMP_SIGV4_ACCESS_KEY: ${{secrets.AMP_SIGV4_ACCESS_KEY}}
+        AMP_SIGV4_SECRET_KEY: ${{secrets.AMP_SIGV4_SECRET_KEY}}
+
+        LOGSTASH_PORT: ${{secrets.LOGSTASH_PORT}}
+
+        OS_DOMAIN_ENDPOINT: ${{secrets.OS_DOMAIN_ENDPOINT}}
+        OS_REGION: ${{secrets.OS_REGION}}
+
+    - name: Long Term VM Test
+      id: long_term
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/longterm.sh
+        .github/workflows/script/longterm.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: LONG_TERM_LOG
+        path: |
+          /var/log/pos
+          
+    - name: Clean Backup Script
+      if: always() && steps.long_term.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/clean_backup.sh
+        .github/workflows/script/clean_backup.sh -i "127.0.0.1" -p "M9-LongTerm_PM1_VM_Test" -n "longterm_vm" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload POS Core Dump
+      if: always() && steps.long_term.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: LONG_TERM_CORE_DUMP
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
