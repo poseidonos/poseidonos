@@ -21,36 +21,32 @@ on:
 jobs:
   Upload_Package:
     runs-on: VM
+    env:
+      Repo_owner: poseidonos
+      Commit_sha: ${{github.sha}}
+      
     steps:
     - run: |
         sudo chown -R $USER:$USER $GITHUB_WORKSPACE
 
-    - name: Release branch checkout
-      if: ${{ github.event_name != 'workflow_dispatch'}}
-      uses: actions/checkout@v1
+    - name: Dispatch value override
+      if: ${{ github.event_name == 'workflow_dispatch'}}
+      run: |
+        echo "Repo_owner=${{inputs.owner}}" >> $GITHUB_ENV
+        echo "Commit_sha=${{inputs.sha}}" >> $GITHUB_ENV
 
-    - name: Personal repo checkout
-      if: ${{ github.event_name == 'workflow_dispatch' }}
+    - name: Checkout
       uses: actions/checkout@v1
       with:
-        repository: ${{ github.event.inputs.owner }}/poseidonos
-        ref: ${{ github.event.inputs.sha }}
+        repository: ${{ env.Repo_owner }}/poseidonos
+        ref: ${{ env.Commit_sha }}
 
-    - name: Build Setup on push or call
-      if: ${{ github.event_name != 'workflow_dispatch'}}
+    - name: Build Setup
       working-directory: ${{github.workspace}}/../poseidonos
       run: |
         sudo apt update
         chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}}/../poseidonos -c --with-fpic
-
-    - name: Build Setup on dispatch
-      if: ${{ github.event_name == 'workflow_dispatch' }}
-      working-directory: ${{github.workspace}}/../poseidonos
-      run: |
-        sudo apt update
-        chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.event.inputs.sha}} -d ${{github.workspace}}/../poseidonos -c --with-fpic
+        .github/workflows/script/build_setup.sh -r ${{env.Commit_sha}} -d ${{github.workspace}}/../poseidonos -c --with-fpic
 
     - name: package build
       working-directory: ${{github.workspace}}/../poseidonos
