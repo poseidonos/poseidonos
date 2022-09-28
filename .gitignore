@@ -35,6 +35,7 @@ CONFIG.local
 .cproject
 .settings
 bin/
+dep/
 lib/spdk-19.01.1/mk/cc.mk
 lib/spdk-19.01.1/mk/config.mk
 lib/spdk-19.01.1/include/spdk/config.h

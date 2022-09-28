@@ -25,7 +25,7 @@ build_pos()
     else
         ./configure --without-asan
     fi
-    make -j 8
+    PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig make -j 8
 }
 
 while getopts "i" opt

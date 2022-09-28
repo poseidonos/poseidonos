@@ -134,7 +134,7 @@ config_h="mk/ibof_config.h"
 rm -rf ${config_h}; touch ${config_h}
 echo "#pragma once" >> ${config_h}
 echo "" >> ${config_h}
-python script/genconfig.py >> ${config_h}
+python3 script/genconfig.py >> ${config_h}
 
 
 # On FreeBSD sed -i 'SUFFIX' - SUFFIX is mandatory. So no way but to delete the backed file.
