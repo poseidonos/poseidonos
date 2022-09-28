@@ -30,33 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "grpc_replication_controller.h"
 
-#include <grpcpp/server.h>
+#include <grpc/status.h>
 
-#include <memory>
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class ConfigManager;
-class GrpcHealth;
-class GrpcReplicationController;
-class GrpcPosManagement;
-
-class GrpcSubscriber
+::grpc::Status
+GrpcReplicationController::StartVolumeSync(
+    ::grpc::ServerContext* context,
+    const pos_rpc::StartVolumeSyncRequest* request,
+    pos_rpc::StartVolumeSyncResponse* response)
 {
-public:
-    GrpcSubscriber(ConfigManager* configManager);
-    ~GrpcSubscriber(void);
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get StartVolumeSync from grpc client");
+    response->set_result(pos_rpc::PosResult::SUCCESS);
 
-    void RunServer(std::string address);
-
-private:
-    ConfigManager* configManager;
-    GrpcHealth* healthChecker;
-    GrpcReplicationController* replicationController;
-    GrpcPosManagement* posManagement;
-
-    std::unique_ptr<::grpc::Server> haGrpcServer;
-};
+    return ::grpc::Status::OK;
+}
 } // namespace pos

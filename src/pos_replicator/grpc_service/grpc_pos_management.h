@@ -32,31 +32,31 @@
 
 #pragma once
 
-#include <grpcpp/server.h>
+#include <grpc++/grpc++.h>
 
-#include <memory>
+#include "proto/generated/cpp/pos_rpc.grpc.pb.h"
+#include "proto/generated/cpp/pos_rpc.pb.h"
 
 namespace pos
 {
-class ConfigManager;
-class GrpcHealth;
-class GrpcReplicationController;
-class GrpcPosManagement;
-
-class GrpcSubscriber
+class GrpcPosManagement final : public pos_rpc::PosManagement::Service
 {
 public:
-    GrpcSubscriber(ConfigManager* configManager);
-    ~GrpcSubscriber(void);
+    GrpcPosManagement(void)
+    {
+    }
+    ~GrpcPosManagement(void)
+    {
+    }
 
-    void RunServer(std::string address);
+    virtual ::grpc::Status UpdateVoluemMeta(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::UpdateVoluemMetaRequest* request,
+        ::pos_rpc::PosResponse* response) override;
 
-private:
-    ConfigManager* configManager;
-    GrpcHealth* healthChecker;
-    GrpcReplicationController* replicationController;
-    GrpcPosManagement* posManagement;
-
-    std::unique_ptr<::grpc::Server> haGrpcServer;
+    virtual ::grpc::Status GetVolumeList(
+        ::grpc::ServerContext* context,
+        const ::pos_rpc::GetVolumeListRequest* request,
+        ::pos_rpc::VolumeListResponse* response) override;
 };
 } // namespace pos

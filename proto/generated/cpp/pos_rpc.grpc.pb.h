@@ -296,61 +296,12 @@ class PosManagement final {
   class StubInterface {
    public:
     virtual ~StubInterface() {}
-    virtual ::grpc::Status CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::pos_rpc::PosResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncCreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncCreateArrayRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncCreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncCreateArrayRaw(context, request, cq));
-    }
-    virtual ::grpc::Status DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::pos_rpc::PosResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncDeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncDeleteArrayRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncDeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncDeleteArrayRaw(context, request, cq));
-    }
-    virtual ::grpc::Status CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::pos_rpc::PosResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncCreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncCreateVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncCreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncCreateVolumeRaw(context, request, cq));
-    }
-    virtual ::grpc::Status DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::pos_rpc::PosResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncDeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncDeleteVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncDeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncDeleteVolumeRaw(context, request, cq));
-    }
-    virtual ::grpc::Status MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::pos_rpc::PosResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncMountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncMountVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncMountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncMountVolumeRaw(context, request, cq));
-    }
-    virtual ::grpc::Status UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::pos_rpc::PosResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncUnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncUnmountVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncUnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncUnmountVolumeRaw(context, request, cq));
-    }
     virtual ::grpc::Status UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::pos_rpc::PosResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> AsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(AsyncUpdateVoluemMetaRaw(context, request, cq));
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>> PrepareAsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>>(PrepareAsyncUpdateVoluemMetaRaw(context, request, cq));
-    }
-    virtual ::grpc::Status GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::pos_rpc::ArrayListResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>> AsyncGetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>>(AsyncGetArrayListRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>> PrepareAsyncGetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>>(PrepareAsyncGetArrayListRaw(context, request, cq));
     }
     virtual ::grpc::Status GetVolumeList(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::pos_rpc::VolumeListResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::VolumeListResponse>> AsyncGetVolumeList(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) {
@@ -362,53 +313,11 @@ class PosManagement final {
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
-      virtual void CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
       virtual void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
       virtual void GetVolumeList(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest* request, ::pos_rpc::VolumeListResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -425,83 +334,20 @@ class PosManagement final {
     #endif
     virtual class experimental_async_interface* experimental_async() { return nullptr; }
   private:
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncCreateArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncCreateArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* AsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::PosResponse>* PrepareAsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>* AsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ArrayListResponse>* PrepareAsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::VolumeListResponse>* AsyncGetVolumeListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::VolumeListResponse>* PrepareAsyncGetVolumeListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
     Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
-    ::grpc::Status CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::pos_rpc::PosResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncCreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncCreateArrayRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncCreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncCreateArrayRaw(context, request, cq));
-    }
-    ::grpc::Status DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::pos_rpc::PosResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncDeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncDeleteArrayRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncDeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncDeleteArrayRaw(context, request, cq));
-    }
-    ::grpc::Status CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::pos_rpc::PosResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncCreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncCreateVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncCreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncCreateVolumeRaw(context, request, cq));
-    }
-    ::grpc::Status DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::pos_rpc::PosResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncDeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncDeleteVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncDeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncDeleteVolumeRaw(context, request, cq));
-    }
-    ::grpc::Status MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::pos_rpc::PosResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncMountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncMountVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncMountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncMountVolumeRaw(context, request, cq));
-    }
-    ::grpc::Status UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::pos_rpc::PosResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncUnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncUnmountVolumeRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncUnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncUnmountVolumeRaw(context, request, cq));
-    }
     ::grpc::Status UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::pos_rpc::PosResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> AsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(AsyncUpdateVoluemMetaRaw(context, request, cq));
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>> PrepareAsyncUpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>>(PrepareAsyncUpdateVoluemMetaRaw(context, request, cq));
-    }
-    ::grpc::Status GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::pos_rpc::ArrayListResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>> AsyncGetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>>(AsyncGetArrayListRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>> PrepareAsyncGetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>>(PrepareAsyncGetArrayListRaw(context, request, cq));
     }
     ::grpc::Status GetVolumeList(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::pos_rpc::VolumeListResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::VolumeListResponse>> AsyncGetVolumeList(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) {
@@ -513,53 +359,11 @@ class PosManagement final {
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
-      void CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CreateArray(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void DeleteArray(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CreateVolume(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void DeleteVolume(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void MountVolume(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void UnmountVolume(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
       void UpdateVoluemMeta(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void GetArrayList(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
       void GetVolumeList(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest* request, ::pos_rpc::VolumeListResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -578,32 +382,11 @@ class PosManagement final {
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
     class experimental_async async_stub_{this};
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncCreateArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncCreateArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateArrayRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncDeleteArrayRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteArrayRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncCreateVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::CreateVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncDeleteVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::DeleteVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncMountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::MountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncUnmountVolumeRaw(::grpc::ClientContext* context, const ::pos_rpc::UnmountVolumeRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* AsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::PosResponse>* PrepareAsyncUpdateVoluemMetaRaw(::grpc::ClientContext* context, const ::pos_rpc::UpdateVoluemMetaRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>* AsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::pos_rpc::ArrayListResponse>* PrepareAsyncGetArrayListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetArrayListRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::VolumeListResponse>* AsyncGetVolumeListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::VolumeListResponse>* PrepareAsyncGetVolumeListRaw(::grpc::ClientContext* context, const ::pos_rpc::GetVolumeListRequest& request, ::grpc::CompletionQueue* cq) override;
-    const ::grpc::internal::RpcMethod rpcmethod_CreateArray_;
-    const ::grpc::internal::RpcMethod rpcmethod_DeleteArray_;
-    const ::grpc::internal::RpcMethod rpcmethod_CreateVolume_;
-    const ::grpc::internal::RpcMethod rpcmethod_DeleteVolume_;
-    const ::grpc::internal::RpcMethod rpcmethod_MountVolume_;
-    const ::grpc::internal::RpcMethod rpcmethod_UnmountVolume_;
     const ::grpc::internal::RpcMethod rpcmethod_UpdateVoluemMeta_;
-    const ::grpc::internal::RpcMethod rpcmethod_GetArrayList_;
     const ::grpc::internal::RpcMethod rpcmethod_GetVolumeList_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
@@ -612,135 +395,8 @@ class PosManagement final {
    public:
     Service();
     virtual ~Service();
-    virtual ::grpc::Status CreateArray(::grpc::ServerContext* context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response);
-    virtual ::grpc::Status DeleteArray(::grpc::ServerContext* context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response);
-    virtual ::grpc::Status CreateVolume(::grpc::ServerContext* context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response);
-    virtual ::grpc::Status DeleteVolume(::grpc::ServerContext* context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response);
-    virtual ::grpc::Status MountVolume(::grpc::ServerContext* context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response);
-    virtual ::grpc::Status UnmountVolume(::grpc::ServerContext* context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response);
     virtual ::grpc::Status UpdateVoluemMeta(::grpc::ServerContext* context, const ::pos_rpc::UpdateVoluemMetaRequest* request, ::pos_rpc::PosResponse* response);
-    virtual ::grpc::Status GetArrayList(::grpc::ServerContext* context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response);
     virtual ::grpc::Status GetVolumeList(::grpc::ServerContext* context, const ::pos_rpc::GetVolumeListRequest* request, ::pos_rpc::VolumeListResponse* response);
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_CreateArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_CreateArray() {
-      ::grpc::Service::MarkMethodAsync(0);
-    }
-    ~WithAsyncMethod_CreateArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCreateArray(::grpc::ServerContext* context, ::pos_rpc::CreateArrayRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_DeleteArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_DeleteArray() {
-      ::grpc::Service::MarkMethodAsync(1);
-    }
-    ~WithAsyncMethod_DeleteArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestDeleteArray(::grpc::ServerContext* context, ::pos_rpc::DeleteArrayRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_CreateVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_CreateVolume() {
-      ::grpc::Service::MarkMethodAsync(2);
-    }
-    ~WithAsyncMethod_CreateVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCreateVolume(::grpc::ServerContext* context, ::pos_rpc::CreateVolumeRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_DeleteVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_DeleteVolume() {
-      ::grpc::Service::MarkMethodAsync(3);
-    }
-    ~WithAsyncMethod_DeleteVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestDeleteVolume(::grpc::ServerContext* context, ::pos_rpc::DeleteVolumeRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_MountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_MountVolume() {
-      ::grpc::Service::MarkMethodAsync(4);
-    }
-    ~WithAsyncMethod_MountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestMountVolume(::grpc::ServerContext* context, ::pos_rpc::MountVolumeRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_UnmountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_UnmountVolume() {
-      ::grpc::Service::MarkMethodAsync(5);
-    }
-    ~WithAsyncMethod_UnmountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestUnmountVolume(::grpc::ServerContext* context, ::pos_rpc::UnmountVolumeRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
-    }
   };
   template <class BaseClass>
   class WithAsyncMethod_UpdateVoluemMeta : public BaseClass {
@@ -748,7 +404,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_UpdateVoluemMeta() {
-      ::grpc::Service::MarkMethodAsync(6);
+      ::grpc::Service::MarkMethodAsync(0);
     }
     ~WithAsyncMethod_UpdateVoluemMeta() override {
       BaseClassMustBeDerivedFromService(this);
@@ -759,27 +415,7 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestUpdateVoluemMeta(::grpc::ServerContext* context, ::pos_rpc::UpdateVoluemMetaRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::PosResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_GetArrayList : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodAsync(7);
-    }
-    ~WithAsyncMethod_GetArrayList() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status GetArrayList(::grpc::ServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestGetArrayList(::grpc::ServerContext* context, ::pos_rpc::GetArrayListRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::ArrayListResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -788,7 +424,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodAsync(8);
+      ::grpc::Service::MarkMethodAsync(1);
     }
     ~WithAsyncMethod_GetVolumeList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -799,292 +435,10 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetVolumeList(::grpc::ServerContext* context, ::pos_rpc::GetVolumeListRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::VolumeListResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(8, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_CreateArray<WithAsyncMethod_DeleteArray<WithAsyncMethod_CreateVolume<WithAsyncMethod_DeleteVolume<WithAsyncMethod_MountVolume<WithAsyncMethod_UnmountVolume<WithAsyncMethod_UpdateVoluemMeta<WithAsyncMethod_GetArrayList<WithAsyncMethod_GetVolumeList<Service > > > > > > > > > AsyncService;
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CreateArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_CreateArray() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::CreateArrayRequest* request, ::pos_rpc::PosResponse* response) { return this->CreateArray(context, request, response); }));}
-    void SetMessageAllocatorFor_CreateArray(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_CreateArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CreateArray(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateArray(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_DeleteArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_DeleteArray() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::DeleteArrayRequest* request, ::pos_rpc::PosResponse* response) { return this->DeleteArray(context, request, response); }));}
-    void SetMessageAllocatorFor_DeleteArray(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_DeleteArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* DeleteArray(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* DeleteArray(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CreateVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_CreateVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(2,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::CreateVolumeRequest* request, ::pos_rpc::PosResponse* response) { return this->CreateVolume(context, request, response); }));}
-    void SetMessageAllocatorFor_CreateVolume(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(2);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_CreateVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CreateVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_DeleteVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_DeleteVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(3,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::DeleteVolumeRequest* request, ::pos_rpc::PosResponse* response) { return this->DeleteVolume(context, request, response); }));}
-    void SetMessageAllocatorFor_DeleteVolume(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_DeleteVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* DeleteVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* DeleteVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_MountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_MountVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(4,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::MountVolumeRequest* request, ::pos_rpc::PosResponse* response) { return this->MountVolume(context, request, response); }));}
-    void SetMessageAllocatorFor_MountVolume(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_MountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* MountVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* MountVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithCallbackMethod_UnmountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_UnmountVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(5,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::UnmountVolumeRequest* request, ::pos_rpc::PosResponse* response) { return this->UnmountVolume(context, request, response); }));}
-    void SetMessageAllocatorFor_UnmountVolume(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_UnmountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* UnmountVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* UnmountVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
+  typedef WithAsyncMethod_UpdateVoluemMeta<WithAsyncMethod_GetVolumeList<Service > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_UpdateVoluemMeta : public BaseClass {
    private:
@@ -1096,7 +450,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(6,
+        MarkMethodCallback(0,
           new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1108,9 +462,9 @@ class PosManagement final {
     void SetMessageAllocatorFor_UpdateVoluemMeta(
         ::grpc::experimental::MessageAllocator< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -1133,53 +487,6 @@ class PosManagement final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_GetArrayList : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithCallbackMethod_GetArrayList() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(7,
-          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::pos_rpc::GetArrayListRequest* request, ::pos_rpc::ArrayListResponse* response) { return this->GetArrayList(context, request, response); }));}
-    void SetMessageAllocatorFor_GetArrayList(
-        ::grpc::experimental::MessageAllocator< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(7);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(7);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
-    }
-    ~ExperimentalWithCallbackMethod_GetArrayList() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status GetArrayList(::grpc::ServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* GetArrayList(
-      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetArrayList(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
   class ExperimentalWithCallbackMethod_GetVolumeList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1190,7 +497,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(8,
+        MarkMethodCallback(1,
           new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1202,9 +509,9 @@ class PosManagement final {
     void SetMessageAllocatorFor_GetVolumeList(
         ::grpc::experimental::MessageAllocator< ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(8);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(8);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -1227,119 +534,17 @@ class PosManagement final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_MountVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_UpdateVoluemMeta<ExperimentalWithCallbackMethod_GetArrayList<ExperimentalWithCallbackMethod_GetVolumeList<Service > > > > > > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_UpdateVoluemMeta<ExperimentalWithCallbackMethod_GetVolumeList<Service > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_CreateArray<ExperimentalWithCallbackMethod_DeleteArray<ExperimentalWithCallbackMethod_CreateVolume<ExperimentalWithCallbackMethod_DeleteVolume<ExperimentalWithCallbackMethod_MountVolume<ExperimentalWithCallbackMethod_UnmountVolume<ExperimentalWithCallbackMethod_UpdateVoluemMeta<ExperimentalWithCallbackMethod_GetArrayList<ExperimentalWithCallbackMethod_GetVolumeList<Service > > > > > > > > > ExperimentalCallbackService;
-  template <class BaseClass>
-  class WithGenericMethod_CreateArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_CreateArray() {
-      ::grpc::Service::MarkMethodGeneric(0);
-    }
-    ~WithGenericMethod_CreateArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_DeleteArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_DeleteArray() {
-      ::grpc::Service::MarkMethodGeneric(1);
-    }
-    ~WithGenericMethod_DeleteArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_CreateVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_CreateVolume() {
-      ::grpc::Service::MarkMethodGeneric(2);
-    }
-    ~WithGenericMethod_CreateVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_DeleteVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_DeleteVolume() {
-      ::grpc::Service::MarkMethodGeneric(3);
-    }
-    ~WithGenericMethod_DeleteVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_MountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_MountVolume() {
-      ::grpc::Service::MarkMethodGeneric(4);
-    }
-    ~WithGenericMethod_MountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
-  class WithGenericMethod_UnmountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_UnmountVolume() {
-      ::grpc::Service::MarkMethodGeneric(5);
-    }
-    ~WithGenericMethod_UnmountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
+  typedef ExperimentalWithCallbackMethod_UpdateVoluemMeta<ExperimentalWithCallbackMethod_GetVolumeList<Service > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_UpdateVoluemMeta : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_UpdateVoluemMeta() {
-      ::grpc::Service::MarkMethodGeneric(6);
+      ::grpc::Service::MarkMethodGeneric(0);
     }
     ~WithGenericMethod_UpdateVoluemMeta() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1351,29 +556,12 @@ class PosManagement final {
     }
   };
   template <class BaseClass>
-  class WithGenericMethod_GetArrayList : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithGenericMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodGeneric(7);
-    }
-    ~WithGenericMethod_GetArrayList() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status GetArrayList(::grpc::ServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-  };
-  template <class BaseClass>
   class WithGenericMethod_GetVolumeList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodGeneric(8);
+      ::grpc::Service::MarkMethodGeneric(1);
     }
     ~WithGenericMethod_GetVolumeList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1385,132 +573,12 @@ class PosManagement final {
     }
   };
   template <class BaseClass>
-  class WithRawMethod_CreateArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_CreateArray() {
-      ::grpc::Service::MarkMethodRaw(0);
-    }
-    ~WithRawMethod_CreateArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCreateArray(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_DeleteArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_DeleteArray() {
-      ::grpc::Service::MarkMethodRaw(1);
-    }
-    ~WithRawMethod_DeleteArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestDeleteArray(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_CreateVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_CreateVolume() {
-      ::grpc::Service::MarkMethodRaw(2);
-    }
-    ~WithRawMethod_CreateVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCreateVolume(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_DeleteVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_DeleteVolume() {
-      ::grpc::Service::MarkMethodRaw(3);
-    }
-    ~WithRawMethod_DeleteVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestDeleteVolume(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_MountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_MountVolume() {
-      ::grpc::Service::MarkMethodRaw(4);
-    }
-    ~WithRawMethod_MountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestMountVolume(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_UnmountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_UnmountVolume() {
-      ::grpc::Service::MarkMethodRaw(5);
-    }
-    ~WithRawMethod_UnmountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestUnmountVolume(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
   class WithRawMethod_UpdateVoluemMeta : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_UpdateVoluemMeta() {
-      ::grpc::Service::MarkMethodRaw(6);
+      ::grpc::Service::MarkMethodRaw(0);
     }
     ~WithRawMethod_UpdateVoluemMeta() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1521,27 +589,7 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestUpdateVoluemMeta(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithRawMethod_GetArrayList : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithRawMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodRaw(7);
-    }
-    ~WithRawMethod_GetArrayList() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status GetArrayList(::grpc::ServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestGetArrayList(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(7, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -1550,7 +598,7 @@ class PosManagement final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodRaw(8);
+      ::grpc::Service::MarkMethodRaw(1);
     }
     ~WithRawMethod_GetVolumeList() override {
       BaseClassMustBeDerivedFromService(this);
@@ -1561,236 +609,8 @@ class PosManagement final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestGetVolumeList(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(8, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CreateArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_CreateArray() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateArray(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_CreateArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CreateArray(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateArray(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_DeleteArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_DeleteArray() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->DeleteArray(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_DeleteArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* DeleteArray(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* DeleteArray(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CreateVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_CreateVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(2,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateVolume(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_CreateVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CreateVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CreateVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CreateVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_DeleteVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_DeleteVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(3,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->DeleteVolume(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_DeleteVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status DeleteVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* DeleteVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* DeleteVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_MountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_MountVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(4,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->MountVolume(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_MountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status MountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* MountVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* MountVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_UnmountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_UnmountVolume() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(5,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->UnmountVolume(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_UnmountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* UnmountVolume(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* UnmountVolume(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
   };
   template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_UpdateVoluemMeta : public BaseClass {
@@ -1803,7 +623,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(6,
+        MarkMethodRawCallback(0,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1831,44 +651,6 @@ class PosManagement final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_GetArrayList : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    ExperimentalWithRawCallbackMethod_GetArrayList() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(7,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->GetArrayList(context, request, response); }));
-    }
-    ~ExperimentalWithRawCallbackMethod_GetArrayList() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status GetArrayList(::grpc::ServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* GetArrayList(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* GetArrayList(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
-  };
-  template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_GetVolumeList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -1879,7 +661,7 @@ class PosManagement final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(8,
+        MarkMethodRawCallback(1,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1907,174 +689,12 @@ class PosManagement final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_CreateArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_CreateArray() {
-      ::grpc::Service::MarkMethodStreamed(0,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::CreateArrayRequest, ::pos_rpc::PosResponse>* streamer) {
-                       return this->StreamedCreateArray(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_CreateArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status CreateArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedCreateArray(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::CreateArrayRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_DeleteArray : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_DeleteArray() {
-      ::grpc::Service::MarkMethodStreamed(1,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::DeleteArrayRequest, ::pos_rpc::PosResponse>* streamer) {
-                       return this->StreamedDeleteArray(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_DeleteArray() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status DeleteArray(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteArrayRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedDeleteArray(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::DeleteArrayRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_CreateVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_CreateVolume() {
-      ::grpc::Service::MarkMethodStreamed(2,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::CreateVolumeRequest, ::pos_rpc::PosResponse>* streamer) {
-                       return this->StreamedCreateVolume(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_CreateVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status CreateVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::CreateVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedCreateVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::CreateVolumeRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_DeleteVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_DeleteVolume() {
-      ::grpc::Service::MarkMethodStreamed(3,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::DeleteVolumeRequest, ::pos_rpc::PosResponse>* streamer) {
-                       return this->StreamedDeleteVolume(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_DeleteVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status DeleteVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::DeleteVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedDeleteVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::DeleteVolumeRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_MountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_MountVolume() {
-      ::grpc::Service::MarkMethodStreamed(4,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::MountVolumeRequest, ::pos_rpc::PosResponse>* streamer) {
-                       return this->StreamedMountVolume(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_MountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status MountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::MountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedMountVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::MountVolumeRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
-  class WithStreamedUnaryMethod_UnmountVolume : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_UnmountVolume() {
-      ::grpc::Service::MarkMethodStreamed(5,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::UnmountVolumeRequest, ::pos_rpc::PosResponse>* streamer) {
-                       return this->StreamedUnmountVolume(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_UnmountVolume() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status UnmountVolume(::grpc::ServerContext* /*context*/, const ::pos_rpc::UnmountVolumeRequest* /*request*/, ::pos_rpc::PosResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedUnmountVolume(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::UnmountVolumeRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
   class WithStreamedUnaryMethod_UpdateVoluemMeta : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_UpdateVoluemMeta() {
-      ::grpc::Service::MarkMethodStreamed(6,
+      ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
           ::pos_rpc::UpdateVoluemMetaRequest, ::pos_rpc::PosResponse>(
             [this](::grpc::ServerContext* context,
@@ -2096,39 +716,12 @@ class PosManagement final {
     virtual ::grpc::Status StreamedUpdateVoluemMeta(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::UpdateVoluemMetaRequest,::pos_rpc::PosResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_GetArrayList : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithStreamedUnaryMethod_GetArrayList() {
-      ::grpc::Service::MarkMethodStreamed(7,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::pos_rpc::GetArrayListRequest, ::pos_rpc::ArrayListResponse>* streamer) {
-                       return this->StreamedGetArrayList(context,
-                         streamer);
-                  }));
-    }
-    ~WithStreamedUnaryMethod_GetArrayList() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable regular version of this method
-    ::grpc::Status GetArrayList(::grpc::ServerContext* /*context*/, const ::pos_rpc::GetArrayListRequest* /*request*/, ::pos_rpc::ArrayListResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedGetArrayList(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::GetArrayListRequest,::pos_rpc::ArrayListResponse>* server_unary_streamer) = 0;
-  };
-  template <class BaseClass>
   class WithStreamedUnaryMethod_GetVolumeList : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_GetVolumeList() {
-      ::grpc::Service::MarkMethodStreamed(8,
+      ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
           ::pos_rpc::GetVolumeListRequest, ::pos_rpc::VolumeListResponse>(
             [this](::grpc::ServerContext* context,
@@ -2149,9 +742,9 @@ class PosManagement final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedGetVolumeList(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::GetVolumeListRequest,::pos_rpc::VolumeListResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_MountVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_UpdateVoluemMeta<WithStreamedUnaryMethod_GetArrayList<WithStreamedUnaryMethod_GetVolumeList<Service > > > > > > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_UpdateVoluemMeta<WithStreamedUnaryMethod_GetVolumeList<Service > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_CreateArray<WithStreamedUnaryMethod_DeleteArray<WithStreamedUnaryMethod_CreateVolume<WithStreamedUnaryMethod_DeleteVolume<WithStreamedUnaryMethod_MountVolume<WithStreamedUnaryMethod_UnmountVolume<WithStreamedUnaryMethod_UpdateVoluemMeta<WithStreamedUnaryMethod_GetArrayList<WithStreamedUnaryMethod_GetVolumeList<Service > > > > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_UpdateVoluemMeta<WithStreamedUnaryMethod_GetVolumeList<Service > > StreamedService;
 };
 
 // /////////////////////////////////////////////////////////////////////////////////
@@ -2185,9 +778,27 @@ class PosIo final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksResponse>> PrepareAsyncWriteHostBlocks(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksResponse>>(PrepareAsyncWriteHostBlocksRaw(context, request, cq));
     }
-    // rpc ReadBlocksSync(ReadBlocksSyncRequest) returns (ReadBlocksSyncResponse) {} // FakePOS-only sync API
-    // rpc WriteBlocksSync(WriteBlocksSyncRequest) returns (WriteBlocksSyncResponse) {} // FakePOS-only sync API
-    // rpc WriteHostRequestSync(WriteHostRequestSyncRequest) returns (WriteHostRequestSyncResponse) {} // FakePOS-only sync API
+    virtual ::grpc::Status ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::pos_rpc::ReadBlocksSyncResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ReadBlocksSyncResponse>> AsyncReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ReadBlocksSyncResponse>>(AsyncReadBlocksSyncRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ReadBlocksSyncResponse>> PrepareAsyncReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ReadBlocksSyncResponse>>(PrepareAsyncReadBlocksSyncRaw(context, request, cq));
+    }
+    virtual ::grpc::Status WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::pos_rpc::WriteBlocksSyncResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksSyncResponse>> AsyncWriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksSyncResponse>>(AsyncWriteBlocksSyncRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksSyncResponse>> PrepareAsyncWriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksSyncResponse>>(PrepareAsyncWriteBlocksSyncRaw(context, request, cq));
+    }
+    virtual ::grpc::Status WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::pos_rpc::WriteHostBlocksSyncResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksSyncResponse>> AsyncWriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksSyncResponse>>(AsyncWriteHostBlocksSyncRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksSyncResponse>> PrepareAsyncWriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksSyncResponse>>(PrepareAsyncWriteHostBlocksSyncRaw(context, request, cq));
+    }
     virtual ::grpc::Status CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::pos_rpc::CompleteHostWriteResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::CompleteHostWriteResponse>> AsyncCompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::CompleteHostWriteResponse>>(AsyncCompleteHostWriteRaw(context, request, cq));
@@ -2216,9 +827,24 @@ class PosIo final {
       #else
       virtual void WriteHostBlocks(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest* request, ::pos_rpc::WriteHostBlocksResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
-      // rpc ReadBlocksSync(ReadBlocksSyncRequest) returns (ReadBlocksSyncResponse) {} // FakePOS-only sync API
-      // rpc WriteBlocksSync(WriteBlocksSyncRequest) returns (WriteBlocksSyncResponse) {} // FakePOS-only sync API
-      // rpc WriteHostRequestSync(WriteHostRequestSyncRequest) returns (WriteHostRequestSyncResponse) {} // FakePOS-only sync API
+      virtual void ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
       virtual void CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest* request, ::pos_rpc::CompleteHostWriteResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest* request, ::pos_rpc::CompleteHostWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
@@ -2240,6 +866,12 @@ class PosIo final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksResponse>* PrepareAsyncWriteBlocksRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksResponse>* AsyncWriteHostBlocksRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksResponse>* PrepareAsyncWriteHostBlocksRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ReadBlocksSyncResponse>* AsyncReadBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ReadBlocksSyncResponse>* PrepareAsyncReadBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksSyncResponse>* AsyncWriteBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteBlocksSyncResponse>* PrepareAsyncWriteBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksSyncResponse>* AsyncWriteHostBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::WriteHostBlocksSyncResponse>* PrepareAsyncWriteHostBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::CompleteHostWriteResponse>* AsyncCompleteHostWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::CompleteHostWriteResponse>* PrepareAsyncCompleteHostWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
@@ -2266,6 +898,27 @@ class PosIo final {
     }
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksResponse>> PrepareAsyncWriteHostBlocks(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksResponse>>(PrepareAsyncWriteHostBlocksRaw(context, request, cq));
+    }
+    ::grpc::Status ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::pos_rpc::ReadBlocksSyncResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>> AsyncReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>>(AsyncReadBlocksSyncRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>> PrepareAsyncReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>>(PrepareAsyncReadBlocksSyncRaw(context, request, cq));
+    }
+    ::grpc::Status WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::pos_rpc::WriteBlocksSyncResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>> AsyncWriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>>(AsyncWriteBlocksSyncRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>> PrepareAsyncWriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>>(PrepareAsyncWriteBlocksSyncRaw(context, request, cq));
+    }
+    ::grpc::Status WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::pos_rpc::WriteHostBlocksSyncResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>> AsyncWriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>>(AsyncWriteHostBlocksSyncRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>> PrepareAsyncWriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>>(PrepareAsyncWriteHostBlocksSyncRaw(context, request, cq));
     }
     ::grpc::Status CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::pos_rpc::CompleteHostWriteResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::CompleteHostWriteResponse>> AsyncCompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
@@ -2295,6 +948,24 @@ class PosIo final {
       #else
       void WriteHostBlocks(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest* request, ::pos_rpc::WriteHostBlocksResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ReadBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void WriteBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void WriteHostBlocksSync(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
       void CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest* request, ::pos_rpc::CompleteHostWriteResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void CompleteHostWrite(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest* request, ::pos_rpc::CompleteHostWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
@@ -2318,11 +989,20 @@ class PosIo final {
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksResponse>* PrepareAsyncWriteBlocksRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksResponse>* AsyncWriteHostBlocksRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksResponse>* PrepareAsyncWriteHostBlocksRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>* AsyncReadBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::ReadBlocksSyncResponse>* PrepareAsyncReadBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::ReadBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>* AsyncWriteBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteBlocksSyncResponse>* PrepareAsyncWriteBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>* AsyncWriteHostBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::WriteHostBlocksSyncResponse>* PrepareAsyncWriteHostBlocksSyncRaw(::grpc::ClientContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::CompleteHostWriteResponse>* AsyncCompleteHostWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::CompleteHostWriteResponse>* PrepareAsyncCompleteHostWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::CompleteHostWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_ReadBlocks_;
     const ::grpc::internal::RpcMethod rpcmethod_WriteBlocks_;
     const ::grpc::internal::RpcMethod rpcmethod_WriteHostBlocks_;
+    const ::grpc::internal::RpcMethod rpcmethod_ReadBlocksSync_;
+    const ::grpc::internal::RpcMethod rpcmethod_WriteBlocksSync_;
+    const ::grpc::internal::RpcMethod rpcmethod_WriteHostBlocksSync_;
     const ::grpc::internal::RpcMethod rpcmethod_CompleteHostWrite_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
@@ -2334,9 +1014,9 @@ class PosIo final {
     virtual ::grpc::Status ReadBlocks(::grpc::ServerContext* context, const ::pos_rpc::ReadBlocksRequest* request, ::pos_rpc::ReadBlocksResponse* response);
     virtual ::grpc::Status WriteBlocks(::grpc::ServerContext* context, const ::pos_rpc::WriteBlocksRequest* request, ::pos_rpc::WriteBlocksResponse* response);
     virtual ::grpc::Status WriteHostBlocks(::grpc::ServerContext* context, const ::pos_rpc::WriteHostBlocksRequest* request, ::pos_rpc::WriteHostBlocksResponse* response);
-    // rpc ReadBlocksSync(ReadBlocksSyncRequest) returns (ReadBlocksSyncResponse) {} // FakePOS-only sync API
-    // rpc WriteBlocksSync(WriteBlocksSyncRequest) returns (WriteBlocksSyncResponse) {} // FakePOS-only sync API
-    // rpc WriteHostRequestSync(WriteHostRequestSyncRequest) returns (WriteHostRequestSyncResponse) {} // FakePOS-only sync API
+    virtual ::grpc::Status ReadBlocksSync(::grpc::ServerContext* context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response);
+    virtual ::grpc::Status WriteBlocksSync(::grpc::ServerContext* context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response);
+    virtual ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response);
     virtual ::grpc::Status CompleteHostWrite(::grpc::ServerContext* context, const ::pos_rpc::CompleteHostWriteRequest* request, ::pos_rpc::CompleteHostWriteResponse* response);
   };
   template <class BaseClass>
@@ -2400,12 +1080,72 @@ class PosIo final {
     }
   };
   template <class BaseClass>
+  class WithAsyncMethod_ReadBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ReadBlocksSync() {
+      ::grpc::Service::MarkMethodAsync(3);
+    }
+    ~WithAsyncMethod_ReadBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestReadBlocksSync(::grpc::ServerContext* context, ::pos_rpc::ReadBlocksSyncRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::ReadBlocksSyncResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_WriteBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_WriteBlocksSync() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_WriteBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestWriteBlocksSync(::grpc::ServerContext* context, ::pos_rpc::WriteBlocksSyncRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::WriteBlocksSyncResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_WriteHostBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_WriteHostBlocksSync() {
+      ::grpc::Service::MarkMethodAsync(5);
+    }
+    ~WithAsyncMethod_WriteHostBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestWriteHostBlocksSync(::grpc::ServerContext* context, ::pos_rpc::WriteHostBlocksSyncRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::WriteHostBlocksSyncResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithAsyncMethod_CompleteHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_CompleteHostWrite() {
-      ::grpc::Service::MarkMethodAsync(3);
+      ::grpc::Service::MarkMethodAsync(6);
     }
     ~WithAsyncMethod_CompleteHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2416,10 +1156,10 @@ class PosIo final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestCompleteHostWrite(::grpc::ServerContext* context, ::pos_rpc::CompleteHostWriteRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::CompleteHostWriteResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_ReadBlocks<WithAsyncMethod_WriteBlocks<WithAsyncMethod_WriteHostBlocks<WithAsyncMethod_CompleteHostWrite<Service > > > > AsyncService;
+  typedef WithAsyncMethod_ReadBlocks<WithAsyncMethod_WriteBlocks<WithAsyncMethod_WriteHostBlocks<WithAsyncMethod_ReadBlocksSync<WithAsyncMethod_WriteBlocksSync<WithAsyncMethod_WriteHostBlocksSync<WithAsyncMethod_CompleteHostWrite<Service > > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_ReadBlocks : public BaseClass {
    private:
@@ -2562,6 +1302,147 @@ class PosIo final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ReadBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ReadBlocksSync() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::pos_rpc::ReadBlocksSyncRequest* request, ::pos_rpc::ReadBlocksSyncResponse* response) { return this->ReadBlocksSync(context, request, response); }));}
+    void SetMessageAllocatorFor_ReadBlocksSync(
+        ::grpc::experimental::MessageAllocator< ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ReadBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ReadBlocksSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ReadBlocksSync(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_WriteBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_WriteBlocksSync() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::pos_rpc::WriteBlocksSyncRequest* request, ::pos_rpc::WriteBlocksSyncResponse* response) { return this->WriteBlocksSync(context, request, response); }));}
+    void SetMessageAllocatorFor_WriteBlocksSync(
+        ::grpc::experimental::MessageAllocator< ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_WriteBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* WriteBlocksSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* WriteBlocksSync(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_WriteHostBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_WriteHostBlocksSync() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::pos_rpc::WriteHostBlocksSyncRequest* request, ::pos_rpc::WriteHostBlocksSyncResponse* response) { return this->WriteHostBlocksSync(context, request, response); }));}
+    void SetMessageAllocatorFor_WriteHostBlocksSync(
+        ::grpc::experimental::MessageAllocator< ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_WriteHostBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* WriteHostBlocksSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* WriteHostBlocksSync(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithCallbackMethod_CompleteHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -2572,7 +1453,7 @@ class PosIo final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(3,
+        MarkMethodCallback(6,
           new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::CompleteHostWriteRequest, ::pos_rpc::CompleteHostWriteResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2584,9 +1465,9 @@ class PosIo final {
     void SetMessageAllocatorFor_CompleteHostWrite(
         ::grpc::experimental::MessageAllocator< ::pos_rpc::CompleteHostWriteRequest, ::pos_rpc::CompleteHostWriteResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(6);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(6);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::CompleteHostWriteRequest, ::pos_rpc::CompleteHostWriteResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -2609,10 +1490,10 @@ class PosIo final {
       { return nullptr; }
   };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_ReadBlocks<ExperimentalWithCallbackMethod_WriteBlocks<ExperimentalWithCallbackMethod_WriteHostBlocks<ExperimentalWithCallbackMethod_CompleteHostWrite<Service > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_ReadBlocks<ExperimentalWithCallbackMethod_WriteBlocks<ExperimentalWithCallbackMethod_WriteHostBlocks<ExperimentalWithCallbackMethod_ReadBlocksSync<ExperimentalWithCallbackMethod_WriteBlocksSync<ExperimentalWithCallbackMethod_WriteHostBlocksSync<ExperimentalWithCallbackMethod_CompleteHostWrite<Service > > > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_ReadBlocks<ExperimentalWithCallbackMethod_WriteBlocks<ExperimentalWithCallbackMethod_WriteHostBlocks<ExperimentalWithCallbackMethod_CompleteHostWrite<Service > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_ReadBlocks<ExperimentalWithCallbackMethod_WriteBlocks<ExperimentalWithCallbackMethod_WriteHostBlocks<ExperimentalWithCallbackMethod_ReadBlocksSync<ExperimentalWithCallbackMethod_WriteBlocksSync<ExperimentalWithCallbackMethod_WriteHostBlocksSync<ExperimentalWithCallbackMethod_CompleteHostWrite<Service > > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_ReadBlocks : public BaseClass {
    private:
@@ -2665,12 +1546,63 @@ class PosIo final {
     }
   };
   template <class BaseClass>
+  class WithGenericMethod_ReadBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ReadBlocksSync() {
+      ::grpc::Service::MarkMethodGeneric(3);
+    }
+    ~WithGenericMethod_ReadBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_WriteBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_WriteBlocksSync() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_WriteBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_WriteHostBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_WriteHostBlocksSync() {
+      ::grpc::Service::MarkMethodGeneric(5);
+    }
+    ~WithGenericMethod_WriteHostBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
   class WithGenericMethod_CompleteHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_CompleteHostWrite() {
-      ::grpc::Service::MarkMethodGeneric(3);
+      ::grpc::Service::MarkMethodGeneric(6);
     }
     ~WithGenericMethod_CompleteHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2742,12 +1674,72 @@ class PosIo final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_ReadBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ReadBlocksSync() {
+      ::grpc::Service::MarkMethodRaw(3);
+    }
+    ~WithRawMethod_ReadBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestReadBlocksSync(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_WriteBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_WriteBlocksSync() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_WriteBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestWriteBlocksSync(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_WriteHostBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_WriteHostBlocksSync() {
+      ::grpc::Service::MarkMethodRaw(5);
+    }
+    ~WithRawMethod_WriteHostBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestWriteHostBlocksSync(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawMethod_CompleteHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_CompleteHostWrite() {
-      ::grpc::Service::MarkMethodRaw(3);
+      ::grpc::Service::MarkMethodRaw(6);
     }
     ~WithRawMethod_CompleteHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -2758,7 +1750,7 @@ class PosIo final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestCompleteHostWrite(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(6, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -2876,6 +1868,120 @@ class PosIo final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ReadBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ReadBlocksSync() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ReadBlocksSync(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ReadBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ReadBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ReadBlocksSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ReadBlocksSync(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_WriteBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_WriteBlocksSync() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->WriteBlocksSync(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_WriteBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* WriteBlocksSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* WriteBlocksSync(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_WriteHostBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_WriteHostBlocksSync() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->WriteHostBlocksSync(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_WriteHostBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* WriteHostBlocksSync(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* WriteHostBlocksSync(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_CompleteHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -2886,7 +1992,7 @@ class PosIo final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(3,
+        MarkMethodRawCallback(6,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -2995,12 +2101,93 @@ class PosIo final {
     virtual ::grpc::Status StreamedWriteHostBlocks(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::WriteHostBlocksRequest,::pos_rpc::WriteHostBlocksResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
+  class WithStreamedUnaryMethod_ReadBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ReadBlocksSync() {
+      ::grpc::Service::MarkMethodStreamed(3,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::pos_rpc::ReadBlocksSyncRequest, ::pos_rpc::ReadBlocksSyncResponse>* streamer) {
+                       return this->StreamedReadBlocksSync(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ReadBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ReadBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::ReadBlocksSyncRequest* /*request*/, ::pos_rpc::ReadBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedReadBlocksSync(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::ReadBlocksSyncRequest,::pos_rpc::ReadBlocksSyncResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_WriteBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_WriteBlocksSync() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::pos_rpc::WriteBlocksSyncRequest, ::pos_rpc::WriteBlocksSyncResponse>* streamer) {
+                       return this->StreamedWriteBlocksSync(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_WriteBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status WriteBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteBlocksSyncRequest* /*request*/, ::pos_rpc::WriteBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedWriteBlocksSync(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::WriteBlocksSyncRequest,::pos_rpc::WriteBlocksSyncResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_WriteHostBlocksSync : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_WriteHostBlocksSync() {
+      ::grpc::Service::MarkMethodStreamed(5,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::pos_rpc::WriteHostBlocksSyncRequest, ::pos_rpc::WriteHostBlocksSyncResponse>* streamer) {
+                       return this->StreamedWriteHostBlocksSync(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_WriteHostBlocksSync() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status WriteHostBlocksSync(::grpc::ServerContext* /*context*/, const ::pos_rpc::WriteHostBlocksSyncRequest* /*request*/, ::pos_rpc::WriteHostBlocksSyncResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedWriteHostBlocksSync(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::WriteHostBlocksSyncRequest,::pos_rpc::WriteHostBlocksSyncResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_CompleteHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_CompleteHostWrite() {
-      ::grpc::Service::MarkMethodStreamed(3,
+      ::grpc::Service::MarkMethodStreamed(6,
         new ::grpc::internal::StreamedUnaryHandler<
           ::pos_rpc::CompleteHostWriteRequest, ::pos_rpc::CompleteHostWriteResponse>(
             [this](::grpc::ServerContext* context,
@@ -3021,17 +2208,17 @@ class PosIo final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedCompleteHostWrite(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::CompleteHostWriteRequest,::pos_rpc::CompleteHostWriteResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_ReadBlocks<WithStreamedUnaryMethod_WriteBlocks<WithStreamedUnaryMethod_WriteHostBlocks<WithStreamedUnaryMethod_CompleteHostWrite<Service > > > > StreamedUnaryService;
+  typedef WithStreamedUnaryMethod_ReadBlocks<WithStreamedUnaryMethod_WriteBlocks<WithStreamedUnaryMethod_WriteHostBlocks<WithStreamedUnaryMethod_ReadBlocksSync<WithStreamedUnaryMethod_WriteBlocksSync<WithStreamedUnaryMethod_WriteHostBlocksSync<WithStreamedUnaryMethod_CompleteHostWrite<Service > > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_ReadBlocks<WithStreamedUnaryMethod_WriteBlocks<WithStreamedUnaryMethod_WriteHostBlocks<WithStreamedUnaryMethod_CompleteHostWrite<Service > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_ReadBlocks<WithStreamedUnaryMethod_WriteBlocks<WithStreamedUnaryMethod_WriteHostBlocks<WithStreamedUnaryMethod_ReadBlocksSync<WithStreamedUnaryMethod_WriteBlocksSync<WithStreamedUnaryMethod_WriteHostBlocksSync<WithStreamedUnaryMethod_CompleteHostWrite<Service > > > > > > > StreamedService;
 };
 
 // /////////////////////////////////////////////////////////////////////////////////
 //
-class PosControl final {
+class ReplicationControl final {
  public:
   static constexpr char const* service_full_name() {
-    return "pos_rpc.PosControl";
+    return "pos_rpc.ReplicationControl";
   }
   class StubInterface {
    public:
