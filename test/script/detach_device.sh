@@ -37,6 +37,7 @@ else
     remove_device $DEVBDF
 
     if [ $2 -eq 1 ]; then
+        sleep 2
         pci_rescan
     fi
     sleep 3
