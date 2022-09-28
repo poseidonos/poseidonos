@@ -1800,7 +1800,7 @@ Root:
     Severity:
     Message: Failed to configure an array.
     Cause: Write buffer device capacity does not meet minimum capacity condition
-    Solution: Please try again with write buffer device of 2GB or more.
+    Solution: Please try again after securing enough size.
   -
     Id: 2560
     Name: UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED
