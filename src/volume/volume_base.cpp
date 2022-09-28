@@ -49,6 +49,8 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     uuid = "";
     attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
+    replicationState = VolumeReplicationState::StandAloneState;
+    replicationRole = VolumeReplicationRoleProperty::Primary;
     totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} size:{} created", name, totalSize);
@@ -63,6 +65,8 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     uuid = inputUuid;
     attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
+    replicationState = VolumeReplicationState::StandAloneState;
+    replicationRole = VolumeReplicationRoleProperty::Primary;
     totalSize = volSizeByte;
     maxiops = _maxiops;
     maxbw = _maxbw;
