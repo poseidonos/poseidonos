@@ -55,13 +55,16 @@ LogWriteHandler::LogWriteHandler(void)
 LogWriteHandler::LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList* waitingList)
 : logBuffer(nullptr),
   bufferAllocator(nullptr),
+  numLogGroups(0),
   logWriteStats(statistics),
   waitingList(waitingList),
+  numIosRequested(nullptr),
+  numIosCompleted(nullptr),
   telemetryPublisher(nullptr),
-  interval(nullptr)
+  interval(nullptr),
+  sumOfTimeSpentPerInterval(0),
+  doneCountPerInterval(0)
 {
-    numIosRequested = 0;
-    numIosCompleted = 0;
 }
 
 LogWriteHandler::~LogWriteHandler(void)
@@ -73,6 +76,16 @@ LogWriteHandler::~LogWriteHandler(void)
     {
         delete interval;
     }
+
+    if (nullptr != numIosRequested)
+    {
+        delete numIosRequested;
+    }
+
+    if (nullptr != numIosCompleted)
+    {
+        delete numIosCompleted;
+    }
 }
 
 void
@@ -83,11 +96,15 @@ LogWriteHandler::Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffe
     logBuffer = buffer;
     telemetryPublisher = tp;
     interval = timeInterval;
+    numLogGroups = journalConfig->GetNumLogGroups();
 
     if (journalConfig->IsDebugEnabled() == true)
     {
-        logWriteStats->Init(journalConfig->GetNumLogGroups());
+        logWriteStats->Init(numLogGroups);
     }
+
+    numIosRequested = new std::vector<std::atomic<uint64_t>>(numLogGroups);
+    numIosCompleted = new std::vector<std::atomic<uint64_t>>(numLogGroups);
 }
 
 void
@@ -106,6 +123,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
     if (EID(SUCCESS) == result)
     {
         int groupId = bufferAllocator->GetLogGroupId(allocatedOffset);
+        assert(groupId < numLogGroups);
         uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
 
         context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
@@ -129,7 +147,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         result = logBuffer->WriteLog(context);
         if (EID(SUCCESS) == result)
         {
-            numIosRequested++;
+            (*numIosRequested)[groupId]++;
         }
         else
         {
@@ -153,12 +171,13 @@ LogWriteHandler::AddLogToWaitingList(LogWriteContext* context)
 void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
-    numIosCompleted++;
-
     LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
 
     if (context != nullptr)
     {
+        assert(context->GetLogGroupId() < numLogGroups);
+        (*numIosCompleted)[context->GetLogGroupId()]++;
+
         context->stopwatch.StoreTimestamp(LogStage::Complete);
         _PublishPeriodicMetrics(context);
 
@@ -204,18 +223,22 @@ LogWriteHandler::_PublishPeriodicMetrics(LogWriteContext* context)
         sumOfTimeSpentPerInterval = 0;
         doneCountPerInterval = 0;
 
-        std::string logGroupId = std::to_string(context->GetLogGroupId());
         POSMetricVector* v = new POSMetricVector();
 
-        POSMetric metricIssueCnt(TEL36005_JRN_LOG_COUNT, POSMetricTypes::MT_GAUGE);
-        metricIssueCnt.AddLabel("group_id", logGroupId);
-        metricIssueCnt.SetGaugeValue(numIosRequested);
-        v->emplace_back(metricIssueCnt);
+        for (size_t i = 0; i < numIosRequested->size(); ++i)
+        {
+            std::string logGroupId = std::to_string(i);
 
-        POSMetric metricDoneCnt(TEL36006_JRN_LOG_DONE_COUNT, POSMetricTypes::MT_GAUGE);
-        metricDoneCnt.AddLabel("group_id", logGroupId);
-        metricDoneCnt.SetGaugeValue(numIosCompleted);
-        v->emplace_back(metricDoneCnt);
+            POSMetric metricIssueCnt(TEL36005_JRN_LOG_COUNT, POSMetricTypes::MT_GAUGE);
+            metricIssueCnt.AddLabel("group_id", logGroupId);
+            metricIssueCnt.SetGaugeValue((*numIosRequested)[i]);
+            v->emplace_back(metricIssueCnt);
+
+            POSMetric metricDoneCnt(TEL36006_JRN_LOG_DONE_COUNT, POSMetricTypes::MT_GAUGE);
+            metricDoneCnt.AddLabel("group_id", logGroupId);
+            metricDoneCnt.SetGaugeValue((*numIosCompleted)[i]);
+            v->emplace_back(metricDoneCnt);
+        }
 
         if (count)
         {
