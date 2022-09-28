@@ -12,7 +12,7 @@ all:
 	@cp -f ../config/pos.conf src/etc/pos/
 	@cp -f ../config/telemetry_default.yaml src/etc/pos/
 	@cp -f ../config/publication_list_default.yaml src/etc/pos/
-	@cp -f ../config/pos_event.yaml src/etc/pos/
+	@cp -f ../src/event/pos_event.yaml src/etc/pos/
 	
 	# Copy CLI man page files
 	@gzip --keep ../tool/cli/docs/manpage/*
