@@ -261,18 +261,19 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 }
 
 uint32_t
-Raid6::_MakeKeyforGFMap(vector<uint32_t> excluded)
+Raid6::_MakeKeyforGFMap(vector<uint32_t>& excluded)
 {
     uint32_t key;
+    // ascending sort
     sort(excluded.begin(), excluded.end());
 
     if (excluded.size() == 1)
     {
-        key = ArrayConfig::MAX_CHUNK_CNT * excluded[0];
+        key = excluded[0];
     }
     else
     {
-        key = ArrayConfig::MAX_CHUNK_CNT * excluded[0] + excluded[1];
+        key = ArrayConfig::MAX_CHUNK_CNT * (excluded[0] + 1) + excluded[1];
     }
 
     return key;
@@ -361,6 +362,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     uint32_t destCnt = excluded.size();
     assert(destCnt <= parityCnt);
 
+    dstSize = dstSize / targets.size();
     uint32_t rebuildCnt = chunkCnt - destCnt;
 
     unsigned char* rebuildInput[dataCnt];
@@ -395,6 +397,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
             // Make Galois field table with given device indices and insert to Map
             rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
             _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
+            POS_TRACE_WARN(EID(RAID_DEBUG_MSG), "a new galois table is inserted, key:{}", key);
             galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
         }
         else
@@ -403,14 +406,17 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
             rebuildGaloisTable = iter->second;
         }
     }
-    ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
 
-    // TODO return two recovered devices at the same time when two devices failure occured
-    for (uint32_t i = 0; i < destCnt; i++)
+    ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
+    for (uint32_t i = 0 ; i < targets.size(); i++)
     {
-        if (find(targets.begin(), targets.end(), excluded[i]) != targets.end())
+        uint32_t targetVal = targets.at(i);
+        for (uint32_t j = 0 ; j < excluded.size(); j++)
         {
-            memcpy(dst, rebuildOutp[i], dstSize);
+            if (targetVal == excluded.at(j))
+            {
+                memcpy((unsigned char*)dst + i * dstSize, rebuildOutp[j], dstSize);
+            }
         }
     }
 

@@ -77,6 +77,9 @@ if [ -f /etc/debian_version ]; then
     pip3 install pyyaml
     # for isal
     apt install -y libisal-dev
+    # for address sanitizer
+    apt install -y libasan4
+    apt install -y libasan4-dbg
 
 else
     echo "pkgdep: unknown system type."

@@ -43,16 +43,13 @@
 namespace pos
 {
 MetaFsService::MetaFsService(void)
-: configManager_(new MetaFsConfigManager(ConfigManagerSingleton::Instance())),
-  needToRemoveConfig_(true),
-  tp_(nullptr),
-  factory_(new MetaFsIoSchedulerFactory())
+: MetaFsService(new MetaFsConfigManager(ConfigManagerSingleton::Instance()), new MetaFsIoSchedulerFactory())
 {
 }
 
-MetaFsService::MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory)
-: configManager_(configManager),
-  needToRemoveConfig_(false),
+MetaFsService::MetaFsService(MetaFsConfigManager* configManager, MetaFsIoSchedulerFactory* factory, const int numaCount)
+: MAX_SCHEDULER_COUNT(numaCount),
+  configManager_(configManager),
   tp_(nullptr),
   factory_(factory)
 {
@@ -83,7 +80,7 @@ MetaFsService::~MetaFsService(void)
         tp_ = nullptr;
     }
 
-    if (needToRemoveConfig_)
+    if (configManager_)
     {
         POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "Delete MetaFsConfigManager");
@@ -95,6 +92,7 @@ MetaFsService::~MetaFsService(void)
     if (factory_)
     {
         delete factory_;
+        factory_ = nullptr;
     }
 }
 
@@ -167,27 +165,33 @@ void
 MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
     const cpu_set_t schedSet, const cpu_set_t mioSet)
 {
+    int countOfScheduler = CPU_COUNT(&schedSet);
+    if (!_CheckSchedulerSettingFromConfig(countOfScheduler))
+    {
+        POS_TRACE_ERROR(EID(MFS_NEED_TO_CHECK_SCHEDULER_SETTING),
+            "A scheduler needs to be created at least, countOfScheduler:{}",
+            countOfScheduler);
+        assert(false);
+    }
+
     const std::string threadName = "MetaScheduler";
     int numOfSchedulersCreated = 0;
+    bool needToIgnoreNuma = (countOfScheduler < MAX_SCHEDULER_COUNT) ? true : false;
+
+    configManager_->SetIgnoreNumaDedicatedScheduling(needToIgnoreNuma);
+
     for (uint32_t coreId = 0; coreId < totalCoreCount; ++coreId)
     {
         if (CPU_ISSET(coreId, &schedSet))
         {
-            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "MetaScheduler #{} is created, coreId: {}",
-                numOfSchedulersCreated, coreId);
-
-            if (!_CheckIfPossibleToCreateScheduler(numOfSchedulersCreated))
-            {
-                POS_TRACE_ERROR(EID(MFS_UNNECESSARY_SCHEDULER_SET),
-                    "This meta scheduler will not be created, when the numa_dedicated setting is turned on");
-                assert(false);
-            }
-
             MetaFsIoScheduler* scheduler = factory_->CreateMetaFsIoScheduler(0, coreId, totalCoreCount,
                 threadName, mioSet, configManager_, tp_);
 
-            int numaId = _GetNumaIdConsideringNumaDedicatedScheduling(_GetNumaId(coreId));
+            int numaId = needToIgnoreNuma ? 0 : _GetNumaId(coreId);
+            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+                "MetaScheduler #{} is created, coreId: {}, numaId: [}",
+                numOfSchedulersCreated, coreId, numaId);
+
             if (ioScheduler_.find(numaId) == ioScheduler_.end())
             {
                 ioScheduler_.insert({numaId, scheduler});
@@ -203,14 +207,46 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
             }
         }
     }
+}
 
-    if (numOfSchedulersCreated > MAX_SCHEDULER_COUNT)
+bool
+MetaFsService::_CheckSchedulerSettingFromConfig(const int countOfScheduler) const
+{
+    if (countOfScheduler == 0)
+    {
+        POS_TRACE_ERROR(EID(MFS_SCHEDULER_NONE),
+            "A scheduler needs to be created at least, countOfScheduler:{}",
+            countOfScheduler);
+        return false;
+    }
+    else if (countOfScheduler > MAX_SCHEDULER_COUNT)
     {
         POS_TRACE_ERROR(EID(MFS_MAX_SCHEDULER_EXCEEDED),
-            "It has exceeded the maximum number that can be generated, numOfSchedulersCreated:{}, MAX_SCHEDULER_COUNT: {}",
-            numOfSchedulersCreated, MAX_SCHEDULER_COUNT);
-        assert(false);
+            "It has exceeded the maximum number that can be generated, countOfScheduler:{}, MAX_SCHEDULER_COUNT: {}",
+            countOfScheduler, MAX_SCHEDULER_COUNT);
+        return false;
     }
+
+    if (configManager_->IsSupportingNumaDedicatedScheduling())
+    {
+        if (countOfScheduler < MAX_SCHEDULER_COUNT)
+        {
+            POS_TRACE_WARN(EID(MFS_SCHEDULER_COUNT_SMALLER_THAN_EXPECTED),
+                "Numa_dedicated is set but the count of metafs io scheduler is not more than one");
+            return true;
+        }
+    }
+    else
+    {
+        if (countOfScheduler > 1)
+        {
+            POS_TRACE_ERROR(EID(MFS_UNNECESSARY_SCHEDULER_SET),
+                "This meta scheduler will not be created, when the numa_dedicated setting is turned on");
+            return false;
+        }
+    }
+
+    return true;
 }
 
 uint32_t

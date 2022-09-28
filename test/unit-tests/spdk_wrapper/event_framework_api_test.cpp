@@ -42,19 +42,17 @@ TEST(EventFrameworkApi, SendSpdkEvent_WithEventFuncOneParams_FailToSendMsg)
     NiceMock<MockSpdkEnvCaller>* mockSpdkEnvCaller = new NiceMock<MockSpdkEnvCaller>;
     uint32_t core = 0;
     EventFuncOneParam func = dummyfunction;
-    struct spdk_thread* thread[1];
-    thread[0] = reinterpret_cast<struct spdk_thread*>(0x1); // to make it non-null
     bool expected = true;
     int eventCallSuccess = -1;
     EXPECT_CALL(*mockSpdkEnvCaller, SpdkEnvGetCurrentCore()).WillRepeatedly(Return(core));
 
     // When: Try to send event with one param function
-    EventFrameworkApi* eventFrameworkApi = EventFrameworkApiSingleton::Instance(mockSpdkThreadCaller, mockSpdkEnvCaller);
+    EventFrameworkApi* eventFrameworkApi = new EventFrameworkApi(mockSpdkThreadCaller, mockSpdkEnvCaller);
     bool actual = eventFrameworkApi->SendSpdkEvent(core, func, nullptr);
 
     eventFrameworkApi->CompleteEvents();
     EXPECT_EQ(actual, expected);
-    EventFrameworkApiSingleton::ResetInstance();
+    delete eventFrameworkApi;
 }
 
 TEST(EventFrameworkApi, GetNextReactor_Success)

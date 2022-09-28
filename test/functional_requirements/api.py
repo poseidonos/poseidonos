@@ -210,5 +210,10 @@ def rescan_ssd():
 
 def get_used_size(arrayname):
     arrayinfo = cli.array_info(arrayname)
+    print (arrayinfo)
     data = json.loads(arrayinfo)
     return data['Response']['result']['data']['used']
+
+
+def set_rebuild_autostart(val):
+    return cli.update_config("rebuild", "auto_start", val, "bool")

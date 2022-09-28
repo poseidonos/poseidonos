@@ -30,7 +30,7 @@ TEST(EventCpuPolicy, HandlePolicy_priority_highest)
     QosUserPolicy userPolicy;
     ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_HIGHEST);
+    rebuildUserPolicy.SetRebuildImpact(PRIORITY_HIGH);
     QosParameters parameters;
     ON_CALL(mockQosContext, GetQosParameters()).WillByDefault(ReturnRef(parameters));
     EventCpuPolicy eventCpuPolicy(&mockQosContext);
@@ -52,7 +52,7 @@ TEST(EventCpuPolicy, HandlePolicy_priority_lowest)
     QosUserPolicy userPolicy;
     ON_CALL(mockQosContext, GetQosUserPolicy()).WillByDefault(ReturnRef(userPolicy));
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
-    rebuildUserPolicy.SetRebuildImpact(PRIORITY_LOWEST);
+    rebuildUserPolicy.SetRebuildImpact(PRIORITY_LOW);
     EventCpuPolicy eventCpuPolicy(&mockQosContext);
     eventCpuPolicy.HandlePolicy();
     eventCpuPolicy.HandlePolicy();

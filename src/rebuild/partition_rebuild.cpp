@@ -61,8 +61,8 @@ void PartitionRebuild::Start(RebuildComplete cb)
     if (bhvr != nullptr)
     {
         string partName = PARTITION_TYPE_STR[bhvr->GetContext()->part];
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "Partition rebuild started, part_name:{}", partName);
+        POS_TRACE_INFO(EID(PARTITION_REBUILD_START),
+            "part_name:{}", partName);
         bhvr->GetContext()->SetResult(RebuildState::REBUILDING);
         bhvr->GetContext()->logger->SetPartitionRebuildStart(partName);
         bhvr->GetContext()->rebuildComplete =
@@ -72,8 +72,8 @@ void PartitionRebuild::Start(RebuildComplete cb)
     }
     else
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "It's not a rebuild target partition");
+        POS_TRACE_INFO(EID(PARTITION_REBUILD_SKIP),
+            "not a target partition");
         RebuildResult res;
         res.result = RebuildState::PASS;
         _Complete(res);
@@ -84,6 +84,9 @@ void PartitionRebuild::Stop(void)
 {
     if (GetResult() <= RebuildState::REBUILDING && bhvr != nullptr)
     {
+        string partName = PARTITION_TYPE_STR[bhvr->GetContext()->part];
+        POS_TRACE_INFO(EID(PARTITION_REBUILD_STOP),
+            "part_name:{}", partName);
         bhvr->StopRebuilding();
     }
 }
@@ -108,15 +111,20 @@ RebuildState PartitionRebuild::GetResult(void)
 
 void PartitionRebuild::_Complete(RebuildResult res)
 {
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "PartitionRebuild completed, array:{}, result:{}", res.array, REBUILD_STATE_STR[(int)res.result]);
+    string partition = "";
+    if (bhvr != nullptr)
+    {
+        partition = PARTITION_TYPE_STR[bhvr->GetContext()->part];
+    }
+    POS_TRACE_INFO(EID(PARTITION_REBUILD_END),
+        "array:{}, partition:{}, result:{}", res.array, partition, REBUILD_STATE_STR[(int)res.result]);
     if (completeCb != nullptr)
     {
         completeCb(res);
     }
     else
     {
-        POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG), "no rebuild complete callback");
+        POS_TRACE_ERROR(EID(PARTITION_REBUILD_END), "No proper callback");
     }
 }
 

@@ -67,7 +67,6 @@ class JournalStatusProvider;
 class CheckpointManager;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
-class CallbackSequenceController;
 class BufferedSegmentContextManager;
 
 class Stripe;
@@ -182,6 +181,8 @@ protected:
     ReplayHandler* replayHandler;
     TelemetryPublisher* telemetryPublisher;
     TelemetryClient* telemetryClient;
+
+    bool isInitialized;
 };
 
 } // namespace pos

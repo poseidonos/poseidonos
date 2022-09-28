@@ -73,6 +73,7 @@ func buildMountArrayReq(command string) (*pb.MountArrayRequest, error) {
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var mount_array_arrayName = ""
 var mount_array_enableWriteThrough = false
+var mount_array_targetAddress = ""
 
 func init() {
 	MountArrayCmd.Flags().StringVarP(&mount_array_arrayName,
@@ -83,4 +84,8 @@ func init() {
 	MountArrayCmd.Flags().BoolVarP(&mount_array_enableWriteThrough,
 		"enable-write-through", "w", false,
 		`When specified, the array to be mounted will work with write through mode.`)
+
+	MountArrayCmd.Flags().StringVarP(&mount_array_targetAddress,
+		"traddr", "i", "",
+		`Default target IP address for the array.`)
 }

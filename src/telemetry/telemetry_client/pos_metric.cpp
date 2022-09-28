@@ -40,6 +40,13 @@
 
 namespace pos
 {
+POSMetric::POSMetric()
+: type(POSMetricTypes::MT_NUM_TYPE),
+name("")
+{
+
+}
+
 POSMetric::POSMetric(std::string name_, POSMetricTypes type_)
 {
     name = name_;

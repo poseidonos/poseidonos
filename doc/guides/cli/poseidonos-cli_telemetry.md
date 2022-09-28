@@ -44,6 +44,7 @@ poseidonos-cli telemetry [flags]
 ### SEE ALSO
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli telemetry get-property](poseidonos-cli_telemetry_get-property.md)	 - Get properties of telemetry.
 * [poseidonos-cli telemetry set-property](poseidonos-cli_telemetry_set-property.md)	 - Set properties of telemetry.
 * [poseidonos-cli telemetry start](poseidonos-cli_telemetry_start.md)	 - Start the collection of telemetry data in PoseidonOS.
 * [poseidonos-cli telemetry stop](poseidonos-cli_telemetry_stop.md)	 - Stop the collection of telemetry data in PoseidonOS.

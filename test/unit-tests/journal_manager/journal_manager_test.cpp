@@ -123,8 +123,7 @@ public:
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
-            versionedSegmentCtx, dirtyMapManager, logFilledNotifier,
-            replayHandler, arrayInfo, tp);
+            versionedSegmentCtx, dirtyMapManager, logFilledNotifier, replayHandler, arrayInfo, tp);
     }
 
     virtual void
@@ -180,7 +179,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalDisabled)
 
     // When: Journal is initialized
     ASSERT_TRUE(journal->Init(nullptr, nullptr, nullptr, nullptr,
-                    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
+                    nullptr, contextManager, nullptr, nullptr, nullptr, nullptr, nullptr) == 0);
 
     // Then: Journal should be initialized with INVALID state
     EXPECT_TRUE(journal->GetJournalManagerStatus() == JOURNAL_INVALID);
@@ -304,9 +303,8 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
 {
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
-    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr);
+    JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization
@@ -339,24 +337,6 @@ TEST_F(JournalManagerTestFixture, Dispose_testWithJournalDisabled)
 {
     // Given: Journal config manager is configured to be disabled
     EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(false));
-
-    // When: Journal is disposed
-    journal->Dispose();
-}
-
-TEST_F(JournalManagerTestFixture, Dispose_testWithJournalEnabled)
-{
-    // Given: Journal config manager is configured to be enabled
-    EXPECT_CALL(*config, IsEnabled).WillRepeatedly(Return(true));
-
-    // Then: Log buffer should be disposed
-    EXPECT_CALL(*logBuffer, Dispose);
-    EXPECT_CALL(*bufferAllocator, Dispose);
-    EXPECT_CALL(*dirtyMapManager, Dispose);
-    EXPECT_CALL(*logFilledNotifier, Dispose);
-    EXPECT_CALL(*logWriteHandler, Dispose);
-    EXPECT_CALL(*replayHandler, Dispose);
-    EXPECT_CALL(*versionedSegmentCtx, Dispose);
 
     // When: Journal is disposed
     journal->Dispose();

@@ -1,28 +1,31 @@
 
-#include <vector>
-#include <spdk/nvme_spec.h>
-#include <string>
-
-#include "src/cli/cli_event_code.h"
 #include "src/cli/command_processor.h"
-#include "src/array_mgmt/array_manager.h"
+
+#include <spdk/nvme_spec.h>
+
+#include <string>
+#include <vector>
+
 #include "src/array/array.h"
-#include "src/cli/request_handler.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/array_mgmt/numa_awared_array_creation.h"
+#include "src/cli/cli_event_code.h"
 #include "src/cli/cli_server.h"
+#include "src/cli/request_handler.h"
+#include "src/device/device_manager.h"
+#include "src/event/event_manager.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/include/nvmf_const.h"
+#include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
-#include "src/mbr/mbr_info.h"
+#include "src/logger/preferences.h"
 #include "src/master_context/version_provider.h"
+#include "src/mbr/mbr_info.h"
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
-#include "src/volume/volume_manager.h"
-#include "src/qos/qos_manager.h"
-#include "src/sys_info/space_info.h"
-#include "src/array_mgmt/numa_awared_array_creation.h"
-#include "src/logger/preferences.h"
-#include "src/helper/rpc/spdk_rpc_client.h"
-#include "src/device/device_manager.h"
 #include "src/resource_checker/smart_collector.h"
+#include "src/sys_info/space_info.h"
+#include "src/volume/volume_manager.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -40,7 +43,7 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    
+
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
     reply->mutable_result()->mutable_data()->set_version(version);
 
@@ -68,7 +71,7 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-    
+
     return grpc::Status::OK;
 }
 
@@ -80,7 +83,7 @@ CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, Sto
 
     int eventId = EID(SUCCESS);
     Status status = grpc::Status::OK;
-    
+
     int ret = 0;
     std::vector<ArrayBootRecord> abrList;
     ret = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
@@ -110,7 +113,7 @@ CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, Sto
 
                     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
                     _SetPosInfo(reply->mutable_info());
-                    
+
                     return status;
                 }
             }
@@ -162,45 +165,48 @@ CommandProcessor::ExecuteSetSystemPropertyCommand(const SetSystemPropertyRequest
     qos_backend_policy newBackendPolicy;
 
     std::string level = request->param().level();
-
-    if (level.compare("highest") == 0)
-        {
-            newBackendPolicy.priorityImpact = PRIORITY_HIGHEST;
-        }
-        else if (level.compare("medium") == 0)
-        {
-            newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
-        }
-        else if (level.compare("lowest") == 0)
-        {
-            newBackendPolicy.priorityImpact = PRIORITY_LOWEST;
-        }
-        else
-        {
-            eventId = EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED);
-            POS_TRACE_WARN(EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED), "priority_level:{}", level);
-            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
-            _SetPosInfo(reply->mutable_info());
-            return status;
-        }
-
-        newBackendPolicy.policyChange = true;
-        int retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newBackendPolicy);
-        if (retVal != SUCCESS)
-        {
-            eventId = EID(CLI_SET_SYSTEM_PROPERTY_FAILURE);
-            POS_TRACE_WARN(eventId, "update_backend_policy_return_value:{}", retVal);
-            status = grpc::Status::OK;
-        }
-
+    IODispatcherSubmission* ioDispatcherSubmission = IODispatcherSubmissionSingleton::Instance();
+    if (level.compare("high") == 0)
+    {
+        newBackendPolicy.priorityImpact = PRIORITY_HIGH;
+        ioDispatcherSubmission->SetRebuildImpact(RebuildImpact::High);
+    }
+    else if (level.compare("medium") == 0)
+    {
+        newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
+        ioDispatcherSubmission->SetRebuildImpact(RebuildImpact::Medium);
+    }
+    else if (level.compare("low") == 0)
+    {
+        newBackendPolicy.priorityImpact = PRIORITY_LOW;
+        ioDispatcherSubmission->SetRebuildImpact(RebuildImpact::Low);
+    }
+    else
+    {
+        eventId = EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED);
+        POS_TRACE_WARN(EID(CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED), "priority_level:{}", level);
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return status;
+    }
+
+    newBackendPolicy.policyChange = true;
+    int retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newBackendPolicy);
+    if (retVal != SUCCESS)
+    {
+        eventId = EID(CLI_SET_SYSTEM_PROPERTY_FAILURE);
+        POS_TRACE_WARN(eventId, "update_backend_policy_return_value:{}", retVal);
+        status = grpc::Status::OK;
+    }
+
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return status;
 }
 
 grpc::Status
 CommandProcessor::ExecuteStartTelemetryCommand(const StartTelemetryRequest* request,
-StartTelemetryResponse* reply)
+    StartTelemetryResponse* reply)
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
@@ -210,7 +216,7 @@ StartTelemetryResponse* reply)
     if (!result)
     {
         _SetEventStatus(EID(TELEMETRY_START_FAILURE), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());                    
+        _SetPosInfo(reply->mutable_info());
         return Status(StatusCode::FAILED_PRECONDITION, "");
     }
 
@@ -218,19 +224,19 @@ StartTelemetryResponse* reply)
     if (!config->GetClient().UpdateConfig(TelemetryConfigType::Client, "enabled", true, true))
     {
         _SetEventStatus(EID(TELEMETRY_START_FAILURE_CONFIG_ERROR), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());                    
+        _SetPosInfo(reply->mutable_info());
         return Status(StatusCode::FAILED_PRECONDITION, "");
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-    
+
     return grpc::Status::OK;
 }
 
 grpc::Status
 CommandProcessor::ExecuteStopTelemetryCommand(const StopTelemetryRequest* request,
-StopTelemetryResponse* reply)
+    StopTelemetryResponse* reply)
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
@@ -240,7 +246,7 @@ StopTelemetryResponse* reply)
     if (!result)
     {
         _SetEventStatus(EID(TELEMETRY_STOP_FAILURE), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());                    
+        _SetPosInfo(reply->mutable_info());
         return Status(StatusCode::FAILED_PRECONDITION, "");
     }
 
@@ -248,19 +254,19 @@ StopTelemetryResponse* reply)
     if (!config->GetClient().UpdateConfig(TelemetryConfigType::Client, "enabled", true, true))
     {
         _SetEventStatus(EID(TELEMETRY_STOP_FAILURE_CONFIG_ERROR), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());                    
+        _SetPosInfo(reply->mutable_info());
         return Status(StatusCode::FAILED_PRECONDITION, "");
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-    
+
     return grpc::Status::OK;
 }
 
 grpc::Status
 CommandProcessor::ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyRequest* request,
-SetTelemetryPropertyResponse* reply)
+    SetTelemetryPropertyResponse* reply)
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
@@ -272,11 +278,31 @@ SetTelemetryPropertyResponse* reply)
     if (publicationListPath != "")
     {
         tc->LoadPublicationList(publicationListPath);
-    }    
+    }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-    
+
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteGetTelemetryPropertyCommand(const GetTelemetryPropertyRequest* request, GetTelemetryPropertyResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    TelemetryClient* tc = TelemetryClientSingleton::Instance();
+
+    bool isRunning = tc->IsRunning();
+    std::string publicationListPath = tc->GetPublicationList();    
+
+    reply->mutable_result()->mutable_data()->set_status(isRunning);
+    reply->mutable_result()->mutable_data()->set_publicationlistpath(publicationListPath);
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+
     return grpc::Status::OK;
 }
 
@@ -287,7 +313,7 @@ CommandProcessor::ExecuteResetEventWrrCommand(const ResetEventWrrRequest* reques
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    for ( int eventId = BackendEvent_Start; eventId != BackendEvent_Unknown; eventId++ )
+    for (int eventId = BackendEvent_Start; eventId != BackendEvent_Unknown; eventId++)
     {
         BackendEvent event = static_cast<BackendEvent>(eventId);
         QosManagerSingleton::Instance()->SetEventWeightWRR(event, RESET_EVENT_WRR_DEFAULT_WEIGHT);
@@ -354,7 +380,7 @@ CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* requ
         _SetPosInfo(reply->mutable_info());
         return Status::OK;
     }
-    
+
     if ((weight < 1) || (3 < weight))
     {
         eventId = EID(CLI_UPDATE_EVENT_WRR_FAILURE_WEIGHT_VALUE_RANGE_VIOLATION);
@@ -373,7 +399,7 @@ CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* requ
     }
 
     QosManagerSingleton::Instance()->SetEventWeightWRR(event, weight);
-    
+
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -386,7 +412,7 @@ CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpar
     reply->set_rid(request->rid());
 
     grpc_cli::AddSpareRequest_Param param = request->param();
-    
+
     string arrayName = param.array();
 
     if (param.spare_size() == 0)
@@ -489,16 +515,16 @@ grpc::Status
 CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, CreateArrayResponse* reply)
 {
     grpc_cli::CreateArrayRequest_Param param = request->param();
-    
+
     DeviceSet<string> nameSet;
     string arrayName = param.name();
-    
+
     string dataFt = "RAID5";
     if (param.raidtype().empty() == false)
     {
         dataFt = param.raidtype();
     }
-    
+
     string metaFt = "RAID10";
     if (dataFt == "RAID0" || dataFt == "NONE")
     {
@@ -520,7 +546,7 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
             nameSet.data.push_back(data.devicename());
         }
     }
-    
+
     if (param.spare_size() != 0)
     {
         for (const grpc_cli::DeviceNameList& spare : (request->param()).spare())
@@ -550,7 +576,7 @@ CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* re
 {
     vector<string> buffers;
     string arrayName = (request->param()).name();
-    
+
     string dataFt = (request->param()).raidtype();
     if (dataFt == "")
     {
@@ -570,7 +596,7 @@ CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* re
 
     int dataCnt = 0;
     dataCnt = (request->param()).numdata();
-    
+
     int spareCnt = 0;
     spareCnt = (request->param()).numspare();
 
@@ -597,9 +623,8 @@ CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* re
     else
     {
         QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
-        int event = EID(CLI_AUTOCREATE_ARRAY_SUCCESS);
-        POS_TRACE_INFO(event, "");
-        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        POS_TRACE_INFO(EID(CLI_AUTOCREATE_ARRAY_SUCCESS), "");
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
@@ -640,7 +665,8 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
 {
     string arrayName = (request->param()).name();
     bool isWTenabled = (request->param()).enablewritethrough();
-    
+    string targetAddress = (request->param()).targetaddress();
+
     if (isWTenabled == false)
     {
         bool isWTenabledAtConfig = false;
@@ -657,12 +683,27 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
     }
 
     IArrayMgmt* array = ArrayMgr();
+
     int ret = array->Mount(arrayName, isWTenabled);
     if (0 != ret)
     {
         _SetEventStatus(ret, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
+    }
+
+    if (targetAddress != "")
+    {
+        if (_IsValidIpAddress(targetAddress))
+        {
+            int eventId = EID(MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID);
+            POS_TRACE_WARN(eventId, "targetAddress:{}", targetAddress);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+
+        array->SetTargetAddress(arrayName,targetAddress);
     }
 
     QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
@@ -676,7 +717,7 @@ CommandProcessor::ExecuteUnmountArrayCommand(const UnmountArrayRequest* request,
 {
     string arrayName = (request->param()).name();
 
-    IArrayMgmt* array =  ArrayMgr();
+    IArrayMgmt* array = ArrayMgr();
     int ret = array->Unmount(arrayName);
     if (ret != 0)
     {
@@ -740,7 +781,8 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
                 POS_TRACE_ERROR(EID(ARRAY_MGR_DEBUG_MSG),
                     "Failed to list array"
                     " because of failing to get componentsInfo"
-                    " with given array name. ArrayName: {}", arrayName);
+                    " with given array name. ArrayName: {}",
+                    arrayName);
                 _SetEventStatus(EID(ARRAY_MGR_DEBUG_MSG), reply->mutable_result()->mutable_status());
                 _SetPosInfo(reply->mutable_info());
                 continue;
@@ -762,15 +804,14 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
                 }
                 array->set_index(info->GetIndex());
                 array->set_dataraid(info->GetDataRaidType());
-                array->set_writethroughenabled(info->IsWriteThroughEnabled());   
+                array->set_writethroughenabled(info->IsWriteThroughEnabled());
+                array->set_name(arrayName);
+                array->set_status(arrayStatus);
+                array->set_createdatetime(createDatetime);
+                array->set_updatedatetime(updateDatetime);
+                array->set_capacity(SpaceInfo::TotalCapacity(info->GetIndex()));
+                array->set_used(SpaceInfo::Used(info->GetIndex()));
             }
-
-            array->set_name(arrayName);
-            array->set_status(arrayStatus);
-            array->set_createdatetime(createDatetime);
-            array->set_updatedatetime(updateDatetime);
-            array->set_capacity(SpaceInfo::SystemCapacity(info->GetIndex()));
-            array->set_used(SpaceInfo::Used(info->GetIndex()));
         }
     }
 
@@ -788,7 +829,7 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
     string arrayName = (request->param()).name();
 
     if (arrayName == "")
-    {   
+    {
         int event = EID(CLI_ARRAY_INFO_NO_ARRAY_NAME);
         POS_TRACE_WARN(event, "");
         _SetEventStatus(event, reply->mutable_result()->mutable_status());
@@ -821,7 +862,7 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
     array->set_createdatetime(arrayInfo->GetCreateDatetime());
     array->set_updatedatetime(arrayInfo->GetUpdateDatetime());
     array->set_rebuildingprogress(to_string(arrayInfo->GetRebuildingProgress()));
-    array->set_capacity(SpaceInfo::SystemCapacity(arrayInfo->GetIndex()));
+    array->set_capacity(SpaceInfo::TotalCapacity(arrayInfo->GetIndex()));
     array->set_used(SpaceInfo::Used(arrayInfo->GetIndex()));
     array->set_metaraid(arrayInfo->GetMetaRaidType());
     array->set_dataraid(arrayInfo->GetDataRaidType());
@@ -866,6 +907,20 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
 }
 
 grpc::Status
+CommandProcessor::ExecuteRebuildArrayCommand(const RebuildArrayRequest* request, RebuildArrayResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    string arrayName = (request->param()).name();
+    IArrayMgmt* array =  ArrayMgr();
+    int ret = array->Rebuild(arrayName);
+    _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, SetLogLevelResponse* reply)
 {
     reply->set_command(request->command());
@@ -881,7 +936,7 @@ CommandProcessor::ExecuteSetLogLevelCommand(const SetLogLevelRequest* request, S
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-    
+
     int ret = logger()->SetLevel(level);
 
     POS_TRACE_INFO(ret, "");
@@ -906,7 +961,7 @@ CommandProcessor::ExecuteSetLogPreferenceCommand(const SetLogPreferenceRequest* 
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-    
+
     bool _structuredLogging = (strcasecmp("true", structuredLogging.c_str()) == 0);
     int ret = logger()->SetStrLogging(_structuredLogging);
     logger()->ApplyPreference();
@@ -924,7 +979,7 @@ CommandProcessor::ExecuteLoggerInfoCommand(const LoggerInfoRequest* request, Log
     reply->set_rid(request->rid());
 
     pos_logger::Preferences pref = logger()->GetPreferenceInstance();
-    
+
     reply->mutable_result()->mutable_data()->set_minorlogpath(pref.MinorLogFilePath());
     reply->mutable_result()->mutable_data()->set_majorlogpath(pref.MajorLogFilePath());
     reply->mutable_result()->mutable_data()->set_logfilesizeinmb(to_string(pref.LogFileSize()));
@@ -945,7 +1000,7 @@ CommandProcessor::ExecuteGetLogLevelCommand(const GetLogLevelRequest* request, G
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    
+
     reply->mutable_result()->mutable_data()->set_level(logger()->GetLevel());
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
@@ -985,11 +1040,16 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
     devType = (request->param()).devtype();
     numBlocks = (request->param()).numblocks();
     blockSize = (request->param()).blocksize();
-    numa = (request->param()).numa(); 
+    numa = (request->param()).numa();
 
     uint32_t numaCount = affinityManager->GetNumaCount();
     if (numa >= numaCount)
     {
+        if (spdkRpcClient != nullptr)
+        {
+            delete spdkRpcClient;
+        }
+        
         int eventId = EID(CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL);
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
@@ -1005,6 +1065,11 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
         blockSize,
         numa);
 
+    if (spdkRpcClient != nullptr)
+    {
+        delete spdkRpcClient;
+    }
+
     if (ret.first != 0)
     {
         int eventId = EID(CLI_CREATE_DEVICE_FAILURE);
@@ -1012,12 +1077,7 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
-    }
-
-    if (spdkRpcClient != nullptr)
-    {
-        delete spdkRpcClient;
-    }
+    }    
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -1033,7 +1093,7 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
     list<string> failedArrayList;
     DeviceManagerSingleton::Instance()->ScanDevs();
     int result = ArrayManagerSingleton::Instance()->Load(failedArrayList);
-    
+
     if (result != 0)
     {
         string failedArrayString = "";
@@ -1050,12 +1110,12 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
             failedArrayString += "no array found";
         }
 
-        POS_TRACE_WARN(result, "failedArrays: " + failedArrayString);       
+        POS_TRACE_WARN(result, "failedArrays: " + failedArrayString);
         _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-  
+
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1081,7 +1141,7 @@ CommandProcessor::ExecuteListDeviceCommand(const ListDeviceRequest* request, Lis
     for (size_t i = 0; i < list.size(); i++)
     {
         grpc_cli::Device* device =
-                reply->mutable_result()->mutable_data()->add_devicelist();
+            reply->mutable_result()->mutable_data()->add_devicelist();
         device->set_name(list[i].name);
         device->set_size(list[i].size);
         device->set_modelnumber(list[i].mn);
@@ -1089,12 +1149,11 @@ CommandProcessor::ExecuteListDeviceCommand(const ListDeviceRequest* request, Lis
         device->set_type(list[i].GetType());
         device->set_address(list[i].bdf);
         device->set_class_(list[i].GetClass());
-    
-        string numa = ((list[i].numa == UNKNOWN_NUMA_NODE) ?
-            "UNKNOWN" : to_string(list[i].numa));
+
+        string numa = ((list[i].numa == UNKNOWN_NUMA_NODE) ? "UNKNOWN" : to_string(list[i].numa));
         device->set_numa(numa);
     }
-  
+
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1105,12 +1164,12 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
 {
     reply->set_command(request->command());
     reply->set_rid(request->rid());
-    
+
     string deviceName = (request->param()).name();
-    if(deviceName == "")
+    if (deviceName == "")
     {
         int eventId = EID(CLI_GET_SMART_LOG_NO_DEVICE_NAME);
-        POS_TRACE_WARN(eventId, "");       
+        POS_TRACE_WARN(eventId, "");
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1121,7 +1180,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
     if (ctrlr == nullptr)
     {
         int eventId = EID(CLI_GET_SMART_LOG_DEVICE_NOT_FOUND);
-        POS_TRACE_WARN(eventId, "deviceName:{}", deviceName);       
+        POS_TRACE_WARN(eventId, "deviceName:{}", deviceName);
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1130,7 +1189,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
     struct spdk_nvme_health_information_page payload = {};
     SmartCollector* smartCollector = SmartCollectorSingleton::Instance();
     SmartReturnType ret = smartCollector->CollectPerCtrl(&payload, ctrlr, SmartReqId::NVME_HEALTH_INFO);
-    
+
     if (ret != SmartReturnType::SUCCESS)
     {
         int eventId = EID(CLI_GET_SMART_LOG_FAILURE);
@@ -1141,7 +1200,7 @@ CommandProcessor::ExecuteGetSmartLogCommand(const GetSmartLogRequest* request, G
         return grpc::Status::OK;
     }
 
-    _FillSmartData(payload, reply->mutable_result()->mutable_data());
+    _FillSmartData(&payload, reply->mutable_result()->mutable_data());
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -1159,9 +1218,9 @@ CommandProcessor::_GetEventId(std::string eventName)
         {"meta_rebuild", pos::BackendEvent_MetadataRebuild},
         {"journalio", pos::BackendEvent_JournalIO},
         {"metaio", pos::BackendEvent_MetaIO},
-        {"fe_rebuild", pos::BackendEvent_FrontendIO}
-    };
-    
+        {"flushmap", pos::BackendEvent_FlushMap},
+        {"fe_rebuild", pos::BackendEvent_FrontendIO}};
+
     auto search = eventDict.find(eventName);
     if (search != eventDict.end())
     {
@@ -1176,7 +1235,7 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     string command = request->command();
     reply->set_command(command);
     reply->set_rid(request->rid());
-    
+
     const char* DEFAULT_SERIAL_NUMBER = "POS0000000000000";
     const char* DEFAULT_MODEL_NUMBER = "POS_VOLUME_EXTENTION";
     uint32_t DEFAULT_MAX_NAMESPACES = 256;
@@ -1200,7 +1259,7 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
             _SetPosInfo(reply->mutable_info());
             return grpc::Status::OK;
         }
-        
+
         string key("subsystem");
         string number;
         serialNumber = DEFAULT_SERIAL_NUMBER;
@@ -1262,7 +1321,7 @@ CommandProcessor::ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* re
     reply->set_rid(request->rid());
 
     string subnqn = (request->param()).subnqn();
-    if(subnqn == "")
+    if (subnqn == "")
     {
         POS_TRACE_INFO(EID(DELETE_SUBSYSTEM_FAILURE_SUBNQN_NAME_NOT_SPECIFIED), "input_subnqn:{}", subnqn);
         _SetEventStatus(EID(DELETE_SUBSYSTEM_FAILURE_SUBNQN_NAME_NOT_SPECIFIED), reply->mutable_result()->mutable_status());
@@ -1343,13 +1402,12 @@ CommandProcessor::ExecuteAddListenerCommand(const AddListenerRequest* request, A
 
     SpdkRpcClient rpcClient;
     NvmfTarget target;
-    
+
     const char* DEFAULT_ADRFAM = "IPv4";
     string subnqn = (request->param()).subnqn();
     string transportType = (request->param()).transporttype();
     string targetAddress = (request->param()).targetaddress();
     string transportServiceId = (request->param()).transportserviceid();
-        
 
     if (nullptr == target.FindSubsystem(subnqn))
     {
@@ -1373,7 +1431,7 @@ CommandProcessor::ExecuteAddListenerCommand(const AddListenerRequest* request, A
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-    
+
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1400,7 +1458,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
 
         for (const auto& address : subsystem["listen_addresses"])
         {
-            grpc_cli::Subsystem_AddressInfo* addressInfoListItem = 
+            grpc_cli::Subsystem_AddressInfo* addressInfoListItem =
                 subsystemListItem->add_listenaddresses();
             addressInfoListItem->set_transporttype(address["trtype"].asString());
             addressInfoListItem->set_addressfamily(address["adrfam"].asString());
@@ -1424,7 +1482,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
 
         for (const auto& ns : subsystem["namespaces"])
         {
-            grpc_cli::Subsystem_Namespace* namespaceListItem = 
+            grpc_cli::Subsystem_Namespace* namespaceListItem =
                 subsystemListItem->add_namespaces();
             namespaceListItem->set_nsid(ns["nsid"].asInt());
             namespaceListItem->set_bdevname(ns["bdev_name"].asString());
@@ -1462,7 +1520,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
 
             for (const auto& address : subsystem["listen_addresses"])
             {
-                grpc_cli::Subsystem_AddressInfo* addressInfoListItem = 
+                grpc_cli::Subsystem_AddressInfo* addressInfoListItem =
                     subsystemListItem->add_listenaddresses();
                 addressInfoListItem->set_transporttype(address["trtype"].asString());
                 addressInfoListItem->set_addressfamily(address["adrfam"].asString());
@@ -1486,7 +1544,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
 
             for (const auto& ns : subsystem["namespaces"])
             {
-                grpc_cli::Subsystem_Namespace* namespaceListItem = 
+                grpc_cli::Subsystem_Namespace* namespaceListItem =
                     subsystemListItem->add_namespaces();
                 namespaceListItem->set_nsid(ns["nsid"].asInt());
                 namespaceListItem->set_bdevname(ns["bdev_name"].asString());
@@ -1513,7 +1571,6 @@ CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* re
     uint32_t bufCacheSize = DEFAULT_BUF_CACHE_SIZE;
     uint32_t numSharedBuf = DEFAULT_NUM_SHARED_BUF;
     uint32_t ioUnitSize = DEFAULT_IO_UNIT_SIZE;
-     
 
     trType = (request->param()).transporttype();
     bufCacheSize = (request->param()).bufcachesize();
@@ -1590,11 +1647,74 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     }
 
     IVolumeEventManager* volMgr =
-            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
     if (volMgr != nullptr)
     {
         int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, uuid);
+        if (ret == SUCCESS)
+        {
+            string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);
+            reply->mutable_result()->mutable_data()->set_targetaddress(targetAddress);
+            
+            int eventId = EID(SUCCESS);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            int eventId = ret;
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+
+    int eventId = EID(CREATE_VOL_INTERNAL_ERROR);
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteDeleteVolumeCommand(const DeleteVolumeRequest* request, DeleteVolumeResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string volumeName = "";
+    string arrayName = "";
+
+    volumeName = (request->param()).name();
+    arrayName = (request->param()).array();
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(DELETE_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(DELETE_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IVolumeEventManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+    if (volMgr != nullptr)
+    {
+        int ret = volMgr->Delete(volumeName);
         if (ret == SUCCESS)
         {
             int eventId = EID(SUCCESS);
@@ -1611,7 +1731,67 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
         }
     }
 
-    int eventId = EID(CREATE_VOL_INTERNAL_ERROR);
+    int eventId = EID(DELETE_VOL_INTERNAL_ERROR);
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* request, UnmountVolumeResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string volumeName = "";
+    string arrayName = "";
+
+    volumeName = (request->param()).name();
+    arrayName = (request->param()).array();
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(UNMOUNT_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(UNMOUNT_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IVolumeEventManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+    if (volMgr != nullptr)
+    {
+        int ret = volMgr->Unmount(volumeName);
+        if (ret == SUCCESS)
+        {
+            int eventId = EID(SUCCESS);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            int eventId = ret;
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+
+    int eventId = EID(UNMOUNT_VOL_INTERNAL_ERROR);
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1636,7 +1816,6 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
 
     updatePrimaryVol = (request->param()).updateprimaryvol();
     isPrimaryVol = (request->param()).isprimaryvol();
-    
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
@@ -1658,8 +1837,8 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
     }
 
     IVolumeEventManager* volMgr =
-            VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
     if (volMgr != nullptr)
     {
         if (newVolumeName != "")
@@ -1675,9 +1854,8 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
 
         if (updatePrimaryVol == true)
         {
-            int ret = isPrimaryVol ?
-                volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Primary)
-                : volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Secondary);
+            int ret = isPrimaryVol ? volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Primary)
+                                   : volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Secondary);
 
             if (ret != SUCCESS)
             {
@@ -1699,14 +1877,14 @@ CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 {
     switch (impact)
     {
-        case PRIORITY_HIGHEST:
-            return "highest";
+        case PRIORITY_HIGH:
+            return "high";
 
         case PRIORITY_MEDIUM:
             return "medium";
 
-        case PRIORITY_LOWEST:
-            return "lowest";
+        case PRIORITY_LOW:
+            return "low";
 
         default:
             return "unknown";
@@ -1714,25 +1892,23 @@ CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 }
 
 void
-CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status *status)
+CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status* status)
 {
     std::string eventName = "";
     std::string message = "";
     std::string cause = "";
     std::string solution = "";
-    
-    std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-        PosEventInfo.find(eventId);
-       
-    if (it != PosEventInfo.end())
+
+    auto event_info = eventManager.GetEventInfo();
+    auto it = event_info->find(eventId);
+    if (it != event_info->end())
     {
-        PosEventInfoEntry* entry = it->second;
-        eventName = entry->GetEventName();
-        message = entry->GetMessage();
-        cause = entry->GetCause();
-        solution = entry->GetSolution();
+        eventName = it->second.GetEventName();
+        message = it->second.GetMessage();
+        cause = it->second.GetCause();
+        solution = it->second.GetSolution();
     }
-    
+
     status->set_code(eventId);
     status->set_event_name(eventName);
     status->set_description(message);
@@ -1741,7 +1917,7 @@ CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status *status)
 }
 
 void
-CommandProcessor::_SetPosInfo(grpc_cli::PosInfo *posInfo)
+CommandProcessor::_SetPosInfo(grpc_cli::PosInfo* posInfo)
 {
     std::string version = pos::VersionProviderSingleton::Instance()->GetVersion();
     posInfo->set_version(version);
@@ -1794,72 +1970,72 @@ CommandProcessor::_GetGCMode(pos::IGCInfo* gc, std::string arrayName)
 
 void
 CommandProcessor::_FillSmartData(
-    struct spdk_nvme_health_information_page payload,
+    struct spdk_nvme_health_information_page *payload,
     grpc_cli::SmartLog* data)
 {
     char cString[128];
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.available_spare ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.available_spare ? "WARNING" : "OK");
     string availableSpareSpace(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.device_reliability ? "WARNING" : "OK");
     string temperature(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.device_reliability ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.device_reliability ? "WARNING" : "OK");
     string deviceReliability(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.read_only ? "Yes" : "No");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.read_only ? "Yes" : "No");
     string readOnly(cString);
 
-    snprintf(cString, sizeof(cString), "%s", payload.critical_warning.bits.volatile_memory_backup ? "WARNING" : "OK");
+    snprintf(cString, sizeof(cString), "%s", payload->critical_warning.bits.volatile_memory_backup ? "WARNING" : "OK");
     string volatileMemoryBackup(cString);
 
-    snprintf(cString, sizeof(cString), "%dC", (int)payload.temperature - 273);
+    snprintf(cString, sizeof(cString), "%dC", (int)payload->temperature - 273);
     string currentTemperature(cString);
 
-    snprintf(cString, sizeof(cString), "%u%%", payload.available_spare);
+    snprintf(cString, sizeof(cString), "%u%%", payload->available_spare);
     string availableSpare(cString);
 
-    snprintf(cString, sizeof(cString), "%u%%", payload.available_spare_threshold);
+    snprintf(cString, sizeof(cString), "%u%%", payload->available_spare_threshold);
     string availableSpareThreshold(cString);
 
-    snprintf(cString, sizeof(cString), "%u%%", payload.percentage_used);
+    snprintf(cString, sizeof(cString), "%u%%", payload->percentage_used);
     string lifePercentageUsed(cString);
 
-    _PrintUint128Dec(payload.data_units_read, cString, sizeof(cString));
+    _PrintUint128Dec(payload->data_units_read, cString, sizeof(cString));
     string dataUnitsRead(cString);
 
-    _PrintUint128Dec(payload.data_units_written, cString, sizeof(cString));
+    _PrintUint128Dec(payload->data_units_written, cString, sizeof(cString));
     string dataUnitsWritten(cString);
 
-    _PrintUint128Dec(payload.host_read_commands, cString, sizeof(cString));
+    _PrintUint128Dec(payload->host_read_commands, cString, sizeof(cString));
     string hostReadCommands(cString);
 
-    _PrintUint128Dec(payload.host_write_commands, cString, sizeof(cString));
+    _PrintUint128Dec(payload->host_write_commands, cString, sizeof(cString));
     string hostWriteCommands(cString);
 
-    _PrintUint128Dec(payload.controller_busy_time, cString, sizeof(cString));
+    _PrintUint128Dec(payload->controller_busy_time, cString, sizeof(cString));
     string controllerBusyTime(cString);
 
-    _PrintUint128Dec(payload.power_cycles, cString, sizeof(cString));
+    _PrintUint128Dec(payload->power_cycles, cString, sizeof(cString));
     string powerCycles(cString);
 
-    _PrintUint128Dec(payload.power_on_hours, cString, sizeof(cString));
+    _PrintUint128Dec(payload->power_on_hours, cString, sizeof(cString));
     string powerOnHours(cString);
 
-    _PrintUint128Dec(payload.unsafe_shutdowns, cString, sizeof(cString));
+    _PrintUint128Dec(payload->unsafe_shutdowns, cString, sizeof(cString));
     string unsafeShutdowns(cString);
-    
-    _PrintUint128Dec(payload.media_errors, cString, sizeof(cString));
+
+    _PrintUint128Dec(payload->media_errors, cString, sizeof(cString));
     string unrecoverableMediaErrors(cString);
 
-    _PrintUint128Dec(payload.num_error_info_log_entries, cString, sizeof(cString));
+    _PrintUint128Dec(payload->num_error_info_log_entries, cString, sizeof(cString));
     string lifetimeErrorLogEntries(cString);
 
-    snprintf(cString, sizeof(cString), "%um", payload.warning_temp_time);
+    snprintf(cString, sizeof(cString), "%um", payload->warning_temp_time);
     string warningTemperatureTime(cString);
 
-    snprintf(cString, sizeof(cString), "%um", payload.critical_temp_time);
+    snprintf(cString, sizeof(cString), "%um", payload->critical_temp_time);
     string criticalTemperatureTime(cString);
 
     data->set_availablesparespace(availableSpareSpace);
@@ -1886,10 +2062,10 @@ CommandProcessor::_FillSmartData(
 
     for (int i = 0; i < 8; i++)
     {
-        if (payload.temp_sensor[i] != 0)
+        if (payload->temp_sensor[i] != 0)
         {
-            snprintf(cString, sizeof(cString), "%dC", (int)payload.temp_sensor[i] - 273);
-            string *temperature = data->add_temperaturesensor();
+            snprintf(cString, sizeof(cString), "%dC", (int)payload->temp_sensor[i] - 273);
+            string* temperature = data->add_temperaturesensor();
             *temperature = cString;
         }
     }
@@ -1929,7 +2105,7 @@ CommandProcessor::_GetBiosInfo()
     const std::string getBiosVersionCmd = "dmidecode -s bios-version";
     const std::string getBiosVendorCmd = "dmidecode -s bios-vendor";
     const std::string getBiosReleaseDateCmd = "dmidecode -s bios-release-date";
-    
+
     BiosInfo bios;
     bios.version = _ExecuteLinuxCmd(getBiosVersionCmd);
     bios.vendor = _ExecuteLinuxCmd(getBiosVendorCmd);
@@ -1945,7 +2121,7 @@ CommandProcessor::_GetSystemInfo()
     const std::string getSystemProductNameCmd = "dmidecode -s system-product-name";
     const std::string getSystemSerialNumberCmd = "dmidecode -s system-serial-number";
     const std::string getSystemUuidCmd = "dmidecode -s system-uuid";
-    
+
     SystemInfo system;
     system.manufacturer = _ExecuteLinuxCmd(getSystemManufacturerCmd);
     system.productName = _ExecuteLinuxCmd(getSystemProductNameCmd);
@@ -1962,7 +2138,7 @@ CommandProcessor::_GetBaseboardInfo()
     const std::string getBaseboardProductNameCmd = "dmidecode -s baseboard-product-name";
     const std::string getBaseboardSerialNumberCmd = "dmidecode -s baseboard-serial-number";
     const std::string getBaseboardVersionCmd = "dmidecode -s baseboard-version";
-    
+
     BaseboardInfo baseboard;
     baseboard.manufacturer = _ExecuteLinuxCmd(getBaseboardManufacturerCmd);
     baseboard.productName = _ExecuteLinuxCmd(getBaseboardProductNameCmd);
@@ -1978,7 +2154,7 @@ CommandProcessor::_GetProcessorInfo()
     const std::string getProcessorManufacturerCmd = "dmidecode -s processor-manufacturer";
     const std::string getProcessorVersioneCmd = "dmidecode -s processor-version";
     const std::string getProcessorFrequencyCmd = "dmidecode -s processor-frequency";
-    
+
     ProcessorInfo processor;
     processor.manufacturer = _ExecuteLinuxCmd(getProcessorManufacturerCmd);
     processor.version = _ExecuteLinuxCmd(getProcessorVersioneCmd);
@@ -1991,21 +2167,31 @@ std::string
 CommandProcessor::_ExecuteLinuxCmd(std::string command)
 {
     char buffer[MAX_LINUX_CMD_LENGTH];
-    string result = ""; 
+    string result = "";
     FILE* pipe = popen(command.c_str(), "r");
 
-    if (!pipe) {
-       return "popen failed!";
-    }   
+    if (!pipe)
+    {
+        return "popen failed!";
+    }
 
-    while (!feof(pipe)) {
-       if ((fgets(buffer, MAX_LINUX_CMD_LENGTH, pipe) != NULL))
-          result += buffer;
-    }   
-    
+    while (!feof(pipe))
+    {
+        if ((fgets(buffer, MAX_LINUX_CMD_LENGTH, pipe) != NULL))
+            result += buffer;
+    }
+
     result.erase(std::remove(result.begin(), result.end(), '\n'),
-            result.end());
+        result.end());
     pclose(pipe);
 
     return result;
+}
+
+bool
+CommandProcessor::_IsValidIpAddress(const std::string &ipAddress)
+{
+    struct sockaddr_in sa;
+    int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+    return result != 0;
 }

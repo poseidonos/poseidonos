@@ -35,7 +35,7 @@
 
 #include <string>
 
-#include "pos_event_id.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {

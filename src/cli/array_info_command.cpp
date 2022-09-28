@@ -82,14 +82,14 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     string state = array->GetStateCtx()->ToStateType().ToString();
     string situ = array->GetStateCtx()->GetSituation().ToString();
     data.SetAttribute(JsonAttribute("index", to_string(array->GetIndex())));
-    data.SetAttribute(JsonAttribute("unique_id", to_string(array->GetUniqueId())));
+    data.SetAttribute(JsonAttribute("uniqueId", to_string(array->GetUniqueId())));
     data.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
     data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
     data.SetAttribute(JsonAttribute("createDatetime", "\"" + array->GetCreateDatetime() + "\""));
     data.SetAttribute(JsonAttribute("updateDatetime", "\"" + array->GetUpdateDatetime() + "\""));
     data.SetAttribute(JsonAttribute("rebuildingProgress", to_string(array->GetRebuildingProgress())));
-    data.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::SystemCapacity(array->GetIndex()))+ "\""));
+    data.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::TotalCapacity(array->GetIndex()))+ "\""));
     data.SetAttribute(JsonAttribute("used", "\"" + to_string(SpaceInfo::Used(array->GetIndex())) + "\""));
     data.SetAttribute(JsonAttribute("metaRaid", "\"" + array->GetMetaRaidType() + "\""));
     data.SetAttribute(JsonAttribute("dataRaid", "\"" + array->GetDataRaidType() + "\""));

@@ -89,6 +89,9 @@ BackendEventMinimumPolicy::EnqueueEvent(EventSmartPtr input)
             case BackendEvent_MetaIO:
                 eventQueue[BackendEvent_MetaIO]->EnqueueEvent(input);
                 break;
+            case BackendEvent_FlushMap:
+                eventQueue[BackendEvent_FlushMap]->EnqueueEvent(input);
+                break;
             case BackendEvent_FrontendIO:
                 eventQueue[BackendEvent_FrontendIO]->EnqueueEvent(input);
                 break;

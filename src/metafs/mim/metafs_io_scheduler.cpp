@@ -38,6 +38,7 @@
 #include <string>
 #include <thread>
 
+#include "src/metafs/config/metafs_config_manager.h"
 #include "src/metafs/include/metafs_aiocb_cxt.h"
 #include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
@@ -52,6 +53,22 @@ MetaFsIoScheduler::MetaFsIoScheduler(void)
   TOTAL_CORE_COUNT(0),
   MIO_CORE_SET()
 {
+    mioCoreCount_ = 0;
+    config_ = nullptr;
+    tp_ = nullptr;
+    cpuStallCnt_ = 0;
+    timeInterval_ = 0;
+    currentReqMsg_ = nullptr;
+    chunkSize_ = 0;
+    fileBaseLpn_ = 0;
+    startLpn_ = 0;
+    currentLpn_ = 0;
+    requestCount_ = 0;
+    remainCount_ = 0;
+    extentsCount_ = 0;
+    currentExtent_ = 0;
+    extents_ = nullptr;
+    needToIgnoreNuma_ = false;
 }
 
 MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
@@ -81,6 +98,7 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
   currentExtent_(0),
   extents_(nullptr),
   weight_(weight),
+  needToIgnoreNuma_(false),
   issueCount_(),
   metricNameForStorage_()
 {
@@ -268,13 +286,13 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 uint32_t
 MetaFsIoScheduler::_GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId)
 {
-    return SUPPORT_NUMA_DEDICATED_SCHEDULING ? numaId : 0;
+    return !needToIgnoreNuma_ ? numaId : 0;
 }
 
 uint32_t
 MetaFsIoScheduler::_GetIndexOfWorkerConsideringNumaDedicatedScheduling(const uint32_t numaId)
 {
-    return SUPPORT_NUMA_DEDICATED_SCHEDULING ? currentLpn_ % mioCoreCountInTheSameNuma_[numaId] : currentLpn_ % mioCoreCount_;
+    return !needToIgnoreNuma_ ? currentLpn_ % mioCoreCountInTheSameNuma_[numaId] : currentLpn_ % mioCoreCount_;
 }
 
 void
@@ -287,6 +305,9 @@ MetaFsIoScheduler::_PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWor
     }
     metaIoWorkerList_[numaId].push_back(worker);
     mioCoreCountInTheSameNuma_[numaId]++;
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+        "Create MioHandler, numaId: {}, metaIoWorkerList_[{}].size(): {}, " + worker->GetLogString(),
+        numaId, numaId, metaIoWorkerList_[numaId].size());
 }
 
 void
@@ -365,6 +386,8 @@ MetaFsIoScheduler::StartThread(void)
     POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "Start MetaIoScheduler, " + GetLogString());
 
+    needToIgnoreNuma_ = config_->NeedToIgnoreNumaDedicatedScheduling();
+
     _CreateMioThread();
 }
 
@@ -377,7 +400,7 @@ MetaFsIoScheduler::_CreateMioThread(void)
 
     for (uint32_t coreId = 0; coreId < TOTAL_CORE_COUNT; ++coreId)
     {
-        if (SUPPORT_NUMA_DEDICATED_SCHEDULING)
+        if (!needToIgnoreNuma_)
         {
             if (numaId != numa_node_of_cpu(coreId))
             {
@@ -391,13 +414,10 @@ MetaFsIoScheduler::_CreateMioThread(void)
                 new ScalableMetaIoWorker(handlerId++, coreId, fileName, config_, nullptr);
             mioHandler->StartThread();
             _PushToMioThreadList(coreId, mioHandler);
-
-            POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "Create MioHandler, " + mioHandler->GetLogString());
         }
     }
 
-    if (SUPPORT_NUMA_DEDICATED_SCHEDULING)
+    if (!needToIgnoreNuma_)
     {
         if (!_DoesMioWorkerForNumaExist(numa_node_of_cpu(coreId_)))
         {

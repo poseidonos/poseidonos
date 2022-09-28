@@ -118,7 +118,7 @@ ReadLogBuffer::Start(void)
             std::ostringstream os;
             os << "No logs to replay. Stop replaying";
 
-            POS_TRACE_DEBUG(eventId, os.str());
+            POS_TRACE_INFO(eventId, os.str());
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
             result = eventId;
         }

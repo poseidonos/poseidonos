@@ -33,11 +33,12 @@
 #pragma once
 
 #include <atomic>
+#include <vector>
 
 #include "../log/waiting_log_list.h"
 #include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
 #include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
+#include "src/meta_file_intf/async_context.h"
 #include "src/metafs/lib/concurrent_metafs_time_interval.h"
 
 namespace pos
@@ -74,12 +75,13 @@ private:
 
     IJournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;
+    int numLogGroups;
 
     LogWriteStatistics* logWriteStats;
     WaitingLogList* waitingList;
 
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
+    std::vector<std::atomic<uint64_t>>* numIosRequested;
+    std::vector<std::atomic<uint64_t>>* numIosCompleted;
 
     TelemetryPublisher* telemetryPublisher;
     ConcurrentMetaFsTimeInterval* interval;

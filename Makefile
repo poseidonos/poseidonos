@@ -143,13 +143,20 @@ DEFINE += -DHAVE_ABSEIL
 CXXFLAGS += $(INCLUDE)
 
 LDFLAGS += -ljsoncpp -ljsonrpccpp-common -ljsonrpccpp-client
-LDFLAGS += -no-pie -laio -ltcmalloc
+LDFLAGS += -no-pie -laio
 LDFLAGS += -lnuma
 LDFLAGS += -lyaml-cpp
 LDFLAGS += -ltbb
 LDFLAGS += -lrocksdb
 LDFLAGS += -lstdc++fs
 LDFLAGS += -lisal
+
+ifeq ($(CONFIG_ASAN), y)
+CPPFLAGS += -fno-omit-frame-pointer -fsanitize=address
+LDFLAGS += -fno-omit-frame-pointer -fsanitize=address
+else
+LDFLAGS += -ltcmalloc
+endif
 
 CLI_CERT_DIR = /etc/pos/cert
 CLI_DIR = $(TOP)/tool/cli

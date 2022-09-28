@@ -39,7 +39,6 @@
 #include <vector>
 #include <sstream>
 
-#include "src/include/pos_event_id.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
 #include "src/cli/grpc_cli_server.h"
@@ -49,6 +48,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
+#include "src/event_scheduler/io_timeout_checker.h"
 #include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/flush_command_manager.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
@@ -162,6 +162,11 @@ Poseidonos::Terminate(void)
     SpdkCallerSingleton::Instance()->SpdkBdevPosUnRegisterPoller(UNVMfCompleteHandler);
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
+    IoTimeoutCheckerSingleton::ResetInstance();
+
+    IoTimeoutCheckerSingleton::ResetInstance();
+
+    IoTimeoutCheckerSingleton::ResetInstance();
 
     air_deactivate();
     air_finalize();
@@ -188,6 +193,10 @@ Poseidonos::Terminate(void)
     SmartCollectorSingleton::ResetInstance();
 
     TraceExporterSingleton::ResetInstance();
+    ConfigManagerSingleton::ResetInstance();
+    VersionProviderSingleton::ResetInstance();
+
+    free(GrpcCliServerThread);
 
     POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
 }
@@ -313,6 +322,8 @@ Poseidonos::_SetupThreadModel(void)
     MetaFsServiceSingleton::Instance()->Initialize(coreCount,
         schedulerCPUSet, workerCPUSet);
     FlushCmdManagerSingleton::Instance();
+
+    IoTimeoutCheckerSingleton::Instance()->Initialize();
 }
 
 void
@@ -384,22 +395,21 @@ Poseidonos::_SetPerfImpact(void)
     if (ret == EID(SUCCESS))
     {
         qos_backend_policy newRebuildPolicy;
-        if (impact.compare("highest") == 0)
+        if (impact.compare("high") == 0)
         {
-            newRebuildPolicy.priorityImpact = PRIORITY_HIGHEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_HIGH;
         }
         else if (impact.compare("medium") == 0)
         {
             newRebuildPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
-        else if (impact.compare("lowest") == 0)
+        else if (impact.compare("low") == 0)
         {
-            newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_LOW;
         }
-
         else
         {
-            newRebuildPolicy.priorityImpact = PRIORITY_LOWEST;
+            newRebuildPolicy.priorityImpact = PRIORITY_LOW;
             POS_TRACE_INFO(static_cast<uint32_t>(EID(QOS_SET_EVENT_POLICY)),
                 "Rebuild Perf Impact not supported, Set to default lowest");
         }

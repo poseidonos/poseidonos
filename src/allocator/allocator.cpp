@@ -95,6 +95,16 @@ Allocator::Init(void)
 
         _RegisterToAllocatorService();
         isInitialized = true;
+
+        POS_TRACE_INFO(EID(ALLOCATOR_INITIALIZE),
+            "Allocator of array {} is initialized", iArrayInfo->GetName());
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(ALLOCATOR_INITIALIZE),
+            "Allocator of array {} is already initialized, so skip Init(). \
+            Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            iArrayInfo->GetName());
     }
     return 0;
 }
@@ -108,13 +118,12 @@ Allocator::PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx)
 void
 Allocator::Dispose(void)
 {
-    POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "[Allocator] Dispose, init:{}", isInitialized);
     if (isInitialized == true)
     {
-        POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Start flushing all write buffer stripes");
+        POS_TRACE_INFO(EID(ALLOCATOR_DISPOSE), "Start flushing all write buffer stripes");
         wbStripeManager->FlushAllWbStripes();
 
-        POS_TRACE_INFO(EID(UNMOUNT_ARRAY_DEBUG_MSG), "Start disposing write buffer stripe manager");
+        POS_TRACE_INFO(EID(ALLOCATOR_DISPOSE), "Start disposing write buffer stripe manager");
         wbStripeManager->Dispose();
 
         contextManager->FlushContexts(nullptr, true);
@@ -126,6 +135,16 @@ Allocator::Dispose(void)
             TelemetryClientSingleton::Instance()->DeregisterPublisher(tp->GetName());
         }
         isInitialized = false;
+
+        POS_TRACE_INFO(EID(ALLOCATOR_DISPOSE),
+            "Allocator of array {} is disposed", iArrayInfo->GetName());
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(ALLOCATOR_DISPOSE),
+            "Allocator of array {} is already disposed, so skip Dispose(). \
+            Dispose() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            iArrayInfo->GetName());
     }
 }
 

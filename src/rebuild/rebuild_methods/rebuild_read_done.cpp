@@ -50,8 +50,7 @@ RebuildReadDone::_DoSpecificJob(void)
     int ret = 0;
     if (_GetErrorCount() > 0)
     {
-        ret = EID(IO_RECOVER_DEBUG_MSG);
-        POS_TRACE_WARN(ret, "rebuild read done with errors");
+        ret = EID(REBUILD_READ_FAIL);
     }
 
     readDoneCallback(ret);
@@ -60,4 +59,3 @@ RebuildReadDone::_DoSpecificJob(void)
 }
 
 } // namespace pos
-

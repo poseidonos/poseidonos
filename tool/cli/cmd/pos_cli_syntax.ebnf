@@ -121,11 +121,12 @@ ArrayCmd = "array" ,
   | ListArrayCmd          | AddSpareCmd
   | RemoveSpareCmd        | DeleteArrayCmd
   | CreateArrayCmd        | AutoCreateArrayCmd
-  | ReplaceArrayDeviceCmd
+  | ReplaceArrayDeviceCmd | RebuildArrayCmd
   ) ;
 
 MountArrayCmd = "mount" , ( "--array-name" | "-a" ) ,
-  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ;
+  ArrayName , [ ( "--enable-write-through" | "-w" ) ] ,
+  [ ( "--traddr" | "-i" ) , TargetAddress ] ;
 
 UnmountArrayCmd = "unmount" , ( "--array-name" | "-a" ) ,
   ArrayName , [ "--force" ] ;
@@ -156,6 +157,9 @@ AutoCreateArrayCmd = "autocreate" , ( "--array-name" | "-a" ) ,
   ArrayName , ( "--buffer" | "-b" ) , DeviceName ,
   ( "--num-data-devs" | "-d" ) , Number , [ ( "--num-spare" | "-s" ) , Number ] ,
   [ "--raid" , RaidType ] ;
+
+RebuildArrayCmd = "rebuild" , ( "--array-name" | "-a" ) ,
+  ArrayName ;
 
 VolumeCmd = "volume" ,
   ( CreateVolumeCmd  | DeleteVolumeCmd
@@ -317,14 +321,23 @@ CreateTransportCmd = "create-transport" ,
   ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,
   BufCacheSize ] , [ "--num-shared-buf" , NumSharedBuffers ] ;
 
-TelemetryCmd = "telemetry" , ( TelemetryStartCmd | TelemetryStopCmd ) ;
+TelemetryCmd = "telemetry" ,
+  ( TelemetryStartCmd
+  | TelemetryStopCmd
+  | TelemetrySetPropertyCmd
+  | TelemetryGetPropertyCmd
+  ) ;
 
 TelemetryStartCmd = TelemetryCmd , ( "start" ) ;
 
 TelemetryStopCmd = TelemetryCmd , ( "stop" ) ;
 
-TelemetrySetPropertyCmd = TelemetryCmd , ( "set-property" ) ,
-[ "--publication-list-path" ] , Identifier ;
+TelemetrySetPropertyCmd = TelemetryCmd ,
+  ( "set-property" ) , [ "--publication-list-path" ] ,
+  Identifier ;
+
+TelemetryGetPropertyCmd = TelemetryCmd ,
+  ( "get-property" ) ;
 
 DevelCmd = "devel" ,
   ( ResetMbrCmd

@@ -34,6 +34,9 @@
 
 #include <stdint.h>
 #include <string>
+#include <map>
+
+using namespace std;
 
 namespace pos
 {
@@ -42,8 +45,8 @@ class SpaceInfo
 public:
     static bool IsEnough(uint32_t arrayId, uint64_t size);
     static uint64_t OPSize(uint32_t arrayId);
+    static uint64_t RawCapacity(uint32_t arrayId);
     static uint64_t TotalCapacity(uint32_t arrayId);
-    static uint64_t SystemCapacity(uint32_t arrayId);
     static uint64_t Used(uint32_t arrayId);
     static uint64_t Remaining(uint32_t arrayId);
 };

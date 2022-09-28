@@ -43,6 +43,7 @@ TelemetryClient::TelemetryClient(std::shared_ptr<grpc::Channel> channel_)
     globalPublisher = new GrpcGlobalPublisher(channel_);
     publisherId = 0;
     defaultEnable = false;
+    isRunning = false;
 }
 
 TelemetryClient::TelemetryClient(void)
@@ -113,6 +114,12 @@ TelemetryClient::IsPublisherRunning(std::string name)
 }
 
 bool
+TelemetryClient::IsRunning()
+{
+    return isRunning;
+}
+
+bool
 TelemetryClient::StartAllPublisher(void)
 {
     POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_START_ALL), "");
@@ -122,6 +129,8 @@ TelemetryClient::StartAllPublisher(void)
         p.second->StartPublishing();
         POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_START), "publisher:{}", p.first);
     }
+
+    isRunning = true;
     return true;
 }
 
@@ -135,6 +144,8 @@ TelemetryClient::StopAllPublisher(void)
         p.second->StopPublishing();
         POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISH_STOP), "publisher:{}", p.first);
     }
+
+    isRunning = false;
     return true;
 }
 
@@ -202,12 +213,19 @@ TelemetryClient::IsPublisherRegistered(const std::string name)
 bool
 TelemetryClient::LoadPublicationList(std::string filePath)
 {
+    publicationListPath = filePath;
     for (auto &p : publisherList)
     {
         p.second->LoadPublicationList(filePath);
     }
     
     return true;
+}
+
+std::string
+TelemetryClient::GetPublicationList()
+{
+    return publicationListPath;
 }
 
 } // namespace pos

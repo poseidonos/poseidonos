@@ -76,7 +76,9 @@ ReplicatorVolumeSubscriber::Dispose(void)
 void
 ReplicatorVolumeSubscriber::Shutdown(void)
 {
-
+    Dispose();
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "ReplicatorVolumeSubscriber has been Shudowned (arrayId = {}, arrayName = {})",
+        arrayId, arrayName);
 }
 
 void

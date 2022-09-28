@@ -126,6 +126,8 @@ static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capaci
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
 static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
 static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_cnt";
+static const std::string TEL60004_ARRAY_CAPACITY_TOTAL = "array_capacity_total";
+static const std::string TEL60005_ARRAY_CAPACITY_USED = "array_capacity_used";
 
 static const std::string TEL70000_READ_IOPS_NETWORK = "read_iops_network";
 static const std::string TEL70001_READ_BPS_NETWORK = "read_bps_network";
@@ -199,5 +201,6 @@ static const std::string TEL140008_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_i
 static const std::string TEL140009_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
 static const std::string TEL140010_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
 static const std::string TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
+static const std::string TEL140012_COUNT_OF_TIMEOUT_IO_CNT = "count_of_timeout_io_cnt";
 
 } // namespace pos

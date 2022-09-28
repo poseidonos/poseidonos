@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include <functional>
+#include <vector>
 
 #include "src/include/smart_ptr_type.h"
 
@@ -42,9 +42,6 @@ class LogWriteHandler;
 class LogWriteContext;
 class EventScheduler;
 
-using GcStripeLogWriteCallback = std::function<int(LogWriteContext*)>;
-
-// TODO (huijeong.kim) : move to class to general folder to be used at everywhere in journal
 class JournalEventFactory
 {
 public:
@@ -53,12 +50,15 @@ public:
 
     virtual void Init(EventScheduler* scheduler, LogWriteHandler* logWriteHandler);
 
-    virtual EventSmartPtr CreateGcLogWriteCompletedEvent(EventSmartPtr callback);
-    virtual EventSmartPtr CreateGcStripeLogWriteRequestEvent(LogWriteContext* callbackContext);
+    virtual EventSmartPtr CreateLogWriteEvent(LogWriteContext* callbackContext);
+
+    virtual EventSmartPtr CreateGcLogWriteEvent(std::vector<LogWriteContext*> blockContexts,
+        EventSmartPtr gcLogWriteCompleted);
+    virtual EventSmartPtr CreateGcBlockLogWriteCompletedEvent(EventSmartPtr callback);
 
 private:
     EventScheduler* eventScheduler = nullptr;
-    GcStripeLogWriteCallback gcCallbackFunc;
+    LogWriteHandler* logWriteHandler = nullptr;
 };
 
 } // namespace pos

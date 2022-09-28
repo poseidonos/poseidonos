@@ -3,4 +3,4 @@ Version: 0.11.0-rc6-+
 Maintainer: PoseidonOS Packaging <packaging@poseidonos.com>
 Description: PoseidonOS
 Architecture: amd64
-Depends: libibverbs-dev (>= 17.1-1ubuntu0.2), librdmacm-dev (>= 17.1-1ubuntu0.2), libjsonrpccpp-dev (>= 0.7.0-1build2), libjsoncpp-dev (>= 1.7.4-3), libyaml-cpp-dev (>= 0.5.2-4ubuntu1), libtbb-dev (>= 2017~U7-8), libc-ares-dev (>= 1.14.0-1ubuntu0.1), libaio1 (>= 0.3.110-5ubuntu0.1), mandoc (>= 1.14.3-3), libgoogle-perftools-dev (>= 2.5-2.2ubuntu3), librocksdb-dev (>= 5.8.8-1), prometheus (>= 2.1.0+ds-1), prometheus-node-exporter (>= 0.15.2+ds-1), libisal-dev (>=2.21.0-1)
+Depends: libibverbs-dev (>= 17.1-1ubuntu0.2), librdmacm-dev (>= 17.1-1ubuntu0.2), libjsonrpccpp-dev (>= 0.7.0-1build2), libjsoncpp-dev (>= 1.7.4-3), libyaml-cpp-dev (>= 0.5.2-4ubuntu1), libtbb-dev (>= 2017~U7-8), libc-ares-dev (>= 1.14.0-1ubuntu0.1), libaio1 (>= 0.3.110-5ubuntu0.1), mandoc (>= 1.14.3-3), libgoogle-perftools-dev (>= 2.5-2.2ubuntu3), librocksdb-dev (>= 5.8.8-1), docker.io (>= 20.10.7-0ubuntu5~18.04.3), prometheus-node-exporter (>= 0.15.2+ds-1), libisal-dev (>=2.21.0-1)

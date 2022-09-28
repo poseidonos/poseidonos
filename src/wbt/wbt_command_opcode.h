@@ -113,7 +113,10 @@ enum WbtCommandOpcode
 
     NUM_WBT_CMDS,
 
-    GET_JOURNAL_STATUS
+    GET_JOURNAL_STATUS,
+
+    // Config
+    UPDATE_CONFIG
 };
 
 } // namespace pos

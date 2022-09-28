@@ -408,11 +408,11 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenInputsAreValid)
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
+    EXPECT_CALL(*mockArrDevMgr, GetFaulty).WillOnce(Return(vector<IArrayDevice*>()));
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockSpareDev));
     EXPECT_CALL(mockAbrControl, FindArrayWithDeviceSN).WillOnce(Return(""));
     EXPECT_CALL(*rawPtr, GetSN).WillOnce(Return(""));
-    EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(false));
     EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
 
     Array array("mock", NULL, &mockAbrControl, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
@@ -483,7 +483,7 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
 
-    // Then: we should receive 0 as a return
+    // Then
     ASSERT_EQ(expected, actual);
 }
 
@@ -510,7 +510,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenStateIsNotProper)
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
 
-    // Then: we should receive 0 as a return
+    // Then
     ASSERT_EQ(STATE_CANNOT_ADD_SPARE, actual);
 }
 
@@ -544,7 +544,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToAddSpare)
     // When: we try to add a spare device
     int actual = array.AddSpare(spareDevName);
 
-    // Then: we should receive 0 as a return
+    // Then
     ASSERT_EQ(FAILED_TO_ADD_SPARE, actual);
 }
 
@@ -579,7 +579,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     // When: we try to add a spare device
     int actual = array.AddSpare(spareDevName);
 
-    // Then: we should receive 0 as a return
+    // Then
     ASSERT_EQ(FAILED_TO_FLUSH, actual);
 }
 
@@ -716,6 +716,7 @@ TEST(Array, DetachDevice_testIfSpareDeviceIsSuccessfullyDetachedFromUnmountedArr
     // Then: the operation should be successful
     ASSERT_EQ(0, actual);
     DestroyFakeNvmeNamespace(fakeNs); // just for cleanup
+    delete mockArrDev;
 }
 
 TEST(Array, DetachDevice_testIfDataDeviceIsSuccessfullyDetachedFromUnmountedArray)
@@ -850,14 +851,14 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     MockIAbrControl mockAbrControl;
 
     EXPECT_CALL(mockEventScheduler, EnqueueEvent).Times(1);
-    EXPECT_CALL(*mockArrayDeviceManager, GetRebuilding).WillOnce(Return(mockArrayDevice));
+    EXPECT_CALL(*mockArrayDeviceManager, GetRebuilding).WillOnce(Return(vector<IArrayDevice*>{mockArrayDevice}));
     EXPECT_CALL(*mockArrayDevice, GetUblock).WillRepeatedly(Return(mockUblockSharedPtr));
-    EXPECT_CALL(*mockUblockDevice, GetSN).WillOnce(Return(mockDevName));
     EXPECT_CALL(*mockArrayDeviceManager, ExportToMeta).Times(1);
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(4);
     EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(1);
     EXPECT_CALL(*mockState, GetSysState).Times(1);
+    EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(true));
     EXPECT_CALL(*mockArrayDeviceManager, ExportToName).Times(1);
     EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(3);
     EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(3);
@@ -965,10 +966,10 @@ TEST(Array, IsRecoverable_testIfBrokenArrayIsNotRecoverable)
     Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    bool actual = array.IsRecoverable(NULL, NULL);
+    int actual = array.IsRecoverable(NULL, NULL);
 
     // Then
-    ASSERT_FALSE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::FAIL));
 }
 
 TEST(Array, IsRecoverable_testIfUnmountedArrayIsNotRecoverable)
@@ -986,10 +987,10 @@ TEST(Array, IsRecoverable_testIfUnmountedArrayIsNotRecoverable)
     Array array("mock-array", mockArrayRebuilder, NULL, NULL, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    bool actual = array.IsRecoverable(mockArrDev, uBlockPtr);
+    int actual = array.IsRecoverable(mockArrDev, uBlockPtr);
 
     // Then
-    ASSERT_FALSE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::FAIL));
 }
 
 TEST(Array, IsRecoverable_testIfArrayFailingToTranslateIsNotRecoverable)
@@ -1010,7 +1011,7 @@ TEST(Array, IsRecoverable_testIfArrayFailingToTranslateIsNotRecoverable)
     bool actual = array.IsRecoverable(mockArrDev, uBlockPtr);
 
     // Then: TODO(hsung): please check whether "true" is intended. IsRecoverable() is returning true when uBlock is null.
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::SUCCESS));
 }
 
 TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecoverable)
@@ -1051,7 +1052,7 @@ TEST(Array, IsRecoverable_testIfMountedHealthyArrayDetachesDataDeviceAndIsRecove
     bool actual = array.IsRecoverable(mockArrDev, mockUblockDevPtr);
 
     // Then
-    ASSERT_TRUE(actual);
+    ASSERT_EQ(actual, static_cast<int>(IoRecoveryRetType::SUCCESS));
     delete mockArrDev;
 }
 
@@ -1072,22 +1073,6 @@ TEST(Array, FindDevice_testIfArrayDevMgrIsQueriedAgainst)
     ASSERT_EQ(nullptr, actual);
 }
 
-TEST(Array, TriggerRebuild_testIfNullTargetShouldNotBeRetried)
-{
-    // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "mock-array");
-
-    EXPECT_CALL(*mockArrDevMgr, GetFaulty).WillOnce(Return(nullptr));
-
-    Array array("mock-array", NULL, NULL, mockArrDevMgr, NULL, NULL, NULL, NULL, NULL, NULL);
-
-    // When
-    bool actual = array.TriggerRebuild(nullptr);
-
-    // Then
-    ASSERT_FALSE(actual);
-}
-
 TEST(Array, TriggerRebuild_testIfNonFaultyArrayDeviceCanSuccessfullyTriggerRebuild)
 {
     // Given
@@ -1099,7 +1084,7 @@ TEST(Array, TriggerRebuild_testIfNonFaultyArrayDeviceCanSuccessfullyTriggerRebui
     Array array("mock-array", NULL, NULL, mockArrDevMgr, NULL, NULL, NULL, NULL, NULL, NULL);
 
     // When
-    bool actual = array.TriggerRebuild(mockArrDev);
+    bool actual = array.TriggerRebuild(vector<IArrayDevice*>{mockArrDev});
 
     // Then
     ASSERT_TRUE(actual);
@@ -1121,7 +1106,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryWhenTheStateIsntSe
     Array array("mock-array", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    bool actual = array.TriggerRebuild(mockArrDev);
+    bool actual = array.TriggerRebuild(vector<IArrayDevice*>{mockArrDev});
 
     // Then
     ASSERT_FALSE(actual);
@@ -1147,7 +1132,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotRetryRebuildDueToReplac
     Array array("mock-array", NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
-    bool actual = array.TriggerRebuild(mockArrDev);
+    bool actual = array.TriggerRebuild(vector<IArrayDevice*>{mockArrDev});
 
     // Then
     ASSERT_FALSE(actual);
@@ -1183,50 +1168,13 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL);
 
     // When
-    bool actual = array.TriggerRebuild(mockArrDev);
+    bool actual = array.TriggerRebuild(vector<IArrayDevice*>{mockArrDev});
 
     // Then
     ASSERT_FALSE(actual);
     delete mockArrDev;
 
     usleep(10000); // intentionally put some jitter to avoid signal propagated from internally-spawned thread
-}
-
-TEST(Array, TriggerRebuild_testIfRebuildNotTriggeredWhenFlushFailed)
-{
-    // Given
-    MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, "name");
-    MockArrayDevice* mockArrDev = new MockArrayDevice(nullptr);
-    NiceMock<MockIStateControl> mockIStateControl;
-    MockArrayState* mockState = new MockArrayState(&mockIStateControl);
-    MockIAbrControl mockAbrControl;
-    MockPartitionServices* mockSvc = new MockPartitionServices;
-    MockArrayRebuilder mockArrayRebuilder(NULL);
-    std::list<RebuildTarget*> emptyTargets;
-    MockPartitionManager* mockPtnMgr = new MockPartitionManager();
-
-
-    int REPLACE_SUCCESS = 0;
-    int FAILED_TO_FLUSH = -1;
-    EXPECT_CALL(*mockArrDev, GetState).WillOnce(Return(ArrayDeviceState::FAULT));
-    EXPECT_CALL(*mockArrDev, GetUblock).WillOnce(Return(nullptr));
-    EXPECT_CALL(*mockState, SetRebuild).WillOnce(Return(true));
-    EXPECT_CALL(*mockArrDevMgr, ReplaceWithSpare).WillOnce(Return(REPLACE_SUCCESS));
-    EXPECT_CALL(*mockArrDev, SetState(ArrayDeviceState::REBUILD)).Times(1);
-    EXPECT_CALL(*mockArrDevMgr, ExportToMeta).WillOnce(Return(DeviceSet<DeviceMeta>()));
-    EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(FAILED_TO_FLUSH));
-    EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
-    EXPECT_CALL(*mockSvc, GetRebuildTargets).Times(0);
-    EXPECT_CALL(mockArrayRebuilder, Rebuild).Times(0);
-
-    Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL);
-
-    // When
-    bool actual = array.TriggerRebuild(mockArrDev);
-
-    // Then
-    ASSERT_FALSE(actual);
-    delete mockArrDev;
 }
 
 // TODO(srm): Fix the issue of spawning a thread during UT context
@@ -1250,7 +1198,7 @@ TEST(Array, DISABLED_ResumeRebuild_testIfResumeRebuildFailedWhenStateChangeFaile
     Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockSvc, NULL, NULL);
 
     // When
-    bool actual = array.ResumeRebuild(mockArrDev);
+    bool actual = array.ResumeRebuild(vector<IArrayDevice*>{mockArrDev});
 
     // Then
     ASSERT_FALSE(actual);
@@ -1277,7 +1225,7 @@ TEST(Array, DISABLED_ResumeRebuild_testIfResumeRebuildProperly)
     Array array("mock-array", &mockArrayRebuilder, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, mockSvc, NULL, NULL);
 
     // When
-    bool actual = array.ResumeRebuild(mockArrDev);
+    bool actual = array.ResumeRebuild(vector<IArrayDevice*>{mockArrDev});
 
     // Then
     ASSERT_TRUE(actual);

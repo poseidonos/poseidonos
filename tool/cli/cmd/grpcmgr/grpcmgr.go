@@ -2,6 +2,7 @@ package grpcmgr
 
 import (
 	"cli/cmd/globals"
+	"cli/cmd/otelmgr"
 	"context"
 	"errors"
 	"fmt"
@@ -37,11 +38,16 @@ func dialToCliServer() (*grpc.ClientConn, error) {
 	return conn, err
 }
 
-func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
+func SendSystemInfo(ctx context.Context, req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
+	t := otelmgr.NewTracer()
+	t.SetTrace(ctx, globals.GRPC_MGR_APP_NAME, globals.GRPC_SYSTEM_INFO_FUNC_NAME)
+	defer t.Release()
+
 	conn, err := dialToCliServer()
 	if err != nil {
 		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
 			dialErrorMsg, err.Error()))
+		t.RecordError(err)
 		return nil, err
 	}
 	defer conn.Close()
@@ -53,6 +59,7 @@ func SendSystemInfo(req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
 	res, err := c.SystemInfo(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
+		t.RecordError(err)
 		return nil, err
 	}
 
@@ -187,6 +194,29 @@ func SendSetTelemetryPropertyRpc(req *pb.SetTelemetryPropertyRequest) (*pb.SetTe
 	defer cancel()
 
 	res, err := c.SetTelemetryProperty(ctx, req)
+
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendGetTelemetryProperty(req *pb.GetTelemetryPropertyRequest) (*pb.GetTelemetryPropertyResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.GetTelemetryProperty(ctx, req)
 
 	if err != nil {
 		log.Error("error: ", err.Error())
@@ -474,6 +504,28 @@ func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
 	defer cancel()
 
 	res, err := c.ArrayInfo(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendRebuildArray(req *pb.RebuildArrayRequest) (*pb.RebuildArrayResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.RebuildArray(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err
@@ -848,6 +900,50 @@ func SendCreateVolume(req *pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, er
 	defer cancel()
 
 	res, err := c.CreateVolume(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendDeleteVolume(req *pb.DeleteVolumeRequest) (*pb.DeleteVolumeResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.DeleteVolume(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendUnmountVolume(req *pb.UnmountVolumeRequest) (*pb.UnmountVolumeResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.UnmountVolume(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err

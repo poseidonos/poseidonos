@@ -240,6 +240,7 @@ UnvmeCmd::_RequestDeallocate(UnvmeDeviceContext* deviceContext,
         rangeDefinition, num_range, callbackFunc, static_cast<void*>(ioCtx));
     POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
         "Requesting Trimming from {} with block number : {}", startingLBA, NumberOfLogicalBlocks);
+    free(rangeDefinition);
     return returnValue;
 }
 

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"cli/cmd/devicecmds"
 	"cli/cmd/globals"
 	"cli/cmd/loggercmds"
+	"cli/cmd/otelmgr"
 	"cli/cmd/qoscmds"
 	"cli/cmd/subsystemcmds"
 	"cli/cmd/systemcmds"
@@ -110,6 +112,7 @@ func init() {
 	regGlobalFlags()
 	log.SetOutput(RootDir)
 	addCmd()
+	regTracer()
 }
 
 func regFlags() {
@@ -145,6 +148,13 @@ func addCmd() {
 	RootCmd.AddCommand(telemetrycmds.TelemetryCmd)
 	RootCmd.AddCommand(completionCmd)
 	RootCmd.AddCommand(clustercmds.ClusterCmd)
+}
+
+func regTracer() {
+	err := otelmgr.GetOtelManagerInstance().InitTracerProvider(context.Background(), globals.OTEL_SERVICE_NAME, getVersion())
+	if err != nil {
+		fmt.Printf("fail to initialize TracerProvider")
+	}
 }
 
 // TODO(mj): this function remains for wbt and file commands. This needs to be revised.

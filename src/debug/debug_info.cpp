@@ -50,6 +50,7 @@
 #include "src/io/general_io/rba_state_service.h"
 #include "src/pos_replicator/posreplicator_manager.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/master_context/config_manager.h"
@@ -66,6 +67,7 @@
 #include "src/volume/volume_service.h"
 #include "src/resource_manager/memory_manager.h"
 #include "src/resource_checker/resource_checker.h"
+#include "src/event_scheduler/io_timeout_checker.h"
 
 namespace pos
 {
@@ -105,7 +107,8 @@ DebugInfo::DebugInfo(void)
   telemetryConfig(nullptr),
   memoryManager(nullptr),
   posReplicatorManager(nullptr),
-  resourceChecker(nullptr)
+  resourceChecker(nullptr),
+  ioTimeoutChecker(nullptr)
 {
 }
 
@@ -133,6 +136,7 @@ DebugInfo::Update(void)
     volumeEventPublisher = VolumeEventPublisherSingleton::Instance();
     eventScheduler = EventSchedulerSingleton::Instance();
     ioDispatcher = IODispatcherSingleton::Instance();
+    ioDispatcherSubmission = IODispatcherSubmissionSingleton::Instance();
     qosManager = QosManagerSingleton::Instance();
     flushCmdManager = FlushCmdManagerSingleton::Instance();
     versionProvider = VersionProviderSingleton::Instance();
@@ -148,6 +152,7 @@ DebugInfo::Update(void)
     signalHandler = SignalHandlerSingleton::Instance();
     posReplicatorManager = PosReplicatorManagerSingleton::Instance();
     resourceChecker = ResourceCheckerSingleton::Instance();
+    ioTimeoutChecker = IoTimeoutCheckerSingleton::Instance();
 }
 // LCOV_EXCL_STOP
 } // namespace pos

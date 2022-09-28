@@ -74,7 +74,7 @@ public:
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual int FlushContexts(EventSmartPtr callback, bool sync);
+    virtual int FlushContexts(EventSmartPtr callback, bool sync, int logGroupId = ALL_LOG_GROUP);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
     virtual SegmentId AllocateRebuildTargetSegment(void);
@@ -101,15 +101,12 @@ public:
     virtual GcCtx* GetGcCtx(void) { return gcCtx; }
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
-    virtual void SyncLogGroup(int logGroupId);
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
     virtual void ResetFlushedInfo(int logGroupId);
+    virtual void SetAllocateDuplicatedFlush(bool flag);
 
 private:
-    void _SyncLogGroup(int logGroupId);
-
     ContextIoManager* ioManager;
-
     AllocatorAddressInfo* addrInfo;
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
@@ -124,7 +121,10 @@ private:
 
     TelemetryPublisher* telPublisher;
 
-    const int ALL_LOG_GROUP = -1;
+    const int INVALID_LOG_GROUP_ID = 0xFFFF;
+    static const int ALL_LOG_GROUP = -1;
+    int logGroupIdInProgress;
+    bool allowDuplicatedFlush;
 };
 
 } // namespace pos

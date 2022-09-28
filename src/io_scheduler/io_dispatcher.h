@@ -87,6 +87,7 @@ private:
     static void _ProcessFrontend(void* ublockDevice);
     static void _AddDeviceToThreadLocalList(UblockSharedPtr device);
     static void _RemoveDeviceFromThreadLocalList(UblockSharedPtr device);
+    static void _SubmitIOInReactor(void* ptr1, void* ptr2);
 
     using IOWorkerMap = std::unordered_map<uint32_t, IOWorker*>;
     using IOWorkerMapIter = IOWorkerMap::iterator;

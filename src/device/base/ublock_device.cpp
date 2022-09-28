@@ -172,8 +172,6 @@ UBlockDevice::Open(void)
         return false;
     }
 
-    returnValue = _WrapupOpenDeviceSpecific(devCtx);
-
     return returnValue;
 }
 
@@ -185,7 +183,7 @@ UBlockDevice::_OpenDeviceDriver(DeviceContext* deviceContextToOpen)
 }
 
 bool
-UBlockDevice::_WrapupOpenDeviceSpecific(DeviceContext* devicecontext)
+UBlockDevice::WrapupOpenDeviceSpecific(void)
 {
     return true;
 }

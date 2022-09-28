@@ -42,11 +42,13 @@
 #include "src/event_scheduler/event_queue.h"
 #include "src/event_scheduler/event_worker.h"
 #include "src/event_scheduler/scheduler_queue.h"
+#include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/qos/qos_manager.h"
+#include "src/spdk_wrapper/accel_engine_api.h"
 
 namespace pos
 {
@@ -97,6 +99,19 @@ EventScheduler::EventScheduler(QosManager* qosManagerArg,
     totalWorkerIDVector.clear();
     ioDispatcher = nullptr;
     terminateStarted = false;
+    ioReactorCount = 0;
+    for (uint32_t coreIndex = 0; coreIndex < MAX_CORE; coreIndex++)
+    {
+        ioReactorCore[coreIndex] = 0;
+    }
+    for (uint32_t coreIndex = 0; coreIndex < MAX_CORE; coreIndex++)
+    {
+        if (AffinityManagerSingleton::Instance()->IsIoReactor(coreIndex))
+        {
+            ioReactorCore[ioReactorCount] = coreIndex;
+            ioReactorCount++;
+        }
+    }
 }
 
 EventScheduler::~EventScheduler(void)
@@ -166,7 +181,38 @@ EventScheduler::EjectIODispatcher(void)
 void
 EventScheduler::EnqueueEvent(EventSmartPtr input)
 {
-    policy->EnqueueEvent(input);
+    if (!affinityManager->UseEventReactor())
+    {
+        policy->EnqueueEvent(input);
+    }
+    else
+    {
+        static std::atomic<uint32_t> lastReactorIndex;
+        uint32_t type = static_cast<uint32_t>(input->GetEventType());
+        if (type == BackendEvent_UserdataRebuild || type == BackendEvent_MetadataRebuild ||
+            type == BackendEvent_FlushMap || type == BackendEvent_GC || type == BackendEvent_Unknown)
+        {
+            type = ReactorType_SpecialEvent;
+        }
+        else
+        {
+            type = ReactorType_IOEvent;
+        }
+
+        uint32_t coreIndex = lastReactorIndex;
+        uint32_t targetCore = ioReactorCore[coreIndex], coreCount = ioReactorCount;
+        bool ret = false;
+        if (type == ReactorType_IOEvent)
+        {
+            ret = SpdkEventScheduler::SendSpdkEvent(targetCore, input);
+            lastReactorIndex = (lastReactorIndex + 1) % coreCount;
+        }
+        else
+        {
+            ret = SpdkEventScheduler::SendSpdkEvent(input);
+        }
+        assert(ret);
+    }
 }
 
 std::queue<EventSmartPtr>

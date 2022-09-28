@@ -50,7 +50,7 @@ RebuildMethod::~RebuildMethod(void)
     {
         if (srcBuffer->IsFull() == false)
         {
-            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+            POS_TRACE_ERROR(EID(REBUILD_BUFFER_WARN),
                 "Some buffers in srcBuffer were not returned but deleted.");
         }
         mm->DeleteBufferPool(srcBuffer);
@@ -60,9 +60,9 @@ RebuildMethod::~RebuildMethod(void)
     {
         if (dstBuffer->IsFull() == false)
         {
-            POS_TRACE_ERROR(EID(REBUILD_DEBUG_MSG),
+            POS_TRACE_ERROR(EID(REBUILD_BUFFER_WARN),
                 "Some buffers in dstBuffer were not returned but deleted.");
-    }
+        }
         mm->DeleteBufferPool(dstBuffer);
         dstBuffer = nullptr;
     }
@@ -78,8 +78,8 @@ RebuildMethod::Init(string owner)
     }
 
     this->owner = owner;
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "Trying initailization, owner:{}, srcSize:{}, dstSize:{}", owner, srcSize, dstSize);
+    POS_TRACE_INFO(EID(REBUILD_METHOD_INIT),
+            "owner:{}, srcSize:{}, dstSize:{}", owner, srcSize, dstSize);
     uint32_t numa = AffinityManagerSingleton::Instance()->GetNumaIdFromCurrentThread();
     BufferInfo srcInfo = {
         .owner = owner,
@@ -90,9 +90,6 @@ RebuildMethod::Init(string owner)
     {
         return false;
     }
-
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "srcBuffer initialized successfully, srcSize:{}", srcSize);
     BufferInfo dstInfo = {
         .owner = owner,
         .size = dstSize,
@@ -104,8 +101,8 @@ RebuildMethod::Init(string owner)
         srcBuffer = nullptr;
         return false;
     }
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "dstBuffer initialized successfully, dstSize:{}", dstSize);
+    POS_TRACE_INFO(EID(REBUILD_BUFFER_INIT_OK),
+            "srcSize:{}, dstSize:{}", srcSize, dstSize);
 
     isInitialized = true;
     return true;

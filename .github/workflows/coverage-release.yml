@@ -1,0 +1,171 @@
+
+name: R4-Coverage_VM_Test
+
+on:
+  schedule:
+    - cron: '0 4-21/4 * * MON-FRI'
+
+  workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'     
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
+
+jobs:
+  Coverage_Test:
+    runs-on: VM
+    timeout-minutes: 5000
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+      with:
+         ref: release/v0.12.0
+    - name: Build Setup
+      working-directory: ${{github.workspace}}
+      run: | 
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+
+    - name: Setup Monitoring Stack
+      uses: ./.github/actions/setup-monitoring-stack
+      with:
+        GA_DETAIL: "NULL"
+
+        POS_EXPORTER_PORT: ${{secrets.POS_EXPORTER_PORT}}
+
+        AMP_REMOTE_WRITE_URL: ${{secrets.AMP_REMOTE_WRITE_URL}}
+        AMP_SIGV4_REGION: ${{secrets.AMP_SIGV4_REGION}}
+        AMP_SIGV4_ACCESS_KEY: ${{secrets.AMP_SIGV4_ACCESS_KEY}}
+        AMP_SIGV4_SECRET_KEY: ${{secrets.AMP_SIGV4_SECRET_KEY}}
+
+        LOGSTASH_PORT: ${{secrets.LOGSTASH_PORT}}
+
+        OS_DOMAIN_ENDPOINT: ${{secrets.OS_DOMAIN_ENDPOINT}}
+        OS_REGION: ${{secrets.OS_REGION}}
+
+    - name: Build UT and Run
+      id: build_ut_and_run
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/unit/ut_build_run_coverage.sh
+        .github/workflows/script/unit/ut_build_run_coverage.sh ${{github.workspace}}
+
+    - name: Volume Test
+      id: volume_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/volume/volume_postcommit.sh
+        .github/workflows/script/volume/volume_postcommit.sh ${{github.workspace}}
+
+    - name: Normal IO Test
+      id: normal_io_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/normal_io.sh
+        .github/workflows/script/normal_io_npor_spor/normal_io.sh ${{github.workspace}}
+
+    - name: NPOR Test
+      id: npor_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/npor.sh
+        .github/workflows/script/normal_io_npor_spor/npor.sh ${{github.workspace}}
+
+    - name: Rebuild Test
+      id: rebuild_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/rebuild/rebuild.sh
+        .github/workflows/script/rebuild/rebuild.sh ${{github.workspace}}
+
+    - name: SPOR Test
+      id: spor_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh
+        .github/workflows/script/normal_io_npor_spor/spor_postcommit.sh ${{github.workspace}}
+
+    - name: WBT Command Test
+      id: wbt_command_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/wb_io_st/wbt_command_coverage.sh
+        .github/workflows/script/wb_io_st/wbt_command_coverage.sh ${{github.workspace}}
+
+    - name: Qos Test 
+      id: qos_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/qos/qos.sh
+        .github/workflows/script/qos/qos.sh ${{github.workspace}} VM
+
+    - name: NVMe Flush Test
+      id: nvme_flush_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/nvme_flush/nvme_flush.sh
+        .github/workflows/script/nvme_flush/nvme_flush.sh ${{github.workspace}}
+
+    - name: GC vm test
+      id: gc_vm_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/gc_vm/gc_vm.sh
+        .github/workflows/script/gc_vm/gc_vm.sh ${{github.workspace}}
+
+    - name: SRM Test
+      id: srm_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/srm/srm.sh
+        .github/workflows/script/srm/srm.sh ${{github.workspace}}
+
+    - name: Various Configuration Test
+      id: various_configuration_test
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/various_config.sh
+        .github/workflows/script/various_config.sh ${{github.workspace}}
+
+    - name: Calculate Code Coverage for UT/IT/ST
+      id: calculate_code_coverage_for_ut_it_st
+      if: always()
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x .github/workflows/script/code_coverage.sh
+        .github/workflows/script/code_coverage.sh ${{github.workspace}}
+
+    - name: Upload POS log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Coverage_LOG
+        path: |
+          /var/log/pos
+
+
+    - name: Upload Gcov Result
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Coverage_Gcov_Result
+        path: |
+          /opt/actions-runner/_work/poseidonos/poseidonos/GcovResult
+          /opt/actions-runner/_work/poseidonos/poseidonos/GcovResult-UT

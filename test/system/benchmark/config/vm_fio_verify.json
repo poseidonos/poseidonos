@@ -1,5 +1,5 @@
 {
-    "Targets": [
+    "TARGETs": [
         {
             "NAME": "Target01",
             "ID": "root",
@@ -122,7 +122,7 @@
             }
         }
     ],
-    "Initiators": [
+    "INITIATORs": [
         {
             "NAME": "Initiator01",
             "ID": "root",
@@ -153,10 +153,10 @@
             ]
         }
     ],
-    "Scenarios": [
+    "SCENARIOs": [
         {
             "PATH": "./test/system/benchmark/scenario/fio_verify.py",
-            "NAME": "fio_precommit",
+            "NAME": "fio_verify",
             "OUTPUT_DIR": "./output",
             "RESULT_FORMAT": "junit_xml",
             "SUBPROC_LOG": true

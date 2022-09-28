@@ -30,6 +30,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstring>
+
 #include "metafs_file_control_api.h"
 
 #include "src/metafs/log/metafs_log.h"
@@ -449,6 +451,7 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName,
 
     // update
     MetaFileContext* context = &cxtList[index];
+    context->Reset();
     context->isActivated = info->data.field.inUse;
     context->fileType = info->data.field.fileProperty.type;
     context->storageType = info->data.field.dataLocation;
@@ -456,10 +459,12 @@ MetaFsFileControlApi::_AddFileContext(std::string& fileName,
     context->fileBaseLpn = info->data.field.extentMap[0].GetStartLpn();
     context->chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     context->extentsCount = info->data.field.extentCnt;
-    context->extents = info->data.field.extentMap;
+    context->CopyExtentsFrom(info->data.field.extentMap, context->extentsCount);
     context->signature = mgmt->GetEpochSignature();
     context->storage = storage;
     assert(context->extentsCount != 0);
+
+    delete info;
 }
 
 void

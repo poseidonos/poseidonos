@@ -25,9 +25,12 @@ func toByte(displayUnit bool, size uint64) string {
 }
 
 func PrintProtoResponse(command string, res protoreflect.ProtoMessage) error {
-	resByte, err := protojson.Marshal(res)
+	m := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}
+	resByte, err := m.Marshal(res)
 	if err != nil {
-		fmt.Println("failed to marshal the protobuf response: %v", err)
+		fmt.Printf("failed to marshal the protobuf response: %v", err)
 		return err
 	}
 
@@ -709,6 +712,22 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 		fmt.Fprintln(w, "RebuildPerfImpact\t: "+res.RESULT.DATA.REBUILDPOLICY)
+
+		w.Flush()
+	case "GETTELEMETRYPROPERTY":
+		res := &pb.GetTelemetryPropertyResponse{}
+		protojson.Unmarshal([]byte(resJSON), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w, "Status\t: "+strconv.FormatBool(res.GetResult().GetData().Status))
+		fmt.Fprintln(w, "PublicationListPath\t: "+res.GetResult().GetData().PublicationListPath)
 
 		w.Flush()
 

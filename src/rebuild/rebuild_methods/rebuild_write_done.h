@@ -45,12 +45,11 @@ class Ubio;
 class RebuildWriteDone : public Callback
 {
 public:
-    RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback, BufferPool* dstBufferPool);
+    RebuildWriteDone(UbioSmartPtr ubio, WriteDoneCallback writeDoneCallback);
 
 private:
     bool _DoSpecificJob(void) override;
     UbioSmartPtr ubio = nullptr;
     WriteDoneCallback writeDoneCallback = nullptr;
-    BufferPool* bufferPool = nullptr;
 };
 } // namespace pos

@@ -165,18 +165,20 @@ TEST(MetaFsWBTApi, FileList_testIfMetaFileInodeWillBeReturned)
     NiceMock<MockMetaFsFileControlApi>* ctrl = new NiceMock<MockMetaFsFileControlApi>(arrayId, storage, nullptr);
     MetaFsWBTApi api(arrayId, ctrl);
 
-    MetaFileInodeInfo original;
-    memcpy(original.data.field.fileName, fileName.c_str(), fileName.length());
-    original.data.field.fd = 1;
+    FileDescriptorType expectedFd = 1;
+    std::string expectedFileName = fileName;
+
+    MetaFileInodeInfo* original = new MetaFileInodeInfo();
+    original->data.field.fd = expectedFd;
+    memcpy(original->data.field.fileName, fileName.c_str(), fileName.length());
     MetaFileInodeDumpCxt result;
 
     api.SetStatus(true);
-    EXPECT_CALL(*ctrl, Wbt_GetMetaFileInode).WillOnce(Return(&original));
+    EXPECT_CALL(*ctrl, Wbt_GetMetaFileInode).WillOnce(Return(original));
 
     EXPECT_EQ(api.GetMetaFileInode(fileName, result, volumeType), true);
-    EXPECT_EQ(result.inodeInfo.data.field.fd, original.data.field.fd);
-    EXPECT_EQ(std::string(result.inodeInfo.data.field.fileName),
-        std::string(original.data.field.fileName));
+    EXPECT_EQ(result.inodeInfo.data.field.fd, expectedFd);
+    EXPECT_EQ(std::string(result.inodeInfo.data.field.fileName), expectedFileName);
 
     delete ctrl;
 }

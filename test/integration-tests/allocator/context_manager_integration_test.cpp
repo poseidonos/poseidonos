@@ -207,11 +207,6 @@ ContextManagerIntegrationTest::TearDown(void)
         delete arrayInfo;
     }
 
-    if (nullptr != tp)
-    {
-        delete tp;
-    }
-
     if (nullptr != tc)
     {
         delete tc;
@@ -271,192 +266,7 @@ ContextManagerIntegrationTest::IncreaseVscOccupiedStripeCount(int logGroupId, in
     return cnt;
 }
 
-TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfValidBlockCountIsIncreasedAndDecreased)
-{
-    uint32_t targetLogGroup = 0;
-    uint32_t firstTestSegId = 2;
-    uint32_t secondTestSegId = 1;
-
-    uint32_t totalValidBlockCountForFirstTestSeg = 0;
-    uint32_t totalValidBlockCountForSecondTestSeg = 0;
-
-    // update data of (log group id: 0, seg id: 2)
-    totalValidBlockCountForFirstTestSeg += IncreaseVscValidBlockCount(targetLogGroup, firstTestSegId, 3);
-    totalValidBlockCountForFirstTestSeg -= DecreaseVscValidBlockCount(targetLogGroup, firstTestSegId, 1);
-
-    // update data of (log group id: 0, seg id: 1)
-    totalValidBlockCountForSecondTestSeg += IncreaseVscValidBlockCount(targetLogGroup, secondTestSegId, 4);
-
-    ctxManager->SyncLogGroup(targetLogGroup);
-
-    // check
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
-}
-
-TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfUpdateAllLogGroupButSyncOnlyOneLogGroup)
-{
-    uint32_t firstTargetLogGroup = 0;
-    uint32_t secondTargetLogGroup = 1;
-
-    uint32_t firstTestSegId = 2;
-    uint32_t secondTestSegId = 1;
-
-    uint32_t totalValidBlockCountForFirstTestSeg = 0;
-    uint32_t totalValidBlockCountForSecondTestSeg = 0;
-
-    // update data of (log group id: 0, seg id: 2)
-    totalValidBlockCountForFirstTestSeg += IncreaseVscValidBlockCount(firstTargetLogGroup, firstTestSegId, 3);
-    totalValidBlockCountForFirstTestSeg -= DecreaseVscValidBlockCount(firstTargetLogGroup, firstTestSegId, 1);
-
-    // update data of (log group id: 0, seg id: 1)
-    totalValidBlockCountForSecondTestSeg += IncreaseVscValidBlockCount(secondTargetLogGroup, secondTestSegId, 4);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), 0);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), 0);
-
-    ctxManager->SyncLogGroup(firstTargetLogGroup);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), 0);
-
-    ctxManager->SyncLogGroup(secondTargetLogGroup);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
-}
-
-TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfResetFlushedInfo)
-{
-    uint32_t firstTargetLogGroup = 0;
-    uint32_t secondTargetLogGroup = 1;
-
-    uint32_t firstTestSegId = 2;
-    uint32_t secondTestSegId = 1;
-
-    uint32_t totalValidBlockCountForFirstTestSeg = 0;
-    uint32_t totalValidBlockCountForSecondTestSeg = 0;
-
-    // update data of (log group id: 0, seg id: 2)
-    totalValidBlockCountForFirstTestSeg += IncreaseVscValidBlockCount(firstTargetLogGroup, firstTestSegId, 3);
-    totalValidBlockCountForFirstTestSeg -= DecreaseVscValidBlockCount(firstTargetLogGroup, firstTestSegId, 1);
-
-    // update data of (log group id: 0, seg id: 1)
-    totalValidBlockCountForSecondTestSeg += IncreaseVscValidBlockCount(secondTargetLogGroup, secondTestSegId, 4);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), 0);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), 0);
-
-    ctxManager->SyncLogGroup(firstTargetLogGroup);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), 0);
-
-    ctxManager->SyncLogGroup(secondTargetLogGroup);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
-
-    ctxManager->ResetFlushedInfo(firstTargetLogGroup);
-    ctxManager->SyncLogGroup(firstTargetLogGroup);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
-
-    ctxManager->SyncLogGroup(secondTargetLogGroup);
-
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg * 2);
-}
-
-TEST_F(ContextManagerIntegrationTest, DISABLED_SyncLogGroup_testIfOccupiedStripedCountIsIncreased)
-{
-    uint32_t targetLogGroup = 0;
-    uint32_t firstTestSegId = 2;
-    uint32_t secondTestSegId = 1;
-
-    uint32_t totalOccupiedStripeCountForFirstTestSeg = 0;
-    uint32_t totalOccupiedStripeCountForSecondTestSeg = 0;
-
-    totalOccupiedStripeCountForFirstTestSeg += IncreaseVscOccupiedStripeCount(targetLogGroup, firstTestSegId, 3);
-    totalOccupiedStripeCountForSecondTestSeg += IncreaseVscOccupiedStripeCount(targetLogGroup, secondTestSegId, 4);
-
-    ctxManager->SyncLogGroup(targetLogGroup);
-
-    // check
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), 0);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), 0);
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetOccupiedStripeCount(),
-        totalOccupiedStripeCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetOccupiedStripeCount(),
-        totalOccupiedStripeCountForSecondTestSeg);
-}
-
-TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_SyncLogGroup)
-{
-    uint32_t firstTargetLogGroup = 0;
-    uint32_t secondTargetLogGroup = 1;
-
-    uint32_t firstTestSegId = 2;
-    uint32_t secondTestSegId = 1;
-
-    uint32_t totalValidBlockCountForFirstTestSeg = 0;
-    uint32_t totalValidBlockCountForSecondTestSeg = 0;
-    uint32_t totalOccupiedStripeCountForFirstTestSeg = 0;
-    uint32_t totalOccupiedStripeCountForSecondTestSeg = 0;
-
-    // update data of (log group id: 0, seg id: 2)
-    totalValidBlockCountForFirstTestSeg += IncreaseVscValidBlockCount(firstTargetLogGroup, firstTestSegId, 3);
-    totalOccupiedStripeCountForFirstTestSeg += IncreaseVscOccupiedStripeCount(firstTargetLogGroup, firstTestSegId, 5);
-
-    totalValidBlockCountForFirstTestSeg -= DecreaseVscValidBlockCount(firstTargetLogGroup, firstTestSegId, 1);
-
-    // update data of (log group id: 0, seg id: 1)
-    totalValidBlockCountForSecondTestSeg += IncreaseVscValidBlockCount(secondTargetLogGroup, secondTestSegId, 4);
-    totalOccupiedStripeCountForSecondTestSeg += IncreaseVscOccupiedStripeCount(secondTargetLogGroup, secondTestSegId, 3);
-
-    int logGroupId = 0;
-    cpHandler->SyncContext(logGroupId);
-
-    // check
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetOccupiedStripeCount(),
-        totalOccupiedStripeCountForFirstTestSeg);
-
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), 0);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetOccupiedStripeCount(), 0);
-
-    ON_CALL(*checkpointFlushCompleted, Execute).WillByDefault([this]() {
-        int result = this->cpHandler->FlushCompleted(ALLOCATOR_META_ID);
-        return result == 0;
-    });
-
-    ON_CALL(*ioManager, FlushContexts(_, _)).WillByDefault([&](EventSmartPtr callback, bool sync) {
-        callback->Execute();
-        return 0;
-    });
-
-    EventSmartPtr flushCallback(checkpointFlushCompleted);
-    ctxManager->FlushContexts(flushCallback, false);
-
-    // To change segmentInfosInFlush in versioned segment ctx.
-    ctxManager->SyncLogGroup(secondTargetLogGroup);
-
-    // Try to sync again with valid block count of first test segment.
-    ctxManager->SyncLogGroup(firstTargetLogGroup);
-
-    // check valid block count of first test segment, it should not be increased after flush.
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetValidBlockCount(), totalValidBlockCountForFirstTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[firstTestSegId].GetOccupiedStripeCount(),
-        totalOccupiedStripeCountForFirstTestSeg);
-
-    // check valid count of second test segment, it should be increased.
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetValidBlockCount(), totalValidBlockCountForSecondTestSeg);
-    EXPECT_EQ(segInfosForSegCtx[secondTestSegId].GetOccupiedStripeCount(),
-        totalOccupiedStripeCountForSecondTestSeg);
-}
-
-TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
+TEST_F(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
 {
     // Constant
     const int TEST_SEG_CNT = 1;
@@ -525,7 +335,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDat
     delete allocatorAddressInfo;
 }
 
-TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
+TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
 {
     NiceMock<MockAllocatorAddressInfo> allocatorAddressInfo;
     NiceMock<MockTelemetryPublisher> telemetryPublisher;
@@ -556,7 +366,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     allocCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(allocCtxFlush->buffer))->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             std::thread allocCtxFlushCallback([&]
             {
@@ -575,7 +385,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     segCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(segCtxFlush->buffer))->sig = SegmentCtx::SIG_SEGMENT_CTX;
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             std::thread segCtxFlushCallback([&]
             {
@@ -600,7 +410,7 @@ TEST(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
     rebuildCtxFlush->buffer = (char*)(new CtxHeader());
     ((CtxHeader*)(rebuildCtxFlush->buffer))->sig = RebuildCtx::SIG_REBUILD_CTX;
     EXPECT_CALL(*rebuildCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback)
+        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             callback();
 

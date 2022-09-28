@@ -41,6 +41,7 @@
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/aio.h"
+#include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/io_scheduler/io_worker.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
@@ -56,6 +57,7 @@
 
 namespace pos
 {
+bool QosManager::needThrottling;
 /* --------------------------------------------------------------------------*/
 /**
  * @Synopsis
@@ -295,6 +297,9 @@ QosManager::PeriodicalJob(uint64_t* nextTick)
             *nextTick = now;
         }
         *nextTick = *nextTick + IBOF_QOS_TIMESLICE_IN_USEC * spdkEnvCaller->SpdkGetTicksHz() / SPDK_SEC_TO_USEC;
+        IODispatcherSubmissionSingleton::Instance()->CheckAndSetBusyMode();
+        IODispatcherSubmissionSingleton::Instance()->RefillRemaining(SPDK_SEC_TO_USEC
+            / IBOF_QOS_TIMESLICE_IN_USEC);
         _ControlThrottling();
     }
 }
@@ -308,6 +313,14 @@ QosManager::_ControlThrottling(void)
     QosUserPolicy& qosUserPolicy = qosContext->GetQosUserPolicy();
     AllVolumeUserPolicy& allVolUserPolicy = qosUserPolicy.GetAllVolumeUserPolicy();
     std::vector<std::pair<uint32_t, uint32_t>> minVols = allVolUserPolicy.GetMinimumGuaranteeVolume();
+    if (minVols.empty())
+    {
+        needThrottling = false;
+    }
+    else
+    {
+        needThrottling = true;
+    }
     for (auto iter : minVols)
     {
         uint32_t arrayId = iter.first;
@@ -777,16 +790,16 @@ QosManager::UpdateBackendPolicy(BackendEvent eventType, qos_backend_policy backe
 {
     std::unique_lock<std::mutex> uniqueLock(policyUpdateLock);
     backendPolicyCli[eventType] = backendPolicy;
-    if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_LOWEST)
+    if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_LOW)
     {
         qos_backend_policy policy;
-        policy.priorityImpact = PRIORITY_HIGHEST;
+        policy.priorityImpact = PRIORITY_HIGH;
         backendPolicyCli[BackendEvent_FrontendIO] = policy;
     }
-    else if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_HIGHEST)
+    else if (eventType == BackendEvent_UserdataRebuild && backendPolicyCli[BackendEvent_UserdataRebuild].priorityImpact == PRIORITY_HIGH)
     {
         qos_backend_policy policy;
-        policy.priorityImpact = PRIORITY_LOWEST;
+        policy.priorityImpact = PRIORITY_LOW;
         backendPolicyCli[BackendEvent_FrontendIO] = policy;
     }
     return QosReturnCode::SUCCESS;

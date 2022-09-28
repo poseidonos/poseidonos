@@ -23,6 +23,8 @@ public:
     MOCK_METHOD(bool, StopUsingDataPool, (std::string name), (override));
     MOCK_METHOD(bool, StartUsingDataPoolForAllPublisher, (), (override));
     MOCK_METHOD(bool, StopUsingDataPoolForAllPublisher, (), (override));
+    MOCK_METHOD(std::string, GetPublicationList, (), (override));
+    MOCK_METHOD(bool, IsRunning, (), (override));
 };
 
 } // namespace pos

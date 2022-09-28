@@ -39,6 +39,6 @@ namespace pos
 class IArrayStateSubscriber
 {
 public:
-    virtual void StateChanged(ArrayStateType& state) = 0;
+    virtual void StateChanged(const ArrayStateType& oldState, const ArrayStateType& newState) = 0;
 };
 } // namespace pos

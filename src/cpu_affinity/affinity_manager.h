@@ -59,6 +59,9 @@ public:
     virtual uint32_t GetNumaIdFromCoreId(uint32_t coreId);
     uint32_t GetCoreCount(CoreType type);
     virtual uint32_t GetNumaCount(void);
+    virtual bool UseEventReactor();
+    virtual bool IsEventReactor(uint32_t reactor);
+    virtual bool IsIoReactor(uint32_t reactor);
 
 private:
     static const uint32_t MAX_NUMA_COUNT = RTE_MAX_NUMA_NODES;

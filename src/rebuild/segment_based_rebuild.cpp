@@ -46,7 +46,7 @@ SegmentBasedRebuild::SegmentBasedRebuild(unique_ptr<RebuildContext> c, IContextM
 : RebuildBehavior(move(c)),
   allocatorSvc(allocatorSvc)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild");
+    POS_TRACE_DEBUG(EID(STRIPES_REBUILD_INIT), "SegmentBasedRebuild");
 }
 
 SegmentBasedRebuild::~SegmentBasedRebuild(void)
@@ -73,8 +73,6 @@ void SegmentBasedRebuild::UpdateProgress(uint32_t val)
     // the val is always 0, but the progress is increased due to reduced remaining.
     uint32_t remainingStripe =
         allocatorSvc->GetRebuildTargetSegmentCount() * ctx->size->stripesPerSegment;
-    POS_TRACE_DEBUG(EID(REBUILD_DEBUG_MSG),
-        "SegmentBasedRebuild::UpdateProgress, remainings:{}", remainingStripe);
     ctx->prog->Update(PARTITION_TYPE_STR[ctx->part], val, remainingStripe);
 }
 
@@ -83,14 +81,15 @@ SegmentBasedRebuild::_Init(void)
 {
     if (isInitialized == false)
     {
+        uint32_t idx = 1;
         for (RebuildMethod* rm : ctx->rm)
         {
-            bool ret = rm->Init("SegmentBasedRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part]);
+            bool ret = rm->Init("SegmentBasedRebuild_" + ctx->array + "_" + PARTITION_TYPE_STR[ctx->part] + "_" + to_string(idx));
             if (ret == false)
             {
                 if (initRetryCnt >= INIT_REBUILD_MAX_RETRY)
                 {
-                    POS_TRACE_ERROR(EID(REBUILD_INIT_FAILED), "part_type:{}, retried:{}",
+                    POS_TRACE_ERROR(EID(REBUILD_BUFFER_INIT_FAIL), "part_type:{}, retried:{}",
                         PARTITION_TYPE_STR[ctx->part], initRetryCnt);
                     ctx->SetResult(RebuildState::FAIL);
                     _Finish(RebuildState::FAIL);
@@ -99,14 +98,16 @@ SegmentBasedRebuild::_Init(void)
                 int logInterval = INIT_REBUILD_MAX_RETRY / 10;
                 if (initRetryCnt % logInterval == 0)
                 {
-                    POS_TRACE_WARN(EID(REBUILD_DEBUG_MSG), "Failed to initialize buffers for segment based rebuild, array:{}, part:{}, retried:{}",
+                    POS_TRACE_WARN(EID(REBUILD_BUFFER_INIT_RETRY), "Failed to initialize buffers for segment based rebuild, array:{}, part:{}, retried:{}",
                         ctx->array, PARTITION_TYPE_STR[ctx->part], initRetryCnt);
                 }
                 initRetryCnt++;
                 return false;
             }
+            idx++;
         }
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild Initialized successfully, {}", PARTITION_TYPE_STR[ctx->part]);
+        POS_TRACE_INFO(EID(REBUILD_BUFFER_INIT_OK), "part:{}, rmCnt:{}",
+            PARTITION_TYPE_STR[ctx->part], ctx->rm.size());
         isInitialized = true;
         initRetryCnt = 0;
     }
@@ -132,10 +133,11 @@ SegmentBasedRebuild::_Recover(void)
     }
 
     uint32_t strCnt = ctx->size->stripesPerSegment;
-    ctx->taskCnt = strCnt;
+    uint32_t callbackCnt = ctx->rm.size();
+    ctx->taskCnt = strCnt * callbackCnt;
     StripeId baseStripe = segId * strCnt;
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-        "Trying to recover, segID:{}, from:{}, cnt:{}", segId, baseStripe, strCnt);
+    POS_TRACE_INFO(EID(STRIPES_REBUILD_BEGIN),
+        "segID:{}, from:{}, taskCnt:{}", segId, baseStripe, ctx->taskCnt);
     for (uint32_t offset = 0; offset < strCnt; offset++)
     {
         StripeId stripeId = baseStripe + offset;
@@ -145,8 +147,8 @@ SegmentBasedRebuild::_Recover(void)
             int ret = rm->Recover(ctx->arrayIndex, stripeId, ctx->size, callback);
             if (ret != 0)
             {
-                POS_TRACE_ERROR(EID(REBUILD_FAILED),
-                    "Failed to recover stripe {} in Partition {} ({})",
+                POS_TRACE_ERROR(ret,
+                    "stripeId:{}, part:{}",
                     stripeId, PARTITION_TYPE_STR[ctx->part]);
                 ctx->SetResult(RebuildState::FAIL);
                 _Finish(RebuildState::FAIL);
@@ -163,13 +165,13 @@ void SegmentBasedRebuild::_RecoverCompleted(SegmentId segmentId, StripeId stripe
     {
         ctx->SetResult(RebuildState::FAIL);
         POS_TRACE_ERROR(result,
-            "Error during rebuild, segID:{}, stripeID:{}, result:{}", segmentId, stripeId, result);
+            "segID:{}, stripeID:{}, result:{}", segmentId, stripeId, result);
     }
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
     if (currentTaskCnt == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
-            "_RecoverCompleted, segID:{}, result:{}", segmentId, (int)(ctx->GetResult()));
+        POS_TRACE_INFO(EID(STRIPES_REBUILD_DONE),
+            "segID:{}, result:{}", segmentId, (int)(ctx->GetResult()));
         allocatorSvc->ReleaseRebuildSegment(segmentId);
         EventSmartPtr nextEvent(new Rebuilder(this));
         nextEvent->SetEventType(BackendEvent_UserdataRebuild);
@@ -180,21 +182,22 @@ void SegmentBasedRebuild::_RecoverCompleted(SegmentId segmentId, StripeId stripe
 void
 SegmentBasedRebuild::_Finish(RebuildState state)
 {
+    POS_TRACE_DEBUG(EID(STRIPES_REBUILD_FINISH), "part:{}", PARTITION_TYPE_STR[ctx->part]);
     if (state == RebuildState::CANCELLED)
     {
-        POS_TRACE_WARN(EID(REBUILD_STOPPED),
+        POS_TRACE_WARN(EID(REBUILD_RESULT_CANCELLED),
             "Partition {} ({}) rebuilding stopped",
             PARTITION_TYPE_STR[ctx->part]);
     }
     else if (state == RebuildState::FAIL)
     {
-        POS_TRACE_WARN(EID(REBUILD_FAILED),
+        POS_TRACE_WARN(EID(REBUILD_RESULT_FAILED),
             "Partition {} ({}) rebuilding failed",
             PARTITION_TYPE_STR[ctx->part]);
     }
     else
     {
-        POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG),
+        POS_TRACE_INFO(EID(REBUILD_RESULT_PASS),
             "Partition {} ({}) rebuilding complete successfully",
             PARTITION_TYPE_STR[ctx->part]);
         ctx->SetResult(RebuildState::PASS);
@@ -209,8 +212,6 @@ SegmentId
 SegmentBasedRebuild::_GetNextSegment(void)
 {
     SegmentId segId = allocatorSvc->AllocateRebuildTargetSegment();
-
-    POS_TRACE_INFO(EID(REBUILD_DEBUG_MSG), "SegmentBasedRebuild::_NextSegment is {}", segId);
     if (segId == UINT32_MAX)
     {
         return ctx->size->totalSegments;

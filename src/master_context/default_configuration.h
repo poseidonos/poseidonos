@@ -169,6 +169,9 @@ private:
         {"enable", "false"},
         {"collector_endpoint", "\"http://localhost:3418/v1/traces\""}
     };
+    vector<ConfigKeyValue> rebuildData = {
+        {"auto_start", "true"}
+    };
 
     using ConfigList =
         std::vector<ConfigModuleData>;
@@ -188,7 +191,8 @@ private:
         {"transport", transportData},
         {"metafs", metaFsData},
         {"write_through", wtData},
-        {"trace", traceData}
+        {"trace", traceData},
+        {"rebuild", rebuildData}
     };
 
     const string CONFIGURATION_PATH = "/etc/pos/";

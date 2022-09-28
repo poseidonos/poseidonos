@@ -33,23 +33,25 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
+#include <yaml-cpp/yaml.h>
+
 #include <atomic>
 #include <iostream>
 #include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
-#include <yaml-cpp/yaml.h>
 
 #include "preferences.h"
 #include "spdlog/spdlog.h"
+#include "src/cli/cli_event_code.h"
 #include "src/dump/dump_module.h"
 #include "src/dump/dump_module.hpp"
-#include "src/lib/singleton.h"
-#include "src/lib/signal_mask.h"
+#include "src/event/event_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/pos_event_id.hpp"
-#include "src/cli/cli_event_code.h"
+#include "src/lib/signal_mask.h"
+#include "src/lib/singleton.h"
 
 #define POS_EVENT_FILE_PATH "/etc/pos/pos_event.yaml"
 
@@ -68,12 +70,13 @@ enum class ModuleInDebugLogDump
     MAX_SIZE,
 };
 
-string BuildPattern(bool logJson);
+string
+BuildPattern(bool logJson);
 
 class Logger
 {
 public:
-// LCOV_EXCL_START
+    // LCOV_EXCL_START
     Logger();
     ~Logger();
 
@@ -104,11 +107,11 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldLog(lvl, eventId))
         {
-            std::unordered_map<int, PosEventInfoEntry*>::const_iterator it =
-                PosEventInfo.find(eventId);
+            auto event_info = eventManager.GetEventInfo();
+            auto it = event_info->find(eventId);
             try
-            {            
-                if (it == PosEventInfo.end())
+            {
+                if (it == event_info->end())
                 {
                     // TODO (mj): currently, we print raw message
                     // when there is no information about the event in PosEventInfo.
@@ -117,32 +120,28 @@ public:
                     // match with PosEventInfo)
                     logger->iboflog_sink(loc, lvl, eventId,
                         fmt::format(
-                            preferences.IsStrLoggingEnabled() ?
-                            "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" :
-                            "\tN/A - {} (cause: N/A, solution: N/A, variables: N/A)",
-                        fmt), args...);
+                            preferences.IsStrLoggingEnabled() ? "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" : "\tN/A - {} (cause: N/A, solution: N/A, variables: N/A)",
+                            fmt),
+                        args...);
                 }
                 else
                 {
-                    PosEventInfoEntry* entry = it->second;
                     logger->iboflog_sink(loc, lvl, eventId,
                         fmt::format(
-                            preferences.IsStrLoggingEnabled() ?
-                                "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" :
-                                "\t{} - {} (cause: {}, solution: {}, variables: {})",
-                            entry->GetEventName(), entry->GetMessage(),
-                            entry->GetCause(), entry->GetSolution(),
-                        fmt), args...);
+                            preferences.IsStrLoggingEnabled() ? "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" : "\t{} - {} (cause: {}, solution: {}, variables: {})",
+                            it->second.GetEventName(), it->second.GetMessage(),
+                            it->second.GetCause(), it->second.GetSolution(),
+                            fmt),
+                        args...);
                 }
             }
-            catch(const std::exception& e)
+            catch (const std::exception& e)
             {
                 try
                 {
-                    logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"",
-                    e.what(), fmt), args...);
+                    logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"", e.what(), fmt), args...);
                 }
-                catch(const std::exception& e)
+                catch (const std::exception& e)
                 {
                     logger->iboflog_sink(loc, lvl, eventId, "expection has occured while parsing the event log: " + std::string(e.what()));
                 }
@@ -197,7 +196,7 @@ private:
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
     pos_logger::Preferences preferences;
-// LCOV_EXCL_STOP
+    // LCOV_EXCL_STOP
 };
 
 using LoggerSingleton = pos::Singleton<Logger>;
@@ -277,30 +276,30 @@ reporter()
     logger()->Poslog(spdlog::source_loc{__FILE__, __LINE__, __FUNCTION__}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__)
 
 #define POS_REPORT_TRACE(eventid, ...)                                                                        \
-    {                                                                                                          \
+    {                                                                                                         \
         logger()->Poslog(spdlog::source_loc{}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__); \
-        reporter()                                                                                             \
+        reporter()                                                                                            \
             ->Poslog(spdlog::source_loc{}, spdlog::level::trace, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
 #define POS_REPORT_WARN(eventid, ...)                                                                        \
-    {                                                                                                         \
+    {                                                                                                        \
         logger()->Poslog(spdlog::source_loc{}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__); \
-        reporter()                                                                                            \
+        reporter()                                                                                           \
             ->Poslog(spdlog::source_loc{}, spdlog::level::warn, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
 #define POS_REPORT_ERROR(eventid, ...)                                                                      \
-    {                                                                                                        \
+    {                                                                                                       \
         logger()->Poslog(spdlog::source_loc{}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__); \
-        reporter()                                                                                           \
+        reporter()                                                                                          \
             ->Poslog(spdlog::source_loc{}, spdlog::level::err, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
 #define POS_REPORT_CRITICAL(eventid, ...)                                                                        \
-    {                                                                                                             \
+    {                                                                                                            \
         logger()->Poslog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__); \
-        reporter()                                                                                                \
+        reporter()                                                                                               \
             ->Poslog(spdlog::source_loc{}, spdlog::level::critical, static_cast<int>(eventid), __VA_ARGS__);     \
     }
 
@@ -317,7 +316,8 @@ public:
     ChangeLogger(Logger* logger, StateT initState)
     : logger_(logger),
       prev_(initState),
-      count_(0)
+      count_(0),
+      logging_(false)
     {
     }
     virtual ~ChangeLogger(void)
@@ -326,6 +326,7 @@ public:
     virtual void LoggingStateChangeConditionally(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int id, StateT currentState, std::string msg)
     {
+        logging_ = false;
         if (prev_ == currentState)
         {
             count_++;
@@ -335,6 +336,7 @@ public:
         if (logger_)
         {
             logger_->Poslog(loc, lvl, id, msg + " current_state:{}, prev_state:{}, prev_state_repeat_count:{} times", prev_, currentState, count_);
+            logging_ = true;
         }
         count_ = 0;
         prev_ = currentState;
@@ -343,11 +345,16 @@ public:
     {
         return count_;
     }
+    virtual bool IsLoggingStateChanged(void)
+    {
+        return logging_;
+    }
 
 private:
     pos::Logger* logger_;
     StateT prev_;
     std::atomic<uint64_t> count_;
+    bool logging_;
 };
 } // namespace pos
 

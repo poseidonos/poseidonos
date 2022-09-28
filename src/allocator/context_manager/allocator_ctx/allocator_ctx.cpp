@@ -337,5 +337,4 @@ AllocatorCtx::GetNumSections(void)
 {
     return NUM_ALLOCATOR_CTX_SECTION;
 }
-
 }  // namespace pos

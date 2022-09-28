@@ -58,7 +58,6 @@ public:
     void UpdateVolumeParameter(uint32_t volId);
     void UpdateContextResourceDetails(void);
     void UpdateContextUserRebuildPolicy(void);
-    bool VolParamActivities(uint32_t volId, uint32_t rector);
 
 private:
     uint32_t arrayId;

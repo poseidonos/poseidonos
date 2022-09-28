@@ -13,7 +13,7 @@ public:
     MOCK_METHOD(void, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, LoadContext, (), (override));
-    MOCK_METHOD(int, Flush, (AllocatorCtxIoCompletion clientCallback), (override));
+    MOCK_METHOD(int, Flush, (AllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
     MOCK_METHOD(char*, GetSectionAddr, (int section), (override));
     MOCK_METHOD(int, GetSectionSize, (int section), (override));

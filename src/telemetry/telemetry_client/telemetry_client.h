@@ -64,12 +64,16 @@ public:
     virtual bool Notify(const std::string& key, const std::string& value) override;
     virtual bool IsPublisherRegistered(const std::string name);
     virtual bool LoadPublicationList(std::string filePath);
+    virtual std::string GetPublicationList(void);
+    virtual bool IsRunning(void);
 
 private:
+    std::string publicationListPath;
     std::map<std::string, TelemetryPublisher*> publisherList;
     GrpcGlobalPublisher* globalPublisher;
     std::atomic<uint64_t> publisherId;
     bool defaultEnable;
+    bool isRunning;
 };
 
 using TelemetryClientSingleton = Singleton<TelemetryClient>;

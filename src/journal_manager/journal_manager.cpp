@@ -80,7 +80,8 @@ JournalManager::JournalManager(void)
   logFilledNotifier(nullptr),
   replayHandler(nullptr),
   telemetryPublisher(nullptr),
-  telemetryClient(nullptr)
+  telemetryClient(nullptr),
+  isInitialized(false)
 {
 }
 
@@ -122,6 +123,7 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     checkpointManager = cpManager;
     dirtyMapManager = dirtyManager;
     logFilledNotifier = logBufferWriteDoneNotifier;
+
     replayHandler = replay;
     arrayInfo = info;
 
@@ -192,7 +194,10 @@ JournalManager::~JournalManager(void)
         {
             telemetryClient->DeregisterPublisher(name);
         }
+    }
 
+    if (telemetryPublisher != nullptr)
+    {
         delete telemetryPublisher;
     }
     delete replayHandler;
@@ -219,9 +224,9 @@ JournalManager::~JournalManager(void)
 IVersionedSegmentContext*
 JournalManager::_CreateVersionedSegmentCtx(void)
 {
-    if (config->IsEnabled() == true)
+    if ((true == config->IsEnabled()) && (true == config->IsVscEnabled()))
     {
-        return new DummyVersionedSegmentCtx();
+        return new VersionedSegmentCtx();
     }
     else
     {
@@ -239,26 +244,41 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 {
     int result = 0;
 
-    if (config->IsEnabled() == true)
+    if (isInitialized == false)
     {
-        journalingStatus.Set(JOURNAL_INIT);
+        if (config->IsEnabled() == true)
+        {
+            journalingStatus.Set(JOURNAL_INIT);
 
-        result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
-        if (result < 0)
-        {
-            return result;
-        }
-        _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
-            wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
+            result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
+            if (result < 0)
+            {
+                return result;
+            }
+            _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
+                wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
-        if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
-        {
-            result = _DoRecovery();
+            ctxManager->SetAllocateDuplicatedFlush(false);
+
+            if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
+            {
+                result = _DoRecovery();
+            }
+            else
+            {
+                result = _Reset();
+            }
         }
-        else
-        {
-            result = _Reset();
-        }
+
+        isInitialized = true;
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZE), "Journal manager for array {} is initialized", arrayInfo->GetName());
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(JOURNAL_MANAGER_INITIALIZE),
+            "Journal manager for array {} is already initialized, so skip Init(). \
+            Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            arrayInfo->GetName());
     }
 
     return result;
@@ -337,14 +357,27 @@ JournalManager::_DoRecovery(void)
 void
 JournalManager::Dispose(void)
 {
-    if (config->IsEnabled() == true)
+    if (isInitialized == true)
     {
-        _Reset();
-        if ((telemetryClient != nullptr) && (telemetryPublisher != nullptr))
+        if (config->IsEnabled() == true)
         {
-            telemetryClient->DeregisterPublisher(telemetryPublisher->GetName());
+            _Reset();
+            if ((telemetryClient != nullptr) && (telemetryPublisher != nullptr))
+            {
+                telemetryClient->DeregisterPublisher(telemetryPublisher->GetName());
+            }
+            _DisposeModules();
         }
-        _DisposeModules();
+
+        isInitialized = false;
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_DISPOSE), "Journal manager for array {} is disposed", arrayInfo->GetName());
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(JOURNAL_MANAGER_DISPOSE),
+            "Journal manager for array {} is already disposed, so skip Dispose(). \
+            Dispose() is designed to be idempotent, but needs developer's further attention when called multiple times",
+            arrayInfo->GetName());
     }
 }
 
@@ -466,7 +499,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
     volumeEventHandler->Init(logFactory, checkpointManager, dirtyMapManager, logWriteHandler,
         config, contextManager, eventScheduler);
-    journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus);
+    journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus, eventScheduler);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);

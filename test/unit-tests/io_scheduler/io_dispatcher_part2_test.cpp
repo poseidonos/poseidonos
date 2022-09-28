@@ -135,79 +135,14 @@ TEST(IODispatcher, Submit_Reactor_Async_Recovery)
 
     // Then 1: Expect actual value and expected value should be same
     EXPECT_EQ(actual, expected);
-
-    // When 2: Call Submit with MockUbio, false(async) and true(isRecoveryNeeded)
-    // But ubio doesn't need recovery
-    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
-    ON_CALL(mockUBlockDevice, SubmitAsyncIO(_)).WillByDefault(Return(3));
-    ON_CALL(*ubio.get(), NeedRecovery()).WillByDefault(Return(false));
-    ON_CALL(*ubio.get(), GetUBlock()).WillByDefault(Return(&mockUBlockDevice));
-    EXPECT_CALL(*ubio.get(), GetUBlock()).Times(AtLeast(1));
-    expected = 3;
-    actual = ioDispatcher.Submit(ubio, false, true);
-
-    // Then 2: Expect actual value and expected value should be same
-    EXPECT_EQ(actual, expected);
 }
 
 TEST(IODispatcher, Submit_Reactor_Async_NotRecovery)
 {
-    // Given: MockEventFrameworkApi, IODispatcher, MockUbio, MockUBlockDevice
-    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
-    ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(true));
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
-    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
-    ON_CALL(mockUBlockDevice, SubmitAsyncIO(_)).WillByDefault(Return(4));
-    NiceMock<MockArrayDevice> mockArrayDevice{nullptr};
-    ON_CALL(mockArrayDevice, GetUblockPtr()).WillByDefault(Return(&mockUBlockDevice));
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
-    ON_CALL(*ubio.get(), GetArrayDev()).WillByDefault(Return(&mockArrayDevice));
-    EXPECT_CALL(*ubio.get(), GetArrayDev()).Times(AtLeast(1));
-    int actual, expected = 4;
-
-    // When: Call Submit with MockUbio, false(async) and false(isRecoveryNeeded)
-    actual = ioDispatcher.Submit(ubio, false, false);
-
-    // Then: Expect actual value and expected value should be same
-    EXPECT_EQ(actual, expected);
 }
 
 TEST(IODispatcher, Submit_NotReactor_Sync_Recovery)
 {
-    // Given: IODispatcher, MockEventFrameworkApi, MockUBlockDevice, MockUbio
-    NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
-    ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(false));
-    NiceMock<MockEventScheduler> mockEventScheduler;
-    ON_CALL(mockEventScheduler, GetAllowedIoCount(_)).WillByDefault(Return(2));
-    IODispatcher ioDispatcher{&mockEventFrameworkApi, &mockEventScheduler};
-
-    NiceMock<MockUBlockDevice> mockUBlockDevice{"", 0, nullptr};
-    auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
-    ON_CALL(*ubio.get(), SetSyncMode()).WillByDefault(Return());
-    ON_CALL(*ubio.get(), GetUBlock()).WillByDefault(Return(&mockUBlockDevice));
-    ON_CALL(*ubio.get(), WaitDone()).WillByDefault(Return());
-    EXPECT_CALL(*ubio.get(), SetSyncMode()).Times(AtLeast(1));
-    EXPECT_CALL(*ubio.get(), GetUBlock()).Times(AtLeast(1));
-    EXPECT_CALL(*ubio.get(), WaitDone()).Times(AtLeast(1));
-    int actual, expected = 0;
-
-    // When 1: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
-    // And ublock->GetDedicatedIOWorker return nullptr
-    ON_CALL(mockUBlockDevice, GetDedicatedIOWorker()).WillByDefault(Return(nullptr));
-    actual = ioDispatcher.Submit(ubio, true, true);
-
-    // Then 1: Expect actual value and expected value should be same
-    EXPECT_EQ(actual, expected);
-
-    // When 2: Call Submit with MockUbio, true(sync) and true(isRecoveryNeeded)
-    // And ublock->GetDedicatedIOWorker return MockIOWorker
-    cpu_set_t cpuSet;
-    NiceMock<MockIOWorker> mockIOWorker{cpuSet, 0};
-    ON_CALL(mockIOWorker, EnqueueUbio(_)).WillByDefault(Return());
-    ON_CALL(mockUBlockDevice, GetDedicatedIOWorker()).WillByDefault(Return(&mockIOWorker));
-    actual = ioDispatcher.Submit(ubio, true, true);
-    // Then 2: Expect actual value and expected value should be same
-    EXPECT_EQ(actual, expected);
 }
 
 } // namespace pos

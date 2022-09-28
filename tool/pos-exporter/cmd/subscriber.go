@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "github.com/poseidonos/pos-exporter/api/pos.metric"
+	pb "github.com/poseidonos/pos-exporter/api"
 )
 
 const (

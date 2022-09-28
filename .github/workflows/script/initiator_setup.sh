@@ -15,7 +15,7 @@ setup_initiator()
     iexecc rm -rf *
     iexecc git reset --hard ${test_rev}
     iexecc ./script/pkgdep.sh
-    sshpass -p ${initiator_password} ssh -tt root@${initiator_ip} "cd ${cwd}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y"
+    sshpass -p ${initiator_password} ssh -tt root@${initiator_ip} "cd ${cwd}/lib; sudo cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=y -DASAN_ENABLE=n"
     sshpass -p ${initiator_password} ssh -tt root@${initiator_ip} "cd ${cwd}; sudo make CACHE=Y -j 16 -C lib spdk"
     iexecc rm -f AP_POS_*
     iexecc ./script/setup_env.sh
