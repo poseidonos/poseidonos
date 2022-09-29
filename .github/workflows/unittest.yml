@@ -1,9 +1,9 @@
 
-name: M-UnitTest_VM
+name: C2-UnitTest_VM
 
 on:
   push:
-    branches: [ main ] 
+    branches: [ main, release/v0.12.0 ] 
 
   workflow_dispatch:
     inputs:

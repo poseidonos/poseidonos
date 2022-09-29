@@ -1066,6 +1066,8 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
             blockSize,
             numa);
 
+        delete spdkRpcClient;
+        
         if (ret.first != 0)
         {
             int eventId = EID(CLI_CREATE_DEVICE_FAILURE);
@@ -1074,8 +1076,6 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
             _SetPosInfo(reply->mutable_info());
             return grpc::Status::OK;
         }
-        
-        delete spdkRpcClient;
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());

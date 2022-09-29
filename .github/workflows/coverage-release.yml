@@ -30,7 +30,7 @@ jobs:
       working-directory: ${{github.workspace}}
       run: | 
         chmod +x .github/workflows/script/build_setup.sh
-        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic 
+        .github/workflows/script/build_setup.sh -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -o "OFF" -c --with-gcov
 
     - name: Setup Monitoring Stack
       uses: ./.github/actions/setup-monitoring-stack
