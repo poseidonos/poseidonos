@@ -16,3 +16,6 @@ systemctl daemon-reload
 rm -rf /usr/local/lib/spdk
 rm -rf /usr/local/etc
 rm -rf /etc/pos
+
+# remove pos-prometheus container
+docker rm -f pos-prometheus
