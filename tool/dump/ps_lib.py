@@ -18,8 +18,7 @@ def find_ibofos_coredump_and_renaming():
             os.path.realpath(__file__ + '/../..'))
         print("test dir from core file name : " + test_dir_from_filename +
               " test dir in this script : " + test_path_from_script)
-        if("!poseidonos.core" in filename
-          and test_path_from_script == test_dir_from_filename):
+        if("!poseidonos.core" in filename):
             if(filename != "poseidonos.core"):
                 command = "mv " + core_dir_path + "/" + path\
                     + " " + core_dir_path + "/" + "poseidonos.core"
