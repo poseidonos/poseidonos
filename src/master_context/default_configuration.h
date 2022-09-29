@@ -183,6 +183,7 @@ private:
         {"flush", flushData},
         {"admin", adminData},
         {"logger", loggerData},
+        {"telemetry", telemetryData},
         {"event_scheduler", eventSchedulerData},
         {"debug", debugData},
         {"ioat", ioatData},
