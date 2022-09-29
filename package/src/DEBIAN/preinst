@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Delete debug tool folder
+if [ -d "/usr/local/bin/tool"]
+then
+	rm -rf /usr/local/bin/tool
+fi

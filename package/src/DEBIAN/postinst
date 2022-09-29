@@ -12,6 +12,10 @@ systemctl daemon-reload
 systemctl enable poseidonos.service
 systemctl enable pos-exporter.service
 
+# add PATH
+echo "export PATH=$PATH:/usr/local/bin/tool" >> ~/.bashrc
+source ~/.bashrc
+
 # Prometheus Docker Container Setting
 docker rm --force pos-prometheus || true
 
