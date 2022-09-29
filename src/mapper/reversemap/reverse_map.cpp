@@ -276,6 +276,7 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
         if (callback != nullptr)
         {
             EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
+            callback = nullptr;
         }
     }
 
