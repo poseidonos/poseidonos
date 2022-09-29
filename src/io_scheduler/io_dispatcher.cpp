@@ -53,6 +53,7 @@ namespace pos
 {
 IODispatcher::DispatcherAction IODispatcher::frontendOperation;
 bool IODispatcher::frontendDone;
+std::atomic<uint32_t> IODispatcher::frontendDoneCount;
 thread_local std::vector<UblockSharedPtr> IODispatcher::threadLocalDeviceList;
 EventFactory* IODispatcher::recoveryEventFactory = nullptr;
 EventFrameworkApi* IODispatcher::eventFrameworkApi = nullptr;
@@ -317,7 +318,6 @@ IODispatcher::_GetLogicalCore(cpu_set_t cpuSet, uint32_t index)
             currentIndex++;
         }
     }
-
     return logicalCore;
 }
 
@@ -326,28 +326,41 @@ IODispatcher::_CallForFrontend(UblockSharedPtr dev)
 {
     UblockSharedPtr* devArg = new UblockSharedPtr(dev);
     frontendDone = false;
+    frontendDoneCount = 0;
 
-    uint32_t firstReactorCore = eventFrameworkApi->GetFirstReactor();
-    bool succeeded = true;
+    if (!eventFrameworkApi->IsReactorNow())
+    {
+        uint32_t firstReactorCore = eventFrameworkApi->GetFirstReactor();
+        bool succeeded = true;
 
-    if (firstReactorCore == eventFrameworkApi->GetCurrentReactor())
-    {
-        _ProcessFrontend(devArg);
+        if (firstReactorCore == eventFrameworkApi->GetCurrentReactor())
+        {
+            _ProcessCurrentFrontend(devArg);
+        }
+        else
+        {
+            succeeded = eventFrameworkApi->SendSpdkEvent(firstReactorCore,
+                _ProcessCurrentFrontend, devArg);
+        }
+        if (unlikely(false == succeeded))
+        {
+            POS_EVENT_ID eventId = EID(DEVICE_COMPLETION_FAILED);
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                "Error: occurred while getting IO completion events from device: {}",
+                dev->GetName());
+        }
+        else
+        {
+            while (false == frontendDone)
+            {
+                usleep(1);
+            }
+        }
     }
-    else
+    else 
     {
-        succeeded = eventFrameworkApi->SendSpdkEvent(firstReactorCore,
-            _ProcessFrontend, devArg);
-    }
-    if (unlikely(false == succeeded))
-    {
-        POS_EVENT_ID eventId = EID(DEVICE_COMPLETION_FAILED);
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            "Error: occurred while getting IO completion events from device: {}",
-            dev->GetName());
-    }
-    else
-    {
+        frontendDoneCount = 0;
+        _ProcessCurrentFrontend(devArg);
         while (false == frontendDone)
         {
             usleep(1);
@@ -402,6 +415,63 @@ IODispatcher::_ProcessFrontend(void* ublockDevice)
         UblockSharedPtr* devArg = new UblockSharedPtr(dev);
         bool success = eventFrameworkApi->SendSpdkEvent(nextCore,
             _ProcessFrontend, devArg);
+        if (unlikely(false == success))
+        {
+            POS_EVENT_ID eventId =
+                EID(DEVICE_COMPLETION_FAILED);
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                "Error: occurred while getting IO completion events from device: {}",
+                dev->GetName());
+
+            frontendDone = true;
+        }
+    }
+    delete static_cast<UblockSharedPtr*>(ublockDevice);
+}
+
+void
+IODispatcher::_ProcessCurrentFrontend(void* ublockDevice)
+{
+    UblockSharedPtr dev = *static_cast<UblockSharedPtr*>(ublockDevice);
+    if (DispatcherAction::OPEN == frontendOperation)
+    {
+        bool devOpen = dev->Open();
+        if (devOpen)
+        {
+            _AddDeviceToThreadLocalList(dev);
+        }
+        else
+        {
+            DeviceType deviceType = dev->GetType();
+            if (DeviceType::SSD == deviceType)
+            {
+                DeviceDetachTrigger detachTrigger;
+                detachTrigger.Run(dev);
+            }
+        }
+    }
+    else
+    {
+        dev->Close();
+        _RemoveDeviceFromThreadLocalList(dev);
+    }
+
+    frontendDoneCount++;
+    
+    if (frontendDoneCount == AccelEngineApi::GetReactorCount())
+    {
+        frontendDone = true;
+    }
+    else
+    {
+        uint32_t nextCore = eventFrameworkApi->GetNextReactor();
+        if (nextCore == INVALID_CORE) 
+        {
+            nextCore = eventFrameworkApi->GetFirstReactor();
+        }
+        UblockSharedPtr* devArg = new UblockSharedPtr(dev);
+        bool success = eventFrameworkApi->SendSpdkEvent(nextCore,
+            _ProcessCurrentFrontend, devArg);
         if (unlikely(false == success))
         {
             POS_EVENT_ID eventId =

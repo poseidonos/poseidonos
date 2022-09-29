@@ -85,6 +85,7 @@ private:
     void _CallForFrontend(UblockSharedPtr device);
     void _SubmitRecovery(UbioSmartPtr ubio);
     static void _ProcessFrontend(void* ublockDevice);
+    static void _ProcessCurrentFrontend(void* ublockDevice);
     static void _AddDeviceToThreadLocalList(UblockSharedPtr device);
     static void _RemoveDeviceFromThreadLocalList(UblockSharedPtr device);
     static void _SubmitIOInReactor(void* ptr1, void* ptr2);
@@ -109,6 +110,7 @@ private:
     static DispatcherAction frontendOperation;
     static EventFactory* recoveryEventFactory;
     static bool frontendDone;
+    static std::atomic<uint32_t> frontendDoneCount;
 
     static EventFrameworkApi* eventFrameworkApi;
     static thread_local std::vector<UblockSharedPtr> threadLocalDeviceList;
