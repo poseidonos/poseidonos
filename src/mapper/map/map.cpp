@@ -66,7 +66,7 @@ Map::~Map(void)
 {
     if (memPool != nullptr)
     {
-        POS_TRACE_INFO(EID(MPAGE_MEMORY_ALLOC_FAILURE), "[Mapper Map] Free Memory Pool in destructor");
+        POS_TRACE_INFO(EID(MPAGE_MEMORY_DESTRUCT), "[Mapper Map] Free Memory Pool in destructor");
         free(memPool);
         memPool = nullptr;
     }

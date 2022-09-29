@@ -167,7 +167,7 @@ Root:
     Cause:
     Solution:
 
-  
+
   # CLI Server: 1200 - 1599
   -
     Id: 1201
@@ -1379,7 +1379,7 @@ Root:
     Cause:
     Solution:
 
-  
+
   # Array: 2500 - 2699
   -
     Id: 2500
@@ -3150,7 +3150,7 @@ Root:
     Cause:
     Solution:
 
-  
+
   # Mapper: 3100 - 3149
   -
     Id: 3100
@@ -3474,8 +3474,14 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3146
+    Name: MPAGE_MEMORY_DESTRUCT
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
-  
   # Allocator: 3150 - 3299
   -
     Id: 3150
@@ -3914,6 +3920,13 @@ Root:
   -
     Id: 3212
     Name: ALLOCATOR_DISPOSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3213
+    Name: ALLOCATOR_SUCCESS
     Severity:
     Message:
     Cause:
@@ -5044,7 +5057,7 @@ Root:
     Message: Waiting for io resource
     Cause: Write operation has been failed due to IOSubmitHandlerStatus::FAIL
     Solution: MetaFs will try again
-  
+
   -
     Id: 4500
     Name: VOLUME_EVENT
@@ -7536,7 +7549,7 @@ Root:
     Cause:
     Solution:
 
-  
+
   # System: 9000 - 9099
   -
     Id: 9000
@@ -7823,14 +7836,14 @@ Root:
     Severity:
     Message:
     Cause:
-    Solution: 
+    Solution:
   -
     Id: 10505
     Name: TRACE_PROCESSOR_FAIL
     Severity:
     Message:
     Cause:
-    Solution: 
+    Solution:
   -
     Id: 10506
     Name: TRACE_PROVIDER_FAIL
