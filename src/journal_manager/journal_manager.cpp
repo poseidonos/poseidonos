@@ -271,11 +271,11 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         }
 
         isInitialized = true;
-        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZE), "Journal manager for array {} is initialized", arrayInfo->GetName());
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Journal manager for array {} is initialized", arrayInfo->GetName());
     }
     else
     {
-        POS_TRACE_WARN(EID(JOURNAL_MANAGER_INITIALIZE),
+        POS_TRACE_WARN(EID(JOURNAL_MANAGER_INITIALIZED),
             "Journal manager for array {} is already initialized, so skip Init(). \
             Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
             arrayInfo->GetName());

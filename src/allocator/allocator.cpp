@@ -70,13 +70,13 @@ Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     _CreateSubmodules();
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Created", arrayName);
+    POS_TRACE_INFO(EID(ALLOCATOR_SUCCESS), "Allocator in Array:{} was Created", arrayName);
 }
 
 Allocator::~Allocator(void)
 {
     _DeleteSubmodules();
-    POS_TRACE_INFO(EID(ALLOCATOR_START), "Allocator in Array:{} was Destroyed", arrayName);
+    POS_TRACE_INFO(EID(ALLOCATOR_SUCCESS), "Allocator in Array:{} was Destroyed", arrayName);
 }
 
 int
