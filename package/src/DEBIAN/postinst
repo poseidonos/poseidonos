@@ -18,9 +18,10 @@ docker rm --force pos-prometheus || true
 tar -xzvf /etc/pos/prometheus.tar.gz -C /etc/pos/
 docker load -i /etc/pos/prometheus.tar
 
+rm -rf /etc/pos/prometheus-data
 chown 65534:65534 /etc/pos/prometheus-data
 
-sed -i 's/localhost/'"$(hostname -i | awk -F" " '{print $1}')"'/g' /etc/pos/pos-prometheus.yml
+sed -i 's/localhost/'"$(hostname -I | awk -F" " '{print $1}')"'/g' /etc/pos/pos-prometheus.yml
 docker run \
     -d \
     --name pos-prometheus \
