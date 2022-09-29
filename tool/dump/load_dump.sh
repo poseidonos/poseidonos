@@ -43,19 +43,11 @@ fi
 if [ -f $ROOT_PATH/$DUMP_EXTRACT_PATH/$DUMP_EXTRACT_PATH ];then
     log_normal "##### Already Extracted core file exists ######"
 else
-    python3 -c 'import core_dump_lib; core_dump_lib.check_split_compressed_file("'"$1"'")'
-    if [ ${?} -ne 0 ];then
-        log_error "### Decompress error for compressed file. Please check exitence of files ###"
-    fi
     cat $1.tar.gz* | pigz -d | tar xf - -C $ROOT_PATH/$DUMP_EXTRACT_PATH
     if [ ${?} -ne 0 ];then
         log_error "### Decompress error for compressed file. Please check exitence of files ###"
     fi
     if [ $IS_LOG_ONLY_COMPRESSED == "0" ];then
- 	python3 -c 'import core_dump_lib; core_dump_lib.check_split_compressed_file("'"$1.$LOG_SUFFIX"'")'
-        if [ ${?} -ne 0 ];then
-            log_error "### Decompress error for log compressed file, Check If *.log.tar.gz exists ###"
-	fi
         cat $1.$LOG_SUFFIX.tar.gz* | pigz -d | tar xf - -C $ROOT_PATH/$DUMP_EXTRACT_PATH
         if [ ${?} -ne 0 ];then
             log_error "### Decompress error for log compressed file, Check If *.log.tar.gz exists ###"
