@@ -100,6 +100,9 @@ private:
         // TRUE after implementing the strcutured logging functionality.
         {"enable_structured_logging", "false"},
     };
+    vector<ConfigKeyValue> telemetryData = {
+        {"enable_selective_publication", "true"}
+    };
     vector<ConfigKeyValue> eventSchedulerData = {
         {"numa_dedicated", "false"}
     };
