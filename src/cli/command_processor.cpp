@@ -1,4 +1,3 @@
-
 #include "src/cli/command_processor.h"
 
 #include <spdk/nvme_spec.h>
@@ -1059,25 +1058,25 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
     // ToDo(mj): now we support to create bdev only.
     // When more device creations are supported,
     // a case switch may be needed.
-    auto ret = spdkRpcClient->BdevMallocCreate(
-        name,
-        numBlocks,
-        blockSize,
-        numa);
-
     if (spdkRpcClient != nullptr)
     {
+        auto ret = spdkRpcClient->BdevMallocCreate(
+            name,
+            numBlocks,
+            blockSize,
+            numa);
+    
         delete spdkRpcClient;
-    }
 
-    if (ret.first != 0)
-    {
-        int eventId = EID(CLI_CREATE_DEVICE_FAILURE);
-        POS_TRACE_INFO(eventId, "error:{}", ret.second);
-        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
-    }    
+        if (ret.first != 0)
+        {
+            int eventId = EID(CLI_CREATE_DEVICE_FAILURE);
+            POS_TRACE_INFO(eventId, "error:{}", ret.second);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
