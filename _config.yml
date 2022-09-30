@@ -5,7 +5,6 @@
 # NOTE: You don't need to provide this property when hosting on GitHub Pages or Netlify.
 
 url:                   http://poseidonos.io/
-#url:                    https://junghyun-34.github.io/poseidonos/
 # Uncomment and set the "base URL" of your site.
 # When your site is in a subdirectory, set to `/<name of directory>`,
 # with a leading `/` but no trailing `/`. Use the empty string '' otherwise.
@@ -80,8 +79,7 @@ remote_theme: hydecorp/hydejack@v9
 # ----------------------------------------------------------------------------------------
  
 # Sidebar image and theme color of the site.
-#accent_image:          /assets/img/sidebar-bg.jpg
-accent_image:          /assets/img/blog/side_bar.jpg
+accent_image:          /assets/img/blog/sidebar_img.jpg
 accent_color:          rgb(79,177,186)
 
 # This is used for the `theme-color` meta tag,
