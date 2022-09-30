@@ -84,7 +84,6 @@ private:
     uint32_t _GetLogicalCore(cpu_set_t cpuSet, uint32_t index);
     void _CallForFrontend(UblockSharedPtr device);
     void _SubmitRecovery(UbioSmartPtr ubio);
-    static void _ProcessFrontend(void* ublockDevice);
     static void _ProcessCurrentFrontend(void* ublockDevice);
     static void _AddDeviceToThreadLocalList(UblockSharedPtr device);
     static void _RemoveDeviceFromThreadLocalList(UblockSharedPtr device);
