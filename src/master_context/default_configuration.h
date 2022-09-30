@@ -154,8 +154,8 @@ private:
         {"num_shared_buffer", "4096"}
     };
     vector<ConfigKeyValue> metaFsData = {
-        {"mio_pool_capacity", "32768"},
-        {"mpio_pool_capacity", "32768"},
+        {"mio_pool_capacity", "64"},
+        {"mpio_pool_capacity", "64"},
         {"write_mpio_cache_capacity", "32"},
         {"direct_access_for_journal_enable", "true"},
         {"time_interval_in_milliseconds_for_metric", "1000"},
