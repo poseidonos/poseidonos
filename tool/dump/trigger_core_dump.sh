@@ -218,7 +218,9 @@ if [ $LOG_ONLY -eq 0 ];then
     mv ./$CORE_FILE $DUMP_PATH"/"$CORE_CRASHED
 else	
     tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz > $CORE_FILE.tar.gz 
-fi	
+fi
+
+echo $CORE_FILE > core_file_name
 
 if [ $? -ne 0 ];then
     log_error "Compression from core file is failed"
