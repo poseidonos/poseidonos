@@ -1,5 +1,5 @@
 Package: poseidonos
-Version: 0.11.0-rc6-+
+Version: 0.12.0-rc0+0e2361399
 Maintainer: PoseidonOS Packaging <packaging@poseidonos.com>
 Description: PoseidonOS
 Architecture: amd64

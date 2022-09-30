@@ -12,6 +12,10 @@ systemctl daemon-reload
 systemctl enable poseidonos.service
 systemctl enable pos-exporter.service
 
+# add PATH
+mv /etc/trigger_core_dump /usr/local/bin
+mv /etc/load_dump /usr/local/bin
+
 # Prometheus Docker Container Setting
 docker rm --force pos-prometheus || true
 
