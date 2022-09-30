@@ -376,59 +376,6 @@ IODispatcher::_SubmitRecovery(UbioSmartPtr ubio)
     eventScheduler->EnqueueEvent(failure);
 }
 
-// This function will be executed in thread level.
-void
-IODispatcher::_ProcessFrontend(void* ublockDevice)
-{
-    UblockSharedPtr dev = *static_cast<UblockSharedPtr*>(ublockDevice);
-    if (DispatcherAction::OPEN == frontendOperation)
-    {
-        bool devOpen = dev->Open();
-        if (devOpen)
-        {
-            _AddDeviceToThreadLocalList(dev);
-        }
-        else
-        {
-            DeviceType deviceType = dev->GetType();
-            if (DeviceType::SSD == deviceType)
-            {
-                DeviceDetachTrigger detachTrigger;
-                detachTrigger.Run(dev);
-            }
-        }
-    }
-    else
-    {
-        dev->Close();
-        _RemoveDeviceFromThreadLocalList(dev);
-    }
-
-    bool isLastReactorNow = eventFrameworkApi->IsLastReactorNow();
-    if (isLastReactorNow)
-    {
-        frontendDone = true;
-    }
-    else
-    {
-        uint32_t nextCore = eventFrameworkApi->GetNextReactor();
-        UblockSharedPtr* devArg = new UblockSharedPtr(dev);
-        bool success = eventFrameworkApi->SendSpdkEvent(nextCore,
-            _ProcessFrontend, devArg);
-        if (unlikely(false == success))
-        {
-            POS_EVENT_ID eventId =
-                EID(DEVICE_COMPLETION_FAILED);
-            POS_TRACE_ERROR(static_cast<int>(eventId),
-                "Error: occurred while getting IO completion events from device: {}",
-                dev->GetName());
-
-            frontendDone = true;
-        }
-    }
-    delete static_cast<UblockSharedPtr*>(ublockDevice);
-}
-
 void
 IODispatcher::_ProcessCurrentFrontend(void* ublockDevice)
 {
