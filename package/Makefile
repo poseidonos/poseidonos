@@ -7,8 +7,6 @@ all:
 	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
 	@cp -f ../bin/pos-exporter src/usr/local/bin/
 	@cp -rf ../tool/dump src/usr/local/bin/tool
-	@mv src/usr/local/bin/tool/trigger_core_dump.sh src/usr/local/bin/tool/trigger_core_dump
-	@mv src/usr/local/bin/tool/load_dump.sh src/usr/local/bin/tool/load_dump
 	@cp -f ../config/pos-prometheus.yml src/etc/pos/
 	@cp -f ../script/setup_env.sh src/usr/local/etc/
 	@cp -rf ../lib/spdk src/usr/local/lib/
