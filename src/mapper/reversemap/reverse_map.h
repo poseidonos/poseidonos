@@ -132,6 +132,7 @@ struct RevMap
 
 class RevMapPageAsyncIoCtx : public AsyncMetaFileIoCtx
 {
+    void HandleIoComplete(void* data) override;
 public:
     int mpageNum;
     Stripe* stripeToFlush = nullptr;

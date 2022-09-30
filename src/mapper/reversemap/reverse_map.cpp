@@ -45,6 +45,17 @@
 
 namespace pos
 {
+
+void
+RevMapPageAsyncIoCtx::HandleIoComplete(void* data)
+{
+    if (ioDoneCheckCallback)
+        error = ioDoneCheckCallback(data);
+    if (callback)
+        callback(this);
+    delete this;
+}
+
 ReverseMapPack::ReverseMapPack(void)
 : wbLsid(UNMAP_STRIPE),
   vsid(UINT32_MAX),
@@ -279,8 +290,6 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             callback = nullptr;
         }
     }
-
-    delete ctx;
 
     if (telemetryPublisher)
     {
