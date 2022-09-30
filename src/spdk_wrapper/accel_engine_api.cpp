@@ -180,6 +180,12 @@ AccelEngineApi::GetReactorCount(void)
     return reactorCount;
 }
 
+void
+AccelEngineApi::SetReactorCount(uint32_t count)
+{
+    reactorCount = count;
+}
+
 uint32_t
 AccelEngineApi::GetIoatReactorCountPerNode(uint32_t node)
 {
