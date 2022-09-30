@@ -17,5 +17,8 @@ rm -rf /usr/local/lib/spdk
 rm -rf /usr/local/etc
 rm -rf /etc/pos
 
+# remove pos log
+rm -rf /var/log/pos/*
+
 # remove pos-prometheus container
-docker rm -f pos-prometheus
+docker rm --force pos-prometheus || true
