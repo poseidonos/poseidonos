@@ -14,6 +14,8 @@ all:
 	@cp -f ../config/telemetry_default.yaml src/etc/pos/
 	@cp -f ../config/publication_list_default.yaml src/etc/pos/
 	@cp -f ../src/event/pos_event.yaml src/etc/pos/
+	@cp -f ../tool/prometheus.tar.gz src/etc/pos/
+	@mkdir -p src/etc/pos/prometheus-data
 	
 	# Copy CLI man page files
 	@gzip --keep ../tool/cli/docs/manpage/*

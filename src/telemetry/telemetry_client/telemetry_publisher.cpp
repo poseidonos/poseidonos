@@ -32,6 +32,7 @@
 
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/master_context/instance_id_provider.h"
+#include "src/master_context/config_manager.h"
 
 namespace pos
 {
@@ -44,6 +45,13 @@ TelemetryPublisher::TelemetryPublisher(std::string name_)
     defaultlabelList.emplace(TEL_PUBNAME_LABEL_KEY, name);
     std::string runId = to_string(InstanceIdProviderSingleton::Instance()->GetInstanceId());
     defaultlabelList.emplace(TEL_RUNID_LABEL_KEY, runId);
+
+    bool enabled;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("telemetry", "enable_structured_logging", &enabled, CONFIG_TYPE_BOOL);
+    if (ret == EID(SUCCESS))
+    {
+        selectivePublication = enabled;
+    }
     
     _LoadPublicationList(DEFAULT_PUBLICATION_LIST_FILE_PATH);
 }
