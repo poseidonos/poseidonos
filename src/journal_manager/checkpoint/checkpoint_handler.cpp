@@ -88,6 +88,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     _SetStatus(STARTED);
 
     assert(numMapsToFlush == 0);
+    assert(checkpointCompletionCallback != nullptr);
 
     numMapsToFlush = pendingDirtyMaps.size();
     numMapsFlushed = 0;
@@ -186,14 +187,15 @@ CheckpointHandler::_TryToComplete(void)
 
         // completed status must not be changed by other threads
         assert(status == COMPLETED);
-
+        assert(checkpointCompletionCallback != nullptr);
         // reset used variables before executing the completion routine.
         _Reset();
 
-        scheduler->EnqueueEvent(checkpointCompletionCallback);
-        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed, arrayId:{}", arrayId);
-
+        // checkpointCompletionCallback must be nullptr before starting next checkpoint
+        auto tempCheckpointCompletionCallback = checkpointCompletionCallback;
         checkpointCompletionCallback = nullptr;
+        scheduler->EnqueueEvent(tempCheckpointCompletionCallback);
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed, arrayId:{}", arrayId);
     }
 }
 
