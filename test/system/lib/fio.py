@@ -28,7 +28,7 @@ import pos
 #     fio_proc.wait()
 
 
-def start_fio(vol_id, runtime_sec, testname = "", subsystem="subsystem1"):
+def start_fio(vol_id, runtime_sec, rw="write", testname = "", subsystem="subsystem1"):
     ip_addr = pos.TR_ADDR
     ns_id = str(vol_id + 1)
     if testname != "":
@@ -44,10 +44,9 @@ def start_fio(vol_id, runtime_sec, testname = "", subsystem="subsystem1"):
         "--runtime=" + str(runtime_sec), \
         "--bs=4096", \
         "--iodepth=128",\
-        "--readwrite=write",\
+        "--readwrite=" + rw,\
         "--offset=0",\
         "--bs_unaligned=1",\
-        "--bs=4096",\
         "--verify=md5",\
         "--serialize_overlap=1",\
         "--time_based",\
@@ -61,8 +60,10 @@ def start_fio(vol_id, runtime_sec, testname = "", subsystem="subsystem1"):
 
     return fio_proc
 
+
 def wait_fio(fio_proc):
     fio_proc.wait()
+
 
 def stop_fio(fio_proc):
     if fio_proc.poll() is None:

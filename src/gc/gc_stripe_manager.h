@@ -38,9 +38,12 @@
 #include "src/gc/victim_stripe.h"
 #include "src/sys_event/volume_event.h"
 #include "src/resource_manager/memory_manager.h"
+#include "src/lib/system_timeout_checker.h"
 
 #include <string>
 #include <utility>
+#include <unordered_map>
+#include <mutex>
 
 namespace pos
 {
@@ -87,8 +90,9 @@ public:
     virtual bool DecreaseRemainingAndCheckIsFull(uint32_t volumeId, uint32_t cnt);
     virtual void SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo);
     virtual std::vector<BlkInfo>* GetBlkInfoList(uint32_t volumeId);
-    virtual void SetFlushed(uint32_t volumeId);
+    virtual void SetFlushed(uint32_t volumeId, bool force = false);
     virtual bool IsAllFinished(void);
+    void CheckTimeout(void);
 
     static const uint32_t GC_WRITE_BUFFER_COUNT = 512;
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
@@ -121,6 +125,9 @@ private:
 
     VolumeEventPublisher* volumeEventPublisher;
     MemoryManager* memoryManager;
+    unordered_map<uint32_t, SystemTimeoutChecker*> timer;
+    const uint64_t TIMEOUT = 5 * 1000000000ULL;
+    mutex timerMtx;
 };
 
 } // namespace pos

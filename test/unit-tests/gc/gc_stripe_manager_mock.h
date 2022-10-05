@@ -24,7 +24,7 @@ public:
     MOCK_METHOD(bool, DecreaseRemainingAndCheckIsFull, (uint32_t volumeId, uint32_t cnt), (override));
     MOCK_METHOD(void, SetBlkInfo, (uint32_t volumeId, uint32_t offset, BlkInfo blkInfo), (override));
     MOCK_METHOD(std::vector<BlkInfo>*, GetBlkInfoList, (uint32_t volumeId), (override));
-    MOCK_METHOD(void, SetFlushed, (uint32_t volumeId), (override));
+    MOCK_METHOD(void, SetFlushed, (uint32_t volumeId, bool force = false), (override));
     MOCK_METHOD(bool, IsAllFinished, (), (override));
 };
 
