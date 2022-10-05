@@ -19,7 +19,7 @@ texecc rm -f total.info total_filtered.lcov
 texecc lcov --rc lcov_branch_coverage=1 -c -d src/ -d test/ --output-file total.info
 
 # exclude unnecessary folders
-cd ${pos_working_dir}; lcov --rc lcov_branch_coverage=1 -r total.info \"/usr/*\" \"test/*\" \"*/generated/*\" \"/home/psd/ibofos/proto/generated/*\" \"*/unit-tests/*\" \"*/integration-tests/*\" \"*/nlohmann/*\" '*/ibofos/lib/*' '*/air/src/*' '*/spdk_wrapper/caller/*' -o total_filtered.lcov
+cd ${pos_working_dir}; lcov --rc lcov_branch_coverage=1 -r total.info '/usr/*' 'test/*' 'lib/*' '*/generated/*' '*/unit-tests/*' '*/integration-tests/*' '*/nlohmann/*' '*/ibofos/lib/*' '*/air/src/*' '*/spdk_wrapper/caller/*' '/opt/actions-runner/_work/poseidonos/poseidonos/lib/opentelemetry-cpp/include/opentelemetry/*' '/opt/actions-runner/_work/poseidonos/poseidonos/lib/spdlog-1.4.2/*' -o total_filtered.lcov
 
 # post-processing the coverage report. This will produce "coverage_filtered_pos.lcov".
 cd ${pos_working_dir}; python test/filter_out_wrong_branches.py total_filtered.lcov

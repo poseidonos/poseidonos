@@ -186,14 +186,14 @@ CheckpointHandler::_TryToComplete(void)
 
         // completed status must not be changed by other threads
         assert(status == COMPLETED);
-
-        // reset used variables before executing the completion routine.
+        assert(checkpointCompletionCallback != nullptr);
+        // reset used variables before executing the completion routine 
+        // and also variables of CheckpointHandler must not be changed after EnqueueEvent()
+        EventSmartPtr tempCheckpointCompletionCallback = checkpointCompletionCallback;
         _Reset();
 
-        scheduler->EnqueueEvent(checkpointCompletionCallback);
+        scheduler->EnqueueEvent(tempCheckpointCompletionCallback);
         POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed, arrayId:{}", arrayId);
-
-        checkpointCompletionCallback = nullptr;
     }
 }
 
@@ -205,6 +205,8 @@ CheckpointHandler::_Reset(void)
 
     numMapsToFlush = 0;
     numMapsFlushed = 0;
+
+    checkpointCompletionCallback = nullptr;
 }
 
 void

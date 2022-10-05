@@ -78,6 +78,7 @@ public:
     static int GetReactorByIndex(uint32_t index);
     static uint32_t GetIoatReactorCount(void);
     static uint32_t GetReactorCount(void);
+    static void SetReactorCount(uint32_t count);
     static uint32_t GetIoatReactorCountPerNode(uint32_t node);
 
 private:

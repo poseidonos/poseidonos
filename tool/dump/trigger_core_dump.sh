@@ -5,9 +5,9 @@ DUMP_PATH=/etc/pos/core
 IBOFOS_LOG_PATH=/var/log/pos/
 IBOFOS_COPY=./poseidonos
 
-PROC_PID=`ps -ef | egrep "*/poseidonos$" | awk '{print $2}'`
+PROC_PID=`pgrep "poseidonos"`
 if [ -z $PROC_PID ];then
-    PROC_PID=`ps -ef | egrep "*/ibofos$" | awk '{print $2}'`
+    PROC_PID=`pgrep "ibofos"`
 fi
 PID="$PROC_PID"
 echo $PID
@@ -62,6 +62,10 @@ get_first_core_information(){
 
 LOG_ONLY=0
 
+if [ ! -z $2 ]; then
+    IBOFOS=$2
+fi
+
 dpkg -l | grep "pigz"
 
 if [ "$?" -ne 0 ]; then
@@ -106,9 +110,9 @@ fi
 
 # if flag indicates not crashed, try to gather the poseidonos in memory log with best effort
 
-if [ ! -z $PROC_PID ]; then
-    get_first_core_information
-fi
+#if [ ! -z $PROC_PID ]; then
+#    get_first_core_information
+#fi
 
 # if test want to indicate log as unique id, please use first param of this script
 if [ "$#" -gt 2 ]; then
@@ -209,12 +213,14 @@ dmesg > $LOG_DIR"/dmesg.log"
 
 if [ $LOG_ONLY -eq 0 ];then
     xz -T0 -c $CORE_FILE > $CORE_FILE.xz
-    tar -c $CORE_FILE.xz $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz -c | split -b 70m - $CORE_FILE.tar.gz 
-    tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz -c | split -b 70m - $CORE_FILE.log.tar.gz 
+    tar -c $CORE_FILE.xz $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz > $CORE_FILE.tar.gz 
+    tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz > $CORE_FILE.log.tar.gz 
     mv ./$CORE_FILE $DUMP_PATH"/"$CORE_CRASHED
 else	
-    tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz -c | split -b 70m - $CORE_FILE.tar.gz 
-fi	
+    tar -c $CALLSTACK_INFO $PENDINGIO_INFO $IN_MEMORY_LOG_FILE $LOG_DIR $IBOFOS_COPY $BINARY_INFO library.tar.gz | pigz > $CORE_FILE.tar.gz 
+fi
+
+echo $CORE_FILE > core_file_name
 
 if [ $? -ne 0 ];then
     log_error "Compression from core file is failed"
@@ -224,8 +230,8 @@ fi
 rm ./$CORE_FILE.xz -rf
 rm $LOG_DIR -rf
 
-echo "####### Tar split compression is finished #######"
-log_normal "#######"$CORE_FILE".tar.gzxx is successfully created, Please Attach this file to IMS #######"
+echo "####### Tar compression is finished #######"
+log_normal "#######"$CORE_FILE".tar.gz is successfully created"
 if [ $LOG_ONLY -eq 0 ];then
-    log_normal "###### new file "$CORE_FILE"."$LOG_SUFFIX".tar.gzxx is successfully created, Please Also Attach this file to IMS #######"
+    log_normal "###### new file "$CORE_FILE"."$LOG_SUFFIX".tar.gz is successfully created."
 fi

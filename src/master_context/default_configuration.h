@@ -100,6 +100,9 @@ private:
         // TRUE after implementing the strcutured logging functionality.
         {"enable_structured_logging", "false"},
     };
+    vector<ConfigKeyValue> telemetryData = {
+        {"enable_selective_publication", "true"}
+    };
     vector<ConfigKeyValue> eventSchedulerData = {
         {"numa_dedicated", "false"}
     };
@@ -151,8 +154,8 @@ private:
         {"num_shared_buffer", "4096"}
     };
     vector<ConfigKeyValue> metaFsData = {
-        {"mio_pool_capacity", "32768"},
-        {"mpio_pool_capacity", "32768"},
+        {"mio_pool_capacity", "64"},
+        {"mpio_pool_capacity", "64"},
         {"write_mpio_cache_capacity", "32"},
         {"direct_access_for_journal_enable", "true"},
         {"time_interval_in_milliseconds_for_metric", "1000"},
@@ -180,6 +183,7 @@ private:
         {"flush", flushData},
         {"admin", adminData},
         {"logger", loggerData},
+        {"telemetry", telemetryData},
         {"event_scheduler", eventSchedulerData},
         {"debug", debugData},
         {"ioat", ioatData},

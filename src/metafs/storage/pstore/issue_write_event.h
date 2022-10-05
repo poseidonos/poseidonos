@@ -37,7 +37,7 @@
 
 #include "src/event_scheduler/event.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/logger/logger.h"
+#include "src/metafs/log/metafs_log.h"
 #include "src/metafs/storage/pstore/mss_aio_cb_cxt.h"
 #include "src/metafs/storage/pstore/mss_aio_data.h"
 
@@ -72,10 +72,9 @@ public:
                 {
                     aioData->SetError((int)result);
                     aioData->SetErrorStopState(true);
-                    cb->InvokeCallback();
                 }
 
-                POS_TRACE_DEBUG(result,
+                MFS_TRACE_DEBUG(result,
                     "arrayId: {}, metaLpn: {}, storage: {}, mpioId: {}, tagId: {}",
                     aioData->GetArrayId(), aioData->GetMetaLpn(), (int)aioData->GetStorageType(),
                     aioData->GetMpioId(), aioData->GetTagId());
