@@ -61,7 +61,7 @@ FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnab
 
 FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
     IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled)
-: Event(false, BackendEvent_Flush),
+: Callback(false, CallbackType_FlushSubmission),
   stripe(inputStripe),
   iIOSubmitHandler(ioSubmitHandler),
   arrayId(arrayId),
@@ -86,7 +86,7 @@ FlushSubmission::~FlushSubmission(void)
 }
 
 bool
-FlushSubmission::Execute(void)
+FlushSubmission::_DoSpecificJob(void)
 {
     StripeId logicalStripeId = stripe->GetUserLsid();
     uint64_t blocksInStripe = 0;
