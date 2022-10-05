@@ -83,9 +83,6 @@ VolumeManager::Init(void)
     _ClearLock();
     _LoadVolumes();
 
-    tp = new TelemetryPublisher(("Volume_Manager"));
-    tp->AddDefaultLabel("array_name", arrayInfo->GetName());
-
     if (tp == nullptr)
     {
         tp = new TelemetryPublisher(("VolumeManager"));
@@ -517,7 +514,7 @@ VolumeManager::CheckVolumeValidity(std::string Name)
 
     if (vol == nullptr)
     {
-        POS_TRACE_INFO(EID(VOL_NOT_FOUND), "volId: {}", vol->ID);
+        POS_TRACE_INFO(EID(VOL_NOT_FOUND), "vol Name: {}", Name);
         return EID(VOL_NOT_FOUND);
     }
 

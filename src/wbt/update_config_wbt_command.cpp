@@ -140,10 +140,6 @@ UpdateConfigWbtCommand::Execute(Args &argv, JsonElement &elem)
         }
     }
 
-    if (value == nullptr)
-    {
-        return EID(WBT_UPDATE_CONFIG_CONVERT_ERROR);
-    }
     if (ret == 0)
     {
         POS_TRACE_WARN(EID(CONFIG_UPDATED_VIA_WBT),

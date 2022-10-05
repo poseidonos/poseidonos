@@ -51,7 +51,6 @@ IoRecoveryEvent::IoRecoveryEvent(UbioSmartPtr ubio, IoCompleter* ioCompleter_)
         ioCompleter = new IoCompleter(ubio);
         ownIoCompleter = true;
     }
-    SetEventType(BackendEvent_FrontendIO);
 }
 
 IoRecoveryEvent::~IoRecoveryEvent(void)

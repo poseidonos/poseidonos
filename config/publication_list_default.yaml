@@ -1,8 +1,5 @@
 metrics_to_publish:
-  response_time:
-  bandwidth_device:
-  capacity_device:
-  uptime_sec:
+  common_process_uptime_second:
   soft_media_error_lower:
   soft_media_error_upper:
   power_cycle_lower:
@@ -19,32 +16,23 @@ metrics_to_publish:
   controller_busy_time_upper:
   warning_temperature_time:
   critical_temperature_time:
-  read_iops_host:
-  read_bytes_per_sec_host:
-  write_iops_host:
-  write_bytes_per_sec_host:
-  read_iops_port:
-  read_bytes_per_sec_port:
-  write_iops_port:
-  write_bytes_per_sec_port:
+  read_iops_device:
+  read_bps_device:
+  write_iops_device:
+  write_bps_device:
+  read_iops_network:
+  read_bps_network:
+  write_iops_network:
+  write_bps_network:
   capacity_array:
   used_array:
   state_array:
   capacity_volume:
   used_volume:
   state_volume:
-  read_latency:
-  write_latency:
-  average_latency:
-  number_of_reads_per_sec:
-  number_of_writes_per_sec:
-  number_of_io_reqs_per_sec:
-  read_bytes_per_sec:
-  write_bytes_per_sec:
-  average_io_size:
-  iops_read:
-  iops_write:
-  iops:
-  array_status:
-  array_capacity_total:
-  array_capacity_used:
+  read_avg_lat_volume:
+  read_iops_volume:
+  read_bps_volume:
+  write_avg_lat_volume:
+  write_iops_volume:
+  write_bps_volume:

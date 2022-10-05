@@ -12,24 +12,29 @@ systemctl daemon-reload
 systemctl enable poseidonos.service
 systemctl enable pos-exporter.service
 
+# add PATH
+mv /etc/trigger_core_dump /usr/local/bin
+mv /etc/load_dump /usr/local/bin
+
 # Prometheus Docker Container Setting
 docker rm --force pos-prometheus || true
 
 tar -xzvf /etc/pos/prometheus.tar.gz -C /etc/pos/
 docker load -i /etc/pos/prometheus.tar
 
+rm -rf /etc/pos/prometheus-data/*
 chown 65534:65534 /etc/pos/prometheus-data
 
-sed -i 's/localhost/'"$(hostname -i | awk -F" " '{print $1}')"'/g' /etc/pos/pos-prometheus.yml
 docker run \
     -d \
+    --network host \
     --name pos-prometheus \
     --restart=always \
-    -p 2113:9090 \
     -v /etc/pos/prometheus-data:/prometheus/data \
     -v /etc/pos/pos-prometheus.yml:/etc/prometheus/prometheus.yml \
     prom/prometheus \
     --web.enable-admin-api \
+    --web.listen-address="0.0.0.0:2113" \
     --config.file=/etc/prometheus/prometheus.yml \
     --storage.tsdb.path="/prometheus/data/" \
     --storage.tsdb.retention.time=30d

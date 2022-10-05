@@ -35,9 +35,9 @@ def execute():
             print ("1st rebuilding has been stopped")
             spare_dev_newly_attached = "unvme-ns-4"
             print (cli.add_device(spare_dev_newly_attached, ARRAYNAME))
-            if api.wait_situation(ARRAYNAME, "REBUILDING") == True: #wait for 2nd rebuilding
+            if api.wait_situation(ARRAYNAME, "REBUILDING", timeout) == True: #wait for 2nd rebuilding
                 print ("2nd rebuilding has been started")
-                if api.wait_situation(ARRAYNAME, "NORMAL") == True: #wait for 2nd rebuilding done
+                if api.wait_situation(ARRAYNAME, "NORMAL", timeout) == True: #wait for 2nd rebuilding done
                     print ("2nd rebuilding complete")
                     fio.stop_fio(fio_proc)
                     return "pass"

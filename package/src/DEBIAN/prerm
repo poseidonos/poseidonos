@@ -16,3 +16,14 @@ systemctl daemon-reload
 rm -rf /usr/local/lib/spdk
 rm -rf /usr/local/etc
 rm -rf /etc/pos
+
+
+# remove pos log
+rm -rf /var/log/pos/*
+
+# remove pos-prometheus container
+docker rm --force pos-prometheus || true
+
+# remove debug tool
+rm -rf /usr/local/bin/trigger_core_dump
+rm -rf /usr/local/bin/load_dump

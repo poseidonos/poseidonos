@@ -593,7 +593,7 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 void
 SegmentCtx::ResetSegmentsStates(void)
 {
-    POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "SegmentCtx::ResetSegmentsStates");
+    POS_TRACE_INFO(EID(ALLOCATOR_RESET_SEGMENTS), "SegmentCtx::ResetSegmentsStates");
 
     int validCount = 0;
     int occupiedStripeCount = 0;
@@ -611,7 +611,7 @@ SegmentCtx::ResetSegmentsStates(void)
         {
             segmentInfos[segId].SetState(SegmentState::SSD);
         }
-        else if ((0 <= validCount) && (1 <= occupiedStripeCount))
+        else if ((0 <= validCount) && (0 <= occupiedStripeCount))
         {
             segmentInfos[segId].SetState(SegmentState::NVRAM);
         }
