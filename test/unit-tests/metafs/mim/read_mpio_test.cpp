@@ -66,7 +66,7 @@ public:
     {
         EXPECT_CALL(*mss, IsAIOSupport);
         ReadMpio::Setup(mpioIoInfo, partialIO, forceSyncIO, mss);
-        PartialMpioDoneCb notifier = AsEntryPointParam1(&WriteMpioTester::DummyDoneQueue, this);
+        PartialMpioDoneCb notifier = AsEntryPointParam1(&ReadMpioTester::DummyDoneQueue, this);
         SetPartialDoneNotifier(notifier);
     }
     bool CompleteIO(void)
