@@ -72,7 +72,6 @@ public:
                 {
                     aioData->SetError((int)result);
                     aioData->SetErrorStopState(true);
-                    cb->InvokeCallback();
                 }
 
                 MFS_TRACE_DEBUG(result,
