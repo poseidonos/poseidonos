@@ -52,7 +52,8 @@ Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
   cacheState(MpioCacheState::Init),
   fileType(MetaFileType::General),
   UNIQUE_ID(idAllocate_++),
-  DIRECT_ACCESS_ENABLED(directAccessEnabled)
+  DIRECT_ACCESS_ENABLED(directAccessEnabled),
+  isAllocated(false)
 {
     mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
@@ -71,6 +72,8 @@ Mpio::Reset(void)
     errorStopState = false;
 
     ResetTimestamp();
+
+    _SetAllocated(false);
 }
 
 // LCOV_EXCL_START
@@ -82,6 +85,7 @@ Mpio::~Mpio(void)
 void
 Mpio::Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO, MetaStorageSubsystem* metaStorage)
 {
+    _SetAllocated(true);
     this->io = mpioIoInfo;
     this->partialIO = partialIO;
     this->forceSyncIO = forceSyncIO;
@@ -168,6 +172,18 @@ Mpio::_CheckDataIntegrity(void) const
     }
 
     return true;
+}
+
+void
+Mpio::_SetAllocated(const bool flag)
+{
+    isAllocated = flag;
+}
+
+bool
+Mpio::_IsAllocated(void) const
+{
+    return isAllocated;
 }
 
 bool
@@ -292,6 +308,12 @@ Mpio::DoIO(const MpAioState expNextState)
 void
 Mpio::_HandlePartialDone(void* notused)
 {
+    if (!_IsAllocated())
+    {
+        POS_TRACE_ERROR(EID(MFS_MPIO_ENQUEUED_TWICE), "UNIQUE_ID:{}", UNIQUE_ID);
+        assert(false);
+    }
+
     // notifiy mpio done to partial mpio done handler (bottomhalf handler of mio handler)
     this->partialMpioDoneNotifier(this); // MpioHandler::EnqueuePartialMpio()
 }

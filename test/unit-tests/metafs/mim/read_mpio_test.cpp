@@ -57,10 +57,24 @@ public:
     {
         return ReadMpio::_HandleError(expNextState);
     }
+    bool HandlePartialDone(void)
+    {
+        _HandlePartialDone();
+        return true;
+    }
     void Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
     {
         EXPECT_CALL(*mss, IsAIOSupport);
         ReadMpio::Setup(mpioIoInfo, partialIO, forceSyncIO, mss);
+        PartialMpioDoneCb notifier = AsEntryPointParam1(&WriteMpioTester::DummyDoneQueue, this);
+        SetPartialDoneNotifier(notifier);
+    }
+    bool CompleteIO(void)
+    {
+        return ReadMpio::_CompleteIO(MpAioState::Complete);
+    }
+    void DummyDoneQueue(Mpio* m)
+    {
     }
 
 private:
@@ -96,6 +110,46 @@ TEST(ReadMpioTester, _HandleError_testIfTheMethodChangesNextStateWhenThereIsAnEr
 
     EXPECT_EQ(result, true);
     EXPECT_EQ(mpio->GetNextState(), MpAioState::Complete);
+
+    delete mpio;
+
+    free(buf);
+}
+
+TEST(ReadMpioTester, EnqueueOnce_testIfThereIsPeace)
+{
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+
+    ReadMpioTester* mpio = new ReadMpioTester(buf);
+
+    MpioIoInfo ioInfo;
+    ioInfo.targetMediaType = MetaStorageType::NVRAM;
+    mpio->Setup(ioInfo, true, true);
+
+    EXPECT_TRUE(mpio->HandlePartialDone());
+    EXPECT_TRUE(mpio->CompleteIO());
+
+    delete mpio;
+
+    free(buf);
+}
+
+TEST(ReadMpioTester, EnqueueTwice_testIfTheAssertionIsWorkingWhenTheMpioHasDoneTwice)
+{
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+
+    ReadMpioTester* mpio = new ReadMpioTester(buf);
+
+    MpioIoInfo ioInfo;
+    ioInfo.targetMediaType = MetaStorageType::NVRAM;
+    mpio->Setup(ioInfo, true, true);
+
+    EXPECT_TRUE(mpio->HandlePartialDone());
+    EXPECT_TRUE(mpio->CompleteIO());
+
+    EXPECT_DEATH(mpio->HandlePartialDone(), "");
 
     delete mpio;
 

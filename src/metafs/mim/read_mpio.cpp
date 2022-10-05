@@ -110,6 +110,7 @@ ReadMpio::_CompleteIO(MpAioState expNextState)
 
     mssIntf = nullptr;
     aioModeEnabled = false;
+    _SetAllocated(false);
 
     return contd2NextRun;
 }
