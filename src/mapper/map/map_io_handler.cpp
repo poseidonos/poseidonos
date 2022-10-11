@@ -198,6 +198,7 @@ MapIoHandler::Load(AsyncLoadCallBack& cb)
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS returned error on Header async loading, mapId:{}", mapId);
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), headerLoadRequest->ToString());
     }
     return ret;
 }
@@ -335,6 +336,7 @@ MapIoHandler::_HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx)
     {
         ioError = headerLoadReqCtx->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS AsyncIO error, ioError:{}", ioError);
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), headerLoadReqCtx->ToString());
     }
 
     mapHeader->ApplyHeader(mapHeaderTempBuffer);
@@ -375,6 +377,7 @@ MapIoHandler::_MpageAsyncLoaded(AsyncMetaFileIoCtx* ctx)
     {
         ioError = mPageLoadReqCtx->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS AsyncIO error, ioError:{}  startMpage:{} numMpages:{}", ioError, startMpage, numMpages);
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), mPageLoadReqCtx->ToString());
     }
     bool loadCompleted = _IncreaseAsyncIoDonePageNum(numMpages);
     if (loadCompleted)
@@ -493,6 +496,7 @@ MapIoHandler::_IssueFlushHeader(void)
     if (ret < 0)
     {
         POS_TRACE_ERROR(EID(MAP_FLUSH_ONGOING), "Failed to Flush mapId:{} Header", mapId);
+        POS_TRACE_ERROR(EID(MAP_FLUSH_ONGOING), headerFlushReq->ToString());
         // TODO(r.saraf) error handling
     }
     return ret;
@@ -508,6 +512,7 @@ MapIoHandler::_MpageFlushed(AsyncMetaFileIoCtx* ctx)
     {
         ioError = mpageFlushReq->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS AsyncIO error, ioError:{}  startMpage:{} numMpages {}", ioError, startMpage, numMpages);
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), mpageFlushReq->ToString());
     }
 
     int ret = EID(SUCCESS);
@@ -537,6 +542,7 @@ MapIoHandler::_HeaderFlushed(AsyncMetaFileIoCtx* ctx)
     {
         ioError = headerFlushReq->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "MFS AsyncIO(Map-Header) error, ioError:{}", ioError);
+        POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), headerFlushReq->ToString());
     }
 
     assert(status == FLUSHING_HEADER);
