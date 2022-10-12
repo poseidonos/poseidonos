@@ -4,6 +4,8 @@
 SYSTEM=`uname -s`
 POS_ROOT=$(readlink -f $(dirname $0))/..
 
+source /etc/os-release
+
 ${POS_ROOT}/script/install_go.sh
 
 if [ -f /etc/debian_version ]; then
@@ -80,14 +82,7 @@ if [ -f /etc/debian_version ]; then
     # for address sanitizer
     apt install -y libasan4
     apt install -y libasan4-dbg
-
-elif [ -f /etc/centos-release ]; then
-    VERS=$(rpm --eval '%{centos_ver}')
-    if [ $VERS -ne 8 ]; then
-        echo "pkgdep: version not supported."
-        exit 1
-    fi
-
+elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
     set -e # exit immediately on any fail
 
     POS_ROOT=$(readlink -f $(dirname $0))/..
