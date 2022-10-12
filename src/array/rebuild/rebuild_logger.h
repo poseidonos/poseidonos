@@ -43,7 +43,7 @@ namespace pos
 class RebuildLogger
 {
 public:
-    explicit RebuildLogger(string arrayName);
+    explicit RebuildLogger(string arrayName, string type);
     virtual ~RebuildLogger(void);
     void SetArrayRebuildStart(void);
     void SetPartitionRebuildStart(string partName);
@@ -53,6 +53,7 @@ public:
 
 private:
     string array;
+    string type;
     string rebuildResult;
     chrono::system_clock::time_point start;
     map<string, chrono::system_clock::time_point> partStart;

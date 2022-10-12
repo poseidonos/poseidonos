@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <mutex>
 
 #include "src/include/array_mgmt_policy.h"
 #include "src/array_components/array_components.h"
@@ -114,6 +115,7 @@ private:
     DeviceManager* deviceManager = nullptr;
     TelemetryClient* telClient = nullptr;
     function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory = nullptr;
+    pthread_rwlock_t arrayListLock;
 };
 // Note that we do not recommend direct access to ArrayManagerSingleton.
 using ArrayManagerSingleton = Singleton<ArrayManager>;
