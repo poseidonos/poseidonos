@@ -38,6 +38,7 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/volume.h"
 #include "src/volume/volume_list.h"
+#include "src/qos/qos_manager.h"
 
 namespace pos
 {
@@ -52,6 +53,21 @@ VolumeCreator::VolumeCreator(VolumeList& volumeList, std::string arrayName, int 
 
 VolumeCreator::~VolumeCreator(void)
 {
+}
+
+void
+VolumeCreator::_CheckQosValidity(uint64_t maxIops,
+        uint64_t maxBw, uint64_t minIops, uint64_t minBw, std::string volName, uint32_t volId)
+{
+    std::string errorMsg = "";
+    std::vector<std::pair<string, uint32_t>> volumeInput;
+    volumeInput.push_back(std::make_pair(volName, volId));
+    int ret = QosManagerSingleton::Instance()->UpdateVolumePolicy(minBw, maxBw,
+        minIops, maxIops, errorMsg, volumeInput, arrayName);
+    if (ret != 0)
+    {
+        throw ret;
+    }
 }
 
 void
@@ -142,7 +158,7 @@ VolumeCreator::Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw,
     {
         _CheckRequestValidity(name, size);
         _CreateVolume(name, size, maxIops, maxBw, minIops, minBw, checkWalVolume, uuid);
-
+        _CheckQosValidity(maxIops, maxBw, minIops, minBw, name, vol->ID);
         _NotificationVolumeEvent();
 
         _SetUuid();

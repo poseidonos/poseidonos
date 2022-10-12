@@ -137,6 +137,10 @@ public:
     void ResetGlobalThrottling(void);
     void SetMinimumVolume(uint32_t arrayId, uint32_t volId, uint64_t value, bool iops);
     void PeriodicalJob(uint64_t* nextTick);
+    int32_t UpdateVolumePolicy(int64_t minBwFromCli,
+        int64_t maxBwFromCli, int64_t minIopsFromCli, int64_t maxIopsFromCli, std::string& errorMsg,
+        std::vector<std::pair<string, uint32_t>>& validVolumes, string arrayName);
+    uint64_t GetRecentValue(int64_t cliInput, uint64_t prevValue);
 
     static bool needThrottling;
 
