@@ -36,14 +36,15 @@
 #include "src/io/general_io/translator.h"
 #include "src/include/meta_const.h"
 #include "src/gc/gc_flush_submission.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/resource_manager/buffer_pool.h"
-
+#include "src/volume/volume_service.h"
 #include "src/include/branch_prediction.h"
-
+#include "src/master_context/config_manager.h"
 #include "src/logger/logger.h"
 
 #include "Air.h"
@@ -82,6 +83,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
   volumeEventPublisher(inputVolumeEventPublisher),
   memoryManager(memoryManager)
 {
+    _SetForceFlushInterval();
     udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
     for (uint32_t volId = 0; volId < GC_VOLUME_COUNT; volId++)
@@ -101,6 +103,12 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
 
 GcStripeManager::~GcStripeManager(void)
 {
+    for (auto t : timer)
+    {
+        delete t.second;
+    }
+    timer.clear();
+
     for (uint32_t volumeId = 0; volumeId < GC_VOLUME_COUNT; volumeId++)
     {
         if (blkInfoList[volumeId] != nullptr)
@@ -135,6 +143,15 @@ GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
 {
     if (false == _IsWriteBufferFull(volEventBase->volId))
     {
+        timerMtx.lock();
+        auto it = timer.find(volEventBase->volId);
+        if (it != timer.end())
+        {
+            timer.erase(it);
+            delete (*it).second;
+        }
+        timerMtx.unlock();
+
         GcWriteBuffer* writeBuffers = gcActiveWriteBuffers[volEventBase->volId];
         delete blkInfoList[volEventBase->volId];
         SetFlushed(volEventBase->volId);
@@ -197,6 +214,28 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
             return gcAllocateBlks;
         }
         flushed[volumeId] = false;
+
+        timerMtx.lock();
+        auto it = timer.find(volumeId);
+        SystemTimeoutChecker* t = nullptr;
+        if (it == timer.end())
+        {
+            t = new SystemTimeoutChecker();
+            timer.emplace(volumeId, t);
+        }
+        else
+        {
+            t = (*it).second;
+        }
+        if (t->IsActive() == false)
+        {
+            POS_TRACE_DEBUG(EID(GC_STRIPE_FORCE_FLUSH_TIMEOUT),
+                "GC force flush timer started, vol_id:{}, interval(ns):{}",
+                volumeId, timeoutInterval);
+            t->SetTimeout(timeoutInterval);
+        }
+        timerMtx.unlock();
+
         _SetActiveStripeTail(volumeId, 0);
         _SetActiveStripeRemaining(volumeId, udSize->blksPerStripe);
         _CreateBlkInfoList(volumeId);
@@ -240,6 +279,43 @@ GcStripeManager::IsAllFinished(void)
     return (flushedStripeCnt == 0);
 }
 
+void
+GcStripeManager::CheckTimeout(void)
+{
+    unique_lock<mutex> lock(timerMtx);
+    for (auto t : timer)
+    {
+        if (t.second->CheckTimeout() == true)
+        {
+            uint32_t volId = t.first;
+            POS_TRACE_WARN(POS_EVENT_ID::GC_STRIPE_FORCE_FLUSH_TIMEOUT,
+                "Force flush due to timeout, vol_id:{}", volId);
+
+            std::vector<BlkInfo>* allocatedBlkInfoList = GetBlkInfoList(volId);
+            GcWriteBuffer* dataBuffer = GetWriteBuffer(volId);
+            IVolumeManager* volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(iArrayInfo->GetIndex());
+            if (unlikely(EID(SUCCESS)
+                != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeStatus::Unmounted)))
+            {
+                SetFlushed(volId);
+                allocatedBlkInfoList->clear();
+                delete allocatedBlkInfoList;
+                ReturnBuffer(dataBuffer);
+                SetFinished();
+            }
+            else
+            {
+                EventSmartPtr flushEvent = std::make_shared<GcFlushSubmission>(iArrayInfo->GetName(),
+                            allocatedBlkInfoList, volId, dataBuffer, this);
+                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
+                bool forceFlush = true;
+                SetFlushed(volId, forceFlush);
+            }
+            t.second->Reset();
+        }
+    }
+}
+
 std::vector<BlkInfo>*
 GcStripeManager::GetBlkInfoList(uint32_t volumeId)
 {
@@ -263,8 +339,17 @@ GcStripeManager::SetBlkInfo(uint32_t volumeId, uint32_t offset, BlkInfo blkInfo)
 }
 
 void
-GcStripeManager::SetFlushed(uint32_t volumeId)
+GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
 {
+    if (force == false)
+    {
+        unique_lock<mutex> lock(timerMtx);
+        auto it = timer.find(volumeId);
+        if (it != timer.end())
+        {
+            (*it).second->Reset();
+        }
+    }
     assert(flushed[volumeId] == false);
     blkInfoList[volumeId] = nullptr;
     gcActiveWriteBuffers[volumeId] = nullptr;
@@ -292,6 +377,12 @@ void
 GcStripeManager::_CreateBlkInfoList(uint32_t volumeId)
 {
     blkInfoList[volumeId] = new std::vector<BlkInfo>(udSize->blksPerStripe);
+    BlkInfo invalidBlkInfo;
+    invalidBlkInfo.volID = UINT32_MAX;
+    for (auto it = blkInfoList[volumeId]->begin(); it != blkInfoList[volumeId]->end(); ++it)
+    {
+        (*it) = invalidBlkInfo;
+    }
 }
 
 bool
@@ -360,4 +451,20 @@ GcStripeManager::_AllocateBlks(uint32_t volumeId, uint32_t numBlks)
 
     return gcAllocateBlks;
 }
+
+void
+GcStripeManager::_SetForceFlushInterval(void)
+{
+    uint64_t intervalInSec = timeoutInterval;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "force_flush_timeout_in_sec",
+            &intervalInSec, ConfigType::CONFIG_TYPE_UINT64);
+    if (ret == 0)
+    {
+        timeoutInterval = intervalInSec;
+    }
+    POS_TRACE_INFO(EID(GC_STRIPE_FORCE_FLUSH_TIMEOUT), "GC force flush interval:{}sec", timeoutInterval);
+    //convert second to nano second
+    timeoutInterval = timeoutInterval * 1000000000ULL;
+}
+
 } // namespace pos

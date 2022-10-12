@@ -117,13 +117,20 @@ GcFlushSubmission::Execute(void)
         return false;
     }
 
+    uint32_t validCnt = 0;
     for (uint32_t offset = 0; offset < blkInfoList->size(); offset++)
     {
         std::vector<BlkInfo>::iterator it = blkInfoList->begin();
         std::advance(it, offset);
         BlkInfo blkInfo = *it;
+        bool isValid = blkInfo.volID != UINT32_MAX;
+        if (isValid == false)
+        {
+            break;
+        }
         stripe->UpdateReverseMapEntry(offset, blkInfo.rba, volumeId);
         stripe->UpdateVictimVsa(offset, blkInfo.vsa);
+        validCnt++;
     }
 
     blkInfoList->clear();
@@ -170,8 +177,9 @@ GcFlushSubmission::Execute(void)
         iArrayInfo->GetIndex());
 
     POS_TRACE_DEBUG((int)POS_EVENT_ID::GC_STRIPE_FLUSH_SUBMIT,
-            "gc flush submission, arrayName:{}, stripeUserLsid:{}, result:{}",
+            "gc flush submission, arrayName:{}, validCnt:{}, stripeUserLsid:{}, result:{}",
             arrayName,
+            validCnt,
             logicalStripeId,
             (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned));
 

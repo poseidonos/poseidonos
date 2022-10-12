@@ -52,6 +52,7 @@ SystemTimeoutChecker::~SystemTimeoutChecker(void)
 void
 SystemTimeoutChecker::SetTimeout(uint64_t nanoSecsLeftFromNow)
 {
+    isActive = true;
     targetFromStartInNSec = nanoSecsLeftFromNow;
     clock_gettime(CLOCK_MONOTONIC_RAW, &startTime);
 }
@@ -59,6 +60,11 @@ SystemTimeoutChecker::SetTimeout(uint64_t nanoSecsLeftFromNow)
 bool
 SystemTimeoutChecker::CheckTimeout(void)
 {
+    if (isActive == false)
+    {
+        return false;
+    }
+
     bool timeoutReached = false;
 
     if (0 < targetFromStartInNSec)
