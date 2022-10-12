@@ -34,7 +34,7 @@ TEST(PartitionRebuild, StartRebuild_testIfRebuildStateIsRebuilding)
     NiceMock<MockEventScheduler> mockEventScheduler;
     ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
     unique_ptr<RebuildContext> ctx = make_unique<RebuildContext>();
-    ctx->logger = new RebuildLogger(arrayName);
+    ctx->logger = new RebuildLogger(arrayName, "TYPE_NOT_INTERESTING");
     ctx->prog = new RebuildProgress(arrayName);
     ctx->stripeCnt = 1024;
     PartitionPhysicalSize size;
@@ -54,7 +54,7 @@ TEST(PartitionRebuild, StopRebuild_testIfRebuildStateIsCancelled)
     // Given
     string arrayName = "POSArray";
     unique_ptr<RebuildContext> ctx = make_unique<RebuildContext>();
-    ctx->logger = new RebuildLogger(arrayName);
+    ctx->logger = new RebuildLogger(arrayName, "TYPE_NOT_INTERESTING");
     ctx->prog = new RebuildProgress(arrayName);
     PartitionPhysicalSize size;
     ctx->size = &size;
@@ -76,7 +76,7 @@ TEST(PartitionRebuild, TotalStripeCnt_testIfTotalStripeCountIsCorrect)
     // Given
     string arrayName = "POSArray";
     unique_ptr<RebuildContext> ctx = make_unique<RebuildContext>();
-    ctx->logger = new RebuildLogger(arrayName);
+    ctx->logger = new RebuildLogger(arrayName, "TYPE_NOT_INTERESTING");
     ctx->prog = new RebuildProgress(arrayName);
     PartitionPhysicalSize size;
     ctx->size = &size;

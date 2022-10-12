@@ -42,9 +42,10 @@
 namespace pos
 {
 
-RebuildLogger::RebuildLogger(string arrayName)
+RebuildLogger::RebuildLogger(string arrayName, string type)
+: array(arrayName),
+  type(type)
 {
-    array = arrayName;
 }
 
 // LCOV_EXCL_START
@@ -82,6 +83,7 @@ void RebuildLogger::WriteLog(void)
     {
         ofile << "=======Rebuild Result=======" << endl;
         ofile << "Name: " << array <<endl;
+        ofile << "Type: " << type <<endl;
         ofile << "Start: " << Time::ToString(chrono::system_clock::to_time_t(start)) << endl;
         for (auto it : partStart)
         {
