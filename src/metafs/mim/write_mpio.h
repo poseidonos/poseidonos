@@ -50,6 +50,7 @@ protected:
     virtual void _InitStateHandler(void) override;
     bool _MergeMDPage(void* userBuf, FileSizeType userWByteOffset, FileSizeType userWByteSize, void* mdpageBuf);
     bool _HandleError(MpAioState expNextState);
+    bool _CompleteIO(MpAioState expNextState);
 
 private:
     bool _Init(MpAioState expNextState);
@@ -57,7 +58,6 @@ private:
     bool _Write(const MpAioState expNextState);
     bool _MergeData(MpAioState expNextState);
     bool _PrepareWrite(MpAioState expNextState);
-    bool _CompleteIO(MpAioState expNextState);
 
     MetaLpnType prevLpn;
     MetaLpnType currLpn;
