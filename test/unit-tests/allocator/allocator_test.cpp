@@ -171,7 +171,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     // when 1.
     int ret = alloc.GetMeta(WBT_SEGMENT_VALID_COUNT, "", file);
     // then 1.
-    EXPECT_EQ((int)ERRID(ALLOCATOR_START), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_FAILED_TO_CREATE_FILE), ret);
 
     // given 2. fail to Write file
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));

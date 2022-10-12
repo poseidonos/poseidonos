@@ -92,11 +92,11 @@ MapContent::OpenMapFile(void)
     int ret = mapIoHandler->OpenFile(fileName, fileSize, fileType);
     if (ret == EID(NEED_TO_INITIAL_STORE))
     {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper] Need to Initial Store fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());
+        POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper] Need to Initial Store fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());
     }
     if (ret < 0)
     {
-        POS_TRACE_ERROR(EID(MAPPER_SUCCESS), "[Mapper] failed to save Header fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper] failed to save Header fileName:{}, arrayId:{}", fileName, addrInfo->GetArrayId());
     }
     return ret;
 }
