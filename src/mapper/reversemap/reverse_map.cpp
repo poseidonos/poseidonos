@@ -45,6 +45,17 @@
 
 namespace pos
 {
+
+void
+RevMapPageAsyncIoCtx::HandleIoComplete(void* data)
+{
+    if (ioDoneCheckCallback)
+        error = ioDoneCheckCallback(data);
+    if (callback)
+        callback(this);
+    delete this;
+}
+
 ReverseMapPack::ReverseMapPack(void)
 : wbLsid(UNMAP_STRIPE),
   vsid(UINT32_MAX),
@@ -246,6 +257,13 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
     }
 
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL33012_MAP_REVERSE_FLUSH_IO_DONE_CNT, POSMetricTypes::MT_COUNT);
+        metric.SetCountValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
+
     uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
     if ((res + 1) == numMpagesPerStripe)
     {
@@ -275,19 +293,14 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
         }
         if (callback != nullptr)
         {
-            EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
+            EventSmartPtr enqueue = callback;
             callback = nullptr;
+            EventSchedulerSingleton::Instance()->EnqueueEvent(enqueue);
         }
     }
 
-    delete ctx;
-
-    if (telemetryPublisher)
-    {
-        POSMetric metric(TEL33012_MAP_REVERSE_FLUSH_IO_DONE_CNT, POSMetricTypes::MT_COUNT);
-        metric.SetCountValue(1);
-        telemetryPublisher->PublishMetric(metric);
-    }
+    // NOTE that ReverseMapPack should not access to its private variables 
+    // after enqueueing callback event as callback might delete this ReverseMapPack
 }
 
 std::tuple<uint32_t, uint32_t, uint32_t>

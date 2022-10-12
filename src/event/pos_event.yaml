@@ -3474,6 +3474,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3146
+    Name: MAPPER_INFO
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   
   # Allocator: 3150 - 3299
@@ -3921,6 +3928,20 @@ Root:
   -
     Id: 3213
     Name: ALLOCATOR_RESET_SEGMENTS
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3214
+    Name: ALLOCATOR_INFO
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3215
+    Name: ALLOCATOR_FAILED_TO_CREATE_FILE
     Severity:
     Message:
     Cause:
@@ -5051,6 +5072,13 @@ Root:
     Message: Waiting for io resource
     Cause: Write operation has been failed due to IOSubmitHandlerStatus::FAIL
     Solution: MetaFs will try again
+  -
+    Id: 4091
+    Name: MFS_MPIO_ENQUEUED_TWICE
+    Severity:
+    Message: The mpio is enqueued twice
+    Cause: It is possible that the mpio is enqueued twice
+    Solution: Need to debug
   
   -
     Id: 4500

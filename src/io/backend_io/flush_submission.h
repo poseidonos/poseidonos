@@ -36,7 +36,7 @@
 #include <string>
 
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
 
 namespace pos
@@ -46,17 +46,18 @@ class IWBStripeAllocator;
 class IIOSubmitHandler;
 class IIOTranslator;
 
-class FlushSubmission : public Event
+class FlushSubmission : public Callback
 {
 public:
     FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled = false);
     FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
         IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled);
     ~FlushSubmission(void) override;
-    bool Execute(void) override;
     uint32_t GetBufferListSize(void);
 
 private:
+    virtual bool _DoSpecificJob(void) override;
+    
     Stripe* stripe;
     IIOSubmitHandler* iIOSubmitHandler;
     std::list<BufferEntry> bufferList;

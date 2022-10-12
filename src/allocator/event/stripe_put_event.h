@@ -34,7 +34,7 @@
 
 #include <string>
 
-#include "src/event_scheduler/event.h"
+#include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
 
 namespace pos
@@ -42,14 +42,15 @@ namespace pos
 class Stripe;
 class IWBStripeAllocator;
 
-class StripePutEvent : public Event
+class StripePutEvent : public Callback
 {
 public:
     StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid);
     StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId);
-    virtual bool Execute(void);
 
 private:
+    virtual bool _DoSpecificJob(void) override;
+
     Stripe& stripe;
     StripeId prevLsid;
     IWBStripeAllocator* iWBStripeAllocator;

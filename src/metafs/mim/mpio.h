@@ -157,6 +157,8 @@ protected:
     void _HandlePartialDone(void* notused = nullptr);
 
     bool _CheckDataIntegrity(void) const;
+    void _SetAllocated(const bool flag);
+    bool _IsAllocated(void) const;
 
 private:
     MssOpcode _ConvertToMssOpcode(const MpAioState mpioState);
@@ -172,5 +174,6 @@ private:
     const uint64_t UNIQUE_ID;
     static std::atomic<uint64_t> idAllocate_;
     const bool DIRECT_ACCESS_ENABLED;
+    bool isAllocated;
 };
 } // namespace pos
