@@ -44,7 +44,7 @@
 #include "src/resource_manager/buffer_pool.h"
 #include "src/volume/volume_service.h"
 #include "src/include/branch_prediction.h"
-
+#include "src/master_context/config_manager.h"
 #include "src/logger/logger.h"
 
 #include "Air.h"
@@ -83,6 +83,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
   volumeEventPublisher(inputVolumeEventPublisher),
   memoryManager(memoryManager)
 {
+    _SetForceFlushInterval();
     udSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
     for (uint32_t volId = 0; volId < GC_VOLUME_COUNT; volId++)
@@ -228,7 +229,10 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
         }
         if (t->IsActive() == false)
         {
-            t->SetTimeout(TIMEOUT);
+            POS_TRACE_DEBUG(EID(GC_STRIPE_FORCE_FLUSH_TIMEOUT),
+                "GC force flush timer started, vol_id:{}, interval(ns):{}",
+                volumeId, timeoutInterval);
+            t->SetTimeout(timeoutInterval);
         }
         timerMtx.unlock();
 
@@ -284,7 +288,7 @@ GcStripeManager::CheckTimeout(void)
         if (t.second->CheckTimeout() == true)
         {
             uint32_t volId = t.first;
-            POS_TRACE_WARN(POS_EVENT_ID::GC_STRIPE_FLUSH_SUBMIT,
+            POS_TRACE_WARN(POS_EVENT_ID::GC_STRIPE_FORCE_FLUSH_TIMEOUT,
                 "Force flush due to timeout, vol_id:{}", volId);
 
             std::vector<BlkInfo>* allocatedBlkInfoList = GetBlkInfoList(volId);
@@ -447,4 +451,20 @@ GcStripeManager::_AllocateBlks(uint32_t volumeId, uint32_t numBlks)
 
     return gcAllocateBlks;
 }
+
+void
+GcStripeManager::_SetForceFlushInterval(void)
+{
+    uint64_t intervalInSec = timeoutInterval;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("flow_control", "force_flush_timeout_in_sec",
+            &intervalInSec, ConfigType::CONFIG_TYPE_UINT64);
+    if (ret == 0)
+    {
+        timeoutInterval = intervalInSec;
+    }
+    POS_TRACE_INFO(EID(GC_STRIPE_FORCE_FLUSH_TIMEOUT), "GC force flush interval:{}sec", timeoutInterval);
+    //convert second to nano second
+    timeoutInterval = timeoutInterval * 1000000000ULL;
+}
+
 } // namespace pos

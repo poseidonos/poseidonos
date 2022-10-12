@@ -108,6 +108,7 @@ private:
     bool _IsWriteBufferFull(uint32_t volumeId);
     void _CreateBlkInfoList(uint32_t volumeId);
     bool _SetBufferPool(void);
+    void _SetForceFlushInterval(void);
 
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
@@ -126,7 +127,7 @@ private:
     VolumeEventPublisher* volumeEventPublisher;
     MemoryManager* memoryManager;
     unordered_map<uint32_t, SystemTimeoutChecker*> timer;
-    const uint64_t TIMEOUT = 5 * 1000000000ULL;
+    uint64_t timeoutInterval = 10;
     mutex timerMtx;
 };
 
