@@ -12,7 +12,7 @@ class MockFlushSubmission : public FlushSubmission
 {
 public:
     using FlushSubmission::FlushSubmission;
-    MOCK_METHOD(bool, Execute, (), (override));
+    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
 
 } // namespace pos
