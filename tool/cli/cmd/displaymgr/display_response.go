@@ -139,49 +139,47 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		w.Flush()
 
 	case "ARRAYINFO":
-		res := messages.ArrayInfoResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.ArrayInfoResponse{}
+		json.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
-		array := res.RESULT.DATA
+		array := res.GetResult().GetData()
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "Name\t: "+array.ARRAYNAME)
-		fmt.Fprintln(w, "Index\t: "+strconv.Itoa(array.ARRAYINDEX))
-		fmt.Fprintln(w, "UniqueID\t: "+strconv.Itoa(array.UNIQUEID))
-		fmt.Fprintln(w, "State\t: "+array.STATE)
-		fmt.Fprintln(w, "Situation\t: "+array.SITUATION)
-		fmt.Fprintln(w, "CreateDatetime\t: "+array.CREATEDATETIME)
-		fmt.Fprintln(w, "UpdateDatetime\t: "+array.UPDATEDATETIME)
-		fmt.Fprintln(w, "RebuildingProgress\t:", array.REBUILDINGPROGRESS)
-		total, _ := strconv.ParseUint(array.CAPACITY, 10, 64)
-		used, _ := strconv.ParseUint(array.USED, 10, 64)
-		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, total))
-		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, used))
-		fmt.Fprintln(w, "GCMode\t: "+array.GCMODE)
-		fmt.Fprintln(w, "MetaRAID\t: "+array.METARAID)
-		fmt.Fprintln(w, "DataRAID\t: "+array.DATARAID)
-		fmt.Fprintln(w, "WriteThrough\t: "+strconv.FormatBool(array.WRITETHROUGH))
+		fmt.Fprintln(w, "Name\t: ", array.GetName())
+		fmt.Fprintln(w, "Index\t: "+strconv.Itoa(int(array.GetIndex())))
+		fmt.Fprintln(w, "UniqueID\t: "+strconv.Itoa(int(array.GetUniqueId())))
+		fmt.Fprintln(w, "State\t: "+array.GetState())
+		fmt.Fprintln(w, "Situation\t: "+array.GetSituation())
+		fmt.Fprintln(w, "CreateDatetime\t: "+array.GetCreateDatetime())
+		fmt.Fprintln(w, "UpdateDatetime\t: "+array.GetUpdateDatetime())
+		fmt.Fprintln(w, "RebuildingProgress\t: "+array.GetRebuildingProgress())
+		fmt.Fprintln(w, "Total\t: "+toByte(displayUnit, array.GetCapacity()))
+		fmt.Fprintln(w, "Used\t: "+toByte(displayUnit, array.GetUsed()))
+		fmt.Fprintln(w, "GCMode\t: "+array.GetGcMode())
+		fmt.Fprintln(w, "MetaRAID\t: "+array.GetMetaRaid())
+		fmt.Fprintln(w, "DataRAID\t: "+array.GetDataRaid())
+		fmt.Fprintln(w, "WriteThrough\t: "+strconv.FormatBool(array.GetWriteThroughEnabled()))
 		fmt.Fprint(w, "BufferDevs\t: ")
 
-		for _, device := range array.DEVICELIST {
-			if device.DEVICETYPE == "BUFFER" {
-				fmt.Fprint(w, device.DEVICENAME+"\t")
+		for _, device := range array.GetDevicelist() {
+			if device.GetType() == "BUFFER" {
+				fmt.Fprint(w, device.GetName()+"\t")
 			}
 		}
 		fmt.Fprintln(w, "")
 
 		fmt.Fprint(w, "DataDevs\t: ")
 
-		for _, device := range array.DEVICELIST {
-			if device.DEVICETYPE == "DATA" {
-				fmt.Fprint(w, device.DEVICENAME+"\t")
+		for _, device := range array.GetDevicelist() {
+			if device.GetType() == "DATA" {
+				fmt.Fprint(w, device.GetName()+"\t")
 			}
 		}
 
@@ -189,9 +187,9 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 		fmt.Fprint(w, "SpareDevs\t: ")
 
-		for _, device := range array.DEVICELIST {
-			if device.DEVICETYPE == "SPARE" {
-				fmt.Fprint(w, device.DEVICENAME+"\t")
+		for _, device := range array.GetDevicelist() {
+			if device.GetType() == "SPARE" {
+				fmt.Fprint(w, device.GetName()+"\t")
 			}
 		}
 
