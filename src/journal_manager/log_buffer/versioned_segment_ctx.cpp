@@ -221,7 +221,6 @@ void
 VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
 {
     bool foundedTargetSegment = false;
-
     shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
     tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
@@ -235,7 +234,6 @@ VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
         }
     }
 
-
     tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
     for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
     {
@@ -247,7 +245,6 @@ VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
             break;
         }
     }
-
 
     if (true == foundedTargetSegment)
     {
