@@ -115,7 +115,7 @@ IOContext::GetDeviceName(void)
 }
 
 uint64_t
-IOContext::GetUBloackAddr(void)
+IOContext::GetUBlockAddr(void)
 {
     return reinterpret_cast<uint64_t>(ubio->GetUBlock());
 }
