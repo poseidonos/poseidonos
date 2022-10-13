@@ -6,9 +6,9 @@ POS_ROOT=$(readlink -f $(dirname $0))/..
 
 source /etc/os-release
 
-${POS_ROOT}/script/install_go.sh
-
 if [ -f /etc/debian_version ]; then
+    ${POS_ROOT}/script/install_go.sh
+
     # Includes Ubuntu, Debian
     apt-get install -y gcc g++ make git 
     # Additional dependencies for NVMe over Fabrics
@@ -129,6 +129,8 @@ elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
     PKGS="${PKGS} patch wget tar openssl-devel"
 
     dnf install -y ${PKGS}
+
+    ${POS_ROOT}/script/install_go.sh
 
     # dir to build unsupported dependencies
     rm -rf ${POS_ROOT}/dep
