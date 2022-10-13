@@ -220,6 +220,8 @@ VersionedSegmentCtx::GetNumLogGroups(void)
 void
 VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
 {
+    bool foundedTargetSegment = false;
+
     shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
     tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
@@ -228,19 +230,30 @@ VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
         if (segmentId == targetSegmentId)
         {
             changedValidBlkCount.unsafe_erase(it);
+            foundedTargetSegment = true;
             break;
         }
     }
 
-    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
-    for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
+    if (true == foundedTargetSegment)
     {
-        auto segmentId = it->first;
-        if (segmentId == targetSegmentId)
+        tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
+        for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
         {
-            changedOccupiedCount.unsafe_erase(it);
-            break;
+            auto segmentId = it->first;
+            if (segmentId == targetSegmentId)
+            {
+                changedOccupiedCount.unsafe_erase(it);
+                break;
+            }
         }
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+                "Failed to find target segment id in versioned segment infos, logGroupId {}, targetSegmentId {}",
+                logGroupId, targetSegmentId);
+        assert(false);
     }
 }
 

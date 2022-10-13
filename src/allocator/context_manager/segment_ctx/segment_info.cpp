@@ -89,7 +89,7 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
             if (state == SegmentState::VICTIM || state == SegmentState::SSD)
             {
                 std::pair<bool, SegmentState> result = {true, state};
-                _MoveToFreeState();
+                MoveToFreeState();
 
                 return result;
             }
@@ -99,7 +99,7 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
             if (state == SegmentState::SSD)
             {
                 std::pair<bool, SegmentState> result = {true, state};
-                _MoveToFreeState();
+                MoveToFreeState();
 
                 return result;
             }
@@ -149,7 +149,7 @@ SegmentInfo::GetState(void)
 }
 
 void
-SegmentInfo::_MoveToFreeState(void)
+SegmentInfo::MoveToFreeState(void)
 {
     occupiedStripeCount = 0;
     validBlockCount = 0;
@@ -179,7 +179,7 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
 
     if (validBlockCount == 0)
     {
-        _MoveToFreeState();
+        MoveToFreeState();
 
         return true;
     }

@@ -75,10 +75,9 @@ public:
     virtual bool MoveToVictimState(void);
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
+    void MoveToFreeState(void);
 
 private:
-    void _MoveToFreeState(void);
-
     std::atomic<uint32_t> validBlockCount;
     std::atomic<uint32_t> occupiedStripeCount;
 
