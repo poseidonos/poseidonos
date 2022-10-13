@@ -218,6 +218,33 @@ VersionedSegmentCtx::GetNumLogGroups(void)
 }
 
 void
+VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
+{
+    shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
+    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
+    for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
+    {
+        auto segmentId = it->first;
+        if (segmentId == targetSegmentId)
+        {
+            changedValidBlkCount.unsafe_erase(it);
+            break;
+        }
+    }
+
+    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
+    for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
+    {
+        auto segmentId = it->first;
+        if (segmentId == targetSegmentId)
+        {
+            changedOccupiedCount.unsafe_erase(it);
+            break;
+        }
+    }
+}
+
+void
 VersionedSegmentCtx::_CheckLogGroupIdValidity(int logGroupId)
 {
     if (logGroupId >= config->GetNumLogGroups())
