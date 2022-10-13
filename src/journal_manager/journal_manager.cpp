@@ -502,7 +502,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus, eventScheduler);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx,
-        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
+        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager, telemetryPublisher);
 
     statusProvider->Init(bufferAllocator, config, logGroupReleaser);
 }
