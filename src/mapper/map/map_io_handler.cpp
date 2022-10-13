@@ -109,7 +109,7 @@ MapIoHandler::OpenFile(std::string fileName, uint64_t fileSize, MetaFileType fil
             file = nullptr;
             return ret;
         }
-        POS_TRACE_INFO(EID(MFS_START), "Map file created, fileName:{}, array:{}", fileName, addrInfo->GetArrayId());
+        POS_TRACE_INFO(EID(MFS_INFO_START), "Map file created, fileName:{}, array:{}", fileName, addrInfo->GetArrayId());
         file->Open();
         return EID(NEED_TO_INITIAL_STORE); // SaveHeader
     }
