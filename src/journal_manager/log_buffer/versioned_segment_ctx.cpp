@@ -237,6 +237,7 @@ VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
 
     if (true == foundedTargetSegment)
     {
+        foundedTargetSegment = false;
         tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
         for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
         {
@@ -244,9 +245,15 @@ VersionedSegmentCtx::EraseSegmentInfo(int logGroupId, SegmentId targetSegmentId)
             if (segmentId == targetSegmentId)
             {
                 changedOccupiedCount.unsafe_erase(it);
+                foundedTargetSegment = true;
                 break;
             }
         }
+    }
+
+    if (true == foundedTargetSegment)
+    {
+        segmentInfos[targetSegmentId].MoveToFreeState();
     }
     else
     {
