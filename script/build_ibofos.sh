@@ -3,6 +3,8 @@
 # build_ibofos.sh
 #
 
+source /etc/os-release
+
 rootdir=$(readlink -f $(dirname $0))/..
 BUILD_INTERNAL=FALSE
 BUILD_ASAN=n
@@ -25,7 +27,12 @@ build_pos()
     else
         ./configure --without-asan
     fi
-    PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig make -j 8
+
+    if echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
+        export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
+    fi
+
+    make -j 8
 }
 
 while getopts "i" opt
@@ -37,3 +44,4 @@ do
 done
 
 build_pos
+
