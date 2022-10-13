@@ -241,6 +241,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
 
     if (EID(SUCCESS) == ret)
     {
+        UpdateQoSProperty(name, maxIops, maxBw, defaultMinIops, defaultMinBw);
         _PublishTelemetryVolumeState(name, VolumeStatus::Unmounted);
         _PublishTelemetryVolumeCapacity(name, size);
         _PublishTelemetryArrayUsage();
