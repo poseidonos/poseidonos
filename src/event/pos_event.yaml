@@ -4088,14 +4088,14 @@ Root:
     Id: 3421
     Name: GC_STRIPE_FLUSH_SUBMIT
     Severity:
-    Message:
+    Message: "GC flush submission"
     Cause:
     Solution:
   -
     Id: 3422
     Name: GC_STRIPE_FLUSH_COMPLETION
     Severity:
-    Message:
+    Message: "GC flush completion"
     Cause:
     Solution:
   -
@@ -4168,7 +4168,34 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3433
+    Name: GC_FORCE_FLUSH_TIMER_INIT
+    Severity:
+    Message: The GC force flush timer interval is set.
+    Cause:
+    Solution:
+  -
+    Id: 3434
+    Name: GC_FORCE_FLUSH_TIMER_START
+    Severity:
+    Message: The GC force flush timer is started.
+    Cause:
+    Solution:
+  -
+    Id: 3435
+    Name: GC_FORCE_FLUSH_TIMER_TIMEOUT
+    Severity:
+    Message: The GC force flush timer expired and the GC stripe is force flushed.
+    Cause:
+    Solution:
+  -
+    Id: 3436
+    Name: GC_FORCE_FLUSH_TIMER_RESET
+    Severity:
+    Message: A flush occurred before the GC force flush timer expired, and the timer was reset.
+    Cause:
+    Solution:
 
   # WBTGC: 3470 - 3499
   -
