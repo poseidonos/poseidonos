@@ -83,6 +83,7 @@ static const std::string TEL36004_JRN_LOAD_LOG_GROUP = "jrn_load_log_group";
 static const std::string TEL36005_JRN_LOG_COUNT = "jrn_log_count";
 static const std::string TEL36006_JRN_LOG_DONE_COUNT = "jrn_log_done_count";
 static const std::string TEL36007_JRN_LOG_WRITE_TIME_AVERAGE = "jrn_log_write_time_average";
+static const std::string TEL36008_JRN_REPLAY_WORKING_TIME = "jrn_replay_working_time";
 static const std::string TEL39999_JRN_ = "j_test_end";
 
 static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";
