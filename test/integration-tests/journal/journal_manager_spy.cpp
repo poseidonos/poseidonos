@@ -107,7 +107,6 @@ JournalManagerSpy::ResetJournalConfiguration(JournalConfiguration* journalConfig
 void
 JournalManagerSpy::StartCheckpoint(void)
 {
-    ((LogGroupReleaserSpy*)(logGroupReleaser))->UpdateFlushingLogGroup();
     ((LogGroupReleaserSpy*)(logGroupReleaser))->TriggerCheckpoint();
 }
 
@@ -150,9 +149,7 @@ JournalManagerSpy::GetMetaPageSize(void)
 bool
 JournalManagerSpy::IsCheckpointCompleted(void)
 {
-    CheckpointStatus status = logGroupReleaser->GetStatus();
-
-    return ((status == CheckpointStatus::INIT) || (status == CheckpointStatus::COMPLETED) && ((LogGroupReleaserSpy*)(logGroupReleaser))->IsFlushCompleted());
+    return (logGroupReleaser->GetFullLogGroups().size() == 0);
 }
 
 int
