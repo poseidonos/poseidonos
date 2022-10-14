@@ -76,6 +76,7 @@ EventMpageAsyncIo::Execute(void)
         if (file->AsyncIO(mPageLoadRequest) < 0) // MFS_FAILED_DUE_TO_ERR
         {
             POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper AsyncLoad] Failed to Issue AsyncLoad, retry.. mpageNum:{}", mpageNum);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), mPageLoadRequest->ToString());
             startMpage = mpageNum;
             return false;
         }

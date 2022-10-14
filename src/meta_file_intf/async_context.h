@@ -33,6 +33,7 @@
 #pragma once
 
 #include <functional>
+#include <string>
 
 #include "meta_file_include.h"
 
@@ -54,6 +55,8 @@ public:
     virtual void HandleIoComplete(void* data);
     virtual int GetError(void) const;
     virtual uint64_t GetLength(void) const;
+
+    virtual std::string ToString(void) const;
 
     MetaFsIoOpcode opcode;
     int fd;
