@@ -31,50 +31,38 @@
  */
 
 #pragma once
+#include <stdint.h>
 
-#include <list>
-
-#include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include <cassert>
 
 namespace pos
 {
-class LogGroupReleaserSpy : public LogGroupReleaser
+enum class ReleaseStatus
+{
+    INIT,
+    WAITING,
+    RELEASING
+};
+
+class LogGroupReleaseStatus
 {
 public:
-    using LogGroupReleaser::LogGroupReleaser;
-    virtual ~LogGroupReleaserSpy(void) = default;
+    LogGroupReleaseStatus(int groupId);
 
-    bool triggerCheckpoint = true;
+    void SetWaiting(uint32_t seqNum);
+    void SetReleasing(void);
+    void Reset(void);
 
-    // Method to access protected method of LogGroupReleaser for unit testing
-    void
-    FlushNextLogGroup(void)
-    {
-        _FlushNextLogGroup();
-    }
+    uint32_t GetSeqNum(void);
+    int GetId(void);
 
-    void
-    TriggerCheckpoint(void)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
+    bool IsFull(void);
+    bool IsReleasing(void);
 
-    bool
-    IsFlushCompleted(void)
-    {
-        return (_IsFlushInProgress() == false);
-    }
-
-protected:
-    virtual void
-    _FlushNextLogGroup(void) override
-    {
-        if (triggerCheckpoint == true)
-        {
-            LogGroupReleaser::_FlushNextLogGroup();
-        }
-    }
+private:
+    int id;
+    uint32_t sequenceNumber;
+    ReleaseStatus status;
 };
+
 } // namespace pos
