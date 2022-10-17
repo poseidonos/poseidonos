@@ -51,7 +51,6 @@ public:
 private:
     bool _HandleInputVolumes(json& doc);
     bool _VerifyMultiVolumeInput(json& doc);
-    uint32_t _HandleVolumePolicy(json& doc);
     std::vector<string> volumeNames;
     std::vector<std::pair<string, uint32_t>> validVolumes;
     std::string errorMsg;

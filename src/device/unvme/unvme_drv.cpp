@@ -83,7 +83,7 @@ AsyncIOComplete(void* ctx, const struct spdk_nvme_cpl* completion)
 {
     UnvmeIOContext* ioCtx = static_cast<UnvmeIOContext*>(ctx);
     UnvmeDeviceContext* devCtx = ioCtx->GetDeviceContext();
-    uint64_t ssdId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
+    uint64_t ssdId {ioCtx->GetUBlockAddr()};
 
     if (likely(!ioCtx->IsAsyncIOCompleted()))
     {
@@ -325,7 +325,7 @@ UnvmeDrv::_SubmitAsyncIOInternal(UnvmeDeviceContext* deviceContext,
 {
     int retValue = 0, retValueComplete = 0;
     int completions = 0;
-    uint64_t ssdId = reinterpret_cast<uint64_t>(ioCtx->GetDeviceContext());
+    uint64_t ssdId {ioCtx->GetUBlockAddr()};
 
     ioCtx->ClearAsyncIOCompleted();
     deviceContext->IncreasePendingIO();

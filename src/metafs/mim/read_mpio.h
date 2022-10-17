@@ -50,11 +50,11 @@ public:
 protected:
     virtual void _InitStateHandler(void) override;
     bool _HandleError(MpAioState expNextState);
+    bool _CompleteIO(MpAioState expNextState);
 
 private:
     bool _Init(MpAioState expNextState);
     bool _MakeReady(MpAioState expNextState);
-    bool _CompleteIO(MpAioState expNextState);
     bool _CopyToUserBuf(void);
 };
 } // namespace pos

@@ -59,6 +59,7 @@ public:
     virtual std::pair<std::list<IOContext*>::iterator, bool> GetErrorKey(void);
 
     virtual std::string GetDeviceName(void);
+    virtual uint64_t GetUBlockAddr(void);
 
     virtual UbioDir GetOpcode(void);
 

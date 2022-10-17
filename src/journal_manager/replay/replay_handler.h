@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <list>
 
 #include "src/journal_manager/replay/log_delete_checker.h"
@@ -59,6 +60,7 @@ class IContextManager;
 class IContextReplayer;
 class IArrayInfo;
 class IVolumeInfoManager;
+class TelemetryPublisher;
 
 class ReplayHandler
 {
@@ -71,7 +73,7 @@ public:
         IJournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager);
+        IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager, TelemetryPublisher* tp);
     virtual void Dispose(void);
 
     virtual int Start(void);
@@ -83,6 +85,9 @@ private:
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager);
     void _AddTask(ReplayTask* task);
     int _ExecuteReplayTasks(void);
+
+    void _StartStopWatch(void);
+    std::chrono::milliseconds _StopAndGetElapsedInMilli(void);
 
     ReplayStateChanger replayState;
 
@@ -96,6 +101,9 @@ private:
 
     ReplayProgressReporter* reporter;
     std::list<ReplayTask*> taskList;
+
+    TelemetryPublisher* telemetryPublisher;
+    std::chrono::system_clock::time_point timeCount;
 };
 
 } // namespace pos

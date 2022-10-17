@@ -33,6 +33,7 @@
 #pragma once
 
 #include <map>
+#include <unordered_set>
 #include <vector>
 
 #include "active_stripe_address.h"
@@ -67,15 +68,15 @@ protected:
 private:
     int _FindWbufIndex(StripeInfo stripeInfo);
     void _AddResetTailToFoundList(int index);
-    void _AddWbufTailToFoundList(int index, ActiveStripeAddr addr);
+    void _AddWbufTailToFoundList(int index, ActiveStripeAddr* addr);
     bool _IsFlushedStripe(StripeInfo stripeInfo);
 
-    ActiveStripeAddr _FindTargetActiveStripeAndRestore(int index);
+    ActiveStripeAddr* _FindTargetActiveStripeAndRestore(int index);
     int _RestoreActiveStripes(void);
     int _RestorePendingStripes(void);
 
     void _AddActiveStripeToRestore(int index);
-    void _SetActiveStripeTail(int index, ActiveStripeAddr addr);
+    void _SetActiveStripeTail(int index, ActiveStripeAddr* addr);
     void _ResetActiveStripeTail(int index);
 
     // TODO(meta): This is same with BlockManager::_IsStripeFull, call block manager instead of this function
@@ -84,7 +85,7 @@ private:
 
     const int INDEX_NOT_FOUND = -1;
 
-    using PendingActiveStripeList = std::vector<ActiveStripeAddr>;
+    using PendingActiveStripeList = std::unordered_set<ActiveStripeAddr*>;
 
     std::vector<VirtualBlkAddr> readTails;
 

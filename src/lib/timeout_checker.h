@@ -45,6 +45,11 @@ public:
 
     virtual void SetTimeout(uint64_t intervalFromNow) = 0;
     virtual bool CheckTimeout(void) = 0;
+    void Reset(void);
+    bool IsActive(void);
+
+protected:
+    bool isActive = false;
 };
 
 } // namespace pos

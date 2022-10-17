@@ -96,7 +96,7 @@ SmartCollector::PublishSmartDataToTelemetryAllCtrl(void)
         }
 
         struct spdk_nvme_health_information_page* payload = new struct spdk_nvme_health_information_page();
-        if (0 == CollectGetLogPage(payload, ctrlr, device.name, SmartReqId::NVME_HEALTH_INFO))
+        if (0 <= CollectGetLogPage(payload, ctrlr, device.name, SmartReqId::NVME_HEALTH_INFO))
         {
             POS_TRACE_DEBUG(EID(SMART_COLLECTOR_EXT_CMD_DBG), "Device Model name:{}, FW REV:{}", device.mn, device.fr);
             PublishSmartTelemetry(payload, device.name);
@@ -108,7 +108,7 @@ SmartCollector::PublishSmartDataToTelemetryAllCtrl(void)
             {
                 struct spdk_nvme_log_samsung_extended_information_entry* extPayload =
                     new struct spdk_nvme_log_samsung_extended_information_entry();
-                if (0 == CollectGetLogPage(extPayload, ctrlr, device.name, SmartReqId::EXTENDED_SMART_INFO))
+                if (0 <= CollectGetLogPage(extPayload, ctrlr, device.name, SmartReqId::EXTENDED_SMART_INFO))
                 {
                     PublishExtSmartTelemetry(extPayload, device.name);
                 }

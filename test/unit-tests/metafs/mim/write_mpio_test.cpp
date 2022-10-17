@@ -32,7 +32,12 @@
 
 #include "src/metafs/mim/write_mpio.h"
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include "test/unit-tests/metafs/storage/mss_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -42,10 +47,11 @@ public:
     explicit WriteMpioTester(void* mdPageBuf)
     : WriteMpio(mdPageBuf, false)
     {
+        mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }
-
     ~WriteMpioTester(void)
     {
+        delete mss;
     }
 
     bool MergeMDPage(void* userBuf, FileSizeType userWByteOffset,
@@ -53,11 +59,32 @@ public:
     {
         return WriteMpio::_MergeMDPage(userBuf, userWByteOffset, userWByteSize, mdpageBuf);
     }
-
     bool HandleError(MpAioState expNextState)
     {
         return WriteMpio::_HandleError(expNextState);
     }
+    bool HandlePartialDone(void)
+    {
+        _HandlePartialDone();
+        return true;
+    }
+    void Setup(MpioIoInfo& mpioIoInfo, bool partialIO, bool forceSyncIO)
+    {
+        EXPECT_CALL(*mss, IsAIOSupport);
+        WriteMpio::Setup(mpioIoInfo, partialIO, forceSyncIO, mss);
+        PartialMpioDoneCb notifier = AsEntryPointParam1(&WriteMpioTester::DummyDoneQueue, this);
+        SetPartialDoneNotifier(notifier);
+    }
+    bool CompleteIO(void)
+    {
+        return WriteMpio::_CompleteIO(MpAioState::Complete);
+    }
+    void DummyDoneQueue(Mpio* m)
+    {
+    }
+
+private:
+    NiceMock<MockMetaStorageSubsystem>* mss;
 };
 
 TEST(WriteMpioTester, _MergeMDPage_testIfTheCopierDoesCorrectly)
@@ -98,6 +125,46 @@ TEST(WriteMpioTester, _HandleError_testIfTheMethodChangesNextStateWhenThereIsAnE
 
     EXPECT_EQ(result, true);
     EXPECT_EQ(mpio->GetNextState(), MpAioState::Complete);
+
+    delete mpio;
+
+    free(buf);
+}
+
+TEST(WriteMpioTester, EnqueueOnce_testIfThereIsPeace)
+{
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+
+    WriteMpioTester* mpio = new WriteMpioTester(buf);
+
+    MpioIoInfo ioInfo;
+    ioInfo.targetMediaType = MetaStorageType::NVRAM;
+    mpio->Setup(ioInfo, true, true);
+
+    EXPECT_TRUE(mpio->HandlePartialDone());
+    EXPECT_TRUE(mpio->CompleteIO());
+
+    delete mpio;
+
+    free(buf);
+}
+
+TEST(WriteMpioTester, EnqueueTwice_testIfTheAssertionIsWorkingWhenTheMpioHasDoneTwice)
+{
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+
+    WriteMpioTester* mpio = new WriteMpioTester(buf);
+
+    MpioIoInfo ioInfo;
+    ioInfo.targetMediaType = MetaStorageType::NVRAM;
+    mpio->Setup(ioInfo, true, true);
+
+    EXPECT_TRUE(mpio->HandlePartialDone());
+    EXPECT_TRUE(mpio->CompleteIO());
+
+    EXPECT_DEATH(mpio->HandlePartialDone(), "");
 
     delete mpio;
 

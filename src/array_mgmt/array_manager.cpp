@@ -61,6 +61,7 @@ ArrayManager::ArrayManager(ArrayRebuilder* arrayRebuilder, AbrManager* abrManage
   telClient(telClient),
   arrayComponentsFactory(arrayComponentsFactory)
 {
+    pthread_rwlock_init(&arrayListLock, nullptr);
     if (deviceManager != nullptr)
     {
         deviceManager->SetDeviceEventCallback(this);
@@ -103,10 +104,12 @@ ArrayManager::~ArrayManager()
 int
 ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string dataFt)
 {
+    pthread_rwlock_wrlock(&arrayListLock);
     if (_FindArray(name) != nullptr)
     {
         int event = EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
         POS_TRACE_WARN(event, "name duplicated: {}", name);
+        pthread_rwlock_unlock(&arrayListLock);
         return event;
     }
 
@@ -115,6 +118,7 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
         int event = EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS);
         POS_TRACE_WARN(event,
             "Current num of Arrays: {}", arrayList.size());
+        pthread_rwlock_unlock(&arrayListLock);
         return event;
     }
 
@@ -130,15 +134,18 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
             "ArrayManager is cleaning up ArrayComponents of {} because of array creation failure", name);
         delete array;
     }
+    pthread_rwlock_unlock(&arrayListLock);
     return ret;
 }
 
 int
 ArrayManager::Delete(string name)
 {
+    pthread_rwlock_wrlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
     {
+        pthread_rwlock_unlock(&arrayListLock);
         if (AbrExists(name))
         {
             int result = _DeleteFaultArray(name);
@@ -155,7 +162,7 @@ ArrayManager::Delete(string name)
         delete array;
         arrayList.erase(name);
     }
-
+    pthread_rwlock_unlock(&arrayListLock);
     return ret;
 }
 
@@ -233,25 +240,30 @@ ArrayManager::Rebuild(string name)
 int
 ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, string name, int eid)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
+    int ret = eid;
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        return f(array);
+        ret = f(array);
     }
     else
     {
         POS_TRACE_WARN(eid, "array_name:{}", name);
-        return eid;
     }
+    pthread_rwlock_unlock(&arrayListLock);
+    return ret;
 }
 
 int
 ArrayManager::DeviceDetached(UblockSharedPtr dev)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
+    int ret = 0;
     if (array != nullptr)
     {
-        return array->GetArray()->DetachDevice(dev);
+        ret = array->GetArray()->DetachDevice(dev);
     }
     else
     {
@@ -260,7 +272,8 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
             dev->GetName(), dev->GetSN());
         deviceManager->RemoveDevice(dev);
     }
-    return 0; // this function will be void type when device lock is removed
+    pthread_rwlock_unlock(&arrayListLock);
+    return ret; // this function will be void type when device lock is removed
 }
 
 void
@@ -279,47 +292,57 @@ ArrayManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
 ComponentsInfo*
 ArrayManager::GetInfo(string name)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
+    ComponentsInfo* info = nullptr;
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
-        return array->GetInfo();
+        info = array->GetInfo();
     }
     else
     {
         POS_TRACE_WARN(EID(ARRAY_MGR_NO_ARRAY_MATCHING_NAME), "ArrayName: {}", name);
-        return nullptr;
     }
+    pthread_rwlock_unlock(&arrayListLock);
+    return info;
 }
 
 ComponentsInfo*
 ArrayManager::GetInfo(uint32_t arrayIdx)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
+    ComponentsInfo* info = nullptr;
     for (auto iter = arrayList.begin(); iter != arrayList.end(); iter++)
     {
         if (iter->second->GetArray()->GetIndex() == arrayIdx)
         {
-            return iter->second->GetInfo();
+            info = iter->second->GetInfo();
         }
     }
-
-    return nullptr;
+    pthread_rwlock_unlock(&arrayListLock);
+    return info;
 }
 
 int
 ArrayManager::PrepareRebuild(string name, bool& resume)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
     {
+        pthread_rwlock_unlock(&arrayListLock);
         return EID(REBUILD_JOB_PREPARE_FAIL);
     }
 
-    return array->PrepareRebuild(resume);
+    int ret = array->PrepareRebuild(resume);
+    pthread_rwlock_unlock(&arrayListLock);
+    return ret;
 }
 
 void
 ArrayManager::RebuildDone(string name)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
@@ -329,6 +352,7 @@ ArrayManager::RebuildDone(string name)
     {
         POS_TRACE_WARN(EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME), "Cannot invoke RebuildDone because the array {} isn't found", name);
     }
+    pthread_rwlock_unlock(&arrayListLock);
 }
 
 int
@@ -363,9 +387,11 @@ ArrayManager::Load(list<string>& failedArrayList)
 int
 ArrayManager::_Load(string name)
 {
+    pthread_rwlock_wrlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
     {
+        pthread_rwlock_unlock(&arrayListLock);
         POS_TRACE_WARN(EID(LOAD_ARRAY_ALREADY_LOADED), "arrayname: {}", name);
         return EID(LOAD_ARRAY_ALREADY_LOADED);
     }
@@ -381,12 +407,14 @@ ArrayManager::_Load(string name)
         delete array;
     }
 
+    pthread_rwlock_unlock(&arrayListLock);
     return ret;
 }
 
 int
 ArrayManager::ResetMbr(void)
 {
+    pthread_rwlock_wrlock(&arrayListLock);
     int result = 0;
     for (auto iter = arrayList.begin(); iter != arrayList.end();)
     {
@@ -401,10 +429,12 @@ ArrayManager::ResetMbr(void)
                 continue;
             }
         }
+        pthread_rwlock_unlock(&arrayListLock);
         POS_TRACE_WARN(result, "Unable to delete array during reset mbr " + iter->first);
         return result;
     }
 
+    pthread_rwlock_unlock(&arrayListLock);
     result = abrManager->ResetMbr();
     return result;
 }
@@ -475,7 +505,9 @@ void
 ArrayManager::SetArrayComponentMap(const map<string, ArrayComponents*>& arrayCompMap)
 {
     // The member variable says it's array"List", but it's actually a map.
+    pthread_rwlock_wrlock(&arrayListLock);
     this->arrayList = arrayCompMap;
+    pthread_rwlock_unlock(&arrayListLock);
 }
 
 const map<string, ArrayComponents*>&
@@ -487,15 +519,20 @@ ArrayManager::GetArrayComponentMap(void)
 void
 ArrayManager::SetTargetAddress(string name, string targetAddress)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     array->SetTargetAddress(targetAddress);
+    pthread_rwlock_unlock(&arrayListLock);
 }
 
 string
 ArrayManager::GetTargetAddress(string name)
 {
+    pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
-    return array->GetTargetAddress();    
+    string addr = array->GetTargetAddress();
+    pthread_rwlock_unlock(&arrayListLock);
+    return addr;
 }
 
 } // namespace pos

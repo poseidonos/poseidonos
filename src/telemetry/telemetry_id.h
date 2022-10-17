@@ -83,6 +83,7 @@ static const std::string TEL36004_JRN_LOAD_LOG_GROUP = "jrn_load_log_group";
 static const std::string TEL36005_JRN_LOG_COUNT = "jrn_log_count";
 static const std::string TEL36006_JRN_LOG_DONE_COUNT = "jrn_log_done_count";
 static const std::string TEL36007_JRN_LOG_WRITE_TIME_AVERAGE = "jrn_log_write_time_average";
+static const std::string TEL36008_JRN_REPLAY_WORKING_TIME = "jrn_replay_working_time";
 static const std::string TEL39999_JRN_ = "j_test_end";
 
 static const std::string TEL40000_METAFS_NORMAL_SHUTDOWN = "normal_shutdown_npor";
@@ -120,12 +121,12 @@ static const std::string TEL50010_WRITE_IOPS_VOLUME = "write_iops_volume";
 static const std::string TEL50011_WRITE_BPS_VOLUME = "write_bps_volume";
 static const std::string TEL50012_WRITE_AVG_LAT_VOLUME = "write_avg_lat_volume";
 static const std::string TEL50020_VOL_VOLUME_STATE = "volume_state";
-static const std::string TEL50021_VOL_VOLUME_TOTAL_CAPACITY= "volume_total_capacity";
-static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_used_capacity";
+static const std::string TEL50021_VOL_VOLUME_TOTAL_CAPACITY= "volume_capacity_total";
+static const std::string TEL50022_VOL_VOLUME_USED_CAPACITY = "volume_capacity_used";
 
 static const std::string TEL60001_ARRAY_STATUS = "array_status";
-static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_cnt";
-static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_cnt";
+static const std::string TEL60002_ARRAY_USAGE_BLK_CNT = "array_usage_blk_cnt";
+static const std::string TEL60003_VOL_USAGE_BLK_CNT = "volume_usage_blk_cnt";
 static const std::string TEL60004_ARRAY_CAPACITY_TOTAL = "array_capacity_total";
 static const std::string TEL60005_ARRAY_CAPACITY_USED = "array_capacity_used";
 

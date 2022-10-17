@@ -98,7 +98,43 @@ QosCreateVolumePolicyCommand::Execute(json& doc, string rid)
     {
         return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, static_cast<int>(EID(QOS_CLI_WRONG_MISSING_PARAMETER)), "vol, Parameter Missing", GetPosInfo());
     }
-    retVal = _HandleVolumePolicy(doc);
+    const int32_t NOT_INPUT = -1;
+    int64_t maxBw = NOT_INPUT, minBw = NOT_INPUT, maxIops = NOT_INPUT, minIops = NOT_INPUT;
+    if (doc["param"].contains("minbw"))
+    {
+        minBw = doc["param"]["minbw"].get<int64_t>();
+    }
+    if (doc["param"].contains("maxbw"))
+    {
+        maxBw = doc["param"]["maxbw"].get<int64_t>();
+    }
+    if (doc["param"].contains("miniops"))
+    {
+        minIops = doc["param"]["miniops"].get<int64_t>();
+    }
+    if (doc["param"].contains("maxiops"))
+    {
+        maxIops = doc["param"]["maxiops"].get<int64_t>();
+    }
+
+    retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(minBw, maxBw,
+        minIops, maxIops, errorMsg, validVolumes, arrayName);
+    if (SUCCESS != retVal)
+    {
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, retVal, errorMsg, GetPosInfo());
+    }
+    for (auto volume : validVolumes)
+    {
+        IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+        qos_vol_policy policy = QosManagerSingleton::Instance()->GetVolumePolicy(volume.second, arrayName);
+        retVal = volMgr->UpdateQoSProperty(volume.first, policy.maxIops, policy.maxBw, policy.minIops, policy.minBw);
+    }
+    if (retVal != SUCCESS)
+    {
+        errorMsg = "QoS update in Volume Manager failed";
+        return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, retVal, errorMsg, GetPosInfo());
+    }
+
     if (SUCCESS != retVal)
     {
         return jFormat.MakeResponse("CREATEQOSVOLUMEPOLICY", rid, retVal, errorMsg, GetPosInfo());
@@ -143,231 +179,11 @@ QosCreateVolumePolicyCommand::_HandleInputVolumes(json& doc)
         }
         else
         {
-            validVolumes.push_back(std::make_pair(*vol, validVol));
+            IVolumeInfoManager* volInfoMgr =
+                VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+            validVolumes.push_back(std::make_pair(*vol, volInfoMgr->GetVolumeID(*vol)));
         }
     }
     return true;
-}
-
-uint32_t
-QosCreateVolumePolicyCommand::_HandleVolumePolicy(json& doc)
-{
-    int retVal = -1;
-    IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
-    for (auto vol = validVolumes.begin(); vol != validVolumes.end(); vol++)
-    {
-        std::pair<string, uint32_t> volume = (*vol);
-        prevVolPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volume.second, arrayName);
-        newVolPolicy = prevVolPolicy;
-        newVolPolicy.policyChange = false;
-        newVolPolicy.maxValueChanged = false;
-
-        if (doc["param"].contains("minbw"))
-        {
-            int64_t minBwFromCli = doc["param"]["minbw"].get<int64_t>();
-            if (-1 != minBwFromCli)
-            {
-                if (minBwFromCli < 0 || ((0 != minBwFromCli) && ((uint64_t)minBwFromCli > MAX_BW_LIMIT)))
-                {
-                    errorMsg = "Min Bandwidth value outside allowed range";
-                    return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                }
-                newVolPolicy.minBwGuarantee = true;
-                newVolPolicy.minBw = minBwFromCli;
-                if (newVolPolicy.minBw != prevVolPolicy.minBw)
-                {
-                    if (prevVolPolicy.maxBw != 0 && prevVolPolicy.maxBw <= newVolPolicy.minBw)
-                    {
-                        errorMsg = "Min bw more than max bw";
-                        return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                    }
-                    if (prevVolPolicy.maxIops != 0)
-                    {
-                        uint32_t prevMaxBw = ((prevVolPolicy.maxIops * ArrayConfig::BLOCK_SIZE_BYTE * KIOPS) / (M_KBYTES * M_KBYTES));
-                        if (newVolPolicy.minBw >= prevMaxBw)
-                        {
-                            errorMsg = "Min bw more than corrosponding Max Iops. Io Size considered 4KB";
-                            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                        }
-                    }
-                    if (prevVolPolicy.minIops != 0)
-                    {
-                         errorMsg = "Min IOPS already set for the volume. Please call poseidonos-cli qos reset and then set Min Bw using poseidonos-cli qos create";
-                         return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                    }
-                    newVolPolicy.policyChange = true;
-                }
-            }
-        }
-
-        if (doc["param"].contains("maxbw"))
-        {
-            int64_t maxBwFromCli = doc["param"]["maxbw"].get<int64_t>();
-            if (-1 != maxBwFromCli)
-            {
-                maxBw = maxBwFromCli;
-                // value 0 means no throttling set
-                if ((0 != maxBw) && (maxBw < MIN_BW_LIMIT || maxBw > MAX_BW_LIMIT))
-                {
-                    errorMsg = "Max Bandwidth value outside allowed range";
-                    return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                }
-                newVolPolicy.maxBw = maxBw;
-                if (newVolPolicy.maxBw != prevVolPolicy.maxBw)
-                {
-                    if ((prevVolPolicy.minBw != 0 && prevVolPolicy.minBw >= newVolPolicy.maxBw) || (newVolPolicy.minBw != 0 && newVolPolicy.minBw >= newVolPolicy.maxBw))
-                    {
-                        errorMsg = "Max bw less than min bw";
-                        return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                    }
-                    if (prevVolPolicy.minIops != 0)
-                    {
-                        uint32_t prevMinBw = ((prevVolPolicy.minIops * ArrayConfig::BLOCK_SIZE_BYTE * KIOPS) / (M_KBYTES * M_KBYTES));
-                        if (newVolPolicy.maxBw <= prevMinBw)
-                        {
-                            errorMsg = "Max bw less than corrosponding Min Iops. IO Size is considered 4KB";
-                            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                        }
-                    }
-                    newVolPolicy.policyChange = true;
-                    newVolPolicy.maxValueChanged = true;
-                }
-            }
-        }
-
-        if (doc["param"].contains("miniops"))
-        {
-            int64_t minIopsFromCli = doc["param"]["miniops"].get<int64_t>();
-            if (-1 != minIopsFromCli)
-            {
-                if (minIopsFromCli < 0 || ((0 != minIopsFromCli) && ((uint64_t)minIopsFromCli > MAX_IOPS_LIMIT)))
-                {
-                    errorMsg = "Min Iops value outside allowed range";
-                    return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                }
-                newVolPolicy.minIopsGuarantee = true;
-                newVolPolicy.minIops = minIopsFromCli;
-                if (newVolPolicy.minIops != prevVolPolicy.minIops)
-                {
-                    if (prevVolPolicy.maxIops != 0 && prevVolPolicy.maxIops <= newVolPolicy.minIops)
-                    {
-                        errorMsg = "Min iops more than max iops";
-                        return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                    }
-                    if (prevVolPolicy.maxBw != 0)
-                    {
-                        uint32_t prevMaxIops = ((prevVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
-                        if (newVolPolicy.minIops >= prevMaxIops)
-                        {
-                            errorMsg = "Min Iops more that corrosponding maxBw. IoSize considered 4KB.";
-                            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                        }
-                    }
-                    if (newVolPolicy.maxBw != 0)
-                    {
-                        uint32_t newMaxIops = ((newVolPolicy.maxBw * M_KBYTES * M_KBYTES) / (ArrayConfig::BLOCK_SIZE_BYTE)) / KIOPS;
-                        if (newVolPolicy.minIops >= newMaxIops)
-                        {
-                            errorMsg = "Max Bw more than corrsoponding Min Iops.IO Size is considered 4KB.";
-                            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                        }
-                    }
-                    if (prevVolPolicy.minBw != 0)
-                    {
-                         errorMsg = "Min Bw already set for the volume. Please call poseidonos-cli qos reset and then set Min IOPS using poseidonos-cli qos create";
-                         return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-                    }
-                    newVolPolicy.policyChange = true;
-                }
-            }
-        }
-
-        if (doc["param"].contains("maxiops"))
-        {
-            int64_t maxIopsFromCli = doc["param"]["maxiops"].get<int64_t>();
-            if (-1 != maxIopsFromCli)
-            {
-                maxIops = maxIopsFromCli;
-                // value 0 means no throttling set.
-                if ((0 != maxIops) && (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT))
-                {
-                    errorMsg = "Max IOPS Value outside allowed range";
-                    return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                }
-                newVolPolicy.maxIops = maxIops;
-                if (newVolPolicy.maxIops != prevVolPolicy.maxIops)
-                {
-                    if ((prevVolPolicy.minIops != 0 && prevVolPolicy.minIops >= newVolPolicy.maxIops) || (newVolPolicy.minIops != 0 && newVolPolicy.minIops >= newVolPolicy.maxIops))
-                    {
-                        errorMsg = "Max iops less than min iops";
-                        return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                    }
-                    if (prevVolPolicy.minBw != 0)
-                    {
-                        uint32_t prevMinIops = ((prevVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
-                        if (newVolPolicy.maxIops <= prevMinIops)
-                        {
-                            errorMsg = "Max Iops less than corrsoponding min Bw. Io size considered 4KB.";
-                            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                        }
-                    }
-                    if (newVolPolicy.minBw != 0)
-                    {
-                        uint32_t newMinIops = ((newVolPolicy.minBw * M_KBYTES * M_KBYTES) / ArrayConfig::BLOCK_SIZE_BYTE) / KIOPS;
-                        if (newVolPolicy.maxIops <= newMinIops)
-                        {
-                            errorMsg = "Max Iops less than corrosponding Min Bw , IO Size is considered 4KB.";
-                            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
-                        }
-                    }
-                    newVolPolicy.policyChange = true;
-                    newVolPolicy.maxValueChanged = true;
-                }
-            }
-        }
-
-        if (true == newVolPolicy.policyChange)
-        {
-            if (true == newVolPolicy.minBwGuarantee && true == newVolPolicy.minIopsGuarantee)
-            {
-                errorMsg = "Either Min IOPS or Min BW Allowed";
-                return QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE;
-            }
-            int32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
-            if (arrayId != -1)
-            {
-                retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);
-            }
-            if (retVal != SUCCESS)
-            {
-                switch (retVal)
-                {
-                    case QosReturnCode::EXCEED_MIN_GUARANTEED_VOLUME_MAX_CNT:
-                    {
-                        errorMsg = "the count of min guaranteeed volume exceeds configured max value (default : 5)";
-                        break;
-                    }
-                    case QosReturnCode::MIN_IOPS_OR_MIN_BW_ONLY_ONE:
-                    {
-                        errorMsg = "Either Min IOPS or Min BW Allowed";
-                        break;
-                    }
-                    default:
-                    {
-                        errorMsg = "Qos Volume Policy Updated in QosManager failed";
-                        break;
-                    }
-                }
-                return retVal;
-            }
-            retVal = volMgr->UpdateQoSProperty(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
-            if (retVal != SUCCESS)
-            {
-                errorMsg = "QoS update in Volume Manager failed";
-                return retVal;
-            }
-        }
-    }
-    return SUCCESS;
 }
 } // namespace pos_cli

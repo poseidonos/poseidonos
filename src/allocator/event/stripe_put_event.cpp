@@ -41,7 +41,7 @@
 namespace pos
 {
 StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid)
-: Event(false, BackendEvent_Flush),
+: Callback(false, CallbackType_StripePutEvent),
   stripe(stripe),
   prevLsid(prevLsid),
   iWBStripeAllocator(wbAllocator)
@@ -56,7 +56,7 @@ StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId)
 }
 
 bool
-StripePutEvent::Execute(void)
+StripePutEvent::_DoSpecificJob(void)
 {
     if (stripe.IsOkToFree())
     {

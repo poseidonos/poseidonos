@@ -49,7 +49,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, vector<IArrayDevi
         arrayName, tgt.size(), dst.size());
 
     RebuildProgress* prog = new RebuildProgress(arrayName);
-    RebuildLogger* rLogger = new RebuildLogger(arrayName);
+    RebuildLogger* rLogger = new RebuildLogger(arrayName, "BASIC");
 
     for (RebuildTarget* tar : tgt)
     {
@@ -93,7 +93,7 @@ ArrayRebuild::ArrayRebuild(string arrayName, uint32_t arrayId, QuickRebuildPair&
         "QuickRebuild, array_name:{}, taskCnt:{}, pairCnt:{}",
         arrayName, tgt.size(), rebuildPair.size());
     RebuildProgress* prog = new RebuildProgress(arrayName);
-    RebuildLogger* rLogger = new RebuildLogger(arrayName);
+    RebuildLogger* rLogger = new RebuildLogger(arrayName, "QUICK");
 
     for (RebuildTarget* tar : tgt)
     {
