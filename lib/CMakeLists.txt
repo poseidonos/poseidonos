@@ -59,7 +59,7 @@ if (${USE_LOCAL_REPO} STREQUAL "y")
 else()
     set(REPO_AIR "https://github.com/poseidonos/air.git")
 endif()
-set(TAG_AIR "v0.8.5-beta")
+set(TAG_AIR "v0.8.6-beta")
 
 ExternalProject_Add(air
 #---Download step-----------------

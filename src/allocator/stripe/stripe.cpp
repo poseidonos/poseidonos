@@ -82,14 +82,14 @@ Stripe::~Stripe(void)
 void
 Stripe::UpdateVictimVsa(uint32_t offset, VirtualBlkAddr vsa)
 {
-    // This code is added for debugging and can be removed due to performance issues or others.
-    for (auto it : oldVsaList)
-    {
-        if ((vsa.stripeId != UNMAP_STRIPE) && (it == vsa))
-        {
-            assert(false);
-        }
-    }
+    // Deprecated after timer-based force flush support
+    // for (auto it : oldVsaList)
+    // {
+    //     if ((vsa.stripeId != UNMAP_STRIPE) && (it == vsa))
+    //     {
+    //         assert(false);
+    //     }
+    // }
 
     oldVsaList[offset] = vsa;
 }

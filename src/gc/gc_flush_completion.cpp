@@ -92,7 +92,7 @@ GcFlushCompletion::_DoSpecificJob(void)
         gcStripeManager->ReturnBuffer(dataBuffer);
         dataBuffer = nullptr;
         POS_TRACE_DEBUG(EID(GC_STRIPE_FLUSH_COMPLETION),
-            "gc flush completion, arrayName:{}, stripeUserLsid:{}",
+            "arrayName:{}, stripeUserLsid:{}",
             arrayName, stripe->GetUserLsid());
     }
 

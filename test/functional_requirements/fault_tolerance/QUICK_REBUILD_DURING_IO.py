@@ -23,7 +23,7 @@ ARRAYNAME = MOUNT_VOL_BASIC_1.ARRAYNAME
 def execute():
     MOUNT_VOL_BASIC_1.execute()
     fio_proc = fio.start_fio(0, 90)
-    time.sleep(10)
+    time.sleep(40)
     cli.replace_device(REPLACE_TARGET_DEV, ARRAYNAME)
     if api.wait_situation(ARRAYNAME, "REBUILDING") == True:
         if api.wait_situation(ARRAYNAME, "NORMAL") == True:

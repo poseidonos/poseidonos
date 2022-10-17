@@ -37,21 +37,14 @@ namespace pos
 const uint64_t
     SystemTimeoutChecker::NANOS_PER_SECOND = 1000000000ULL;
 
-SystemTimeoutChecker::SystemTimeoutChecker(void)
-: targetFromStartInNSec(0),
-  startTime{
-      0,
-  }
-{
-}
-
-SystemTimeoutChecker::~SystemTimeoutChecker(void)
+SystemTimeoutChecker::~SystemTimeoutChecker()
 {
 }
 
 void
 SystemTimeoutChecker::SetTimeout(uint64_t nanoSecsLeftFromNow)
 {
+    isActive = true;
     targetFromStartInNSec = nanoSecsLeftFromNow;
     clock_gettime(CLOCK_MONOTONIC_RAW, &startTime);
 }
@@ -59,8 +52,12 @@ SystemTimeoutChecker::SetTimeout(uint64_t nanoSecsLeftFromNow)
 bool
 SystemTimeoutChecker::CheckTimeout(void)
 {
-    bool timeoutReached = false;
+    if (isActive == false)
+    {
+        return false;
+    }
 
+    bool timeoutReached = false;
     if (0 < targetFromStartInNSec)
     {
         struct timespec now;
@@ -82,6 +79,35 @@ SystemTimeoutChecker::CheckTimeout(void)
     }
 
     return timeoutReached;
+}
+
+uint64_t
+SystemTimeoutChecker::Elapsed(void)
+{
+    if (isActive == false)
+    {
+        return 0;
+    }
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &now);
+
+    uint64_t elapsedInNSec =
+        ((now.tv_sec - startTime.tv_sec) * NANOS_PER_SECOND) +
+        now.tv_nsec - startTime.tv_nsec;
+
+    return elapsedInNSec;
+}
+
+void
+SystemTimeoutChecker::Reset(void)
+{
+    isActive = false;
+}
+
+bool
+SystemTimeoutChecker::IsActive(void)
+{
+    return isActive;
 }
 
 } // namespace pos

@@ -111,6 +111,7 @@ Copier::Execute(void)
     }
     else
     {
+        meta->GetGcStripeManager()->CheckTimeout();
         switch (copybackState)
         {
             case CopierStateType::COPIER_THRESHOLD_CHECK_STATE:

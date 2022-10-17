@@ -136,7 +136,7 @@ QosListPoliciesCommand::Execute(json& doc, string rid)
             }
             else
             {
-                volumeIds.push_back(validVol);
+                volumeIds.push_back(volMgr->GetVolumeID(*vol));
             }
         }
         for (auto vol = volumeIds.begin(); vol != volumeIds.end(); vol++)

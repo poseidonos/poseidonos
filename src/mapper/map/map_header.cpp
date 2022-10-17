@@ -89,7 +89,7 @@ MapHeader::CopyToBuffer(char* buffer)
     header->numTotalMpages = mPageMap->GetNumBits();
     header->numUsedBlks = numUsedBlks;
     header->age = ++age;
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numValidMpages, header->numUsedBlks);
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numValidMpages, header->numUsedBlks);
     memcpy((buffer + sizeof(MpageInfo)), (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
     return 0;
 }
@@ -113,7 +113,7 @@ MapHeader::ApplyHeader(char* buffer)
     numUsedBlks = header->numUsedBlks;
     age = header->age;
     mPageMap->SetNumBitsSet(header->numValidMpages);
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numUsedBlks, header->numValidMpages);
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numUsedBlks, header->numValidMpages);
     memcpy(mPageMap->GetMapAddr(), buffer + sizeof(MpageInfo), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
 }
 

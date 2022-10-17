@@ -114,6 +114,12 @@ IOContext::GetDeviceName(void)
     return ubio->GetUBlock()->GetName();
 }
 
+uint64_t
+IOContext::GetUBlockAddr(void)
+{
+    return reinterpret_cast<uint64_t>(ubio->GetUBlock());
+}
+
 void
 IOContext::SetErrorKey(std::list<IOContext*>::iterator it)
 {

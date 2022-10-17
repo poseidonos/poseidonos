@@ -63,7 +63,7 @@ func TestArrayInfoResHumanReadable(t *testing.T) {
 	var resJSON = `{"command":"ARRAYINFO","rid":"fromCLI",` +
 		`"result":{"status":{"code":0,"description":"DONE"},` +
 		`"data":{"index": 0,"name":"TargetArrayName", ` +
-		`"state":"BUSY","situation":"REBUILDING", "rebuilding_progress":76, ` +
+		`"state":"BUSY","situation":"REBUILDING", "rebuildingProgress":"76", ` +
 		`"capacity":120795955200, "used":107374182400, ` +
 		`"devicelist":[{"type":"BUFFER","name":"uram0"}, ` +
 		`{"type":"DATA","name":"unvme-ns-0"},{"type":"DATA","name":"unvme-ns-1"},` +
@@ -176,7 +176,7 @@ unvme-ns-3     |VMWare NVME_0001    |0000:1b:00.0   |SYSTEM        |VMware Virtu
 func TestSMARTResHumanReadable(t *testing.T) {
 	var command = "SMART"
 	var resJSON = `{"rid":"fromCLI","result":{"status":{"module":"",` +
-		`"code":0,"description":"DONE"},"data":{"percentage_used":"0","temperature":"11759"}}}`
+		`"code":0,"description":"DONE"},"data":{"percentage_used":"28","temperature":"11759"}}}`
 
 	expected := `Percentage used : 0
 Tempurature     : 11759

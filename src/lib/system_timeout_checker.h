@@ -33,25 +33,26 @@
 #ifndef __SYSTEM_TIMEOUT_CHECKER_H__
 #define __SYSTEM_TIMEOUT_CHECKER_H__
 
+#include <cstdint>
 #include <ctime>
-
-#include "src/lib/timeout_checker.h"
 
 namespace pos
 {
-class SystemTimeoutChecker : public TimeoutChecker
+class SystemTimeoutChecker
 {
 public:
-    SystemTimeoutChecker(void);
-    ~SystemTimeoutChecker(void) override;
-
-    void SetTimeout(uint64_t nanoSecsLeftFromNow) override;
-    bool CheckTimeout(void) override;
+    virtual ~SystemTimeoutChecker();
+    virtual void SetTimeout(uint64_t nanoSecsLeftFromNow);
+    virtual bool CheckTimeout(void);
+    uint64_t Elapsed(void);
+    void Reset(void);
+    bool IsActive(void);
 
 private:
+    bool isActive = false;
     static const uint64_t NANOS_PER_SECOND;
-    uint64_t targetFromStartInNSec;
-    struct timespec startTime;
+    uint64_t targetFromStartInNSec = 0;
+    struct timespec startTime = { 0 };
 };
 } // namespace pos
 
