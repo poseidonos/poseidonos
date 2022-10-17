@@ -163,8 +163,12 @@ TEST_F(RocksDBReplayStripeIntegrationTest, ReplaySeveralUnflushedStripe)
         VirtualBlkAddr tailVsa = ReplayTestFixture::GetNextBlock(writtenLastBlock);
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
             ReconstructActiveStripe(testInfo->defaultTestVol, partialStripe.GetWbAddr().stripeId, tailVsa, partialStripe.GetRevMap()));
+        EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()),
+            SetActiveStripeTail(testInfo->defaultTestVol, tailVsa, partialStripe.GetWbAddr().stripeId))
+            .Times(AtLeast(0));
         EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
-            FinishStripe(partialStripe.GetWbAddr().stripeId, tailVsa));
+            FinishStripe(partialStripe.GetWbAddr().stripeId, tailVsa))
+            .Times(AtLeast(0));
     }
 
     {
@@ -181,7 +185,10 @@ TEST_F(RocksDBReplayStripeIntegrationTest, ReplaySeveralUnflushedStripe)
             ReconstructActiveStripe(testInfo->defaultTestVol, fullStripe.GetWbAddr().stripeId, tail, fullStripe.GetRevMap()));
         EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()),
             SetActiveStripeTail(testInfo->defaultTestVol, tail, fullStripe.GetWbAddr().stripeId))
-            .Times(1);
+            .Times(AtLeast(0));
+        EXPECT_CALL(*(testAllocator->GetWBStripeAllocatorMock()),
+            FinishStripe(fullStripe.GetWbAddr().stripeId, tail))
+            .Times(AtLeast(0));
     }
 
     EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);

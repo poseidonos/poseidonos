@@ -63,6 +63,26 @@ ActiveWBStripeReplayer::ActiveWBStripeReplayer(IContextReplayer* ctxReplayer,
 
 ActiveWBStripeReplayer::~ActiveWBStripeReplayer(void)
 {
+    for (uint32_t index = 0; index < foundActiveStripes.size(); index++)
+    {
+        if (foundActiveStripes[index].size() > 0)
+        {
+            for (auto stripe : foundActiveStripes[index])
+            {
+                delete stripe;
+            }
+            foundActiveStripes[index].clear();
+        }
+    }
+
+    if (pendingActiveStripes.size() > 0)
+    {
+        for (auto stripe : pendingActiveStripes)
+        {
+            delete stripe;
+        }
+        pendingActiveStripes.clear();
+    }
 }
 
 void
@@ -83,7 +103,7 @@ ActiveWBStripeReplayer::Update(StripeInfo stripeInfo)
             .stripeId = stripeInfo.GetVsid(),
             .offset = stripeInfo.GetLastOffset() + 1};
 
-        ActiveStripeAddr addr(stripeInfo.GetVolumeId(), tailVsa,
+        ActiveStripeAddr* addr = new ActiveStripeAddr(stripeInfo.GetVolumeId(), tailVsa,
             stripeInfo.GetWbLsid());
 
         POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE),
@@ -92,7 +112,7 @@ ActiveWBStripeReplayer::Update(StripeInfo stripeInfo)
 
         if (index == INDEX_NOT_FOUND)
         {
-            pendingActiveStripes.push_back(addr);
+            pendingActiveStripes.insert(addr);
         }
         else
         {
@@ -130,16 +150,16 @@ ActiveWBStripeReplayer::_FindWbufIndex(StripeInfo stripeInfo)
 void
 ActiveWBStripeReplayer::_AddResetTailToFoundList(int index)
 {
-    ActiveStripeAddr resetAddr;
-    resetAddr.Reset();
+    ActiveStripeAddr* resetAddr = new ActiveStripeAddr;
+    resetAddr->Reset();
 
-    foundActiveStripes[index].push_back(resetAddr);
+    foundActiveStripes[index].insert(resetAddr);
 }
 
 void
-ActiveWBStripeReplayer::_AddWbufTailToFoundList(int index, ActiveStripeAddr newAddr)
+ActiveWBStripeReplayer::_AddWbufTailToFoundList(int index, ActiveStripeAddr* newAddr)
 {
-    foundActiveStripes[index].push_back(newAddr);
+    foundActiveStripes[index].insert(newAddr);
 }
 
 void
@@ -154,19 +174,19 @@ ActiveWBStripeReplayer::UpdateRevMaps(int volId, StripeId vsid, uint64_t offset,
 ActiveStripeAddr*
 ActiveWBStripeReplayer::_FindStripe(int index, StripeId vsid)
 {
-    for (auto stripe = foundActiveStripes[index].begin(); stripe != foundActiveStripes[index].end(); stripe++)
+    for (auto stripe : foundActiveStripes[index])
     {
         if (stripe->IsValid() == true && stripe->GetTail().stripeId == vsid)
         {
-            return &(*stripe);
+            return stripe;
         }
     }
 
-    for (auto stripe = pendingActiveStripes.begin(); stripe != pendingActiveStripes.end(); stripe++)
+    for (auto stripe : pendingActiveStripes)
     {
         if (stripe->IsValid() == true && stripe->GetTail().stripeId == vsid)
         {
-            return &(*stripe);
+            return stripe;
         }
     }
 
@@ -199,8 +219,8 @@ ActiveWBStripeReplayer::_RestoreActiveStripes(void)
 
         if (foundActiveStripes[index].size() != 0)
         {
-            ActiveStripeAddr current = _FindTargetActiveStripeAndRestore(index);
-            if (current.IsValid() == true)
+            ActiveStripeAddr* current = _FindTargetActiveStripeAndRestore(index);
+            if (current && current->IsValid() == true)
             {
                 _SetActiveStripeTail(index, current);
             }
@@ -227,8 +247,8 @@ ActiveWBStripeReplayer::_AddActiveStripeToRestore(int index)
     {
         assert(stripeAddr.stripeLoc == IN_WRITE_BUFFER_AREA);
 
-        ActiveStripeAddr currentAddr(index, readTails[index], stripeAddr.stripeId);
-        foundActiveStripes[index].push_back(currentAddr);
+        ActiveStripeAddr* currentAddr = new ActiveStripeAddr(index, readTails[index], stripeAddr.stripeId);
+        foundActiveStripes[index].insert(currentAddr);
     }
 }
 
@@ -247,16 +267,16 @@ ActiveWBStripeReplayer::_GetNumBlksPerStripe(void)
 }
 
 void
-ActiveWBStripeReplayer::_SetActiveStripeTail(int index, ActiveStripeAddr addr)
+ActiveWBStripeReplayer::_SetActiveStripeTail(int index, ActiveStripeAddr* addr)
 {
     contextReplayer->SetActiveStripeTail(index,
-        addr.GetTail(), addr.GetWbLsid());
+        addr->GetTail(), addr->GetWbLsid());
 
     std::ostringstream logString;
     logString << "[Replay] Restore active stripe (index " << index
-              << ", vsid " << addr.GetTail().stripeId
-              << ", wbLsid " << addr.GetWbLsid()
-              << ", offset " << addr.GetTail().offset << ")";
+              << ", vsid " << addr->GetTail().stripeId
+              << ", wbLsid " << addr->GetWbLsid()
+              << ", offset " << addr->GetTail().offset << ")";
     POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
 }
@@ -272,41 +292,42 @@ ActiveWBStripeReplayer::_ResetActiveStripeTail(int index)
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, EID(JOURNAL_REPLAY_WB_STRIPE), logString.str());
 }
 
-ActiveStripeAddr
+ActiveStripeAddr*
 ActiveWBStripeReplayer::_FindTargetActiveStripeAndRestore(int index)
 {
-    ActiveStripeAddr lastActiveStripe;
+    ActiveStripeAddr* lastActiveStripe = nullptr;
 
-    for (auto it = foundActiveStripes[index].begin();
-         it != foundActiveStripes[index].end();)
+    for (auto it = foundActiveStripes[index].cbegin();
+         it != foundActiveStripes[index].cend();)
     {
-        if (it->IsValid() == false)
+        if ((*it)->IsValid() == false)
         {
+            delete *it;
             it = foundActiveStripes[index].erase(it);
         }
         else
         {
             POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_WB_STRIPE),
-                "Start reconstructing stripe, vol {}, wbLsid {}", it->GetVolumeId(), it->GetWbLsid());
+                "Start reconstructing stripe, vol {}, wbLsid {}", (*it)->GetVolumeId(), (*it)->GetWbLsid());
 
-            int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(it->GetVolumeId(),
-                it->GetWbLsid(), it->GetTail(), it->GetRevMap());
+            int reconstructResult = wbStripeAllocator->ReconstructActiveStripe((*it)->GetVolumeId(),
+                (*it)->GetWbLsid(), (*it)->GetTail(), (*it)->GetRevMap());
             if (reconstructResult < 0)
             {
                 int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STRIPE_FLUSH_FAILED));
                 std::ostringstream os;
-                os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
-                   << ", tail offset " << it->GetTail().offset;
+                os << "Failed to reconstruct active stripe, wb lsid " << (*it)->GetWbLsid()
+                   << ", tail offset " << (*it)->GetTail().offset;
 
                 POS_TRACE_ERROR(eventId, os.str());
                 POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
             }
             else
             {
-                if (lastActiveStripe.IsValid() == true)
+                if (lastActiveStripe != nullptr && lastActiveStripe->IsValid() == true)
                 {
-                    pendingStripes.push_back(new PendingStripe(lastActiveStripe.GetVolumeId(),
-                        lastActiveStripe.GetWbLsid(), lastActiveStripe.GetTail()));
+                    pendingStripes.push_back(new PendingStripe(lastActiveStripe->GetVolumeId(),
+                        lastActiveStripe->GetWbLsid(), lastActiveStripe->GetTail()));
                 }
                 lastActiveStripe = *it;
             }
@@ -323,23 +344,24 @@ ActiveWBStripeReplayer::_RestorePendingStripes(void)
     for (auto it = pendingActiveStripes.begin();
          it != pendingActiveStripes.end();)
     {
-        int reconstructResult = wbStripeAllocator->ReconstructActiveStripe(it->GetVolumeId(),
-            it->GetWbLsid(), it->GetTail(), it->GetRevMap());
+        int reconstructResult = wbStripeAllocator->ReconstructActiveStripe((*it)->GetVolumeId(),
+            (*it)->GetWbLsid(), (*it)->GetTail(), (*it)->GetRevMap());
         if (reconstructResult < 0)
         {
             int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STRIPE_FLUSH_FAILED));
             std::ostringstream os;
-            os << "Failed to reconstruct active stripe, wb lsid " << it->GetWbLsid()
-               << ", tail offset " << it->GetTail().offset;
+            os << "Failed to reconstruct active stripe, wb lsid " << (*it)->GetWbLsid()
+               << ", tail offset " << (*it)->GetTail().offset;
 
             POS_TRACE_ERROR(eventId, os.str());
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
         }
         else
         {
-            pendingStripes.push_back(new PendingStripe(it->GetVolumeId(),
-                it->GetWbLsid(), it->GetTail()));
+            pendingStripes.push_back(new PendingStripe((*it)->GetVolumeId(),
+                (*it)->GetWbLsid(), (*it)->GetTail()));
         }
+        delete *it;
         it = pendingActiveStripes.erase(it);
     }
     return 0;

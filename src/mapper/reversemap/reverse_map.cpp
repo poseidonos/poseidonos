@@ -45,6 +45,17 @@
 
 namespace pos
 {
+
+void
+RevMapPageAsyncIoCtx::HandleIoComplete(void* data)
+{
+    if (ioDoneCheckCallback)
+        error = ioDoneCheckCallback(data);
+    if (callback)
+        callback(this);
+    delete this;
+}
+
 ReverseMapPack::ReverseMapPack(void)
 : wbLsid(UNMAP_STRIPE),
   vsid(UINT32_MAX),
@@ -132,6 +143,7 @@ ReverseMapPack::Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid)
         {
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "[ReverseMapPack] Error!, Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
             ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
@@ -169,6 +181,7 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
                 "[ReverseMapPack] Error!, Calling AsyncIO Failed at RevMap FLUSH, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
             ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
@@ -246,6 +259,13 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
     }
 
+    if (telemetryPublisher)
+    {
+        POSMetric metric(TEL33012_MAP_REVERSE_FLUSH_IO_DONE_CNT, POSMetricTypes::MT_COUNT);
+        metric.SetCountValue(1);
+        telemetryPublisher->PublishMetric(metric);
+    }
+
     uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
     if ((res + 1) == numMpagesPerStripe)
     {
@@ -258,12 +278,14 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             {
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] Error!! WRONG SIGNATURE IN REVMAP HEADER, vsid:{}, hdvsid{}, sig:{}", revMapPageAsyncIoReq->vsid, hdr.u.header.vsid, hdr.u.header.magic);
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] FirstEntry Data In ReverseMap, rba:{}, volumeId{}", hdr2.u.body.entry[0].u.entry.rba, hdr2.u.body.entry[0].u.entry.volumeId);
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
                 assert(false);
             }
             else if (hdr.u.header.vsid != revMapPageAsyncIoReq->vsid)
             {
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] WRONG VSID IN REVMAP HEADER, vsid:{}, hdvsid{}, sig:{}", revMapPageAsyncIoReq->vsid, hdr.u.header.vsid, hdr.u.header.magic);
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] FirstEntry Data In ReverseMap, rba:{}, volumeId{}", hdr2.u.body.entry[0].u.entry.rba, hdr2.u.body.entry[0].u.entry.volumeId);
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
                 assert(false);
             }
             else
@@ -275,19 +297,14 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
         }
         if (callback != nullptr)
         {
-            EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
+            EventSmartPtr enqueue = callback;
             callback = nullptr;
+            EventSchedulerSingleton::Instance()->EnqueueEvent(enqueue);
         }
     }
 
-    delete ctx;
-
-    if (telemetryPublisher)
-    {
-        POSMetric metric(TEL33012_MAP_REVERSE_FLUSH_IO_DONE_CNT, POSMetricTypes::MT_COUNT);
-        metric.SetCountValue(1);
-        telemetryPublisher->PublishMetric(metric);
-    }
+    // NOTE that ReverseMapPack should not access to its private variables 
+    // after enqueueing callback event as callback might delete this ReverseMapPack
 }
 
 std::tuple<uint32_t, uint32_t, uint32_t>

@@ -153,7 +153,7 @@ VSAMapManager::CreateVsaMapContent(VSAMapContent* vm, int volId, uint64_t volSiz
             POSMetricValue v;
             v.gauge = numWriteIssuedCount;
             tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-            POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap] Issue Flush Header, volume:{} arrayId:{}", volId, addrInfo->GetArrayId());
+            POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VSAMap] Issue Flush Header, volume:{} arrayId:{}", volId, addrInfo->GetArrayId());
             ret = vsaMaps[volId]->FlushHeader(callBackVSAMap);
             if (ret < 0)
             {
@@ -226,7 +226,7 @@ VSAMapManager::FlushDirtyPagesGiven(int volId, MpageList dirtyPages, EventSmartP
         return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
     int cnt = dirtyPages.size();
-    POS_TRACE_INFO(EID(MAPPER_FAILED), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, arrayId:{}, numdirtyPages:{}", volId, addrInfo->GetArrayId(), cnt);
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VSAMap FlushDirtyPagesGiven] Issue Flush VSAMap, volume :{}, arrayId:{}, numdirtyPages:{}", volId, addrInfo->GetArrayId(), cnt);
     POSMetricValue v;
     v.gauge = cnt;
     tp->PublishData(TEL33010_MAP_VSA_FLUSHED_DIRTYPAGE_CNT, v, MT_GAUGE);
@@ -263,7 +263,7 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
         POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing in volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
         return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap FlushTouchedPages] Issue Flush VSAMap, volume :{}, arrayId:{}", volId, addrInfo->GetArrayId());
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VSAMap FlushTouchedPages] Issue Flush VSAMap, volume :{}, arrayId:{}", volId, addrInfo->GetArrayId());
     assert(vsaMaps[volId] != nullptr);
     assert(vsaMaps[volId]->GetCallback() == nullptr);
     vsaMaps[volId]->SetCallback(cb);
@@ -294,7 +294,7 @@ int
 VSAMapManager::FlushAllMaps(void)
 {
     int ret = 0;
-    POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap FlushAllMaps] Issue Flush All VSAMaps, arrayId:{}", addrInfo->GetArrayId());
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VSAMap FlushAllMaps] Issue Flush All VSAMaps, arrayId:{}", addrInfo->GetArrayId());
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
         if ((isVsaMapInternalAccessable[volId] == true) && (vsaMaps[volId] != nullptr))

@@ -55,8 +55,8 @@ public:
     UblockSharedPtr GetUblock(void) override;
     UBlockDevice* GetUblockPtr(void) override;
     void SetUblock(UblockSharedPtr uBlock) override;
-    string GetName(void);
-    string GetSerial(void);
+    string GetName(void) override;
+    string GetSerial(void) override;
     uint32_t GetDataIndex(void) { return dataIndex; }
     string PrevUblockInfo() { return prevUblockInfo; }
 

@@ -57,6 +57,32 @@ index e2a42a7a0..c2201b5ee 100755
  		--)
  			break
  			;;
+diff --git examples/nvme/fio_plugin/fio_plugin.c examples/nvme/fio_plugin/fio_plugin.c
+index e37eeeb7b..b1fcc135c 100644
+--- examples/nvme/fio_plugin/fio_plugin.c
++++ examples/nvme/fio_plugin/fio_plugin.c
+@@ -1473,10 +1473,6 @@ static void spdk_fio_cleanup(struct thread_data *td)
+ 			pthread_join(g_ctrlr_thread_id, NULL);
+ 		}
+ 	}
+-
+-	if (g_spdk_env_initialized) {
+-		spdk_env_fini();
+-	}
+ }
+ 
+ /* This function enables addition of SPDK parameters to the fio config
+@@ -1752,6 +1748,10 @@ static void fio_init fio_spdk_register(void)
+ 
+ static void fio_exit fio_spdk_unregister(void)
+ {
++	if (g_spdk_env_initialized) {
++		spdk_env_fini();
++	}
++
+ 	unregister_ioengine(&ioengine);
+ }
+ 
 diff --git include/spdk/bdev_module.h include/spdk/bdev_module.h
 index 85d94aa7b..a73bc1bca 100644
 --- include/spdk/bdev_module.h

@@ -3481,6 +3481,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3147
+    Name: MAPPER_INFO
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Allocator: 3150 - 3299
   -
@@ -3933,7 +3940,14 @@ Root:
     Solution:
   -
     Id: 3214
-    Name: ALLOCATOR_SUCCESS
+    Name: ALLOCATOR_INFO
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3215
+    Name: ALLOCATOR_FAILED_TO_CREATE_FILE
     Severity:
     Message:
     Cause:
@@ -4080,14 +4094,14 @@ Root:
     Id: 3421
     Name: GC_STRIPE_FLUSH_SUBMIT
     Severity:
-    Message:
+    Message: "GC flush submission"
     Cause:
     Solution:
   -
     Id: 3422
     Name: GC_STRIPE_FLUSH_COMPLETION
     Severity:
-    Message:
+    Message: "GC flush completion"
     Cause:
     Solution:
   -
@@ -4160,7 +4174,34 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3433
+    Name: GC_FORCE_FLUSH_TIMER_INIT
+    Severity:
+    Message: The GC force flush timer interval is set.
+    Cause:
+    Solution:
+  -
+    Id: 3434
+    Name: GC_FORCE_FLUSH_TIMER_START
+    Severity:
+    Message: The GC force flush timer is started.
+    Cause:
+    Solution:
+  -
+    Id: 3435
+    Name: GC_FORCE_FLUSH_TIMER_TIMEOUT
+    Severity:
+    Message: The GC force flush timer expired and the GC stripe is force flushed.
+    Cause:
+    Solution:
+  -
+    Id: 3436
+    Name: GC_FORCE_FLUSH_TIMER_RESET
+    Severity:
+    Message: A flush occurred before the GC force flush timer expired, and the timer was reset.
+    Cause:
+    Solution:
 
   # WBTGC: 3470 - 3499
   -
@@ -5064,7 +5105,14 @@ Root:
     Message: Waiting for io resource
     Cause: Write operation has been failed due to IOSubmitHandlerStatus::FAIL
     Solution: MetaFs will try again
-
+  -
+    Id: 4091
+    Name: MFS_MPIO_ENQUEUED_TWICE
+    Severity:
+    Message: The mpio is enqueued twice
+    Cause: It is possible that the mpio is enqueued twice
+    Solution: Need to debug
+  
   -
     Id: 4500
     Name: VOLUME_EVENT

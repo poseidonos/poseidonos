@@ -24,12 +24,12 @@ metrics_to_publish:
   read_bps_network:
   write_iops_network:
   write_bps_network:
-  capacity_array:
-  used_array:
-  state_array:
-  capacity_volume:
-  used_volume:
-  state_volume:
+  array_capacity_total:
+  array_usage_blk_cnt:
+  array_status:
+  volume_capacity_total:
+  volume_usage_blk_cnt:
+  volume_state:
   read_avg_lat_volume:
   read_iops_volume:
   read_bps_volume:

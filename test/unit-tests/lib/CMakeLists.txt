@@ -1,4 +1,3 @@
-POS_ADD_UNIT_TEST(counter_timeout_checker_ut counter_timeout_checker_test.cpp)
 POS_ADD_UNIT_TEST(singleton_ut singleton_test.cpp)
 POS_ADD_UNIT_TEST(signal_mask_ut signal_mask_test.cpp)
 POS_ADD_UNIT_TEST(bitmap_ut bitmap_test.cpp)

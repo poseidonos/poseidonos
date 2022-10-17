@@ -74,6 +74,8 @@ enum CallbackType
     CallbackType_PosReplicatorIOCompletion,
     CallbackType_GcLogWrite,
     CallbackType_BackendLogWriteDone,
+    CallbackType_StripePutEvent,
+    CallbackType_FlushSubmission,
     Total_CallbackType_Cnt
 };
 }
