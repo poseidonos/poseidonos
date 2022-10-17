@@ -72,7 +72,9 @@ class TelemetryClient;
 class TelemetryManagerService;
 class TelemetryConfig;
 class MemoryManager;
+#ifdef WITH_REPLICATOR
 class PosReplicatorManager;
+#endif
 class ResourceChecker;
 class IoTimeoutChecker;
 
@@ -119,7 +121,9 @@ private:
     TelemetryClient* telemetryClient;
     TelemetryConfig* telemetryConfig;
     MemoryManager* memoryManager;
+#ifdef WITH_REPLICATOR
     PosReplicatorManager* posReplicatorManager;
+#endif
     ResourceChecker* resourceChecker;
     IoTimeoutChecker* ioTimeoutChecker;
 };

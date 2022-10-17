@@ -387,6 +387,7 @@ list(FILTER dep_src EXCLUDE REGEX ".+mock.cpp")
 list(FILTER dep_src EXCLUDE REGEX ".+/unit_test/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/fake/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/mock/.+")
+list(FILTER dep_src EXCLUDE REGEX ".+/pos_replicator/.+")
 
 foreach(f ${dep_src})
     #message("picking up ${f} for compile")
