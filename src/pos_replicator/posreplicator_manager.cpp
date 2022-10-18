@@ -167,16 +167,16 @@ PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
     std::string volumeName;
     int ret;
 
-    ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, arrayName);
+    ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
     if (ret != EID(SUCCESS))
     {
-        POS_TRACE_WARN(ret, "Invalid Input volume name");
+        POS_TRACE_WARN(ret, "Invalid Input volume name, volume_id:{}", io.volume_id);
         return ret;
     }
-    ret = ConvertArrayIdtoArrayName(io.array_id, volumeName);
+    ret = ConvertArrayIdtoArrayName(io.array_id, arrayName);
     if (ret != EID(SUCCESS))
     {
-        POS_TRACE_WARN(ret, "Invalid Input array name");
+        POS_TRACE_WARN(ret, "Invalid Input array name, array_id:{}", io.array_id);
         return ret;
     }
 

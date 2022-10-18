@@ -121,7 +121,7 @@ UNVMfSubmitHandler(struct pos_io* io)
             default:
             {
                 POS_EVENT_ID eventId = EID(BLKHDLR_WRONG_IO_DIRECTION);
-                POS_TRACE_ERROR(eventId, "Wrong IO direction (only read/write types are suppoered)");
+                POS_TRACE_ERROR(eventId, "Wrong IO direction:{} (only read/write types are supported)", io->ioType);
                 throw eventId;
                 break;
             }
