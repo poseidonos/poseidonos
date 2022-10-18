@@ -3908,6 +3908,19 @@ index b6573a237..0f1a8e119 100644
  			/* Create poll group threads, and send a message to each thread
  			 * and create a poll group.
  			 */
+diff --git scripts/pkgdep/rhel.sh scripts/pkgdep/rhel.sh
+index d307d1bce..212b1e907 100755
+--- scripts/pkgdep/rhel.sh
++++ scripts/pkgdep/rhel.sh
+@@ -83,7 +83,7 @@ fi
+ 
+ yum install -y gcc gcc-c++ make cmake CUnit-devel libaio-devel openssl-devel \
+ 	libuuid-devel libiscsi-devel ncurses-devel json-c-devel libcmocka-devel
+-if echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rhel 8'; then
++if echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rhel 8|rocky 8'; then
+ 	yum install -y python36
+ 	#Create hard link to use in SPDK as python
+ 	if [[ ! -e /usr/bin/python && -e /etc/alternatives/python3 ]]; then
 diff --git scripts/rpc.py scripts/rpc.py
 index ab034142b..3f3358a7a 100755
 --- scripts/rpc.py

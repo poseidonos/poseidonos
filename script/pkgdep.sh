@@ -4,9 +4,11 @@
 SYSTEM=`uname -s`
 POS_ROOT=$(readlink -f $(dirname $0))/..
 
-${POS_ROOT}/script/install_go.sh
+source /etc/os-release
 
 if [ -f /etc/debian_version ]; then
+    ${POS_ROOT}/script/install_go.sh
+
     # Includes Ubuntu, Debian
     apt-get install -y gcc g++ make git 
     # Additional dependencies for NVMe over Fabrics
@@ -80,8 +82,118 @@ if [ -f /etc/debian_version ]; then
     # for address sanitizer
     apt install -y libasan4
     apt install -y libasan4-dbg
+elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
+    set -e # exit immediately on any fail
 
+    POS_ROOT=$(readlink -f $(dirname $0))/..
+
+    dnf install -y epel-release
+    dnf config-manager --set-enabled powertools
+
+    PKGS="gcc gcc-c++ make git" # g++ -> gcc-c++
+    PKGS="${PKGS} rdma-core-devel" # libibverbs-dev, librdmacm-dev
+    PKGS="${PKGS} jsoncpp-devel" # libjsoncpp-dev
+    PKGS="${PKGS} libpciaccess-devel" # libpciaccess-dev
+    PKGS="${PKGS} python3-configshell" # python-configshell*
+    PKGS="${PKGS} numactl-devel libuuid-devel" # libnuma-dev -> numactl-devel, uuid-dev -> libuuid-devel
+    PKGS="${PKGS} libibverbs-utils perftest" # ibverbs-utils -> libibverbs-utils
+    PKGS="${PKGS} python3 python3-pip"
+    PKGS="${PKGS} iperf"
+    PKGS="${PKGS} cmake systemd-devel" # libsystemd-dev -> systemd-devel
+    PKGS="${PKGS} jq rapidjson-devel" # rapidjson-dev -> rapidjson-devel
+    PKGS="${PKGS} python3-psutil"
+    PKGS="${PKGS} ccache"
+    PKGS="${PKGS} libmnl-devel" # libmnl-dev
+    PKGS="${PKGS} automake autoconf libtool bison flex"
+    PKGS="${PKGS} python3-paramiko"
+    PKGS="${PKGS} xfsprogs"
+    PKGS="${PKGS} clang-tools-extra" # clang-format
+    PKGS="${PKGS} libpmemblk-devel" # libpmemblk-dev
+    PKGS="${PKGS} meson"
+    PKGS="${PKGS} python3-pytz" # python3-tz
+    PKGS="${PKGS} gdb"
+    # libjsonrpccpp-dev will be installed manually
+    PKGS="${PKGS} c-ares-devel pkg-config cmake" # libc-ares-dev -> c-ares-devel
+    PKGS="${PKGS} pigz"
+    PKGS="${PKGS} mandoc"
+    PKGS="${PKGS} yaml-cpp-devel" # libyaml-cpp-dev
+    PKGS="${PKGS} numactl"
+    PKGS="${PKGS} tbb-devel" # libtbb-dev
+    # nvme module already available by default
+    PKGS="${PKGS} google-perftools-devel" # libgoogle-perftools-dev
+    PKGS="${PKGS} rocksdb-devel" # librocksdb-dev
+    # libisal-dev will be installed manually
+    # libasan -> gcc
+
+    # Additional packages
+    PKGS="${PKGS} patch wget tar openssl-devel"
+
+    dnf install -y ${PKGS}
+
+    ${POS_ROOT}/script/install_go.sh
+
+    # dir to build unsupported dependencies
+    rm -rf ${POS_ROOT}/dep
+    mkdir -p ${POS_ROOT}/dep
+
+    # libsonrpccpp
+    ## libargtable
+    cd ${POS_ROOT}/dep
+    wget 'http://prdownloads.sourceforge.net/argtable/argtable2-13.tar.gz'
+    tar xf argtable2-13.tar.gz
+    cd argtable2-13
+    ./configure
+    make -j 4
+    make install
+
+    ## catch
+    cd /usr/include
+    wget 'https://github.com/catchorg/Catch2/releases/download/v1.12.2/catch.hpp'
+
+    ## hiredis
+    cd ${POS_ROOT}/dep
+    git clone 'https://github.com/redis/hiredis.git'
+    cd hiredis
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+    make -j 4
+    make install
+
+    ## other deps
+    dnf -y install libcurl-devel libmicrohttpd-devel jsoncpp-devel cmake
+
+    ## finally itself
+    cd ${POS_ROOT}/dep
+    git clone 'https://github.com/cinemast/libjson-rpc-cpp.git'
+    cd libjson-rpc-cpp
+    git checkout v1.0.0
+    mkdir build
+    cd build
+    cmake ..
+    make -j 4
+    make install
+    ldconfig
+
+    # isa-l
+    cd ${POS_ROOT}/dep
+    dnf -y install nasm
+    git clone 'https://github.com/intel/isa-l.git'
+    cd isa-l
+    ./autogen.sh
+    ./configure
+    make
+    make install
+
+    python3 -m pip install py-markdown-table pyyaml
+
+    # jsoncpp-devel installed in different directory: link it
+    mkdir -p /usr/include/jsoncpp
+    ln -s /usr/include/json /usr/include/jsoncpp/json
+
+    # RHEL does not look for libraries in /usr/local/lib unlike Ubuntu
+    echo '/usr/local/lib' > /etc/ld.so.conf.d/pos-local-lib.conf
 else
     echo "pkgdep: unknown system type."
-	exit 1
+    exit 1
 fi

@@ -1,5 +1,5 @@
 diff --git drivers/bus/pci/linux/pci.c drivers/bus/pci/linux/pci.c
-index a2198abf4..a51ad0f88 100644
+index a2198abf43..a51ad0f88c 100644
 --- drivers/bus/pci/linux/pci.c
 +++ drivers/bus/pci/linux/pci.c
 @@ -331,7 +331,7 @@ pci_scan_one(const char *dirname, const struct rte_pci_addr *addr)
@@ -11,3 +11,18 @@ index a2198abf4..a51ad0f88 100644
  		return 0;
  	}
  	/* device is valid, add in list (sorted) */
+diff --git drivers/vdpa/ifc/base/ifcvf.h drivers/vdpa/ifc/base/ifcvf.h
+index a288ce57dc..573a35ffb4 100644
+--- drivers/vdpa/ifc/base/ifcvf.h
++++ drivers/vdpa/ifc/base/ifcvf.h
+@@ -13,7 +13,10 @@
+ #define IFCVF_SUBSYS_DEVICE_ID	0x001A
+ 
+ #define IFCVF_MAX_QUEUES		1
++
++#ifndef VIRTIO_F_IOMMU_PLATFORM
+ #define VIRTIO_F_IOMMU_PLATFORM		33
++#endif
+ 
+ /* Common configuration */
+ #define IFCVF_PCI_CAP_COMMON_CFG	1
