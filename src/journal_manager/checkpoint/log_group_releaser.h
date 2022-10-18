@@ -64,7 +64,7 @@ public:
         IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
     void Reset(void);
 
-    virtual void LogGroupFull(int logGroupId, uint32_t sequenceNumber);
+    virtual void MarkLogGroupFull(int logGroupId, uint32_t sequenceNumber);
 
     virtual int GetFlushingLogGroupId(void) override;
     virtual std::list<int> GetFullLogGroups(void) override;

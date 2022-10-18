@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
