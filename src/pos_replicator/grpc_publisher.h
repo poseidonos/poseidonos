@@ -33,10 +33,10 @@
 #pragma once
 
 #include <grpc++/grpc++.h>
+#include <string>
 
 #include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
 #include "proto/generated/cpp/replicator_rpc.pb.h"
-
 #include "src/helper/json/json_helper.h"
 
 namespace pos
@@ -55,7 +55,11 @@ public:
     int CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf);
 
 private:
+    void _ConnectGrpcServer(std::string targetAddress);
+    bool _WaitUntilReady(void);
+
     ConfigManager* configManager;
+    std::shared_ptr<grpc::Channel> channel;
     std::unique_ptr<replicator_rpc::ReplicatorIo::Stub> stub;
 };
 } // namespace pos
