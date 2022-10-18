@@ -8,7 +8,7 @@ import TEST_LIB
 import TEST_LOG
 import TEST_SETUP_POS
 
-log_buffer_size_mb = 50
+log_buffer_size_mb = 1
 current_test = 0
 arrayId = 0
 volId = 1
