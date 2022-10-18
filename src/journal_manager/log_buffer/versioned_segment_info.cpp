@@ -69,6 +69,12 @@ VersionedSegmentInfo::IncreaseOccupiedStripeCount(SegmentId segId)
     changedOccupiedStripeCount[segId]++;
 }
 
+void
+VersionedSegmentInfo::ResetOccupiedStripeCount(SegmentId segId)
+{
+    changedOccupiedStripeCount[segId] = 0;
+}
+
 tbb::concurrent_unordered_map<SegmentId, int>
 VersionedSegmentInfo::GetChangedValidBlockCount(void)
 {
