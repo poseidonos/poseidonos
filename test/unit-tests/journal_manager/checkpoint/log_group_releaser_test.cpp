@@ -45,7 +45,7 @@ TEST(LogGroupReleaser, Reset_testIfResetSuccessfully)
     EXPECT_EQ(releaser.GetFlushingLogGroupId(), 0);
 }
 
-TEST(LogGroupReleaser, AddToFullLogGroup_testIfFristLogGroupCheckpointIsStarted)
+TEST(LogGroupReleaser, MarkLogGroupFull_testIfFirstLogGroupCheckpointIsStarted)
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
@@ -63,19 +63,19 @@ TEST(LogGroupReleaser, AddToFullLogGroup_testIfFristLogGroupCheckpointIsStarted)
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
     // When: log group 0 is full
-    releaser.LogGroupFull(0, 0); // Add log group 0, seq num 0
+    releaser.MarkLogGroupFull(0, 0); // Add log group 0, seq num 0
     EXPECT_EQ(releaser.GetFlushingLogGroupId(), 0);
     std::list<int> expectedFullLogGroups = {0};
     EXPECT_EQ(releaser.GetFullLogGroups(), expectedFullLogGroups);
 
     // When: log group 1 is full, but releasing log group 0 is not yet completed
-    releaser.LogGroupFull(1, 1); // Add log group 1, seq num 1
+    releaser.MarkLogGroupFull(1, 1); // Add log group 1, seq num 1
     EXPECT_EQ(releaser.GetFlushingLogGroupId(), 0);
     std::list<int> expectedFullLogGroups2 = {0, 1};
     EXPECT_EQ(releaser.GetFullLogGroups(), expectedFullLogGroups2);
 }
 
-TEST(LogGroupReleaser, AddToFullLogGroup_testIfCheckpointIsNotStartedWhenOnlySecondLogGroupIsFull)
+TEST(LogGroupReleaser, MarkLogGroupFull_testIfCheckpointIsNotStartedWhenOnlySecondLogGroupIsFull)
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
@@ -93,7 +93,7 @@ TEST(LogGroupReleaser, AddToFullLogGroup_testIfCheckpointIsNotStartedWhenOnlySec
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(0);
 
     // When: log group 1 is full, before log group 0 is full
-    releaser.LogGroupFull(1, 1); // Add log group 1, seq num 1
+    releaser.MarkLogGroupFull(1, 1); // Add log group 1, seq num 1
 
     // Then: Releaser is waiting for log group 0 to be completed,
     // and log group 1 is just in the full log group list
@@ -144,8 +144,8 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointStarted)
     // When: Log group 0 and 1 is full, and checkpoint for log group 0 starts
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
-    releaser.LogGroupFull(0, 10); // Add log group 0, seq num 10
-    releaser.LogGroupFull(1, 11); // Add log group 1, seq num 11
+    releaser.MarkLogGroupFull(0, 10); // Add log group 0, seq num 10
+    releaser.MarkLogGroupFull(1, 11); // Add log group 1, seq num 11
 
     // Then: Notifier should be notified and checkpoint for the next log group should be started
     EXPECT_CALL(notifier, NotifyLogBufferReseted(0)).Times(1);
@@ -176,7 +176,7 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointIsNotStartedWh
     // When: Log group 0 is full and checkpoint started
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
-    releaser.LogGroupFull(0, 10); // Add log group 0, seq num 10
+    releaser.MarkLogGroupFull(0, 10); // Add log group 0, seq num 10
 
     // Then: Notifier should be notified and checkpoint for the next log group should not be started
     EXPECT_CALL(notifier, NotifyLogBufferReseted(0)).Times(1);
