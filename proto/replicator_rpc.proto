@@ -8,7 +8,7 @@ enum PosResult {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-service ReplicatorIo {
+service ReplicatorIoService {
     // HA side server
     rpc CompleteRead(CompleteReadRequest) returns (CompleteReadResponse) {}
     rpc CompleteWrite(CompleteWriteRequest) returns (CompleteWriteResponse) {}
@@ -23,10 +23,11 @@ message Chunk {
 }
 
 message CompleteReadRequest {
-    string array_name = 1;
-    string volume_name = 2;
-    uint64 lsn = 3;
-    repeated Chunk data = 4;
+  string array_name = 1;
+  string volume_name = 2;
+  uint64 rba = 3;
+  uint64 num_blocks = 4;
+  repeated Chunk data = 5;
 }
 
 message CompleteReadResponse {

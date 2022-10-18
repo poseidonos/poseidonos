@@ -11,10 +11,11 @@ option(POS_SKIP_IT_BUILD "Skip compiling test/integration-tests/**/*_test.cpp" O
 option(POS_BUILD_SHARED_LIB "Build POS as shared library (vs. static)" ON)
 option(POS_TESTEXEC_WITH_NATIVE_GTEST "Run UTs/ITs by executing gtest binaries directly (vs. ctest)" ON)
 option(POS_DISABLE_LOGGING "Disable the POS logger while running UTs/ITs" ON)
-option(POS_ENABLE_REPLICATOR "Enable the POS replicator module" OFF)
+option(POS_ENABLE_REPLICATOR "Enable the POS replicator module" ON)
 
 # Set compiler option releated to Replicator
 if(POS_ENABLE_REPLICATOR)
+    message("ReplicatorManager will be compiled with POS")
     add_definitions(-DIBOF_CONFIG_REPLICATOR)
 endif(POS_ENABLE_REPLICATOR)
 
@@ -398,7 +399,11 @@ list(FILTER dep_src EXCLUDE REGEX ".+mock.cpp")
 list(FILTER dep_src EXCLUDE REGEX ".+/unit_test/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/fake/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/mock/.+")
-list(FILTER dep_src EXCLUDE REGEX ".+/pos_replicator/.+")
+
+if(NOT POS_ENABLE_REPLICATOR)
+    message("ReplicatorManager will be excluded from POS.")
+    list(FILTER dep_src EXCLUDE REGEX ".+/pos_replicator/.+")
+endif(NOT POS_ENABLE_REPLICATOR)
 
 foreach(f ${dep_src})
     #message("picking up ${f} for compile")
@@ -414,10 +419,11 @@ endif(POS_BUILD_SHARED_LIB)
 
 file(GLOB_RECURSE fixture_src ${POS_TEST_ROOT}/fixtures/*.cpp LIST_DIRECTORIES true)
 file(GLOB_RECURSE utils_src ${POS_TEST_ROOT}/unit-tests/utils/*.cpp LIST_DIRECTORIES true)
+file(GLOB_RECURSE replicator_fixture_src ${POS_TEST_ROOT}/unit-tests/pos_replicator/mock_grpc/*.cpp LIST_DIRECTORIES true)
 
 # for fixtures and utils
 add_library(
-    postestlib STATIC ${fixture_src} ${utils_src}
+    postestlib STATIC ${fixture_src} ${utils_src} ${replicator_fixture_src}
 )
 
 link_directories (

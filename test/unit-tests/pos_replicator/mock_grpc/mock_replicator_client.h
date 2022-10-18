@@ -32,33 +32,35 @@
 
 #pragma once
 
-#include <grpcpp/server.h>
+#include <grpc++/grpc++.h>
 
-#include <memory>
+#include <list>
+#include <map>
+#include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
+
+#include "proto/generated/cpp/pos_rpc.grpc.pb.h"
+#include "proto/generated/cpp/pos_rpc.pb.h"
+#include "src/helper/json/json_helper.h"
+#include "src/include/grpc_server_socket_address.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class ConfigManager;
-class GrpcHealth;
-class GrpcReplicationController;
-class GrpcPosIo;
-class GrpcPosManagement;
-
-class GrpcSubscriber
+class MockReplicatorClient
 {
 public:
-    GrpcSubscriber(ConfigManager* configManager);
-    ~GrpcSubscriber(void);
+    MockReplicatorClient(std::shared_ptr<grpc::Channel> channel_);
+    ~MockReplicatorClient(void);
 
-    void RunServer(std::string address);
+    ::grpc::Status WriteBlocks(void);
+    ::grpc::Status WriteHostBlocks(void);
+    ::grpc::Status ReadBlocks(void);
+    ::grpc::Status CompleteHostWrite(void);
 
 private:
-    ConfigManager* configManager;
-    GrpcHealth* healthChecker;
-    GrpcReplicationController* replicationController;
-    GrpcPosIo* posIo;
-    GrpcPosManagement* posManagement;
-
-    std::unique_ptr<::grpc::Server> haGrpcServer;
+    std::unique_ptr<pos_rpc::PosIo::Stub> PosIostub;
 };
 } // namespace pos

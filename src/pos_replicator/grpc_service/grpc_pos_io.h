@@ -1,5 +1,3 @@
-// dummy ha server : pos_rpc
-
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -34,34 +32,62 @@
 
 #pragma once
 
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/grpc_server_socket_address.h"
-#include "src/include/pos_event_id.h"
+#include <grpc++/grpc++.h>
+#include <string>
+#include <utility>
+
 #include "proto/generated/cpp/pos_rpc.grpc.pb.h"
 #include "proto/generated/cpp/pos_rpc.pb.h"
 
-#include <list>
-#include <map>
-#include <string>
-#include <vector>
-#include <nlohmann/json.hpp>
-#include <grpc++/grpc++.h>
-
 namespace pos
 {
-class DummyHaClient
+class GrpcPosIo final : public pos_rpc::PosIo::Service
 {
 public:
-    DummyHaClient(std::shared_ptr<grpc::Channel> channel_);
-    ~DummyHaClient(void);
+    GrpcPosIo(void)
+    {
+    }
+    ~GrpcPosIo(void)
+    {
+    }
 
-    ::grpc::Status WriteBlocks(void);
-    ::grpc::Status WriteHostBlocks(void);
-    ::grpc::Status ReadBlocks(void);
-    ::grpc::Status CompleteHostWrite(void);
+    virtual ::grpc::Status WriteBlocks(
+        ::grpc::ServerContext* context,
+        const pos_rpc::WriteBlocksRequest* request,
+        pos_rpc::WriteBlocksResponse* response) override;
+
+    virtual ::grpc::Status WriteBlocksSync(
+        ::grpc::ServerContext* context,
+        const pos_rpc::WriteBlocksSyncRequest* request,
+        pos_rpc::WriteBlocksSyncResponse* response) override;
+
+    virtual ::grpc::Status WriteHostBlocks(
+        ::grpc::ServerContext* context,
+        const pos_rpc::WriteHostBlocksRequest* request,
+        pos_rpc::WriteHostBlocksResponse* response) override;
+
+    virtual ::grpc::Status WriteHostBlocksSync(
+        ::grpc::ServerContext* context,
+        const pos_rpc::WriteHostBlocksSyncRequest* request,
+        pos_rpc::WriteHostBlocksSyncResponse* response) override;
+
+    virtual ::grpc::Status ReadBlocks(
+        ::grpc::ServerContext* context,
+        const pos_rpc::ReadBlocksRequest* request,
+        pos_rpc::ReadBlocksResponse* response) override;
+
+    virtual ::grpc::Status ReadBlocksSync(
+        ::grpc::ServerContext* context,
+        const pos_rpc::ReadBlocksSyncRequest* request,
+        pos_rpc::ReadBlocksSyncResponse* response) override;
+
+    virtual ::grpc::Status CompleteHostWrite(
+        ::grpc::ServerContext* context,
+        const pos_rpc::CompleteHostWriteRequest* request,
+        pos_rpc::CompleteHostWriteResponse* response) override;
 
 private:
-    std::unique_ptr<pos_rpc::PosIo::Stub> PosIostub;
+    ::grpc::Status _CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int>& arraySet,
+        std::pair<std::string, int>& volumeSet);
 };
-}
+} // namespace pos

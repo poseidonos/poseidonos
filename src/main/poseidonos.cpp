@@ -115,6 +115,9 @@ Poseidonos::Init(int argc, char** argv)
         _InitResourceChecker();
 #ifdef IBOF_CONFIG_REPLICATOR
         _InitReplicatorManager();
+        POS_TRACE_INFO((EID(HA_DEBUG_MSG)), "ReplicatorManager is compiled with POS");
+#else
+        POS_TRACE_INFO((EID(HA_DEBUG_MSG)), "ReplicatorManager is excluded from POS. Skip initializing Replicator Manager");
 #endif
         _InitTraceExporter(argv[0], pos::ConfigManagerSingleton::Instance(), pos::VersionProviderSingleton::Instance(), pos::TraceExporterSingleton::Instance(new OtlpFactory()));
         POS_TRACE_INFO(EID(POS_INITIALIZING_EXPORTER), "");
@@ -141,8 +144,19 @@ Poseidonos::_InitIOInterface(void)
 void
 Poseidonos::_InitReplicatorManager(void)
 {
-    PosReplicatorManager* posReplicatorManager = PosReplicatorManagerSingleton::Instance();
-    posReplicatorManager->Init(new GrpcPublisher(nullptr, ConfigManagerSingleton::Instance()), new GrpcSubscriber(ConfigManagerSingleton::Instance()));
+    ConfigManager* configManager = ConfigManagerSingleton::Instance();
+    std::string module("replicator");
+    bool isEnabled = false;
+    int ret = configManager->GetValue(module, "enable", &isEnabled, CONFIG_TYPE_BOOL);
+    if (ret == EID(SUCCESS) && isEnabled == true)
+    {
+        PosReplicatorManager* posReplicatorManager = PosReplicatorManagerSingleton::Instance();
+        posReplicatorManager->Init(new GrpcPublisher(nullptr, ConfigManagerSingleton::Instance()), new GrpcSubscriber(ConfigManagerSingleton::Instance()));
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(HA_DEBUG_MSG), "POS Replicator is disabled. Skip initializing ReplicatorManager");
+    }
 }
 #endif
 

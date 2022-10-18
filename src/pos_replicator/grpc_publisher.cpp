@@ -36,6 +36,7 @@
 #include <string>
 #include <thread>
 
+#include "src/include/array_config.h"
 #include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -50,9 +51,9 @@ GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigMana
         static_cast<void*>(&serverAddress), CONFIG_TYPE_STRING);
     if (ret != 0)
     {
-        POS_TRACE_INFO(static_cast<int>(EID(HA_DEBUG_MSG)),
-            "Cannot read address of grpc publisher from pos config file, Address will be default vaule set defined in the \"grpc_server_socket_address.h\"");
         serverAddress = GRPC_HA_PUB_SERVER_SOCKET_ADDRESS;
+        POS_TRACE_WARN(static_cast<int>(EID(HA_DEBUG_MSG)),
+            "Cannot read address of grpc publisher from pos config file, Address will be set as the default vaule. POS_HA_PUBLISHER: {}", serverAddress);
     }
     new std::thread(&GrpcPublisher::_ConnectGrpcServer, this, serverAddress);
 }
@@ -74,7 +75,7 @@ GrpcPublisher::_ConnectGrpcServer(std::string targetAddress)
         }
     }
 
-    stub = ::replicator_rpc::ReplicatorIo::NewStub(channel);
+    stub = ::replicator_rpc::ReplicatorIoService::NewStub(channel);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator publisher has been initialized with the channel newly established on {}", targetAddress);
 }
 
@@ -99,7 +100,7 @@ GrpcPublisher::_WaitUntilReady()
 
 int
 GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
-    string arrayName, void* buf, uint64_t& lsn)
+    string arrayName, void* buffer, uint64_t& lsn)
 {
     ::grpc::ClientContext cliContext;
     replicator_rpc::PushHostWriteRequest* request = new replicator_rpc::PushHostWriteRequest;
@@ -119,10 +120,9 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
     */
 
     grpc::Status status = stub->PushHostWrite(&cliContext, *request, &response);
-
     if (status.ok() == false)
     {
-        POS_TRACE_ERROR(EID(HA_INVALID_RETURN_LSN), "Failed to send PushHostWrite response to invalid lsn");
+        POS_TRACE_ERROR(EID(HA_INVALID_RETURN_LSN), "Failed to send PushHostWrite");
         return EID(HA_INVALID_RETURN_LSN);
     }
     lsn = response.lsn();
@@ -173,30 +173,44 @@ GrpcPublisher::CompleteWrite(uint64_t lsn, string volumeName, string arrayName)
 }
 
 int
-GrpcPublisher::CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf)
+GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer)
 {
     ::grpc::ClientContext cliContext;
     replicator_rpc::CompleteReadRequest* request = new replicator_rpc::CompleteReadRequest;
     replicator_rpc::CompleteReadResponse response;
+    struct Chunk
+    {
+        char contents[ArrayConfig::BLOCK_SIZE_BYTE];
+    };
 
-    request->set_lsn(lsn);
     request->set_array_name(arrayName);
     request->set_volume_name(volumeName);
-    // to do set buffer
+    request->set_rba(rba);
+    request->set_num_blocks(numBlocks);
+
+    for (uint64_t index = 0; index < numBlocks; index++)
+    {
+        char* dataPtr = (char*)buffer + index * ArrayConfig::BLOCK_SIZE_BYTE;
+        Chunk* chunkPtr = reinterpret_cast<Chunk*>(dataPtr);
+
+        replicator_rpc::Chunk* data = request->add_data();
+        data->set_content((char*)chunkPtr);
+    }
 
     grpc::Status status;
     if (_WaitUntilReady() == true)
     {
         status = stub->CompleteRead(&cliContext, *request, &response);
-        POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Complete to send CompleteRead response to replicator");
+        if (status.ok() == true)
+        {
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::REPLICATOR, EID(HA_DEBUG_MSG), "Complete to send CompleteRead response to replicator. volume name: {}, rba:{}, num_block: {}", volumeName, rba, numBlocks);
+        }
+        else
+        {
+            POS_TRACE_ERROR(EID(HA_COMPLETION_FAIL), "Failed to send CompleteRead response to replicator due to grpc error, status: {}", status.error_code());
+            return EID(HA_COMPLETION_FAIL);
+        }
     }
-
-    if (status.ok() == false)
-    {
-        POS_TRACE_ERROR(EID(HA_COMPLETION_FAIL), "Failed to send CompleteRead response to replicator due to grpc error, status: {}", status.error_code());
-        return EID(HA_COMPLETION_FAIL);
-    }
-
     return EID(SUCCESS);
 }
 } // namespace pos
