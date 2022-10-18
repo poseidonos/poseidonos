@@ -242,7 +242,10 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 void
 VersionedSegmentCtx::ResetInfosAfterSegmentFreed(int logGroupId, SegmentId targetSegmentId)
 {
-    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(targetSegmentId);
+    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
+    {
+        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
+    }
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
 }
