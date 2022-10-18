@@ -16,7 +16,6 @@ SUBDIRS = allocator \
         master_context \
         gc \
         gc/flow_control \
-        pos_replicator \
         array \
         array/device \
         array/ft \
