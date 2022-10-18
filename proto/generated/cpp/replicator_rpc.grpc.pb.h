@@ -30,10 +30,10 @@ namespace replicator_rpc {
 
 // /////////////////////////////////////////////////////////////////////////////////
 //
-class ReplicatorIo final {
+class ReplicatorIoService final {
  public:
   static constexpr char const* service_full_name() {
-    return "replicator_rpc.ReplicatorIo";
+    return "replicator_rpc.ReplicatorIoService";
   }
   class StubInterface {
    public:

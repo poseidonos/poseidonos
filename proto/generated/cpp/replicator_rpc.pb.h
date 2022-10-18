@@ -397,12 +397,13 @@ class CompleteReadRequest PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDataFieldNumber = 4,
+    kDataFieldNumber = 5,
     kArrayNameFieldNumber = 1,
     kVolumeNameFieldNumber = 2,
-    kLsnFieldNumber = 3,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
   };
-  // repeated .replicator_rpc.Chunk data = 4;
+  // repeated .replicator_rpc.Chunk data = 5;
   int data_size() const;
   private:
   int _internal_data_size() const;
@@ -452,13 +453,22 @@ class CompleteReadRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_volume_name();
   public:
 
-  // uint64 lsn = 3;
-  void clear_lsn();
-  ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
-  void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_lsn() const;
-  void _internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
   // @@protoc_insertion_point(class_scope:replicator_rpc.CompleteReadRequest)
@@ -471,7 +481,8 @@ class CompleteReadRequest PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk > data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_replicator_5frpc_2eproto;
 };
@@ -2573,27 +2584,47 @@ inline void CompleteReadRequest::set_allocated_volume_name(std::string* volume_n
   // @@protoc_insertion_point(field_set_allocated:replicator_rpc.CompleteReadRequest.volume_name)
 }
 
-// uint64 lsn = 3;
-inline void CompleteReadRequest::clear_lsn() {
-  lsn_ = PROTOBUF_ULONGLONG(0);
+// uint64 rba = 3;
+inline void CompleteReadRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteReadRequest::_internal_lsn() const {
-  return lsn_;
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteReadRequest::_internal_rba() const {
+  return rba_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteReadRequest::lsn() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteReadRequest.lsn)
-  return _internal_lsn();
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteReadRequest::rba() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteReadRequest.rba)
+  return _internal_rba();
 }
-inline void CompleteReadRequest::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+inline void CompleteReadRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
   
-  lsn_ = value;
+  rba_ = value;
 }
-inline void CompleteReadRequest::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_lsn(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteReadRequest.lsn)
+inline void CompleteReadRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteReadRequest.rba)
 }
 
-// repeated .replicator_rpc.Chunk data = 4;
+// uint64 num_blocks = 4;
+inline void CompleteReadRequest::clear_num_blocks() {
+  num_blocks_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteReadRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteReadRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteReadRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void CompleteReadRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  num_blocks_ = value;
+}
+inline void CompleteReadRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteReadRequest.num_blocks)
+}
+
+// repeated .replicator_rpc.Chunk data = 5;
 inline int CompleteReadRequest::_internal_data_size() const {
   return data_.size();
 }

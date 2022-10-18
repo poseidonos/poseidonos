@@ -1,5 +1,3 @@
-// dummy ha server : replicator_rpc
-
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -34,27 +32,28 @@
 
 #pragma once
 
-#include "src/helper/json/json_helper.h"
-#include "src/logger/logger.h"
-#include "src/include/grpc_server_socket_address.h"
-#include "src/include/pos_event_id.h"
-#include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
-#include "proto/generated/cpp/replicator_rpc.pb.h"
+#include <grpc++/grpc++.h>
 
 #include <list>
 #include <map>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <vector>
-#include <nlohmann/json.hpp>
-#include <grpc++/grpc++.h>
+
+#include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
+#include "proto/generated/cpp/replicator_rpc.pb.h"
+#include "src/helper/json/json_helper.h"
+#include "src/include/grpc_server_socket_address.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class DummyHaServer final : public replicator_rpc::ReplicatorIo::Service
+class MockReplicatorServer final : public replicator_rpc::ReplicatorIoService::Service
 {
 public:
-    DummyHaServer(void);
-    ~DummyHaServer(void);
+    MockReplicatorServer(void);
+    ~MockReplicatorServer(void);
 
     void RunServer(std::string address);
 
@@ -82,7 +81,8 @@ public:
         ::grpc::ServerContext* context,
         const ::replicator_rpc::TransferHostWriteRequest* request,
         ::replicator_rpc::TransferHostWriteResponse* response) override;
+
 private:
-    std::unique_ptr<::grpc::Server> dummyHAServer;
+    std::unique_ptr<::grpc::Server> server;
 };
-}
+} // namespace pos

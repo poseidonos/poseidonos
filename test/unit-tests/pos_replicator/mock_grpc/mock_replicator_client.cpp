@@ -30,35 +30,65 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <grpcpp/server.h>
-
-#include <memory>
+#include "mock_replicator_client.h"
 
 namespace pos
 {
-class ConfigManager;
-class GrpcHealth;
-class GrpcReplicationController;
-class GrpcPosIo;
-class GrpcPosManagement;
-
-class GrpcSubscriber
+MockReplicatorClient::MockReplicatorClient(std::shared_ptr<grpc::Channel> channel_)
 {
-public:
-    GrpcSubscriber(ConfigManager* configManager);
-    ~GrpcSubscriber(void);
+    // new grpc server setting
+    string serverAddr(GRPC_HA_SUB_SERVER_SOCKET_ADDRESS);
 
-    void RunServer(std::string address);
+    std::shared_ptr<grpc::Channel> channel = channel_;
+    if (channel == nullptr)
+    {
+        channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
+    }
 
-private:
-    ConfigManager* configManager;
-    GrpcHealth* healthChecker;
-    GrpcReplicationController* replicationController;
-    GrpcPosIo* posIo;
-    GrpcPosManagement* posManagement;
+    PosIostub = ::pos_rpc::PosIo::NewStub(channel);
+}
 
-    std::unique_ptr<::grpc::Server> haGrpcServer;
-};
+MockReplicatorClient::~MockReplicatorClient(void)
+{
+}
+
+::grpc::Status
+MockReplicatorClient::WriteBlocks(void)
+{
+    ::grpc::ClientContext cliContext;
+    pos_rpc::WriteBlocksRequest* request = new pos_rpc::WriteBlocksRequest;
+    pos_rpc::WriteBlocksResponse response;
+
+    return PosIostub->WriteBlocks(&cliContext, *request, &response);
+}
+
+::grpc::Status
+MockReplicatorClient::WriteHostBlocks(void)
+{
+    ::grpc::ClientContext cliContext;
+    pos_rpc::WriteHostBlocksRequest* request = new pos_rpc::WriteHostBlocksRequest;
+    pos_rpc::WriteHostBlocksResponse response;
+
+    return PosIostub->WriteHostBlocks(&cliContext, *request, &response);
+}
+
+::grpc::Status
+MockReplicatorClient::ReadBlocks(void)
+{
+    ::grpc::ClientContext cliContext;
+    pos_rpc::ReadBlocksRequest* request = new pos_rpc::ReadBlocksRequest;
+    pos_rpc::ReadBlocksResponse response;
+
+    return PosIostub->ReadBlocks(&cliContext, *request, &response);
+}
+
+::grpc::Status
+MockReplicatorClient::CompleteHostWrite(void)
+{
+    ::grpc::ClientContext cliContext;
+    pos_rpc::CompleteHostWriteRequest* request = new pos_rpc::CompleteHostWriteRequest;
+    pos_rpc::CompleteHostWriteResponse response;
+
+    return PosIostub->CompleteHostWrite(&cliContext, *request, &response);
+}
 } // namespace pos

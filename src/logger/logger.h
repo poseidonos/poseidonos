@@ -67,6 +67,7 @@ enum class ModuleInDebugLogDump
     FLUSH_CMD,
     JOURNAL,
     META,
+    REPLICATOR,
     MAX_SIZE,
 };
 

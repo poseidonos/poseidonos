@@ -75,9 +75,9 @@ public:
     int UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId);
 
     int HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks, void* data);
-    void HAIOCompletion(uint64_t lsn, pos_io io, VolumeIoSmartPtr volumeIo);
-    void HAWriteCompletion(uint64_t lsn, pos_io io);
-    void HAReadCompletion(uint64_t lsn, pos_io io, VolumeIoSmartPtr volumeIo);
+    void HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
+    void HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
+    void HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
 
     int ConvertArrayIdtoArrayName(int arrayId, std::string& arrayName);
     int ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std::string& volumeName);
@@ -86,7 +86,7 @@ public:
 
     void AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo);
 
-    int ConvertNametoIdx(std::pair<std::string, int> arraySet, std::pair<std::string, int> volumeSet);
+    int ConvertNametoIdx(std::pair<std::string, int>& arraySet, std::pair<std::string, int>& volumeSet);
 
 protected:
     std::thread* posRepilicatorManagerServerThread;
@@ -95,8 +95,8 @@ protected:
 private:
     void _AddWaitPOSIoRequest(uint64_t lsn, pos_io io);
 
-    void _MakeIoRequest(GrpcCallbackType callbackType, pos_io io, uint64_t lsn);
-    pos_io _MakePosIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks);
+    VolumeIoSmartPtr _MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks);
+    void _RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn);
 
     std::unordered_map<uint64_t, pos_io> waitPosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
     std::unordered_map<uint64_t, VolumeIoSmartPtr> donePosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
@@ -110,23 +110,6 @@ private:
     GrpcPublisher* grpcPublisher;
     GrpcSubscriber* grpcSubscriber;
 };
-
-class PosReplicatorIOCompletion : public Callback, public std::enable_shared_from_this<PosReplicatorIOCompletion>
-{
-public:
-    PosReplicatorIOCompletion(GrpcCallbackType grpcCallbackType, VolumeIoSmartPtr inputVolumeIo, uint64_t lsn_, pos_io& posIo, CallbackSmartPtr originCallback_);
-    ~PosReplicatorIOCompletion(void) override;
-
-private:
-    bool _DoSpecificJob(void) override;
-
-    GrpcCallbackType grpcCallbackType;
-    VolumeIoSmartPtr volumeIo;
-    uint64_t lsn;
-    pos_io& posIo;
-    CallbackSmartPtr originCallback;
-};
-
 // [To do] grpc contact point for 2node-HA
 using PosReplicatorManagerSingleton = Singleton<PosReplicatorManager>;
 } // namespace pos

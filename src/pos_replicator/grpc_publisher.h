@@ -33,6 +33,7 @@
 #pragma once
 
 #include <grpc++/grpc++.h>
+#include <memory>
 #include <string>
 
 #include "proto/generated/cpp/replicator_rpc.grpc.pb.h"
@@ -49,10 +50,10 @@ public:
     GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigManager* configManager);
     ~GrpcPublisher(void);
 
-    int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buf, uint64_t& lsn);
+    int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buffer, uint64_t& lsn);
     int CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
     int CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
-    int CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf);
+    int CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer);
 
 private:
     void _ConnectGrpcServer(std::string targetAddress);
@@ -60,6 +61,6 @@ private:
 
     ConfigManager* configManager;
     std::shared_ptr<grpc::Channel> channel;
-    std::unique_ptr<replicator_rpc::ReplicatorIo::Stub> stub;
+    std::unique_ptr<replicator_rpc::ReplicatorIoService::Stub> stub;
 };
 } // namespace pos

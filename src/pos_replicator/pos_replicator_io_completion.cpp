@@ -30,69 +30,49 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dummy_ha_client.h"
+#include "pos_replicator_io_completion.h"
+
+#include "posreplicator_manager.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
+#include "src/bio/volume_io.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-DummyHaClient::DummyHaClient(std::shared_ptr<grpc::Channel> channel_)
+PosReplicatorIOCompletion::PosReplicatorIOCompletion(GrpcCallbackType callbackType, VolumeIoSmartPtr inputVolumeIo, uint64_t lsn_, CallbackSmartPtr originCallback_)
+: Callback(true, CallbackType_PosReplicatorIOCompletion),
+  grpcCallbackType(callbackType),
+  volumeIo(inputVolumeIo),
+  lsn(lsn_),
+  originCallback(originCallback_)
 {
-    // new grpc server setting
-    string serverAddr(GRPC_HA_SUB_SERVER_SOCKET_ADDRESS);
+}
 
-    std::shared_ptr<grpc::Channel> channel = channel_;
-    if (channel == nullptr)
+PosReplicatorIOCompletion::~PosReplicatorIOCompletion(void)
+{
+}
+
+bool
+PosReplicatorIOCompletion::_DoSpecificJob(void)
+{
+    if (grpcCallbackType == GrpcCallbackType::WaitGrpc)
     {
-        channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
+        volumeIo->SetCallback(originCallback);
+        PosReplicatorManagerSingleton::Instance()->AddDonePOSIoRequest(lsn, volumeIo);
+    }
+    else
+    {
+        try
+        {
+            PosReplicatorManagerSingleton::Instance()->HAIOCompletion(lsn, volumeIo);
+        }
+        catch (const char* errorMsg)
+        {
+            POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "{}", errorMsg);
+        }
     }
 
-    PosIostub = ::pos_rpc::PosIo::NewStub(channel);
-
+    return true;
 }
-
-DummyHaClient::~DummyHaClient(void)
-{
-    
-}
-
-::grpc::Status
-DummyHaClient::WriteBlocks(void)
-{
-    ::grpc::ClientContext cliContext;
-    pos_rpc::WriteBlocksRequest* request = new pos_rpc::WriteBlocksRequest;
-    pos_rpc::WriteBlocksResponse response;
-
-    return PosIostub->WriteBlocks(&cliContext, *request, &response);
-}
-
-::grpc::Status
-DummyHaClient::WriteHostBlocks(void)
-{
-    ::grpc::ClientContext cliContext;
-    pos_rpc::WriteHostBlocksRequest* request = new pos_rpc::WriteHostBlocksRequest;
-    pos_rpc::WriteHostBlocksResponse response;
-
-    return PosIostub->WriteHostBlocks(&cliContext, *request, &response);
-}
-
-::grpc::Status
-DummyHaClient::ReadBlocks(void)
-{
-    ::grpc::ClientContext cliContext;
-    pos_rpc::ReadBlocksRequest* request = new pos_rpc::ReadBlocksRequest;
-    pos_rpc::ReadBlocksResponse response;
-
-    return PosIostub->ReadBlocks(&cliContext, *request, &response);
-
-}
-
-::grpc::Status
-DummyHaClient::CompleteHostWrite(void)
-{
-    ::grpc::ClientContext cliContext;
-    pos_rpc::CompleteHostWriteRequest* request = new pos_rpc::CompleteHostWriteRequest;
-    pos_rpc::CompleteHostWriteResponse response;
-
-    return PosIostub->CompleteHostWrite(&cliContext, *request, &response);
-}
-
-}
+} // namespace pos

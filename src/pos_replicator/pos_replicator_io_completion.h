@@ -32,33 +32,23 @@
 
 #pragma once
 
-#include <grpcpp/server.h>
-
-#include <memory>
+#include "src/event_scheduler/callback.h"
+#include "src/pos_replicator/posreplicator_config.h"
 
 namespace pos
 {
-class ConfigManager;
-class GrpcHealth;
-class GrpcReplicationController;
-class GrpcPosIo;
-class GrpcPosManagement;
-
-class GrpcSubscriber
+class PosReplicatorIOCompletion : public Callback, public std::enable_shared_from_this<PosReplicatorIOCompletion>
 {
 public:
-    GrpcSubscriber(ConfigManager* configManager);
-    ~GrpcSubscriber(void);
-
-    void RunServer(std::string address);
+    PosReplicatorIOCompletion(GrpcCallbackType grpcCallbackType, VolumeIoSmartPtr inputVolumeIo, uint64_t lsn_, CallbackSmartPtr originCallback_);
+    ~PosReplicatorIOCompletion(void) override;
 
 private:
-    ConfigManager* configManager;
-    GrpcHealth* healthChecker;
-    GrpcReplicationController* replicationController;
-    GrpcPosIo* posIo;
-    GrpcPosManagement* posManagement;
+    bool _DoSpecificJob(void) override;
 
-    std::unique_ptr<::grpc::Server> haGrpcServer;
+    GrpcCallbackType grpcCallbackType;
+    VolumeIoSmartPtr volumeIo;
+    uint64_t lsn;
+    CallbackSmartPtr originCallback;
 };
 } // namespace pos

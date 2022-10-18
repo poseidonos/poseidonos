@@ -32,52 +32,52 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "dummy_ha_server.h"
-
-#include <thread>
-#include <string>
 #include <grpc/grpc.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server.h>
 #include <grpcpp/server_builder.h>
 #include <grpcpp/server_context.h>
 
+#include <string>
+#include <thread>
+
+#include "mock_replicator_server.h"
+
 namespace pos
 {
-DummyHaServer::DummyHaServer(void)
+MockReplicatorServer::MockReplicatorServer(void)
 {
     // new grpc server setting
     string address(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
 
-    // new std::thread(&DummyHaServer::RunServer, this, address);
+    // new std::thread(&MockReplicatorServer::RunServer, this, address);
 }
 
-DummyHaServer::~DummyHaServer(void)
+MockReplicatorServer::~MockReplicatorServer(void)
 {
-    dummyHAServer->Shutdown();
+    server->Shutdown();
 }
-
 
 void
-DummyHaServer::RunServer(std::string address)
+MockReplicatorServer::RunServer(std::string address)
 {
     ::grpc::ServerBuilder builder;
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
     builder.RegisterService(this);
 
-    dummyHAServer = builder.BuildAndStart();
-    dummyHAServer->Wait();
+    server = builder.BuildAndStart();
+    server->Wait();
 }
 
 ::grpc::Status
-DummyHaServer::CompleteRead(
-    ::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request,::replicator_rpc::CompleteReadResponse* response)
+MockReplicatorServer::CompleteRead(
+    ::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response)
 {
     return ::grpc::Status::OK;
 }
 
 ::grpc::Status
-DummyHaServer::CompleteWrite(
+MockReplicatorServer::CompleteWrite(
     ::grpc::ServerContext* context, const ::replicator_rpc::CompleteWriteRequest* request,
     ::replicator_rpc::CompleteWriteResponse* response)
 {
@@ -85,7 +85,7 @@ DummyHaServer::CompleteWrite(
 }
 
 ::grpc::Status
-DummyHaServer::PushHostWrite(
+MockReplicatorServer::PushHostWrite(
     ::grpc::ServerContext* context, const ::replicator_rpc::PushHostWriteRequest* request,
     ::replicator_rpc::PushHostWriteResponse* response)
 {
@@ -95,7 +95,7 @@ DummyHaServer::PushHostWrite(
 }
 
 ::grpc::Status
-DummyHaServer::PushDirtyLog(
+MockReplicatorServer::PushDirtyLog(
     ::grpc::ServerContext* context, const ::replicator_rpc::PushDirtyLogRequest* request,
     ::replicator_rpc::PushDirtyLogResponse* response)
 {
@@ -103,7 +103,7 @@ DummyHaServer::PushDirtyLog(
 }
 
 ::grpc::Status
-DummyHaServer::TransferDirtyLog(
+MockReplicatorServer::TransferDirtyLog(
     ::grpc::ServerContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request,
     ::replicator_rpc::TransferDirtyLogResponse* response)
 {
@@ -111,11 +111,11 @@ DummyHaServer::TransferDirtyLog(
 }
 
 ::grpc::Status
-DummyHaServer::TransferHostWrite(
+MockReplicatorServer::TransferHostWrite(
     ::grpc::ServerContext* context, const ::replicator_rpc::TransferHostWriteRequest* request,
     ::replicator_rpc::TransferHostWriteResponse* response)
 {
     return ::grpc::Status::OK;
 }
 
-}
+} // namespace pos
