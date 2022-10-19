@@ -109,7 +109,7 @@ Callback::~Callback(void)
         POS_TRACE_WARN(
             eventId,
             "Callback destroy without executed : {}",
-            static_cast<uint32_t>(GetEventType()));
+            static_cast<uint32_t>(type));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
         dumpCallbackError.AddDump(buffer, 0);
     }
@@ -120,7 +120,7 @@ Callback::~Callback(void)
         POS_TRACE_WARN(
             eventId,
             "Callback Error : Type : {}, Critical Error : {}",
-            static_cast<uint32_t>(GetEventType()),
+            static_cast<uint32_t>(type),
             static_cast<uint32_t>(_GetMostCriticalError()));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
         dumpCallbackError.AddDump(buffer, 0);
