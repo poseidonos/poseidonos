@@ -58,10 +58,10 @@ class WBStripeManager : public IWBStripeAllocator
 public:
     WBStripeManager(void) = default;
     WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap, IVolumeInfoManager* VolManager,
-        IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info, ContextManager* ctxMgr,
-        BlockManager* blkMgr, StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
+        IStripeMap* iStripeMap, AllocatorCtx* allocCtx, AllocatorAddressInfo* info,
+        StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
         MemoryManager* memoryManager = MemoryManagerSingleton::Instance(), EventScheduler* eventScheduler = nullptr);
-    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
+    WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, AllocatorCtx* allocCtx,
         std::string arrayName, int arrayId);
     virtual ~WBStripeManager(void);
     virtual void Init(void);
@@ -106,9 +106,7 @@ protected:
     // DOCs
     IStripeMap* iStripeMap;
     AllocatorAddressInfo* addrInfo;
-    ContextManager* contextManager;
     AllocatorCtx* allocCtx;
-    BlockManager* blockManager;
     TelemetryPublisher* tp;
     std::string arrayName;
     int arrayId;

@@ -39,33 +39,28 @@
 #include <map>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "src/allocator/include/allocator_const.h"
 #include "src/bio/flush_io.h"
 
 namespace pos
 {
 class IReverseMap;
 class ReverseMapPack;
-using DataBufferIter = std::vector<void*>::iterator;
 
 class Stripe
 {
 public:
     Stripe(void) = default;
-    Stripe(ReverseMapPack* rev, IReverseMap* revMapMan, bool withDataBuffer, uint32_t numBlksPerStripe);
-    Stripe(IReverseMap* revMapMan, bool withDataBuffer_, uint32_t numBlksPerStripe);
+    Stripe(IReverseMap* revMapMan, uint32_t numBlksPerStripe);
     virtual ~Stripe(void);
-    virtual bool Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, ASTailArrayIdx tailarrayidx);
+    virtual bool Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, uint32_t volumeId);
 
     virtual uint32_t GetVolumeId(void);
     virtual StripeId GetVsid(void);
-    virtual void SetVsid(StripeId virtsid);
 
     virtual StripeId GetWbLsid(void);
-    virtual void SetWbLsid(StripeId wbAreaLsid);
-
     virtual StripeId GetUserLsid(void);
 
+    ReverseMapPack* GetRevMapPack(void);
     virtual void UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId);
     virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(uint32_t offset);
     virtual int Flush(EventSmartPtr callback);
@@ -74,7 +69,7 @@ public:
     virtual VirtualBlkAddr GetVictimVsa(uint32_t offset);
 
     virtual bool IsFinished(void);
-    virtual void SetFinished(bool state);
+    virtual void SetFinished(void);
 
     virtual uint32_t GetBlksRemaining(void);
     virtual uint32_t DecreseBlksRemaining(uint32_t amount);
@@ -83,17 +78,13 @@ public:
     virtual void Derefer(uint32_t blockCount);
     virtual bool IsOkToFree(void);
 
-    virtual void AddDataBuffer(void* buf);
-    virtual DataBufferIter DataBufferBegin(void);
-    virtual DataBufferIter DataBufferEnd(void);
-
     virtual void UpdateFlushIo(FlushIoSmartPtr flushIo);
 
     virtual bool IsActiveFlushTarget(void);
     virtual void SetActiveFlushTarget(void);
 
 protected: // for UT
-    ASTailArrayIdx volumeId;
+    uint32_t volumeId;
     StripeId vsid; // SSD LSID, Actually User Area LSID
     StripeId wbLsid;
     StripeId userLsid;
@@ -102,10 +93,8 @@ protected: // for UT
     std::atomic<bool> finished;
     std::atomic<uint32_t> remaining; // #empty block(s) left, on this stripe
     std::atomic<uint32_t> referenceCount;
-    std::vector<void*> dataBuffer;
     std::vector<VirtualBlkAddr> oldVsaList;
     uint32_t totalBlksPerUserStripe;
-    bool withDataBuffer;
 
     FlushIoSmartPtr flushIo;
     std::mutex flushIoUpdate;

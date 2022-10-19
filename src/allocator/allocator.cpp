@@ -497,7 +497,7 @@ Allocator::_CreateSubmodules(void)
     tp->AddDefaultLabel("array_name", arrName);
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
     blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
-    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
+    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager->GetAllocatorCtx(), arrayName, iArrayInfo->GetIndex());
 }
 
 void
