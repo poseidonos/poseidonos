@@ -238,4 +238,15 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
         assert(false);
     }
 }
+
+void
+VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
+{
+    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
+    {
+        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
+    }
+    segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
+    segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
+}
 } // namespace pos
