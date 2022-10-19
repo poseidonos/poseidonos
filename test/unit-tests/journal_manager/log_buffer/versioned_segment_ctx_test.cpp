@@ -308,4 +308,47 @@ TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
     delete[] segmentInfos;
 }
 
+TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
+{
+    // Make precondition
+    VersionedSegmentCtx versionedSegCtx;
+    int numLogGroups = 2;
+    NiceMock<MockJournalConfiguration> config;
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+    int numSegments = 3;
+    SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
+    segmentInfos[0].SetOccupiedStripeCount(100);
+    segmentInfos[1].SetOccupiedStripeCount(12);
+    segmentInfos[2].SetOccupiedStripeCount(0);
+
+    std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
+    for (int index = 0; index < numLogGroups; index++)
+    {
+        std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
+        versionedSegmentInfo.push_back(input);
+    }
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+
+    int targetLogGroup = 0;
+    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+
+    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 100);
+    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12);
+    EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0);
+
+    // Test
+    versionedSegCtx.ResetInfosAfterSegmentFreed(0);
+    result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 0);
+    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12);
+
+    versionedSegCtx.ResetInfosAfterSegmentFreed(1);
+    result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 0);
+    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 0);
+
+    delete[] segmentInfos;
+}
+
 } // namespace pos
