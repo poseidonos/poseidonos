@@ -60,7 +60,7 @@ StripePutEvent::_DoSpecificJob(void)
 {
     if (stripe.IsOkToFree())
     {
-        stripe.SetFinished(true);
+        stripe.SetFinished();
         if (iWBStripeAllocator != nullptr)
         {
             iWBStripeAllocator->FreeWBStripeId(prevLsid);

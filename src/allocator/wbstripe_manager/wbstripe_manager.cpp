@@ -54,14 +54,11 @@ namespace pos
 {
 WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReverseMap* iReverseMap_,
     IVolumeInfoManager* volManager, IStripeMap* istripeMap_, AllocatorCtx* allocCtx_,
-    AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr,
-    StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
+    AllocatorAddressInfo* info, StripeLoadStatus* stripeLoadStatus, std::string arrayName, int arrayId,
     MemoryManager* memoryManager, EventScheduler* eventSchedulerArg)
 : stripeBufferPool(nullptr),
   iStripeMap(istripeMap_),
   addrInfo(info),
-  contextManager(ctxMgr),
-  blockManager(blkMgr),
   tp(tp_),
   arrayName(arrayName),
   arrayId(arrayId),
@@ -75,10 +72,9 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
     eventScheduler = eventSchedulerArg;
 }
 
-WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, ContextManager* ctxMgr, BlockManager* blkMgr, std::string arrayName, int arrayId)
-: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, nullptr, info, ctxMgr, blkMgr, new StripeLoadStatus(), arrayName, arrayId)
+WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, AllocatorCtx* allocCtx_, std::string arrayName, int arrayId)
+: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, allocCtx_, info, new StripeLoadStatus(), arrayName, arrayId)
 {
-    allocCtx = ctxMgr->GetAllocatorCtx();
 }
 // LCOV_EXCL_START
 WBStripeManager::~WBStripeManager(void)
@@ -116,7 +112,7 @@ WBStripeManager::Init(void)
 
     for (uint32_t stripeCnt = 0; stripeCnt < totalNvmStripes; ++stripeCnt)
     {
-        Stripe* stripe = new Stripe(iReverseMap, true, addrInfo->GetblksPerStripe());
+        Stripe* stripe = new Stripe(iReverseMap, addrInfo->GetblksPerStripe());
         // DEPRECATED: "stripe" used to have its dedicated buffer that would be allocated from stripeBufferPool, but not any more.
         wbStripeArray.push_back(stripe);
     }
@@ -268,6 +264,15 @@ WBStripeManager::_WaitForStripeFlushComplete(Stripe* stripe)
     {
         usleep(1);
     }
+
+    // TODO Stripe will be finished after revmap flushed. So waiting for all revmap IO is not valid for now.
+    // But we may need to enable it later - when revmap is flushed after user data flushed
+    /*
+    if (stripe->GetRevMapPack() != nullptr)
+    {
+        stripe->GetRevMapPack()->WaitPendingIoDone();
+    }
+    */
 }
 
 int
@@ -281,7 +286,7 @@ WBStripeManager::ReconstructActiveStripe(uint32_t volumeId, StripeId wbLsid, Vir
         assert(volumeManager != nullptr);
         volumeManager->GetVolumeSize(volumeId, totalRbaNum);
         totalRbaNum = DivideUp(totalRbaNum, BLOCK_SIZE);
-        ret = iReverseMap->ReconstructReverseMap(volumeId, totalRbaNum, wbLsid, tailVsa.stripeId, tailVsa.offset, revMapInfos);
+        ret = iReverseMap->ReconstructReverseMap(volumeId, totalRbaNum, wbLsid, tailVsa.stripeId, tailVsa.offset, revMapInfos, stripe->GetRevMapPack());
     }
     return ret;
 }

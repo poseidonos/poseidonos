@@ -111,7 +111,7 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     }
 
     StripeId newVsid = arrayLsid;
-    Stripe* stripe = new Stripe(iReverseMap, false, addrInfo->GetblksPerStripe());
+    Stripe* stripe = new Stripe(iReverseMap, addrInfo->GetblksPerStripe());
     bool stripeAssigned = stripe->Assign(newVsid, UINT32_MAX, iWBStripeAllocator->GetUserStripeId(newVsid), 0);
     if (!stripeAssigned)
     {
