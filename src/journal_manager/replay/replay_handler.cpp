@@ -157,6 +157,7 @@ ReplayHandler::_ExecuteReplayTasks(void)
 
         if (result != 0)
         {
+            // TODO (cheolho.kang): Add sequence to dump journal buffer
             if (result > 0)
             {
                 reporter->CompleteAll();

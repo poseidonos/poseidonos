@@ -2931,6 +2931,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 3056
+    Name: JOURNAL_REPLAY_LOG_PARSE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
     Id: 3060
     Name: JOURNAL_REPLAY_STRIPE_FLUSH
     Severity:

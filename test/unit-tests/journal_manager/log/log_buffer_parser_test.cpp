@@ -1,10 +1,14 @@
 #include "src/journal_manager/log/log_buffer_parser.h"
 
 #include <gtest/gtest.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
 
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "test/unit-tests/journal_manager/log/log_list_mock.h"
+#include "src/journal_manager/replay/replay_log_list.h"
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -15,6 +19,13 @@ MATCHER_P(EqLog, expected, "Equality matcher for log")
 {
     return (memcmp(expected, arg->GetData(), arg->GetSize()) == 0);
 }
+
+MATCHER_P(SoftEqLog, expected, "Equality matcher for log")
+{
+    Log* expectedLog = reinterpret_cast<Log*>(expected);
+    return (expectedLog->type == arg->GetType() && expectedLog->seqNum == arg->GetSeqNum());
+}
+
 
 TEST(LogBufferParser, LogBufferParser_testIfConstructedSuccessfully)
 {
@@ -306,6 +317,88 @@ TEST(LogBufferParser, GetLogs_testIfSeveralSequenceNumberSeen)
 
     // Then: LogBufferParser will return the error code
     int expect = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND)) * -1;
+    EXPECT_EQ(result, expect);
+    free(logBuffer);
+}
+
+TEST(LogBufferParser, GetLogs_testIfSeveralOldSequenceNumber)
+{
+    // Given
+    uint32_t resetedSequenceNumber = 10;
+    uint64_t logBufferSize = sizeof(struct Log) + sizeof(BlockWriteDoneLog) * (resetedSequenceNumber + 2) + sizeof(LogGroupFooter);
+    void* logBuffer = malloc(logBufferSize);
+    char* temp = (char*)logBuffer;
+    NiceMock<MockLogList> logList;
+
+    uint64_t currentOffset = 0;
+
+    {
+        Log log;
+        log.type = LogType::BLOCK_WRITE_DONE;
+        log.seqNum = LOG_VALID_MARK;
+
+        char* targetBuffer = (char*)logBuffer + currentOffset;
+        memcpy(targetBuffer, &log, sizeof(log));
+
+        log.seqNum = LOG_VALID_MARK;
+        EXPECT_CALL(logList, AddLog(SoftEqLog((targetBuffer))));
+        currentOffset += (sizeof(struct Log) - sizeof(log.seqNum));
+    }
+
+    for (int count = 0; count <= resetedSequenceNumber + 1; count++)
+    {
+        BlockWriteDoneLog log;
+        log.type = LogType::BLOCK_WRITE_DONE;
+        log.seqNum = count;
+
+        char* targetBuffer = (char*)logBuffer + currentOffset;
+        memcpy(targetBuffer, &log, sizeof(log));
+
+        EXPECT_CALL(logList, AddLog(SoftEqLog(targetBuffer)));
+
+        currentOffset += sizeof(BlockWriteDoneLog);
+    }
+
+    LogGroupFooter footer;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = resetedSequenceNumber;
+
+    char* targetBuffer = (char*)logBuffer + currentOffset;
+    memcpy(targetBuffer, &footer, sizeof(LogGroupFooter));
+
+    // Then: Invalid logs will be deleted
+    EXPECT_CALL(logList, EraseReplayLogGroup(resetedSequenceNumber));
+
+    // When
+    LogBufferParser parser;
+    int result = parser.GetLogs(logBuffer, logBufferSize, logList);
+
+    // Then: LogBufferParser will return the error code
+    int expect = 0;
+    EXPECT_EQ(result, expect);
+    free(logBuffer);
+}
+
+TEST(LogBufferParser, DISABLED_GetLogs_testWithRealDump)
+{
+    // Given
+
+    int fd = open("log_group.out", O_RDWR, 0777);
+    EXPECT_TRUE(fd != -1);
+
+    uint64_t logBufferSize = lseek(fd, 0, SEEK_END);
+    void* logBuffer = calloc(logBufferSize, sizeof(char));
+
+    pread(fd, logBuffer, logBufferSize, 0);
+    
+    NiceMock<MockLogList> logList;
+
+    // When
+    LogBufferParser parser;
+    int result = parser.GetLogs(logBuffer, logBufferSize, logList);
+
+    // Then: LogBufferParser will return the success code
+    int expect = 0;
     EXPECT_EQ(result, expect);
     free(logBuffer);
 }
