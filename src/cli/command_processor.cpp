@@ -274,14 +274,19 @@ CommandProcessor::ExecuteSetTelemetryPropertyCommand(const SetTelemetryPropertyR
 
     std::string publicationListPath = (request->param()).publicationlistpath();
 
-    if (publicationListPath != "")
+    if (_IsValidFile(publicationListPath))
     {
         tc->LoadPublicationList(publicationListPath);
+    }
+    else
+    {
+        _SetEventStatus(EID(TELEMETRY_SET_PROPERTY_FAILURE_INVALID_FILE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-
     return grpc::Status::OK;
 }
 
@@ -2193,4 +2198,28 @@ CommandProcessor::_IsValidIpAddress(const std::string &ipAddress)
     struct sockaddr_in sa;
     int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
     return result != 0;
+}
+
+bool
+CommandProcessor::_IsValidFile(const std::string& path)
+{
+    std::string extension = path.substr(path.find_last_of(".") + 1);
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+    [](unsigned char c){ return std::tolower(c); });
+
+    if(extension != "yaml") {
+        return false;
+    } 
+
+    if (FILE *file = fopen(path.c_str(), "r"))
+    {
+        fclose(file);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+
+    return false;
 }
