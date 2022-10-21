@@ -70,6 +70,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     blockAllocStatus = blockAllocStatus_;
     contextReplayer = ctxReplayer_;
     telPublisher = tp;
+
+    segmentContextUpdater = nullptr;
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_)
@@ -90,6 +92,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
 
     rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
+
+    segmentContextUpdater = nullptr;
 }
 
 ContextManager::~ContextManager(void)
@@ -101,6 +105,18 @@ ContextManager::~ContextManager(void)
     delete blockAllocStatus;
     delete ioManager;
     delete contextReplayer;
+}
+
+void
+ContextManager::SetSegmentContextUpdaterPtr(ISegmentCtx *p)
+{
+    segmentContextUpdater = p;
+}
+
+ISegmentCtx*
+ContextManager::GetSegmentContextUpdaterPtr(void)
+{
+    return segmentContextUpdater;
 }
 
 void

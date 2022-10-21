@@ -245,7 +245,9 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
     for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
     {
         segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
+        segmentInfoDiffs[groupId]->ResetValidBlockCount(targetSegmentId);
     }
+
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
 }

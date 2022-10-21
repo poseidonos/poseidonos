@@ -49,6 +49,7 @@
 #include "src/include/backend_event.h"
 #include "src/io/general_io/io_submit_handler.h"
 #include "src/logger/logger.h"
+#include "src/metadata/segment_context_updater.h"
 
 namespace pos
 {
@@ -312,6 +313,8 @@ Copier::_CleanUpVictimSegments(void)
             POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
                 "Move to free list among the victim lists, VictimSegid:{}, validCount:{}", victimSegId, validCount);
             segmentCtx->MoveToFreeState(victimSegId);
+            SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
+            segmentCtxUpdater->ResetInfos(victimSegId);
         }
     }
 }
