@@ -875,4 +875,10 @@ SegmentCtx::GetSegmentInfos(void)
 {
     return segmentInfos;
 }
+
+void
+SegmentCtx::ResetInfos(SegmentId segId)
+{
+    return;
+}
 } // namespace pos
