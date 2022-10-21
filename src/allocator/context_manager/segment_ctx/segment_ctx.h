@@ -117,6 +117,7 @@ public:
     virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
 
     virtual SegmentInfo* GetSegmentInfos(void);
+    virtual void ResetInfos(SegmentId segId);
 
     static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
 

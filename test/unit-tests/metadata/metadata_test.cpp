@@ -42,6 +42,9 @@ TEST(Metadata, Metadata_testContructor)
         NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
         NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
         NiceMock<MockMetaService> metaService;
+        NiceMock<MockIContextManager> contextManager;
+
+        EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
 
         // When 2
         Metadata metaForUt(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
@@ -54,6 +57,9 @@ TEST(Metadata, Metadata_testContructor)
         NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
         NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
         NiceMock<MockMetaService> metaService;
+        NiceMock<MockIContextManager> contextManager;
+
+        EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
 
         // When 3
         Metadata* metataInHeap = new Metadata(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);
@@ -67,6 +73,9 @@ TEST(Metadata, Metadata_testContructor)
         NiceMock<MockJournalManager>* journal = new NiceMock<MockJournalManager>(&arrayInfo, &stateControl);
         NiceMock<MockMetaFsFileControlApi> metaFsCtrl;
         NiceMock<MockMetaService> metaService;
+        NiceMock<MockIContextManager> contextManager;
+
+        EXPECT_CALL(*allocator, GetIContextManager).WillOnce(Return(&contextManager));
 
         // When 4
         Metadata metaForUt(&arrayInfo, mapper, allocator, journal, &metaFsCtrl, &metaService);

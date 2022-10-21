@@ -57,5 +57,6 @@ public:
     MOCK_METHOD(void, ValidateBlocksWithGroupId, (VirtualBlks blks, int logGroupId), (override));
     MOCK_METHOD(bool, InvalidateBlocksWithGroupId, (VirtualBlks blks, bool isForced, int logGroupId), (override));
     MOCK_METHOD(bool, UpdateStripeCount, (StripeId lsid, int logGroupId), (override));
+    MOCK_METHOD(void, ResetInfos, (SegmentId segId), (override));
 };
 } // namespace pos
