@@ -182,6 +182,41 @@ def test():
     test_ok("vol3", "POSArray", "maxbw", "0")
     test_ok("vol3", "POSArray", "maxiops", "100")
 
+    cmd = pos_cli + " volume create -v vol4 --size " + str(volume_size) + "  --maxiops 18446744073709550 --maxbw 15 --array-name POSArray"
+    print_and_execute(cmd, "0")
+    test_ok("vol4", "POSArray", "maxbw", "15")
+    test_ok("vol4", "POSArray", "maxiops", "18446744073709550")
+
+    cmd = pos_cli + " qos create -a POSArray -v vol3 --maxiops 18446744073709550 --minbw 0"
+    print_and_execute(cmd, "0")
+    test_ok("vol3", "POSArray", "minbw", "0")
+    test_ok("vol3", "POSArray", "maxbw", "0")
+    test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
+    cmd = pos_cli + " qos create -a POSArray -v vol3 --maxiops 18446744073709550 --maxbw 18446744073709550"
+    print_and_execute(cmd, "1858")
+    test_ok("vol3", "POSArray", "minbw", "0")
+    test_ok("vol3", "POSArray", "maxbw", "0")
+    test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
+    cmd = pos_cli + " qos create -a POSArray -v vol3 --maxiops 18446744073709550 --maxbw 17592186044415"
+    print_and_execute(cmd, "0")
+    test_ok("vol3", "POSArray", "minbw", "0")
+    test_ok("vol3", "POSArray", "maxbw", "17592186044415")
+    test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
+    cmd = pos_cli + " qos create -a POSArray -v vol3 --maxiops 18446744073709552 --maxbw 17592186044415"
+    print_and_execute(cmd, "1858")
+    test_ok("vol3", "POSArray", "minbw", "0")
+    test_ok("vol3", "POSArray", "maxbw", "17592186044415")
+    test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
+    cmd = pos_cli + " qos create -a POSArray -v vol3 --maxiops 18446744073709550 --maxbw 17592186044416"
+    print_and_execute(cmd, "1858")
+    test_ok("vol3", "POSArray", "minbw", "0")
+    test_ok("vol3", "POSArray", "maxbw", "17592186044415")
+    test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
 if __name__ == "__main__":
     global bringup_argument
     parser = argparse.ArgumentParser(
