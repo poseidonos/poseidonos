@@ -105,6 +105,9 @@ public:
     virtual void ResetFlushedInfo(int logGroupId);
     virtual void SetAllocateDuplicatedFlush(bool flag);
 
+    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* p);
+    ISegmentCtx* GetSegmentContextUpdaterPtr(void);
+
 private:
     ContextIoManager* ioManager;
     AllocatorAddressInfo* addrInfo;
@@ -125,6 +128,8 @@ private:
     static const int ALL_LOG_GROUP = -1;
     int logGroupIdInProgress;
     bool allowDuplicatedFlush;
+
+    ISegmentCtx* segmentContextUpdater;
 };
 
 } // namespace pos

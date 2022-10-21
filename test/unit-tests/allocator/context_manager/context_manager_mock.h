@@ -39,6 +39,8 @@ public:
     MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
     MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
     MOCK_METHOD(void, SetAllocateDuplicatedFlush, (bool flag), (override));
+    MOCK_METHOD(void, SetSegmentContextUpdaterPtr, (ISegmentCtx* p), (override));
+    MOCK_METHOD(ISegmentCtx* GetSegmentContextUpdaterPtr, (void), (override));
 };
 
 } // namespace pos
