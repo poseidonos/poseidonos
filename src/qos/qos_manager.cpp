@@ -1087,9 +1087,21 @@ QosManager::UpdateVolumePolicy(int64_t minBwFromCli,
             return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
         }
 
+        if (minBw != 0 && (minBw > MAX_BW_LIMIT))
+        {
+            errorMsg = "Min Bandwidth value outside allowed range";
+            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
+        }
+
         if (maxIops != 0 && (maxIops < MIN_IOPS_LIMIT || maxIops > MAX_IOPS_LIMIT))
         {
             errorMsg = "Max Iops value outside allowed range";
+            return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
+        }
+
+        if (minIops != 0 && (minIops > MAX_IOPS_LIMIT))
+        {
+            errorMsg = "Min Iops value outside allowed range";
             return static_cast<int>(EID(VOL_REQ_QOS_OUT_OF_RANGE));
         }
 
