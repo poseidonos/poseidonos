@@ -247,7 +247,7 @@ def create_array():
         return False
 
 def mount_pos():
-    out = cli.mount_array(ARRAYNAME)
+    out = cli.mount_array(ARRAYNAME + " --timeout 1800")
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array mounted successfully")
