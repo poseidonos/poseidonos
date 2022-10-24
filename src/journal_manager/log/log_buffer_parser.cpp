@@ -205,7 +205,6 @@ LogBufferParser::_ResetedLogFound(uint32_t seqNumber)
 uint32_t
 LogBufferParser::_GetLatestSequenceNumber(void)
 {
-    uint32_t seqNumber = -1;
     if (logsFound.size() > 1)
     {
         int event = static_cast<int>(EID(JOURNAL_REPLAY_LOG_PARSE));
