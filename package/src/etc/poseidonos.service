@@ -8,6 +8,7 @@ ExecStart=/usr/local/bin/poseidonos
 ExecStop=/usr/local/bin/poseidonos-cli system stop --force
 ExecStopPost=/usr/local/lib/spdk/scripts/setup.sh reset
 KillMode=none
+TimeoutSec=900
 
 [Install]
 WantedBy=multi-user.target
