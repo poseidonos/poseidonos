@@ -1,10 +1,11 @@
 POS_VERSION := $(shell pwd | sed -n -e '/POS_VERSION =/p' ../Makefile | cut -d 'v' -f2)
-PKG_VERSION := $(shell pwd | git log | grep commit | head -1 | cut -d ' ' -f2)
+PKG_VERSION := $(shell pwd | git rev-parse --short HEAD)
 
 all:
 	# Copy library and config files
 	@cp -f ../bin/poseidonos src/usr/local/bin/
 	@cp -f ../bin/poseidonos-cli src/usr/local/bin/
+	@cp -f ../bin/pos-exporter src/usr/local/bin/
 	@cp -f ../script/setup_env.sh src/usr/local/etc/
 	@cp -f ../lib/gperf/.libs/libtcmalloc.so* src/usr/local/lib/
 	@cp -rf ../lib/spdk src/usr/local/lib
