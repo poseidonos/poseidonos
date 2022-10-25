@@ -62,7 +62,7 @@ private:
     };
 
     void _LogFound(LogHandlerInterface* log);
-    void _ResetedLogFound(uint32_t seqNumber);
+    void _LogResetFound(uint32_t seqNumber);
     uint32_t _GetLatestSequenceNumber(void);
     void _PrintFoundLogTypes(void);
 

@@ -110,10 +110,10 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
             LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
             if (footer.isReseted)
             {
-                int event = static_cast<int>(EID(JOURNAL_REPLAY_LOG_PARSE));
-                POS_TRACE_INFO(event, "Reseted footer is found. Found logs with SeqNumber ({}) or less will be reseted ", footer.resetedSequenceNumber);
+                int event = static_cast<int>(EID(MULTIPLE_SEQ_NUM_FOUND_WITHOUT_CHECKPOINT));
+                POS_TRACE_INFO(event, "LogGroup Footer Reset is found. Found logs with SeqNumber ({}) or less will be reset", footer.resetedSequenceNumber);
                 logs.EraseReplayLogGroup(footer.resetedSequenceNumber);
-                _ResetedLogFound(footer.resetedSequenceNumber);
+                _LogResetFound(footer.resetedSequenceNumber);
             }
             else
             {
@@ -187,7 +187,7 @@ LogBufferParser::_LogFound(LogHandlerInterface* log)
 }
 
 void
-LogBufferParser::_ResetedLogFound(uint32_t seqNumber)
+LogBufferParser::_LogResetFound(uint32_t seqNumber)
 {
     for (auto it = logsFound.cbegin(); it != logsFound.cend();)
     {
@@ -207,7 +207,7 @@ LogBufferParser::_GetLatestSequenceNumber(void)
 {
     if (logsFound.size() > 1)
     {
-        int event = static_cast<int>(EID(JOURNAL_REPLAY_LOG_PARSE));
+        int event = static_cast<int>(EID(MULTIPLE_SEQ_NUM_FOUND_WITHOUT_CHECKPOINT));
         POS_TRACE_ERROR(event, "Multiple sequence numbers are found without checkpoint.");
     }
 
