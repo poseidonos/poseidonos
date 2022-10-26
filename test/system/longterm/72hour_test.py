@@ -28,8 +28,8 @@ TESTTIME_IN_HOUR = 72
 ELAPSED_MIN = 0
 ELAPSED_HOUR = 0
 RC = True
-# CLI MOUNT TIMEOUT
-# In Write Through mode, larger timeout value for mount is needed than cli default timeout becasuse of large number of IO
+# CLI timeout in seconds for array mount command
+# In Write Through mode, larger timeout value for mount is needed than cli default timeout because of large number of IO
 CLI_MOUNT_TIMEOUT = 1800
 
 #for PM
