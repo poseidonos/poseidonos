@@ -55,7 +55,6 @@ public:
     virtual void ResetFlushedInfo(int logGroupId) = 0;
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) = 0;
 
     // For UT
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,

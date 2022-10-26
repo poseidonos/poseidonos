@@ -100,9 +100,7 @@ Poseidonos::Init(int argc, char** argv)
         _InitIOInterface();
         _InitMemoryChecker();
         _InitResourceChecker();
-#ifdef WITH_REPLICATOR
         _InitReplicatorManager();
-#endif
         _InitTraceExporter(argv[0], pos::ConfigManagerSingleton::Instance(), pos::VersionProviderSingleton::Instance(), pos::TraceExporterSingleton::Instance(new OtlpFactory()));
     }
     else
@@ -123,14 +121,12 @@ Poseidonos::_InitIOInterface(void)
     IODispatcher::RegisterRecoveryEventFactory(ioRecoveryEventFactory);
 }
 
-#ifdef WITH_REPLICATOR
 void
 Poseidonos::_InitReplicatorManager(void)
 {
     PosReplicatorManager* posReplicatorManager = PosReplicatorManagerSingleton::Instance();
     posReplicatorManager->Init(new GrpcPublisher(nullptr, ConfigManagerSingleton::Instance()), new GrpcSubscriber(ConfigManagerSingleton::Instance()));
 }
-#endif
 
 void
 Poseidonos::Run(void)

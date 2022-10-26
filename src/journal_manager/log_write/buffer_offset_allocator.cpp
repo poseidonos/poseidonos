@@ -187,7 +187,7 @@ BufferOffsetAllocator::_TryToSetFull(int id)
     if (changedToFullStatus == true)
     {
         uint32_t sequenceNumber = statusList[id]->GetSeqNum();
-        releaser->MarkLogGroupFull(id, sequenceNumber);
+        releaser->AddToFullLogGroup({id, sequenceNumber});
 
         POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_FULL),
             "Log group id {} is added to full log group", id);
