@@ -33,10 +33,11 @@
 #pragma once
 
 #include <atomic>
-#include <list>
 #include <mutex>
+#include <vector>
 
 #include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/checkpoint/log_group_release_status.h"
 #include "src/journal_manager/log/log_group_footer.h"
 #include "src/journal_manager/log_buffer/i_log_group_reset_completed.h"
 #include "src/journal_manager/status/i_checkpoint_status.h"
@@ -52,18 +53,6 @@ class EventScheduler;
 class IMapFlush;
 class IContextManager;
 
-struct LogGroupInfo
-{
-    int logGroupId;
-    uint32_t sequenceNumber;
-
-    inline bool
-    operator==(LogGroupInfo input) const
-    {
-        return (input.logGroupId == logGroupId && input.sequenceNumber == sequenceNumber);
-    }
-};
-
 class LogGroupReleaser : public ICheckpointStatus, public ILogGroupResetCompleted
 {
 public:
@@ -75,7 +64,7 @@ public:
         IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler);
     void Reset(void);
 
-    virtual void AddToFullLogGroup(struct LogGroupInfo logGroupInfo);
+    virtual void MarkLogGroupFull(int logGroupId, uint32_t sequenceNumber);
 
     virtual int GetFlushingLogGroupId(void) override;
     virtual std::list<int> GetFullLogGroups(void) override;
@@ -84,15 +73,11 @@ public:
     virtual void LogGroupResetCompleted(int logGroupId) override;
 
 protected:
-    void _AddToFullLogGroupList(struct LogGroupInfo logGroupInfo);
-    bool _HasFullLogGroup(void);
+    void _SetLogGroupFull(int logGroupId, uint32_t sequenceNumber);
+    bool _IsFlushInProgress(void);
 
     virtual void _FlushNextLogGroup(void);
-    void _UpdateFlushingLogGroup(void);
-    LogGroupInfo _PopFullLogGroup(void);
     virtual void _TriggerCheckpoint(void);
-
-    void _ResetFlushingLogGroup(void);
 
     void _CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset);
 
@@ -102,13 +87,10 @@ protected:
     LogBufferWriteDoneNotifier* releaseNotifier;
     IJournalLogBuffer* logBuffer;
 
-    std::mutex fullLogGroupLock;
-    std::list<LogGroupInfo> fullLogGroup;
+    std::mutex flushTriggerLock;
+    std::vector<LogGroupReleaseStatus> logGroups;
+    int nextLogGroupId;
 
-    std::atomic<int> flushingLogGroupId;
-    std::atomic<uint32_t> flushingSequenceNumber;
-
-    std::atomic<bool> checkpointTriggerInProgress;
     CheckpointManager* checkpointManager;
 
     IContextManager* contextManager;

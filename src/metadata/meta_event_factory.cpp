@@ -53,6 +53,7 @@ MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
   contextManager(contextManager),
   arrayInfo(arrayInfo)
 {
+    contextManager->SetSegmentContextUpdaterPtr(segmentCtx);
 }
 
 CallbackSmartPtr
