@@ -58,6 +58,7 @@
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/easy_telemetry_publisher.h"
 #include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 
 namespace pos
@@ -495,7 +496,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     logGroupReleaser->Init(config, logFilledNotifier, logBuffer,
         checkpointManager, mapFlush, contextManager, eventScheduler);
 
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, telemetryPublisher,
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, EasyTelemetryPublisherSingleton::Instance(),
         new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
     volumeEventHandler->Init(logFactory, checkpointManager, dirtyMapManager, logWriteHandler,
         config, contextManager, eventScheduler);

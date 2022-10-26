@@ -30,21 +30,22 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "src/telemetry/telemetry_client/pos_metric.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include <map>
+
 #include <chrono>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
 POSMetric::POSMetric()
 : type(POSMetricTypes::MT_NUM_TYPE),
-name("")
+  name("")
 {
-
 }
 
 POSMetric::POSMetric(std::string name_, POSMetricTypes type_)
@@ -107,25 +108,25 @@ POSMetric::GetName(void)
 }
 
 POSMetricTypes
-POSMetric::GetType(void)
+POSMetric::GetType(void) const
 {
     return type;
 }
 
 uint64_t
-POSMetric::GetCountValue(void)
+POSMetric::GetCountValue(void) const
 {
     return value.count;
 }
 
 int64_t
-POSMetric::GetGaugeValue(void)
+POSMetric::GetGaugeValue(void) const
 {
     return value.gauge;
 }
 
 POSHistogramValue*
-POSMetric::GetHistogramValue(void)
+POSMetric::GetHistogramValue(void) const
 {
     return value.histogram;
 }
@@ -135,7 +136,6 @@ POSMetric::GetLabelList(void)
 {
     return (&labelList);
 }
-
 
 POSHistogramValue::POSHistogramValue(std::vector<int64_t> upperBound_)
 {
@@ -192,6 +192,20 @@ uint64_t
 POSHistogramValue::GetTotalCount(void)
 {
     return totalCount;
+}
+
+size_t
+POSMetric::Hash(void) const
+{
+    std::string base = name;
+    size_t hashAccumulated = 0; // one trick is to hash individual label and add up since the operation is commutative.
+    // When it turns out that such accumulation leads to frequent hash collision, we'll find a better way.
+    for (auto label : labelList)
+    {
+        hashAccumulated += std::hash<std::string>{}(label.second);
+    }
+    base += std::to_string(hashAccumulated);
+    return std::hash<std::string>{}(base);
 }
 
 } // namespace pos
