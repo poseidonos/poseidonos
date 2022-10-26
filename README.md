@@ -40,17 +40,6 @@ sudo ./build_lib.sh
 cd script/
 sudo ./build_ibofos.sh
 ```
-
-### 2.1. Install POS (Optional)
-
-Execute $make install as follows.
-```
-sudo make install
-```
-This will install POS to your system, including registering POS and CLI binaries to your environment variables, creating related files (e.g., configuration, telemetry, event, ...), and generating man pages for CLI. 
-
-If you have done this step earlier, you can omit this step. 
-
 ## Run POS
 
 ```bash

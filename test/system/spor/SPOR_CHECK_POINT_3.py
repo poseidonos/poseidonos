@@ -9,7 +9,7 @@ import TEST_LOG
 import TEST_SETUP_POS
 import TEST_DEBUGGING
 
-log_buffer_size_mb = 1
+log_buffer_size_mb = 5
 current_test = 0
 arrayId = 0
 volId = 1
