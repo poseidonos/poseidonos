@@ -22,8 +22,9 @@ protoc --go_out=api --go_opt=paths=source_relative \
 lib/pnconnector/script/build_resource.sh
 
 # Patching protojson
+echo "Installing and patching protojson..."
+rm -rf ${GOPATH}/pkg/mod/google.golang.org/protobuf@v1.28.0
 ${GO} mod download
-patch -R -f ${GOPATH}/pkg/mod/google.golang.org/protobuf@v1.28.0/encoding/protojson/encode.go ./patches/protojson_encode.patch
 patch -f --silent ${GOPATH}/pkg/mod/google.golang.org/protobuf@v1.28.0/encoding/protojson/encode.go ./patches/protojson_encode.patch
 if [ $? -ne 0 ];
 then
