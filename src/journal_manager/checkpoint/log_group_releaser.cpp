@@ -51,9 +51,7 @@ LogGroupReleaser::LogGroupReleaser(void)
 : config(nullptr),
   releaseNotifier(nullptr),
   logBuffer(nullptr),
-  flushingLogGroupId(-1),
-  flushingSequenceNumber(0),
-  checkpointTriggerInProgress(false),
+  nextLogGroupId(0),
   checkpointManager(nullptr),
   contextManager(nullptr),
   eventScheduler(nullptr)
@@ -62,6 +60,7 @@ LogGroupReleaser::LogGroupReleaser(void)
 
 LogGroupReleaser::~LogGroupReleaser(void)
 {
+    logGroups.clear();
 }
 
 void
@@ -75,43 +74,55 @@ LogGroupReleaser::Init(JournalConfiguration* journalConfiguration,
     checkpointManager = cpManager;
     contextManager = ctxManager;
     eventScheduler = scheduler;
+
+    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
+    {
+        LogGroupReleaseStatus info(groupId);
+        logGroups.push_back(info);
+    }
 }
 
 void
 LogGroupReleaser::Reset(void)
 {
-    flushingLogGroupId = -1;
-    fullLogGroup.clear();
+    nextLogGroupId = 0;
+    for (auto group : logGroups)
+    {
+        group.Reset();
+    }
 }
 
 void
-LogGroupReleaser::AddToFullLogGroup(struct LogGroupInfo logGroupInfo)
+LogGroupReleaser::MarkLogGroupFull(int logGroupId, uint32_t sequenceNumber)
 {
-    _AddToFullLogGroupList(logGroupInfo);
+    assert((uint32_t)logGroupId < logGroups.size());
+    logGroups[logGroupId].SetWaiting(sequenceNumber);
+
     _FlushNextLogGroup();
-}
-
-void
-LogGroupReleaser::_AddToFullLogGroupList(struct LogGroupInfo logGroupInfo)
-{
-    std::unique_lock<std::mutex> lock(fullLogGroupLock);
-    fullLogGroup.push_back(logGroupInfo);
 }
 
 void
 LogGroupReleaser::_FlushNextLogGroup(void)
 {
-    if ((flushingLogGroupId == -1) && (_HasFullLogGroup()))
+    std::unique_lock<std::mutex> lock(flushTriggerLock);
+
+    if (_IsFlushInProgress() == false)
     {
-        if (checkpointTriggerInProgress.exchange(true) == false)
+        if (logGroups[nextLogGroupId].IsFull() == true)
         {
-            _UpdateFlushingLogGroup();
-            assert(flushingLogGroupId != -1);
-            checkpointTriggerInProgress = false;
+            logGroups[nextLogGroupId].SetReleasing();
+
+            POS_TRACE_INFO(EID(JOURNAL_FLUSH_LOG_GROUP),
+                "Flush next log group {}, seq number {}", nextLogGroupId, logGroups[nextLogGroupId].GetSeqNum());
 
             _TriggerCheckpoint();
         }
     }
+}
+bool
+LogGroupReleaser::_IsFlushInProgress(void)
+{
+    return (logGroups[nextLogGroupId].IsReleasing());
 }
 
 void
@@ -121,13 +132,13 @@ LogGroupReleaser::_TriggerCheckpoint(void)
     uint64_t footerOffset;
 
     POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STARTED),
-        "Submit checkpoint start for log group {}", flushingLogGroupId);
+        "Submit checkpoint start for log group {}", nextLogGroupId);
 
     _CreateFlushingLogGroupFooter(footer, footerOffset);
 
     EventSmartPtr checkpointSubmission = _CreateCheckpointSubmissionEvent();
 
-    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, flushingLogGroupId, checkpointSubmission));
+    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, nextLogGroupId, checkpointSubmission));
     eventScheduler->EnqueueEvent(event);
 }
 
@@ -141,11 +152,11 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
     uint64_t footerOffset;
     _CreateFlushingLogGroupFooter(footer, footerOffset);
     footer.isReseted = true;
-    footer.resetedSequenceNumber = flushingSequenceNumber;
+    footer.resetedSequenceNumber = logGroups[nextLogGroupId].GetSeqNum();
 
-    EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, flushingLogGroupId));
-    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, flushingLogGroupId, footer, footerOffset, resetLogGroupCompletion));
-    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, flushingLogGroupId));
+    EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, nextLogGroupId));
+    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, nextLogGroupId, footer, footerOffset, resetLogGroupCompletion));
+    EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, nextLogGroupId));
 
     return checkpointSubmission;
 }
@@ -153,7 +164,7 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
 void
 LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset)
 {
-    LogGroupLayout layout = config->GetLogBufferLayout(flushingLogGroupId);
+    LogGroupLayout layout = config->GetLogBufferLayout(nextLogGroupId);
     uint64_t version = contextManager->GetStoredContextVersion(SEGMENT_CTX);
 
     footer.lastCheckpointedSeginfoVersion = version;
@@ -162,64 +173,33 @@ LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t
     footerOffset = layout.footerStartOffset;
 }
 
-bool
-LogGroupReleaser::_HasFullLogGroup(void)
-{
-    std::unique_lock<std::mutex> lock(fullLogGroupLock);
-    return (fullLogGroup.size() != 0);
-}
-
-void
-LogGroupReleaser::_UpdateFlushingLogGroup(void)
-{
-    struct LogGroupInfo result = _PopFullLogGroup();
-    flushingLogGroupId = result.logGroupId;
-    flushingSequenceNumber = result.sequenceNumber;
-    POS_TRACE_DEBUG(EID(JOURNAL_FLUSH_LOG_GROUP),
-        "Flush next log group {}, seq number {}", flushingLogGroupId, flushingSequenceNumber);
-}
-
-struct LogGroupInfo
-LogGroupReleaser::_PopFullLogGroup(void)
-{
-    std::unique_lock<std::mutex> lock(fullLogGroupLock);
-
-    assert(fullLogGroup.size() != 0);
-    int retLogGroup = fullLogGroup.front().logGroupId;
-    uint32_t retSequenceNumber = fullLogGroup.front().sequenceNumber;
-    fullLogGroup.pop_front();
-
-    return {retLogGroup, retSequenceNumber};
-}
-
 void
 LogGroupReleaser::LogGroupResetCompleted(int logGroupId)
 {
     releaseNotifier->NotifyLogBufferReseted(logGroupId);
 
-    _ResetFlushingLogGroup();
-    _FlushNextLogGroup();
-}
+    logGroups[nextLogGroupId].Reset();
+    nextLogGroupId = (nextLogGroupId + 1) % config->GetNumLogGroups();
 
-void
-LogGroupReleaser::_ResetFlushingLogGroup(void)
-{
-    flushingLogGroupId = -1;
+    _FlushNextLogGroup();
 }
 
 int
 LogGroupReleaser::GetFlushingLogGroupId(void)
 {
-    return flushingLogGroupId;
+    return nextLogGroupId;
 }
 
 std::list<int>
 LogGroupReleaser::GetFullLogGroups(void)
 {
     std::list<int> result;
-    for (auto it: fullLogGroup)
+    for (auto group : logGroups)
     {
-        result.push_back(it.logGroupId);
+        if (group.IsFull())
+        {
+            result.push_back(group.GetId());
+        }
     }
     return result;
 }

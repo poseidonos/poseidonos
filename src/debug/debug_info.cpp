@@ -107,7 +107,9 @@ DebugInfo::DebugInfo(void)
   telemetryClient(nullptr),
   telemetryConfig(nullptr),
   memoryManager(nullptr),
+#ifdef WITH_REPLICATOR
   posReplicatorManager(nullptr),
+#endif
   resourceChecker(nullptr),
   ioTimeoutChecker(nullptr)
 {
@@ -151,7 +153,9 @@ DebugInfo::Update(void)
     telemetryConfig = TelemetryConfigSingleton::Instance();
     memoryManager = MemoryManagerSingleton::Instance();
     signalHandler = SignalHandlerSingleton::Instance();
+#ifdef WITH_REPLICATOR
     posReplicatorManager = PosReplicatorManagerSingleton::Instance();
+#endif
     resourceChecker = ResourceCheckerSingleton::Instance();
     ioTimeoutChecker = IoTimeoutCheckerSingleton::Instance();
 }

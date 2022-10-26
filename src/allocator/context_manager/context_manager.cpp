@@ -70,6 +70,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     blockAllocStatus = blockAllocStatus_;
     contextReplayer = ctxReplayer_;
     telPublisher = tp;
+    segmentContextUpdater = nullptr;
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_)
@@ -90,6 +91,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
 
     rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
+    segmentContextUpdater = nullptr;
 }
 
 ContextManager::~ContextManager(void)
@@ -268,5 +270,17 @@ ContextManager::ResetFlushedInfo(int logGroupId)
     }
 
     logGroupIdInProgress = INVALID_LOG_GROUP_ID;
+}
+
+void
+ContextManager::SetSegmentContextUpdaterPtr(ISegmentCtx *segmentContextUpdater_)
+{
+    segmentContextUpdater = segmentContextUpdater_;
+}
+
+ISegmentCtx*
+ContextManager::GetSegmentContextUpdaterPtr(void)
+{
+    return segmentContextUpdater;
 }
 } // namespace pos

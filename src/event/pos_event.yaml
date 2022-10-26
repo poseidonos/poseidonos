@@ -2095,7 +2095,13 @@ Root:
     Message: Failed to mount array.
     Cause: Input target address is invalid.
     Solution: Please check the format of the target address.
-
+  -
+    Id: 2603
+    Name: AUTO_CREATE_ARRAY_DEBUG
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
   # Rebuild: 2800 - 2899
     Id: 2800
@@ -2866,6 +2872,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3038
+    Name: JOURNAL_LOG_GROUP_STATUS_CHANGED
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   -
     Id: 3040
@@ -2913,6 +2926,20 @@ Root:
   -
     Id: 3055
     Name: JOURNAL_INVALID_LOG_FOUND
+    Severity:
+    Message:
+    Cause: Some of the old logs can not be erased becuase log offset can be additionally increased for mpage align. align.
+    Solution: Ignore the old logs by sequence number
+  -
+    Id: 3056
+    Name: MULTIPLE_SEQ_NUM_FOUND_WITHOUT_CHECKPOINT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3057
+    Name: JOURNAL_LOG_GROUP_FOOTER_FOUND
     Severity:
     Message:
     Cause:
@@ -7819,6 +7846,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 9528
+    Name: TELEMETRY_SET_PROPERTY_FAILURE_INVALID_FILE
+    Severity:
+    Message: Failed to set telemetry property.
+    Cause: Could not open the file.
+    Solution: Check if the file path is correct, or you have the permission.
 
 
   # DEBUG: 10000 - 10199
