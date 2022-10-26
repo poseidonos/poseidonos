@@ -20,6 +20,18 @@ protoc --go_out=api --go_opt=paths=source_relative \
 
 # Build CLI binary
 lib/pnconnector/script/build_resource.sh
+
+# Patching protojson
+${GO} mod download
+patch -R -f ${GOPATH}/pkg/mod/google.golang.org/protobuf@v1.28.0/encoding/protojson/encode.go ./patches/protojson_encode.patch
+patch -f --silent ${GOPATH}/pkg/mod/google.golang.org/protobuf@v1.28.0/encoding/protojson/encode.go ./patches/protojson_encode.patch
+if [ $? -ne 0 ];
+then
+    echo "patching protojson failed!"
+    exit 1
+fi
+
+# Build CLI
 ${GO} build -tags debug,ssloff -ldflags "-X cli/cmd.PosCliVersion=$POS_CLI_VERSION -X cli/cmd.GitCommit=$GIT_COMMIT_CLI -X cli/cmd.BuildTime=$BUILD_TIME_CLI -X cli/cmd.RootDir=$ROOT_DIR"
 mv ./cli bin/poseidonos-cli
 

@@ -1,0 +1,11 @@
+--- encode.go	2022-10-20 14:13:22.126921685 +0900
++++ encode_patch.go	2022-10-20 14:23:15.318912480 +0900
+@@ -274,7 +274,7 @@
+ 	case protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Uint64Kind,
+ 		protoreflect.Sfixed64Kind, protoreflect.Fixed64Kind:
+ 		// 64-bit integers are written out as JSON string.
+-		e.WriteString(val.String())
++		e.WriteUint(val.Uint())
+ 
+ 	case protoreflect.FloatKind:
+ 		// Encoder.WriteFloat handles the special numbers NaN and infinites.

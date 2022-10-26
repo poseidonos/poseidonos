@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,51 +30,74 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <list>
-
-#include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include "src/journal_manager/checkpoint/log_group_release_status.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include <cassert>
 
 namespace pos
 {
-class LogGroupReleaserSpy : public LogGroupReleaser
+LogGroupReleaseStatus::LogGroupReleaseStatus(int groupId)
+: id(groupId),
+  sequenceNumber(0),
+  status(ReleaseStatus::INIT)
 {
-public:
-    using LogGroupReleaser::LogGroupReleaser;
-    virtual ~LogGroupReleaserSpy(void) = default;
+}
 
-    bool triggerCheckpoint = true;
+void
+LogGroupReleaseStatus::SetWaiting(uint32_t seqNum)
+{
+    assert(status == ReleaseStatus::INIT);
 
-    // Method to access protected method of LogGroupReleaser for unit testing
-    void
-    FlushNextLogGroup(void)
-    {
-        _FlushNextLogGroup();
-    }
+    sequenceNumber = seqNum;
+    status = ReleaseStatus::WAITING;
 
-    void
-    TriggerCheckpoint(void)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
+    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
+        "ReleaseStatus, id: {}, status: {}", id, status);
+}
 
-    bool
-    IsFlushCompleted(void)
-    {
-        return (_IsFlushInProgress() == false);
-    }
+void
+LogGroupReleaseStatus::SetReleasing(void)
+{
+    assert(status == ReleaseStatus::WAITING);
+    status = ReleaseStatus::RELEASING;
 
-protected:
-    virtual void
-    _FlushNextLogGroup(void) override
-    {
-        if (triggerCheckpoint == true)
-        {
-            LogGroupReleaser::_FlushNextLogGroup();
-        }
-    }
-};
+    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
+        "ReleaseStatus, id: {}, status: {}", id, status);
+}
+
+void
+LogGroupReleaseStatus::Reset(void)
+{
+    sequenceNumber = 0;
+    status = ReleaseStatus::INIT;
+
+    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
+        "ReleaseStatus, id: {}, status: {}", id, status);
+}
+
+uint32_t
+LogGroupReleaseStatus::GetSeqNum(void)
+{
+    return sequenceNumber;
+}
+
+int
+LogGroupReleaseStatus::GetId(void)
+{
+    return id;
+}
+
+bool
+LogGroupReleaseStatus::IsFull(void)
+{
+    return (status != ReleaseStatus::INIT);
+}
+
+bool
+LogGroupReleaseStatus::IsReleasing(void)
+{
+    return (status == ReleaseStatus::RELEASING);
+}
+
 } // namespace pos

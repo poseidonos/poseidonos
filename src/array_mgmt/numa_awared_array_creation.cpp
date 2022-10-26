@@ -40,14 +40,7 @@ namespace pos
 {
 NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dataCnt, int spareCnt, DeviceManager* devMgr)
 {
-    result.code = EID(CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS);
-    int requiredDevCnt = dataCnt + spareCnt;
-    auto&& systemDevs = Enumerable::Where(devMgr->GetDevs(),
-        [](auto d) { return (d->GetClass() == DeviceClass::SYSTEM &&
-                             d->GetType() == DeviceType::SSD); });
-
-    auto&& devsByNuma = Enumerable::GroupBy(systemDevs,
-        [](auto d) { return d->GetNuma(); });
+    result.code = EID(SUCCESS);
 
     DevName bufferName(buffers.front());
     UblockSharedPtr buf = devMgr->GetDev(bufferName);
@@ -57,40 +50,28 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
         POS_TRACE_WARN(result.code, "nvm_name:{}", buffers.front());
         return;
     }
-    int targetNuma = buf->GetNuma();
-    size_t numofDevsInTargetNuma = 0;
-    size_t maxNumofDevsInTargetNumaWithSameCapacity = 0;
-
-    for (auto numaGroup : devsByNuma)
+    int requiredDevCnt = dataCnt + spareCnt;
+    int targetNumaId = buf->GetNuma();
+    auto&& devsInTargetNuma = Enumerable::Where(devMgr->GetDevs(),
+        [targetNumaId](auto d) { return (d->GetClass() == DeviceClass::SYSTEM &&
+                             d->GetType() == DeviceType::SSD &&
+                             d->GetNuma() == targetNumaId); });
+    size_t numofDevsInTargetNuma = devsInTargetNuma.size();
+    if ((int)numofDevsInTargetNuma >= requiredDevCnt)
     {
-        int numaId = numaGroup.first;
-        if (numaId != targetNuma)
-        {
-            continue;
-        }
-        auto sameNumaDevs = numaGroup.second;
-        numofDevsInTargetNuma = sameNumaDevs.size();
-        if ((int)numofDevsInTargetNuma < requiredDevCnt)
-        {
-            continue;
-        }
-
-        auto&& devsBySize = Enumerable::GroupBy(sameNumaDevs,
-            [](auto d) { return d->GetSize(); });
-
+        auto&& devsBySize = Enumerable::GroupBy(devsInTargetNuma,
+                [](auto d) { return d->GetSize(); });
         for (auto sizeGroup : devsBySize)
         {
             uint64_t devSize = sizeGroup.first;
             auto sameSizeDevs = sizeGroup.second;
             size_t numofDevsWithSameCapacity = sameSizeDevs.size();
-            if (maxNumofDevsInTargetNumaWithSameCapacity < numofDevsWithSameCapacity)
-            {
-                maxNumofDevsInTargetNumaWithSameCapacity = numofDevsWithSameCapacity;
-            }
+            POS_TRACE_DEBUG(EID(AUTO_CREATE_ARRAY_DEBUG), "Matching devices... required:{}, numa_id:{}, num_of_ssds_in_the_numa:{}, num_of_ssds_same_capa:{}, capacity:{}",
+                requiredDevCnt, targetNumaId, numofDevsInTargetNuma, numofDevsWithSameCapacity, devSize);
             if ((int)numofDevsWithSameCapacity >= requiredDevCnt)
             {
                 ArrayCreationOptions option;
-                option.numaId = numaId;
+                option.numaId = targetNumaId;
                 int dCnt = dataCnt;
                 int sCnt = spareCnt;
                 for (UblockSharedPtr dev : sameSizeDevs)
@@ -108,20 +89,14 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
                 }
                 if (buffers.size() > 0)
                 {
-                    DevName bufferName(buffers.front());
-                    UblockSharedPtr buf = devMgr->GetDev(bufferName);
-                    if (buf != nullptr && buf->GetNuma() == numaId)
-                    {
-                        option.devs.nvm.push_back(buffers.front());
-                    }
-                    else
-                    {
-                        continue;
-                    }
+                    option.devs.nvm.push_back(buffers.front());
                 }
                 option.capacity = devSize * dataCnt;
                 result.options.push_back(option);
                 result.code = EID(SUCCESS);
+                POS_TRACE_INFO(EID(AUTO_CREATE_ARRAY_DEBUG), "Device matching success, count:{}, numa_id:{}, capacity:{}",
+                    requiredDevCnt, targetNumaId, devSize);
+                break;
             }
             else
             {
@@ -129,10 +104,15 @@ NumaAwaredArrayCreation::NumaAwaredArrayCreation(vector<string> buffers, int dat
             }
         }
     }
+    else
+    {
+        result.code = EID(CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS);
+    }
 
     if (result.code != EID(SUCCESS))
     {
-        POS_TRACE_WARN(result.code, "required: {}, num of devs in same numa:{}, num of devs in same numa with same capacity: {}", requiredDevCnt, numofDevsInTargetNuma, maxNumofDevsInTargetNumaWithSameCapacity);
+        POS_TRACE_WARN(result.code, "Device matching failed, required:{}, numa_id:{}, num_of_ssds_in_the_numa:{}",
+            requiredDevCnt, targetNumaId, numofDevsInTargetNuma);
     }
 }
 } // namespace pos

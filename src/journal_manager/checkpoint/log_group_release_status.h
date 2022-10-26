@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,45 +31,38 @@
  */
 
 #pragma once
+#include <stdint.h>
 
-#include <list>
-
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/journal_manager/checkpoint/checkpoint_submission.h"
-#include "src/journal_manager/checkpoint/log_group_releaser.h"
+#include <cassert>
 
 namespace pos
 {
-class LogGroupReleaserSpy : public LogGroupReleaser
+enum class ReleaseStatus
+{
+    INIT,
+    WAITING,
+    RELEASING
+};
+
+class LogGroupReleaseStatus
 {
 public:
-    using LogGroupReleaser::LogGroupReleaser;
-    virtual ~LogGroupReleaserSpy(void) = default;
+    LogGroupReleaseStatus(int groupId);
 
-    // Metohds to inject protected member values for unit testing
-    void
-    SetFlushingLogGroupId(int id)
-    {
-        flushingLogGroupId = id;
-    }
+    void SetWaiting(uint32_t seqNum);
+    void SetReleasing(void);
+    void Reset(void);
 
-    void
-    SetFullLogGroups(std::list<LogGroupInfo> logGroups)
-    {
-        fullLogGroup = logGroups;
-    }
+    uint32_t GetSeqNum(void);
+    int GetId(void);
 
-    void
-    SetCheckpointTriggerInProgress(bool value)
-    {
-        checkpointTriggerInProgress = value;
-    }
+    bool IsFull(void);
+    bool IsReleasing(void);
 
-    // Method to access protected method of LogGroupReleaser for unit testing
-    void
-    FlushNextLogGroup(void)
-    {
-        LogGroupReleaser::_FlushNextLogGroup();
-    }
+private:
+    int id;
+    uint32_t sequenceNumber;
+    ReleaseStatus status;
 };
+
 } // namespace pos
