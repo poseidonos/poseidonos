@@ -102,6 +102,7 @@ ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
 {
     for (auto it = logGroups.cbegin(); it != logGroups.cend();)
     {
+        // TODO (cheolho.kang): It should be refactored later to erase replay logs with invalid sequence numbers using LogBufferParser.logs 
         if (it->first <= seqNum || it->first == LOG_VALID_MARK)
         {
             int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));

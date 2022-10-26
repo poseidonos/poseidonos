@@ -2928,11 +2928,18 @@ Root:
     Name: JOURNAL_INVALID_LOG_FOUND
     Severity:
     Message:
-    Cause:
-    Solution:
+    Cause: Some of the old logs can not be erased becuase log offset can be additionally increased for mpage align. align.
+    Solution: Ignore the old logs by sequence number
   -
     Id: 3056
     Name: MULTIPLE_SEQ_NUM_FOUND_WITHOUT_CHECKPOINT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3057
+    Name: JOURNAL_LOG_GROUP_FOOTER_FOUND
     Severity:
     Message:
     Cause:

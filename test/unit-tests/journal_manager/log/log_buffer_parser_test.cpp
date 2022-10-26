@@ -373,16 +373,17 @@ TEST(LogBufferParser, GetLogs_testIfSeveralOldSequenceNumber)
     LogBufferParser parser;
     int result = parser.GetLogs(logBuffer, logBufferSize, logList);
 
-    // Then: LogBufferParser will return the error code
+    // Then: LogBufferParser will return the success code
     int expect = 0;
     EXPECT_EQ(result, expect);
     free(logBuffer);
 }
 
+// Test scenario to verify the journal log buffer with actual journal file extracted from core dump.
+// It will be used later to use this TC with the test script
 TEST(LogBufferParser, DISABLED_GetLogs_testWithRealDump)
 {
-    // Given
-
+    // Given: Actual journal log buffer file getting through memory dump
     int fd = open("log_group.out", O_RDWR, 0777);
     EXPECT_TRUE(fd != -1);
 

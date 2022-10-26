@@ -157,7 +157,7 @@ ReplayHandler::_ExecuteReplayTasks(void)
 
         if (result != 0)
         {
-            // TODO (cheolho.kang): Add sequence to dump journal buffer
+            // TODO (cheolho.kang): For debuggability, Add the process of dumping the journal log buffer before dispose.
             if (result > 0)
             {
                 reporter->CompleteAll();
