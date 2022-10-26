@@ -107,7 +107,7 @@ ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
         {
             int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
             POS_TRACE_INFO(event, "Erasing Replay Log Group for SeqNum {} with {} entries", it->first, it->second.logs.size());
-            for (ReplayLog replayLog : it->second.logs)
+            for (const ReplayLog& replayLog : it->second.logs)
             {
                 delete replayLog.log;
             }
