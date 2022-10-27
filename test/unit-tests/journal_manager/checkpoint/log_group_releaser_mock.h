@@ -12,7 +12,7 @@ class MockLogGroupReleaser : public LogGroupReleaser
 public:
     using LogGroupReleaser::LogGroupReleaser;
     MOCK_METHOD(void, Init, (JournalConfiguration* config, LogBufferWriteDoneNotifier* notified, IJournalLogBuffer* logBuffer, CheckpointManager* cpManager, IMapFlush* mapFlush, IContextManager* contextManager, EventScheduler* scheduler), (override));
-    MOCK_METHOD(void, LogGroupFull, (int logGroupId, uint32_t sequenceNumber), (override));
+    MOCK_METHOD(void, AddToFullLogGroup, (struct LogGroupInfo logGroupInfo), (override));
     MOCK_METHOD(int, GetFlushingLogGroupId, (), (override));
     MOCK_METHOD(std::list<int>, GetFullLogGroups, (), (override));
     MOCK_METHOD(CheckpointStatus, GetStatus, (), (override));

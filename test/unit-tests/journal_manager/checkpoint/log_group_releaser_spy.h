@@ -30,64 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/checkpoint/log_group_release_status.h"
+#pragma once
 
-#include <cassert>
+#include <list>
+
+#include "src/event_scheduler/event_scheduler.h"
+#include "src/journal_manager/checkpoint/checkpoint_submission.h"
+#include "src/journal_manager/checkpoint/log_group_releaser.h"
 
 namespace pos
 {
-LogGroupReleaseStatus::LogGroupReleaseStatus(int groupId)
-: id(groupId),
-  sequenceNumber(0),
-  status(ReleaseStatus::INIT)
+class LogGroupReleaserSpy : public LogGroupReleaser
 {
-}
+public:
+    using LogGroupReleaser::LogGroupReleaser;
+    virtual ~LogGroupReleaserSpy(void) = default;
 
-void
-LogGroupReleaseStatus::SetWaiting(uint32_t seqNum)
-{
-    assert(status == ReleaseStatus::INIT);
+    // Metohds to inject protected member values for unit testing
+    void
+    SetFlushingLogGroupId(int id)
+    {
+        flushingLogGroupId = id;
+    }
 
-    sequenceNumber = seqNum;
-    status = ReleaseStatus::WAITING;
-}
+    void
+    SetFullLogGroups(std::list<LogGroupInfo> logGroups)
+    {
+        fullLogGroup = logGroups;
+    }
 
-void
-LogGroupReleaseStatus::SetReleasing(void)
-{
-    assert(status == ReleaseStatus::WAITING);
-    status = ReleaseStatus::RELEASING;
-}
+    void
+    SetCheckpointTriggerInProgress(bool value)
+    {
+        checkpointTriggerInProgress = value;
+    }
 
-void
-LogGroupReleaseStatus::Reset(void)
-{
-    sequenceNumber = 0;
-    status = ReleaseStatus::INIT;
-}
-
-uint32_t
-LogGroupReleaseStatus::GetSeqNum(void)
-{
-    return sequenceNumber;
-}
-
-int
-LogGroupReleaseStatus::GetId(void)
-{
-    return id;
-}
-
-bool
-LogGroupReleaseStatus::IsFull(void)
-{
-    return (status != ReleaseStatus::INIT);
-}
-
-bool
-LogGroupReleaseStatus::IsReleasing(void)
-{
-    return (status == ReleaseStatus::RELEASING);
-}
-
+    // Method to access protected method of LogGroupReleaser for unit testing
+    void
+    FlushNextLogGroup(void)
+    {
+        LogGroupReleaser::_FlushNextLogGroup();
+    }
+};
 } // namespace pos
