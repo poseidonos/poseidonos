@@ -71,9 +71,7 @@ private:
     void _InitAIR(void);
     void _InitMemoryChecker(void);
     void _InitResourceChecker(void);
-#ifdef WITH_REPLICATOR
     void _InitReplicatorManager(void);
-#endif
     void _SetPerfImpact(void);
     int _LoadConfiguration(void);
     void _RunCLIService(void);
