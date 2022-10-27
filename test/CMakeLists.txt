@@ -11,12 +11,6 @@ option(POS_SKIP_IT_BUILD "Skip compiling test/integration-tests/**/*_test.cpp" O
 option(POS_BUILD_SHARED_LIB "Build POS as shared library (vs. static)" ON)
 option(POS_TESTEXEC_WITH_NATIVE_GTEST "Run UTs/ITs by executing gtest binaries directly (vs. ctest)" ON)
 option(POS_DISABLE_LOGGING "Disable the POS logger while running UTs/ITs" ON)
-option(POS_ENABLE_REPLICATOR "Enable the POS replicator module" OFF)
-
-# Set compiler option releated to Replicator
-if(POS_ENABLE_REPLICATOR)
-    add_definitions(-DWITH_REPLICATOR)
-endif(POS_ENABLE_REPLICATOR)
 
 # By default, we use 4 threads to run unit tests and 1 thread to run integration tests.
 # Those numbers are to limit the tests from consuming too much resource of a build server, 
@@ -89,11 +83,6 @@ MACRO(POS_CMAKE_SUBDIR_ALL)
 
     # filter out test root directory
     list(FILTER files_cmakelists EXCLUDE REGEX ".+/test/CMakeLists.txt")
-
-    # filter out replicator directory if replicator option is off)
-    if(NOT POS_ENABLE_REPLICATOR)
-        list(FILTER files_cmakelists EXCLUDE REGEX ".+/test/unit-tests/pos_replicator/CMakeLists.txt")
-    endif(NOT POS_ENABLE_REPLICATOR)
 
     foreach(file_cmakelists ${files_cmakelists})
         #message("file_cmakelists: ${file_cmakelists}")
@@ -398,7 +387,6 @@ list(FILTER dep_src EXCLUDE REGEX ".+mock.cpp")
 list(FILTER dep_src EXCLUDE REGEX ".+/unit_test/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/fake/.+")
 list(FILTER dep_src EXCLUDE REGEX ".+/mock/.+")
-list(FILTER dep_src EXCLUDE REGEX ".+/pos_replicator/.+")
 
 foreach(f ${dep_src})
     #message("picking up ${f} for compile")

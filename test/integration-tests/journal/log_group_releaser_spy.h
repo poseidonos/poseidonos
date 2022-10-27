@@ -46,7 +46,32 @@ public:
     using LogGroupReleaser::LogGroupReleaser;
     virtual ~LogGroupReleaserSpy(void) = default;
 
+    void
+    UpdateFlushingLogGroup(void)
+    {
+        LogGroupReleaser::_UpdateFlushingLogGroup();
+    }
+
+    void
+    SetFlushingLogGroupId(int id)
+    {
+        flushingLogGroupId = id;
+    }
+
     bool triggerCheckpoint = true;
+
+    // Metohds to inject protected member values for unit testing
+    void
+    SetFullLogGroups(std::list<LogGroupInfo> logGroups)
+    {
+        fullLogGroup = logGroups;
+    }
+
+    void
+    SetCheckpointTriggerInProgress(bool value)
+    {
+        checkpointTriggerInProgress = value;
+    }
 
     // Method to access protected method of LogGroupReleaser for unit testing
     void
@@ -58,13 +83,13 @@ public:
     void
     TriggerCheckpoint(void)
     {
-        LogGroupReleaser::_FlushNextLogGroup();
+        _TriggerCheckpoint();
     }
 
     bool
     IsFlushCompleted(void)
     {
-        return (_IsFlushInProgress() == false);
+        return (flushingLogGroupId == -1) && (_HasFullLogGroup() == false);
     }
 
 protected:
@@ -75,6 +100,17 @@ protected:
         {
             LogGroupReleaser::_FlushNextLogGroup();
         }
+    }
+
+    virtual void
+    _TriggerCheckpoint(void) override
+    {
+        EventSmartPtr event = _CreateCheckpointSubmissionEvent();
+
+        event->Execute();
+        // TODO (cheolho.kang): need to change to execute from other thread
+        // std::thread eventExecution(&Event::Execute, event);
+        // eventExecution.detach();
     }
 };
 } // namespace pos

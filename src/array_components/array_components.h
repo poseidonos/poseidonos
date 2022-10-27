@@ -72,9 +72,7 @@ public:
         IStateControl* state,
         Array* array,
         VolumeManager* volMgr,
-#ifdef WITH_REPLICATOR
         ReplicatorVolumeSubscriber* replicatorVolumeSubscriber,
-#endif
         GarbageCollector* gc,
         Metadata* meta,
         RBAStateManager* rbaStateMgr,
@@ -114,9 +112,7 @@ private:
     GarbageCollector* gc = nullptr;
     Metadata* meta = nullptr;
     VolumeManager* volMgr = nullptr;
-#ifdef WITH_REPLICATOR
     ReplicatorVolumeSubscriber* replicatorVolumeSubscriber = nullptr;
-#endif
     MetaFs* metafs = nullptr;
     RBAStateManager* rbaStateMgr = nullptr;
     Nvmf* nvmf = nullptr;

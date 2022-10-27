@@ -65,7 +65,7 @@ struct BlockWriteDoneLog : Log
     VirtualBlkAddr startVsa;
     int wbIndex;
     StripeAddr writeBufferStripeAddress;
-    uint8_t reserved[12] = {0, };
+    uint8_t reserved[12];
 };
 
 struct StripeMapUpdatedLog : Log

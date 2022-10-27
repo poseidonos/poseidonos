@@ -88,11 +88,7 @@ BuildMockArrayComponents(std::string arrayName, Array* array)
 {
     NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
     return std::make_shared<MockArrayComponents>(arrayName, nullptr, nullptr,
-        mockStateMgr, nullptr, array, nullptr, 
-#ifdef WITH_REPLICATOR
-        nullptr, 
-#endif
-        nullptr, nullptr,
+        mockStateMgr, nullptr, array, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
@@ -101,11 +97,7 @@ NewMockArrayComponents(std::string arrayName)
 {
     NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
     return new MockArrayComponents(arrayName, nullptr, nullptr,
-        mockStateMgr, nullptr, nullptr, nullptr, 
-#ifdef WITH_REPLICATOR
-        nullptr, 
-#endif
-        nullptr, nullptr, nullptr,
+        mockStateMgr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
