@@ -13,7 +13,6 @@ public:
     MOCK_METHOD(void, AddLog, (LogHandlerInterface* log), (override));
     MOCK_METHOD(bool, IsEmpty, (), (override));
     MOCK_METHOD(void, SetLogGroupFooter, (uint32_t seqNum, LogGroupFooter footer), (override));
-    MOCK_METHOD(void, EraseReplayLogGroup, (uint32_t seqNum), (override));
     MOCK_METHOD(ReplayLogGroup, PopReplayLogGroup, (), (override));
 };
 
