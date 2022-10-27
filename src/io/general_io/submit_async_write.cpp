@@ -32,6 +32,8 @@
 
 #include "src/io/general_io/submit_async_write.h"
 
+#include <air/Air.h>
+
 #include "src/array/service/array_service_layer.h"
 #include "src/bio/ubio.h"
 #include "src/event_scheduler/callback.h"
@@ -81,6 +83,7 @@ SubmitAsyncWrite::Execute(
     {
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+        airlog("Pending_Internal_Write", "internal", arrayId, -1);
         return errorToReturn;
     }
     LogicalWriteEntry logicalWriteEntry = {
@@ -108,6 +111,7 @@ SubmitAsyncWrite::Execute(
         EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+        airlog("Pending_Internal_Write", "internal", arrayId, -1);
         return IOSubmitHandlerStatus::SUCCESS;
     }
 
@@ -120,6 +124,7 @@ SubmitAsyncWrite::Execute(
         {
             IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+            airlog("Pending_Internal_Write", "internal", arrayId, -1);
             POS_EVENT_ID eventId = EID(PARITY_ONLY_NOT_SUPPORTED);
             POS_TRACE_ERROR(eventId, "Meta Partition with parity only is not supported");
             return errorToReturn;
@@ -139,6 +144,7 @@ SubmitAsyncWrite::Execute(
         {
             IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+            airlog("Pending_Internal_Write", "internal", arrayId, -1);
             return IOSubmitHandlerStatus::TRYLOCK_FAIL;
         }
     }
@@ -165,6 +171,7 @@ SubmitAsyncWrite::Execute(
     {
         bool done = callback->Execute();
         IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+        airlog("Pending_Internal_Write", "internal", arrayId, -1);
         if (false == done)
         {
             IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
@@ -175,7 +182,7 @@ SubmitAsyncWrite::Execute(
 
     callback->SetWaitingCount(1);
     CallbackSmartPtr arrayUnlocking(
-        new ArrayUnlocking(targetDevices, stripeId, locker));
+        new ArrayUnlocking(targetDevices, stripeId, locker, arrayId));
     arrayUnlocking->SetCallee(callback);
     arrayUnlocking->SetWaitingCount(totalIoCount);
     arrayUnlocking->SetEventType(callback->GetEventType());

@@ -32,6 +32,7 @@
 
 #include "src/qos/qos_volume_manager.h"
 
+#include <air/Air.h>
 #include <algorithm>
 #include <iostream>
 #include <unordered_set>
@@ -296,6 +297,7 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
     }
 
     EnqueueVolumeIo(volId, volIo);
+    airlog("Feqos_Volume_Q_Count", "internal", volId, 1);
     pendingIO[volId]++;
 }
 
@@ -538,6 +540,8 @@ QosVolumeManager::ResetGlobalThrottling(void)
 {
     int64_t bwUnit = basicBwUnit;
     int64_t iopsUnit = basicIopsUnit;
+    airlog("Feqos_Global_BW_Throttling", "internal", 0, globalBwThrottling * PARAMETER_COLLECTION_INTERVAL);
+    airlog("Feqos_Global_Iops_Throttling", "internal", 0, globalIopsThrottling * PARAMETER_COLLECTION_INTERVAL);
     bwUnit = std::max(bwUnit, static_cast<int64_t>(globalThrottlingChangingRate * globalBwThrottling));
     iopsUnit = std::max(iopsUnit, static_cast<int64_t>(globalThrottlingChangingRate * globalIopsThrottling));
     globalBwThrottling += _GetThrottlingChange(globalRemainingVolumeBw, globalThrottlingIncreaseCoefficient * bwUnit, bwUnit);
@@ -676,6 +680,10 @@ QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
     uint64_t userSetIops = iopsThrottling[volId];
     int64_t bwUnit = basicBwUnit;
     int64_t iopsUnit = basicIopsUnit;
+    const uint32_t ARRAY_SHIFT = 8;
+    uint32_t arrVolId = (arrayId << ARRAY_SHIFT) + volId;
+    airlog("Feqos_Dynamic_BW_Throttling", "internal", arrVolId, dynamicBwThrottling[volId] * PARAMETER_COLLECTION_INTERVAL);
+    airlog("Feqos_Dynamic_Iops_Throttling", "internal", arrVolId, dynamicIopsThrottling[volId] * PARAMETER_COLLECTION_INTERVAL);
     bwUnit = std::max(bwUnit, static_cast<int64_t>(dynamicBwThrottling[volId] * volumeThrottlingChangingRate));
     iopsUnit = std::max(iopsUnit, static_cast<int64_t>(dynamicIopsThrottling[volId] * volumeThrottlingChangingRate));
     dynamicBwThrottling[volId] += _GetThrottlingChange(remainingDynamicVolumeBw[volId] - minThrottlingBiasedRate * dynamicBwThrottling[volId], minGuaranteedIncreaseCoefficient * bwUnit, bwUnit);
@@ -930,6 +938,7 @@ QosVolumeManager::_PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint
     {
         return false;
     }
+    airlog("Feqos_Volume_Q_Count", "internal", volId, -1);
     pendingIO[volId]--;
     SubmitVolumeIoToAio(aioSubmission, volId, queuedVolumeIo);
     return true;
