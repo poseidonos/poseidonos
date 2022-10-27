@@ -2095,13 +2095,7 @@ Root:
     Message: Failed to mount array.
     Cause: Input target address is invalid.
     Solution: Please check the format of the target address.
-  -
-    Id: 2603
-    Name: AUTO_CREATE_ARRAY_DEBUG
-    Severity:
-    Message:
-    Cause:
-    Solution:
+
   -
   # Rebuild: 2800 - 2899
     Id: 2800
