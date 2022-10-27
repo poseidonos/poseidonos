@@ -7832,13 +7832,6 @@ Root:
     Message:
     Cause:
     Solution:
-  -
-    Id: 9528
-    Name: TELEMETRY_SET_PROPERTY_FAILURE_INVALID_FILE
-    Severity:
-    Message: Failed to set telemetry property.
-    Cause: Could not open the file.
-    Solution: Check if the file path is correct, or you have the permission.
 
 
   # DEBUG: 10000 - 10199
