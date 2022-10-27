@@ -48,7 +48,6 @@ public:
     virtual void IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual void IncreaseOccupiedStripeCount(SegmentId segId);
-    virtual void ResetOccupiedStripeCount(SegmentId segId);
 
     virtual tbb::concurrent_unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
     virtual tbb::concurrent_unordered_map<SegmentId, uint32_t> GetChangedOccupiedStripeCount(void);
