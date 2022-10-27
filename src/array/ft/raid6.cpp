@@ -227,37 +227,23 @@ Raid6::_MakeEncodingGFTable()
 void
 Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
 {
-    uint64_t* src_ptr = nullptr;
-    uint64_t* dst_ptr = nullptr;
+    assert(dataCnt == src.size());
+    assert(parityCnt == dst.size());
 
     unsigned char* sources[chunkCnt];
 
-    for (uint32_t i = 0; i < chunkCnt; i++)
-    {
-        sources[i] = new unsigned char[chunkSize];
-    }
-
-    int32_t src_iter = 0;
+    uint32_t i = 0;
     for (const BufferEntry& src_buffer : src)
     {
-        src_ptr = (uint64_t*)src_buffer.GetBufferPtr();
-        memcpy(sources[src_iter++], src_ptr, chunkSize);
+        sources[i++] = (unsigned char*)src_buffer.GetBufferPtr();
+    }
+    for (const BufferEntry& dst_buffer : dst)
+    {
+        sources[i++] = (unsigned char*)dst_buffer.GetBufferPtr();
     }
 
     // Reed-Solomon encoding using Intel ISA-L API
     ec_encode_data(chunkSize, dataCnt, parityCnt, galoisTable, sources, &sources[dataCnt]);
-
-    int32_t dst_iter = 0;
-    for (const BufferEntry& dst_buffer : dst)
-    {
-        dst_ptr = (uint64_t*)dst_buffer.GetBufferPtr();
-        memcpy(dst_ptr, sources[dataCnt + dst_iter++], chunkSize);
-    }
-
-    for (uint32_t i = 0; i < chunkCnt; i++)
-    {
-        delete sources[i];
-    }
 }
 
 uint32_t
@@ -350,33 +336,50 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
 void
 Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> targets, vector<uint32_t> abnormals)
 {
-    vector<uint32_t> merged;
-    merge(targets.begin(), targets.end(),
-        abnormals.begin(), abnormals.end(), std::back_inserter(merged));
-
-    // Make device index vector for rebuild
-    vector<uint32_t> excluded = Enumerable::Distinct(merged,
-        [](auto p) { return p; });
-    assert(excluded.size() != 0);
+    vector<uint32_t> excluded;
+    {
+        vector<uint32_t> merged;
+        merge(targets.begin(), targets.end(),
+            abnormals.begin(), abnormals.end(), std::back_inserter(merged));
+        // Make device index vector for rebuild
+        excluded = Enumerable::Distinct(merged,
+            [](auto p) { return p; });
+        assert(excluded.size() != 0);
+    }
 
     uint32_t destCnt = excluded.size();
     assert(destCnt <= parityCnt);
-
-    dstSize = dstSize / targets.size();
-    uint32_t rebuildCnt = chunkCnt - destCnt;
+    uint32_t targetCnt = targets.size();
+    dstSize = dstSize / targetCnt;
 
     unsigned char* rebuildInput[dataCnt];
-    unsigned char* rebuildOutp[destCnt];
-
     unsigned char* src_ptr = (unsigned char*)src;
     for (uint32_t i = 0; i < dataCnt; i++)
     {
         rebuildInput[i] = src_ptr + (i * dstSize);
     }
 
-    for (uint32_t i = 0; i < destCnt; i++)
+    unsigned char* rebuildOutp[destCnt];
+    vector<unsigned char*> tmpAlloc;
+
+    for (uint32_t i = 0 ; i < excluded.size(); i++)
     {
-        rebuildOutp[i] = new unsigned char[dstSize];
+        bool memAssigned = false;
+        for (uint32_t j = 0 ; j < targets.size(); j++)
+        {
+            if (excluded.at(i) == targets.at(j))
+            {
+                rebuildOutp[i] = (unsigned char*)dst + j * dstSize;
+                memAssigned = true;
+                break;
+            }
+        }
+        if (memAssigned == false)
+        {
+            unsigned char* tmp = new unsigned char[dstSize];
+            rebuildOutp[i] = tmp;
+            tmpAlloc.push_back(tmp);
+        }
     }
 
     // Make key for Galois field table caching during rebuild
@@ -396,6 +399,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         {
             // Make Galois field table with given device indices and insert to Map
             rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
+            uint32_t rebuildCnt = chunkCnt - destCnt;
             _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
             POS_TRACE_WARN(EID(RAID_DEBUG_MSG), "a new galois table is inserted, key:{}", key);
             galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
@@ -408,21 +412,9 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     }
 
     ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
-    for (uint32_t i = 0 ; i < targets.size(); i++)
+    for (auto mem : tmpAlloc)
     {
-        uint32_t targetVal = targets.at(i);
-        for (uint32_t j = 0 ; j < excluded.size(); j++)
-        {
-            if (targetVal == excluded.at(j))
-            {
-                memcpy((unsigned char*)dst + i * dstSize, rebuildOutp[j], dstSize);
-            }
-        }
-    }
-
-    for (uint32_t i = 0; i < destCnt; i++)
-    {
-        delete rebuildOutp[i];
+        delete mem;
     }
 }
 

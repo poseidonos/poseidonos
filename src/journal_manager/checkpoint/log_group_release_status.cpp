@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,46 +30,74 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <cstdint>
-#include <map>
-#include <vector>
-
-#include "src/journal_manager/log/log_group_footer.h"
-#include "src/journal_manager/log/log_handler.h"
-#include "src/journal_manager/log/log_list.h"
+#include "src/journal_manager/checkpoint/log_group_release_status.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+#include <cassert>
 
 namespace pos
 {
-class LogBufferParser
+LogGroupReleaseStatus::LogGroupReleaseStatus(int groupId)
+: id(groupId),
+  sequenceNumber(0),
+  status(ReleaseStatus::INIT)
 {
-public:
-    LogBufferParser(void);
-    virtual ~LogBufferParser(void);
-    virtual int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
+}
 
-private:
-    class ValidMarkFinder
-    {
-    public:
-        ValidMarkFinder(char* bufferPtr, uint64_t maxOffset);
-        bool GetNextValidMarkOffset(uint64_t startOffset, uint64_t& foundOffset);
+void
+LogGroupReleaseStatus::SetWaiting(uint32_t seqNum)
+{
+    assert(status == ReleaseStatus::INIT);
 
-    private:
-        char* buffer;
-        uint64_t maxOffset;
-    };
+    sequenceNumber = seqNum;
+    status = ReleaseStatus::WAITING;
 
-    void _LogFound(LogHandlerInterface* log);
-    void _LogResetFound(uint32_t seqNumber);
-    uint32_t _GetLatestSequenceNumber(void);
-    void _PrintFoundLogTypes(void);
-    void _GetNextSearchOffset(uint64_t& searchOffset, uint64_t foundOffset);
+    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
+        "ReleaseStatus, id: {}, status: {}", id, status);
+}
 
-    LogHandlerInterface* _GetLogHandler(char* ptr);
+void
+LogGroupReleaseStatus::SetReleasing(void)
+{
+    assert(status == ReleaseStatus::WAITING);
+    status = ReleaseStatus::RELEASING;
 
-    std::map<uint32_t, std::vector<int>> logsFound;
-};
+    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
+        "ReleaseStatus, id: {}, status: {}", id, status);
+}
+
+void
+LogGroupReleaseStatus::Reset(void)
+{
+    sequenceNumber = 0;
+    status = ReleaseStatus::INIT;
+
+    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
+        "ReleaseStatus, id: {}, status: {}", id, status);
+}
+
+uint32_t
+LogGroupReleaseStatus::GetSeqNum(void)
+{
+    return sequenceNumber;
+}
+
+int
+LogGroupReleaseStatus::GetId(void)
+{
+    return id;
+}
+
+bool
+LogGroupReleaseStatus::IsFull(void)
+{
+    return (status != ReleaseStatus::INIT);
+}
+
+bool
+LogGroupReleaseStatus::IsReleasing(void)
+{
+    return (status == ReleaseStatus::RELEASING);
+}
 
 } // namespace pos
