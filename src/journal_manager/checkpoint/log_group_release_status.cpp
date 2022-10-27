@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,8 +31,7 @@
  */
 
 #include "src/journal_manager/checkpoint/log_group_release_status.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+
 #include <cassert>
 
 namespace pos
@@ -51,9 +50,6 @@ LogGroupReleaseStatus::SetWaiting(uint32_t seqNum)
 
     sequenceNumber = seqNum;
     status = ReleaseStatus::WAITING;
-
-    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "ReleaseStatus, id: {}, status: {}", id, status);
 }
 
 void
@@ -61,9 +57,6 @@ LogGroupReleaseStatus::SetReleasing(void)
 {
     assert(status == ReleaseStatus::WAITING);
     status = ReleaseStatus::RELEASING;
-
-    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "ReleaseStatus, id: {}, status: {}", id, status);
 }
 
 void
@@ -71,9 +64,6 @@ LogGroupReleaseStatus::Reset(void)
 {
     sequenceNumber = 0;
     status = ReleaseStatus::INIT;
-
-    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "ReleaseStatus, id: {}, status: {}", id, status);
 }
 
 uint32_t

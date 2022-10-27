@@ -2866,13 +2866,6 @@ Root:
     Message:
     Cause:
     Solution:
-  -
-    Id: 3038
-    Name: JOURNAL_LOG_GROUP_STATUS_CHANGED
-    Severity:
-    Message:
-    Cause:
-    Solution:
 
   -
     Id: 3040

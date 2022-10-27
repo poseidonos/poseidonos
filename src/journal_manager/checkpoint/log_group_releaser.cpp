@@ -93,7 +93,7 @@ LogGroupReleaser::Reset(void)
 }
 
 void
-LogGroupReleaser::MarkLogGroupFull(int logGroupId, uint32_t sequenceNumber)
+LogGroupReleaser::LogGroupFull(int logGroupId, uint32_t sequenceNumber)
 {
     assert((uint32_t)logGroupId < logGroups.size());
     logGroups[logGroupId].SetWaiting(sequenceNumber);
