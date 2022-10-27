@@ -112,10 +112,4 @@ SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
     pthread_rwlock_unlock(&lock);
     return ret;
 }
-
-void
-SegmentContextUpdater::ResetInfos(SegmentId segId)
-{
-    versionedContext->ResetInfosAfterSegmentFreed(segId);
-}
 } // namespace pos

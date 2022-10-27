@@ -52,7 +52,6 @@ public:
     MOCK_METHOD((tbb::concurrent_unordered_map<SegmentId, int>), GetChangedValidBlockCount, (), (override));
     MOCK_METHOD((tbb::concurrent_unordered_map<SegmentId, uint32_t>), GetChangedOccupiedStripeCount, (), (override));
     MOCK_METHOD(void, ResetOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD(void, ResetValidBlockCount, (SegmentId segId), (override));
 };
 
 } // namespace pos
