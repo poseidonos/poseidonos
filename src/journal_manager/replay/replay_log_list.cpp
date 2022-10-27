@@ -32,6 +32,7 @@
 
 #include "src/journal_manager/replay/replay_log_list.h"
 
+#include "src/journal_manager/log/log_event.h"
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/logger/logger.h"
@@ -99,14 +100,24 @@ ReplayLogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
 void
 ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
 {
-    ReplayLogGroup replayLogGroup = logGroups[seqNum];
-    int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
-    POS_TRACE_INFO(event, "Erasing Replay Log Group for SeqNum {} with {} entries", seqNum, replayLogGroup.logs.size());
-    for (ReplayLog replayLog : replayLogGroup.logs)
+    for (auto it = logGroups.cbegin(); it != logGroups.cend();)
     {
-        delete replayLog.log;
+        // TODO (cheolho.kang): It should be refactored later to erase replay logs with invalid sequence numbers using LogBufferParser.logs 
+        if (it->first <= seqNum || it->first == LOG_VALID_MARK)
+        {
+            int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
+            POS_TRACE_INFO(event, "Erasing Replay Log Group for SeqNum {} with {} entries", it->first, it->second.logs.size());
+            for (ReplayLog replayLog : it->second.logs)
+            {
+                delete replayLog.log;
+            }
+            logGroups.erase(it++);
+        }
+        else
+        {
+            it++;
+        }
     }
-    logGroups.erase(seqNum);
 }
 
 ReplayLogGroup
