@@ -115,7 +115,6 @@ public:
     virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
     virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
     virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
-    virtual void ResetInfos(SegmentId segId);
 
     virtual SegmentInfo* GetSegmentInfos(void);
     virtual void ResetInfos(SegmentId segId);
