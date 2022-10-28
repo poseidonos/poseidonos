@@ -109,7 +109,7 @@ GcFlushSubmission::Execute(void)
             return false;
         }
 
-        Stripe* allocatedStripe = _AllocateStripe(volumeId);
+        allocatedStripe = _AllocateStripe(volumeId);
         if (allocatedStripe == nullptr)
         {
             if (0 < token)
@@ -121,7 +121,7 @@ GcFlushSubmission::Execute(void)
     }
     else
     {
-        Stripe* allocatedStripe = _AllocateStripe(volumeId);
+        allocatedStripe = _AllocateStripe(volumeId);
         if (allocatedStripe == nullptr)
         {
             return false;
