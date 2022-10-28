@@ -313,9 +313,10 @@ Copier::_CleanUpVictimSegments(void)
             // Push to free list among the victim lists
             POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
                 "Move to free list among the victim lists, VictimSegid:{}, validCount:{}", victimSegId, validCount);
-            segmentCtx->MoveToFreeState(victimSegId);
+
             SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
             segmentCtxUpdater->ResetInfos(victimSegId);
+            segmentCtx->MoveToFreeState(victimSegId);
         }
     }
 }
