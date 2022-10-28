@@ -84,12 +84,12 @@ func printResInJSON(resJSON string) {
 func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 	switch command {
 	case "LISTARRAY":
-		res := messages.ListArrayResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		res := &pb.ListArrayResponse{}
+		json.Unmarshal([]byte(resJSON), res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
 
@@ -120,19 +120,17 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 				globals.FieldSeparator+"----------")
 
 		// Data
-		for _, array := range res.RESULT.DATA.ARRAYLIST {
-			total, _ := strconv.ParseUint(array.CAPACITY, 10, 64)
-			used, _ := strconv.ParseUint(array.USED, 10, 64)
+		for _, array := range res.GetResult().GetData().GetArrayList() {
 			fmt.Fprint(w,
-				strconv.Itoa(array.ARRAYINDEX)+"\t"+
-					globals.FieldSeparator+array.ARRAYNAME+"\t"+
-					globals.FieldSeparator+array.STATUS+"\t"+
-					globals.FieldSeparator+array.CREATEDATETIME+"\t"+
-					globals.FieldSeparator+array.UPDATEDATETIME+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, total)+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, used)+"\t"+
-					globals.FieldSeparator+strconv.FormatBool(array.WRITETHROUGH)+"\t"+
-					globals.FieldSeparator+array.DATARAID)
+				strconv.Itoa(int(array.GetIndex()))+"\t"+
+					globals.FieldSeparator+array.GetName()+"\t"+
+					globals.FieldSeparator+array.GetStatus()+"\t"+
+					globals.FieldSeparator+array.GetCreateDatetime()+"\t"+
+					globals.FieldSeparator+array.GetUpdateDatetime()+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, array.GetCapacity())+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, array.GetUsed())+"\t"+
+					globals.FieldSeparator+strconv.FormatBool(array.GetWriteThroughEnabled())+"\t"+
+					globals.FieldSeparator+array.GetDataRaid())
 
 			fmt.Fprintln(w, "")
 		}
