@@ -108,18 +108,6 @@ ContextManager::~ContextManager(void)
 }
 
 void
-ContextManager::SetSegmentContextUpdaterPtr(ISegmentCtx *p)
-{
-    segmentContextUpdater = p;
-}
-
-ISegmentCtx*
-ContextManager::GetSegmentContextUpdaterPtr(void)
-{
-    return segmentContextUpdater;
-}
-
-void
 ContextManager::Init(void)
 {
     allocatorCtx->Init();
