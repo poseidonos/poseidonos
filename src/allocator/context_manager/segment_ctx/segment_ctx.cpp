@@ -870,12 +870,6 @@ SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
     return UpdateOccupiedStripeCount(lsid);
 }
 
-void
-SegmentCtx::ResetInfos(SegmentId segId)
-{
-    return;
-}
-
 SegmentInfo*
 SegmentCtx::GetSegmentInfos(void)
 {
