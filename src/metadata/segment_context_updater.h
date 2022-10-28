@@ -53,7 +53,7 @@ public:
     virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
     virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
     virtual void ResetInfos(SegmentId segId);
-    
+
 private:
     const PartitionLogicalSize* addrInfo;
     ISegmentCtx* activeSegmentCtx;

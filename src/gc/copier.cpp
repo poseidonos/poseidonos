@@ -317,6 +317,8 @@ Copier::_CleanUpVictimSegments(void)
             SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
             segmentCtxUpdater->ResetInfos(victimSegId);
             segmentCtx->MoveToFreeState(victimSegId);
+            SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
+            segmentCtxUpdater->ResetInfos(victimSegId);
         }
     }
 }
