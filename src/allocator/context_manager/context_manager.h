@@ -107,9 +107,6 @@ public:
     virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_);
     virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void);
 
-    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* p);
-    ISegmentCtx* GetSegmentContextUpdaterPtr(void);
-
 private:
     ContextIoManager* ioManager;
     AllocatorAddressInfo* addrInfo;
