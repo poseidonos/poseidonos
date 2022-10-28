@@ -497,7 +497,19 @@ StripePartition::GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair)
         ctx.reset();
         return nullptr;
     }
-    
+
+    bool isInPlaceUpdate = type != PartitionType::USER_DATA;
+    if (isInPlaceUpdate == true)
+    {
+        // In the in-place update, the latest data of the src device is not guaranteed.
+        // Delegate to RAID-based recovery
+        assert(ctx->secondaryRp.size() != 0);
+        ctx->rp = ctx->secondaryRp;
+        ctx->secondaryRp.clear();
+        POS_TRACE_INFO(EID(REBUILD_CTX_DEBUG), "Quick rebuild pair was replaced in in-place write partition, part:{}, rpCnt:{}, backupRpCnt:{}",
+            PARTITION_TYPE_STR[type], ctx->rp.size(), ctx->secondaryRp.size());
+    }
+
     ctx->part = type;
     ctx->stripeCnt = logicalSize.totalStripes;
     ctx->size = GetPhysicalSize();

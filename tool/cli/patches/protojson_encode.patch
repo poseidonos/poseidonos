@@ -1,0 +1,15 @@
+--- /root/go/pkg/mod/google.golang.org/protobuf@v1.28.0/encoding/protojson/encode.go	2022-10-26 13:58:41.394891124 +0900
++++ ../encode_diff.go	2022-10-26 14:02:53.590887211 +0900
+@@ -269,10 +269,10 @@
+ 	case pref.Int32Kind, pref.Sint32Kind, pref.Sfixed32Kind:
+ 		e.WriteInt(val.Int())
+ 
+-	case pref.Uint32Kind, pref.Fixed32Kind:
++	case pref.Uint32Kind, pref.Fixed32Kind, pref.Uint64Kind:
+ 		e.WriteUint(val.Uint())
+ 
+-	case pref.Int64Kind, pref.Sint64Kind, pref.Uint64Kind,
++	case pref.Int64Kind, pref.Sint64Kind, 
+ 		pref.Sfixed64Kind, pref.Fixed64Kind:
+ 		// 64-bit integers are written out as JSON string.
+ 		e.WriteString(val.String())

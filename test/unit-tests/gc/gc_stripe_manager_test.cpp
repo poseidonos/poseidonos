@@ -169,7 +169,7 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testIf)
     EXPECT_TRUE(isFull == true);
 
     // when set flushed
-    gcStripeManager->SetFlushed(volId);
+    gcStripeManager->SetFlushed(volId, false);
     // then isallfinished return false
     EXPECT_TRUE(gcStripeManager->IsAllFinished() == false);
 

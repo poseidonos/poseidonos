@@ -112,6 +112,7 @@ Copier::Execute(void)
     }
     else
     {
+        meta->GetGcStripeManager()->CheckTimeout();
         switch (copybackState)
         {
             case CopierStateType::COPIER_THRESHOLD_CHECK_STATE:
@@ -312,6 +313,9 @@ Copier::_CleanUpVictimSegments(void)
             // Push to free list among the victim lists
             POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
                 "Move to free list among the victim lists, VictimSegid:{}, validCount:{}", victimSegId, validCount);
+
+            SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
+            segmentCtxUpdater->ResetInfos(victimSegId);
             segmentCtx->MoveToFreeState(victimSegId);
             SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
             segmentCtxUpdater->ResetInfos(victimSegId);

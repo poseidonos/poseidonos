@@ -34,6 +34,8 @@
 
 #include <gtest/gtest.h>
 
+#include <boost/format.hpp>
+
 namespace pos
 {
 int TestHandler(void* data)
@@ -91,5 +93,47 @@ TEST(AsyncMetaFileIoCtx, GetLength_testIfTheMethodCanReturnTheLength)
     ctx.length = length;
 
     EXPECT_EQ(ctx.GetLength(), length);
+}
+
+void TestFunction(pos::AsyncMetaFileIoCtx* ctx)
+{
+}
+
+TEST(AsyncMetaFileIoCtx, ToString_testIfTheMethodReturnsInternalFieldAsStringCorrectly)
+{
+    const MetaFsIoOpcode expectedOpcode = MetaFsIoOpcode::Read;
+    const int expectedFd = 1;
+    const uint64_t expectedFileOffset = 11;
+    const uint64_t expectedLength = 10;
+    char expectedBuffer = 'A';
+    const MetaIoCbPtr expectedMetaIoCb = TestFunction;
+    const int expectedError = 3;
+    const MetaFileIoCbPtr expectedFileIoCb = nullptr;
+    const uint32_t expectedVsid = 2;
+
+    AsyncMetaFileIoCtx ctx;
+    ctx.opcode = MetaFsIoOpcode::Read;
+    ctx.fd = expectedFd;
+    ctx.fileOffset = expectedFileOffset;
+    ctx.length = expectedLength;
+    ctx.buffer = &expectedBuffer;
+    ctx.callback = expectedMetaIoCb;
+    ctx.error = expectedError;
+    ctx.ioDoneCheckCallback = expectedFileIoCb;
+    ctx.vsid = expectedVsid;
+
+    // opcode:1, fd:1, fileOffset:11, length:10, buffer:0x7ffe9b99fe8f, callback:not nullptr, error:3, ioDoneCheckCallback:nullptr, vsid:2
+    std::string expectedStr;
+    expectedStr = expectedStr.append("opcode:").append(std::to_string((int)expectedOpcode)).append(", ");
+    expectedStr = expectedStr.append("fd:").append(std::to_string(expectedFd)).append(", ");
+    expectedStr = expectedStr.append("fileOffset:").append(std::to_string((int)expectedFileOffset)).append(", ");
+    expectedStr = expectedStr.append("length:").append(std::to_string((int)expectedLength)).append(", ");
+    expectedStr = expectedStr.append("buffer:").append(((&expectedBuffer == nullptr) ? "nullptr" : "0x" + (boost::format("%x") % ((uint64_t)(uint64_t*)&expectedBuffer)).str())).append(", ");
+    expectedStr = expectedStr.append("callback:").append((expectedMetaIoCb == nullptr) ? "nullptr" : "not nullptr").append(", ");
+    expectedStr = expectedStr.append("error:").append(std::to_string((int)expectedError)).append(", ");
+    expectedStr = expectedStr.append("ioDoneCheckCallback:").append((expectedFileIoCb == nullptr) ? "nullptr" : "not nullptr").append(", ");
+    expectedStr = expectedStr.append("vsid:").append(std::to_string((int)expectedVsid));
+
+    EXPECT_FALSE(ctx.ToString().compare(expectedStr));
 }
 } // namespace pos

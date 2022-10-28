@@ -204,10 +204,11 @@ AllocatorFileIo::_Load(char* buf)
         else
         {
             numFilesReading--;
-            delete request;
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
                 "[AllocatorFileIo] Failed to issue load:{}, fname:{}, size:{}",
                 ret, client->GetFilename(), fileSize);
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), request->ToString());
+            delete request;
             return -1;
         }
     }
@@ -259,6 +260,7 @@ AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId
         numFilesFlushing--;
         POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO),
             "[AllocatorFileIo] Failed to issue store:{}, fname:{}", ret, client->GetFilename());
+        POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), request->ToString());
 
         delete request;
         delete[] buf;

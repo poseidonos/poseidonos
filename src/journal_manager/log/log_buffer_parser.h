@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <vector>
 
 #include "src/journal_manager/log/log_group_footer.h"
@@ -60,12 +61,15 @@ private:
         uint64_t maxOffset;
     };
 
-    void _LogFound(LogType type);
+    void _LogFound(LogHandlerInterface* log);
+    void _LogResetFound(uint32_t seqNumber);
+    uint32_t _GetLatestSequenceNumber(void);
     void _PrintFoundLogTypes(void);
+    void _GetNextSearchOffset(uint64_t& searchOffset, uint64_t foundOffset);
 
     LogHandlerInterface* _GetLogHandler(char* ptr);
 
-    std::vector<int> logsFound;
+    std::map<uint32_t, std::vector<int>> logsFound;
 };
 
 } // namespace pos

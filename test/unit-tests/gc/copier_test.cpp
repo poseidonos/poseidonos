@@ -115,6 +115,7 @@ public:
 
         EXPECT_CALL(*iContextManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
         EXPECT_CALL(*iContextManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
+        EXPECT_CALL(*meta, GetGcStripeManager).WillRepeatedly(Return(gcStripeManager));
     }
 
     virtual void

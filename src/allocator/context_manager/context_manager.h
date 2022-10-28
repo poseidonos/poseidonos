@@ -104,6 +104,8 @@ public:
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
     virtual void ResetFlushedInfo(int logGroupId);
     virtual void SetAllocateDuplicatedFlush(bool flag);
+    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_);
+    virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void);
 
     virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* p);
     ISegmentCtx* GetSegmentContextUpdaterPtr(void);

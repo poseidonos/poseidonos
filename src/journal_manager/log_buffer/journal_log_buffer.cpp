@@ -226,6 +226,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     {
         POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_READ_FAILED),
             "Failed to read log buffer");
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED), logBufferReadReq->ToString());
         delete logBufferReadReq;
         return -1 * (EID(JOURNAL_LOG_BUFFER_READ_FAILED));
     }
@@ -256,6 +257,7 @@ JournalLogBuffer::WriteLog(LogWriteContext* context)
     {
         POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED),
             "Failed to write journal log");
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED), context->ToString());
         ret = -1 * EID(JOURNAL_LOG_WRITE_FAILED);
     }
 
@@ -321,6 +323,7 @@ JournalLogBuffer::InternalIo(LogBufferIoContext* context)
     {
         POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED),
             "Failed to reset log buffer");
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED), context->ToString());
     }
     return ret;
 }

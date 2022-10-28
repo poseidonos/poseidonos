@@ -41,5 +41,17 @@ TimeoutChecker::TimeoutChecker(void)
 TimeoutChecker::~TimeoutChecker(void)
 {
 }
+
+void
+TimeoutChecker::Reset(void)
+{
+    isActive = false;
+}
+
+bool
+TimeoutChecker::IsActive(void)
+{
+    return isActive;
+}
 // LCOV_EXCL_STOP
 } // namespace pos

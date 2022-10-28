@@ -43,13 +43,16 @@
 #include "src/journal_manager/replay/replay_logs.h"
 #include "src/journal_manager/replay/replay_volume_deletion.h"
 #include "src/journal_manager/replay/reset_log_buffer.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 ReplayHandler::ReplayHandler(IStateControl* iState)
 : replayState(iState),
   config(nullptr),
-  logBuffer(nullptr)
+  logBuffer(nullptr),
+  telemetryPublisher(nullptr),
+  timeCount(std::chrono::system_clock::now())
 {
     reporter = new ReplayProgressReporter();
     logDeleteChecker = new LogDeleteChecker();
@@ -60,10 +63,11 @@ ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     IJournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
-    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager)
+    IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager, TelemetryPublisher* tp)
 {
     config = journalConfiguration;
     logBuffer = journalLogBuffer;
+    telemetryPublisher = tp;
 
     _InitializeTaskList(vsaMap, stripeMap, mapFlush, segmentCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
@@ -138,11 +142,22 @@ ReplayHandler::_ExecuteReplayTasks(void)
     for (auto task : taskList)
     {
         reporter->TaskStarted(task->GetId(), task->GetNumSubTasks());
+        _StartStopWatch();
         result = task->Start();
+        std::chrono::milliseconds durationTime = _StopAndGetElapsedInMilli();
+        if (telemetryPublisher)
+        {
+            POSMetric metric(TEL36008_JRN_REPLAY_WORKING_TIME, POSMetricTypes::MT_COUNT);
+            metric.SetCountValue(durationTime.count());
+            metric.AddLabel("task_id", std::to_string((int)task->GetId()));
+            telemetryPublisher->PublishMetric(metric);
+        }
+
         reporter->TaskCompleted(task->GetId());
 
         if (result != 0)
         {
+            // TODO (cheolho.kang): For debuggability, Add the process of dumping the journal log buffer before dispose.
             if (result > 0)
             {
                 reporter->CompleteAll();
@@ -157,4 +172,19 @@ ReplayHandler::_ExecuteReplayTasks(void)
     return result;
 }
 
+void
+ReplayHandler::_StartStopWatch(void)
+{
+    timeCount = std::chrono::system_clock::now();
+}
+
+std::chrono::milliseconds
+ReplayHandler::_StopAndGetElapsedInMilli(void)
+{
+    std::chrono::milliseconds durationTime;
+    std::chrono::system_clock::time_point endTime = std::chrono::system_clock::now();
+    durationTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - timeCount);
+
+    return durationTime;
+}
 } // namespace pos

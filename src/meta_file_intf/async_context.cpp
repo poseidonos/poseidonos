@@ -32,6 +32,9 @@
 
 #include "async_context.h"
 
+#include <boost/format.hpp>
+#include <sstream>
+
 namespace pos
 {
 AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
@@ -66,5 +69,22 @@ uint64_t
 AsyncMetaFileIoCtx::GetLength(void) const
 {
     return length;
+}
+
+std::string
+AsyncMetaFileIoCtx::ToString(void) const
+{
+    std::ostringstream oss;
+    oss << "opcode:" << (int)opcode << ", ";
+    oss << "fd:" << fd << ", ";
+    oss << "fileOffset:" << (int)fileOffset << ", ";
+    oss << "length:" << (int)length << ", ";
+    oss << "buffer:" << ((buffer == nullptr) ? "nullptr" : "0x" + (boost::format("%x") % (uint64_t)(uint64_t*)buffer).str()) << ", ";
+    oss << "callback:" << ((callback == nullptr) ? "nullptr" : "not nullptr") << ", ";
+    oss << "error:" << error << ", ";
+    oss << "ioDoneCheckCallback:" << ((ioDoneCheckCallback == nullptr) ? "nullptr" : "not nullptr") << ", ";
+    oss << "vsid:" << vsid;
+
+    return oss.str();
 }
 } // namespace pos

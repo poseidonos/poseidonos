@@ -108,9 +108,12 @@ ArrayDevice::SetState(ArrayDeviceState input)
     {
         devName = uBlock->GetName();
     }
-    state = input;
-    POS_TRACE_INFO(EID(ARRAY_EVENT_DEV_STATE_CHANGED),
-        "Array device [" + devName + "]'s state is changed to {} (0=normal, 1=fault, 2=rebuild)", input);
+    if (state != input)
+    {
+        POS_TRACE_TRACE(EID(ARRAY_EVENT_DEV_STATE_CHANGED),
+            "Array device [" + devName + "]'s state is changed from {} to {} (0=normal, 1=fault, 2=rebuild)", state, input);
+        state = input;
+    }
 }
 
 void

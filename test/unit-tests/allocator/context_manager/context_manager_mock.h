@@ -5,6 +5,7 @@
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
+
 namespace pos
 {
 class MockContextManager : public ContextManager
@@ -39,8 +40,8 @@ public:
     MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
     MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
     MOCK_METHOD(void, SetAllocateDuplicatedFlush, (bool flag), (override));
-    MOCK_METHOD(void, SetSegmentContextUpdaterPtr, (ISegmentCtx* p), (override));
-    MOCK_METHOD(ISegmentCtx* GetSegmentContextUpdaterPtr, (void), (override));
+    MOCK_METHOD(void, SetSegmentContextUpdaterPtr, (ISegmentCtx* segmentContextUpdater_), (override));
+    MOCK_METHOD(ISegmentCtx*, GetSegmentContextUpdaterPtr, (), (override));
 };
 
 } // namespace pos

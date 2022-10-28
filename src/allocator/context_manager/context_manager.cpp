@@ -285,4 +285,16 @@ ContextManager::ResetFlushedInfo(int logGroupId)
 
     logGroupIdInProgress = INVALID_LOG_GROUP_ID;
 }
+
+void
+ContextManager::SetSegmentContextUpdaterPtr(ISegmentCtx *segmentContextUpdater_)
+{
+    segmentContextUpdater = segmentContextUpdater_;
+}
+
+ISegmentCtx*
+ContextManager::GetSegmentContextUpdaterPtr(void)
+{
+    return segmentContextUpdater;
+}
 } // namespace pos

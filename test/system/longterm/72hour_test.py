@@ -28,6 +28,9 @@ TESTTIME_IN_HOUR = 72
 ELAPSED_MIN = 0
 ELAPSED_HOUR = 0
 RC = True
+# CLI timeout in seconds for array mount command
+# In Write Through mode, larger timeout value for mount is needed than cli default timeout because of large number of IO
+CLI_MOUNT_TIMEOUT = 1800
 
 #for PM
 # DATA = "unvme-ns-0,unvme-ns-1,unvme-ns-2,unvme-ns-3,unvme-ns-4"
@@ -247,7 +250,7 @@ def create_array():
         return False
 
 def mount_pos():
-    out = cli.mount_array(ARRAYNAME)
+    out = cli.mount_array(ARRAYNAME + " --timeout " + str(CLI_MOUNT_TIMEOUT))
     code = json_parser.get_response_code(out)
     if code == 0:
         write_log ("array mounted successfully")

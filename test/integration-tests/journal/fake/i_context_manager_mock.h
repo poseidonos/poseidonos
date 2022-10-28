@@ -34,7 +34,7 @@ public:
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx) { return; }
     virtual void ResetFlushedInfo(int logGroupId) { return; }
     virtual void SetAllocateDuplicatedFlush(bool flag) { return; }
-    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* p) { return; }
+    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_) { return; }
     virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void) { return nullptr; }
 
     IContextManagerMock(void)

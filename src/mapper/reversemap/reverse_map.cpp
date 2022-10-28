@@ -143,6 +143,7 @@ ReverseMapPack::Load(uint64_t fileOffset, EventSmartPtr cb, uint32_t vsid)
         {
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), "[ReverseMapPack] Error!, Calling AsyncIO Failed at RevMap LOAD, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
             ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
@@ -180,6 +181,7 @@ ReverseMapPack::Flush(Stripe* stripe, uint64_t fileOffset, EventSmartPtr cb, uin
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
                 "[ReverseMapPack] Error!, Calling AsyncIO Failed at RevMap FLUSH, mpageNum:{}",
                 revMapPageAsyncIoReq->mpageNum);
+            POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
             ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
@@ -276,12 +278,14 @@ ReverseMapPack::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
             {
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] Error!! WRONG SIGNATURE IN REVMAP HEADER, vsid:{}, hdvsid{}, sig:{}", revMapPageAsyncIoReq->vsid, hdr.u.header.vsid, hdr.u.header.magic);
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] FirstEntry Data In ReverseMap, rba:{}, volumeId{}", hdr2.u.body.entry[0].u.entry.rba, hdr2.u.body.entry[0].u.entry.volumeId);
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
                 assert(false);
             }
             else if (hdr.u.header.vsid != revMapPageAsyncIoReq->vsid)
             {
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] WRONG VSID IN REVMAP HEADER, vsid:{}, hdvsid{}, sig:{}", revMapPageAsyncIoReq->vsid, hdr.u.header.vsid, hdr.u.header.magic);
                 POS_TRACE_ERROR(EID(MAPPER_FAILED), "[ReverseMapPack] FirstEntry Data In ReverseMap, rba:{}, volumeId{}", hdr2.u.body.entry[0].u.entry.rba, hdr2.u.body.entry[0].u.entry.volumeId);
+                POS_TRACE_ERROR(EID(MAPPER_FAILED), revMapPageAsyncIoReq->ToString());
                 assert(false);
             }
             else
