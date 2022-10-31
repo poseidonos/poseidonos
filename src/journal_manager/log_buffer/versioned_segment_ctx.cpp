@@ -248,14 +248,12 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
     for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
     {
         segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
-        segmentInfoDiffs[groupId]->ResetValidBlockCount(targetSegmentId);
     }
 
-    segmentInfos[targetSegmentId].SetValidBlockCount(0);
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
-  
-    // trap. check again after reset it. 
+
+    // trap. check again after reset it.
     for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
     {
         shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[groupId];
@@ -268,7 +266,7 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
             {
                 continue;
             }
-          
+
             uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
             if ((validBlockCountDiff != 0) || (0 != getValidCount))
             {
