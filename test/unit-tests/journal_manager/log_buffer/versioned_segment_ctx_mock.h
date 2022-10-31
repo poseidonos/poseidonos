@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(int, GetNumSegments, (), (override));
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
     MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
-    MOCK_METHOD(void, ResetInfosAfterSegmentFreed, (SegmentId targetSegmentId), (override));
+    MOCK_METHOD(void, ResetInfosAfterSegmentFreed, (int logGroupId, SegmentId targetSegmentId), (override));
 };
 
 class MockVersionedSegmentCtx : public VersionedSegmentCtx
@@ -69,7 +69,7 @@ public:
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
     MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo), (override));
-    MOCK_METHOD(void, ResetInfosAfterSegmentFreed, (SegmentId targetSegmentId), (override));
+    MOCK_METHOD(void, ResetInfosAfterSegmentFreed, (int logGroupId, SegmentId targetSegmentId), (override));
 };
 
 } // namespace pos

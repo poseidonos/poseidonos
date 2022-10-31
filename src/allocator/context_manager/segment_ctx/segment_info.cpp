@@ -66,7 +66,7 @@ SegmentInfo::GetValidBlockCount(void)
 void
 SegmentInfo::SetValidBlockCount(int cnt)
 {
-    // for wbt
+    std::lock_guard<std::mutex> lock(seglock);
     validBlockCount = cnt;
 }
 
@@ -118,6 +118,7 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
 void
 SegmentInfo::SetOccupiedStripeCount(uint32_t cnt)
 {
+    std::lock_guard<std::mutex> lock(seglock);
     occupiedStripeCount = cnt;
 }
 

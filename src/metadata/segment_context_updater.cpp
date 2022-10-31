@@ -85,7 +85,7 @@ SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForc
     bool ret = activeSegmentCtx->InvalidateBlks(blks, isForced);
     if (true == ret)
     {
-        versionedContext->ResetInfosAfterSegmentFreed(segmentId);
+        versionedContext->ResetInfosAfterSegmentFreed(logGroupId, segmentId);
     }
     else
     {
@@ -103,7 +103,7 @@ SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
     bool ret = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
     if (true == ret)
     {
-        versionedContext->ResetInfosAfterSegmentFreed(segmentId);
+        versionedContext->ResetInfosAfterSegmentFreed(logGroupId, segmentId);
     }
     else
     {
@@ -116,6 +116,6 @@ SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
 void
 SegmentContextUpdater::ResetInfos(SegmentId segId)
 {
-    versionedContext->ResetInfosAfterSegmentFreed(segId);
+    versionedContext->ResetInfosAfterSegmentFreed(-1, segId);
 }
 } // namespace pos
