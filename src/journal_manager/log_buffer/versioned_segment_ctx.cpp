@@ -245,36 +245,7 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 void
 VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
 {
-    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
-    {
-        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
-    }
-
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
-
-    // trap. check again after reset it.
-    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
-    {
-        shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[groupId];
-        tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
-        for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
-        {
-            auto segmentId = it->first;
-            auto validBlockCountDiff = it->second;
-            if (targetSegmentId != segmentId)
-            {
-                continue;
-            }
-
-            uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
-            if ((validBlockCountDiff != 0) || (0 != getValidCount))
-            {
-                POS_TRACE_ERROR(EID(JOURNAL_INVALID),
-                                "segId {} reset to zero but its actual validCnt {} and diff {}", segmentId, getValidCount, validBlockCountDiff);
-                assert(false);
-            }
-        }
-    }
 }
 } // namespace pos
