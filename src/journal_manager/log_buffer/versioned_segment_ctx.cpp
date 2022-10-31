@@ -155,11 +155,14 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 
         segmentInfos[segmentId].SetValidBlockCount(result);
 
-        if (0 > (int)getValidCount)
+        if ((0 > (int)getValidCount) ||
+             (0 > result) ||
+             (130172 < result))
         {
             POS_TRACE_ERROR(EID(JOURNAL_INVALID),
-                "After update underflow occurred, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
-                logGroupId, segmentId, getValidCount, validBlockCountDiff);
+                "After update underflow occurred, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, result {}",
+                logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
+
             assert(false);
         }
     }
@@ -247,6 +250,8 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
         segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
         segmentInfoDiffs[groupId]->ResetValidBlockCount(targetSegmentId);
     }
+
+    segmentInfos[targetSegmentId].SetValidBlockCount(0);
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
 }
