@@ -29,7 +29,7 @@ TEST(SegmentContextUpdater, ValidateBlks_testIfBothContextIsUpdatedProperly)
     sizeInfo.stripesPerSegment = 128;
 
     SegmentContextUpdater updater(&segmentCtx, &versionedCtx, &sizeInfo);
-    
+
     VirtualBlks blks = {
         .startVsa = { .stripeId = 1000, .offset = 0 },
         .numBlks = 10};
@@ -50,7 +50,7 @@ TEST(SegmentContextUpdater, InvalidateBlks_testIfBothContextIsUpdatedProperly)
     sizeInfo.stripesPerSegment = 128;
 
     SegmentContextUpdater updater(&segmentCtx, &versionedCtx, &sizeInfo);
-    
+
     VirtualBlks blks = {
         .startVsa = { .stripeId = 1000, .offset = 0 },
         .numBlks = 10};
