@@ -173,6 +173,17 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         auto segmentId = it->first;
         auto occupiedStripeCountDiff = it->second;
 
+        uint32_t getOccupiedStripeCount = segmentInfos[segmentId].GetOccupiedStripeCount();
+        uint32_t result = getOccupiedStripeCount + occupiedStripeCountDiff;
+        if (1024 < result)
+        {
+            POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+                "After update overflowed occurred, logGroupId {}, segmentInfos[{}].GetOccupiedStripeCount() = {}, occupiedStripeCountDiff {}, result {}",
+                logGroupId, segmentId, getOccupiedStripeCount, occupiedStripeCountDiff, result);
+
+            assert(false);
+        }
+
         segmentInfos[segmentId].SetOccupiedStripeCount(segmentInfos[segmentId].GetOccupiedStripeCount() + occupiedStripeCountDiff);
     }
 }

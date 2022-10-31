@@ -83,13 +83,10 @@ SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForc
     pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
     bool ret = activeSegmentCtx->InvalidateBlks(blks, isForced);
+    versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
     if (true == ret)
     {
         versionedContext->ResetInfosAfterSegmentFreed(segmentId);
-    }
-    else
-    {
-        versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
     }
     pthread_rwlock_unlock(&lock);
     return ret;
@@ -101,13 +98,10 @@ SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
     pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
     bool ret = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
+    versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
     if (true == ret)
     {
         versionedContext->ResetInfosAfterSegmentFreed(segmentId);
-    }
-    else
-    {
-        versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
     }
     pthread_rwlock_unlock(&lock);
     return ret;
