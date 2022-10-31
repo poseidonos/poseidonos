@@ -243,15 +243,10 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 }
 
 void
-VersionedSegmentCtx::ResetInfosAfterSegmentFreed(int logGroupId, SegmentId targetSegmentId)
+VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
 {
     for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
     {
-        if ((-1 != logGroupId) && (groupId != logGroupId))
-        {
-            continue;
-        }
-
         segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
         segmentInfoDiffs[groupId]->ResetValidBlockCount(targetSegmentId);
     }

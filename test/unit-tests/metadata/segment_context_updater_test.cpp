@@ -96,7 +96,7 @@ TEST(SegmentContextUpdater, ResetVscSegInfos_testIfSegmentFreedWhileInvalidating
     int targetLogGroupId = 0;
     int targetSegmentId = 0;
     EXPECT_CALL(segmentCtx, InvalidateBlks(blks, true)).WillRepeatedly(Return(true));
-    EXPECT_CALL(versionedCtx, ResetInfosAfterSegmentFreed(targetLogGroupId, targetSegmentId)).Times(1);
+    EXPECT_CALL(versionedCtx, ResetInfosAfterSegmentFreed(targetSegmentId)).Times(1);
 
     updater.InvalidateBlocksWithGroupId(blks, true, targetLogGroupId);
 }
@@ -118,7 +118,7 @@ TEST(SegmentContextUpdater, ResetVscSegInfos_testIfSegmentFreedWhileUpdatingStri
     StripeId lsid = 1;
     int targetLogGroupId = 0;
     EXPECT_CALL(segmentCtx, UpdateOccupiedStripeCount(lsid)).WillRepeatedly(Return(true));
-    EXPECT_CALL(versionedCtx, ResetInfosAfterSegmentFreed(targetLogGroupId, targetSegmentId)).Times(1);
+    EXPECT_CALL(versionedCtx, ResetInfosAfterSegmentFreed(targetSegmentId)).Times(1);
 
     updater.UpdateStripeCount(lsid, targetLogGroupId);
 }

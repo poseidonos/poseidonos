@@ -338,12 +338,12 @@ TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
     EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0);
 
     // Test
-    versionedSegCtx.ResetInfosAfterSegmentFreed(targetLogGroup, 0);
+    versionedSegCtx.ResetInfosAfterSegmentFreed(0);
     result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
     EXPECT_EQ(result[0].GetOccupiedStripeCount(), 0);
     EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12);
 
-    versionedSegCtx.ResetInfosAfterSegmentFreed(targetLogGroup, 1);
+    versionedSegCtx.ResetInfosAfterSegmentFreed(1);
     result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
     EXPECT_EQ(result[0].GetOccupiedStripeCount(), 0);
     EXPECT_EQ(result[1].GetOccupiedStripeCount(), 0);

@@ -62,7 +62,7 @@ public:
     virtual int GetNumLogGroups(void) override { return 0; };
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
-    virtual void ResetInfosAfterSegmentFreed(int logGroupId, SegmentId targetSegmentId) override { return; }
+    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override { return; }
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
@@ -87,7 +87,7 @@ public:
     virtual int GetNumSegments(void) override;
     virtual int GetNumLogGroups(void) override;
 
-    virtual void ResetInfosAfterSegmentFreed(int logGroupId, SegmentId targetSegmentId) override;
+    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override;
 
 private:
     void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);
