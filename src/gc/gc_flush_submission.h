@@ -51,12 +51,12 @@ class GcFlushSubmission : public Event
 {
 public:
     explicit GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager);
+                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager, bool forceFlush = false);
     GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
                     GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
                     CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
                     IIOSubmitHandler* inputIIOSubmitHandler,
-                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo);
+                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo, bool forceFlush = false);
     ~GcFlushSubmission(void) override;
     bool Execute(void) override;
 
@@ -74,6 +74,7 @@ private:
     IIOSubmitHandler* iIOSubmitHandler;
     FlowControl* flowControl;
     IArrayInfo* iArrayInfo;
+    bool isForceFlush = false;
 };
 
 } // namespace pos

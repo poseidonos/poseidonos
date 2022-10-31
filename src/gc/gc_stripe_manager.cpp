@@ -305,10 +305,10 @@ GcStripeManager::CheckTimeout(void)
             }
             else
             {
-                EventSmartPtr flushEvent = std::make_shared<GcFlushSubmission>(iArrayInfo->GetName(),
-                            allocatedBlkInfoList, volId, dataBuffer, this);
-                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
                 bool forceFlush = true;
+                EventSmartPtr flushEvent = std::make_shared<GcFlushSubmission>(iArrayInfo->GetName(),
+                            allocatedBlkInfoList, volId, dataBuffer, this, forceFlush);
+                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
                 SetFlushed(volId, forceFlush);
             }
             t.second->Reset();
