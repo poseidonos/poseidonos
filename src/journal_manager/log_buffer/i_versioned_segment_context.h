@@ -56,6 +56,7 @@ public:
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
     virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) = 0;
+    virtual void ResetOccupiedStripeCount(int logGroupId, SegmentId segId) = 0;
 
     // For UT
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,

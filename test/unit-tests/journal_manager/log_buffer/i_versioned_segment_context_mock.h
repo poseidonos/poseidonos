@@ -24,6 +24,7 @@ public:
     MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo), (override));
     MOCK_METHOD(void, ResetInfosAfterSegmentFreed, (SegmentId targetSegmentId), (override));
+    MOCK_METHOD(void, ResetOccupiedStripeCount, (int logGroupId, SegmentId segId), (override));
 };
 
 } // namespace pos
