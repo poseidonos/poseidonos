@@ -187,7 +187,7 @@ CheckpointHandler::_TryToComplete(void)
         // completed status must not be changed by other threads
         assert(status == COMPLETED);
         assert(checkpointCompletionCallback != nullptr);
-        // reset used variables before executing the completion routine 
+        // reset used variables before executing the completion routine
         // and also variables of CheckpointHandler must not be changed after EnqueueEvent()
         EventSmartPtr tempCheckpointCompletionCallback = checkpointCompletionCallback;
         _Reset();

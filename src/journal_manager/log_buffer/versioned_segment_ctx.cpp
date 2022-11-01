@@ -181,6 +181,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 
         uint32_t getOccupiedStripeCount = segmentInfos[segmentId].GetOccupiedStripeCount();
         uint32_t result = getOccupiedStripeCount + occupiedStripeCountDiff;
+
         if (addrInfo->GetstripesPerSegment() < result)
         {
             POS_TRACE_ERROR(EID(JOURNAL_INVALID),
@@ -277,6 +278,16 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
             targetSegmentId);
         assert(false);
     }
+}
+
+void
+VersionedSegmentCtx::ResetOccupiedStripeCount(int logGroupId, SegmentId segId)
+{
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
+
+    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segId);
+
 }
 
 void

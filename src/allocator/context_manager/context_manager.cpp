@@ -256,7 +256,7 @@ void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "ContextManager::ResetFlushedInfo {}", logGroupId);
-
+    
     if (ALL_LOG_GROUP == logGroupId)
     {
         for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
