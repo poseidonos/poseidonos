@@ -259,4 +259,14 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
 }
+
+void
+VersionedSegmentCtx::ResetOccupiedStripeCount(int logGroupId, SegmentId segId)
+{
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
+
+    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segId);
+
+}
 } // namespace pos
