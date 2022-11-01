@@ -86,6 +86,7 @@ SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForc
     versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
     if (true == ret)
     {
+        versionedContext->ResetOccupiedStripeCount(logGroupId, segmentId);
         versionedContext->ResetInfosAfterSegmentFreed(segmentId);
     }
     pthread_rwlock_unlock(&lock);
@@ -98,10 +99,14 @@ SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
     pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
     bool ret = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
-    versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
     if (true == ret)
     {
+        versionedContext->ResetOccupiedStripeCount(logGroupId, segmentId);
         versionedContext->ResetInfosAfterSegmentFreed(segmentId);
+    }
+    else
+    {
+        versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
     }
     pthread_rwlock_unlock(&lock);
     return ret;
@@ -111,5 +116,14 @@ void
 SegmentContextUpdater::ResetInfos(SegmentId segId)
 {
     versionedContext->ResetInfosAfterSegmentFreed(segId);
+}
+
+void
+VersionedSegmentCtx::ResetOccupiedStripeCount(int logGroupId, SegmentId segId)
+{
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
+
+    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segId);
 }
 } // namespace pos
