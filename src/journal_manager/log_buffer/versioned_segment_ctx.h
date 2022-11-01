@@ -44,6 +44,7 @@ namespace pos
 class VersionedSegmentInfo;
 class JournalConfiguration;
 class SegmentInfo;
+class AllocatorAddressInfo;
 
 class DummyVersionedSegmentCtx : public IVersionedSegmentContext
 {
@@ -51,7 +52,8 @@ public:
     DummyVersionedSegmentCtx(void) = default;
     virtual ~DummyVersionedSegmentCtx(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) override {}
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos,
+        uint32_t numSegments, AllocatorAddressInfo* addrInfo_) override {}
     virtual void Dispose(void) override {}
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
@@ -61,7 +63,8 @@ public:
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
-        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo,
+        AllocatorAddressInfo* addrInfo_) override {}
     virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override { return; }
     virtual void ResetOccupiedStripeCount(int logGroupId, SegmentId segId) override { return; }
 };
@@ -72,12 +75,13 @@ public:
     VersionedSegmentCtx(void);
     virtual ~VersionedSegmentCtx(void);
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) override;
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos,
+        uint32_t numSegments, AllocatorAddressInfo* addrInfo_) override;
     virtual void Dispose(void) override;
 
     // For UT
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
-        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo);
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo, AllocatorAddressInfo* addrInfo_);
 
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
@@ -97,11 +101,12 @@ private:
     void _CheckLogGroupIdValidity(int logGroupId);
     void _CheckSegIdValidity(int segId);
 
+    const int ALL_LOG_GROUP = -1;
     JournalConfiguration* config;
     uint32_t numSegments;
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
     SegmentInfo* segmentInfos;
-    const int ALL_LOG_GROUP = -1;
+    AllocatorAddressInfo* addrInfo;
 };
 
 } // namespace pos

@@ -46,7 +46,7 @@ protected:
     NiceMock<SegmentCtxTester>* segmentCtx;
 };
 
-TEST_F(SegmentCtxIntegrationTest, MockOverride_Example)
+TEST_F(SegmentCtxIntegrationTest, DISABLED_MockOverride_Example)
 {
     NiceMock<SegmentCtxTesterExample>* seg = new NiceMock<SegmentCtxTesterExample>;
 

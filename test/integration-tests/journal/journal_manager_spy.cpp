@@ -62,7 +62,7 @@ JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* m
         allocator->GetISegmentCtx(),
         allocator->GetIWBStripeAllocator(),
         allocator->GetIContextManager(), allocator->GetIContextReplayer(),
-        volumeManager, eventScheduler);
+        volumeManager, eventScheduler, allocator->GetAllocatorAddrInfo());
 
     if (journalingStatus.Get() != WAITING_TO_BE_REPLAYED)
     {
