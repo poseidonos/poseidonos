@@ -267,5 +267,6 @@ VersionedSegmentCtx::ResetOccupiedStripeCount(int logGroupId, SegmentId segId)
     _CheckLogGroupIdValidity(logGroupId);
 
     segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segId);
+
 }
 } // namespace pos
