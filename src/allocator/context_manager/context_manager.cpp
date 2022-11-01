@@ -143,7 +143,6 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 
     logGroupIdInProgress = logGroupId;
 
-    std::lock_guard<std::mutex> lock(ctxLock);
     SegmentInfo* vscSegInfo = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
     return ioManager->FlushContexts(callback, sync, reinterpret_cast<char*>(vscSegInfo));
 }
@@ -257,7 +256,7 @@ void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "ContextManager::ResetFlushedInfo {}", logGroupId);
-    std::lock_guard<std::mutex> lock(ctxLock);
+    
     if (ALL_LOG_GROUP == logGroupId)
     {
         for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
