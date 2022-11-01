@@ -117,13 +117,4 @@ SegmentContextUpdater::ResetInfos(SegmentId segId)
 {
     versionedContext->ResetInfosAfterSegmentFreed(segId);
 }
-
-void
-VersionedSegmentCtx::ResetOccupiedStripeCount(int logGroupId, SegmentId segId)
-{
-    _CheckSegIdValidity(segId);
-    _CheckLogGroupIdValidity(logGroupId);
-
-    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segId);
-}
 } // namespace pos
