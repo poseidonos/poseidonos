@@ -89,6 +89,7 @@ public:
     virtual IContextReplayer* GetIContextReplayer(void);
     virtual ISegmentCtx* GetISegmentCtx(void);
     void PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx);
+    AllocatorAddressInfo* GetAllocatorAddrInfo(void);
 
 private:
     void _CreateSubmodules(void);

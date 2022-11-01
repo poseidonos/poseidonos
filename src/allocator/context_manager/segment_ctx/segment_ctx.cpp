@@ -436,6 +436,13 @@ SegmentCtx::AllocateFreeSegment(void)
             segmentInfos[segId].MoveToNvramState();
             segmentList[SegmentState::NVRAM]->AddToList(segId);
 
+            bool ret = segmentList[SegmentState::SSD]->Contains(segId);
+            if (true == ret)
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS),
+                    "segId {}", segId);
+                assert(false);
+            }
             int numFreeSegment = _OnNumFreeSegmentChanged();
             POS_TRACE_DEBUG(EID(ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS),
                 "segment_id:{}, num_free_segments:{}", segId, numFreeSegment);

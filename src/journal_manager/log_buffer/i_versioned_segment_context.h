@@ -40,13 +40,15 @@ namespace pos
 class JournalConfiguration;
 class SegmentInfo;
 class VersionedSegmentInfo;
+class AllocatorAddressInfo;
 
 class IVersionedSegmentContext
 {
 public:
     virtual ~IVersionedSegmentContext(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) = 0;
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos,
+        uint32_t numSegments, AllocatorAddressInfo* addrInfo_) = 0;
     virtual void Dispose(void) = 0;
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
@@ -56,10 +58,12 @@ public:
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
     virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) = 0;
+    virtual void ResetOccupiedStripeCount(int logGroupId, SegmentId segId) = 0;
 
     // For UT
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
-        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) = 0;
+        std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo,
+        AllocatorAddressInfo* addrInfo_) = 0;
 };
 
 } // namespace pos
