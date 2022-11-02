@@ -152,11 +152,21 @@ GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
         }
         timerMtx.unlock();
 
+        POS_TRACE_DEBUG(EID(GC_DEBUG),
+                "Volume deleted and acquiring flush lock, vol_id:{}", volEventBase->volId);
+        do
+        {
+            usleep(1000);
+        } while (true == ffLocker.TryForceFlushLock((uint32_t)volEventBase->volId));
+        POS_TRACE_DEBUG(EID(GC_DEBUG),
+                "flush lock acquired, vol_id:{}", volEventBase->volId);
         GcWriteBuffer* writeBuffers = gcActiveWriteBuffers[volEventBase->volId];
         delete blkInfoList[volEventBase->volId];
+        blkInfoList[volEventBase->volId] = nullptr;
         SetFlushed(volEventBase->volId);
         ReturnBuffer(writeBuffers);
         SetFinished();
+        _ResetFlushLock((uint32_t)volEventBase->volId);
     }
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
@@ -288,9 +298,14 @@ GcStripeManager::CheckTimeout(void)
         if (t.second->CheckTimeout() == true)
         {
             uint32_t volId = t.first;
+            if (ffLocker.TryForceFlushLock(volId) == false)
+            {
+                POS_TRACE_DEBUG(POS_EVENT_ID::GC_STRIPE_FORCE_FLUSH_TIMEOUT,
+                    "Force flush timer expired but it was postponed due to failure to acquire lock, vol_id:{}", volId);
+                continue;
+            }
             POS_TRACE_WARN(POS_EVENT_ID::GC_STRIPE_FORCE_FLUSH_TIMEOUT,
                 "Force flush due to timeout, vol_id:{}", volId);
-
             std::vector<BlkInfo>* allocatedBlkInfoList = GetBlkInfoList(volId);
             GcWriteBuffer* dataBuffer = GetWriteBuffer(volId);
             IVolumeManager* volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(iArrayInfo->GetIndex());
@@ -311,9 +326,22 @@ GcStripeManager::CheckTimeout(void)
                 EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
                 SetFlushed(volId, forceFlush);
             }
+            ffLocker.UnlockForceFlushLock(volId);
             t.second->Reset();
         }
     }
+}
+
+bool
+GcStripeManager::TryFlushLock(uint32_t volId)
+{
+    return ffLocker.TryLock(volId);
+}
+
+void
+GcStripeManager::ReleaseFlushLock(uint32_t volId)
+{
+    ffLocker.Unlock(volId);
 }
 
 std::vector<BlkInfo>*
@@ -465,6 +493,12 @@ GcStripeManager::_SetForceFlushInterval(void)
     POS_TRACE_INFO(EID(GC_STRIPE_FORCE_FLUSH_TIMEOUT), "GC force flush interval:{}sec", timeoutInterval);
     //convert second to nano second
     timeoutInterval = timeoutInterval * 1000000000ULL;
+}
+
+void
+GcStripeManager::_ResetFlushLock(uint32_t volId)
+{
+    ffLocker.Reset(volId);
 }
 
 } // namespace pos

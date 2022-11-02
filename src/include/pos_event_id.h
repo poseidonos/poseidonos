@@ -551,6 +551,7 @@ enum class POS_EVENT_ID
     GC_RELEASE_VICTIM_SEGMENT = 3431,
     GC_THRESHOLD_CHECK_DISABLE = 3432,
     GC_STRIPE_FORCE_FLUSH_TIMEOUT = 3433,
+    GC_DEBUG = 3434,
 
     // --------------WBT GC (3470)----------------
     GC_WBT_START = 3470,
