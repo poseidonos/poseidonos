@@ -341,9 +341,9 @@ Root:
     Id: 1225
     Name: CLI_LIST_ARRAY_NO_ARRAY_EXISTS
     Severity:
-    Message:
+    Message: There is no array created.
     Cause:
-    Solution:
+    Solution: Create an array and try again.
   -
     Id: 1226
     Name: CLI_LIST_ARRAY_FAILURE
