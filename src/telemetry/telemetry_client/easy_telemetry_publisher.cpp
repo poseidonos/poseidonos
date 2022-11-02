@@ -79,7 +79,7 @@ EasyTelemetryPublisher::~EasyTelemetryPublisher(void)
         delete publisher;
     }
 
-    if (!timeInterval)
+    if (timeInterval)
     {
         delete timeInterval;
     }
@@ -105,7 +105,7 @@ EasyTelemetryPublisher::Initialize(ConfigManager* config, const cpu_set_t& gener
 
     POS_TRACE_INFO(EID(SUCCESS),
         "Easy Telemetry Publisher is to periodically publish stats, coreId:{}",
-        sched_getcpu(), interval_in_millisecond);
+        sched_getcpu());
 }
 
 void
@@ -131,7 +131,7 @@ void
 EasyTelemetryPublisher::IncreaseCounter(const std::string& id, const uint64_t value,
     const VectorLabels& labels)
 {
-    queue.push({id, POSMetricTypes::MT_COUNT, value, labels});
+    queue.push(_CreateCounterMetric(id, value, labels));
 }
 
 void
@@ -145,14 +145,29 @@ void
 EasyTelemetryPublisher::UpdateGauge(const std::string& id, const uint64_t value,
     const VectorLabels& labels)
 {
-    queue.push({id, POSMetricTypes::MT_GAUGE, value, labels});
+    queue.push(_CreateGagueMetric(id, value, labels));
 }
 
 POSMetric
-EasyTelemetryPublisher::_CreateMetric(const POSMetricTypes type, const std::string& id,
+EasyTelemetryPublisher::_CreateGagueMetric(const std::string& id, const uint64_t value,
     const VectorLabels& labels)
 {
-    POSMetric m(id, type);
+    POSMetric m(id, POSMetricTypes::MT_GAUGE);
+    m.SetGaugeValue(value);
+    for (auto& label : labels)
+    {
+        m.AddLabel(label.first, label.second);
+    }
+
+    return m;
+}
+
+POSMetric
+EasyTelemetryPublisher::_CreateCounterMetric(const std::string& id, const uint64_t value,
+    const VectorLabels& labels)
+{
+    POSMetric m(id, POSMetricTypes::MT_COUNT);
+    m.SetCountValue(value);
     for (auto& label : labels)
     {
         m.AddLabel(label.first, label.second);
@@ -186,14 +201,16 @@ EasyTelemetryPublisher::_UpdateInterval(ConfigManager* config)
     uint32_t interval = 0;
     std::string module = "telemetry";
     std::string key = "interval_in_millisecond_for_easy_telemetry_publisher";
+    std::string additionalStr = "using default value";
 
     if (!config->GetValue(module, key, &interval, ConfigType::CONFIG_TYPE_UINT32))
     {
         interval_in_millisecond = interval;
+        additionalStr = "as loaded";
     }
 
-    POS_TRACE_INFO(EID(SUCCESS), "Easy Telemetry Publisher is going to publish metrics every {} ms",
-        interval_in_millisecond);
+    POS_TRACE_INFO(EID(SUCCESS), "Easy Telemetry Publisher is going to publish metrics every {} ms {}",
+        interval_in_millisecond, additionalStr);
 }
 
 void
@@ -215,29 +232,24 @@ EasyTelemetryPublisher::_PeriodicPublish(void)
 void
 EasyTelemetryPublisher::UpdateMetrics(void)
 {
-    RawDataForMetric metricInfo;
-    while (queue.try_pop(metricInfo))
+    POSMetric metric;
+    while (queue.try_pop(metric))
     {
-        auto& id = metricInfo.id;
-        auto metricType = metricInfo.type;
-        auto value = metricInfo.value;
-        auto& label = metricInfo.label;
-
-        MetricWithFlags m{_CreateMetric(metricType, id, label), true};
+        MetricWithFlags m{metric, true};
         auto hashed = m.metric.Hash();
-        auto& map = metrics[(int)metricType];
+        auto& map = metrics[(int)metric.GetType()];
 
         auto itor = map.find(hashed);
         if (itor == map.end())
         {
             // new entry and/or label
-            switch (metricType)
+            switch (metric.GetType())
             {
                 case POSMetricTypes::MT_COUNT:
-                    m.metric.SetCountValue(value);
+                    m.metric.SetCountValue(metric.GetCountValue());
                     break;
                 case POSMetricTypes::MT_GAUGE:
-                    m.metric.SetGaugeValue(value);
+                    m.metric.SetGaugeValue(metric.GetGaugeValue());
                     break;
                 default:
                     assert(false);
@@ -248,16 +260,16 @@ EasyTelemetryPublisher::UpdateMetrics(void)
         else
         {
             // existing entry
-            switch (metricType)
+            switch (metric.GetType())
             {
                 case POSMetricTypes::MT_COUNT:
                 {
-                    auto newValue = itor->second.metric.GetCountValue() + value;
+                    auto newValue = itor->second.metric.GetCountValue() + metric.GetCountValue();
                     itor->second.metric.SetCountValue(newValue);
                 }
                 break;
                 case POSMetricTypes::MT_GAUGE:
-                    itor->second.metric.SetGaugeValue(value);
+                    itor->second.metric.SetGaugeValue(metric.GetGaugeValue());
                     break;
                 default:
                     assert(false);

@@ -60,14 +60,6 @@ struct MetricWithFlags
 using VectorLabels = std::vector<std::pair<std::string, std::string>>;
 using MetricRepository = std::vector<std::unordered_map<size_t, MetricWithFlags>>;
 
-struct RawDataForMetric
-{
-    std::string id;
-    POSMetricTypes type;
-    uint64_t value;
-    VectorLabels label;
-};
-
 class EasyTelemetryPublisher
 {
 public:
@@ -89,11 +81,20 @@ public:
     virtual void PublishMetricsWithLabels(void);
     virtual void UpdateMetrics(void);
 
-    // only for test
+    /** only for test **/
     MetricRepository GetMetricRepository(void)
     {
         return metrics;
     }
+    void RunWorker(void)
+    {
+        _RunWorker();
+    }
+    void StopWorker(void)
+    {
+        _StopWorker();
+    }
+    /** only for test **/
 
 private:
     void _PeriodicPublish(void);
@@ -101,7 +102,10 @@ private:
     void _StopWorker(void);
     void _UpdateInterval(ConfigManager* config);
 
-    POSMetric _CreateMetric(const POSMetricTypes type, const std::string& id, const VectorLabels& labels);
+    POSMetric _CreateGagueMetric(const std::string& id, const uint64_t value,
+        const VectorLabels& labels);
+    POSMetric _CreateCounterMetric(const std::string& id, const uint64_t value,
+        const VectorLabels& labels);
 
     const uint32_t DEFAULT_INTERVAL_IN_MILLISECOND;
     const std::string PUBLISHER_NAME;
@@ -110,7 +114,7 @@ private:
     bool isCreatedPublisher;
     uint32_t interval_in_millisecond;
 
-    tbb::concurrent_queue<RawDataForMetric> queue;
+    tbb::concurrent_queue<POSMetric> queue;
     MetricRepository metrics;
 
     std::thread* worker;
