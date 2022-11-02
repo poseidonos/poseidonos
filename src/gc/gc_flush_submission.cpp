@@ -129,7 +129,7 @@ GcFlushSubmission::Execute(void)
             return false;
         }
         flowControl->Reset();
-        POS_TRACE_INFO(EID(GC_STRIPE_FLUSH_SUBMIT), "Token reset due to force flush");
+        POS_TRACE_INFO(EID(GC_FORCE_FLUSH_DEBUG), "Token reset due to force flush");
     }
 
     uint32_t validCnt = 0;

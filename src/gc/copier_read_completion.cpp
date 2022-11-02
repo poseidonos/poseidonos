@@ -94,6 +94,8 @@ CopierReadCompletion::_DoSpecificJob(void)
     assert(volId != UINT32_MAX);
     if (gcStripeManager->TryFlushLock(volId) == false)
     {
+        POS_TRACE_DEBUG(EID(GC_FLUSH_LOCK_DEBUG),
+            "Failed to acquire flush lock. It will be retried, vol_id:{}", volId);
         return false;
     }
     uint32_t remainCnt = blkCnt - allocatedCnt;

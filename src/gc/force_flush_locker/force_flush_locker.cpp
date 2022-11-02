@@ -31,6 +31,8 @@
  */
 
 #include "force_flush_locker.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
@@ -55,7 +57,16 @@ ForceFlushLocker::TryForceFlushLock(uint32_t volId)
     {
         return false;
     }
-    return busyLocker->TryLock(volId);
+    bool ret = busyLocker->TryLock(volId);
+    if (ret == true)
+    {
+        POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "force flush lock acquired, vol_id:{}", volId);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "force flush lock failed, vol_id:{}", volId);
+    }
+    return ret;
 }
 
 void
@@ -63,6 +74,7 @@ ForceFlushLocker::UnlockForceFlushLock(uint32_t volId)
 {
     unique_lock<mutex> lock(lockerMtx);
     busyLocker->Unlock(volId);
+    POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "force flush lock unlocked, vol_id:{}", volId);
 }
 
 bool
@@ -71,6 +83,7 @@ ForceFlushLocker::TryLock(uint32_t volId)
     unique_lock<mutex> lock(lockerMtx);
     if (busyLocker->Exists(volId) == true)
     {
+        POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "flush lock failued, vol_id:{}", volId);
         return false;
     }
     return normalLocker->TryLock(volId);
