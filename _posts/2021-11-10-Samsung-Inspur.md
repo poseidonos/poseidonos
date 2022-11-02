@@ -16,22 +16,17 @@ Those who are serious about future-proofing their server architecture should def
 
 Poseidon is an open-source storage project developed by a multi-industry collaboration (Inspur, Samsung, and Naver Cloud) capable of meeting the needs of both the hyperscaler server manufacturers and the general data center market. Inspur is responsible for developing some of the hardware, while Samsung took the role of creating the storage OS. After the hardware and software were integrated, it was provided to Naver Cloud to run tests and deploy. Poseidon has come a long way since version 1, as the first version of the storage OS was released on GitHub in April ’21 with regular updates since then.
 
-
 ![a](../assets/img/blog/a.png)
-
 
 
 Poseidon V2 is a new reference platform that leverages PCIe Gen5 and the E3 form factor. Compared to version 1, which used E1.S and the Gen4 interface, V2 is capable of achieving higher performance and can accommodate more density. It also offers two types of backplanes on the same server.
 
 Component-wise, it features both open source and up-to-date technology, including an SPR Xeon CPU, DDR5 memory, CXL interface, Open Compute Project (OCP) NIC, and Datacenter-ready Secure Control Module (DC-SCM).
 
-
 ![b](../assets/img/blog/b.png)
 
 This allows Poseidon V2 to offer a range of different builds, including high-performance shared storage, high-memory servers for Cloud service, and accelerator servers for AI/ML, as seen in the figure below:
 
-
 ![c](../assets/img/blog/c.png)
-
 
 Inspur believes its customers can greatly benefit from the modular design offered in Poseidon V2. The technology shown at OCP is often many years ahead of broad adoption in the enterprise. Poseidon V2 feels a little more mature though and may pop up in the modern data center sooner thanks to the aggressive feature set and increased appetite for open standards.
