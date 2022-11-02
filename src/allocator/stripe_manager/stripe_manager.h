@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,52 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <vector>
-
-#include "src/allocator/wbstripe_manager/stripe_load_status.h"
-#include "src/event_scheduler/callback.h"
+#include "src/mapper/i_reversemap.h"
+#include "src/mapper/i_stripemap.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class BufferPool;
+class ContextManager;
+class IWBStripeAllocator;
+class AllocatorAddressInfo;
+class AllocatorCtx;
+class BlockAllocationStatus;
 
-class WriteStripeCompletion : public Callback
+class StripeManager
 {
 public:
-    WriteStripeCompletion(BufferPool* bufferPool, std::vector<void*> buffer, StripeLoadStatus* status);
-    virtual ~WriteStripeCompletion(void) = default;
+    StripeManager(void) = default;
+    StripeManager(ContextManager* ctxMgr, AllocatorAddressInfo* addrInfo_, int arrayId);
+    StripeManager(ContextManager* ctxMgr, IReverseMap* iReverseMap_, IStripeMap* stripeMap_, AllocatorAddressInfo* addrInfo_, int arrayId);
+    virtual ~StripeManager(void) = default;
+
+    virtual void Init(IWBStripeAllocator* wbStripeManager);
+
+    virtual std::pair<StripeId, StripeId> AllocateStripesForUser(uint32_t volumeId);
+    virtual StripeSmartPtr AllocateGcDestStripe(uint32_t volumeId);
+
+protected:
+    bool _IsLastStripesWithinSegment(StripeId stripeId);
 
 private:
-    virtual bool _DoSpecificJob(void) override;
+    StripeId _AllocateSsdStripe(void);
+    StripeId _AllocateSegmentAndStripe(void);
+    StripeId _AllocateWbStripe(void);
+    void _RollBackWbStripeIdAllocation(StripeId wbLsid = UINT32_MAX);
 
-    BufferPool* bufferPool;
-    std::vector<void*> bufferList;
-    StripeLoadStatus* status;
+    StripeId _AllocateUserSsdStripe(int volumeId);
+    StripeSmartPtr _AllocateStripe(StripeId vsid, StripeId wbLsid, uint32_t volumeId);
+
+    IWBStripeAllocator* wbStripeManager;
+    ContextManager* contextManager;
+    AllocatorCtx* allocCtx;
+    BlockAllocationStatus* allocStatus;
+    AllocatorAddressInfo* addrInfo;
+    int arrayId;
+
+    IReverseMap* reverseMap;
+    IStripeMap* stripeMap;
 };
 
 } // namespace pos

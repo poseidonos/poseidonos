@@ -14,7 +14,7 @@ public:
     using LogWriteContextFactory::LogWriteContextFactory;
     MOCK_METHOD(void, Init, (JournalConfiguration * config, LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer), (override));
     MOCK_METHOD(LogWriteContext*, CreateBlockMapLogWriteContext, (VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent), (override));
-    MOCK_METHOD(LogWriteContext*, CreateStripeMapLogWriteContext, (Stripe * stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent), (override));
+    MOCK_METHOD(LogWriteContext*, CreateStripeMapLogWriteContext, (StripeSmartPtr stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(LogWriteContext*, CreateGcBlockMapLogWriteContext, (GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(std::vector<LogWriteContext*>, CreateGcBlockMapLogWriteContexts, (GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(LogWriteContext*, CreateGcStripeFlushedLogWriteContext, (GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent), (override));

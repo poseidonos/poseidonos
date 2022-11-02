@@ -30,33 +30,41 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/wbstripe_manager/write_stripe_completion.h"
+#pragma once
 
-#include "src/resource_manager/buffer_pool.h"
+#include <atomic>
+#include <string>
+#include <tuple>
+#include <vector>
 
+#include "src/allocator/stripe_manager/stripe.h"
+#include "src/logger/logger.h"
 namespace pos
 {
-WriteStripeCompletion::WriteStripeCompletion(BufferPool* bufferPool, std::vector<void*> buffer, StripeLoadStatus* status)
-: Callback(false, CallbackType_WriteThroughStripeLoad),
-  bufferPool(bufferPool),
-  bufferList(buffer),
-  status(status)
+class StripeSpy : public Stripe
 {
-}
-
-bool
-WriteStripeCompletion::_DoSpecificJob(void)
-{
-    // TODO (meta) check fail case (reference: writecompletion)
-
-    status->StripeLoaded();
-
-    for (auto b : bufferList)
+public:
+    using Stripe::Stripe;
+    virtual ~StripeSpy(void) = default;
+    uint32_t
+    GetBlksRemaining(void)
     {
-        bufferPool->ReturnBuffer(b);
+        return 0;
     }
-
-    return true;
-}
+    int
+    Flush(EventSmartPtr callback)
+    {
+        return 0;
+    }
+    void
+    UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
+    {
+    }
+    uint32_t
+    DecreseBlksRemaining(uint32_t amount)
+    {
+        return 0;
+    }
+};
 
 } // namespace pos

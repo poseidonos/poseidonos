@@ -70,8 +70,6 @@ class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
 class BufferedSegmentContextManager;
 
-class Stripe;
-
 class IVSAMap;
 class IStripeMap;
 class IMapFlush;

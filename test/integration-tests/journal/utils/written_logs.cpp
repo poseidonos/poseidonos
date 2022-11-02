@@ -49,7 +49,7 @@ WrittenLogs::AddToWriteList(VolumeIoSmartPtr volumeIo)
 }
 
 void
-WrittenLogs::AddToWriteList(Stripe* stripe, StripeAddr oldAddr)
+WrittenLogs::AddToWriteList(StripeSmartPtr stripe, StripeAddr oldAddr)
 {
     numJournalIssued++;
 

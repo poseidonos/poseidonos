@@ -12,7 +12,7 @@ class MockMetaEventFactory : public MetaEventFactory
 public:
     using MetaEventFactory::MetaEventFactory;
     MOCK_METHOD(CallbackSmartPtr, CreateBlockMapUpdateEvent, (VolumeIoSmartPtr volumeIo), (override));
-    MOCK_METHOD(CallbackSmartPtr, CreateStripeMapUpdateEvent, (Stripe* stripe), (override));
+    MOCK_METHOD(CallbackSmartPtr, CreateStripeMapUpdateEvent, (StripeSmartPtr stripe), (override));
     MOCK_METHOD(CallbackSmartPtr, CreateGcMapUpdateEvent, (StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, (std::map<SegmentId, uint32_t> invalidSegCnt)), (override));
 };
 

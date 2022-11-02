@@ -37,7 +37,7 @@
 
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/callback.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
@@ -211,8 +211,9 @@ TEST(MetaUpdater, UpdateStripeMap_testIfJournalWriteRequestedWhenJournalEnabled)
 
     MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
-    NiceMock<MockStripe> stripe;
-    ON_CALL(stripe, GetVsid).WillByDefault(Return(0));
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    StripeSmartPtr stripePtr = StripeSmartPtr(stripe);
+    ON_CALL(*stripe, GetVsid).WillByDefault(Return(0));
 
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     CallbackSmartPtr metaCallback(new NiceMock<MockCallback>(true));
@@ -225,9 +226,9 @@ TEST(MetaUpdater, UpdateStripeMap_testIfJournalWriteRequestedWhenJournalEnabled)
         .stripeId = 10};
     EXPECT_CALL(stripeMap, GetLSA).WillOnce(Return(oldAddr));
 
-    EXPECT_CALL(journalWriter, AddStripeMapUpdatedLog(&stripe, oldAddr, _)).WillOnce(Return(0));
+    EXPECT_CALL(journalWriter, AddStripeMapUpdatedLog(stripePtr, oldAddr, _)).WillOnce(Return(0));
 
-    int result = metaUpdater.UpdateStripeMap(&stripe, metaCallback);
+    int result = metaUpdater.UpdateStripeMap(stripePtr, metaCallback);
     EXPECT_EQ(result, 0);
 }
 
@@ -242,7 +243,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventExecutedWhenJournalD
 
     MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
-    NiceMock<MockStripe> stripe;
+    StripeSmartPtr stripe = StripeSmartPtr(new NiceMock<MockStripe>());
 
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     NiceMock<MockCallback>* metaCallback = new NiceMock<MockCallback>(true);
@@ -253,7 +254,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventExecutedWhenJournalD
 
     EXPECT_CALL(*metaCallback, _DoSpecificJob).WillOnce(Return(true));
 
-    int result = metaUpdater.UpdateStripeMap(&stripe, clientCallback);
+    int result = metaUpdater.UpdateStripeMap(stripe, clientCallback);
     EXPECT_EQ(result, 0);
 }
 
@@ -268,7 +269,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventIsEnqueuedToEventSch
 
     MetaUpdater metaUpdater(&stripeMap, &journal, &journalWriter, &eventScheduler, &metaEventFactory, &arrayInfo);
 
-    NiceMock<MockStripe> stripe;
+    StripeSmartPtr stripe = StripeSmartPtr(new NiceMock<MockStripe>());
 
     CallbackSmartPtr clientCallback(new NiceMock<MockCallback>(true));
     NiceMock<MockCallback>* metaCallback = new NiceMock<MockCallback>(true);
@@ -280,7 +281,7 @@ TEST(MetaUpdater, UpdateStripeMap_testIfStripeMapUpdateEventIsEnqueuedToEventSch
     EXPECT_CALL(*metaCallback, _DoSpecificJob).WillOnce(Return(false));
     EXPECT_CALL(eventScheduler, EnqueueEvent).Times(1);
 
-    int result = metaUpdater.UpdateStripeMap(&stripe, clientCallback);
+    int result = metaUpdater.UpdateStripeMap(stripe, clientCallback);
     EXPECT_EQ(result, 0);
 }
 

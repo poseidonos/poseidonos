@@ -58,7 +58,7 @@ public:
         CallbackSequenceController* sequencer);
 
     virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
-    virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
+    virtual LogWriteContext* CreateStripeMapLogWriteContext(StripeSmartPtr stripe,
         StripeAddr oldAddr, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateGcBlockMapLogWriteContext(
         GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);

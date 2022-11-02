@@ -37,7 +37,6 @@
 namespace pos
 {
 class ReverseMapPack;
-class Stripe;
 
 class IReverseMap
 {

@@ -7,7 +7,7 @@
 #include "src/journal_manager/log/log_list.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/bio/volume_io.h"
 #include "src/include/address_type.h"
 
@@ -23,7 +23,7 @@ public:
 
     // TODO (cheolho.kang) naming
     void AddToWriteList(VolumeIoSmartPtr volumeIo);
-    void AddToWriteList(Stripe* stripe, StripeAddr oldAddr);
+    void AddToWriteList(StripeSmartPtr stripe, StripeAddr oldAddr);
     void AddToWriteList(GcStripeMapUpdateList mapUpdates);
 
     bool CheckLogInTheList(LogHandlerInterface* log);

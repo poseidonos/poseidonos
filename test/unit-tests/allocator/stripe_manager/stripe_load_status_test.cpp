@@ -1,4 +1,4 @@
-#include "src/allocator/wbstripe_manager/stripe_load_status.h"
+#include "src/allocator/stripe_manager/stripe_load_status.h"
 
 #include <gtest/gtest.h>
 

@@ -64,7 +64,7 @@ MetaEventFactory::CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo)
 }
 
 CallbackSmartPtr
-MetaEventFactory::CreateStripeMapUpdateEvent(Stripe* stripe)
+MetaEventFactory::CreateStripeMapUpdateEvent(StripeSmartPtr stripe)
 {
     CallbackSmartPtr callback(new StripeMapUpdate(stripe, stripeMap, segmentCtx));
     return callback;

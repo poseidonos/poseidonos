@@ -38,7 +38,6 @@
 
 namespace pos
 {
-class Stripe;
 class VolumeIo;
 class IWBStripeAllocator;
 
@@ -51,8 +50,8 @@ public:
     ~WriteCompletion(void) override;
 
 private:
-    bool _UpdateStripe(Stripe*& stripeToFlush);
-    bool _RequestFlush(Stripe* stripe);
+    bool _UpdateStripe(StripeSmartPtr& stripeToFlush);
+    bool _RequestFlush(StripeSmartPtr stripe);
     bool _DoSpecificJob(void) override;
 
     VolumeIoSmartPtr volumeIo;

@@ -52,7 +52,7 @@ public:
     Stripe(void) = default;
     Stripe(IReverseMap* revMapMan, uint32_t numBlksPerStripe);
     virtual ~Stripe(void);
-    virtual bool Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, uint32_t volumeId);
+    virtual void Assign(StripeId vsid, StripeId wbLsid, StripeId userLsid, uint32_t volumeId);
 
     virtual uint32_t GetVolumeId(void);
     virtual StripeId GetVsid(void);

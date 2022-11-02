@@ -9,7 +9,7 @@
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/journal_manager/log_buffer/log_group_reset_context.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
@@ -101,11 +101,11 @@ TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSucces
     StripeAddr oldAddr = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = wbLsid};
-    NiceMock<MockStripe> stripe;
-    EXPECT_CALL(stripe, GetUserLsid).WillOnce(Return(vsid));
-    EXPECT_CALL(stripe, GetVsid).WillOnce(Return(vsid));
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    EXPECT_CALL(*stripe, GetUserLsid).WillOnce(Return(vsid));
+    EXPECT_CALL(*stripe, GetVsid).WillOnce(Return(vsid));
     EventSmartPtr callbackEvent;
-    LogWriteContext* logWriteContext = logWriteContextFactory.CreateStripeMapLogWriteContext(&stripe, oldAddr, callbackEvent);
+    LogWriteContext* logWriteContext = logWriteContextFactory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callbackEvent);
 
     // Then
     StripeAddr newAddr = {

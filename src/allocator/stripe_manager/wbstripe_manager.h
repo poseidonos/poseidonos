@@ -67,7 +67,8 @@ public:
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual Stripe* GetStripe(StripeId wbLsid) override;
+    virtual void AssignStripe(StripeSmartPtr stripe) override;
+    virtual StripeSmartPtr GetStripe(StripeId wbLsid) override;
     virtual void FreeWBStripeId(StripeId lsid) override;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) override;
@@ -81,26 +82,22 @@ public:
     virtual int FlushAllPendingStripesInVolume(int volumeId) override;
     virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) override;
 
-    virtual StripeId GetUserStripeId(StripeId vsid) override;
-
     virtual int FlushAllWbStripes(void);
-    virtual void PushStripeToStripeArray(Stripe* stripe); // for UT
 
 protected:
-    Stripe* _GetStripe(StripeAddr& lsidEntry);
+    StripeSmartPtr _GetStripe(StripeAddr& lsidEntry);
 
-    Stripe* _FinishActiveStripe(ASTailArrayIdx index);
-    bool _FillBlocksToStripe(Stripe* stripe, StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks);
+    StripeSmartPtr _FinishActiveStripe(ASTailArrayIdx index);
+    bool _FillBlocksToStripe(StripeSmartPtr stripe, StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks);
     VirtualBlks _AllocateRemainingBlocks(ASTailArrayIdx index);
     VirtualBlks _GetRemainingBlocks(VirtualBlkAddr tail);
-    Stripe* _FinishRemainingBlocks(StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks);
-    virtual int _RequestStripeFlush(Stripe* stripe);
-    int _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx idx, Stripe*& stripe);
-    int _ReconstructReverseMap(uint32_t volumeId, Stripe* stripe, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
-    void _WaitForStripeFlushComplete(Stripe* stripe);
+    StripeSmartPtr _FinishRemainingBlocks(StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks);
+    virtual int _RequestStripeFlush(StripeSmartPtr stripe);
+    int _ReconstructAS(StripeSmartPtr stripe, uint64_t blockCount);
+    void _WaitForStripeFlushComplete(StripeSmartPtr stripe);
     void _LoadStripe(StripeAddr from, StripeAddr to);
 
-    std::vector<Stripe*> wbStripeArray;
+    std::vector<StripeSmartPtr> wbStripeArray;
     BufferPool* stripeBufferPool;
 
     // DOCs

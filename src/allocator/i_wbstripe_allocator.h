@@ -34,15 +34,17 @@
 
 #include <map>
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 
 namespace pos
 {
 class IWBStripeAllocator
 {
 public:
-    virtual Stripe* GetStripe(StripeId wbLsid) = 0;
+    virtual void AssignStripe(StripeSmartPtr stripe) = 0;
     virtual void FreeWBStripeId(StripeId lsid) = 0;
+
+    virtual StripeSmartPtr GetStripe(StripeId wbLsid) = 0;
 
     virtual bool ReferLsidCnt(StripeAddr& lsa) = 0;
     virtual void DereferLsidCnt(StripeAddr& lsa, uint32_t blockCount) = 0;
@@ -54,8 +56,6 @@ public:
     virtual int FlushAllPendingStripes(void) = 0;
     virtual int FlushAllPendingStripesInVolume(int volumeId) = 0;
     virtual int FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo) = 0;
-
-    virtual StripeId GetUserStripeId(StripeId vsid) = 0;
 };
 
 } // namespace pos

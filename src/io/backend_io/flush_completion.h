@@ -35,10 +35,10 @@
 #include <string>
 
 #include "src/event_scheduler/callback.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class Stripe;
 class IStripeMap;
 class StripePutEvent;
 class EventScheduler;
@@ -47,8 +47,8 @@ class FlushCompletion : public Callback
 {
 public:
     FlushCompletion(void) = delete;
-    explicit FlushCompletion(Stripe* stripe, int arrayId);
-    FlushCompletion(Stripe* stripe,
+    explicit FlushCompletion(StripeSmartPtr stripe, int arrayId);
+    FlushCompletion(StripeSmartPtr stripe,
         IStripeMap* stripeMap,
         EventScheduler* eventScheduler,
         int arrayId);
@@ -57,7 +57,7 @@ public:
 private:
     virtual bool _DoSpecificJob(void) override;
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     IStripeMap* iStripeMap;
     EventScheduler* eventScheduler;
     int arrayId;

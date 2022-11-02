@@ -37,12 +37,11 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
+#include "src/allocator/stripe_manager/wbstripe_manager.h"
 #include "src/io/backend_io/flush_submission.h"
 
 namespace pos
 {
-using StripeVec = std::vector<Stripe*>;
 class IVolumeInfoManager;
 class WBStripeManagerSpy : public WBStripeManager
 {
@@ -51,9 +50,9 @@ public:
     virtual ~WBStripeManagerSpy(void) = default;
 
     int
-    _ReconstructAS(StripeId vsid, StripeId wbLsid, uint64_t blockCount, ASTailArrayIdx tailarrayidx, Stripe*& stripe)
+    _ReconstructAS(StripeSmartPtr stripe, uint64_t blockCount)
     {
-        return WBStripeManager::_ReconstructAS(vsid, wbLsid, blockCount, tailarrayidx, stripe);
+        return WBStripeManager::_ReconstructAS(stripe, blockCount);
     }
     VirtualBlks
     _GetRemainingBlocks(VirtualBlkAddr tail)
@@ -61,11 +60,11 @@ public:
         return WBStripeManager::_GetRemainingBlocks(tail);
     }
     bool
-    _FillBlocksToStripe(Stripe* stripe, StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks)
+    _FillBlocksToStripe(StripeSmartPtr stripe, StripeId wbLsid, BlkOffset startOffset, uint32_t numBlks)
     {
         return WBStripeManager::_FillBlocksToStripe(stripe, wbLsid, startOffset, numBlks);
     }
-    Stripe*
+    StripeSmartPtr
     _FinishActiveStripe(ASTailArrayIdx index)
     {
         return WBStripeManager::_FinishActiveStripe(index);

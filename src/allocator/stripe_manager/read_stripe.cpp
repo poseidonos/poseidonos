@@ -30,33 +30,54 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/allocator/stripe_manager/read_stripe.h"
 
-#include <vector>
+#include <list>
 
-#include "src/allocator/wbstripe_manager/stripe_load_status.h"
-#include "src/event_scheduler/callback.h"
-#include "src/include/address_type.h"
-#include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/array/ft/buffer_entry.h"
+#include "src/include/meta_const.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class ReadStripe : public Callback
+ReadStripe::ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId)
+: ReadStripe(readAddr, buffer, callback, arrayId, IIOSubmitHandler::GetInstance())
 {
-public:
-    ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId);
-    ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler);
-    virtual ~ReadStripe(void) = default;
+}
 
-private:
-    virtual bool _DoSpecificJob(void);
+ReadStripe::ReadStripe(StripeAddr stripeAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler)
+: Callback(false, CallbackType_WriteThroughStripeLoad),
+  buffers(buffer),
+  doneCallback(callback),
+  arrayId(arrayId),
+  ioSubmitHandler(ioSubmitHandler)
+{
+    assert(stripeAddr.stripeLoc == IN_USER_AREA);
 
-    LogicalBlkAddr readAddr;
-    std::vector<void*> buffers;
-    CallbackSmartPtr doneCallback;
-    int arrayId;
+    readAddr.stripeId = stripeAddr.stripeId;
+    readAddr.offset = 0;
+}
 
-    IIOSubmitHandler* ioSubmitHandler;
-};
+bool
+ReadStripe::_DoSpecificJob(void)
+{
+    std::list<BufferEntry> bufferList;
+    uint32_t blockCount = 0;
 
+    for (auto b : buffers)
+    {
+        BufferEntry bufferEntry(b, BLOCKS_IN_CHUNK);
+        bufferList.push_back(bufferEntry);
+        blockCount += BLOCKS_IN_CHUNK;
+    }
+
+    IOSubmitHandlerStatus result =
+        ioSubmitHandler->SubmitAsyncIO(IODirection::READ,
+            bufferList, readAddr, blockCount,
+            PartitionType::USER_DATA, doneCallback, arrayId);
+
+    return (result == IOSubmitHandlerStatus::SUCCESS ||
+        result == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP);
+}
 } // namespace pos

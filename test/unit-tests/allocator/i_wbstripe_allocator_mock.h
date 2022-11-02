@@ -10,7 +10,8 @@ class MockIWBStripeAllocator : public IWBStripeAllocator
 {
 public:
     using IWBStripeAllocator::IWBStripeAllocator;
-    MOCK_METHOD(Stripe*, GetStripe, (StripeId wbLsid), (override));
+    MOCK_METHOD(void, AssignStripe, (StripeSmartPtr stripe), (override));
+    MOCK_METHOD(StripeSmartPtr, GetStripe, (StripeId wbLsid), (override));
     MOCK_METHOD(void, FreeWBStripeId, (StripeId lsid), (override));
     MOCK_METHOD(bool, ReferLsidCnt, (StripeAddr& lsa), (override));
     MOCK_METHOD(void, DereferLsidCnt, (StripeAddr& lsa, uint32_t blockCount), (override));
@@ -20,7 +21,6 @@ public:
     MOCK_METHOD(int, FlushAllPendingStripes, (), (override));
     MOCK_METHOD(int, FlushAllPendingStripesInVolume, (int volumeId), (override));
     MOCK_METHOD(int, FlushAllPendingStripesInVolume, (int volumeId, FlushIoSmartPtr flushIo), (override));
-    MOCK_METHOD(StripeId, GetUserStripeId, (StripeId vsid), (override));
 };
 
 } // namespace pos

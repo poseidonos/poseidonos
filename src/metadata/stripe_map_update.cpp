@@ -32,13 +32,13 @@
 
 #include "src/metadata/stripe_map_update.h"
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/include/address_type.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
-StripeMapUpdate::StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap,
+StripeMapUpdate::StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap,
     ISegmentCtx* segmentCtx_)
 : MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),
   stripe(stripe),

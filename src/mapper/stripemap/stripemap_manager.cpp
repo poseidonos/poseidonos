@@ -37,7 +37,7 @@
 #include <tuple>
 
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/mapper/address/mapper_address_info.h"

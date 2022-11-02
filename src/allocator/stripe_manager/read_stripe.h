@@ -32,39 +32,31 @@
 
 #pragma once
 
-#include <atomic>
-#include <string>
-#include <tuple>
 #include <vector>
 
-#include "src/allocator/stripe/stripe.h"
-#include "src/logger/logger.h"
+#include "src/allocator/stripe_manager/stripe_load_status.h"
+#include "src/event_scheduler/callback.h"
+#include "src/include/address_type.h"
+#include "src/io_submit_interface/i_io_submit_handler.h"
+
 namespace pos
 {
-class StripeSpy : public Stripe
+class ReadStripe : public Callback
 {
 public:
-    using Stripe::Stripe;
-    virtual ~StripeSpy(void) = default;
-    uint32_t
-    GetBlksRemaining(void)
-    {
-        return 0;
-    }
-    int
-    Flush(EventSmartPtr callback)
-    {
-        return 0;
-    }
-    void
-    UpdateReverseMapEntry(uint32_t offset, BlkAddr rba, uint32_t volumeId)
-    {
-    }
-    uint32_t
-    DecreseBlksRemaining(uint32_t amount)
-    {
-        return 0;
-    }
+    ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId);
+    ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler);
+    virtual ~ReadStripe(void) = default;
+
+private:
+    virtual bool _DoSpecificJob(void);
+
+    LogicalBlkAddr readAddr;
+    std::vector<void*> buffers;
+    CallbackSmartPtr doneCallback;
+    int arrayId;
+
+    IIOSubmitHandler* ioSubmitHandler;
 };
 
 } // namespace pos
