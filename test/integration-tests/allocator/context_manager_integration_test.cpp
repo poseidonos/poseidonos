@@ -182,7 +182,7 @@ ContextManagerIntegrationTest::SetUp(void)
         std::shared_ptr<VersionedSegmentInfo> input(new VersionedSegmentInfo());
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx->Init(config, loadedSegInfos, numOfSegment, versionedSegmentInfo);
+    versionedSegCtx->Init(config, loadedSegInfos, numOfSegment, versionedSegmentInfo, addrInfo);
 
     ctxManager = new ContextManager(tp, allocCtx, segCtx, reCtx,
         versionedSegCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);

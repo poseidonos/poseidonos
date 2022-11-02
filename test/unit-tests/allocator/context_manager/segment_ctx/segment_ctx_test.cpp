@@ -539,7 +539,7 @@ TEST(SegmentCtx, AllocateFreeSegment_testWhenSegmentIsAllocated)
     // given
     NiceMock<MockAllocatorAddressInfo>* addrInfo = new NiceMock<MockAllocatorAddressInfo>;
     SegmentInfo* segInfos = new SegmentInfo[100]();
-    NiceMock<MockSegmentList> freeSegmentList, nvramSegmentList;
+    NiceMock<MockSegmentList> freeSegmentList, nvramSegmentList, ssdSegmentList;
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
     NiceMock<MockTelemetryPublisher>* tp = new NiceMock<MockTelemetryPublisher>();
 
@@ -547,6 +547,7 @@ TEST(SegmentCtx, AllocateFreeSegment_testWhenSegmentIsAllocated)
     SegmentCtx segCtx(tp, nullptr, segInfos, nullptr, rebuildCtx, addrInfo, &gcCtx, 0);
     segCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
     segCtx.SetSegmentList(SegmentState::NVRAM, &nvramSegmentList);
+    segCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
 
     EXPECT_CALL(freeSegmentList, PopSegment).WillOnce(Return(8));
     EXPECT_CALL(nvramSegmentList, AddToList(8));

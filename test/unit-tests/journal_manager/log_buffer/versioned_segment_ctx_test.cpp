@@ -39,6 +39,7 @@
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 
 using testing::NiceMock;
 using testing::Return;
@@ -56,7 +57,7 @@ TEST(VersionedSegmentCtx, Init_testIfInitWhenNumberOfLogGroupsIsTwo)
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
 
     SegmentInfo* segmentInfos = new SegmentInfo[3]();
-    versionedSegCtx.Init(&config, segmentInfos, 3);
+    versionedSegCtx.Init(&config, segmentInfos, 3, nullptr);
 
     delete[] segmentInfos;
 }
@@ -76,7 +77,7 @@ TEST(VersionedSegmentCtx, Dispose_testIfContextIsDeleted)
 
     // When : Init and Dispose
     SegmentInfo* segmentInfos = new SegmentInfo[3]();
-    versionedSegCtx.Init(&config, segmentInfos, 3);
+    versionedSegCtx.Init(&config, segmentInfos, 3, nullptr);
     versionedSegCtx.Dispose();
 
     delete[] segmentInfos;
@@ -98,7 +99,7 @@ TEST(VersionedSegmentCtx, IncreaseValidBlockCount_testIfValidBlockCountIsIncreas
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, nullptr);
 
     // When, Then
     uint32_t targetLogGroup = 0;
@@ -129,7 +130,7 @@ TEST(VersionedSegmentCtx, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountI
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, nullptr);
 
     // When, Then
     uint32_t targetLogGroup = 0;
@@ -153,13 +154,20 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsReturned)
     int numSegments = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
 
+    int totalBlockCount = 100;
+    int stripesPerSegment = 10;
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+    ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(totalBlockCount));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, &addrInfo);
 
     // When
     int targetLogGroup = 0;
@@ -210,13 +218,20 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsApplied)
     segmentInfos[1].SetOccupiedStripeCount(12);
     segmentInfos[2].SetOccupiedStripeCount(0);
 
+    int totalBlockCount = 100;
+    int stripesPerSegment = 200;
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+    ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(totalBlockCount));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, &addrInfo);
 
     // When
     int targetLogGroup = 0;
@@ -257,13 +272,20 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenInvalidLogGroupId
     int numSegments = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
 
+    int totalBlockCount = 100;
+    int stripesPerSegment = 200;
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+    ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(totalBlockCount));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, &addrInfo);
 
     // When
     ASSERT_DEATH(versionedSegCtx.GetUpdatedInfoToFlush(5), "");
@@ -282,13 +304,20 @@ TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
     int numSegments = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegments]();
 
+    int totalBlockCount = 100;
+    int stripesPerSegment = 200;
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+    ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(totalBlockCount));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, &addrInfo);
 
     int targetLogGroup = 0;
     tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount;
@@ -322,13 +351,20 @@ TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
     segmentInfos[1].SetOccupiedStripeCount(12);
     segmentInfos[2].SetOccupiedStripeCount(0);
 
+    int totalBlockCount = 100;
+    int stripesPerSegment = 200;
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+    ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(totalBlockCount));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
         std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
         versionedSegmentInfo.push_back(input);
     }
-    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
+    versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo, &addrInfo);
 
     int targetLogGroup = 0;
     SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
@@ -350,5 +386,4 @@ TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
 
     delete[] segmentInfos;
 }
-
 } // namespace pos

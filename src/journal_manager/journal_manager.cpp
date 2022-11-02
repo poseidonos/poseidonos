@@ -240,7 +240,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
     IVolumeInfoManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
-    EventScheduler* eventScheduler, TelemetryClient* tc)
+    EventScheduler* eventScheduler, TelemetryClient* tc, AllocatorAddressInfo* addrInfo)
 {
     int result = 0;
 
@@ -256,7 +256,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
                 return result;
             }
             _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
-                wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
+                wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler, addrInfo);
 
             ctxManager->SetAllocateDuplicatedFlush(false);
 
@@ -460,7 +460,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IVolumeInfoManager* volumeManager,
-    EventScheduler* eventScheduler)
+    EventScheduler* eventScheduler, AllocatorAddressInfo* addrInfo)
 {
     telemetryClient = tc;
     telemetryClient->RegisterPublisher(telemetryPublisher);
@@ -481,7 +481,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
             loadedSegmentInfos = segmentCtx->GetSegmentInfos();
         }
     }
-    versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
+    versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments, addrInfo);
 
     logFactory->Init(config, logFilledNotifier);
     eventFactory->Init(eventScheduler, logWriteHandler);

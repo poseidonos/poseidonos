@@ -39,13 +39,15 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/logger/logger.h"
 #include "versioned_segment_info.h"
+#include "src/allocator/address/allocator_address_info.h"
 
 namespace pos
 {
 VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
   numSegments(0),
-  segmentInfos(nullptr)
+  segmentInfos(nullptr),
+  addrInfo(nullptr)
 {
 }
 
@@ -55,7 +57,8 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_,
+    AllocatorAddressInfo* addrInfo_)
 {
     _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
 
@@ -64,16 +67,19 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
         std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
         segmentInfoDiffs.push_back(segmentInfo);
     }
+
+    addrInfo = addrInfo_;
 }
 
 void
 VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_,
-    std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo)
+    std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo, AllocatorAddressInfo* addrInfo_)
 {
     _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
 
     assert((int)inputVersionedSegmentInfo.size() == config->GetNumLogGroups());
     segmentInfoDiffs = inputVersionedSegmentInfo;
+    addrInfo = addrInfo_;
 }
 
 void
@@ -155,11 +161,14 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 
         segmentInfos[segmentId].SetValidBlockCount(result);
 
-        if (0 > (int)getValidCount)
+        if ((0 > (int)getValidCount) ||
+            (0 > (int)result) ||
+            (addrInfo->GetblksPerSegment() < result))
         {
             POS_TRACE_ERROR(EID(JOURNAL_INVALID),
-                "After update underflow occurred, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
-                logGroupId, segmentId, getValidCount, validBlockCountDiff);
+                "error occurred while updating valid block count, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, result {}",
+                logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
+
             assert(false);
         }
     }
@@ -170,7 +179,20 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         auto segmentId = it->first;
         auto occupiedStripeCountDiff = it->second;
 
-        segmentInfos[segmentId].SetOccupiedStripeCount(segmentInfos[segmentId].GetOccupiedStripeCount() + occupiedStripeCountDiff);
+        uint32_t getOccupiedStripeCount = segmentInfos[segmentId].GetOccupiedStripeCount();
+        uint32_t result = getOccupiedStripeCount + occupiedStripeCountDiff;
+
+        if (addrInfo->GetstripesPerSegment() < result)
+        {
+            POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+                "overflow occurred while updating occupied stripe count, logGroupId {}, segmentInfos[{}].GetOccupiedStripeCount() = {}, occupiedStripeCountDiff {}, result {}",
+                logGroupId, segmentId, getOccupiedStripeCount, occupiedStripeCountDiff, result);
+
+            result = addrInfo->GetstripesPerSegment();
+            //assert(false);
+        }
+
+        segmentInfos[segmentId].SetOccupiedStripeCount(result);
     }
 }
 
@@ -242,12 +264,25 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 void
 VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
 {
-    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
-    {
-        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
-        segmentInfoDiffs[groupId]->ResetValidBlockCount(targetSegmentId);
-    }
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
+
+    if (0 != segmentInfos[targetSegmentId].GetOccupiedStripeCount())
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID),
+            "Reset occupied stripe count error occurred, segId {}",
+            targetSegmentId);
+        assert(false);
+    }
+}
+
+void
+VersionedSegmentCtx::ResetOccupiedStripeCount(int logGroupId, SegmentId segId)
+{
+    _CheckSegIdValidity(segId);
+    _CheckLogGroupIdValidity(logGroupId);
+
+    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segId);
+
 }
 } // namespace pos

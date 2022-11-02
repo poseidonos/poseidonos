@@ -187,7 +187,8 @@ Metadata::Init(void)
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayInfo->GetIndex()),
         metaFsCtrl,
         EventSchedulerSingleton::Instance(),
-        TelemetryClientSingleton::Instance());
+        TelemetryClientSingleton::Instance(),
+        allocator->GetAllocatorAddrInfo());
 
     if (result != 0)
     {
