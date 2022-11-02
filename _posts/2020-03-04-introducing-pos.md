@@ -37,5 +37,3 @@ The outcomes are clear to see. The Facebook data center in Prineville, Oregon, w
 Independent evaluations of the OCP point to its long-term success. Respected press outlets like The Next Platform have evaluated the state of the OCP and found evidence of long-term growth and rising popularity, writing: “Step by step, the OCP ecosystem keeps growing and improving on every key metric, and the base of customers and the amount of money that companies are spending on OCP iron – including servers, storage, switches, edge cell sites, and network interface cards – is also growing as a consequence.”
 
 Samsung has quickly released SSDs that satisfy the OCP SSD specifications and has continued to work on OCP projects, along with Project Poseidon. Samsung’s rapid application and engagement have allowed the company to lead the market and develop technology that works for the greater good. It has opened the door to future collaboration alongside other major system builders to build better data centers for the future.
-
-
