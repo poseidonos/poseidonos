@@ -243,9 +243,15 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
         SegmentState prevState = result.second;
         bool removed = segmentList[prevState]->RemoveFromList(segId);
 
-        POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-            "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}",
-            segId, prevState, removed);
+        bool removeFromSSDList = false;
+        if (true == segmentList[SegmentState::SSD]->Contains(segId))
+        {
+            removeFromSSDList = segmentList[SegmentState::SSD]->RemoveFromList(segId);
+        }
+
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
+            "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}, removeFromSSDList{}",
+            segId, prevState, removed, removeFromSSDList);
         _SegmentFreed(segId);
     }
 
