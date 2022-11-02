@@ -218,4 +218,10 @@ IsSameVsa(VirtualBlkAddr vsa1, VirtualBlkAddr vsa2)
     return ((vsa1.stripeId == vsa2.stripeId) && (vsa1.offset == vsa2.offset));
 }
 
+constexpr StripeId
+VsidToUserLsid(StripeId vsid)
+{
+    return vsid;
+}
+
 } // namespace pos

@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 #include <test/unit-tests/allocator/i_block_allocator_mock.h>
 #include <test/unit-tests/allocator/i_context_manager_mock.h>
-#include <test/unit-tests/allocator/stripe/stripe_mock.h>
+#include <test/unit-tests/allocator/stripe_manager/stripe_mock.h>
 #include <test/unit-tests/array_models/dto/partition_logical_size_mock.h>
 #include <test/unit-tests/array_models/interface/i_array_info_mock.h>
 #include <test/unit-tests/cpu_affinity/affinity_manager_mock.h>

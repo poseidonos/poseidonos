@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/wbstripe_manager/write_stripe_completion.h"
+#include "src/allocator/stripe_manager/write_stripe_completion.h"
 
 namespace pos
 {

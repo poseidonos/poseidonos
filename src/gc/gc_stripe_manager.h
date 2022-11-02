@@ -33,7 +33,7 @@
 #pragma once
 #include <vector>
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/victim_stripe.h"
 #include "src/gc/force_flush_locker/force_flush_locker.h"
@@ -114,7 +114,6 @@ private:
     void _StartTimer(uint32_t volumeId);
     void _ResetFlushLock(uint32_t volId);
 
-    std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
 
     BufferPool* gcWriteBufferPool = nullptr;

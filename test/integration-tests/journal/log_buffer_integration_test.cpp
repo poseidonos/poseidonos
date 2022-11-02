@@ -13,7 +13,7 @@
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/utils/test_info.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 
 namespace pos
 {
@@ -122,7 +122,7 @@ JournalLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateStripeMapLogWriteContext(stripe, oldAddr, callback);
+        factory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callback);
     context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
 

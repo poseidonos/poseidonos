@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/wbstripe_manager/read_stripe_completion.h"
+#include "src/allocator/stripe_manager/read_stripe.h"
 
 namespace pos
 {
-class MockReadStripeCompletion : public ReadStripeCompletion
+class MockReadStripe : public ReadStripe
 {
 public:
-    using ReadStripeCompletion::ReadStripeCompletion;
+    using ReadStripe::ReadStripe;
     MOCK_METHOD(bool, _DoSpecificJob, (), (override));
 };
 

@@ -30,47 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/io/backend_io/flush_read_completion.h"
+#include "src/allocator/stripe_manager/write_stripe_completion.h"
 
-#include "src/include/branch_prediction.h"
-#include "src/include/pos_event_id.hpp"
-#include "src/include/backend_event.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/io/backend_io/flush_submission.h"
-#include "src/logger/logger.h"
+#include "src/resource_manager/buffer_pool.h"
 
 namespace pos
 {
-FlushReadCompletion::FlushReadCompletion(StripeSmartPtr stripe, int arrayId, EventScheduler* eventSchedulerArg)
-: Callback(false, CallbackType_FlushReadCompletion),
-  stripe(stripe),
-  arrayId(arrayId),
-  eventScheduler(eventSchedulerArg)
-{
-    SetEventType(BackendEvent_Flush);
-}
-
-FlushReadCompletion::~FlushReadCompletion(void)
+WriteStripeCompletion::WriteStripeCompletion(BufferPool* bufferPool, std::vector<void*> buffer, StripeLoadStatus* status)
+: Callback(false, CallbackType_WriteThroughStripeLoad),
+  bufferPool(bufferPool),
+  bufferList(buffer),
+  status(status)
 {
 }
 
 bool
-FlushReadCompletion::_DoSpecificJob(void)
+WriteStripeCompletion::_DoSpecificJob(void)
 {
-    EventSmartPtr flushEvent(new FlushSubmission(stripe, arrayId));
-    if (unlikely(nullptr == flushEvent))
+    // TODO (meta) check fail case (reference: writecompletion)
+
+    status->StripeLoaded();
+
+    for (auto b : bufferList)
     {
-        POS_EVENT_ID eventId =
-            EID(FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY);
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            "Fail to allocate memory");
-        return false;
+        bufferPool->ReturnBuffer(b);
     }
-    if (nullptr == eventScheduler)
-    {
-        eventScheduler = EventSchedulerSingleton::Instance();
-    }
-    eventScheduler->EnqueueEvent(flushEvent);
 
     return true;
 }

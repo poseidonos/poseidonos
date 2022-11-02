@@ -40,7 +40,7 @@
 
 namespace pos
 {
-StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid)
+StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, StripeSmartPtr stripe, StripeId prevLsid)
 : Callback(false, CallbackType_StripePutEvent),
   stripe(stripe),
   prevLsid(prevLsid),
@@ -48,7 +48,7 @@ StripePutEvent::StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, 
 {
 }
 
-StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId)
+StripePutEvent::StripePutEvent(StripeSmartPtr stripe, StripeId prevLsid, int arrayId)
 : StripePutEvent(nullptr, stripe, prevLsid)
 {
     iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId);
@@ -58,9 +58,9 @@ StripePutEvent::StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId)
 bool
 StripePutEvent::_DoSpecificJob(void)
 {
-    if (stripe.IsOkToFree())
+    if (stripe->IsOkToFree())
     {
-        stripe.SetFinished();
+        stripe->SetFinished();
         if (iWBStripeAllocator != nullptr)
         {
             iWBStripeAllocator->FreeWBStripeId(prevLsid);

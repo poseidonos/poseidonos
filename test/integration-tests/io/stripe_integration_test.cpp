@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "src/allocator/stripe/stripe.h"
-#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
+#include "src/allocator/stripe_manager/stripe.h"
+#include "src/allocator/stripe_manager/wbstripe_manager.h"
 #include "src/mapper/reversemap/reverse_map.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
-#include "test/unit-tests/allocator/wbstripe_manager/stripe_load_status_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_load_status_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/mapper/i_reversemap_mock.h"
@@ -84,9 +84,13 @@ TEST_F(StripeIntegrationTest, TestUserStripeAllocation)
     StripeId vsid = 10, wbLsid = 3, userLsid = 10;
     int volumeId = 2;
 
-    Stripe* stripe = wbstripeManager->GetStripe(wbLsid);
-    bool ret = stripe->Assign(vsid, wbLsid, userLsid, volumeId);
-    EXPECT_EQ(ret, true);
+    StripeSmartPtr stripe = StripeSmartPtr(new Stripe(&reverseMap, info.GetblksPerStripe()));
+    stripe->Assign(vsid, wbLsid, userLsid, volumeId);
+    wbstripeManager->AssignStripe(stripe);
+
+    EXPECT_EQ(stripe->GetVsid(), vsid);
+    EXPECT_EQ(stripe->GetWbLsid(), wbLsid);
+    EXPECT_EQ(stripe->GetVolumeId(), volumeId);
 }
 
 TEST_F(StripeIntegrationTest, TestGcStripeAllocation)
@@ -94,11 +98,11 @@ TEST_F(StripeIntegrationTest, TestGcStripeAllocation)
     StripeId vsid = 23, wbLsid = UNMAP_STRIPE, userLsid = 23;
     int volumeId = 3;
 
-    Stripe* stripe = new Stripe(&reverseMap, info.GetblksPerStripe());
-    bool ret = stripe->Assign(vsid, wbLsid, userLsid, volumeId);
-    EXPECT_EQ(ret, true);
-
-    delete stripe;
+    StripeSmartPtr stripe = StripeSmartPtr(new Stripe(&reverseMap, info.GetblksPerStripe()));
+    stripe->Assign(vsid, wbLsid, userLsid, volumeId);
+    EXPECT_EQ(stripe->GetVsid(), vsid);
+    EXPECT_EQ(stripe->GetWbLsid(), wbLsid);
+    EXPECT_EQ(stripe->GetVolumeId(), volumeId);
 }
 
 TEST_F(StripeIntegrationTest, TestUserStripeAllocationToFlush)
@@ -107,9 +111,9 @@ TEST_F(StripeIntegrationTest, TestUserStripeAllocationToFlush)
     int volumeId = 2;
 
     // Stripe allocation
-    Stripe* stripe = wbstripeManager->GetStripe(wbLsid);
-    bool assignSucceed = stripe->Assign(vsid, wbLsid, userLsid, volumeId);
-    EXPECT_EQ(assignSucceed, true);
+    StripeSmartPtr stripe = StripeSmartPtr(new Stripe(&reverseMap, info.GetblksPerStripe()));
+    stripe->Assign(vsid, wbLsid, userLsid, volumeId);
+    wbstripeManager->AssignStripe(stripe);
 
     // Update reversemap
     std::vector<BlkAddr> rbas;

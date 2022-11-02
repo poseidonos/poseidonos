@@ -30,54 +30,62 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/wbstripe_manager/read_stripe.h"
+#include "src/allocator/stripe_manager/read_stripe_completion.h"
+
+#include <stdlib.h>
 
 #include <list>
 
-#include "src/array/ft/buffer_entry.h"
 #include "src/include/meta_const.h"
-#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-ReadStripe::ReadStripe(StripeAddr readAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId)
-: ReadStripe(readAddr, buffer, callback, arrayId, IIOSubmitHandler::GetInstance())
+ReadStripeCompletion::ReadStripeCompletion(StripeAddr stripeAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId)
+: ReadStripeCompletion(stripeAddr, buffer, callback, arrayId, IIOSubmitHandler::GetInstance())
 {
 }
 
-ReadStripe::ReadStripe(StripeAddr stripeAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler)
+ReadStripeCompletion::ReadStripeCompletion(StripeAddr stripeAddr, std::vector<void*> buffer, CallbackSmartPtr callback, int arrayId, IIOSubmitHandler* ioSubmitHandler)
 : Callback(false, CallbackType_WriteThroughStripeLoad),
   buffers(buffer),
   doneCallback(callback),
   arrayId(arrayId),
   ioSubmitHandler(ioSubmitHandler)
 {
-    assert(stripeAddr.stripeLoc == IN_USER_AREA);
+    assert(stripeAddr.stripeLoc == IN_WRITE_BUFFER_AREA);
 
-    readAddr.stripeId = stripeAddr.stripeId;
-    readAddr.offset = 0;
+    writeAddr.stripeId = stripeAddr.stripeId;
+    writeAddr.offset = 0;
 }
 
 bool
-ReadStripe::_DoSpecificJob(void)
+ReadStripeCompletion::_DoSpecificJob(void)
 {
-    std::list<BufferEntry> bufferList;
-    uint32_t blockCount = 0;
-
+    IOSubmitHandlerStatus result = IOSubmitHandlerStatus::SUCCESS;
     for (auto b : buffers)
     {
-        BufferEntry bufferEntry(b, BLOCKS_IN_CHUNK);
+        std::list<BufferEntry> bufferList;
+        uint32_t blockCount = BLOCKS_IN_CHUNK;
+        BufferEntry bufferEntry(b, blockCount);
         bufferList.push_back(bufferEntry);
-        blockCount += BLOCKS_IN_CHUNK;
-    }
 
-    IOSubmitHandlerStatus result =
-        ioSubmitHandler->SubmitAsyncIO(IODirection::READ,
-            bufferList, readAddr, blockCount,
-            PartitionType::USER_DATA, doneCallback, arrayId);
+        // NOTE: Instead of submitting (a list of buffer entries, a single write address),
+        // we should be submitting (a single buffer, a single write address) if the partition of the destination is WRITE_BUFFER.
+        result = ioSubmitHandler->SubmitAsyncIO(IODirection::WRITE,
+            bufferList, writeAddr, blockCount,
+            PartitionType::WRITE_BUFFER, doneCallback, arrayId);
+        if (result != IOSubmitHandlerStatus::SUCCESS && result != IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP)
+        {
+            POS_TRACE_ERROR(result, "Failed to submit async write I/O when copying a stripe {} from SSD to Write Buffer.", writeAddr.stripeId);
+            return false;
+        }
+
+        writeAddr.offset += blockCount;
+    }
 
     return (result == IOSubmitHandlerStatus::SUCCESS ||
         result == IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP);
 }
+
 } // namespace pos

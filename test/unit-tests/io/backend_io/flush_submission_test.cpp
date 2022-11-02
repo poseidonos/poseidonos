@@ -13,7 +13,7 @@
 #include "src/logger/logger.h"
 #include "src/array_models/dto/partition_logical_size.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/array/service/io_translator/i_io_translator_mock.h"
 #include "test/unit-tests/io_submit_interface/i_io_submit_handler_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
@@ -30,12 +30,12 @@ namespace pos
 TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Stack)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
 
     // When : Creat flushSubmission
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     IIOSubmitHandler::RegisterInstance(&mockIIOSubmitHandler);
-    FlushSubmission flushSubmission(&mockStripe, 0);
+    FlushSubmission flushSubmission(StripeSmartPtr(mockStripe), 0);
 
     // Then : Do nothing
 }
@@ -43,12 +43,12 @@ TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Stack)
 TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Heap)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
 
     // When : Creat flushSubmission
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     IIOSubmitHandler::RegisterInstance(&mockIIOSubmitHandler);
-    FlushSubmission* flushSubmission = new FlushSubmission(&mockStripe, 0);
+    FlushSubmission* flushSubmission = new FlushSubmission(StripeSmartPtr(mockStripe), 0);
 
     // Then : Release memory
     delete flushSubmission;
@@ -57,11 +57,11 @@ TEST(FlushSubmission, FlushSubmission_Constructor_OneArgument_Heap)
 TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
 
     // When : constructor is called
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr, nullptr, false);
+    FlushSubmission flushSubmission(StripeSmartPtr(mockStripe), &mockIIOSubmitHandler, 0, nullptr, nullptr, false);
 
     // Then : Do nothing
 }
@@ -69,7 +69,7 @@ TEST(FlushSubmission, FlushSubmission_Constructor_ThreeArguments)
 TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     NiceMock<MockIArrayInfo> mockArrayInfo;
     const uint32_t BUFFER_SIZE = 4;
@@ -88,8 +88,8 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
     PartitionLogicalSize partLogicalSize;
     partLogicalSize.chunksPerStripe = BUFFER_SIZE; // implies the number of chunks
     ON_CALL(mockArrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&partLogicalSize));
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, &mockArrayInfo, nullptr, false);
-    
+    FlushSubmission flushSubmission(StripeSmartPtr(mockStripe), &mockIIOSubmitHandler, 0, &mockArrayInfo, nullptr, false);
+
     flushSubmission.Execute();
 
     // Then 1: bufferList size equals bufferSize
@@ -100,13 +100,13 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckBufferSizeAndReturn)
 TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     NiceMock<MockIArrayInfo> mockArrayInfo;
     PartitionLogicalSize partLogicalSize;
     partLogicalSize.chunksPerStripe = 5; // don't care the value
     ON_CALL(mockArrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&partLogicalSize));
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, &mockArrayInfo, nullptr, false);
+    FlushSubmission flushSubmission(StripeSmartPtr(mockStripe), &mockIIOSubmitHandler, 0, &mockArrayInfo, nullptr, false);
     bool actualReturn;
     int arrayId = 0;
 
@@ -142,10 +142,10 @@ TEST(FlushSubmission, FlushSubmission_Execute_CheckReturnValue)
 TEST(FlushSubmission, FlushSubmission_Execute_TranslatorNotNull)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     NiceMock<MockIIOSubmitHandler> mockIIOSubmitHandler;
     NiceMock<MockIIOTranslator> mockIIOTranslator;
-    FlushSubmission flushSubmission(&mockStripe, &mockIIOSubmitHandler, 0, nullptr, &mockIIOTranslator, false);
+    FlushSubmission flushSubmission(StripeSmartPtr(mockStripe), &mockIIOSubmitHandler, 0, nullptr, &mockIIOTranslator, false);
     bool actualReturn;
 
     // When : Translate returns value except SUCCESS(0)
@@ -159,11 +159,11 @@ TEST(FlushSubmission, FlushSubmission_Execute_TranslatorNotNull)
 TEST(FlushSubmission, FlushSubmission_GetBufferListSize_EmptyArgument)
 {
     // Given
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     uint32_t bufferSize;
 
     // When : Creat flushSubmit and call GetBufferListSize
-    FlushSubmission flushSubmission(&mockStripe, 0);
+    FlushSubmission flushSubmission(StripeSmartPtr(mockStripe), 0);
     bufferSize = flushSubmission.GetBufferListSize();
 
     // Then : GetBufferListSize return 0

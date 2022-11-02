@@ -1,4 +1,4 @@
-#include "src/allocator/wbstripe_manager/read_stripe_completion.h"
+#include "src/allocator/stripe_manager/read_stripe.h"
 #include "src/include/meta_const.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/io_submit_interface/i_io_submit_handler_mock.h"
@@ -11,12 +11,12 @@ using ::testing::_;
 
 namespace pos
 {
-TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
+TEST(ReadStripe, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
 {
     const uint32_t CHUNK_CNT = 5;
-    StripeAddr writeAddr = {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = 5 };
+    StripeAddr readAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = 10 };
 
     std::vector<void*> buffers;
     for (int i = 0; i < CHUNK_CNT; i++) // assume we have only 5 chunks per stripe
@@ -27,22 +27,17 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
     CallbackSmartPtr callback(new NiceMock<MockCallback>(false));
     NiceMock<MockIIOSubmitHandler> ioSubmitHandler;
 
-    ReadStripeCompletion readStripeCompletion(writeAddr, buffers, callback, 0, &ioSubmitHandler);
+    ReadStripe readStripe(readAddr, buffers, callback, 0, &ioSubmitHandler);
 
     LogicalBlkAddr expectedAddr = {
-        .stripeId = 5,
+        .stripeId = 10,
         .offset = 0 };
+    EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
+        IODirection::READ,
+        _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
+        PartitionType::USER_DATA, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 
-    for (int i = 0; i < CHUNK_CNT; i++)
-    {
-        EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
-            IODirection::WRITE,
-            _, expectedAddr, BLOCKS_IN_CHUNK,
-            PartitionType::WRITE_BUFFER, _, 0, _)).Times(1);
-        expectedAddr.offset += BLOCKS_IN_CHUNK;
-    }
-
-    bool success = readStripeCompletion.Execute();
+    bool success = readStripe.Execute();
     EXPECT_EQ(success, true);
 
     for (auto b : buffers)
@@ -51,12 +46,12 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnTrueWhenIoSubmitSuccess)
     }
 }
 
-TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
+TEST(ReadStripe, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
 {
     const uint32_t CHUNK_CNT = 5;
-    StripeAddr writeAddr = {
-        .stripeLoc = IN_WRITE_BUFFER_AREA,
-        .stripeId = 5 };
+    StripeAddr readAddr = {
+        .stripeLoc = IN_USER_AREA,
+        .stripeId = 10 };
 
     std::vector<void*> buffers;
     for (int i = 0; i < CHUNK_CNT; i++) // assume we have only 5 chunks per stripe
@@ -67,18 +62,17 @@ TEST(ReadStripeCompletion, _DoSpecificJob_testIfReturnFalseWhenIoSubmitFails)
     CallbackSmartPtr callback(new NiceMock<MockCallback>(false));
     NiceMock<MockIIOSubmitHandler> ioSubmitHandler;
 
-    ReadStripeCompletion readStripeCompletion(writeAddr, buffers, callback, 0, &ioSubmitHandler);
+    ReadStripe readStripe(readAddr, buffers, callback, 0, &ioSubmitHandler);
 
     LogicalBlkAddr expectedAddr = {
-        .stripeId = 5,
+        .stripeId = 10,
         .offset = 0 };
-
     EXPECT_CALL(ioSubmitHandler, SubmitAsyncIO(
-        IODirection::WRITE,
-        _, expectedAddr, BLOCKS_IN_CHUNK,
-        PartitionType::WRITE_BUFFER, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
+        IODirection::READ,
+        _, expectedAddr, BLOCKS_IN_CHUNK * CHUNK_CNT,
+        PartitionType::USER_DATA, _, 0, _)).WillOnce(Return(IOSubmitHandlerStatus::FAIL));
 
-    bool success = readStripeCompletion.Execute();
+    bool success = readStripe.Execute();
     EXPECT_EQ(success, false);
 
     for (auto b : buffers)

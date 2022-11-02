@@ -7,7 +7,7 @@
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
 
-#include <test/unit-tests/allocator/stripe/stripe_mock.h>
+#include <test/unit-tests/allocator/stripe_manager/stripe_mock.h>
 #include <test/unit-tests/io/general_io/rba_state_manager_mock.h>
 #include <test/unit-tests/gc/gc_map_update_request_mock.h>
 #include <test/unit-tests/allocator/i_block_allocator_mock.h>
@@ -185,7 +185,7 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
                         dataBuffer, gcStripeManager, callback, blockAllocator,
                         ioSubmitHandler, flowControl, array);
     EXPECT_CALL(*flowControl, GetToken(_, _)).WillOnce(Return(partitionLogicalSize.blksPerStripe));
-    EXPECT_CALL(*blockAllocator, AllocateGcDestStripe(testVolumeId)).WillOnce(Return(stripe));
+    EXPECT_CALL(*blockAllocator, AllocateGcDestStripe(testVolumeId)).WillOnce(Return(StripeSmartPtr(stripe)));
 
     EXPECT_CALL(*ioSubmitHandler, SubmitAsyncIO(_, _, _, _, _, _, arrayIndex, _)).WillOnce(Return(IOSubmitHandlerStatus::SUCCESS));
 

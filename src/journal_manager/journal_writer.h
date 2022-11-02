@@ -40,8 +40,6 @@
 
 namespace pos
 {
-class Stripe;
-
 class LogWriteHandler;
 class LogWriteContextFactory;
 class JournalEventFactory;
@@ -57,7 +55,7 @@ public:
         JournalEventFactory* journalEventFactory, JournalingStatus* status, EventScheduler* scheduler);
 
     virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent);
+    virtual int AddStripeMapUpdatedLog(StripeSmartPtr stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent);
     virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
 
 private:

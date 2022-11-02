@@ -4005,7 +4005,7 @@ Root:
     Solution: but it's not the rebuilding target.
   -
     Id: 3199
-    Name: ALLOCATOR_FAILED_TO_ASSIGN_STRIPE
+    Name: ALLOCATOR_RESERVED
     Severity:
     Message:
     Cause:
@@ -4125,6 +4125,13 @@ Root:
   -
     Id: 3216
     Name: ALLOCATOR_META_ARCHIVE_STORE_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3217
+    Name: WBSTRIPE_MANAGER_FAILED_TO_GET_BUFFER
     Severity:
     Message:
     Cause:

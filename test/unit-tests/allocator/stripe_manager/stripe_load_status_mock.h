@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/allocator/wbstripe_manager/stripe_load_status.h"
+#include "src/allocator/stripe_manager/stripe_load_status.h"
 
 namespace pos
 {

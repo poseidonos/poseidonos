@@ -1,4 +1,4 @@
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 
 #include <gtest/gtest.h>
 
@@ -32,22 +32,10 @@ TEST(Stripe, Assign_TestIfValidatesTheEqualityOfVsidAndUserLsid)
     StripeId userLsid = 10;
     uint32_t volumeId = 5;
 
-    // When 1: we try to assign a stripe with vsid == userLsid
-    bool stripeAssigned = stripe.Assign(vsid, wbLsid, userLsid, volumeId);
+    // When: we try to assign a stripe with vsid == userLsid
+    stripe.Assign(vsid, wbLsid, userLsid, volumeId);
 
-    // Then 1: we should succeed to assign
-    EXPECT_EQ(true, stripeAssigned);
-
-    // Given 2: vsid != userLsid
-    userLsid = vsid + 1;
-
-    // When 2: we try to assign a stripe with vsid != userLsid
-    stripeAssigned = stripe.Assign(vsid, wbLsid, userLsid, volumeId);
-
-    // Then 2: we should fail to assign
-    EXPECT_EQ(false, stripeAssigned);
-
-    // Simple setter tests
+    // Then: simple setter tests
     EXPECT_EQ(stripe.GetVsid(), vsid);
     EXPECT_EQ(stripe.GetWbLsid(), wbLsid);
     EXPECT_EQ(stripe.GetVolumeId(), volumeId);

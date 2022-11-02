@@ -39,7 +39,7 @@
 #include "src/allocator/allocator.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_wbstripe_allocator.h"
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array_mgmt/array_manager.h"
@@ -96,7 +96,7 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
-    Stripe* allocatedStripe = nullptr;
+    StripeSmartPtr stripe = nullptr;
     if (isForceFlush == false)
     {
         const PartitionLogicalSize* udSize =
@@ -109,8 +109,8 @@ GcFlushSubmission::Execute(void)
             return false;
         }
 
-        allocatedStripe = _AllocateStripe(volumeId);
-        if (allocatedStripe == nullptr)
+        stripe = _AllocateStripe(volumeId);
+        if (stripe == nullptr)
         {
             if (0 < token)
             {
@@ -121,16 +121,14 @@ GcFlushSubmission::Execute(void)
     }
     else
     {
-        allocatedStripe = _AllocateStripe(volumeId);
-        if (allocatedStripe == nullptr)
+        stripe = _AllocateStripe(volumeId);
+        if (stripe == nullptr)
         {
             return false;
         }
         flowControl->Reset();
         POS_TRACE_INFO(EID(FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH), "");
     }
-
-    StripeSmartPtr stripe(allocatedStripe);
 
     uint32_t validCnt = 0;
     for (uint32_t offset = 0; offset < blkInfoList->size(); offset++)
@@ -203,10 +201,10 @@ GcFlushSubmission::Execute(void)
     return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
 }
 
-Stripe*
+StripeSmartPtr
 GcFlushSubmission::_AllocateStripe(uint32_t volumeId)
 {
-    Stripe* stripe = iBlockAllocator->AllocateGcDestStripe(volumeId);
+    StripeSmartPtr stripe = iBlockAllocator->AllocateGcDestStripe(volumeId);
     return stripe;
 }
 

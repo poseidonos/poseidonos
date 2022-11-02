@@ -81,7 +81,7 @@ BlockMapUpdate::_DoSpecificJob(void)
     vsaMap->SetVSAs(volumeIo->GetVolumeId(), rba, targetVsaRange);
 
     StripeAddr lsidEntry = volumeIo->GetLsidEntry();
-    Stripe& stripe = _GetStripe(lsidEntry);
+    StripeSmartPtr stripe = _GetStripe(lsidEntry);
     _UpdateReverseMap(stripe);
 
     uint32_t vsaRangeCount = oldVsaRangeMaker->GetCount();
@@ -102,7 +102,7 @@ BlockMapUpdate::_DoSpecificJob(void)
 }
 
 void
-BlockMapUpdate::_UpdateReverseMap(Stripe& stripe)
+BlockMapUpdate::_UpdateReverseMap(StripeSmartPtr stripe)
 {
     VirtualBlkAddr startVsa = volumeIo->GetVsa();
     uint32_t blocks = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
@@ -114,14 +114,14 @@ BlockMapUpdate::_UpdateReverseMap(Stripe& stripe)
     {
         uint64_t vsOffset = startVsOffset + blockIndex;
         BlkAddr targetRba = startRba + blockIndex;
-        stripe.UpdateReverseMapEntry(vsOffset, targetRba, volumeId);
+        stripe->UpdateReverseMapEntry(vsOffset, targetRba, volumeId);
     }
 }
 
-Stripe&
+StripeSmartPtr
 BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
 {
-    Stripe* foundStripe = wbStripeAllocator->GetStripe(lsidEntry.stripeId);
+    StripeSmartPtr foundStripe = wbStripeAllocator->GetStripe(lsidEntry.stripeId);
 
     if (unlikely(nullptr == foundStripe))
     {
@@ -131,6 +131,6 @@ BlockMapUpdate::_GetStripe(StripeAddr& lsidEntry)
         throw eventId;
     }
 
-    return *foundStripe;
+    return foundStripe;
 }
 } // namespace pos

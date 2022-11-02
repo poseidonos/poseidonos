@@ -40,13 +40,11 @@
 
 namespace pos
 {
-class Stripe;
-
 class IMetaUpdater
 {
 public:
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) = 0;
-    virtual int UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback) = 0;
+    virtual int UpdateStripeMap(StripeSmartPtr stripe, CallbackSmartPtr callback) = 0;
     virtual int UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) = 0;
 };
 } // namespace pos

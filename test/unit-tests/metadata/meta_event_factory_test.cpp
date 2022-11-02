@@ -9,7 +9,7 @@
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
@@ -62,8 +62,8 @@ TEST(MetaEventFactory, CreateStripeMapUpdateEvent_testIfStripeMapUpdateEventIsCr
 
     MetaEventFactory factory(nullptr, &stripeMap, nullptr, nullptr, &contextManager, nullptr);
 
-    NiceMock<MockStripe> stripe;
-    CallbackSmartPtr actual = factory.CreateStripeMapUpdateEvent(&stripe);
+    StripeSmartPtr stripe = StripeSmartPtr(new NiceMock<MockStripe>());
+    CallbackSmartPtr actual = factory.CreateStripeMapUpdateEvent(stripe);
 
     EXPECT_EQ(typeid(*actual.get()), typeid(StripeMapUpdate));
 }

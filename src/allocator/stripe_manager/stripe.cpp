@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 
 #include <string>
 
@@ -91,16 +91,11 @@ Stripe::GetVictimVsa(uint32_t offset)
     return oldVsaList[offset];
 }
 
-bool
+void
 Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, uint32_t volumeId_)
 {
-    if (vsid_ != userLsid_)
-    {
-        POS_TRACE_ERROR(EID(META_STRIPE_FAILED_TO_ASSIGN),
-            "Cannot assign a stripe when its vsid {} does not match with userLsid {}",
-            vsid_, userLsid_);
-        return false;
-    }
+    assert(vsid_ == userLsid_);
+
     vsid = vsid_;
     wbLsid = wbLsid_;
     userLsid = userLsid_;
@@ -112,7 +107,6 @@ Stripe::Assign(StripeId vsid_, StripeId wbLsid_, StripeId userLsid_, uint32_t vo
 
     // wbLsid of GC stripe would be UNMAP_STRIPE
     revMapPack = iReverseMap->AllocReverseMapPack(vsid, wbLsid);
-    return true;
 }
 
 bool

@@ -32,7 +32,7 @@
 
 #include "log_write_context_factory.h"
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
@@ -86,7 +86,7 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
 }
 
 LogWriteContext*
-LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
+LogWriteContextFactory::CreateStripeMapLogWriteContext(StripeSmartPtr stripe,
     StripeAddr oldAddr, EventSmartPtr callbackEvent)
 {
     StripeAddr newAddr = {

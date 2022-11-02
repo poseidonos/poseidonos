@@ -39,13 +39,11 @@
 
 namespace pos
 {
-class Stripe;
-
 class IJournalWriter
 {
 public:
     virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent) = 0;
-    virtual int AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent) = 0;
+    virtual int AddStripeMapUpdatedLog(StripeSmartPtr stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent) = 0;
     virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent) = 0;
 };
 

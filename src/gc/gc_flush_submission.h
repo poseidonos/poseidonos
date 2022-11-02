@@ -45,7 +45,6 @@
 
 namespace pos
 {
-class Stripe;
 class FlowControl;
 
 class GcFlushSubmission : public Event
@@ -62,7 +61,7 @@ public:
     bool Execute(void) override;
 
 private:
-    Stripe* _AllocateStripe(uint32_t volumeId);
+    StripeSmartPtr _AllocateStripe(uint32_t volumeId);
 
     std::string arrayName;
     std::vector<BlkInfo>* blkInfoList;
