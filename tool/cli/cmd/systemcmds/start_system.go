@@ -32,7 +32,7 @@ Syntax:
 
 		req := messages.BuildReq(command, uuid)
 
-		reqJSON, err := json.Marshal(req)
+		reqJson, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
 		}
@@ -41,7 +41,7 @@ Syntax:
 			fmt.Println("Launching PoseidonOS...")
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
+		displaymgr.PrintRequest(string(reqJson))
 
 		// TODO(mj): Here, we execute a script to run POS. This needs to be revised in the future.
 

@@ -32,16 +32,16 @@ Example:
 		var command = "LISTQOSPOLICIES"
 
 		req := formListQosReq(command)
-		reqJSON, err := json.Marshal(req)
+		reqJson, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
+		displaymgr.PrintRequest(string(reqJson))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJson))
 			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
