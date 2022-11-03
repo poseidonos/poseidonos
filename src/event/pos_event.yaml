@@ -4223,6 +4223,55 @@ Root:
     Message: A flush occurred before the GC force flush timer expired, and the timer was reset.
     Cause:
     Solution:
+  -
+    Id: 3437
+    Name: GC_STRIPE_FORCIBLY_FLUSHED
+    Severity:
+    Message: The GC stripe forcibly flushed because the timer expired.
+    Cause:
+    Solution:
+  -
+    Id: 3440
+    Name: GC_NORMAL_FLUSH_TRYLOCK_FAILED
+    Severity:
+    Message: GC normal flush lock acquisition failed
+    Cause: Forced flushing
+    Solution:
+  -
+    Id: 3441
+    Name: GC_FORCE_FLUSH_LOCK_ACQUIRED
+    Severity:
+    Message: GC force flush lock acquired
+    Cause:
+    Solution:
+  -
+    Id: 3442
+    Name: GC_FORCE_FLUSH_TRYLOCK_FAILED
+    Severity:
+    Message: GC force flush lock acquisition failed
+    Cause:
+    Solution: It will be retried
+  -
+    Id: 3443
+    Name: GC_FORCE_FLUSH_LOCK_RELEASED
+    Severity:
+    Message: GC force flush lock released
+    Cause:
+    Solution:
+  -
+    Id: 3444
+    Name: GC_FORCE_FLUSH_TRYLOCK_WAITING
+    Severity:
+    Message: Waiting for GC force flush lock acquisition
+    Cause: The volume is deleted and need to reset flush lock
+    Solution:
+  -
+    Id: 3445
+    Name: GC_FLUSH_LOCK_RESET
+    Severity:
+    Message: GC flush lock reset
+    Cause: The volume is deleted
+    Solution:
 
   # WBTGC: 3470 - 3499
   -
@@ -4338,6 +4387,13 @@ Root:
     Name: FLOW_CONTROL_NO_MATCHING_REQ_ARRAY_NAME
     Severity:
     Message:
+    Cause:
+    Solution:
+  -
+    Id: 3511
+    Name: FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH
+    Severity:
+    Message: Tokens are reset due to force flush.
     Cause:
     Solution:
 
