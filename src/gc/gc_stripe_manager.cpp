@@ -42,6 +42,7 @@
 #include "src/gc/gc_flush_submission.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/meta_const.h"
+#include "src/include/array_config.h"
 #include "src/io/general_io/translator.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
@@ -57,20 +58,16 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo)
 {
 }
 
-bool
+void
 GcStripeManager::_SetBufferPool(void)
 {
     BufferInfo info = {
         .owner = typeid(this).name(),
         .size = CHUNK_SIZE,
-        .count = udSize->chunksPerStripe * GC_WRITE_BUFFER_COUNT};
+        .count = udSize->chunksPerStripe * ArrayConfig::GC_BUFFER_COUNT};
 
     gcWriteBufferPool = memoryManager->CreateBufferPool(info);
-    if (gcWriteBufferPool == nullptr)
-    {
-        return false;
-    }
-    return true;
+    assert(gcWriteBufferPool != nullptr);
 }
 
 GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
@@ -92,11 +89,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
     }
     flushedStripeCnt = 0;
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
-    if (_SetBufferPool() == false)
-    {
-        POS_TRACE_ERROR(EID(GC_ERROR_MSG),
-            "Failed to allocated memory in GC_STRIPE_MANAGER");
-    }
+    _SetBufferPool();
 }
 
 GcStripeManager::~GcStripeManager(void)
