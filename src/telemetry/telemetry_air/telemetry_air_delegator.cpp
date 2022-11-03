@@ -33,6 +33,7 @@
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 
 #include <exception>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -164,7 +165,22 @@ SetCustomArrayIdVolumeIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
 void
 SetCustomSourceDeviceIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
 {
-    metric->AddLabel("device_id", ToString(airNodeObj["index"]));
+    uint64_t index{ToPrimitive<uint64_t>(airNodeObj["index"])};
+    std::string decoded_pcie_addr {""};
+    uint64_t incoded_pcie_addr[4] {0,};
+    std::stringstream decoded_pcie_addr_ss[4];
+    incoded_pcie_addr[0] = (index & 0xFFFF00000) >> 20;
+    incoded_pcie_addr[1] = (index & 0xFF000) >> 12;
+    incoded_pcie_addr[2] = (index & 0xFF0) >> 4;
+    incoded_pcie_addr[3] = (index & 0xF);
+    decoded_pcie_addr_ss[0] << std::hex << std::setw(4) << std::setfill('0') << incoded_pcie_addr[0];
+    decoded_pcie_addr_ss[1] << std::hex << std::setw(2) << std::setfill('0') << incoded_pcie_addr[1];
+    decoded_pcie_addr_ss[2] << std::hex << std::setw(2) << std::setfill('0') << incoded_pcie_addr[2];
+    decoded_pcie_addr_ss[3] << std::hex << std::setw(1) << std::setfill('0') << incoded_pcie_addr[3];
+    decoded_pcie_addr = decoded_pcie_addr_ss[0].str() + ":" + decoded_pcie_addr_ss[1].str()
+        + ":" + decoded_pcie_addr_ss[2].str() + "." + decoded_pcie_addr_ss[3].str();
+
+    metric->AddLabel("device_id", decoded_pcie_addr);
     metric->AddLabel("source", ToString(airNodeObj["filter"]));
 }
 
