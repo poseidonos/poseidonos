@@ -38,18 +38,20 @@ Example:
 
 		req := &pb.AddListenerRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-		reqJSON, err := protojson.Marshal(req)
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
+		displaymgr.PrintRequest(string(reqJson))
 
 		if !(globals.IsTestingReqBld) {
 			var resJSON string
 
 			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
 				res, err := grpcmgr.SendAddListener(req)
 				if err != nil {

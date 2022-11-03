@@ -94,14 +94,14 @@ Example:
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
 			for _, request := range requestList {
-				reqJSON, err := json.Marshal(request)
+				reqJson, err := json.Marshal(request)
 				if err != nil {
 					log.Error("error:", err)
 				}
 
-				displaymgr.PrintRequest(string(reqJSON))
+				displaymgr.PrintRequest(string(reqJson))
 
-				resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+				resJSON := socketmgr.SendReqAndReceiveRes(string(reqJson))
 
 				displaymgr.PrintResponse(request.COMMAND, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 			}

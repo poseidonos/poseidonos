@@ -31,19 +31,22 @@ Syntax:
 			NumBlocks: create_device_numBlocks, BlockSize: create_device_blockSize,
 			DevType: create_device_deviceType, Numa: create_device_numa}
 		req := &pb.CreateDeviceRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-		reqJSON, err := protojson.Marshal(req)
+
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
+		displaymgr.PrintRequest(string(reqJson))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
 			var resJSON string
 
 			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
 				res, err := grpcmgr.SendCreateDevice(req)
 				if err != nil {

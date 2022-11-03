@@ -132,8 +132,8 @@ func WBT(cmd *cobra.Command, args []string) (model.Response, error) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		reqJSON, _ := json.Marshal(req)
-		displaymgr.PrintRequest(string(reqJSON))
+		reqJson, _ := json.Marshal(req)
+		displaymgr.PrintRequest(string(reqJson))
 
 		resJSON, _ := json.Marshal(res)
 		// mj: isDebug is true for WBT commands at default.
