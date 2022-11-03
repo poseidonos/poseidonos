@@ -92,6 +92,12 @@ CopierReadCompletion::_DoSpecificJob(void)
     list<BlkInfo> blkInfoList = victimStripe->GetBlkInfoList(listIndex);
 
     uint32_t volId = blkInfoList.begin()->volID;
+    assert(volId != UINT32_MAX);
+    if (gcStripeManager->TryFlushLock(volId) == false)
+    {
+        POS_TRACE_DEBUG(EID(GC_NORMAL_FLUSH_TRYLOCK_FAILED), "vol_id:{}", volId);
+        return false;
+    }
     uint32_t remainCnt = blkCnt - allocatedCnt;
     while (remainCnt)
     {
@@ -99,6 +105,7 @@ CopierReadCompletion::_DoSpecificJob(void)
             gcStripeManager->AllocateWriteBufferBlks(volId, remainCnt);
         if (0 == gcAllocateBlks.numBlks)
         {
+            gcStripeManager->ReleaseFlushLock(volId);
             return false;
         }
         uint32_t startOffset = gcAllocateBlks.startOffset;
@@ -151,7 +158,7 @@ CopierReadCompletion::_DoSpecificJob(void)
             }
         }
     }
-
+    gcStripeManager->ReleaseFlushLock(volId);
     volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo, blkCnt);
     airlog("InternalIoPendingCnt", "user", volId, -blkCnt);
     meta->ReturnBuffer(stripeId, buffer);

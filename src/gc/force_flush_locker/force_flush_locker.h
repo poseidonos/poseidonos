@@ -32,56 +32,30 @@
 
 #pragma once
 
-#include "src/lib/singleton.h"
-#include "src/event_scheduler/callback_type.h"
-#include "src/event_scheduler/publish_pending_io.h"
+#include <mutex>
 
-#include <vector>
+#include "force_flush_locker_busy_state.h"
+#include "force_flush_locker_normal_state.h"
+
+using namespace std;
 
 namespace pos
 {
-
-const uint32_t CHECK_RESOLUTION_RANGE = 36000; // 1 hour
-const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
-const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
-class TelemetryPublisher;
-
-struct PendingIo
-{
-    std::atomic<std::int64_t> pendingIoCnt[CHECK_RESOLUTION_RANGE];
-    std::atomic<std::uint64_t> oldestIdx;
-};
-
-class IoTimeoutChecker
+class ForceFlushLocker
 {
 public:
-    IoTimeoutChecker(void);
-    ~IoTimeoutChecker(void);
-
-    void Initialize(void);
-
-    void IncreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
-    void DecreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
-
-    bool FindPendingIo(CallbackType callbackType);
-    void GetPendingIoCount(CallbackType callbackType, std::vector<int> &pendingIoCnt);
-
-    void MoveOldestIdx(CallbackType callbackType);
-    void MoveCurrentIdx(uint64_t pendingTime);
-
-    uint64_t GetCurrentRoughTime(void);
+    ForceFlushLocker(void);
+    virtual ~ForceFlushLocker(void);
+    bool TryForceFlushLock(uint32_t volId);
+    void UnlockForceFlushLock(uint32_t volId);
+    bool TryLock(uint32_t volId);
+    void Unlock(uint32_t volId);
+    void Reset(uint32_t volId);
 
 private:
-
-    bool _CheckPeningOverTime(CallbackType callbackType);    
-
-    bool initialize;
-    PublishPendingIo* publisher;
-    std::atomic<std::uint64_t> currentIdx;
-
-    PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
-    TelemetryPublisher* telemetryPublisher;
+    ForceFlushLockerNormalState* normalLocker = nullptr;
+    ForceFlushLockerBusyState* busyLocker = nullptr;
+    mutex lockerMtx;
 };
 
-using IoTimeoutCheckerSingleton = Singleton<IoTimeoutChecker>;
-}
+} // namespace pos

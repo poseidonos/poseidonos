@@ -187,5 +187,6 @@ private:
     static int64_t globalThrottlingIncreaseCoefficient;
     int64_t minGuaranteedIncreaseCoefficient;
     float minThrottlingBiasedRate;
+    static const uint32_t ARRAY_SHIFT = 8;
 };
 } // namespace pos

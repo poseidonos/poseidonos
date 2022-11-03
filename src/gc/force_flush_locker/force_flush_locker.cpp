@@ -30,58 +30,79 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/lib/singleton.h"
-#include "src/event_scheduler/callback_type.h"
-#include "src/event_scheduler/publish_pending_io.h"
-
-#include <vector>
+#include "force_flush_locker.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
 
-const uint32_t CHECK_RESOLUTION_RANGE = 36000; // 1 hour
-const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
-const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
-class TelemetryPublisher;
-
-struct PendingIo
+ForceFlushLocker::ForceFlushLocker(void)
 {
-    std::atomic<std::int64_t> pendingIoCnt[CHECK_RESOLUTION_RANGE];
-    std::atomic<std::uint64_t> oldestIdx;
-};
-
-class IoTimeoutChecker
-{
-public:
-    IoTimeoutChecker(void);
-    ~IoTimeoutChecker(void);
-
-    void Initialize(void);
-
-    void IncreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
-    void DecreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
-
-    bool FindPendingIo(CallbackType callbackType);
-    void GetPendingIoCount(CallbackType callbackType, std::vector<int> &pendingIoCnt);
-
-    void MoveOldestIdx(CallbackType callbackType);
-    void MoveCurrentIdx(uint64_t pendingTime);
-
-    uint64_t GetCurrentRoughTime(void);
-
-private:
-
-    bool _CheckPeningOverTime(CallbackType callbackType);    
-
-    bool initialize;
-    PublishPendingIo* publisher;
-    std::atomic<std::uint64_t> currentIdx;
-
-    PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
-    TelemetryPublisher* telemetryPublisher;
-};
-
-using IoTimeoutCheckerSingleton = Singleton<IoTimeoutChecker>;
+    normalLocker = new ForceFlushLockerNormalState();
+    busyLocker = new ForceFlushLockerBusyState();
 }
+
+ForceFlushLocker::~ForceFlushLocker(void)
+{
+    delete busyLocker;
+    delete normalLocker;
+}
+
+bool
+ForceFlushLocker::TryForceFlushLock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    if (normalLocker->Exists(volId) == true)
+    {
+        return false;
+    }
+    bool ret = busyLocker->TryLock(volId);
+    if (ret == true)
+    {
+        POS_TRACE_INFO(EID(GC_FORCE_FLUSH_LOCK_ACQUIRED), "vol_id:{}", volId);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(GC_FORCE_FLUSH_TRYLOCK_FAILED), "vol_id:{}", volId);
+    }
+    return ret;
+}
+
+void
+ForceFlushLocker::UnlockForceFlushLock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    busyLocker->Unlock(volId);
+    POS_TRACE_INFO(EID(GC_FORCE_FLUSH_LOCK_RELEASED), "vol_id:{}", volId);
+}
+
+bool
+ForceFlushLocker::TryLock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    if (busyLocker->Exists(volId) == true)
+    {
+        POS_TRACE_DEBUG(EID(GC_NORMAL_FLUSH_TRYLOCK_FAILED), "vol_id:{}", volId);
+        return false;
+    }
+    return normalLocker->TryLock(volId);
+}
+
+void
+ForceFlushLocker::Unlock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    normalLocker->Unlock(volId);
+}
+
+void
+ForceFlushLocker::Reset(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    normalLocker->Reset(volId);
+    busyLocker->Reset(volId);
+    POS_TRACE_INFO(EID(GC_FLUSH_LOCK_RESET), "vol_id:{}", volId);
+}
+
+} // namespace pos

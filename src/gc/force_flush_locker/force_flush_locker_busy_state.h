@@ -31,57 +31,27 @@
  */
 
 #pragma once
+#include <unordered_set>
 
-#include "src/lib/singleton.h"
-#include "src/event_scheduler/callback_type.h"
-#include "src/event_scheduler/publish_pending_io.h"
+#include "force_flush_locker_state.h"
 
-#include <vector>
+using namespace std;
 
 namespace pos
 {
-
-const uint32_t CHECK_RESOLUTION_RANGE = 36000; // 1 hour
-const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
-const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
-class TelemetryPublisher;
-
-struct PendingIo
-{
-    std::atomic<std::int64_t> pendingIoCnt[CHECK_RESOLUTION_RANGE];
-    std::atomic<std::uint64_t> oldestIdx;
-};
-
-class IoTimeoutChecker
+class ForceFlushLockerBusyState : public ForceFlushLockerState
 {
 public:
-    IoTimeoutChecker(void);
-    ~IoTimeoutChecker(void);
-
-    void Initialize(void);
-
-    void IncreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
-    void DecreasePendingCnt(CallbackType callbackType, uint64_t pendingTime);
-
-    bool FindPendingIo(CallbackType callbackType);
-    void GetPendingIoCount(CallbackType callbackType, std::vector<int> &pendingIoCnt);
-
-    void MoveOldestIdx(CallbackType callbackType);
-    void MoveCurrentIdx(uint64_t pendingTime);
-
-    uint64_t GetCurrentRoughTime(void);
+    virtual ~ForceFlushLockerBusyState(void)
+    {
+    }
+    bool TryLock(uint32_t volId) override;
+    void Unlock(uint32_t volId) override;
+    bool Exists(uint32_t volId) override;
+    void Reset(uint32_t volId) override;
 
 private:
-
-    bool _CheckPeningOverTime(CallbackType callbackType);    
-
-    bool initialize;
-    PublishPendingIo* publisher;
-    std::atomic<std::uint64_t> currentIdx;
-
-    PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
-    TelemetryPublisher* telemetryPublisher;
+    unordered_set<uint32_t> busySet;
 };
 
-using IoTimeoutCheckerSingleton = Singleton<IoTimeoutChecker>;
-}
+} // namespace pos

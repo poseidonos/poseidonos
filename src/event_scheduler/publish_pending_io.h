@@ -38,6 +38,7 @@
 namespace pos
 {
 
+class TelemetryPublisher;
 class PublishPendingIo
 {
 public:
@@ -50,7 +51,7 @@ public:
 
 private:
 
-    void _PublishMetric();
+    void _PublishMetric(uint64_t currentIdx);
 
     bool enabled;
     bool flagStop;
