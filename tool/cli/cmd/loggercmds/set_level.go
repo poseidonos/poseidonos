@@ -40,10 +40,10 @@ Syntax:
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			var resJSON string
+			var resJson string
 
 			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJson))
+				resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
 				res, err := grpcmgr.SendSetLogLevel(req)
 				if err != nil {
@@ -54,10 +54,10 @@ Syntax:
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
-				resJSON = string(resByte)
+				resJson = string(resByte)
 			}
 
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }

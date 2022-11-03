@@ -40,19 +40,19 @@ func PrintProtoResponse(command string, res protoreflect.ProtoMessage) error {
 	return nil
 }
 
-func PrintResponse(command string, resJSON string, isDebug bool, isJSONRes bool, displayUnit bool) {
+func PrintResponse(command string, resJson string, isDebug bool, isJSONRes bool, displayUnit bool) {
 	if isJSONRes {
-		printResInJSON(resJSON)
+		printResInJSON(resJson)
 	} else if isDebug {
-		printResToDebug(resJSON)
+		printResToDebug(resJson)
 	} else {
-		printResToHumanReadable(command, resJSON, displayUnit)
+		printResToHumanReadable(command, resJson, displayUnit)
 	}
 }
 
-func printResToDebug(resJSON string) {
+func printResToDebug(resJson string) {
 	res := messages.Response{}
-	json.Unmarshal([]byte(resJSON), &res)
+	json.Unmarshal([]byte(resJson), &res)
 
 	printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
 		res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
@@ -73,19 +73,19 @@ func printResToDebug(resJSON string) {
 	w.Flush()
 }
 
-func printResInJSON(resJSON string) {
-	if resJSON != "" {
-		fmt.Println("{\"Response\":", resJSON, "}")
+func printResInJSON(resJson string) {
+	if resJson != "" {
+		fmt.Println("{\"Response\":", resJson, "}")
 	}
 }
 
 // TODO(mj): Currently, the output records may have whitespace.
 // It should be assured that the output records do not have whitespace to pipeline the data to awk.
-func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
+func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 	switch command {
 	case "LISTARRAY":
 		res := &pb.ListArrayResponse{}
-		json.Unmarshal([]byte(resJSON), res)
+		json.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -138,7 +138,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "ARRAYINFO":
 		res := &pb.ArrayInfoResponse{}
-		json.Unmarshal([]byte(resJSON), res)
+		json.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -197,7 +197,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTVOLUME":
 		res := messages.ListVolumeResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -254,7 +254,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "VOLUMEINFO":
 		res := messages.VolumeInfoResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -285,7 +285,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTDEVICE":
 		res := &pb.ListDeviceResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -330,7 +330,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "SMARTLOG":
 		res := messages.SMARTLOGResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -373,7 +373,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "GETLOGLEVEL":
 		res := &pb.GetLogLevelResponse{}
-		json.Unmarshal([]byte(resJSON), res)
+		json.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -385,7 +385,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LOGGERINFO":
 		res := &pb.LoggerInfoResponse{}
-		json.Unmarshal([]byte(resJSON), res)
+		json.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -410,7 +410,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "CREATEQOSVOLUMEPOLICY":
 		res := messages.Response{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -420,7 +420,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "RESETQOSVOLUMEPOLICY":
 		res := messages.Response{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -430,7 +430,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTQOSPOLICIES":
 		res := messages.ListQosResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if globals.CliServerSuccessCode != res.RESULT.STATUS.CODE {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -459,7 +459,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTSUBSYSTEM":
 		res := &pb.ListSubsystemResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -500,7 +500,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "SUBSYSTEMINFO":
 		res := &pb.SubsystemInfoResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -551,7 +551,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTNODE":
 		res := &pb.ListNodeResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -584,7 +584,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTHAVOLUME":
 		res := &pb.ListHaVolumeResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -626,7 +626,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "LISTHAREPLICATION":
 		res := &pb.ListHaReplicationResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -665,7 +665,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "SYSTEMINFO":
 		res := &pb.SystemInfoResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -698,7 +698,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "GETSYSTEMPROPERTY":
 		res := messages.POSPropertyResponse{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -712,7 +712,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 		w.Flush()
 	case "GETTELEMETRYPROPERTY":
 		res := &pb.GetTelemetryPropertyResponse{}
-		protojson.Unmarshal([]byte(resJSON), res)
+		protojson.Unmarshal([]byte(resJson), res)
 
 		status := res.GetResult().GetStatus()
 		if isFailed(*status) {
@@ -729,12 +729,12 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	case "STARTPOS":
 		res := messages.Response{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 		fmt.Println(res.RESULT.STATUS.DESCRIPTION)
 
 	case "STOPPOS":
 		res := messages.Response{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
@@ -746,7 +746,7 @@ func printResToHumanReadable(command string, resJSON string, displayUnit bool) {
 
 	default:
 		res := messages.Response{}
-		json.Unmarshal([]byte(resJSON), &res)
+		json.Unmarshal([]byte(resJson), &res)
 
 		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
 			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,

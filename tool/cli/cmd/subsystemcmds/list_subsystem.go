@@ -56,10 +56,10 @@ func executeSubsystemInfoCmd(command string) {
 	displaymgr.PrintRequest(string(reqJson))
 
 	if !(globals.IsTestingReqBld) {
-		var resJSON string
+		var resJson string
 
 		if globals.EnableGrpc == false {
-			resJSON = socketmgr.SendReqAndReceiveRes(string(reqJson))
+			resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 		} else {
 			res, err := grpcmgr.SendSubsystemInfo(req)
 			if err != nil {
@@ -70,10 +70,10 @@ func executeSubsystemInfoCmd(command string) {
 			if err != nil {
 				log.Fatalf("failed to marshal the protobuf response: %v", err)
 			}
-			resJSON = string(resByte)
+			resJson = string(resByte)
 		}
 
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 	}
 }
 
@@ -91,10 +91,10 @@ func executeListSubsystemCmd(command string) {
 	displaymgr.PrintRequest(string(reqJson))
 
 	if !(globals.IsTestingReqBld) {
-		var resJSON string
+		var resJson string
 
 		if globals.EnableGrpc == false {
-			resJSON = socketmgr.SendReqAndReceiveRes(string(reqJson))
+			resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 		} else {
 			res, err := grpcmgr.SendListSubsystem(req)
 			if err != nil {
@@ -105,10 +105,10 @@ func executeListSubsystemCmd(command string) {
 			if err != nil {
 				log.Fatalf("failed to marshal the protobuf response: %v", err)
 			}
-			resJSON = string(resByte)
+			resJson = string(resByte)
 		}
 
-		displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 	}
 }
 
