@@ -127,7 +127,6 @@ void
 IOWorker::DecreaseCurrentOutstandingIoCount(int count)
 {
     currentOutstandingIOCount -= count;
-    airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), count);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -258,7 +257,6 @@ void
 IOWorker::_SubmitAsyncIO(UbioSmartPtr ubio)
 {
     currentOutstandingIOCount++;
-    airlog("IOWorker_Submit", "internal", static_cast<uint64_t>(id), 1);
     UBlockDeviceSubmissionAdapter ublockDeviceSubmission;
     IOWorkerSubmissionNotifier ioWorkerSubmissionNotifier(this);
     qosManager->HandleEventUbioSubmission(&ublockDeviceSubmission,
@@ -272,7 +270,6 @@ IOWorker::_SubmitPendingIO(void)
     int completeCount =
         qosManager->IOWorkerPoller(id, &ublockDeviceSubmission);
     currentOutstandingIOCount -= completeCount;
-    airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), completeCount);
 }
 
 /* --------------------------------------------------------------------------*/
@@ -293,7 +290,6 @@ IOWorker::_CompleteCommand(void)
                     static_cast<uint32_t>(eventCount)))
             {
                 currentOutstandingIOCount -= eventCount;
-                airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), eventCount);
             }
             else
             {
@@ -351,7 +347,6 @@ IOWorker::_HandleDeviceOperation(void)
             deviceList.erase(device);
             uint32_t completeCount = device->Close();
             currentOutstandingIOCount -= completeCount;
-            airlog("IOWorker_Complete", "internal", static_cast<uint64_t>(id), completeCount);
             break;
         }
     }
