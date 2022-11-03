@@ -53,16 +53,16 @@ Syntax:
 			startScriptPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 			startScriptPath += "/../script/start_poseidonos.sh"
 			err := exec.Command("/bin/sh", "-c", "sudo "+startScriptPath).Run()
-			resJSON := ""
+			resJson := ""
 			uuid := globals.GenerateUUID()
 			if err != nil {
-				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `"` + `,"result":{"status":{"code":11000,` +
+				resJson = `{"command":"STARTPOS","rid":"` + uuid + `"` + `,"result":{"status":{"code":11000,` +
 					`"description":"PoseidonOS has failed to start with error code: 11000"}}}`
 			} else {
-				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
+				resJson = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
 					`"description":"Done! PoseidonOS has started!"}}}`
 			}
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 
 	},

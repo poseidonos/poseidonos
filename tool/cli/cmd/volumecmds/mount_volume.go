@@ -101,9 +101,9 @@ Example:
 
 				displaymgr.PrintRequest(string(reqJson))
 
-				resJSON := socketmgr.SendReqAndReceiveRes(string(reqJson))
+				resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
 
-				displaymgr.PrintResponse(request.COMMAND, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+				displaymgr.PrintResponse(request.COMMAND, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 			}
 		}
 	},
