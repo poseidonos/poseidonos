@@ -122,10 +122,10 @@ private:
         {"CNT_PendingIO", "", true, "count", TEL80000_DEVICE_PENDING_IO_COUNT, POSMetricTypes::MT_GAUGE},
 
         {"Feqos_Global_BW_Throttling", "", true, "qd_avg", TEL120000_FEQOS_GLOBAL_BW, POSMetricTypes::MT_GAUGE},
-        {"Feqos_Dynamic_BW_Throttling", "", true, "qd_avg", TEL120001_FEQOS_DYNAMIC_BW, POSMetricTypes::MT_GAUGE},
-        {"Feqos_Global_Iops_Throttling", "", true, "qd_avg", TEL120002_FEQOS_GLOBAL_BW, POSMetricTypes::MT_GAUGE},
-        {"Feqos_Dynamic_Iops_Throttling", "", true, "qd_avg", TEL120003_FEQOS_DYNAMIC_BW, POSMetricTypes::MT_GAUGE},
-        {"Feqos_Volume_Q_Count", "", false, "count", TEL120004_FEQOS_VOLUME_Q_BW, POSMetricTypes::MT_GAUGE},
+        {"Feqos_Dynamic_BW_Throttling", "", true, "qd_avg", TEL120001_FEQOS_DYNAMIC_BW, POSMetricTypes::MT_GAUGE, CustomLabel::ArrayIdVolumeId},
+        {"Feqos_Global_Iops_Throttling", "", true, "qd_avg", TEL120002_FEQOS_GLOBAL_IOPS, POSMetricTypes::MT_GAUGE},
+        {"Feqos_Dynamic_Iops_Throttling", "", true, "qd_avg", TEL120003_FEQOS_DYNAMIC_BW, POSMetricTypes::MT_GAUGE, CustomLabel::ArrayIdVolumeId},
+        {"Feqos_Volume_Q_Count", "", false, "count", TEL120004_FEQOS_VOLUME_Q_BW, POSMetricTypes::MT_GAUGE, CustomLabel::ArrayIdVolumeId},
 
         {"Ubio_Constructor", "", false, "count", TEL130000_COUNT_OF_UBIO_CONSTRUCTORS, POSMetricTypes::MT_GAUGE},
         {"Ubio_Destructor", "", false, "count", TEL130001_COUNT_OF_UBIO_DESTRUCTORS, POSMetricTypes::MT_GAUGE},

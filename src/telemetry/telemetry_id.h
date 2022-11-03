@@ -171,7 +171,7 @@ static const std::string TEL110032_UNDER_TEMPERATURE_COUNT = "under_temperature_
 
 static const std::string TEL120000_FEQOS_GLOBAL_BW = "feqos_global_bw_throttling";
 static const std::string TEL120001_FEQOS_DYNAMIC_BW = "feqos_dynamic_bw_throttling";
-static const std::string TEL120002_FEQOS_GLOBAL_BW = "feqos_global_iops_throttling";
+static const std::string TEL120002_FEQOS_GLOBAL_IOPS = "feqos_global_iops_throttling";
 static const std::string TEL120003_FEQOS_DYNAMIC_BW = "feqos_dynamic_iops_throttling";
 static const std::string TEL120004_FEQOS_VOLUME_Q_BW = "feqos_volume_queue_count";
 

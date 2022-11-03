@@ -296,8 +296,9 @@ QosVolumeManager::HandlePosIoSubmission(IbofIoSubmissionAdapter* aioSubmission, 
         return;
     }
 
+    uint32_t arrVolId = (volIo->GetArrayId() << ARRAY_SHIFT) + volId;
+    airlog("Feqos_Volume_Q_Count", "internal", arrVolId, 1);
     EnqueueVolumeIo(volId, volIo);
-    airlog("Feqos_Volume_Q_Count", "internal", volId, 1);
     pendingIO[volId]++;
 }
 
@@ -680,7 +681,6 @@ QosVolumeManager::ResetVolumeThrottling(int volId, uint32_t arrayId)
     uint64_t userSetIops = iopsThrottling[volId];
     int64_t bwUnit = basicBwUnit;
     int64_t iopsUnit = basicIopsUnit;
-    const uint32_t ARRAY_SHIFT = 8;
     uint32_t arrVolId = (arrayId << ARRAY_SHIFT) + volId;
     airlog("Feqos_Dynamic_BW_Throttling", "internal", arrVolId, dynamicBwThrottling[volId] * PARAMETER_COLLECTION_INTERVAL);
     airlog("Feqos_Dynamic_Iops_Throttling", "internal", arrVolId, dynamicIopsThrottling[volId] * PARAMETER_COLLECTION_INTERVAL);
@@ -938,7 +938,8 @@ QosVolumeManager::_PollingAndSubmit(IbofIoSubmissionAdapter* aioSubmission, uint
     {
         return false;
     }
-    airlog("Feqos_Volume_Q_Count", "internal", volId, -1);
+    uint32_t arrVolId = (queuedVolumeIo->GetArrayId() << ARRAY_SHIFT) + volId;
+    airlog("Feqos_Volume_Q_Count", "internal", arrVolId, -1);
     pendingIO[volId]--;
     SubmitVolumeIoToAio(aioSubmission, volId, queuedVolumeIo);
     return true;
