@@ -166,8 +166,8 @@ GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
         SetFlushed(volEventBase->volId);
         ReturnBuffer(writeBuffers);
         SetFinished();
-        _ResetFlushLock((uint32_t)volEventBase->volId);
     }
+    _ResetFlushLock((uint32_t)volEventBase->volId);
     return (int)POS_EVENT_ID::VOL_EVENT_OK;
 }
 
