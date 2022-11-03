@@ -157,7 +157,7 @@ GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
         do
         {
             usleep(1000);
-        } while (true == ffLocker.TryForceFlushLock((uint32_t)volEventBase->volId));
+        } while (false == ffLocker.TryForceFlushLock((uint32_t)volEventBase->volId));
         POS_TRACE_DEBUG(EID(GC_FLUSH_LOCK_DEBUG),
                 "flush lock acquired, vol_id:{}", volEventBase->volId);
         GcWriteBuffer* writeBuffers = gcActiveWriteBuffers[volEventBase->volId];
