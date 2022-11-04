@@ -423,7 +423,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         delete mem;
     }
 #if !USE_RAID6_DECODE_CACHING
-    delete rebuildGaloisTable;
+    delete[] rebuildGaloisTable;
 #endif
 
 }

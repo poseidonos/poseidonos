@@ -12,6 +12,7 @@
 #include <test/unit-tests/gc/gc_map_update_request_mock.h>
 
 #include "test/unit-tests/resource_manager/memory_manager_mock.h"
+#include "test/unit-tests/resource_manager/buffer_pool_mock.h"
 
 using ::testing::_;
 using ::testing::AnyNumber;
@@ -48,7 +49,17 @@ public:
 
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         memoryManager = new MockMemoryManager();
-        EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(nullptr));
+        {
+            BufferInfo info;
+            uint32_t socket = 0;
+            MockBufferPool* pool = new MockBufferPool(info, socket);
+            EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(pool));
+            EXPECT_CALL(*memoryManager, DeleteBufferPool).WillRepeatedly(
+            [](BufferPool* pool) -> bool {
+                delete pool;
+                return true;
+            });;
+        }
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
 
         stripe = new NiceMock<MockStripe>();

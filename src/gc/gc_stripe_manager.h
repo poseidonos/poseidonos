@@ -97,7 +97,6 @@ public:
     virtual bool TryFlushLock(uint32_t volId);
     virtual void ReleaseFlushLock(uint32_t volId);
 
-    static const uint32_t GC_WRITE_BUFFER_COUNT = 512;
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
 private:
@@ -110,7 +109,7 @@ private:
     GcAllocateBlks _AllocateBlks(uint32_t volumeId, uint32_t numBlks);
     bool _IsWriteBufferFull(uint32_t volumeId);
     void _CreateBlkInfoList(uint32_t volumeId);
-    bool _SetBufferPool(void);
+    void _SetBufferPool(void);
     void _SetForceFlushInterval(void);
     void _StartTimer(uint32_t volumeId);
     void _ResetFlushLock(uint32_t volId);
