@@ -93,9 +93,10 @@ class VolumeBase
 {
 public:
     VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-        VolumeAttribute volumeAttribute);
+        VolumeAttribute volumeAttribute, VolumeReplicationRoleProperty voluemRole);
     VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
-        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute);
+        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute,
+        VolumeReplicationRoleProperty voluemRole);
     virtual ~VolumeBase(void);
     int Mount(void);
     int Unmount(void);

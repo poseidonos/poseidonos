@@ -43,13 +43,15 @@ class Volume : public VolumeBase
 {
 public:
     Volume(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-        VolumeAttribute volumeAttribute = VolumeAttribute::UserData)
-    : VolumeBase(arrayName, arrayIdx, volName, volSizeByte, volumeAttribute)
+        VolumeAttribute volumeAttribute = VolumeAttribute::UserData,
+        VolumeReplicationRoleProperty voluemRole = VolumeReplicationRoleProperty::Primary)
+    : VolumeBase(arrayName, arrayIdx, volName, volSizeByte, volumeAttribute, voluemRole)
     {
     }
     Volume(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte,
-        uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw, VolumeAttribute volumeAttribute = VolumeAttribute::UserData)
-    : VolumeBase(arrayName, arrayIdx, volName, uuid, volSizeByte, maxiops, miniops, maxbw, minbw, volumeAttribute)
+        uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw, VolumeAttribute volumeAttribute = VolumeAttribute::UserData,
+        VolumeReplicationRoleProperty voluemRole = VolumeReplicationRoleProperty::Primary)
+    : VolumeBase(arrayName, arrayIdx, volName, uuid, volSizeByte, maxiops, miniops, maxbw, minbw, volumeAttribute, voluemRole)
     {
     }
     ~Volume(void) override

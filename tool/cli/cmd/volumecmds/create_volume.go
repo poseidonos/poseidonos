@@ -119,7 +119,7 @@ var (
 	create_volume_maxBandwidth uint64 = 0
 	create_volume_iswalvol            = false
 	create_volume_uuid                = ""
-	create_volume_nsid                = ""
+	create_volume_nsid          int32 = 0
 	create_volume_isPrimary           = true
 	create_volume_isSecondary         = false
 )
@@ -156,8 +156,8 @@ If you do not specify the unit, it will be B in default. (Note: the size must be
 		"uuid", "", "",
 		"UUID for the volume to be created.")
 
-	CreateVolumeCmd.Flags().StringVarP(&create_volume_nsid,
-		"nsid", "", "",
+	CreateVolumeCmd.Flags().Int32VarP(&create_volume_nsid,
+		"nsid", "", -1,
 		"Namespace ID for the volume to be created.")
 
 	CreateVolumeCmd.Flags().BoolVarP(&create_volume_isSecondary,

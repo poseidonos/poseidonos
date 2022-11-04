@@ -1616,7 +1616,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     uint64_t maxBw = 0;
     bool isWalVol = false;
     string uuid = "";
-    string nsid = "";
+    int32_t nsid = -1;
     bool isPrimary = true;
 
     volumeName = (request->param()).name();
@@ -1659,7 +1659,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
 
     if (volMgr != nullptr)
     {
-        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, uuid, nsid, isPrimary);
+        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, nsid, isPrimary, uuid);
         if (ret == SUCCESS)
         {
             string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);

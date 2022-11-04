@@ -2489,12 +2489,12 @@ constexpr CreateVolumeRequest_Param::CreateVolumeRequest_Param(
   : name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , array_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , uuid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , nsid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , size_(PROTOBUF_ULONGLONG(0))
   , maxiops_(PROTOBUF_ULONGLONG(0))
   , maxbw_(PROTOBUF_ULONGLONG(0))
   , iswalvol_(false)
-  , isprimary_(false){}
+  , isprimary_(false)
+  , nsid_(0){}
 struct CreateVolumeRequest_ParamDefaultTypeInternal {
   constexpr CreateVolumeRequest_ParamDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -5156,7 +5156,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "lumeRequest.Param\032\223\001\n\005Param\022\014\n\004name\030\001 \001("
   "\t\022\r\n\005array\030\002 \001(\t\022\014\n\004size\030\003 \001(\004\022\017\n\007maxiop"
   "s\030\004 \001(\004\022\r\n\005maxbw\030\005 \001(\004\022\020\n\010iswalvol\030\006 \001(\010"
-  "\022\014\n\004uuid\030\007 \001(\t\022\014\n\004nsid\030\010 \001(\t\022\021\n\tisprimar"
+  "\022\014\n\004uuid\030\007 \001(\t\022\014\n\004nsid\030\010 \001(\005\022\021\n\tisprimar"
   "y\030\t \001(\010\"\252\002\n\024CreateVolumeResponse\022\017\n\007comm"
   "and\030\001 \001(\t\022\013\n\003rid\030\002 \001(\t\0225\n\006result\030\003 \001(\0132%"
   ".grpc_cli.CreateVolumeResponse.Result\022\037\n"
@@ -55143,14 +55143,9 @@ CreateVolumeRequest_Param::CreateVolumeRequest_Param(const CreateVolumeRequest_P
     uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_uuid(), 
       GetArena());
   }
-  nsid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (!from._internal_nsid().empty()) {
-    nsid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_nsid(), 
-      GetArena());
-  }
   ::memcpy(&size_, &from.size_,
-    static_cast<size_t>(reinterpret_cast<char*>(&isprimary_) -
-    reinterpret_cast<char*>(&size_)) + sizeof(isprimary_));
+    static_cast<size_t>(reinterpret_cast<char*>(&nsid_) -
+    reinterpret_cast<char*>(&size_)) + sizeof(nsid_));
   // @@protoc_insertion_point(copy_constructor:grpc_cli.CreateVolumeRequest.Param)
 }
 
@@ -55158,11 +55153,10 @@ void CreateVolumeRequest_Param::SharedCtor() {
 name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 array_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 uuid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-nsid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&size_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&isprimary_) -
-    reinterpret_cast<char*>(&size_)) + sizeof(isprimary_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&nsid_) -
+    reinterpret_cast<char*>(&size_)) + sizeof(nsid_));
 }
 
 CreateVolumeRequest_Param::~CreateVolumeRequest_Param() {
@@ -55176,7 +55170,6 @@ void CreateVolumeRequest_Param::SharedDtor() {
   name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   array_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   uuid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  nsid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
 void CreateVolumeRequest_Param::ArenaDtor(void* object) {
@@ -55198,10 +55191,9 @@ void CreateVolumeRequest_Param::Clear() {
   name_.ClearToEmpty();
   array_.ClearToEmpty();
   uuid_.ClearToEmpty();
-  nsid_.ClearToEmpty();
   ::memset(&size_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&isprimary_) -
-      reinterpret_cast<char*>(&size_)) + sizeof(isprimary_));
+      reinterpret_cast<char*>(&nsid_) -
+      reinterpret_cast<char*>(&size_)) + sizeof(nsid_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -55267,12 +55259,10 @@ const char* CreateVolumeRequest_Param::_InternalParse(const char* ptr, ::PROTOBU
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // string nsid = 8;
+      // int32 nsid = 8;
       case 8:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 66)) {
-          auto str = _internal_mutable_nsid();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.CreateVolumeRequest.Param.nsid"));
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 64)) {
+          nsid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -55365,14 +55355,10 @@ failure:
         7, this->_internal_uuid(), target);
   }
 
-  // string nsid = 8;
-  if (this->nsid().size() > 0) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_nsid().data(), static_cast<int>(this->_internal_nsid().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "grpc_cli.CreateVolumeRequest.Param.nsid");
-    target = stream->WriteStringMaybeAliased(
-        8, this->_internal_nsid(), target);
+  // int32 nsid = 8;
+  if (this->nsid() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(8, this->_internal_nsid(), target);
   }
 
   // bool isprimary = 9;
@@ -55418,13 +55404,6 @@ size_t CreateVolumeRequest_Param::ByteSizeLong() const {
         this->_internal_uuid());
   }
 
-  // string nsid = 8;
-  if (this->nsid().size() > 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_nsid());
-  }
-
   // uint64 size = 3;
   if (this->size() != 0) {
     total_size += 1 +
@@ -55454,6 +55433,13 @@ size_t CreateVolumeRequest_Param::ByteSizeLong() const {
   // bool isprimary = 9;
   if (this->isprimary() != 0) {
     total_size += 1 + 1;
+  }
+
+  // int32 nsid = 8;
+  if (this->nsid() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+        this->_internal_nsid());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -55496,9 +55482,6 @@ void CreateVolumeRequest_Param::MergeFrom(const CreateVolumeRequest_Param& from)
   if (from.uuid().size() > 0) {
     _internal_set_uuid(from._internal_uuid());
   }
-  if (from.nsid().size() > 0) {
-    _internal_set_nsid(from._internal_nsid());
-  }
   if (from.size() != 0) {
     _internal_set_size(from._internal_size());
   }
@@ -55513,6 +55496,9 @@ void CreateVolumeRequest_Param::MergeFrom(const CreateVolumeRequest_Param& from)
   }
   if (from.isprimary() != 0) {
     _internal_set_isprimary(from._internal_isprimary());
+  }
+  if (from.nsid() != 0) {
+    _internal_set_nsid(from._internal_nsid());
   }
 }
 
@@ -55540,10 +55526,9 @@ void CreateVolumeRequest_Param::InternalSwap(CreateVolumeRequest_Param* other) {
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   array_.Swap(&other->array_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   uuid_.Swap(&other->uuid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  nsid_.Swap(&other->nsid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(CreateVolumeRequest_Param, isprimary_)
-      + sizeof(CreateVolumeRequest_Param::isprimary_)
+      PROTOBUF_FIELD_OFFSET(CreateVolumeRequest_Param, nsid_)
+      + sizeof(CreateVolumeRequest_Param::nsid_)
       - PROTOBUF_FIELD_OFFSET(CreateVolumeRequest_Param, size_)>(
           reinterpret_cast<char*>(&size_),
           reinterpret_cast<char*>(&other->size_));

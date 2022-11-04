@@ -33146,12 +33146,12 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
     kNameFieldNumber = 1,
     kArrayFieldNumber = 2,
     kUuidFieldNumber = 7,
-    kNsidFieldNumber = 8,
     kSizeFieldNumber = 3,
     kMaxiopsFieldNumber = 4,
     kMaxbwFieldNumber = 5,
     kIswalvolFieldNumber = 6,
     kIsprimaryFieldNumber = 9,
+    kNsidFieldNumber = 8,
   };
   // string name = 1;
   void clear_name();
@@ -33201,22 +33201,6 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_uuid();
   public:
 
-  // string nsid = 8;
-  void clear_nsid();
-  const std::string& nsid() const;
-  void set_nsid(const std::string& value);
-  void set_nsid(std::string&& value);
-  void set_nsid(const char* value);
-  void set_nsid(const char* value, size_t size);
-  std::string* mutable_nsid();
-  std::string* release_nsid();
-  void set_allocated_nsid(std::string* nsid);
-  private:
-  const std::string& _internal_nsid() const;
-  void _internal_set_nsid(const std::string& value);
-  std::string* _internal_mutable_nsid();
-  public:
-
   // uint64 size = 3;
   void clear_size();
   ::PROTOBUF_NAMESPACE_ID::uint64 size() const;
@@ -33262,6 +33246,15 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   void _internal_set_isprimary(bool value);
   public:
 
+  // int32 nsid = 8;
+  void clear_nsid();
+  ::PROTOBUF_NAMESPACE_ID::int32 nsid() const;
+  void set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_nsid() const;
+  void _internal_set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.CreateVolumeRequest.Param)
  private:
   class _Internal;
@@ -33272,12 +33265,12 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uuid_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr nsid_;
   ::PROTOBUF_NAMESPACE_ID::uint64 size_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxiops_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxbw_;
   bool iswalvol_;
   bool isprimary_;
+  ::PROTOBUF_NAMESPACE_ID::int32 nsid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -72821,65 +72814,24 @@ inline void CreateVolumeRequest_Param::set_allocated_uuid(std::string* uuid) {
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateVolumeRequest.Param.uuid)
 }
 
-// string nsid = 8;
+// int32 nsid = 8;
 inline void CreateVolumeRequest_Param::clear_nsid() {
-  nsid_.ClearToEmpty();
+  nsid_ = 0;
 }
-inline const std::string& CreateVolumeRequest_Param::nsid() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateVolumeRequest_Param::_internal_nsid() const {
+  return nsid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateVolumeRequest_Param::nsid() const {
   // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.nsid)
   return _internal_nsid();
 }
-inline void CreateVolumeRequest_Param::set_nsid(const std::string& value) {
+inline void CreateVolumeRequest_Param::_internal_set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  nsid_ = value;
+}
+inline void CreateVolumeRequest_Param::set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_nsid(value);
   // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.nsid)
-}
-inline std::string* CreateVolumeRequest_Param::mutable_nsid() {
-  // @@protoc_insertion_point(field_mutable:grpc_cli.CreateVolumeRequest.Param.nsid)
-  return _internal_mutable_nsid();
-}
-inline const std::string& CreateVolumeRequest_Param::_internal_nsid() const {
-  return nsid_.Get();
-}
-inline void CreateVolumeRequest_Param::_internal_set_nsid(const std::string& value) {
-  
-  nsid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void CreateVolumeRequest_Param::set_nsid(std::string&& value) {
-  
-  nsid_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.CreateVolumeRequest.Param.nsid)
-}
-inline void CreateVolumeRequest_Param::set_nsid(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  nsid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:grpc_cli.CreateVolumeRequest.Param.nsid)
-}
-inline void CreateVolumeRequest_Param::set_nsid(const char* value,
-    size_t size) {
-  
-  nsid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:grpc_cli.CreateVolumeRequest.Param.nsid)
-}
-inline std::string* CreateVolumeRequest_Param::_internal_mutable_nsid() {
-  
-  return nsid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* CreateVolumeRequest_Param::release_nsid() {
-  // @@protoc_insertion_point(field_release:grpc_cli.CreateVolumeRequest.Param.nsid)
-  return nsid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void CreateVolumeRequest_Param::set_allocated_nsid(std::string* nsid) {
-  if (nsid != nullptr) {
-    
-  } else {
-    
-  }
-  nsid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), nsid,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateVolumeRequest.Param.nsid)
 }
 
 // bool isprimary = 9;
