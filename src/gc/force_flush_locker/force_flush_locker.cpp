@@ -30,51 +30,78 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/event_scheduler/event.h"
-#include "src/gc/victim_stripe.h"
-#include "src/gc/gc_stripe_manager.h"
-
-#include <string>
-#include <list>
-#include <utility>
-#include <vector>
+#include "force_flush_locker.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 
 namespace pos
 {
-class Stripe;
-class FlowControl;
 
-class GcFlushSubmission : public Event
+ForceFlushLocker::ForceFlushLocker(void)
 {
-public:
-    explicit GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager, bool forceFlush = false);
-    GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
-                    CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
-                    IIOSubmitHandler* inputIIOSubmitHandler,
-                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo, bool forceFlush = false);
-    ~GcFlushSubmission(void) override;
-    bool Execute(void) override;
+    normalLocker = new ForceFlushLockerNormalState();
+    busyLocker = new ForceFlushLockerBusyState();
+}
 
-    Stripe* AllocateStripe(uint32_t volumeId);
+ForceFlushLocker::~ForceFlushLocker(void)
+{
+    delete busyLocker;
+    delete normalLocker;
+}
 
-private:
-    std::string arrayName;
-    std::vector<BlkInfo>* blkInfoList;
-    uint32_t volumeId;
-    GcWriteBuffer* dataBuffer;
-    GcStripeManager* gcStripeManager;
+bool
+ForceFlushLocker::TryForceFlushLock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    if (normalLocker->Exists(volId) == true)
+    {
+        return false;
+    }
+    bool ret = busyLocker->TryLock(volId);
+    if (ret == true)
+    {
+        POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "force flush lock acquired, vol_id:{}", volId);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "force flush lock failed, vol_id:{}", volId);
+    }
+    return ret;
+}
 
-    CallbackSmartPtr inputCallback;
-    IBlockAllocator* iBlockAllocator;
-    IIOSubmitHandler* iIOSubmitHandler;
-    FlowControl* flowControl;
-    IArrayInfo* iArrayInfo;
-    bool isForceFlush = false;
-};
+void
+ForceFlushLocker::UnlockForceFlushLock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    busyLocker->Unlock(volId);
+    POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "force flush lock unlocked, vol_id:{}", volId);
+}
+
+bool
+ForceFlushLocker::TryLock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    if (busyLocker->Exists(volId) == true)
+    {
+        POS_TRACE_INFO(EID(GC_FLUSH_LOCK_DEBUG), "flush lock failued, vol_id:{}", volId);
+        return false;
+    }
+    return normalLocker->TryLock(volId);
+}
+
+void
+ForceFlushLocker::Unlock(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    normalLocker->Unlock(volId);
+}
+
+void
+ForceFlushLocker::Reset(uint32_t volId)
+{
+    unique_lock<mutex> lock(lockerMtx);
+    normalLocker->Reset(volId);
+    busyLocker->Reset(volId);
+}
 
 } // namespace pos

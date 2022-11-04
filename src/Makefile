@@ -16,6 +16,7 @@ SUBDIRS = allocator \
         master_context \
         gc \
         gc/flow_control \
+        gc/force_flush_locker \
         array \
         array/device \
         array/ft \

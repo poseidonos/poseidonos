@@ -31,50 +31,27 @@
  */
 
 #pragma once
+#include <unordered_set>
 
-#include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/event_scheduler/event.h"
-#include "src/gc/victim_stripe.h"
-#include "src/gc/gc_stripe_manager.h"
+#include "force_flush_locker_state.h"
 
-#include <string>
-#include <list>
-#include <utility>
-#include <vector>
+using namespace std;
 
 namespace pos
 {
-class Stripe;
-class FlowControl;
-
-class GcFlushSubmission : public Event
+class ForceFlushLockerNormalState : public ForceFlushLockerState
 {
 public:
-    explicit GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager, bool forceFlush = false);
-    GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
-                    CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
-                    IIOSubmitHandler* inputIIOSubmitHandler,
-                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo, bool forceFlush = false);
-    ~GcFlushSubmission(void) override;
-    bool Execute(void) override;
-
-    Stripe* AllocateStripe(uint32_t volumeId);
+    virtual ~ForceFlushLockerNormalState(void)
+    {
+    }
+    bool TryLock(uint32_t volId) override;
+    void Unlock(uint32_t volId) override;
+    bool Exists(uint32_t volId) override;
+    void Reset(uint32_t volId) override;
 
 private:
-    std::string arrayName;
-    std::vector<BlkInfo>* blkInfoList;
-    uint32_t volumeId;
-    GcWriteBuffer* dataBuffer;
-    GcStripeManager* gcStripeManager;
-
-    CallbackSmartPtr inputCallback;
-    IBlockAllocator* iBlockAllocator;
-    IIOSubmitHandler* iIOSubmitHandler;
-    FlowControl* flowControl;
-    IArrayInfo* iArrayInfo;
-    bool isForceFlush = false;
+    unordered_multiset<uint32_t> workingSet;
 };
 
 } // namespace pos

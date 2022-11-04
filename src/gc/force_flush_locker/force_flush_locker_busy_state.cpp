@@ -30,51 +30,32 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/io_submit_interface/i_io_submit_handler.h"
-#include "src/event_scheduler/event.h"
-#include "src/gc/victim_stripe.h"
-#include "src/gc/gc_stripe_manager.h"
-
-#include <string>
-#include <list>
-#include <utility>
-#include <vector>
+#include "force_flush_locker_busy_state.h"
 
 namespace pos
 {
-class Stripe;
-class FlowControl;
-
-class GcFlushSubmission : public Event
+bool
+ForceFlushLockerBusyState::TryLock(uint32_t volId)
 {
-public:
-    explicit GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager, bool forceFlush = false);
-    GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-                    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
-                    CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
-                    IIOSubmitHandler* inputIIOSubmitHandler,
-                    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo, bool forceFlush = false);
-    ~GcFlushSubmission(void) override;
-    bool Execute(void) override;
+    auto ret = busySet.insert(volId);
+    return ret.second;
+}
 
-    Stripe* AllocateStripe(uint32_t volumeId);
+void
+ForceFlushLockerBusyState::Unlock(uint32_t volId)
+{
+    busySet.erase(volId);
+}
 
-private:
-    std::string arrayName;
-    std::vector<BlkInfo>* blkInfoList;
-    uint32_t volumeId;
-    GcWriteBuffer* dataBuffer;
-    GcStripeManager* gcStripeManager;
+bool
+ForceFlushLockerBusyState::Exists(uint32_t volId)
+{
+    return busySet.find(volId) != busySet.end();
+}
 
-    CallbackSmartPtr inputCallback;
-    IBlockAllocator* iBlockAllocator;
-    IIOSubmitHandler* iIOSubmitHandler;
-    FlowControl* flowControl;
-    IArrayInfo* iArrayInfo;
-    bool isForceFlush = false;
-};
-
-} // namespace pos
+void
+ForceFlushLockerBusyState::Reset(uint32_t volId)
+{
+    busySet.erase(volId);
+}
+}; // namespace pos
