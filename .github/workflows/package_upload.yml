@@ -1,0 +1,74 @@
+
+name: Package_Upload
+
+on:
+  push:
+    branches: [ release/v0.12.0  ]
+    tags:
+      - 'v*'
+  
+  workflow_call:
+
+  workflow_dispatch:
+    inputs:
+       owner:
+          description: 'Repo owner'     
+          required: true
+          default: 'poseidonos'
+       sha:
+          description: 'Commit hash'
+          required: true
+          default: 'main'
+
+jobs:
+  Upload_Package:
+    runs-on: VM
+    env:
+      Repo_owner: poseidonos
+      Commit_sha: ${{github.sha}}
+      
+    steps:
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - name: Dispatch value override
+      if: ${{ github.event_name == 'workflow_dispatch'}}
+      run: |
+        echo "Repo_owner=${{inputs.owner}}" >> $GITHUB_ENV
+        echo "Commit_sha=${{inputs.sha}}" >> $GITHUB_ENV
+
+    - name: Checkout
+      uses: actions/checkout@v1
+      with:
+        repository: ${{ env.Repo_owner }}/poseidonos
+        ref: ${{ env.Commit_sha }}
+
+    - name: Build Setup
+      working-directory: ${{github.workspace}}/../poseidonos
+      run: |
+        sudo apt update
+        chmod +x .github/workflows/script/build_setup.sh
+        .github/workflows/script/build_setup.sh -r ${{env.Commit_sha}} -d ${{github.workspace}}/../poseidonos -c --with-fpic
+
+    - name: Tagged package version
+      if: startsWith(github.ref, 'refs/tags/v')
+      working-directory: ${{github.workspace}}/../poseidonos
+      run: sed "s/+\${PKG_VERSION}//g" package/Makefile -i
+
+    - name: package build
+      working-directory: ${{github.workspace}}/../poseidonos
+      run: |
+        sudo make package -j8
+        mv package/debian/poseidonos.deb ${{github.workspace}}
+
+    - name: Set ouputs
+      working-directory: ${{github.workspace}}/../poseidonos
+      id: vars
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+
+    - name: Package artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: poseidonos-${{ steps.vars.outputs.sha_short }}.deb
+        path: |
+          ${{github.workspace}}/poseidonos.deb

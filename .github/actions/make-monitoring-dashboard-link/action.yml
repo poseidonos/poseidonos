@@ -1,0 +1,28 @@
+name: "Make POS Monitoring Dashboard Link"
+Description: "This action sets POS monitoring dashboard link"
+inputs:
+  GRAFANA_DASHBOARD:
+    required: true
+  ESTIMATED_EXECUTION_TIME:
+    required: true
+  
+runs:
+  using: "composite"
+  steps:
+    - name: "Make POS Monitoring Dashboard Link"
+      shell: bash
+      run: |
+        START_TIME=$(( $(date +%s) * 1000 ))
+        GRAFANA_DASHBOARD_DIRECT=$(echo ${{ inputs.GRAFANA_DASHBOARD}}"&refresh=10s&from=${START_TIME}&to=${START_TIME}+${{ inputs.ESTIMATED_EXECUTION_TIME }}&var-ga_commit_hash=${{ github.sha }}&var-ga_workflow=${{ github.workflow }}" | sed 's/#/%23/g')
+        cat > ${{ github.workspace }}/Dashboard.html <<-EOF
+          <html>
+            <body>
+              <p> Redirect to Dashboard soon </p>
+              <script>
+              setTimeout(() => {
+              window.location.href = '${GRAFANA_DASHBOARD_DIRECT}';
+              }, 2);
+              </script>
+            </body>
+          </html>
+        EOF
