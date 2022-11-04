@@ -1247,6 +1247,8 @@ message CreateVolumeRequest {
 		uint64 maxbw = 5;
 		bool iswalvol = 6;
 		string uuid = 7;
+		string nsid = 8;
+		bool isprimary = 9;
 	}
 	Param param = 4;
 }
