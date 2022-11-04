@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
+#include <set>
 #include <vector>
 
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -118,6 +119,7 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleCounterMetri
     // wait for update
     while(!fakePublisher->IsUpdated())
     {
+        usleep(1);
     }
 
     vector<POSMetric> metrics = fakePublisher->GetMetrics();
@@ -139,6 +141,7 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleGaugeMetric)
     // wait for update
     while(!fakePublisher->IsUpdated())
     {
+        usleep(1);
     }
 
     vector<POSMetric> metrics = fakePublisher->GetMetrics();
@@ -163,6 +166,7 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleCounterMetri
     // wait for update
     while(!fakePublisher->IsUpdated())
     {
+        usleep(1);
     }
 
     {
@@ -178,6 +182,7 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleCounterMetri
     // wait for update
     while(!fakePublisher->IsUpdated())
     {
+        usleep(1);
     }
 
     {
@@ -203,6 +208,7 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleGaugeMetricT
     // wait for update
     while(!fakePublisher->IsUpdated())
     {
+        usleep(1);
     }
 
     {
@@ -218,6 +224,7 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleGaugeMetricT
     // wait for update
     while(!fakePublisher->IsUpdated())
     {
+        usleep(1);
     }
 
     {
@@ -226,6 +233,90 @@ TEST_F(EasyTelemetryPublisherTest, testIfThePublisherPublishesSingleGaugeMetricT
         EXPECT_EQ(metrics[0].GetName(), metricId);
         EXPECT_EQ(metrics[0].GetGaugeValue(), expectedLastGauge);
     }
+
+    publisher->StopWorker();
+}
+
+TEST_F(EasyTelemetryPublisherTest, testIfMetricsWithVariousLabelsArePublishedAsIntended)
+{
+    const string metricId_1 = "test_metric_1";
+    const string metricId_2 = "test_metric_2";
+    const size_t expectedCounter = 1;
+    const size_t expectedSize = 4;
+
+    // #1
+    {
+        VectorLabels label;
+        label.push_back({"label1", "val1"});
+        label.push_back({"label2", "val2"});
+        publisher->IncreaseCounter(metricId_1, label);
+    }
+
+    // #2
+    {
+        VectorLabels label;
+        label.push_back({"label1", "val1"});
+        label.push_back({"label2", "val3"});
+        publisher->IncreaseCounter(metricId_1, label);
+    }
+
+    // #3
+    {
+        VectorLabels label;
+        label.push_back({"label2", "val1"});
+        label.push_back({"label3", "val2"});
+        publisher->IncreaseCounter(metricId_1, label);
+    }
+
+    // #1
+    {
+        VectorLabels label;
+        label.push_back({"label2", "val2"});
+        label.push_back({"label1", "val1"});
+        publisher->IncreaseCounter(metricId_1, label);
+    }
+
+    // #4
+    {
+        VectorLabels label;
+        label.push_back({"label2", "val2"});
+        label.push_back({"label1", "val1"});
+        fakePublisher->SetUpdated(false);
+        publisher->IncreaseCounter(metricId_2, label);
+    }
+
+    publisher->RunWorker();
+
+    // wait for update
+    while(!fakePublisher->IsUpdated())
+    {
+        usleep(1);
+    }
+
+    vector<POSMetric> metrics = fakePublisher->GetMetrics();
+    ASSERT_EQ(metrics.size(), expectedSize);
+
+    set<string> ids;
+    for (auto& metric : metrics)
+    {
+        ids.insert(metric.GetName());
+        if (!(metric.GetName() == metricId_1 || metric.GetName() == metricId_2))
+        {
+            ASSERT_TRUE(false) << "not expected name: " << metric.GetName();
+        }
+    }
+    EXPECT_EQ(ids.size(), 2);
+
+    set<uint64_t> values;
+    for (auto& metric : metrics)
+    {
+        values.insert(metric.GetCountValue());
+        if (!(1 <= metric.GetCountValue() || metric.GetCountValue() >= 2))
+        {
+            ASSERT_TRUE(false) << "not expected value: " << metric.GetCountValue();
+        }
+    }
+    EXPECT_EQ(values.size(), 2);
 
     publisher->StopWorker();
 }

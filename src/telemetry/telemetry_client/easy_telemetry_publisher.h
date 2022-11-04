@@ -78,10 +78,9 @@ public:
     virtual void UpdateGauge(const std::string& id, const uint64_t value,
         const VectorLabels& labels);
 
+    /** only for test **/
     virtual void PublishMetricsWithLabels(void);
     virtual void UpdateMetrics(void);
-
-    /** only for test **/
     MetricRepository GetMetricRepository(void)
     {
         return metrics;
@@ -102,7 +101,7 @@ private:
     void _StopWorker(void);
     void _UpdateInterval(ConfigManager* config);
 
-    POSMetric _CreateGagueMetric(const std::string& id, const uint64_t value,
+    POSMetric _CreateGaugeMetric(const std::string& id, const uint64_t value,
         const VectorLabels& labels);
     POSMetric _CreateCounterMetric(const std::string& id, const uint64_t value,
         const VectorLabels& labels);

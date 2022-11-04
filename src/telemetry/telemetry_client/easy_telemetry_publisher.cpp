@@ -145,11 +145,11 @@ void
 EasyTelemetryPublisher::UpdateGauge(const std::string& id, const uint64_t value,
     const VectorLabels& labels)
 {
-    queue.push(_CreateGagueMetric(id, value, labels));
+    queue.push(_CreateGaugeMetric(id, value, labels));
 }
 
 POSMetric
-EasyTelemetryPublisher::_CreateGagueMetric(const std::string& id, const uint64_t value,
+EasyTelemetryPublisher::_CreateGaugeMetric(const std::string& id, const uint64_t value,
     const VectorLabels& labels)
 {
     POSMetric m(id, POSMetricTypes::MT_GAUGE);
@@ -188,10 +188,16 @@ EasyTelemetryPublisher::_RunWorker(void)
 void
 EasyTelemetryPublisher::_StopWorker(void)
 {
+    POS_TRACE_INFO(EID(SUCCESS), "Easy Telemetry Publisher is going to make the worker stop");
     if (worker != nullptr)
     {
         isRunnable = false;
         worker->join();
+        POS_TRACE_INFO(EID(SUCCESS), "The worker has been stopped");
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(TELEMETRY_THREAD_IS_NOT_EXIST), "There is no thread to stop");
     }
 }
 
@@ -207,6 +213,10 @@ EasyTelemetryPublisher::_UpdateInterval(ConfigManager* config)
     {
         interval_in_millisecond = interval;
         additionalStr = "as loaded";
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(TELEMETRY_INTERVAL_HAS_NOT_BEEN_LOADED), "The interval has not been loaded");
     }
 
     POS_TRACE_INFO(EID(SUCCESS), "Easy Telemetry Publisher is going to publish metrics every {} ms {}",
@@ -227,6 +237,8 @@ EasyTelemetryPublisher::_PeriodicPublish(void)
 
         usleep(1);
     }
+
+    POS_TRACE_INFO(EID(SUCCESS), "The worker has been stopped");
 }
 
 void
@@ -252,6 +264,8 @@ EasyTelemetryPublisher::UpdateMetrics(void)
                     m.metric.SetGaugeValue(metric.GetGaugeValue());
                     break;
                 default:
+                    POS_TRACE_WARN(EID(TELEMETRY_NOT_SUPPORT_TYPE),
+                        "The metric type {} is not supported", (int)metric.GetType());
                     assert(false);
                     break;
             }

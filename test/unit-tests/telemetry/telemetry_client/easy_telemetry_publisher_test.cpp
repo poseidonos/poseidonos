@@ -199,6 +199,77 @@ TEST(EasyTelemetryPublisher, GetMetricRepository_testIfThePublisherHasExpectedMe
     EXPECT_EQ((*metric.metric.GetLabelList())["label1"], "val1");
 }
 
+TEST(EasyTelemetryPublisher, IncreaseCounter_testIfTheMetricHasSameLabelsButNotTheSameSequence)
+{
+    NiceMock<MockTelemetryPublisher> tp;
+    NiceMock<MockConfigManager> config;
+    cpu_set_t generalCpuSet;
+    EasyTelemetryPublisher easyTp(&tp);
+    easyTp.Initialize(&config, generalCpuSet);
+
+    // id: test1, label: {label1, 1}, {label2, 2}
+    const string metricId = "test1";
+    const size_t expectedCounter = 1;
+    VectorLabels label;
+    // label1 -> label2
+    label.push_back({"label1", "1"});
+    label.push_back({"label2", "2"});
+    easyTp.IncreaseCounter(metricId, label);
+
+    // calc expected metric
+    POSMetric expectedMetric("test1", POSMetricTypes::MT_COUNT);
+    expectedMetric.AddLabel("label1", "1");
+    expectedMetric.AddLabel("label2", "2");
+    size_t expectedHash = expectedMetric.Hash();
+
+    // update metrics
+    easyTp.UpdateMetrics();
+
+    {
+        // get metrics
+        MetricRepository repo = easyTp.GetMetricRepository();
+
+        // check count
+        ASSERT_NE(repo[(int)POSMetricTypes::MT_COUNT].find(expectedHash), repo[(int)POSMetricTypes::MT_COUNT].end());
+        ASSERT_EQ(repo[(int)POSMetricTypes::MT_COUNT].size(), expectedCounter);
+
+        auto& metric = repo[(int)POSMetricTypes::MT_COUNT][expectedHash];
+        EXPECT_EQ(metric.metric.GetName(), metricId);
+        EXPECT_EQ(metric.metric.GetType(), POSMetricTypes::MT_COUNT);
+        EXPECT_EQ(metric.metric.GetCountValue(), 1);
+        EXPECT_EQ((*metric.metric.GetLabelList())["label1"], "1");
+        EXPECT_EQ((*metric.metric.GetLabelList())["label2"], "2");
+    }
+
+    // change the sequence of the labels
+    {
+        VectorLabels label;
+        // label2 -> label1
+        label.push_back({"label2", "2"});
+        label.push_back({"label1", "1"});
+        easyTp.IncreaseCounter(metricId, label);
+    }
+
+    // update metrics
+    easyTp.UpdateMetrics();
+
+    {
+        // get metrics
+        MetricRepository repo = easyTp.GetMetricRepository();
+
+        // check count
+        ASSERT_NE(repo[(int)POSMetricTypes::MT_COUNT].find(expectedHash), repo[(int)POSMetricTypes::MT_COUNT].end());
+        ASSERT_EQ(repo[(int)POSMetricTypes::MT_COUNT].size(), expectedCounter);
+
+        auto& metric = repo[(int)POSMetricTypes::MT_COUNT][expectedHash];
+        EXPECT_EQ(metric.metric.GetName(), metricId);
+        EXPECT_EQ(metric.metric.GetType(), POSMetricTypes::MT_COUNT);
+        EXPECT_EQ(metric.metric.GetCountValue(), 1 + 1);
+        EXPECT_EQ((*metric.metric.GetLabelList())["label1"], "1");
+        EXPECT_EQ((*metric.metric.GetLabelList())["label2"], "2");
+    }
+}
+
 TEST(EasyTelemetryPublisher, GetMetricRepository_testIfThePublisherHasTwoExpectedMetricsEvenIfTheyHaveTheSameName)
 {
     NiceMock<MockTelemetryPublisher> tp;
