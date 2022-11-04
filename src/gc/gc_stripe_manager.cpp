@@ -401,6 +401,7 @@ GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
                 gcWriteBufferPool->ReturnBuffer(*it);
             }
             delete gcActiveWriteBuffers[volumeId];
+            POS_TRACE_DEBUG(EID(GC_GET_BUFFER_FAILED), "vol_id:{}", volumeId);
             return false;
         }
         gcActiveWriteBuffers[volumeId]->push_back(buffer);
