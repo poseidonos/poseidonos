@@ -2170,35 +2170,35 @@ Root:
     Id: 2810
     Name: INVOKE_REBUILD_DUE_TO_SPARE_ADDED
     Severity:
-    Message:
+    Message: A spare device is added in the degraded state and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2811
     Name: INVOKE_REBUILD_DUE_TO_DEVICE_DETACHED
     Severity:
-    Message:
+    Message: Device failure detected and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2812
     Name: INVOKE_REBUILD_DUE_TO_ARRAY_MOUNTED
     Severity:
-    Message:
+    Message: The rebuild target was found at the time of array mount and the rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2813
     Name: INVOKE_RESUME_REBUILD
     Severity:
-    Message:
-    Cause:
+    Message: A suspended rebuild operation has been found and rebuild execution conditions are being checked.
+    Cause: The rebuild operation might have been canceled during the rebuild or the process might have been forcibly terminated.
     Solution:
   -
     Id: 2814
     Name: INVOKE_REBUILD_DUE_TO_USER_REQUEST
     Severity:
-    Message:
+    Message: The user has requested the rebuild and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
