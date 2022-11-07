@@ -32,7 +32,7 @@ Syntax:
 
 		req := messages.BuildReq(command, uuid)
 
-		reqJSON, err := json.Marshal(req)
+		reqJson, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
 		}
@@ -41,7 +41,7 @@ Syntax:
 			fmt.Println("Launching PoseidonOS...")
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
+		displaymgr.PrintRequest(string(reqJson))
 
 		// TODO(mj): Here, we execute a script to run POS. This needs to be revised in the future.
 
@@ -53,16 +53,16 @@ Syntax:
 			startScriptPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 			startScriptPath += "/../script/start_poseidonos.sh"
 			err := exec.Command("/bin/sh", "-c", "sudo "+startScriptPath).Run()
-			resJSON := ""
+			resJson := ""
 			uuid := globals.GenerateUUID()
 			if err != nil {
-				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `"` + `,"result":{"status":{"code":11000,` +
+				resJson = `{"command":"STARTPOS","rid":"` + uuid + `"` + `,"result":{"status":{"code":11000,` +
 					`"description":"PoseidonOS has failed to start with error code: 11000"}}}`
 			} else {
-				resJSON = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
+				resJson = `{"command":"STARTPOS","rid":"` + uuid + `","result":{"status":{"code":0,` +
 					`"description":"Done! PoseidonOS has started!"}}}`
 			}
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 
 	},

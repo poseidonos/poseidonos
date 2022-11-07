@@ -45,7 +45,6 @@ Event::Event(bool isFrontEndEvent, BackendEvent eventType, AffinityManager* affi
   numa(INVALID_NUMA),
   affinityManager(affinityManagerArg)
 {
-    airlog("Event_Constructor", "internal", static_cast<uint64_t>(event), 1);
     if (nullptr == affinityManager)
     {
         affinityManager = AffinityManagerSingleton::Instance();
@@ -56,7 +55,6 @@ Event::Event(bool isFrontEndEvent, BackendEvent eventType, AffinityManager* affi
 // LCOV_EXCL_START
 Event::~Event(void)
 {
-    airlog("Event_Destructor", "internal", static_cast<uint64_t>(event), 1);
 }
 // LCOV_EXCL_STOP
 

@@ -302,7 +302,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_READ_Data)
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
-    EXPECT_EQ(posMetricVector->size(), 1);
+    EXPECT_EQ(posMetricVector->size(), 2);
     EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50002_READ_AVG_LAT_VOLUME);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 234);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");
@@ -345,7 +345,7 @@ TEST(TelemetryAirDelegator, dataHandler_RunState_LAT_ARR_VOL_WRITE_Data)
 
     // Then: Expect dataHandler returns zero(success), Clear AIR data
     EXPECT_EQ(actual, expected);
-    EXPECT_EQ(posMetricVector->size(), 1);
+    EXPECT_EQ(posMetricVector->size(), 2);
     EXPECT_EQ(posMetricVector->at(0).GetName(), TEL50012_WRITE_AVG_LAT_VOLUME);
     EXPECT_EQ(posMetricVector->at(0).GetGaugeValue(), 36804);
     EXPECT_EQ(posMetricVector->at(0).GetLabelList()->at("array_id"), "3");

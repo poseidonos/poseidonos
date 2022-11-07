@@ -34,6 +34,7 @@
 
 #include "src/bio/ubio.h"
 #include "src/device/base/ublock_device.h"
+#include "src/device/unvme/unvme_ssd.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
 #include "src/include/branch_prediction.h"
@@ -115,9 +116,9 @@ IOContext::GetDeviceName(void)
 }
 
 uint64_t
-IOContext::GetUBlockAddr(void)
+IOContext::GetEncodedPCIeAddr(void)
 {
-    return reinterpret_cast<uint64_t>(ubio->GetUBlock());
+    return reinterpret_cast<UnvmeSsd*>(ubio->GetUBlock())->GetEncodedPCIeAddr();
 }
 
 void

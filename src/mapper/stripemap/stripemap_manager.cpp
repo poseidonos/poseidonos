@@ -194,7 +194,7 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
 {
     if (numWriteIssuedCount != 0)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER StripeMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "Failed to Issue Flush. Another Flush is still progressing, issuedCount:{}", numWriteIssuedCount);
         return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
 
@@ -205,7 +205,7 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
     POSMetricValue v;
     v.gauge = numWriteIssuedCount;
     tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper StripeMap FlushTouchedPages] Issue Flush StripeMap, array:{}, arrayId:{}",
+    POS_TRACE_INFO(EID(MAP_FLUSH_STARTED), "map:stripemap, array:{}, arrayId:{}",
         addrInfo->GetArrayName(), addrInfo->GetArrayId());
     int ret = stripeMap->FlushTouchedPages(eventStripeMap);
     if (ret < 0)
@@ -221,8 +221,9 @@ StripeMapManager::FlushTouchedPages(EventSmartPtr cb)
 void
 StripeMapManager::MapFlushDone(int mapId)
 {
-    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED), "[Mapper StripeMap] StripeMap Flush Done, WritePendingCnt:{} @MapAsyncFlushDone, array:{}, arrayId:{}",
-        numWriteIssuedCount, addrInfo->GetArrayName(), addrInfo->GetArrayId());
+    POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED),
+        "map:stripemap, mapId:{}, arrayId:{}, numWriteIssued:{}",
+        mapId, addrInfo->GetArrayId(), numWriteIssuedCount);
     if (callback != nullptr)
     {
         eventScheduler->EnqueueEvent(callback);
