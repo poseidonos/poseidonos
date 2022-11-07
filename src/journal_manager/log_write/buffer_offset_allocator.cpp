@@ -125,8 +125,8 @@ BufferOffsetAllocator::AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffse
     {
         statusList[currentLogGroupId]->SetActive(_GetNextSeqNum());
 
-        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "New log group {} is allocated", currentLogGroupId);
+        POS_TRACE_INFO(EID(JOURNAL_LOG_GROUP_ALLOCATED),
+            "logGroupId:{}", currentLogGroupId);
     }
 
     uint64_t offset = 0;
@@ -168,8 +168,8 @@ BufferOffsetAllocator::_GetNewActiveGroup(void)
     else
     {
         statusList[currentLogGroupId]->SetActive(_GetNextSeqNum());
-        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "New log group {} is allocated", currentLogGroupId);
+        POS_TRACE_INFO(EID(JOURNAL_LOG_GROUP_ALLOCATED),
+            "logGroupId:{}", currentLogGroupId);
         return 0;
     }
 }
@@ -188,9 +188,6 @@ BufferOffsetAllocator::_TryToSetFull(int id)
     {
         uint32_t sequenceNumber = statusList[id]->GetSeqNum();
         releaser->MarkLogGroupFull(id, sequenceNumber);
-
-        POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_FULL),
-            "Log group id {} is added to full log group", id);
     }
 }
 

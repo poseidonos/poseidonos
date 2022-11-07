@@ -38,7 +38,9 @@ Syntax:
 			return buildErr
 		}
 
-		reqJson, err := protojson.Marshal(req)
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
 		if err != nil {
 			fmt.Printf("failed to marshal the protobuf request: %v", err)
 			t.RecordError(err)
