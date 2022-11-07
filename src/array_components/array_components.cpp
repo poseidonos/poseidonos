@@ -51,7 +51,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     nullptr /*state*/,
     nullptr /*array*/,
     nullptr /*volMgr*/,
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     nullptr /*replicatorVolumeSubscriber*/,
 #endif
     nullptr /*gc*/,
@@ -89,7 +89,7 @@ ArrayComponents::ArrayComponents(string arrayName,
     IStateControl* state,
     Array* array,
     VolumeManager* volMgr,
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     ReplicatorVolumeSubscriber* replicatorVolumeSubscriber,
 #endif
     GarbageCollector* gc,
@@ -109,7 +109,7 @@ ArrayComponents::ArrayComponents(string arrayName,
   gc(gc),
   meta(meta),
   volMgr(volMgr),
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
   replicatorVolumeSubscriber(replicatorVolumeSubscriber),
 #endif
   rbaStateMgr(rbaStateMgr),
@@ -281,7 +281,7 @@ ArrayComponents::_SetMountSequence(void)
     mountSequence.push_back(nvmf);
     mountSequence.push_back(metafs);
     mountSequence.push_back(volMgr);
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     mountSequence.push_back(replicatorVolumeSubscriber);
 #endif
     mountSequence.push_back(meta);
@@ -303,7 +303,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
 {
     if (metafs != nullptr
         || volMgr != nullptr
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
         || replicatorVolumeSubscriber != nullptr
 #endif
         || nvmf != nullptr
@@ -322,7 +322,7 @@ ArrayComponents::_InstantiateMetaComponentsAndMountSequenceInOrder(bool isArrayL
     // Please note that the order of creation should be like the following:
     metafs = metaFsFactory(array, isArrayLoaded);
     volMgr = new VolumeManager(array, state);
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     replicatorVolumeSubscriber = new ReplicatorVolumeSubscriber(array);
 #endif
     nvmf = new Nvmf(array->GetName(), array->GetIndex());
@@ -379,7 +379,7 @@ ArrayComponents::_DestructMetaComponentsInOrder(void)
         nvmf = nullptr;
         POS_TRACE_DEBUG(EID(ARRAY_COMPO_DEBUG_MSG), "Nvmf for {} has been deleted.", arrayName);
     }
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     if (replicatorVolumeSubscriber != nullptr)
     {
         delete replicatorVolumeSubscriber;
