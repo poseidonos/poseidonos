@@ -89,6 +89,10 @@ SUBDIRS = allocator \
         event \
         trace 
 
+ifeq ($(CONFIG_REPLICATOR), y)
+        SUBDIRS += pos_replicator
+endif
+
 .PHONY: $(SUBDIRS)
 
 poseidonos: $(SUBDIRS)

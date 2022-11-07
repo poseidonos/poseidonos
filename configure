@@ -32,6 +32,7 @@ function usage()
 	echo "Address Sanitizer Setting:"
 	echo "--with-asan                Build IBOF with ASAN"
 	echo "--without-asan             Build IBOF without ASAN"
+	echo "--with-replicator          Build POS with Repliactor"
     #Just another example 
     #echo " mbr-mock                  Build IBOF with mock mbr."
 	echo ""
@@ -101,6 +102,9 @@ for i in "$@"; do
 			;;
 		--without-asan)
 			CONFIG[ASAN]=n
+			;;
+		--with-replicator)
+			CONFIG[REPLICATOR]=y
 			;;
 		--)
 			break

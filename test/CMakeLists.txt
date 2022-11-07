@@ -15,7 +15,7 @@ option(POS_ENABLE_REPLICATOR "Enable the POS replicator module" OFF)
 
 # Set compiler option releated to Replicator
 if(POS_ENABLE_REPLICATOR)
-    add_definitions(-DWITH_REPLICATOR)
+    add_definitions(-DIBOF_CONFIG_REPLICATOR)
 endif(POS_ENABLE_REPLICATOR)
 
 # By default, we use 4 threads to run unit tests and 1 thread to run integration tests.

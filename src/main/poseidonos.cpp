@@ -113,7 +113,7 @@ Poseidonos::Init(int argc, char** argv)
         _InitMemoryChecker();
         POS_TRACE_INFO(EID(POS_INITIALIZING_RESOURCE_CHECKER), "");
         _InitResourceChecker();
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
         _InitReplicatorManager();
 #endif
         _InitTraceExporter(argv[0], pos::ConfigManagerSingleton::Instance(), pos::VersionProviderSingleton::Instance(), pos::TraceExporterSingleton::Instance(new OtlpFactory()));
@@ -137,7 +137,7 @@ Poseidonos::_InitIOInterface(void)
     IODispatcher::RegisterRecoveryEventFactory(ioRecoveryEventFactory);
 }
 
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
 void
 Poseidonos::_InitReplicatorManager(void)
 {

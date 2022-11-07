@@ -37,17 +37,18 @@
 #include <vector>
 
 #include "components_info.h"
+#include "mk/ibof_config.h"
+#include "src/admin/smart_log_meta_io.h"
 #include "src/array/array.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/garbage_collector.h"
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/io_scheduler/io_dispatcher_submission.h"
-#include "src/volume/volume_manager.h"
 #include "src/metafs/metafs.h"
 #include "src/network/nvmf.h"
-#include "src/admin/smart_log_meta_io.h"
 #include "src/pos_replicator/replicator_volume_subscriber.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/volume/volume_manager.h"
 
 using namespace std;
 
@@ -72,7 +73,7 @@ public:
         IStateControl* state,
         Array* array,
         VolumeManager* volMgr,
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
         ReplicatorVolumeSubscriber* replicatorVolumeSubscriber,
 #endif
         GarbageCollector* gc,
@@ -114,7 +115,7 @@ private:
     GarbageCollector* gc = nullptr;
     Metadata* meta = nullptr;
     VolumeManager* volMgr = nullptr;
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     ReplicatorVolumeSubscriber* replicatorVolumeSubscriber = nullptr;
 #endif
     MetaFs* metafs = nullptr;
