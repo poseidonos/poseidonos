@@ -28,13 +28,15 @@ TEST(LogWriteContextFactory, Init_testIfExecutedSuccessfully)
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
 
     // When
-    logWriteContextFactory.Init(&config, &notifier);
+    logWriteContextFactory.Init(&config, &notifier, &sequencer);
 
     // Then
     EXPECT_EQ(&notifier, logWriteContextFactory.GetLogBufferWriteDoneNotifier());
+    EXPECT_EQ(&sequencer, logWriteContextFactory.GetCallbackSequenceController());
 }
 
 TEST(LogWriteContextFactory, CreateBlockMapLogWriteContext_testIfExecutedSuccessfully)
@@ -42,8 +44,9 @@ TEST(LogWriteContextFactory, CreateBlockMapLogWriteContext_testIfExecutedSuccess
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier);
+    logWriteContextFactory.Init(&config, &notifier, &sequencer);
 
     // When
     EventSmartPtr callbackEvent;
@@ -79,6 +82,7 @@ TEST(LogWriteContextFactory, CreateBlockMapLogWriteContext_testIfExecutedSuccess
     EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
 
     EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
+    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
     EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
 }
 
@@ -87,8 +91,9 @@ TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSucces
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier);
+    logWriteContextFactory.Init(&config, &notifier, &sequencer);
 
     // When
     StripeId vsid = 100;
@@ -116,6 +121,7 @@ TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSucces
     EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
 
     EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
+    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
     EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
 }
 
@@ -126,7 +132,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
     ON_CALL(config, GetMetaPageSize).WillByDefault(Return(MAX_LOG_SIZE));
 
     LogWriteContextFactory factory;
-    factory.Init(&config, nullptr);
+    factory.Init(&config, nullptr, nullptr);
 
     GcStripeMapUpdateList mapUpdates;
     mapUpdates.volumeId = 10;
@@ -179,7 +185,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
     ON_CALL(config, GetMetaPageSize).WillByDefault(Return(MAX_LOG_SIZE));
 
     LogWriteContextFactory factory;
-    factory.Init(&config, nullptr);
+    factory.Init(&config, nullptr, nullptr);
 
     GcStripeMapUpdateList mapUpdates;
     mapUpdates.volumeId = 10;
@@ -235,8 +241,9 @@ TEST(LogWriteContextFactory, CreateGcStripeFlushedLogWriteContext_testIfExecuted
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier);
+    logWriteContextFactory.Init(&config, &notifier, &sequencer);
 
     // When
     int volumeId = 1;
@@ -261,6 +268,7 @@ TEST(LogWriteContextFactory, CreateGcStripeFlushedLogWriteContext_testIfExecuted
     expectDirtyMap.emplace(STRIPE_MAP_ID);
     EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
     EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
+    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
     EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
 }
 
@@ -269,8 +277,9 @@ TEST(LogWriteContextFactory, CreateVolumeDeletedLogWriteContext_testIfExecutedSu
     // Given
     NiceMock<MockJournalConfiguration> config;
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier);
+    logWriteContextFactory.Init(&config, &notifier, &sequencer);
 
     // When
     int volumeId = 1;
