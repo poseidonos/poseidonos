@@ -37,11 +37,12 @@
 #include "src/metafs/common/metafs_type.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "src/metafs/include/meta_storage_specific.h"
-#include "src/metafs/include/mf_property.h"
-#include "src/metafs/storage/mss.h"
+#include "src/metafs/include/meta_file_property.h"
 
 namespace pos
 {
+class MetaStorageSubsystem;
+
 class MetaFileContext
 {
 public:

@@ -37,10 +37,9 @@
 
 #include "src/metafs/include/meta_storage_specific.h"
 #include "src/metafs/include/meta_volume_type.h"
-#include "src/metafs/include/mf_lock_type.h"
 #include "src/metafs/common/metafs_common.h"
-#include "src/metafs/include/mf_property.h"
-#include "src/metafs/include/mf_dataformat.h"
+#include "src/metafs/include/meta_file_property.h"
+#include "src/metafs/include/meta_file_dataformat.h"
 
 namespace pos
 {
@@ -126,7 +125,6 @@ public:
       arrayId(0),
       fileByteSize(MetaFsCommonConst::INVALID_BYTE_SIZE),
       volType(MetaVolumeType::Max),
-      lock(MetaFileLockType::Default),
       fileProperty()
     {
     }
@@ -153,7 +151,6 @@ public:
     int arrayId;
     FileSizeType fileByteSize;
     MetaVolumeType volType;
-    MetaFileLockType lock;
 
     MetaFilePropertySet fileProperty; // used to file creation & format/reconfig
 

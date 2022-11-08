@@ -37,7 +37,7 @@
 #include <unordered_map>
 
 #include "src/metafs/common/meta_file_name.h"
-#include "mf_inode_req.h"
+#include "meta_file_inode_req.h"
 #include "src/metafs/include/meta_file_extent.h"
 #include "metafs_common.h"
 

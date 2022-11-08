@@ -47,7 +47,7 @@
 #include "src/metafs/common/metafs_stopwatch.h"
 #include "src/metafs/include/meta_file_context.h"
 #include "src/metafs/include/meta_file_extent.h"
-#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_property.h"
 
 namespace pos
 {

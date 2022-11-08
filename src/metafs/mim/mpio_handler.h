@@ -35,7 +35,7 @@
 #include <string>
 
 #include "mpio_allocator.h"
-#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_property.h"
 #include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/metafs_io_wrr_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"

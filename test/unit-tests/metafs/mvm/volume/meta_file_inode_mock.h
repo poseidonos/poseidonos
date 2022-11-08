@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/mvm/volume/mf_inode.h"
+#include "src/metafs/mvm/volume/meta_file_inode.h"
 
 namespace pos
 {
