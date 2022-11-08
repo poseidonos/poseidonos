@@ -66,6 +66,7 @@ VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* ar
   stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
+    airlog("VolumeIo_Constructor", "user", GetEventType(), 1);
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
@@ -84,10 +85,12 @@ VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
   stripeId(UNMAP_STRIPE),
   arrayMgmt(arrayMgmt)
 {
+    airlog("VolumeIo_Constructor", "user", GetEventType(), 1);
 }
 
 VolumeIo::~VolumeIo(void)
 {
+    airlog("VolumeIo_Destructor", "user", GetEventType(), 1);
 }
 
 VolumeIoSmartPtr

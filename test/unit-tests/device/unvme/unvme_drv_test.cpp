@@ -63,7 +63,7 @@ TEST(UnvmeDrv,
     EXPECT_CALL(mockIoCtx, GetOutOfMemoryRetryCount)
         .WillRepeatedly(Return(UNVME_DRV_OUT_OF_MEMORY_RETRY_LIMIT));
     EXPECT_CALL(mockIoCtx, IsAdminCommand).WillOnce(Return(true));
-    EXPECT_CALL(mockIoCtx, GetEncodedPCIeAddr).WillRepeatedly(Return(0));
+    EXPECT_CALL(mockIoCtx, GetUBlockAddr).WillRepeatedly(Return(0));
     NiceMock<MockUnvmeDeviceContext> mockDevCtx;
     mockDevCtx.ioCompletionCount = 0;
     EXPECT_CALL(mockDevCtx, GetPendingError).WillOnce(Return(&mockIoCtx));

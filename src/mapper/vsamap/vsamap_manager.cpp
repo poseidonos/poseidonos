@@ -260,10 +260,10 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
 {
     if (mapFlushState[volId] != MapFlushState::FLUSH_DONE)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "Failed to Issue Flush, Another Flush is still progressing, volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER VSAMap FlushTouchedPages] Failed to Issue Flush, Another Flush is still progressing in volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
         return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
-    POS_TRACE_INFO(EID(MAP_FLUSH_STARTED), "map:vsamap, volume:{}, arrayId:{}", volId, addrInfo->GetArrayId());
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VSAMap FlushTouchedPages] Issue Flush VSAMap, volume :{}, arrayId:{}", volId, addrInfo->GetArrayId());
     assert(vsaMaps[volId] != nullptr);
     assert(vsaMaps[volId]->GetCallback() == nullptr);
     vsaMaps[volId]->SetCallback(cb);
@@ -281,11 +281,11 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
         numWriteIssuedCount--;
         v.gauge = numWriteIssuedCount;
         tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-        POS_TRACE_ERROR(EID(MAP_FLUSH_FAILED), "map:vsamap, volumeId:{}, arrayId:{}", volId, addrInfo->GetArrayId());
+        POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap FlushTouchedPages] failed to flush vsamap, volumeId:{}, arrayId:{}", volId, addrInfo->GetArrayId());
     }
     else
     {
-        POS_TRACE_INFO(EID(MAP_FLUSH_ONGOING), "map:vsamap, volumeId:{}, arrayId:{}", volId, addrInfo->GetArrayId());
+        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VSAMap FlushTouchedPages] flush vsamp started volumeId:{}, arrayId:{}", volId, addrInfo->GetArrayId());
     }
     return ret;
 }
@@ -313,8 +313,14 @@ VSAMapManager::FlushAllMaps(void)
                 POSMetricValue v;
                 v.gauge = numWriteIssuedCount;
                 tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-                POS_TRACE_ERROR(EID(MAP_FLUSH_FAILED),
-                    "map:vsamap, volumeId:{}, arrayId:{}",
+                POS_TRACE_ERROR(EID(MAPPER_FAILED),
+                    "[Mapper VSAMap FlushAllMaps] failed to flush vsamap, volumeId:{}, arrayId:{}",
+                    volId, addrInfo->GetArrayId());
+            }
+            else
+            {
+                POS_TRACE_INFO(EID(MAPPER_SUCCESS),
+                    "[Mapper VSAMap FlushAllMaps] flush vsamp started volumeId:{}, arrayId:{}",
                     volId, addrInfo->GetArrayId());
             }
         }
@@ -397,8 +403,8 @@ void
 VSAMapManager::MapFlushDone(int mapId)
 {
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED),
-        "map:vsamap, mapId:{}, arrayId:{}, numWriteIssued:{}",
-        mapId, addrInfo->GetArrayId(), numWriteIssuedCount);
+        "[Mapper VSAMap] arrayId:{} mapId:{} WritePendingCnt:{} Flushed Done",
+        addrInfo->GetArrayId(), mapId, numWriteIssuedCount);
     EventSmartPtr callback = vsaMaps[mapId]->GetCallback();
     if (callback != nullptr)
     {

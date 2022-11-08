@@ -32,7 +32,6 @@
 
 #include "stripe_map_update_request.h"
 
-#include <air/Air.h>
 #include <memory>
 #include <sstream>
 
@@ -95,7 +94,6 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
 
         bool done = event.Execute();
         FlushCountSingleton::Instance()->pendingFlush--;
-        airlog("Pending_Flush", "internal", arrayId, -1);
         if (false == done)
         {
             EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));
@@ -106,7 +104,6 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to proceed stripe map update request event: {}", _GetErrorCount());
         FlushCountSingleton::Instance()->pendingFlush--;
-        airlog("Pending_Flush", "internal", arrayId, -1);
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
@@ -117,7 +114,6 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Stripe #{} is not in WriteBuffer.", stripe->GetVsid());
         FlushCountSingleton::Instance()->pendingFlush--;
-        airlog("Pending_Flush", "internal", arrayId, -1);
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
@@ -131,7 +127,6 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to allocate event: {}", message.str());
         FlushCountSingleton::Instance()->pendingFlush--;
-        airlog("Pending_Flush", "internal", arrayId, -1);
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }

@@ -68,12 +68,12 @@ public:
             }
         }
 
-        BufferInfo info = {
-            .owner = "stripe_copy_submission_test",
-            .size = 256,
-            .count =  GC_BUFFER_COUNT
-        };
-        gcBufferPool = new NiceMock<MockBufferPool>(info, 0, nullptr);
+        gcBufferPool = new std::vector<BufferPool*>;
+        for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
+        {
+            BufferInfo info;
+            gcBufferPool->push_back(new NiceMock<MockBufferPool>(info, 0, nullptr));
+        }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, nullptr, victimStripes, gcBufferPool);
     }
@@ -100,7 +100,7 @@ protected:
     NiceMock<MockIReverseMap>* revMap;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    BufferPool* gcBufferPool;
+    std::vector<BufferPool*>* gcBufferPool;
 
     EventSmartPtr mockCopyEvent;
     EventSmartPtr mockStripeCopier;

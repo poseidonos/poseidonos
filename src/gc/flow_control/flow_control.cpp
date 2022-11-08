@@ -240,13 +240,6 @@ FlowControl::InitDistributer(void)
     }
 }
 
-void
-FlowControl::Reset(void)
-{
-    bucket[FlowControlType::USER] = 0;
-    bucket[FlowControlType::GC] = 0;
-}
-
 bool
 FlowControl::_RefillToken(FlowControlType type)
 {

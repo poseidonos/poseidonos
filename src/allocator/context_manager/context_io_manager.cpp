@@ -132,7 +132,7 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externa
         POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS sync {}", sync);
         return EID(ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS);
     }
-    POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "Started, sync:{}", sync);
+    POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] sync:{}, start to flush", sync);
 
     int ret = 0;
     flushCallback = callback;
@@ -211,9 +211,7 @@ ContextIoManager::_FlushCompleted(void)
 
     if (remaining == 0 && flushInProgress.exchange(false) == true)
     {
-        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE),
-            "Completed, remaining:{}, flushInProgress:{}", remaining, flushInProgress);
-
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "[AllocatorFlush] Complete to flush allocator files");
         if (flushCallback != nullptr)
         {
             eventScheduler->EnqueueEvent(flushCallback);

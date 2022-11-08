@@ -33,7 +33,6 @@
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 
 #include <exception>
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -165,22 +164,7 @@ SetCustomArrayIdVolumeIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
 void
 SetCustomSourceDeviceIdLabel(POSMetric* metric, const air::JSONdoc& airNodeObj)
 {
-    uint64_t index{ToPrimitive<uint64_t>(airNodeObj["index"])};
-    std::string decoded_pcie_addr {""};
-    uint64_t incoded_pcie_addr[4] {0,};
-    std::stringstream decoded_pcie_addr_ss[4];
-    incoded_pcie_addr[0] = (index & 0xFFFF00000) >> 20;
-    incoded_pcie_addr[1] = (index & 0xFF000) >> 12;
-    incoded_pcie_addr[2] = (index & 0xFF0) >> 4;
-    incoded_pcie_addr[3] = (index & 0xF);
-    decoded_pcie_addr_ss[0] << std::hex << std::setw(4) << std::setfill('0') << incoded_pcie_addr[0];
-    decoded_pcie_addr_ss[1] << std::hex << std::setw(2) << std::setfill('0') << incoded_pcie_addr[1];
-    decoded_pcie_addr_ss[2] << std::hex << std::setw(2) << std::setfill('0') << incoded_pcie_addr[2];
-    decoded_pcie_addr_ss[3] << std::hex << std::setw(1) << std::setfill('0') << incoded_pcie_addr[3];
-    decoded_pcie_addr = decoded_pcie_addr_ss[0].str() + ":" + decoded_pcie_addr_ss[1].str()
-        + ":" + decoded_pcie_addr_ss[2].str() + "." + decoded_pcie_addr_ss[3].str();
-
-    metric->AddLabel("device_id", decoded_pcie_addr);
+    metric->AddLabel("device_id", ToString(airNodeObj["index"]));
     metric->AddLabel("source", ToString(airNodeObj["filter"]));
 }
 
@@ -346,16 +330,14 @@ TelemetryAirDelegator::RegisterAirEvent(void)
 {
     air_request_data(
         {"PERF_ARR_VOL", "PERF_PORT", "LAT_ARR_VOL_READ", "LAT_ARR_VOL_WRITE", "PERF_SSD_Read",
-            "PERF_SSD_Write", "CNT_PendingIO",
-            "Ubio_Constructor", "Ubio_Destructor", "SSD_Submit", "SSD_Complete",
-            "Event_Push_In_Reactor", "Event_Execute_In_Reactor", "Event_Execute_Failed",
-            "Callback_Constructor", "Callback_Destructor", "Pending_Flush", "Pending_Internal_Write",
+            "PERF_SSD_Write", "CNT_PendingIO", "VolumeIo_Constructor", "VolumeIo_Destructor",
+            "Ubio_Constructor", "Ubio_Destructor", "SSD_Submit", "SSD_Complete", "EventQueue_Push",
+            "WorkerCommonQueue_Push", "WorkerCommonQueue_Pop", "Callback_Constructor", "Callback_Destructor",
+            "Event_Constructor", "Event_Destructor", "IOWorker_Submit", "IOWorker_Complete",
             "RequestedUserRead", "RequestedUserWrite", "RequestedUserAdminIo",
             "CompleteUserRead", "CompleteUserWrite", "CompleteUserAdminIo",
             "UserFlushProcess", "PartialWriteProcess", "UserFailIo",
-            "UserReadPendingCnt", "UserWritePendingCnt", "InternalIoPendingCnt", "TimeOutIoCnt",
-            "Feqos_Global_BW_Throttling", "Feqos_Dynamic_BW_Throttling", "Feqos_Global_Iops_Throttling",
-            "Feqos_Dynamic_Iops_Throttling", "Feqos_Volume_Q_Count", "Q_EventQueue"},
+            "UserReadPendingCnt", "UserWritePendingCnt", "InternalIoPendingCnt", "TimeOutIoCnt"},
         std::move(dataHandler));
 }
 

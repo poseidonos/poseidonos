@@ -89,7 +89,6 @@ public:
     virtual int GetToken(FlowControlType type, int token);
     virtual void ReturnToken(FlowControlType type, int token);
     virtual void InitDistributer(void);
-    virtual void Reset(void);
 
 private:
     bool _RefillToken(FlowControlType type);

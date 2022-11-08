@@ -75,17 +75,7 @@ public:
         gcStatus = new NiceMock<MockGcStatus>;
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         memoryManager = new MockMemoryManager();
-        {
-            BufferInfo info;
-            uint32_t socket = 0;
-            MockBufferPool* pool = new MockBufferPool(info, socket);
-            EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(pool));
-            EXPECT_CALL(*memoryManager, DeleteBufferPool).WillRepeatedly(
-            [](BufferPool* pool) -> bool {
-                delete pool;
-                return true;
-            });;
-        }
+        EXPECT_CALL(*memoryManager, CreateBufferPool).WillRepeatedly(Return(nullptr));
         gcStripeManager = new NiceMock<MockGcStripeManager>(array, volumeEventPublisher, memoryManager);
         iReverseMap = new NiceMock<MockIReverseMap>();
         victimStripes = new std::vector<std::vector<VictimStripe*>>;
@@ -98,13 +88,12 @@ public:
             }
         }
 
-        BufferInfo info = {
-            .owner = "copier_test",
-            .size = 256,
-            .count =  GC_BUFFER_COUNT
-        };
-
-        gcBufferPool = new NiceMock<MockBufferPool>(info, 0, nullptr);
+        gcBufferPool = new std::vector<BufferPool*>;
+        for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
+        {
+            BufferInfo info;
+            gcBufferPool->push_back(new NiceMock<MockBufferPool>(info, 0, nullptr));
+        }
 
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, gcStripeManager, victimStripes, gcBufferPool);
         iBlockAllocator = new NiceMock<MockIBlockAllocator>;
@@ -162,7 +151,7 @@ protected:
     NiceMock<MockSegmentCtx>* segCtx;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    BufferPool* gcBufferPool;
+    std::vector<BufferPool*>* gcBufferPool;
     MockMemoryManager* memoryManager;
     CpuSetArray cpuSetArray;
 

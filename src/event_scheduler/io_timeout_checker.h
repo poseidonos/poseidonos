@@ -44,7 +44,7 @@ namespace pos
 const uint32_t CHECK_RESOLUTION_RANGE = 36000; // 1 hour
 const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
 const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
-class TelemetryPublisher;
+
 
 struct PendingIo
 {
@@ -80,7 +80,6 @@ private:
     std::atomic<std::uint64_t> currentIdx;
 
     PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
-    TelemetryPublisher* telemetryPublisher;
 };
 
 using IoTimeoutCheckerSingleton = Singleton<IoTimeoutChecker>;

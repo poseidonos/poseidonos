@@ -32,8 +32,6 @@
 
 #include "src/spdk_wrapper/event_framework_api.h"
 
-#include <air/Air.h>
-
 #include "spdk/env.h"
 #include "spdk/event.h"
 #include "spdk/nvmf.h"
@@ -170,7 +168,6 @@ EventFrameworkApi::CompleteEvents(void)
         EventFuncOneParam func = std::get<0>(eventArgument);
         void* arg1 = std::get<1>(eventArgument);
         countOfeventQueues[core]--;
-        airlog("Q_EventQueue", "internal", core, countOfeventQueues[core]);
         func(arg1);
         processedEvents++;
         if (processedEvents >= MAX_PROCESSABLE_EVENTS)
@@ -205,7 +202,6 @@ EventFrameworkApi::CompleteSingleQueueEvents(void)
         EventFuncOneParam func = std::get<0>(eventArgument);
         void* arg1 = std::get<1>(eventArgument);
         countOfeventSingleQueues[numaIndex]--;
-        airlog("Q_EventQueue", "internal", numaIndex + MAX_REACTOR_COUNT, countOfeventSingleQueues[numaIndex]);
         func(arg1);
         processedEvents++;
         if (processedEvents >= MAX_PROCESSABLE_EVENTS)

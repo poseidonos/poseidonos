@@ -38,9 +38,7 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 			return buildErr
 		}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
 			fmt.Printf("failed to marshal the protobuf request: %v", err)
 			return err

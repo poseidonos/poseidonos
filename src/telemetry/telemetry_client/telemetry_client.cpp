@@ -69,7 +69,7 @@ TelemetryClient::RegisterPublisher(TelemetryPublisher* publisher)
     {
         publisher->StartPublishing();
     }
-    POS_TRACE_INFO(EID(TELEMETRY_CLIENT_PUBLISHER_REGISTRATION_SUCCESS),
+    POS_TRACE_DEBUG(EID(TELEMETRY_CLIENT_PUBLISHER_REGISTRATION_SUCCESS),
         "publisher:{}, num_publishers:{}, turn_on:{}", name, publisherList.size(), defaultEnable);
     return 0;
 }

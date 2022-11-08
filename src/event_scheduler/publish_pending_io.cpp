@@ -50,6 +50,7 @@ PublishPendingIo::PublishPendingIo(int periodTime_, int durationCnt_)
 
     cpu_set_t cpuSet = AffinityManagerSingleton::Instance()->GetCpuSet(CoreType::GENERAL_USAGE);
     sched_setaffinity(0, sizeof(cpuSet), &cpuSet);
+
     thread = new std::thread(&PublishPendingIo::Run, this);
 }
 
@@ -73,11 +74,12 @@ PublishPendingIo::Run(void)
     while (1)
     {
         count = (count + 1) % durationCnt;
+
         IoTimeoutCheckerSingleton::Instance()->MoveCurrentIdx(count);
 
         if ((count % CHECK_TIMEOUT_THRESHOLD) == 0)
         {
-            _PublishMetric(count);
+            _PublishMetric();
         }
         usleep(periodTime * 1000);
 
@@ -87,7 +89,7 @@ PublishPendingIo::Run(void)
 }
 
 void
-PublishPendingIo::_PublishMetric(uint64_t currentIdx)
+PublishPendingIo::_PublishMetric()
 {
     for (int idx = 0 ; idx < CallbackType::Total_CallbackType_Cnt; idx++)
     {
@@ -102,6 +104,8 @@ PublishPendingIo::_PublishMetric(uint64_t currentIdx)
             }
         }
     }
+
+    
 }
 
 void

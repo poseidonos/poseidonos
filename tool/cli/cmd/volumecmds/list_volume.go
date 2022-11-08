@@ -57,17 +57,17 @@ Example2 (displaying a detailed information of a volume):
 
 		req := messages.BuildReqWithParam(command, globals.GenerateUUID(), param)
 
-		reqJson, err := json.Marshal(req)
+		reqJSON, err := json.Marshal(req)
 		if err != nil {
 			log.Error("error:", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJson))
+		displaymgr.PrintRequest(string(reqJSON))
 
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
-			resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			resJSON := socketmgr.SendReqAndReceiveRes(string(reqJSON))
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }
