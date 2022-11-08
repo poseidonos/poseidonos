@@ -45,7 +45,7 @@ TEST(VolumeCreator, Do_wrongName)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(newName, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(newName, size, maxIops, maxBw, minIops, minBw, uuid, false, 0, true);
 
     // Then
     ASSERT_NE(actual, expected);
@@ -77,7 +77,7 @@ TEST(VolumeCreator, Do_SameName)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false, -1, true);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -105,7 +105,7 @@ TEST(VolumeCreator, Do_SetSizeFail)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false, -1, true);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -133,7 +133,7 @@ TEST(VolumeCreator, Do_NotEnoughArraySize)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false, -1, true);
 
     // Then
     ASSERT_EQ(actual, expected);
