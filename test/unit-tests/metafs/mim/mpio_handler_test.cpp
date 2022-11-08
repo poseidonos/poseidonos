@@ -54,6 +54,7 @@ TEST(MpioHandler, Normal)
     MockMetaFsConfigManager* conf = new MockMetaFsConfigManager(nullptr);
     EXPECT_CALL(*conf, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
     EXPECT_CALL(*conf, IsDirectAccessEnabled).WillRepeatedly(Return(false));
+    EXPECT_CALL(*conf, IsSupportCheckingCrcWhenReading).WillRepeatedly(Return(false));
     EXPECT_CALL(*conf, GetMpioPoolCapacity).WillRepeatedly(Return(100));
     EXPECT_CALL(*conf, GetWriteMpioCacheCapacity).WillRepeatedly(Return(10));
 
@@ -61,7 +62,7 @@ TEST(MpioHandler, Normal)
 
     EXPECT_CALL(*allocator, TryReleaseTheOldestCache).Times(AtLeast(1));
 
-    MockWriteMpio* mpio = new MockWriteMpio(this, conf->IsDirectAccessEnabled());
+    MockWriteMpio* mpio = new MockWriteMpio(this, conf->IsDirectAccessEnabled(), conf->IsSupportCheckingCrcWhenReading());
     EXPECT_CALL(*mpio, ExecuteAsyncState).Times(AtLeast(1));
 
     MockMetaFsIoWrrQ<Mpio*, MetaFileType>* doneQ = new MockMetaFsIoWrrQ<Mpio*, MetaFileType>();

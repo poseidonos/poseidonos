@@ -52,7 +52,7 @@ public:
     MioStateExecuteEntryTexture(void)
     {
     }
-    ~MioStateExecuteEntryTexture(void)
+    virtual ~MioStateExecuteEntryTexture(void)
     {
     }
     virtual void SetUp(void) override

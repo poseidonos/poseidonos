@@ -78,7 +78,8 @@ class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecu
 {
 public:
     Mpio(void) = delete;
-    explicit Mpio(void* mdPageBuf, const bool directAccessEnabled);
+    Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCrcWhenReading, AsyncCallback callback);
+    Mpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading);
     virtual ~Mpio(void);
     Mpio(const Mpio& mpio) = delete;
     Mpio& operator=(const Mpio& mio) = delete;
@@ -136,7 +137,7 @@ public:
     MpioIoInfo io;
 
 protected:
-    MDPage mdpage;
+    MDPage* mdpage;
 
     bool partialIO;
     MetaStorageSubsystem* mssIntf;
@@ -151,7 +152,7 @@ protected:
 
     virtual void _InitStateHandler(void) = 0;
     bool _DoMemCpy(void* dst, void* src, const size_t nbytes);
-    bool _DoMemSetZero(void* addr, const size_t nbytes);
+    bool _DoMemSetZero(void);
 
     static void _HandleAsyncMemOpDone(void* obj);
     void _HandlePartialDone(void* notused = nullptr);
@@ -174,6 +175,7 @@ private:
     const uint64_t UNIQUE_ID;
     static std::atomic<uint64_t> idAllocate_;
     const bool DIRECT_ACCESS_ENABLED;
+    const bool SUPPORT_CHECKING_CRC_WHEN_READING;
     bool isAllocated;
 };
 } // namespace pos
