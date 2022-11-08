@@ -23,7 +23,7 @@ SRCS += $(wildcard *.cpp) \
 	catalog.cpp \
 	catalog_manager.cpp \
 	extent_allocator.cpp \
-	mf_inode.cpp \
+	meta_file_inode.cpp \
 	inode_table_header.cpp \
 	inode_creator.cpp \
 	inode_deleter.cpp \

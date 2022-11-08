@@ -33,44 +33,60 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
+#include "metafs_common.h"
+#include "src/metafs/include/meta_storage_specific.h"
+#include "src/metafs/include/meta_file_property.h"
 #include "src/metafs/include/meta_file_extent.h"
-#include "mf_property.h"
-#include "metafs_control_request.h"
 
 namespace pos
 {
-class MetaFileInodeCreateReq
+struct MetaFileInfoDumpCxt
 {
 public:
-    MetaFileInodeCreateReq(void)
-    : fd(MetaFsCommonConst::INVALID_FD),
-      fileName(nullptr),
-      fileByteSize(0),
-      ioAttribute(),
-      media(MetaStorageType::Default),
-      extentList(nullptr)
-    {
-    }
-
-    void
-    Setup(MetaFsFileControlRequest& reqMsg, FileDescriptorType newFD,
-            MetaStorageType mediaType, std::vector<MetaFileExtent>* newExtent)
-    {
-        fd = newFD;
-        fileName = reqMsg.fileName;
-        fileByteSize = reqMsg.fileByteSize;
-        ioAttribute = reqMsg.fileProperty;
-        media = mediaType;
-        extentList = newExtent;
-    }
-
+    std::string fileName;
     FileDescriptorType fd;
-    std::string* fileName;
-    FileSizeType fileByteSize;
-    MetaFilePropertySet ioAttribute;
-    MetaStorageType media;
-    std::vector<MetaFileExtent>* extentList;
+    FileSizeType size;
+    uint64_t ctime;
+    MetaLpnType lpnBase;
+    MetaLpnType lpnCount;
+    std::string location;
+};
+
+class MetaFileInodeInfo
+{
+public:
+    MetaFileInodeInfo(void)
+    {
+        memset(data.all, 0, META_FILE_INODE_INFO_BYTE_SIZE);
+    }
+
+    static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096 * 2;
+
+    union UData {
+        UData(void)
+        {
+        }
+        struct S
+        {
+            bool inUse;
+            FileDescriptorType fd;
+            char fileName[128]; // Change this to MAX_FILE_NAME_LENGTH or string *
+            FileSizeType fileByteSize;
+            FileSizeType dataChunkSize;
+            MetaStorageType dataLocation;
+            MetaFilePropertySet fileProperty;
+            uint16_t extentCnt;
+            MetaFileExtent extentMap[MetaFsConfig::MAX_PAGE_MAP_CNT];
+        } field;
+        uint8_t all[META_FILE_INODE_INFO_BYTE_SIZE];
+    } data;
+};
+
+class MetaFileInodeDumpCxt
+{
+public:
+    MetaFileInodeInfo inodeInfo;
+    uint32_t inodeSize = MetaFileInodeInfo::META_FILE_INODE_INFO_BYTE_SIZE;
 };
 } // namespace pos

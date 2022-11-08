@@ -4,4 +4,4 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/include/mf_lock_type.h"
+#include "src/metafs/include/meta_file_integrity_type.h"

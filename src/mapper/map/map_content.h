@@ -37,7 +37,7 @@
 #include "src/mapper/map/map.h"
 #include "src/mapper/map/map_header.h"
 #include "src/metafs/include/metafs_service.h"
-#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_property.h"
 
 #include <string>
 
