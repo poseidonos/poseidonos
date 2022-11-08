@@ -31,13 +31,9 @@
 
 #include "io_timeout_checker.h"
 
-#include <air/Air.h>
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 namespace pos
 {
@@ -54,8 +50,6 @@ currentIdx(0)
             pendingIoCnt[idx].pendingIoCnt[timeResolution] = 0;
         }
     }
-    telemetryPublisher = new TelemetryPublisher("PublishPendingIo");
-    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
 }
 
 IoTimeoutChecker::~IoTimeoutChecker(void)
@@ -64,11 +58,6 @@ IoTimeoutChecker::~IoTimeoutChecker(void)
     {
         publisher->TimerStop();
         delete publisher;
-    }
-    if (nullptr != telemetryPublisher)
-    {
-        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher->GetName());
-        delete telemetryPublisher;
     }
 }
 
@@ -113,6 +102,7 @@ IoTimeoutChecker::MoveCurrentIdx(uint64_t pendingTime)
     }
 
     currentIdx = pendingTime;
+
     for (int idx = 0 ; idx < CallbackType::Total_CallbackType_Cnt; idx++)
     {
         if (currentIdx == pendingIoCnt[idx].oldestIdx)
@@ -183,20 +173,12 @@ IoTimeoutChecker::_CheckPeningOverTime(CallbackType callbackType)
 
 bool 
 IoTimeoutChecker::FindPendingIo(CallbackType callbackType)
-{
+{    
     if (false == initialize)
     {
         return false;
     }
-    POSMetric metricOldest = POSMetric(TEL140012_CALLBACK_OLDEST_TIME_INDEX, MT_GAUGE);
-    metricOldest.SetGaugeValue(pendingIoCnt[callbackType].oldestIdx);
-    metricOldest.AddLabel("index", std::to_string(static_cast<uint32_t>(callbackType)));
-    telemetryPublisher->PublishMetric(metricOldest);
-
-    POSMetric metricCurrentIdx = POSMetric(TEL140013_CALLBACK_CURRENT_TIME_INDEX, MT_GAUGE);
-    metricCurrentIdx.SetGaugeValue(currentIdx);
-    metricCurrentIdx.AddLabel("index", std::to_string(0));
-    telemetryPublisher->PublishMetric(metricCurrentIdx);
+ 
     return _CheckPeningOverTime(callbackType);
 }
 

@@ -42,11 +42,7 @@ GrpcGlobalPublisher::GrpcGlobalPublisher(std::shared_ptr<grpc::Channel> channel_
     std::shared_ptr<grpc::Channel> channel = channel_;
     if (channel == nullptr)
     {
-        // set to 50 MB, Default : 4MB
-        auto cargs = grpc::ChannelArguments();
-        cargs.SetMaxReceiveMessageSize(50 * 1024 * 1024); 
-        cargs.SetMaxSendMessageSize(50 * 1024 * 1024);
-        channel = grpc::CreateCustomChannel(serverAddr, grpc::InsecureChannelCredentials(), cargs);
+        channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
     }
     stub = ::MetricManager::NewStub(channel);
     publishFailureCount = 0;

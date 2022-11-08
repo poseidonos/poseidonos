@@ -32,8 +32,6 @@
 
 #include "src/event_scheduler/spdk_event_scheduler.h"
 
-#include <air/Air.h>
-
 #include "spdk/env.h"
 #include "spdk/event.h"
 #include "src/include/branch_prediction.h"
@@ -54,7 +52,7 @@ SpdkEventScheduler::SendSpdkEvent(uint32_t core, EventSmartPtr event)
 
         return false;
     }
-    airlog("Event_Push_In_Reactor", "internal", static_cast<uint64_t>(event->GetEventType()), 1);
+
     EventSmartPtr* argument = new EventSmartPtr(event);
 
     return EventFrameworkApiSingleton::Instance()->SendSpdkEvent(core, InvokeEvent, argument);
@@ -67,7 +65,6 @@ SpdkEventScheduler::ExecuteOrScheduleEvent(uint32_t core, EventSmartPtr event)
 
     if (done == false)
     {
-        airlog("Event_Execute_Failed", "internal", static_cast<uint64_t>(event->GetEventType()), 1);
         SendSpdkEvent(core, event);
     }
 }
@@ -82,7 +79,7 @@ SpdkEventScheduler::SendSpdkEvent(EventSmartPtr event)
 
         return false;
     }
-    airlog("Event_Push_In_Reactor", "internal", static_cast<uint64_t>(event->GetEventType()), 1);
+
     EventSmartPtr* argument = new EventSmartPtr(event);
 
     return EventFrameworkApiSingleton::Instance()->SendSpdkEvent(InvokeEvent, argument);
@@ -92,7 +89,6 @@ void
 SpdkEventScheduler::InvokeEvent(void* voidTypeEvent)
 {
     EventSmartPtr event = *static_cast<EventSmartPtr*>(voidTypeEvent);
-    airlog("Event_Execute_In_Reactor", "internal", static_cast<uint64_t>(event->GetEventType()), 1);
     uint32_t core = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     ExecuteOrScheduleEvent(core, event);
     delete static_cast<EventSmartPtr*>(voidTypeEvent);

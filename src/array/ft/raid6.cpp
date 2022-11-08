@@ -246,7 +246,6 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
     ec_encode_data(chunkSize, dataCnt, parityCnt, galoisTable, sources, &sources[dataCnt]);
 }
 
-#if USE_RAID6_DECODE_CACHING
 uint32_t
 Raid6::_MakeKeyforGFMap(vector<uint32_t>& excluded)
 {
@@ -265,7 +264,6 @@ Raid6::_MakeKeyforGFMap(vector<uint32_t>& excluded)
 
     return key;
 }
-#endif
 
 void
 Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
@@ -385,7 +383,6 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     }
 
     // Make key for Galois field table caching during rebuild
-#if USE_RAID6_DECODE_CACHING
     uint32_t key = _MakeKeyforGFMap(excluded);
     unsigned char* rebuildGaloisTable = nullptr;
     auto iter = galoisTableMap.find(key);
@@ -413,19 +410,12 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
             rebuildGaloisTable = iter->second;
         }
     }
-#else
-    unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
-    _MakeDecodingGFTable(chunkCnt - destCnt, excluded, rebuildGaloisTable);
-#endif
+
     ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
     for (auto mem : tmpAlloc)
     {
         delete mem;
     }
-#if !USE_RAID6_DECODE_CACHING
-    delete[] rebuildGaloisTable;
-#endif
-
 }
 
 bool
@@ -479,12 +469,10 @@ Raid6::~Raid6()
     delete[] encodeMatrix;
     delete[] galoisTable;
 
-#if USE_RAID6_DECODE_CACHING
     for (auto iter = galoisTableMap.begin(); iter != galoisTableMap.end(); iter++)
     {
         delete[](iter->second);
     }
-#endif
 }
 
 int

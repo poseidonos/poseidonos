@@ -32,17 +32,15 @@ Syntax:
 
 		param := buildHaReplStartParam()
 		req := &pb.StartHaReplicationRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJson))
+		displaymgr.PrintRequest(string(reqJSON))
 
 		if !(globals.IsTestingReqBld) {
-			var resJson string
+			var resJSON string
 
 			res, err := grpcmgr.SendStartHaReplication(req)
 			if err != nil {
@@ -54,9 +52,9 @@ Syntax:
 			if err != nil {
 				log.Fatalf("failed to marshal the protobuf response: %v", err)
 			}
-			resJson = string(resByte)
+			resJSON = string(resByte)
 
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }

@@ -59,12 +59,12 @@
 namespace pos
 {
 GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager, bool forceFlush)
+    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
 : GcFlushSubmission(arrayName, blkInfoList, volumeId, dataBuffer, gcStripeManager, nullptr,
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
       IIOSubmitHandler::GetInstance(),
       FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
-      ArrayMgr()->GetInfo(arrayName)->arrayInfo, forceFlush)
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo)
 {
 }
 
@@ -72,7 +72,7 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
     GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
     CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
     IIOSubmitHandler* inputIIOSubmitHandler,
-    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo, bool forceFlush)
+    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo)
 : Event(false, BackendEvent_Flush),
   arrayName(arrayName),
   blkInfoList(blkInfoList),
@@ -83,8 +83,7 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
   iBlockAllocator(inputIBlockAllocator),
   iIOSubmitHandler(inputIIOSubmitHandler),
   flowControl(inputFlowControl),
-  iArrayInfo(inputIArrayInfo),
-  isForceFlush(forceFlush)
+  iArrayInfo(inputIArrayInfo)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -96,38 +95,24 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
-    Stripe* allocatedStripe = nullptr;
-    if (isForceFlush == false)
+    const PartitionLogicalSize* udSize =
+        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
+
+    int token = flowControl->GetToken(FlowControlType::GC, totalBlksPerUserStripe);
+    if (0 >= token)
     {
-        const PartitionLogicalSize* udSize =
-            iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-        uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
-
-        int token = flowControl->GetToken(FlowControlType::GC, totalBlksPerUserStripe);
-        if (0 >= token)
-        {
-            return false;
-        }
-
-        allocatedStripe = _AllocateStripe(volumeId);
-        if (allocatedStripe == nullptr)
-        {
-            if (0 < token)
-            {
-                flowControl->ReturnToken(FlowControlType::GC, token);
-            }
-            return false;
-        }
+        return false;
     }
-    else
+
+    Stripe* allocatedStripe = _AllocateStripe(volumeId);
+    if (allocatedStripe == nullptr)
     {
-        allocatedStripe = _AllocateStripe(volumeId);
-        if (allocatedStripe == nullptr)
+        if (0 < token)
         {
-            return false;
+            flowControl->ReturnToken(FlowControlType::GC, token);
         }
-        flowControl->Reset();
-        POS_TRACE_INFO(EID(FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH), "");
+        return false;
     }
 
     StripeSmartPtr stripe(allocatedStripe);

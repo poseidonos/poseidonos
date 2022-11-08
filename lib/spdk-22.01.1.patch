@@ -2510,10 +2510,10 @@ index 000000000..0045180cb
 +include $(SPDK_ROOT_DIR)/mk/spdk.lib.mk
 diff --git module/bdev/pos/bdev_pos.c module/bdev/pos/bdev_pos.c
 new file mode 100644
-index 000000000..682934a8b
+index 000000000..d3f1de5b0
 --- /dev/null
 +++ module/bdev/pos/bdev_pos.c
-@@ -0,0 +1,1041 @@
+@@ -0,0 +1,1043 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -2816,9 +2816,11 @@ index 000000000..682934a8b
 +	       uint64_t offset,
 +	       uint64_t byte_count)
 +{
-+	spdk_bdev_io_complete(spdk_bdev_io_from_ctx(task), SPDK_BDEV_IO_STATUS_SUCCESS);
++	task->status = SPDK_BDEV_IO_STATUS_SUCCESS;
++	task->num_outstanding = 1;
 +
-+	return 0;
++	return spdk_accel_submit_fill(ch, mdisk->pos_buf + offset, 0,
++				      byte_count, pos_done, task);
 +}
 +
 +static int64_t

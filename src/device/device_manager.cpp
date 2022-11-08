@@ -374,11 +374,13 @@ DeviceManager::GetDev(DeviceIdentifier& devID)
     auto it = find_if(devices.begin(), devices.end(), devID.GetPredicate());
     if (it != devices.end())
     {
+        POS_TRACE_DEBUG(EID(DEVICEMGR_GETDEV),
+            "Device Found: {}", devID.val);
         return (*it);
     }
 
-    POS_TRACE_DEBUG(EID(DEVICEMGR_DEVICE_NOT_FOUND),
-        "dev_id:{}", devID.val);
+    POS_TRACE_INFO(EID(DEVICEMGR_GETDEV),
+        "Device Not Found: {}", devID.val);
     return nullptr;
 }
 

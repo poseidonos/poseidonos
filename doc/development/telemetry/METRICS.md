@@ -115,22 +115,21 @@
   - [_**overTemperatureCount**_](#overtemperaturecount)
   - [_**underTemperatureCount**_](#undertemperaturecount)
 - [**IOCount**](#iocount)
+  - [_**count_of_volume_io_constructors**_](#count_of_volume_io_constructors)
+  - [_**count_of_volume_io_destructors**_](#count_of_volume_io_destructors)
   - [_**count_of_ubio_constructors**_](#count_of_ubio_constructors)
   - [_**count_of_ubio_destructors**_](#count_of_ubio_destructors)
   - [_**submission_count_of_ssd_ios**_](#submission_count_of_ssd_ios)
   - [_**completion_count_of_ssd_ios**_](#completion_count_of_ssd_ios)
-  - [_**event_push_in_reactor**_](#event_push_in_reactor)
-  - [_**event_execute_in_reactor**_](#event_execute_in_reactor)
-  - [_**event_execute_failed_in_reactor**_](#event_execute_failed_in_reactor)
-  - [_**count_of_callback_constructors**_](#count_of_callback_constructors)
+  - [_**pushing_count_of_event_queue**_](#pushing_count_of_event_queue)
+  - [_**pushing_count_of_worker_common_queue**_](#pushing_count_of_worker_common_queue)
+  - [_**popping_count_of_worker_common_queue**_](#popping_count_of_worker_common_queue)
+  - [_**count_of_callback_contructors**_](#count_of_callback_contructors)
   - [_**count_of_callback_destructors**_](#count_of_callback_destructors)
-  - [_**pending_flush_count**_](#pending_flush_count)
-  - [_**pending_internal_write_count**_](#pending_internal_write_count)
-  - [_**pending_byte_io_count**_](#pending_byte_io_count)
-  - [_**pending_avg_qd_in_event_queue**_](#pending_avg_qd_in_event_queue)
-  - [_**pending_max_qd_in_event_queue**_](#pending_max_qd_in_event_queue)
-  - [_**read_max_lat_volume**_](#read_max_lat_volume)
-  - [_**write_max_lat_volume**_](#write_max_lat_volume)
+  - [_**count_of_event_contructors**_](#count_of_event_contructors)
+  - [_**count_of_event_destructors**_](#count_of_event_destructors)
+  - [_**submission_count_in_io_worker**_](#submission_count_in_io_worker)
+  - [_**completion_count_in_io_worker**_](#completion_count_in_io_worker)
   - [_**count_of_requested_user_read**_](#count_of_requested_user_read)
   - [_**count_of_requested_user_write**_](#count_of_requested_user_write)
   - [_**count_of_requested_user_adminio**_](#count_of_requested_user_adminio)
@@ -1721,25 +1720,10 @@ Under Temperature Count Value
 IO Count group contains the metrics for internal count related to IO E2E path
 
 ---
-### _**feqos_global_bw_throttling**_
 
-**ID**: 120000
+### _**count_of_volume_io_constructors**_
 
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.11.0
-
-The value of frontend global bandwidth throttling 
-
----
-
-### _**feqos_dynamic_bw_throttling**_
-
-**ID**: 120001
+**ID**: 130001
 
 **Type**: Count
 
@@ -1749,13 +1733,13 @@ The value of frontend global bandwidth throttling
 
 **Introduced**: v0.11.0
 
-The value of dynamic bandwidth throttling 
+The accumulated count of volume IO's constructors
 
 ---
 
-### _**feqos_global_iops_throttling**_
+### _**count_of_volume_io_destructors**_
 
-**ID**: 120002
+**ID**: 130002
 
 **Type**: Count
 
@@ -1765,31 +1749,13 @@ The value of dynamic bandwidth throttling
 
 **Introduced**: v0.11.0
 
-The value of global Iops throttling 
-
----
-
-### _**feqos_dynamic_iops_throttling**_
-
-**ID**: 120003
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.11.0
-
-The value of global Iops throttling 
-
----
+The accumulated count of volume IO's destructors
 
 ---
 
 ### _**count_of_ubio_constructors**_
 
-**ID**: 130000
+**ID**: 130003
 
 **Type**: Count
 
@@ -1805,7 +1771,7 @@ The accumulated count of ubio's constructors
 
 ### _**count_of_ubio_destructors**_
 
-**ID**: 130001
+**ID**: 130004
 
 **Type**: Count
 
@@ -1821,7 +1787,7 @@ The accumulated count of ubio's destructors
 
 ### _**submission_count_of_ssd_ios**_
 
-**ID**: 130002
+**ID**: 130005
 
 **Type**: Count
 
@@ -1837,7 +1803,7 @@ The accumulated submission count of ssd's IOs
 
 ### _**completion_count_of_ssd_ios**_
 
-**ID**: 130003
+**ID**: 130006
 
 **Type**: Count
 
@@ -1851,57 +1817,57 @@ The accumulated completion count of ssd's IOs
 
 ---
 
-### _**event_push_in_reactor**_
-
-**ID**: 130004
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.12.0
-
-The accumulated pushing count of reactor's event queue
-
----
-
-### _**event_execute_in_reactor**_
-
-**ID**: 130005
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.12.0
-
-The accumulated count of executing reactor's event
-
----
-
-### _**event_execute_failed_in_reactor**_
-
-**ID**: 130006
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.12.0
-
-The accumulated failed count of executing reactor's event
-
----
-
-### _**count_of_callback_constructors**_
+### _**pushing_count_of_event_queue**_
 
 **ID**: 130007
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated pushing count of each event queue located in event scheduler
+
+---
+
+### _**pushing_count_of_worker_common_queue**_
+
+**ID**: 130008
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated pushing count of worker common queue from event queue
+
+---
+
+### _**popping_count_of_worker_common_queue**_
+
+**ID**: 130009
+
+**Type**: Count
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.11.0
+
+The accumulated popping count of worker common queue
+
+---
+
+### _**count_of_callback_contructors**_
+
+**ID**: 130010
 
 **Type**: Count
 
@@ -1915,9 +1881,9 @@ The accumulated count of callback constructors
 
 ---
 
-### _**count_of_callback_destructors**_
+### _**count_of_callback_detructors**_
 
-**ID**: 130008
+**ID**: 130011
 
 **Type**: Count
 
@@ -1932,55 +1898,7 @@ The accumulated count of callback destructors
 ---
 
 
-### _**pending_flush_count**_
-
-**ID**: 130009
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.12.0
-
-Pending flush count in backend
-
----
-
-### _**pending_internal_write_count**_
-
-**ID**: 130010
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.12.0
-
-The pending count of io submit handler's writes
-
----
-
-### _**pending_byte_io_count**_
-
-**ID**: 130011
-
-**Type**: Count
-
-**Monitoring**: Mandatory
-
-**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
-
-**Introduced**: v0.12.0
-
-The pending count of byte io
-
----
-
-### _**pending_avg_qd_in_event_queue**_
+### _**count_of_event_contructors**_
 
 **ID**: 130012
 
@@ -1990,12 +1908,13 @@ The pending count of byte io
 
 **Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
 
-**Introduced**: v0.12.0
+**Introduced**: v0.11.0
 
-The average pending count of reactor event queue
+The accumulated count of event constructors
+
 ---
 
-### _**pending_max_qd_in_event_queue**_
+### _**count_of_event_destructors**_
 
 **ID**: 130013
 
@@ -2005,14 +1924,15 @@ The average pending count of reactor event queue
 
 **Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
 
-**Introduced**: v0.12.0
+**Introduced**: v0.11.0
 
-The average pending count of reactor event queue
+The accumulated count of event destructors
+
 ---
 
-### _**read_max_lat_volume**_
+### _**submission_count_in_io_worker**_
 
-**ID**: 130013
+**ID**: 130014
 
 **Type**: Count
 
@@ -2020,13 +1940,15 @@ The average pending count of reactor event queue
 
 **Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
 
-**Introduced**: v0.12.0
+**Introduced**: v0.11.0
 
-max read latency per volume
+The accumulated submission count of io worker
+
 ---
-### _**write_max_lat_volume**_
 
-**ID**: 130013
+### _**completion_count_in_io_worker**_
+
+**ID**: 130015
 
 **Type**: Count
 
@@ -2034,10 +1956,12 @@ max read latency per volume
 
 **Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
 
-**Introduced**: v0.12.0
+**Introduced**: v0.11.0
 
-max write latency per volume
+The accumulated completion count of io worker
+
 ---
+
 ### _**count_of_requested_user_read**_
 
 **ID**: 140000
@@ -2050,7 +1974,7 @@ max write latency per volume
 
 **Introduced**: v0.11.0
 
-The accumulated completion count of frontend requested user read
+The accumulated completion count of io worker
 
 ---
 
@@ -2066,7 +1990,7 @@ The accumulated completion count of frontend requested user read
 
 **Introduced**: v0.11.0
 
-The accumulated completion count of frontend requested user write
+The accumulated completion count of io worker
 
 ---
 
@@ -2082,7 +2006,7 @@ The accumulated completion count of frontend requested user write
 
 **Introduced**: v0.11.0
 
-The accumulated completion count of frontend requested admin commands
+The accumulated completion count of io worker
 
 ---
 
@@ -2098,7 +2022,7 @@ The accumulated completion count of frontend requested admin commands
 
 **Introduced**: v0.11.0
 
-The accumulated completion count of completing user read
+The accumulated completion count of io worker
 
 ---
 
@@ -2114,7 +2038,7 @@ The accumulated completion count of completing user read
 
 **Introduced**: v0.11.0
 
-The accumulated completion count of completing user write
+The accumulated completion count of io worker
 
 ---
 
@@ -2130,7 +2054,7 @@ The accumulated completion count of completing user write
 
 **Introduced**: v0.11.0
 
-The accumulated completion count of completing user admin command
+The accumulated completion count of io worker
 
 ---
 
@@ -2146,7 +2070,7 @@ The accumulated completion count of completing user admin command
 
 **Introduced**: v0.11.0
 
-The accumulated count of flushing process
+The accumulated completion count of io worker
 
 ---
 
@@ -2162,7 +2086,7 @@ The accumulated count of flushing process
 
 **Introduced**: v0.11.0
 
-The accumulated count of partial writes
+The accumulated completion count of io worker
 
 ---
 
@@ -2178,7 +2102,7 @@ The accumulated count of partial writes
 
 **Introduced**: v0.11.0
 
-The accumulated failed count of user ios
+The accumulated completion count of io worker
 
 ---
 
@@ -2194,7 +2118,7 @@ The accumulated failed count of user ios
 
 **Introduced**: v0.11.0
 
-The accumulated count of read pending count
+The accumulated completion count of io worker
 
 ---
 
@@ -2210,7 +2134,7 @@ The accumulated count of read pending count
 
 **Introduced**: v0.11.0
 
-The accumulated count of write pending count
+The accumulated completion count of io worker
 
 ---
 
@@ -2226,11 +2150,11 @@ The accumulated count of write pending count
 
 **Introduced**: v0.11.0
 
-The accumulated count of gc related io pending count
+The accumulated completion count of io worker
 
 ---
 
-### _**callback_oldest_time_idx**_
+### _**count_of_timeout_io_cnt**_
 
 **ID**: 140012
 
@@ -2242,6 +2166,6 @@ The accumulated count of gc related io pending count
 
 **Introduced**: v0.11.0
 
-The accumulated count of gc 
+The accumulated completion count of io worker
 
 ---

@@ -47,20 +47,18 @@ Example:
 
 		req := &pb.DeleteSubsystemRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
+		reqJSON, err := protojson.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJson))
+		displaymgr.PrintRequest(string(reqJSON))
 
 		if !(globals.IsTestingReqBld) {
-			var resJson string
+			var resJSON string
 
 			if globals.EnableGrpc == false {
-				resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
+				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
 			} else {
 				res, err := grpcmgr.SendDeleteSubsystem(req)
 				if err != nil {
@@ -71,10 +69,10 @@ Example:
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
-				resJson = string(resByte)
+				resJSON = string(resByte)
 			}
 
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }

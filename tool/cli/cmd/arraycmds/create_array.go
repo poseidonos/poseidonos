@@ -45,9 +45,7 @@ Eample 2 (creating an array with RAID6):
 			return buildErr
 		}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
+		reqJson, err := protojson.Marshal(req)
 		if err != nil {
 			fmt.Printf("failed to marshal the protobuf request: %v", err)
 			return err

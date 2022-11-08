@@ -20,7 +20,7 @@ public:
     MOCK_METHOD(void, SetErrorKey, (std::list<IOContext*>::iterator it), (override));
     MOCK_METHOD((std::pair<std::list<IOContext*>::iterator, bool>), GetErrorKey, (), (override));
     MOCK_METHOD(std::string, GetDeviceName, (), (override));
-    MOCK_METHOD(uint64_t, GetEncodedPCIeAddr, (), (override));
+    MOCK_METHOD(uint64_t, GetUBlockAddr, (), (override));
     MOCK_METHOD(UbioDir, GetOpcode, (), (override));
     MOCK_METHOD(void*, GetBuffer, (), (override));
     MOCK_METHOD(uint64_t, GetStartByteOffset, (), (override));

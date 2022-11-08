@@ -122,8 +122,8 @@ LogGroupBufferStatus::TryToSetFull(void)
         _SetStatus(LogGroupStatus::FULL);
 
         POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_FULL),
-            "sequenceNumber:{}, added:{}, filled:{}",
-            seqNum, numLogsAdded, numLogsFilled);
+            "Log group is fully filled, added {} filled {}",
+            numLogsAdded, numLogsFilled);
 
         return true;
     }

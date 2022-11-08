@@ -54,7 +54,7 @@ public:
     CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
                 BitMapMutex* inputInUseBitmap, GcStripeManager* inputGcStripeManager,
                 std::vector<std::vector<VictimStripe*>>* inputVictimStripes,
-                BufferPool* inputGcBufferPooll,
+                std::vector<BufferPool*>* inputGcBufferPool,
                 MemoryManager* memoryManager =
                     MemoryManagerSingleton::Instance());
 
@@ -85,10 +85,11 @@ public:
     virtual std::string GetArrayName(void);
     virtual unsigned int GetArrayIndex(void);
 
+    static const uint32_t GC_BUFFER_COUNT = 512;
     static const uint32_t GC_CONCURRENT_COUNT = 16;
     static const uint32_t GC_VICTIM_SEGMENT_COUNT = 2;
 private:
-    void _CreateBufferPool(uint32_t chunkCnt, uint32_t chunkSize);
+    void _CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize);
     void _CreateVictimStripes(IArrayInfo* array);
 
     std::atomic<uint32_t> requestStripeCount;
@@ -110,7 +111,7 @@ private:
     unsigned int arrayIndex;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    BufferPool* gcBufferPool = nullptr;
+    std::vector<BufferPool*>* gcBufferPool;
     MemoryManager* memoryManager;
 };
 

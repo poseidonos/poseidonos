@@ -32,8 +32,6 @@
 
 #include "src/io/general_io/io_submit_handler.h"
 
-#include <air/Air.h>
-
 #include <list>
 #include <string>
 
@@ -113,7 +111,6 @@ IOSubmitHandler::SubmitAsyncIO(
             SubmitAsyncWrite asyncWrite;
             bool needTrim = false;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite++;
-            airlog("Pending_Internal_Write", "internal", arrayId, 1);
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
                 partitionToIO, callback, arrayId, needTrim, parityOnly);
         }
@@ -122,7 +119,6 @@ IOSubmitHandler::SubmitAsyncIO(
             SubmitAsyncWrite asyncWrite;
             bool needTrim = true;
             IOSubmitHandlerCountSingleton::Instance()->pendingWrite++;
-            airlog("Pending_Internal_Write", "internal", arrayId, 1);
             errorToReturn = asyncWrite.Execute(bufferList, startLSA, blockCount,
                 partitionToIO, callback, arrayId, needTrim, false);
         }
@@ -148,7 +144,6 @@ IOSubmitHandler::SubmitAsyncByteIO(
 
     AsyncByteIO asyncByteIO;
     IOSubmitHandlerCountSingleton::Instance()->pendingByteIo++;
-    airlog("Pending_Byte_IO", "internal", 0, 1);
     errorToReturn = asyncByteIO.Execute(direction,
         buffer, startLSA, partitionToIO, callback, arrayId);
     return errorToReturn;

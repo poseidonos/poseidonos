@@ -27,19 +27,19 @@ func connectToCliServer() (net.Conn, error) {
 	return conn, err
 }
 
-func SendReqAndReceiveRes(reqJson string) string {
+func SendReqAndReceiveRes(reqJSON string) string {
 	conn, err := connectToCliServer()
 	if err != nil {
 		log.Error("cannot send a request to cli server: not connected")
-		return buildConnErrResp(reqJson, err.Error())
+		return buildConnErrResp(reqJSON, err.Error())
 	}
 	defer conn.Close()
 
-	fmt.Fprintf(conn, reqJson)
+	fmt.Fprintf(conn, reqJSON)
 	res, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil && err != io.EOF {
 		log.Error("could not receive data from the cli sever:", err)
-		return buildConnErrResp(reqJson, err.Error())
+		return buildConnErrResp(reqJSON, err.Error())
 	}
 
 	return res

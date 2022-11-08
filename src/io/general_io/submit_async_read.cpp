@@ -32,8 +32,6 @@
 
 #include "src/io/general_io/submit_async_read.h"
 
-#include <air/Air.h>
-
 #include "src/array/service/array_service_layer.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/memory.h"

@@ -45,7 +45,7 @@ class IIOLocker;
 class ArrayUnlocking : public Callback
 {
 public:
-    ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId, IIOLocker* inputLocker, uint32_t arrayId);
+    ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId, IIOLocker* inputLocker);
     ~ArrayUnlocking(void) override;
 
 private:
@@ -54,6 +54,5 @@ private:
     std::set<IArrayDevice*> lockedDevs;
     StripeId stripeId;
     IIOLocker* locker;
-    uint32_t arrayId;
 };
 } // namespace pos

@@ -202,7 +202,7 @@ VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
     _CheckLogGroupIdValidity(logGroupId);
     segmentInfoDiffs[logGroupId]->Reset();
 
-    POS_TRACE_INFO(EID(VERSIONED_SEGMENT_INFO), "Versioned segment info is flushed, logGroupId:{}", logGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Versioned segment info is flushed, logGroup {}", logGroupId);
 }
 
 int

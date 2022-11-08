@@ -42,11 +42,8 @@ func runSubscriber() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	// set to 50 MB, Default : 4MB
-	grpcServer := grpc.NewServer(
-		grpc.MaxSendMsgSize(50*1024*1024), 
-    	grpc.MaxRecvMsgSize(50*1024*1024))
-
+	var opts []grpc.ServerOption
+	grpcServer := grpc.NewServer(opts...)
 	pb.RegisterMetricManagerServer(grpcServer, newServer())
 	grpcServer.Serve(lis)
 }

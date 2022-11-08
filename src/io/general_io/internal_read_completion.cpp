@@ -31,7 +31,6 @@
  */
 
 #include "src/io/general_io/internal_read_completion.h"
-
 #include "src/io/general_io/io_submit_handler_count.h"
 namespace pos
 {

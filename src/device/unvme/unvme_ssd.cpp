@@ -34,7 +34,6 @@
 
 #include <cstdio>
 #include <iostream>
-#include <sstream>
 
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
@@ -68,32 +67,6 @@ UnvmeSsd::UnvmeSsd(
     property->sn = _GetSN();
     property->fr = _GetFR();
     property->numa = _GetNuma();
-
-    if (12 == addr.size())
-    {
-        uint64_t pcie_addr_1 {0};
-        std::string pcie_addr_1_s {addr.substr(0, 4)};
-        std::stringstream pcie_addr_1_ss {pcie_addr_1_s};
-        pcie_addr_1_ss >> std::hex >> pcie_addr_1;
-
-        uint64_t pcie_addr_2 {0};
-        std::string pcie_addr_2_s {addr.substr(5, 2)};
-        std::stringstream pcie_addr_2_ss {pcie_addr_2_s};
-        pcie_addr_2_ss >> std::hex >> pcie_addr_2;
-
-        uint64_t pcie_addr_3 {0};
-        std::string pcie_addr_3_s {addr.substr(8, 2)};
-        std::stringstream pcie_addr_3_ss {pcie_addr_3_s};
-        pcie_addr_3_ss >> std::hex >> pcie_addr_3;
-
-        uint64_t pcie_addr_4 {0};
-        std::string pcie_addr_4_s {addr.substr(11, 1)};
-        std::stringstream pcie_addr_4_ss {pcie_addr_4_s};
-        pcie_addr_4_ss >> std::hex >> pcie_addr_4;
-
-        encoded_pcie_addr = (pcie_addr_1 << 20) + (pcie_addr_2 << 12)
-            + (pcie_addr_3 << 4) + pcie_addr_4;
-    }
 
     _ClassifyDevice(property);
 }

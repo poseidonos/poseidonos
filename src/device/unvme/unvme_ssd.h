@@ -67,10 +67,6 @@ public:
     {
         return isSupportedExtendedSmart;
     }
-    inline uint64_t GetEncodedPCIeAddr(void)
-    {
-        return encoded_pcie_addr;
-    }
 
 private:
     DeviceContext* _AllocateDeviceContext(void) override;
@@ -92,7 +88,6 @@ private:
     SpdkEnvCaller* spdkEnvCaller;
     bool isHotDetached = false;
     bool isSupportedExtendedSmart;
-    uint64_t encoded_pcie_addr {0};
 };
 } // namespace pos
 

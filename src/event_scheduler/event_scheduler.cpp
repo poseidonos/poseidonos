@@ -198,6 +198,7 @@ EventScheduler::EnqueueEvent(EventSmartPtr input)
         {
             type = ReactorType_IOEvent;
         }
+
         uint32_t coreIndex = lastReactorIndex;
         uint32_t targetCore = ioReactorCore[coreIndex], coreCount = ioReactorCount;
         bool ret = false;

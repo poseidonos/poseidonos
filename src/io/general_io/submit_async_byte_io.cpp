@@ -34,8 +34,6 @@
 
 #include "src/io/general_io/submit_async_byte_io.h"
 
-#include <air/Air.h>
-
 #include "src/array/service/array_service_layer.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
@@ -75,7 +73,6 @@ AsyncByteIO::_CallbackFunc(void *callbackPtr)
         delete callbackSmartPtr;
     }
     IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
-    airlog("Pending_Byte_IO", "internal", 0, -1);
 }
 
 void*
@@ -127,7 +124,6 @@ AsyncByteIO::Execute(
     {
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
-        airlog("Pending_Byte_IO", "internal", 0, -1);
         return errorToReturn;
     }
     if (unlikely(buffer == nullptr))
@@ -137,7 +133,6 @@ AsyncByteIO::Execute(
             "Buffer pointer of Byte IO is null");
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
-        airlog("Pending_Byte_IO", "internal", 0, -1);
         return errorToReturn;
     }
 
@@ -150,7 +145,6 @@ AsyncByteIO::Execute(
             "Parition type is not allowed for memory access");
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
-        airlog("Pending_Byte_IO", "internal", 0, -1);
         return errorToReturn;
     }
 
@@ -176,7 +170,6 @@ AsyncByteIO::Execute(
             static_cast<int>(direction));
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
-        airlog("Pending_Byte_IO", "internal", 0, -1);
         return errorToReturn;
     }
 
@@ -188,7 +181,6 @@ AsyncByteIO::Execute(
             "Translate or Convert Error in ByteIO");
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingByteIo--;
-        airlog("Pending_Byte_IO", "internal", 0, -1);
         return errorToReturn;
     }
 

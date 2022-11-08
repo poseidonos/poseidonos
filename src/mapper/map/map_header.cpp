@@ -89,7 +89,7 @@ MapHeader::CopyToBuffer(char* buffer)
     header->numTotalMpages = mPageMap->GetNumBits();
     header->numUsedBlks = numUsedBlks;
     header->age = ++age;
-    POS_TRACE_INFO(EID(COPY_MAP_HEADER), "mapId:{}, age:{}, numValidPgs:{}, numUsedBlks:{}", mapId, header->age, header->numValidMpages, header->numUsedBlks);
+    POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numValidMpages, header->numUsedBlks);
     memcpy((buffer + sizeof(MpageInfo)), (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
     return 0;
 }
