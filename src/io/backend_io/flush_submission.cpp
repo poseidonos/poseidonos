@@ -32,6 +32,8 @@
 
 #include "flush_submission.h"
 
+#include <air/Air.h>
+
 #include <list>
 #include <string>
 
@@ -113,6 +115,7 @@ FlushSubmission::_DoSpecificJob(void)
         .blkCnt = 1};
 
     FlushCountSingleton::Instance()->pendingFlush++;
+    airlog("Pending_Flush", "internal", arrayId, 1);
 
     if (likely(translator != nullptr))
     {
@@ -124,6 +127,7 @@ FlushSubmission::_DoSpecificJob(void)
             POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);
             // No retry
             FlushCountSingleton::Instance()->pendingFlush--;
+            airlog("Pending_Flush", "internal", arrayId, -1);
             FlushCountSingleton::Instance()->callbackNotCalledCount++;
             return true;
         }

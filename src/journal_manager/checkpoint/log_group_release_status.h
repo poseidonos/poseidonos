@@ -60,6 +60,8 @@ public:
     bool IsReleasing(void);
 
 private:
+    void _PrintStatusChangedLog(ReleaseStatus from);
+
     int id;
     uint32_t sequenceNumber;
     ReleaseStatus status;

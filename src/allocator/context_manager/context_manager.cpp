@@ -255,7 +255,7 @@ ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSe
 void
 ContextManager::ResetFlushedInfo(int logGroupId)
 {
-    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "ContextManager::ResetFlushedInfo {}", logGroupId);
+    POS_TRACE_INFO(EID(VERSIONED_SEGMENT_INFO), "ResetFlushedInfo, logGroupId:{}", logGroupId);
 
     if (ALL_LOG_GROUP == logGroupId)
     {

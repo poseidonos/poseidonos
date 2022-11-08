@@ -32,6 +32,8 @@
 
 #include "src/io/general_io/array_unlocking.h"
 
+#include <air/Air.h>
+
 #include "src/array/service/array_service_layer.h"
 #include "src/include/branch_prediction.h"
 #include "src/io/general_io/io_submit_handler_count.h"
@@ -39,11 +41,12 @@
 namespace pos
 {
 ArrayUnlocking::ArrayUnlocking(std::set<IArrayDevice*> devs, StripeId stripeId,
-    IIOLocker* inputLocker)
+    IIOLocker* inputLocker, uint32_t arrayId)
 : Callback(false, CallbackType_ArrayUnlocking),
   lockedDevs(devs),
   stripeId(stripeId),
-  locker(inputLocker)
+  locker(inputLocker),
+  arrayId(arrayId)
 {
 }
 
@@ -59,6 +62,7 @@ ArrayUnlocking::_DoSpecificJob(void)
         locker->Unlock(lockedDevs, stripeId);
     }
     IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
+    airlog("Pending_Internal_Write", "internal", arrayId, -1);
     return true;
 }
 } // namespace pos

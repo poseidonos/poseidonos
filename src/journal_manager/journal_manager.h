@@ -67,6 +67,7 @@ class JournalStatusProvider;
 class CheckpointManager;
 class DirtyMapManager;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
 class BufferedSegmentContextManager;
 
 class Stripe;
@@ -107,6 +108,7 @@ public:
         IVersionedSegmentContext* versionedSegCtx_,
         DirtyMapManager* dirtyManager,
         LogBufferWriteDoneNotifier* logBufferWriteDoneNotifier,
+        CallbackSequenceController* sequenceController,
         ReplayHandler* replayHandler,
         IArrayInfo* arrayInfo,
         TelemetryPublisher* tp);
@@ -177,6 +179,7 @@ protected:
     IVersionedSegmentContext* versionedSegCtx;
     DirtyMapManager* dirtyMapManager;
     LogBufferWriteDoneNotifier* logFilledNotifier;
+    CallbackSequenceController* sequenceController;
 
     ReplayHandler* replayHandler;
     TelemetryPublisher* telemetryPublisher;

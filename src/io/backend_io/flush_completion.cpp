@@ -32,6 +32,8 @@
 
 #include "flush_completion.h"
 
+#include <air/Air.h>
+
 #include "src/allocator/event/stripe_put_event.h"
 #include "src/allocator/stripe/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -87,6 +89,7 @@ FlushCompletion::_DoSpecificJob(void)
 
         bool done = event.Execute();
         FlushCountSingleton::Instance()->pendingFlush--;
+        airlog("Pending_Flush", "internal", arrayId, -1);
         if (false == done)
         {
             EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));

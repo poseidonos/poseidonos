@@ -277,8 +277,8 @@ AllocatorFileIo::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
     assert(header->sig == client->GetSignature());
 
     _AfterFlush(ctx);
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE),
-        "[AllocatorFlush] File flushed, sig:{}, version:{}", header->sig, header->ctxVersion);
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_COMPLETED),
+        "sig:{}, version:{}", header->sig, header->ctxVersion);
 
     AllocatorIoCtx* ioContext = reinterpret_cast<AllocatorIoCtx*>(ctx);
     ioContext->clientCallback();

@@ -44,6 +44,7 @@ namespace pos
 {
 class LogHandlerInterface;
 class LogBufferWriteDoneNotifier;
+class CallbackSequenceController;
 
 class MapUpdateLogWriteContext : public LogWriteContext
 {
@@ -52,16 +53,25 @@ public:
 
     // For UT
     MapUpdateLogWriteContext(MapList dirtyList, EventSmartPtr callback,
-        LogBufferWriteDoneNotifier* logFilledNotifier);
+        LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer);
 
     MapUpdateLogWriteContext(LogHandlerInterface* log, MapList dirtyList,
-        EventSmartPtr callback, LogBufferWriteDoneNotifier* notifier);
+        EventSmartPtr callback, LogBufferWriteDoneNotifier* notifier,
+        CallbackSequenceController* sequencer);
     virtual ~MapUpdateLogWriteContext(void) = default;
 
     MapList& GetDirtyList(void);
     virtual void IoDone(void) override;
 
+    // For UT
+    inline CallbackSequenceController*
+    GetCallbackSequenceController(void)
+    {
+        return sequenceController;
+    }
+
 protected:
+    CallbackSequenceController* sequenceController;
     MapList dirty;
 };
 
