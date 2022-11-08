@@ -48,7 +48,7 @@ class LogWriteContext;
 class IJournalLogBuffer;
 class JournalConfiguration;
 class LogWriteStatistics;
-class TelemetryPublisher;
+class EasyTelemetryPublisher;
 
 class LogWriteHandler : public LogBufferWriteDoneEvent
 {
@@ -58,7 +58,7 @@ public:
     virtual ~LogWriteHandler(void);
 
     virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-        JournalConfiguration* config, TelemetryPublisher* telemetryPublisher,
+        JournalConfiguration* config, EasyTelemetryPublisher* telemetryPublisher,
         ConcurrentMetaFsTimeInterval* timeInterval = nullptr);
     virtual void Dispose(void);
 
@@ -83,7 +83,7 @@ private:
     std::vector<std::atomic<uint64_t>>* numIosRequested;
     std::vector<std::atomic<uint64_t>>* numIosCompleted;
 
-    TelemetryPublisher* telemetryPublisher;
+    EasyTelemetryPublisher* easyTp;
     ConcurrentMetaFsTimeInterval* interval;
     std::atomic<uint64_t> sumOfTimeSpentPerInterval;
     std::atomic<uint64_t> doneCountPerInterval;

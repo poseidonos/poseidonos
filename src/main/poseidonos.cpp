@@ -75,6 +75,7 @@
 #include "src/telemetry/telemetry_air/telemetry_air_delegator.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/easy_telemetry_publisher.h"
 #include "src/resource_checker/resource_checker.h"
 #include "src/resource_checker/smart_collector.h"
 #include "src/trace/trace_exporter.h"
@@ -328,6 +329,9 @@ Poseidonos::_SetupThreadModel(void)
     FlushCmdManagerSingleton::Instance();
 
     IoTimeoutCheckerSingleton::Instance()->Initialize();
+
+    cpu_set_t generalCPUSet = affinityManager->GetCpuSet(CoreType::GENERAL_USAGE);
+    EasyTelemetryPublisherSingleton::Instance()->Initialize(ConfigManagerSingleton::Instance(), generalCPUSet);
 }
 
 void

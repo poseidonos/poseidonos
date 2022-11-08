@@ -100,12 +100,13 @@ public:
     virtual int AddLabel(std::string key, std::string value);
 
     virtual std::string GetName(void);
-    virtual POSMetricTypes GetType(void);
+    virtual POSMetricTypes GetType(void) const;
     // virtual time_t GetTime(void);
-    virtual uint64_t GetCountValue(void);
-    virtual int64_t GetGaugeValue(void);
-    virtual POSHistogramValue* GetHistogramValue(void);
+    virtual uint64_t GetCountValue(void) const;
+    virtual int64_t GetGaugeValue(void) const;
+    virtual POSHistogramValue* GetHistogramValue(void) const;
     virtual MetricLabelMap* GetLabelList(void);
+    virtual size_t Hash(void) const;
 
 private:
     POSMetricTypes type;       // Mandatory
