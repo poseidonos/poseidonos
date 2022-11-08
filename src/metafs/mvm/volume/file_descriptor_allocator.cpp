@@ -36,7 +36,6 @@
 #include <unordered_map>
 
 #include "metafs_common_const.h"
-#include "mf_inode.h"
 #include "src/logger/logger.h"
 #include "src/metafs/common/meta_file_util.h"
 

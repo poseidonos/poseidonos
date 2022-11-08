@@ -39,7 +39,7 @@
 
 #include "src/metafs/mim/metafs_io_request.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
-#include "test/unit-tests/metafs/lib/metafs_time_interval.h"
+#include "test/unit-tests/metafs/lib/metafs_time_interval_mock.h"
 
 using ::testing::Return;
 using ::testing::Test;

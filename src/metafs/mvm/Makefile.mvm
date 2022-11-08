@@ -1,7 +1,7 @@
 include $(MFS_TOP_DIR)/mvm/Makefile.include
 
 MVM_SRCS += \
-	mf_inode.cpp \
+	meta_file_inode.cpp \
 	meta_volume.cpp \
 	ssd_meta_volume.cpp \
 	nvram_meta_volume.cpp \

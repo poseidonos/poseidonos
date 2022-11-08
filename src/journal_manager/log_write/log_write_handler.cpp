@@ -41,6 +41,7 @@
 #include "src/journal_manager/replay/replay_stripe.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/easy_telemetry_publisher.h"
 #include "src/metadata/block_map_update.h"
 
 namespace pos
@@ -60,7 +61,7 @@ LogWriteHandler::LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList*
   waitingList(waitingList),
   numIosRequested(nullptr),
   numIosCompleted(nullptr),
-  telemetryPublisher(nullptr),
+  easyTp(nullptr),
   interval(nullptr),
   sumOfTimeSpentPerInterval(0),
   doneCountPerInterval(0)
@@ -90,11 +91,11 @@ LogWriteHandler::~LogWriteHandler(void)
 
 void
 LogWriteHandler::Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-    JournalConfiguration* journalConfig, TelemetryPublisher* tp, ConcurrentMetaFsTimeInterval* timeInterval)
+    JournalConfiguration* journalConfig, EasyTelemetryPublisher* tp, ConcurrentMetaFsTimeInterval* timeInterval)
 {
     bufferAllocator = allocator;
     logBuffer = buffer;
-    telemetryPublisher = tp;
+    easyTp = tp;
     interval = timeInterval;
     numLogGroups = journalConfig->GetNumLogGroups();
 
@@ -218,36 +219,23 @@ LogWriteHandler::_PublishPeriodicMetrics(LogWriteContext* context)
     uint64_t time = sumOfTimeSpentPerInterval.fetch_and(elapsedTime) + elapsedTime;
     uint64_t count = doneCountPerInterval.fetch_and(1) + 1;
 
-    if (telemetryPublisher && interval && interval->CheckInterval())
+    if (easyTp && interval && interval->CheckInterval())
     {
         sumOfTimeSpentPerInterval = 0;
         doneCountPerInterval = 0;
 
-        POSMetricVector* v = new POSMetricVector();
-
         for (size_t i = 0; i < numIosRequested->size(); ++i)
         {
-            std::string logGroupId = std::to_string(i);
-
-            POSMetric metricIssueCnt(TEL36005_JRN_LOG_COUNT, POSMetricTypes::MT_GAUGE);
-            metricIssueCnt.AddLabel("group_id", logGroupId);
-            metricIssueCnt.SetGaugeValue((*numIosRequested)[i]);
-            v->emplace_back(metricIssueCnt);
-
-            POSMetric metricDoneCnt(TEL36006_JRN_LOG_DONE_COUNT, POSMetricTypes::MT_GAUGE);
-            metricDoneCnt.AddLabel("group_id", logGroupId);
-            metricDoneCnt.SetGaugeValue((*numIosCompleted)[i]);
-            v->emplace_back(metricDoneCnt);
+            VectorLabels labels;
+            labels.push_back({"group_id", std::to_string(i)});
+            easyTp->UpdateGauge(TEL36005_JRN_LOG_COUNT, (*numIosRequested)[i], labels);
+            easyTp->UpdateGauge(TEL36006_JRN_LOG_DONE_COUNT, (*numIosCompleted)[i], labels);
         }
 
         if (count)
         {
-            POSMetric m(TEL36007_JRN_LOG_WRITE_TIME_AVERAGE, POSMetricTypes::MT_GAUGE);
-            m.SetGaugeValue(time / count);
-            v->emplace_back(m);
+            easyTp->UpdateGauge(TEL36007_JRN_LOG_WRITE_TIME_AVERAGE, (time / count));
         }
-
-        telemetryPublisher->PublishMetricList(v);
     }
 }
 

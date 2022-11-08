@@ -32,16 +32,40 @@
 
 #pragma once
 
+#include "meta_file_integrity_type.h"
+
 namespace pos
 {
-enum class MetaFileLockType
+// definitions below indicate io characteristics of the corresponding meta file access
+// meta filesystem stores metadata and service io efficiently according to the setting given by user
+enum class MetaFileType
 {
-    NoFLock, // no explicit file lock. Lock will be granted while processing I/O for the byte range
-    Read,    // explicit read lock. Subsequent read request will be blocked if any single read op. is inprogress
-    Write,   // explicit read/write lock. Any subsequent i/o request will be blocked if any write op. is inprogress
+    SpecialPurposeMap,
+    Journal,
+    Map,
+    General,
+    MAX
+};
 
-    Max,
+class MetaFilePropertySet
+{
+public:
+    MetaFilePropertySet(void)
+    : MetaFilePropertySet(MetaFileIntegrityType::Default, MetaFileType::General)
+    {
+    }
+    MetaFilePropertySet(MetaFileType type)
+    : MetaFilePropertySet(MetaFileIntegrityType::Default, type)
+    {
+    }
+    MetaFilePropertySet(MetaFileIntegrityType integrity, MetaFileType type)
+    : integrity(integrity),
+      type(type)
+    {
+    }
+    ~MetaFilePropertySet(void) = default;
 
-    Default = NoFLock,
+    MetaFileIntegrityType integrity;
+    MetaFileType type;
 };
 } // namespace pos

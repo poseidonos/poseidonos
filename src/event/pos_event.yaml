@@ -5239,7 +5239,49 @@ Root:
     Message: The mpio is enqueued twice
     Cause: It is possible that the mpio is enqueued twice
     Solution: Need to debug
-  
+  -
+    Id: 4092
+    Name: MFS_INVALID_CRC
+    Severity:
+    Message: It is failed to find to match crc values between written crc and generated crc from data buffer
+    Cause: Written crc or data might be damaged
+    Solution:
+  -
+    Id: 4093
+    Name: MFS_INVALID_META_LPN
+    Severity:
+    Message: It is failed to find to match lpn numbers between expected one and written
+    Cause: Written lpn number or data might be damaged
+    Solution:
+  -
+    Id: 4094
+    Name: MFS_INVALID_FILE_DESCRIPTOR
+    Severity:
+    Message: It is failed to find to match crc values between expected one and written
+    Cause: Written file descriptor or data might be damaged
+    Solution:
+  -
+    Id: 4095
+    Name: MFS_INVALID_SIGNATURE
+    Severity:
+    Message: It is failed to find to match signatures between expected one and written
+    Cause: Written signature or data might be damaged
+    Solution:
+  -
+    Id: 4096
+    Name: MFS_INVALID_EPOCH_SIGNATURE
+    Severity:
+    Message: It is failed to find to match epoch signatures between expected one and written
+    Cause: Written epoch signature or data might be damaged
+    Solution:
+  -
+    Id: 4097
+    Name: MFS_FAILED_TO_CHECK_INTEGRITY
+    Severity:
+    Message: There are some problems with data integrity
+    Cause: Data may be damaged
+    Solution:
+
   -
     Id: 4500
     Name: VOLUME_EVENT
@@ -7953,6 +7995,27 @@ Root:
     Message: Failed to set telemetry property.
     Cause: Could not open the file.
     Solution: Check if the file path is correct, or you have the permission.
+  -
+    Id: 9529
+    Name: TELEMETRY_INTERVAL_HAS_NOT_BEEN_LOADED
+    Severity:
+    Message: Failed to load time interval for easy telemetry.
+    Cause: Could not load the time interval.
+    Solution: Check if the file is correct, or the interval_in_millisecond_for_easy_telemetry_publisher is in the file.
+  -
+    Id: 9530
+    Name: TELEMETRY_THREAD_IS_NOT_EXIST
+    Severity:
+    Message: Failed to stop the worker to publish metrics.
+    Cause: Could not stop the worker thread.
+    Solution: Check if the worker has been run.
+  -
+    Id: 9531
+    Name: TELEMETRY_NOT_SUPPORT_TYPE
+    Severity:
+    Message: The metric type is not supported currently.
+    Cause: Could not publish the metric.
+    Solution: Need to implement
 
 
   # DEBUG: 10000 - 10199

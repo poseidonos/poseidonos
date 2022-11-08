@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_property.h"
 
 namespace pos
 {
