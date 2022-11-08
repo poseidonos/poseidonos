@@ -65,13 +65,13 @@ public:
                 (*victimStripes)[stripeIndex].push_back(new NiceMock<MockVictimStripe>(array, nullptr, nullptr, nullptr, nullptr));
             }
         }
-        gcBufferPool = new std::vector<BufferPool*>;
-        for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
-        {
-            BufferInfo info;
-            gcBufferPool->push_back(new NiceMock<MockBufferPool>(info, 0, nullptr));
-        }
+        BufferInfo info = {
+            .owner = "stripe_copier_test",
+            .size = 256,
+            .count =  GC_BUFFER_COUNT
+        };
 
+        gcBufferPool = new NiceMock<MockBufferPool>(info, 0, nullptr);
         meta = new NiceMock<MockCopierMeta>(array, udSize, inUseBitmap, nullptr, victimStripes, gcBufferPool);
     }
 
@@ -95,7 +95,7 @@ protected:
     NiceMock<MockBitMapMutex>* inUseBitmap;
 
     std::vector<std::vector<VictimStripe*>>* victimStripes;
-    std::vector<BufferPool*>* gcBufferPool;
+    BufferPool* gcBufferPool = nullptr;
 
     EventSmartPtr mockCopyEvent;
     EventSmartPtr mockStripeCopier;

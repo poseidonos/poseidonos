@@ -31,21 +31,26 @@
  */
 
 #include "src/journal_manager/log_buffer/map_update_log_write_context.h"
+
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 
 namespace pos
 {
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(MapList dirtyList, EventSmartPtr callback,
-    LogBufferWriteDoneNotifier* logFilledNotifier)
+    LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer)
 : LogWriteContext(callback, logFilledNotifier),
+  sequenceController(sequencer),
   dirty(dirtyList)
 {
 }
 
 MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogHandlerInterface* log,
     MapList dirtyList, EventSmartPtr callback,
-    LogBufferWriteDoneNotifier* logFilledNotifier)
+    LogBufferWriteDoneNotifier* logFilledNotifier,
+    CallbackSequenceController* sequencer)
 : LogWriteContext(log, callback, logFilledNotifier),
+  sequenceController(sequencer),
   dirty(dirtyList)
 {
 }
@@ -59,7 +64,9 @@ MapUpdateLogWriteContext::GetDirtyList(void)
 void
 MapUpdateLogWriteContext::IoDone(void)
 {
+    sequenceController->GetCallbackExecutionApproval();
     LogBufferIoContext::IoDone();
+    sequenceController->NotifyCallbackCompleted();
 
     // Log filled notify should be after the callback function completed
     logFilledNotifier->NotifyLogFilled(GetLogGroupId(), dirty);

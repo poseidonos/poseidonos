@@ -49,31 +49,41 @@ LogGroupReleaseStatus::SetWaiting(uint32_t seqNum)
 {
     assert(status == ReleaseStatus::INIT);
 
+    ReleaseStatus from = status;
+
     sequenceNumber = seqNum;
     status = ReleaseStatus::WAITING;
 
-    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "ReleaseStatus, id: {}, status: {}", id, status);
+    _PrintStatusChangedLog(from);
 }
 
 void
 LogGroupReleaseStatus::SetReleasing(void)
 {
     assert(status == ReleaseStatus::WAITING);
+
+    ReleaseStatus from = status;
     status = ReleaseStatus::RELEASING;
 
-    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "ReleaseStatus, id: {}, status: {}", id, status);
+    _PrintStatusChangedLog(from);
 }
 
 void
 LogGroupReleaseStatus::Reset(void)
 {
     sequenceNumber = 0;
+
+    ReleaseStatus from = status;
     status = ReleaseStatus::INIT;
 
+    _PrintStatusChangedLog(from);
+}
+
+void
+LogGroupReleaseStatus::_PrintStatusChangedLog(ReleaseStatus from)
+{
     POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "ReleaseStatus, id: {}, status: {}", id, status);
+        "logGroupId:{}, from:{}, to:{}", id, from, status);
 }
 
 uint32_t

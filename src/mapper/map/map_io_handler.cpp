@@ -255,14 +255,13 @@ MapIoHandler::FlushTouchedPages(EventSmartPtr callback)
     delete copiedBitmap;
     if (touchedPages->GetNumBitsSet() != 0)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_STARTED), "[MAPPER FlushTouchedPages mapId:{}] started", mapId);
         numPagesToAsyncIo = touchedPages->GetNumBitsSet();
         std::unique_ptr<SequentialPageFinder> sequentialPages = std::make_unique<SequentialPageFinder>(touchedPages);
         _Flush(std::move(sequentialPages));
     }
     else
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "[MAPPER FlushTouchedPages mapId:{}] completed, W/O any pages to flush", mapId);
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "mapId:{}, numPagesToAsyncIo:0", mapId);
         _CompleteFlush();
         // TODO(r.saraf) Handle callback returning false value (callback executed in _CompleteFlush)
     }
@@ -483,7 +482,7 @@ int
 MapIoHandler::_IssueFlushHeader(void)
 {
     status = FLUSHING_HEADER;
-    POS_TRACE_DEBUG(EID(MAP_FLUSH_ONGOING), "Starting Flush mapId:{} Header", mapId);
+    POS_TRACE_DEBUG(EID(MAP_FLUSH_ONGOING), "Flush map header, mapId:{}", mapId);
 
     MapFlushIoContext* headerFlushReq = new MapFlushIoContext();
     headerFlushReq->opcode = MetaFsIoOpcode::Write;
@@ -518,7 +517,7 @@ MapIoHandler::_MpageFlushed(AsyncMetaFileIoCtx* ctx)
     int ret = EID(SUCCESS);
     bool flushCompleted = _IncreaseAsyncIoDonePageNum(numMpages);
 
-    POS_TRACE_DEBUG(EID(MAP_FLUSH_ONGOING), "Map {} startMpage {} numMpages {} flush completed ", mapId, startMpage, numMpages);
+    POS_TRACE_DEBUG(EID(MAP_FLUSH_ONGOING), "Mpage flushed, Map:{}, startMpage:{}, numMpages:{}", mapId, startMpage, numMpages);
 
     // After mpage flushing, Flush header data
     if (flushCompleted)
@@ -558,7 +557,7 @@ MapIoHandler::_HeaderFlushed(AsyncMetaFileIoCtx* ctx)
         // mpage & header flush done
         status = FLUSHING_DONE;
         _ResetAsyncIoPageNum();
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "mapId:{} Flush Completed", mapId);
+        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "Header flushed, mapId:{}", mapId);
     }
 
     _CompleteFlush();

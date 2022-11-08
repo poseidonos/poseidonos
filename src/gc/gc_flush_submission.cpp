@@ -59,12 +59,12 @@
 namespace pos
 {
 GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>* blkInfoList, uint32_t volumeId,
-    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager)
+    GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager, bool forceFlush)
 : GcFlushSubmission(arrayName, blkInfoList, volumeId, dataBuffer, gcStripeManager, nullptr,
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(arrayName),
       IIOSubmitHandler::GetInstance(),
       FlowControlServiceSingleton::Instance()->GetFlowControl(arrayName),
-      ArrayMgr()->GetInfo(arrayName)->arrayInfo)
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo, forceFlush)
 {
 }
 
@@ -72,7 +72,7 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
     GcWriteBuffer* dataBuffer, GcStripeManager* gcStripeManager,
     CallbackSmartPtr inputCallback, IBlockAllocator* inputIBlockAllocator,
     IIOSubmitHandler* inputIIOSubmitHandler,
-    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo)
+    FlowControl* inputFlowControl, IArrayInfo* inputIArrayInfo, bool forceFlush)
 : Event(false, BackendEvent_Flush),
   arrayName(arrayName),
   blkInfoList(blkInfoList),
@@ -83,7 +83,8 @@ GcFlushSubmission::GcFlushSubmission(std::string arrayName, std::vector<BlkInfo>
   iBlockAllocator(inputIBlockAllocator),
   iIOSubmitHandler(inputIIOSubmitHandler),
   flowControl(inputFlowControl),
-  iArrayInfo(inputIArrayInfo)
+  iArrayInfo(inputIArrayInfo),
+  isForceFlush(forceFlush)
 {
     SetEventType(BackendEvent_Flush);
 }
@@ -95,24 +96,38 @@ GcFlushSubmission::~GcFlushSubmission(void)
 bool
 GcFlushSubmission::Execute(void)
 {
-    const PartitionLogicalSize* udSize =
-        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
-
-    int token = flowControl->GetToken(FlowControlType::GC, totalBlksPerUserStripe);
-    if (0 >= token)
+    Stripe* allocatedStripe = nullptr;
+    if (isForceFlush == false)
     {
-        return false;
-    }
+        const PartitionLogicalSize* udSize =
+            iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+        uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
 
-    Stripe* allocatedStripe = _AllocateStripe(volumeId);
-    if (allocatedStripe == nullptr)
-    {
-        if (0 < token)
+        int token = flowControl->GetToken(FlowControlType::GC, totalBlksPerUserStripe);
+        if (0 >= token)
         {
-            flowControl->ReturnToken(FlowControlType::GC, token);
+            return false;
         }
-        return false;
+
+        allocatedStripe = _AllocateStripe(volumeId);
+        if (allocatedStripe == nullptr)
+        {
+            if (0 < token)
+            {
+                flowControl->ReturnToken(FlowControlType::GC, token);
+            }
+            return false;
+        }
+    }
+    else
+    {
+        allocatedStripe = _AllocateStripe(volumeId);
+        if (allocatedStripe == nullptr)
+        {
+            return false;
+        }
+        flowControl->Reset();
+        POS_TRACE_INFO(EID(FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH), "");
     }
 
     StripeSmartPtr stripe(allocatedStripe);

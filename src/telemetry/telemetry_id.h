@@ -169,26 +169,28 @@ static const std::string TEL110030_LOWEST_TEMPERATURE = "lowest_temeperature";
 static const std::string TEL110031_OVER_TEMPERATURE_COUNT = "over_temperature_count";
 static const std::string TEL110032_UNDER_TEMPERATURE_COUNT = "under_temperature_count";
 
-static const std::string TEL120001_READ_IOPS_PER_PORT = "read_iops_per_port";
-static const std::string TEL120002_READ_RATE_BYTES_PER_SECOND_PER_PORT = "read_rate_bytes_per_second_per_port";
-static const std::string TEL120011_WRITE_IOPS_PER_PORT = "write_iops_per_port";
-static const std::string TEL120012_WRITE_RATE_BYTES_PER_SECOND_PER_PORT = "write_rate_bytes_per_second_per_port";
+static const std::string TEL120000_FEQOS_GLOBAL_BW = "feqos_global_bw_throttling";
+static const std::string TEL120001_FEQOS_DYNAMIC_BW = "feqos_dynamic_bw_throttling";
+static const std::string TEL120002_FEQOS_GLOBAL_IOPS = "feqos_global_iops_throttling";
+static const std::string TEL120003_FEQOS_DYNAMIC_BW = "feqos_dynamic_iops_throttling";
+static const std::string TEL120004_FEQOS_VOLUME_Q_BW = "feqos_volume_queue_count";
 
-static const std::string TEL130001_COUNT_OF_VOLUME_IO_CONSTRUCTORS = "count_of_volume_io_constructors";
-static const std::string TEL130002_COUNT_OF_VOLUME_IO_DESTRUCTORS = "count_of_volume_io_destructors";
-static const std::string TEL130003_COUNT_OF_UBIO_CONSTRUCTORS = "count_of_ubio_constructors";
-static const std::string TEL130004_COUNT_OF_UBIO_DESTRUCTORS = "count_of_ubio_destructors";
-static const std::string TEL130005_SUBMISSION_COUNT_OF_SSD_IOS = "submission_count_of_ssd_ios";
-static const std::string TEL130006_COMPLETION_COUNT_OF_SSD_IOS = "completion_count_of_ssd_ios";
-static const std::string TEL130007_PUSHING_COUNT_OF_EVENT_QUEUE = "pushing_count_of_event_queue";
-static const std::string TEL130008_PUSHING_COUNT_OF_WORKER_COMMON_QUEUE = "pushing_count_of_worker_common_queue";
-static const std::string TEL130009_POPPING_COUNT_OF_WORKER_COMMON_QUEUE = "popping_count_of_worker_common_queue";
-static const std::string TEL130010_COUNT_OF_CALLBACK_CONSTRUCTORS = "count_of_callback_contructors";
-static const std::string TEL130011_COUNT_OF_CALLBACK_DESTRUCTORS = "count_of_callback_destructors";
-static const std::string TEL130012_COUNT_OF_EVENT_CONSTRUCTORS = "count_of_event_contructors";
-static const std::string TEL130013_COUNT_OF_EVENT_DESTRUCTORS = "count_of_event_destructors";
-static const std::string TEL130014_SUBMISSION_COUNT_IN_IO_WORKER = "submission_count_in_io_worker";
-static const std::string TEL130015_COMPLETION_COUNT_IN_IO_WORKER = "completion_count_in_io_worker";
+static const std::string TEL130000_COUNT_OF_UBIO_CONSTRUCTORS = "count_of_ubio_constructors";
+static const std::string TEL130001_COUNT_OF_UBIO_DESTRUCTORS = "count_of_ubio_destructors";
+static const std::string TEL130002_SUBMISSION_COUNT_OF_SSD_IOS = "submission_count_of_ssd_ios";
+static const std::string TEL130003_COMPLETION_COUNT_OF_SSD_IOS = "completion_count_of_ssd_ios";
+static const std::string TEL130004_EVENT_PUSH_IN_REACTOR = "event_push_in_reactor";
+static const std::string TEL130005_EVENT_EXECUTE_IN_REACTOR = "event_execute_in_reactor";
+static const std::string TEL130006_EVENT_EXECUTE_FAILED_IN_REACTOR = "event_execute_failed_in_reactor";
+static const std::string TEL130007_COUNT_OF_CALLBACK_CONSTRUCTORS = "count_of_callback_constructors";
+static const std::string TEL130008_COUNT_OF_CALLBACK_DESTRUCTORS = "count_of_callback_destructors";
+static const std::string TEL130009_COUNT_OF_PENDING_FLUSH = "pending_flush_count";
+static const std::string TEL130010_COUNT_OF_PENDING_INTERNAL_WRITE = "pending_internal_write_count";
+static const std::string TEL130011_COUNT_OF_BYTE_IO = "pending_byte_io_count";
+static const std::string TEL130012_EVENT_PENDING_Q_AVG = "pending_avg_qd_in_event_queue";
+static const std::string TEL130013_EVENT_PENDING_Q_MAX = "pending_max_qd_in_event_queue";
+static const std::string TEL130014_READ_MAX_LAT_VOLUME = "read_max_lat_volume";
+static const std::string TEL130015_WRITE_MAX_LAT_VOLUME = "write_max_lat_volume";
 
 static const std::string TEL140000_COUNT_OF_REQUSTED_USER_READ = "count_of_requested_user_read";
 static const std::string TEL140001_COUNT_OF_REQUSTED_USER_WRITE = "count_of_requested_user_write";
@@ -202,6 +204,7 @@ static const std::string TEL140008_COUNT_OF_USER_FAIL_IO = "count_of_user_fail_i
 static const std::string TEL140009_COUNT_OF_USER_READ_PENDING_CNT = "count_of_user_read_pending_cnt";
 static const std::string TEL140010_COUNT_OF_USER_WRITE_PENDING_CNT = "count_of_user_write_pending_cnt";
 static const std::string TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_internal_io_pending_cnt";
-static const std::string TEL140012_COUNT_OF_TIMEOUT_IO_CNT = "count_of_timeout_io_cnt";
+static const std::string TEL140012_CALLBACK_OLDEST_TIME_INDEX = "callback_oldest_time_idx";
+static const std::string TEL140013_CALLBACK_CURRENT_TIME_INDEX = "callback_current_time_idx";
 
 } // namespace pos

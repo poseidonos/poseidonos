@@ -60,14 +60,16 @@ LogGroupFooterWriteEvent::Execute(void)
     int result = logBuffer->InternalIo(context);
     if (result != 0)
     {
-        POS_TRACE_DEBUG(EID(JOUNRAL_WRITE_LOG_GROUP_FOOTER),
-            "Failed to write log group footer");
+        POS_TRACE_WARN(EID(JOURNAL_WRITE_LOG_GROUP_FOOTER),
+            "Failed to write log group footer, logGroupId:{}, lastCheckpointedSeginfoVersion: {}, isReseted:{}, resetedSequenceNumber: {}",
+            logGroupId, footer.lastCheckpointedSeginfoVersion, footer.isReseted, footer.resetedSequenceNumber);
         return false;
     }
     else
     {
-        POS_TRACE_DEBUG(EID(JOUNRAL_WRITE_LOG_GROUP_FOOTER),
-            "Write log group footer (id {}, version {})", logGroupId, footer.lastCheckpointedSeginfoVersion);
+        POS_TRACE_INFO(EID(JOURNAL_WRITE_LOG_GROUP_FOOTER),
+            "logGroupId:{}, lastCheckpointedSeginfoVersion: {}, isReseted:{}, resetedSequenceNumber: {}",
+            logGroupId, footer.lastCheckpointedSeginfoVersion, footer.isReseted, footer.resetedSequenceNumber);
         return true;
     }
 }

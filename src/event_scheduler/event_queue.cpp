@@ -78,9 +78,6 @@ EventQueue::DequeueEvent(void)
 {
     std::unique_lock<std::mutex> uniqueLock(queueLock);
 
-    uint32_t q_size = queue.size();
-    airlog("Q_EventQueue", "base", 0, q_size);
-
     if (queue.empty())
     {
         return nullptr;
