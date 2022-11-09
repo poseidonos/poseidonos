@@ -8,7 +8,6 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // TODO(mj): Currently, this command only supports REBUILDPERFIMPACT command.
@@ -18,8 +17,7 @@ var SetSystemPropCmd = &cobra.Command{
 	Short: "Set the property of PoseidonOS.",
 	Long: `
 Set the property of PoseidonOS.
-(Note: this command is not officially supported yet.
- It might be  possible this command cause an error.)
+(Note: this command might cause an error as it is supported unofficially.)
 
 Syntax:
 	poseidonos-cli system set-property [--rebuild-impact (highest | medium | lowest)]
@@ -38,14 +36,11 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 			return buildErr
 		}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
-		if err != nil {
-			fmt.Printf("failed to marshal the protobuf request: %v", err)
-			return err
+		printReqErr := displaymgr.PrintProtoReqJson(req)
+		if printReqErr != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", printReqErr)
+			return printReqErr
 		}
-		displaymgr.PrintRequest(string(reqJson))
 
 		res, gRpcErr := grpcmgr.SendSetSystemProperty(req)
 		if gRpcErr != nil {
@@ -53,10 +48,10 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
-		if printErr != nil {
-			fmt.Printf("failed to print the response: %v", printErr)
-			return printErr
+		printResErr := displaymgr.PrintProtoResponse(command, res)
+		if printResErr != nil {
+			fmt.Printf("failed to print the response: %v", printResErr)
+			return printResErr
 		}
 
 		return nil
