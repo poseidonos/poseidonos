@@ -1616,6 +1616,8 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     uint64_t maxBw = 0;
     bool isWalVol = false;
     string uuid = "";
+    int32_t nsid = -1;
+    bool isPrimary = true;
 
     volumeName = (request->param()).name();
     arrayName = (request->param()).array();
@@ -1624,6 +1626,8 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     maxBw = (request->param()).maxbw();
     isWalVol = (request->param()).iswalvol();
     uuid = (request->param()).uuid();
+    nsid = (request->param()).nsid();
+    isPrimary = (request->param()).isprimary();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
@@ -1655,7 +1659,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
 
     if (volMgr != nullptr)
     {
-        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, uuid);
+        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, nsid, isPrimary, uuid);
         if (ret == SUCCESS)
         {
             string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);

@@ -71,6 +71,9 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         uint64_t maxbw = 0;
         bool checkWalVol = doc["param"]["iswalvol"].get<bool>();
 
+        int32_t nsid = -1;
+        bool isPrimary = true;
+
         if (doc["param"].contains("maxiops") &&
             doc["param"]["maxiops"].is_number_unsigned() == true)
         {
@@ -111,7 +114,7 @@ CreateVolumeCommand::Execute(json& doc, string rid)
         ret = EID(CREATE_VOL_INTERNAL_ERROR);
         if (volMgr != nullptr)
         {
-            ret = volMgr->Create(volName, size, maxiops, maxbw, checkWalVol, "");
+            ret = volMgr->Create(volName, size, maxiops, maxbw, checkWalVol, nsid, isPrimary, "");
             if (ret == SUCCESS)
             {
                 return jFormat.MakeResponse("CREATEVOLUME", rid, SUCCESS,

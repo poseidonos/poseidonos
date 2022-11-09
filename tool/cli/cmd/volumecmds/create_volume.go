@@ -23,11 +23,12 @@ Create a volume from an array in PoseidonOS.
 
 Syntax: 
 	poseidonos-cli volume create (--volume-name | -v) VolumeName 
-	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] [--iswalvol]
+	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth]
+	[--iswalvol] [--nsid NSID] [--primary] [--secondary]
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
-	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol
+	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol --primary
 `,
 
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -88,13 +89,18 @@ func buildCreateVolumeReq(command string) (*pb.CreateVolumeRequest, error) {
 		return nil, err
 	}
 
+	//
+	create_volume_isPrimary = !create_volume_isSecondary
+
 	param := &pb.CreateVolumeRequest_Param{
-		Name:    create_volume_volumeName,
-		Array:   create_volume_arrayName,
-		Size:    volumeSizeInByte,
-		Maxiops: create_volume_maxIOPS,
-		Maxbw:   create_volume_maxBandwidth,
-		Uuid:    create_volume_uuid,
+		Name:      create_volume_volumeName,
+		Array:     create_volume_arrayName,
+		Size:      volumeSizeInByte,
+		Maxiops:   create_volume_maxIOPS,
+		Maxbw:     create_volume_maxBandwidth,
+		Uuid:      create_volume_uuid,
+		Nsid:      create_volume_nsid,
+		Isprimary: create_volume_isPrimary,
 	}
 
 	uuid := globals.GenerateUUID()
@@ -115,6 +121,9 @@ var (
 	create_volume_maxBandwidth uint64 = 0
 	create_volume_iswalvol            = false
 	create_volume_uuid                = ""
+	create_volume_nsid          int32 = 0
+	create_volume_isPrimary           = true
+	create_volume_isSecondary         = false
 )
 
 func init() {
@@ -148,4 +157,13 @@ If you do not specify the unit, it will be B in default. (Note: the size must be
 	CreateVolumeCmd.Flags().StringVarP(&create_volume_uuid,
 		"uuid", "", "",
 		"UUID for the volume to be created.")
+
+	CreateVolumeCmd.Flags().Int32VarP(&create_volume_nsid,
+		"nsid", "", -1,
+		"Namespace ID for the volume to be created.")
+
+	CreateVolumeCmd.Flags().BoolVarP(&create_volume_isSecondary,
+		"secondary", "", false,
+		`If specified, the volume to be created will be a secondary volume for HA.
+If not specified, this volume will be created as a primary volume.`)
 }

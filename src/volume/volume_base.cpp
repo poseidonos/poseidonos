@@ -41,7 +41,7 @@
 namespace pos
 {
 VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-        VolumeAttribute volumeAttribute)
+        VolumeAttribute volumeAttribute, VolumeReplicationRoleProperty voluemRole)
 {
     array = arrayName;
     arrayId = arrayIdx;
@@ -50,14 +50,15 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
     replicationState = VolumeReplicationState::StandAloneState;
-    replicationRole = VolumeReplicationRoleProperty::Primary;
+    replicationRole = voluemRole;
     totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} size:{} created", name, totalSize);
 }
 
 VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
-        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute)
+        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute,
+        VolumeReplicationRoleProperty voluemRole)
 {
     array = arrayName;
     arrayId = arrayIdx;
@@ -66,7 +67,7 @@ VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName,
     attribute = volumeAttribute;
     status = VolumeStatus::Unmounted;
     replicationState = VolumeReplicationState::StandAloneState;
-    replicationRole = VolumeReplicationRoleProperty::Primary;
+    replicationRole = voluemRole;
     totalSize = volSizeByte;
     maxiops = _maxiops;
     maxbw = _maxbw;

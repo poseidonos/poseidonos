@@ -212,7 +212,8 @@ VolumeManager::_PublishTelemetryArrayUsage(void)
 }
 
 int
-VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume, std::string uuid)
+VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume,
+                    int32_t nsid, bool isPrimary, std::string uuid)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -237,7 +238,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     uint64_t defaultMinIops = 0;
     uint64_t defaultMinBw = 0;
 
-    ret = volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, uuid, checkWalVolume);
+    ret = volumeCreator.Do(name, size, maxIops, maxBw, defaultMinIops, defaultMinBw, uuid, checkWalVolume, nsid, isPrimary);
 
     if (EID(SUCCESS) == ret)
     {

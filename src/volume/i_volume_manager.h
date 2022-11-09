@@ -46,7 +46,8 @@ class IVolumeManager : public IVolumeEventManager, public IVolumeInfoManager, pu
 {
 public:
     public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid = "") = 0;
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
+                        int32_t nsid, bool isPrimary, std::string uuid = "") = 0;
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;

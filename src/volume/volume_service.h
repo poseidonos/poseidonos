@@ -64,6 +64,8 @@ private:
     int volumeManagerCnt;
     IVolumeManager* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];
     std::mutex listMutex;
+
+    
 };
 
 using VolumeServiceSingleton = Singleton<VolumeService>;

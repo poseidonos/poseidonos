@@ -70,7 +70,7 @@ TEST(VolumeManager, CreateVolume_testFailedToCreateVolIfArrayIsNotMounted)
     VolumeManager* volumeManager = new VolumeManager(iArrayInfo, iState);
 
     int expected = EID(VOL_MGR_NOT_INITIALIZED);
-    int actual = volumeManager->Create(name, size, maxIops, maxBw, false, uuid);
+    int actual = volumeManager->Create(name, size, maxIops, maxBw, false, 0, true, uuid);
 
     ASSERT_EQ(actual, expected);
 

@@ -33150,6 +33150,8 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
     kMaxiopsFieldNumber = 4,
     kMaxbwFieldNumber = 5,
     kIswalvolFieldNumber = 6,
+    kIsprimaryFieldNumber = 9,
+    kNsidFieldNumber = 8,
   };
   // string name = 1;
   void clear_name();
@@ -33235,6 +33237,24 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   void _internal_set_iswalvol(bool value);
   public:
 
+  // bool isprimary = 9;
+  void clear_isprimary();
+  bool isprimary() const;
+  void set_isprimary(bool value);
+  private:
+  bool _internal_isprimary() const;
+  void _internal_set_isprimary(bool value);
+  public:
+
+  // int32 nsid = 8;
+  void clear_nsid();
+  ::PROTOBUF_NAMESPACE_ID::int32 nsid() const;
+  void set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_nsid() const;
+  void _internal_set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.CreateVolumeRequest.Param)
  private:
   class _Internal;
@@ -33249,6 +33269,8 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 maxiops_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxbw_;
   bool iswalvol_;
+  bool isprimary_;
+  ::PROTOBUF_NAMESPACE_ID::int32 nsid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -72790,6 +72812,46 @@ inline void CreateVolumeRequest_Param::set_allocated_uuid(std::string* uuid) {
   uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), uuid,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.CreateVolumeRequest.Param.uuid)
+}
+
+// int32 nsid = 8;
+inline void CreateVolumeRequest_Param::clear_nsid() {
+  nsid_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateVolumeRequest_Param::_internal_nsid() const {
+  return nsid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 CreateVolumeRequest_Param::nsid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.nsid)
+  return _internal_nsid();
+}
+inline void CreateVolumeRequest_Param::_internal_set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  nsid_ = value;
+}
+inline void CreateVolumeRequest_Param::set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_nsid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.nsid)
+}
+
+// bool isprimary = 9;
+inline void CreateVolumeRequest_Param::clear_isprimary() {
+  isprimary_ = false;
+}
+inline bool CreateVolumeRequest_Param::_internal_isprimary() const {
+  return isprimary_;
+}
+inline bool CreateVolumeRequest_Param::isprimary() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.isprimary)
+  return _internal_isprimary();
+}
+inline void CreateVolumeRequest_Param::_internal_set_isprimary(bool value) {
+  
+  isprimary_ = value;
+}
+inline void CreateVolumeRequest_Param::set_isprimary(bool value) {
+  _internal_set_isprimary(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.isprimary)
 }
 
 // -------------------------------------------------------------------

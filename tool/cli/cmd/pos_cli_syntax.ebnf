@@ -172,7 +172,7 @@ CreateVolumeCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
   [ "--maxbw" , Bandwidth ] , [ "--wal-volume" ] ,
-  [ "--uuid" , Uuid ] ;
+  [ "--uuid" , Uuid ] , [ "--nsid" , Identifier ] , [ "--primary" ] , [ "--secondary" ] ;
 
 DeleteVolumeCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
