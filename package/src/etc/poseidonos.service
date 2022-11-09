@@ -5,9 +5,8 @@ Description=poseidonos
 Type=simple
 ExecStartPre=/usr/local/etc/setup_env.sh
 ExecStart=/usr/local/bin/poseidonos
-ExecStop=/usr/local/bin/poseidonos-cli system stop --force
 ExecStopPost=/usr/local/lib/spdk/scripts/setup.sh reset
-KillMode=none
+KillSignal=SIGKILL
 TimeoutSec=900
 
 [Install]
