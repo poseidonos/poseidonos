@@ -53,11 +53,11 @@ Syntax:
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
-		if printErr != nil {
-			fmt.Printf("failed to print the response: %v", printErr)
-			t.RecordError(printErr)
-			return printErr
+		printResErr := displaymgr.PrintProtoResponse(command, res)
+		if printResErr != nil {
+			fmt.Printf("failed to print the response: %v", printResErr)
+			t.RecordError(printResErr)
+			return printResErr
 		}
 
 		return nil
