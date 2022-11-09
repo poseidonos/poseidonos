@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(easy_telemetry_publisher_test easy_telemetry_publisher_test.cpp)

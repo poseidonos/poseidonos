@@ -32,6 +32,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "mdpage_control_info.h"
 #include "os_header.h"
 
@@ -41,17 +43,17 @@ namespace pos
 class MDPage
 {
 public:
+    MDPage(void) = delete;
     explicit MDPage(void* buf);
     virtual ~MDPage(void);
 
     virtual void AttachControlInfo(void);
-    virtual void Make(const MetaLpnType metaLpn, const FileDescriptorType fd,
+    virtual void ClearControlInfo(void);
+    virtual void BuildControlInfo(const MetaLpnType metaLpn, const FileDescriptorType fd,
         const int arrayId, const uint64_t signature);
-    virtual bool CheckValid(const int arrayId, const uint64_t signature) const;
-    virtual bool CheckFileMismatch(const FileDescriptorType fd) const;
-    virtual bool CheckLpnMismatch(const MetaLpnType srcLpn) const;
-    virtual void ClearCtrlInfo(void);
-    virtual uint8_t* GetDataBuf(void) const
+    virtual bool IsValidSignature(const uint64_t signature) const;
+    virtual uint32_t GenerateCrcFromDataBuffer(void) const;
+    virtual uint8_t* GetDataBuffer(void) const
     {
         return dataAll;
     }
@@ -59,12 +61,23 @@ public:
     {
         return MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     }
+    virtual size_t GetCrcCoveredSize(void) const
+    {
+        return (MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES - sizeof(uint32_t));
+    }
     virtual uint32_t GetMfsSignature(void) const
     {
         return ctrlInfo->mfsSignature;
     }
+    virtual int CheckDataIntegrity(const MetaLpnType srcLpn, const FileDescriptorType fd,
+        const bool skipCheckingCrc = false) const;
 
 private:
+    bool _DoesFileDescriptorMatch(const FileDescriptorType fd) const;
+    bool _DoesMetaLpnMatch(const MetaLpnType srcLpn) const;
+    uint32_t _GenerateCrc(void) const;
+    std::string _ToString(void) const;
+
     uint8_t* dataAll;
     MDPageControlInfo* ctrlInfo;
 };

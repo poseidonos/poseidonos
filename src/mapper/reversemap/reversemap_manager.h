@@ -41,6 +41,7 @@
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
 #include "src/mapper/reversemap/reverse_map.h"
+#include "src/mapper/reversemap/reverse_map_io.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/volume/i_volume_info_manager.h"
 
@@ -57,32 +58,37 @@ public:
 
     virtual void Init(void);
     virtual void Dispose(void);
-    virtual int Load(ReverseMapPack* rev, StripeId wblsid, StripeId vsid, EventSmartPtr cb);
-    virtual int Flush(ReverseMapPack* rev, StripeId wblsid, Stripe* stripe, StripeId vsid, EventSmartPtr cb);
-
-    virtual int UpdateReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint64_t offset, BlkAddr rba, uint32_t volumeId);
-    virtual std::tuple<BlkAddr, uint32_t> GetReverseMapEntry(ReverseMapPack* rev, StripeId wblsid, uint64_t offset);
-    virtual ReverseMapPack* Assign(StripeId wblsid, StripeId vsid);
-    virtual ReverseMapPack* AllocReverseMapPack(uint32_t vsid);
-    virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t totalRba, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos);
-
-    virtual uint64_t GetReverseMapPerStripeFileSize(void);
-    virtual uint64_t GetWholeReverseMapFileSize(void);
-    virtual int LoadReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf);
-    virtual int StoreReverseMapForWBT(MetaFileIntf* fileLinux, uint64_t offset, uint64_t fileSize, char* buf);
-    virtual char* GetReverseMapPtrForWBT(void);
+    virtual int Load(ReverseMapPack* rev, EventSmartPtr cb);
+    virtual int Flush(ReverseMapPack* rev, EventSmartPtr cb);
+    virtual ReverseMapPack* AllocReverseMapPack(StripeId vsid, StripeId wblsid);
+    virtual int ReconstructReverseMap(uint32_t volumeId, uint64_t totalRba, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos, ReverseMapPack* revMapPack);
     virtual void WaitAllPendingIoDone(void);
 
+    // For WBT commands
+    virtual uint64_t GetReverseMapPerStripeFileSize(void);
+    virtual uint64_t GetWholeReverseMapFileSize(void);
+    virtual int LoadReverseMapForWBT(uint64_t offset, uint64_t fileSize, char* buf);
+    virtual int StoreReverseMapForWBT(uint64_t offset, uint64_t fileSize, char* buf);
+
 private:
+    struct IoCount
+    {
+        std::atomic<uint64_t> issuedCount;
+        std::atomic<uint64_t> completedCount;
+    };
+
     bool _FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba);
     int _SetNumMpages(void);
+    uint64_t _GetFileOffset(StripeId vsid);
+    ReverseMapIo* _CreateIoContext(ReverseMapPack* rev, EventSmartPtr cb, IoDirection dir);
+    void _ReverseMapIoDone(ReverseMapIo* reverseMapIo);
 
-    uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
     uint64_t numMpagesPerStripe; // It depends on block count per a stripe
     uint64_t fileSizePerStripe;
     uint64_t fileSizeWholeRevermap;
 
-    ReverseMapPack* revMapPacks;
+    IoCount counts[IoDirection::NUM_DIRECTIONS];
+
     MetaFileIntf* revMapWholefile;
 
     IVSAMap* iVSAMap;

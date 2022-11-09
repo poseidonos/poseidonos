@@ -341,9 +341,9 @@ Root:
     Id: 1225
     Name: CLI_LIST_ARRAY_NO_ARRAY_EXISTS
     Severity:
-    Message:
+    Message: There is no array created.
     Cause:
-    Solution:
+    Solution: Create an array and try again.
   -
     Id: 1226
     Name: CLI_LIST_ARRAY_FAILURE
@@ -2170,35 +2170,35 @@ Root:
     Id: 2810
     Name: INVOKE_REBUILD_DUE_TO_SPARE_ADDED
     Severity:
-    Message:
+    Message: A spare device is added in the degraded state and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2811
     Name: INVOKE_REBUILD_DUE_TO_DEVICE_DETACHED
     Severity:
-    Message:
+    Message: Device failure detected and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2812
     Name: INVOKE_REBUILD_DUE_TO_ARRAY_MOUNTED
     Severity:
-    Message:
+    Message: The rebuild target was found at the time of array mount and the rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2813
     Name: INVOKE_RESUME_REBUILD
     Severity:
-    Message:
-    Cause:
+    Message: A suspended rebuild operation has been found and rebuild execution conditions are being checked.
+    Cause: The rebuild operation might have been canceled during the rebuild or the process might have been forcibly terminated.
     Solution:
   -
     Id: 2814
     Name: INVOKE_REBUILD_DUE_TO_USER_REQUEST
     Severity:
-    Message:
+    Message: The user has requested the rebuild and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
@@ -2825,7 +2825,7 @@ Root:
     Solution:
   -
     Id: 3031
-    Name: JOURNAL_FLUSH_LOG_GROUP
+    Name: JOURNAL_RELEASE_LOG_GROUP_STARTED
     Severity:
     Message:
     Cause:
@@ -2839,7 +2839,7 @@ Root:
     Solution:
   -
     Id: 3033
-    Name: JOURNAL_CHECKPOINT_STATUS
+    Name: JOURNAL_CHECKPOINT_STATUS_CHANGED
     Severity:
     Message:
     Cause:
@@ -2860,7 +2860,7 @@ Root:
     Solution:
   -
     Id: 3036
-    Name: JOUNRAL_WRITE_LOG_GROUP_FOOTER
+    Name: JOURNAL_WRITE_LOG_GROUP_FOOTER
     Severity:
     Message:
     Cause:
@@ -2879,7 +2879,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3039
+    Name: JOURNAL_LOG_GROUP_ALLOCATED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 3040
     Name: JOURNAL_HANDLE_VOLUME_DELETION
@@ -2887,7 +2893,27 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3041
+    Name: JOURNAL_CHECKPOINT_FLUSH_METADATA
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3042
+    Name: JOURNAL_CHECKPOINT_FLUSH_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3043
+    Name: JOURNAL_RELEASE_LOG_GROUP_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 3050
     Name: JOURNAL_REPLAY_STARTED
@@ -3000,7 +3026,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3068
+    Name: VERSIONED_SEGMENT_INFO
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 3070
     Name: ROCKSDB_LOG_BUFFER_OPENED
@@ -3293,7 +3325,7 @@ Root:
     Solution:
   -
     Id: 3116
-    Name: REVMAP_GET_MFS_ALIGNED_IOSIZE_FAILURE
+    Name: COPY_MAP_HEADER
     Severity:
     Message:
     Cause:
@@ -3307,7 +3339,7 @@ Root:
     Solution:
   -
     Id: 3118
-    Name: REVMAP_NOT_LINKED_PACK
+    Name: REVMAP_RESERVED
     Severity:
     Message:
     Cause:
@@ -3335,7 +3367,7 @@ Root:
     Solution:
   -
     Id: 3122
-    Name: REVMAP_MFS_IO_ERROR
+    Name: REVMAP_IO_ERROR
     Severity:
     Message:
     Cause:
@@ -3515,7 +3547,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3148
+    Name: MAP_FLUSH_FAILED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   # Allocator: 3150 - 3299
   -
     Id: 3150
@@ -3979,7 +4017,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3216
+    Name: ALLOCATOR_META_ARCHIVE_STORE_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   # Metadata: 3300 - 3399
   -
     Id: 3300
@@ -4229,6 +4273,55 @@ Root:
     Message: A flush occurred before the GC force flush timer expired, and the timer was reset.
     Cause:
     Solution:
+  -
+    Id: 3437
+    Name: GC_STRIPE_FORCIBLY_FLUSHED
+    Severity:
+    Message: The GC stripe forcibly flushed because the timer expired.
+    Cause:
+    Solution:
+  -
+    Id: 3440
+    Name: GC_NORMAL_FLUSH_TRYLOCK_FAILED
+    Severity:
+    Message: GC normal flush lock acquisition failed
+    Cause: Forced flushing
+    Solution:
+  -
+    Id: 3441
+    Name: GC_FORCE_FLUSH_LOCK_ACQUIRED
+    Severity:
+    Message: GC force flush lock acquired
+    Cause:
+    Solution:
+  -
+    Id: 3442
+    Name: GC_FORCE_FLUSH_TRYLOCK_FAILED
+    Severity:
+    Message: GC force flush lock acquisition failed
+    Cause:
+    Solution: It will be retried
+  -
+    Id: 3443
+    Name: GC_FORCE_FLUSH_LOCK_RELEASED
+    Severity:
+    Message: GC force flush lock released
+    Cause:
+    Solution:
+  -
+    Id: 3444
+    Name: GC_FORCE_FLUSH_TRYLOCK_WAITING
+    Severity:
+    Message: Waiting for GC force flush lock acquisition
+    Cause: The volume is deleted and need to reset flush lock
+    Solution:
+  -
+    Id: 3445
+    Name: GC_FLUSH_LOCK_RESET
+    Severity:
+    Message: GC flush lock reset
+    Cause: The volume is deleted
+    Solution:
 
   # WBTGC: 3470 - 3499
   -
@@ -4344,6 +4437,13 @@ Root:
     Name: FLOW_CONTROL_NO_MATCHING_REQ_ARRAY_NAME
     Severity:
     Message:
+    Cause:
+    Solution:
+  -
+    Id: 3511
+    Name: FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH
+    Severity:
+    Message: Tokens are reset due to force flush.
     Cause:
     Solution:
 
@@ -5139,7 +5239,49 @@ Root:
     Message: The mpio is enqueued twice
     Cause: It is possible that the mpio is enqueued twice
     Solution: Need to debug
-  
+  -
+    Id: 4092
+    Name: MFS_INVALID_CRC
+    Severity:
+    Message: It is failed to find to match crc values between written crc and generated crc from data buffer
+    Cause: Written crc or data might be damaged
+    Solution:
+  -
+    Id: 4093
+    Name: MFS_INVALID_META_LPN
+    Severity:
+    Message: It is failed to find to match lpn numbers between expected one and written
+    Cause: Written lpn number or data might be damaged
+    Solution:
+  -
+    Id: 4094
+    Name: MFS_INVALID_FILE_DESCRIPTOR
+    Severity:
+    Message: It is failed to find to match crc values between expected one and written
+    Cause: Written file descriptor or data might be damaged
+    Solution:
+  -
+    Id: 4095
+    Name: MFS_INVALID_SIGNATURE
+    Severity:
+    Message: It is failed to find to match signatures between expected one and written
+    Cause: Written signature or data might be damaged
+    Solution:
+  -
+    Id: 4096
+    Name: MFS_INVALID_EPOCH_SIGNATURE
+    Severity:
+    Message: It is failed to find to match epoch signatures between expected one and written
+    Cause: Written epoch signature or data might be damaged
+    Solution:
+  -
+    Id: 4097
+    Name: MFS_FAILED_TO_CHECK_INTEGRITY
+    Severity:
+    Message: There are some problems with data integrity
+    Cause: Data may be damaged
+    Solution:
+
   -
     Id: 4500
     Name: VOLUME_EVENT
@@ -7853,6 +7995,27 @@ Root:
     Message: Failed to set telemetry property.
     Cause: Could not open the file.
     Solution: Check if the file path is correct, or you have the permission.
+  -
+    Id: 9529
+    Name: TELEMETRY_INTERVAL_HAS_NOT_BEEN_LOADED
+    Severity:
+    Message: Failed to load time interval for easy telemetry.
+    Cause: Could not load the time interval.
+    Solution: Check if the file is correct, or the interval_in_millisecond_for_easy_telemetry_publisher is in the file.
+  -
+    Id: 9530
+    Name: TELEMETRY_THREAD_IS_NOT_EXIST
+    Severity:
+    Message: Failed to stop the worker to publish metrics.
+    Cause: Could not stop the worker thread.
+    Solution: Check if the worker has been run.
+  -
+    Id: 9531
+    Name: TELEMETRY_NOT_SUPPORT_TYPE
+    Severity:
+    Message: The metric type is not supported currently.
+    Cause: Could not publish the metric.
+    Solution: Need to implement
 
 
   # DEBUG: 10000 - 10199

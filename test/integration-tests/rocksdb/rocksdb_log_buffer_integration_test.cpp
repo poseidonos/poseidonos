@@ -49,7 +49,7 @@ RocksDBLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(NUM_LOG_GROUPS));
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
 
-    factory.Init(&config, new LogBufferWriteDoneNotifier());
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks = new RocksDBLogBuffer(GetLogDirName());
     journalRocks->Init(&config, &factory, 0, nullptr);
 
@@ -290,7 +290,7 @@ TEST_F(RocksDBLogBufferIntegrationTest, CreateAndClose)
     // Given : array name and When JournalRocks opened
     RocksDBLogBuffer journalRocks("OpenAndClose");
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
-    factory.Init(&config, new LogBufferWriteDoneNotifier());
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks.Init(&config, &factory, 0, nullptr);
 
     uint64_t logBufferSize = LOG_BUFFER_SIZE;

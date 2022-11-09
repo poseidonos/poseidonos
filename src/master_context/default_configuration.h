@@ -101,7 +101,8 @@ private:
         {"enable_structured_logging", "false"},
     };
     vector<ConfigKeyValue> telemetryData = {
-        {"enable_selective_publication", "true"}
+        {"enable_selective_publication", "true"},
+        {"interval_in_millisecond_for_easy_telemetry_publisher", "1000"},
     };
     vector<ConfigKeyValue> eventSchedulerData = {
         {"numa_dedicated", "false"}
@@ -165,6 +166,7 @@ private:
         {"wrr_count_journal", "1"},
         {"wrr_count_map", "1"},
         {"wrr_count_general", "1"},
+        {"support_checking_crc_when_reading", "true"},
     };
     vector<ConfigKeyValue> wtData = {
         {"enable", "false"}

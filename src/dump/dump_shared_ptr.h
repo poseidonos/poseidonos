@@ -55,6 +55,7 @@ enum class DumpSharedPtrType
     IO_CONTEXT,
     CALLBACK,
     JOURNAL_IO_CONTEXT,
+    REVERSE_MAP_IO,
     MAX_DUMP_PTR
 };
 

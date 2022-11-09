@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mf_inode.h"
+#include "meta_file_inode.h"
 
 #include "src/metafs/include/metafs_common_const.h"
 #include "src/metafs/log/metafs_log.h"

@@ -36,7 +36,7 @@
 #include <vector>
 
 #include "src/metafs/include/meta_file_extent.h"
-#include "mf_property.h"
+#include "meta_file_property.h"
 #include "metafs_control_request.h"
 
 namespace pos

@@ -112,7 +112,6 @@ Copier::Execute(void)
     }
     else
     {
-        meta->GetGcStripeManager()->CheckTimeout();
         switch (copybackState)
         {
             case CopierStateType::COPIER_THRESHOLD_CHECK_STATE:
@@ -199,6 +198,7 @@ Copier::_CompareThresholdState(void)
                 "trigger start, cnt:{}, victimId:{}",
                 numFreeSegments, victimId);
         }
+        meta->GetGcStripeManager()->CheckTimeout();
     }
 }
 

@@ -44,9 +44,8 @@
 #include "inode_table.h"
 #include "inode_table_header.h"
 #include "metafs_control_request.h"
-#include "mf_inode.h"
-#include "mf_inode_req.h"
-#include "mf_property.h"
+#include "meta_file_inode_req.h"
+#include "meta_file_property.h"
 #include "on_volume_meta_region_mgr.h"
 #include "os_header.h"
 #include "src/metafs/mvm/volume/inode_creator.h"
@@ -56,6 +55,8 @@ namespace pos
 {
 using FileDescriptorInVolume = std::unordered_map<FileDescriptorType, MetaVolumeType>;
 using FileHashInVolume = std::unordered_map<StringHashType, MetaVolumeType>;
+
+class MetaFileInode;
 
 // handle all operations required to meta file inode and its header
 class InodeManager : public OnVolumeMetaRegionManager

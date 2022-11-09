@@ -40,18 +40,20 @@ Example:
 
 		req := &pb.CreateSubsystemRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-		reqJSON, err := protojson.Marshal(req)
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
 		if err != nil {
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJSON))
+		displaymgr.PrintRequest(string(reqJson))
 
 		if !(globals.IsTestingReqBld) {
-			var resJSON string
+			var resJson string
 
 			if globals.EnableGrpc == false {
-				resJSON = socketmgr.SendReqAndReceiveRes(string(reqJSON))
+				resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
 				res, err := grpcmgr.SendCreateSubsystem(req)
 				if err != nil {
@@ -62,10 +64,10 @@ Example:
 				if err != nil {
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
-				resJSON = string(resByte)
+				resJson = string(resByte)
 			}
 
-			displaymgr.PrintResponse(command, resJSON, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
 }

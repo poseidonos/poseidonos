@@ -109,6 +109,7 @@ public:
         versionedSegmentCtx = new NiceMock<MockVersionedSegmentCtx>;
         dirtyMapManager = new NiceMock<MockDirtyMapManager>;
         logFilledNotifier = new NiceMock<MockLogBufferWriteDoneNotifier>;
+        callbackSequenceController = new NiceMock<MockCallbackSequenceController>;
         replayHandler = new NiceMock<MockReplayHandler>;
         arrayInfo = new NiceMock<MockIArrayInfo>;
         tp = new NiceMock<MockTelemetryPublisher>;
@@ -123,7 +124,8 @@ public:
             logWriteContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
-            versionedSegmentCtx, dirtyMapManager, logFilledNotifier, replayHandler, arrayInfo, tp);
+            versionedSegmentCtx, dirtyMapManager, logFilledNotifier,
+            callbackSequenceController, replayHandler, arrayInfo, tp);
     }
 
     virtual void
@@ -154,6 +156,7 @@ protected:
     NiceMock<MockVersionedSegmentCtx>* versionedSegmentCtx;
     NiceMock<MockDirtyMapManager>* dirtyMapManager;
     NiceMock<MockLogBufferWriteDoneNotifier>* logFilledNotifier;
+    NiceMock<MockCallbackSequenceController>* callbackSequenceController;
     NiceMock<MockReplayHandler>* replayHandler;
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockTelemetryPublisher>* tp;
@@ -304,7 +307,7 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
     JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization

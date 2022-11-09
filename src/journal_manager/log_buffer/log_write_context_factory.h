@@ -39,6 +39,7 @@
 #include "src/include/address_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 #include "src/mapper/include/mpage_info.h"
 
@@ -53,7 +54,8 @@ public:
     LogWriteContextFactory(void);
     virtual ~LogWriteContextFactory(void);
 
-    virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target);
+    virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target,
+        CallbackSequenceController* sequencer);
 
     virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateStripeMapLogWriteContext(Stripe* stripe,
@@ -70,9 +72,15 @@ public:
         uint64_t groupSize, EventSmartPtr callbackEvent, char* dataBuffer);
 
     // For UT
-    inline LogBufferWriteDoneNotifier* GetLogBufferWriteDoneNotifier(void)
+    inline LogBufferWriteDoneNotifier*
+    GetLogBufferWriteDoneNotifier(void)
     {
         return notifier;
+    }
+    inline CallbackSequenceController*
+    GetCallbackSequenceController(void)
+    {
+        return sequenceController;
     }
 
 private:
@@ -80,6 +88,7 @@ private:
 
     JournalConfiguration* config;
     LogBufferWriteDoneNotifier* notifier;
+    CallbackSequenceController* sequenceController;
 };
 
 } // namespace pos

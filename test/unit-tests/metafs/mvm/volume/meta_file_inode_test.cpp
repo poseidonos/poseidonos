@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/metafs/mvm/volume/mf_inode.h"
+#include "src/metafs/mvm/volume/meta_file_inode.h"
 
 #include <vector>
 #include <string>

@@ -31,62 +31,27 @@
  */
 
 #pragma once
+#include <unordered_set>
 
-#include <string>
+#include "force_flush_locker_state.h"
 
-#include "metafs_common.h"
-#include "src/metafs/include/meta_storage_specific.h"
-#include "src/metafs/include/mf_property.h"
-#include "src/metafs/include/meta_file_extent.h"
+using namespace std;
 
 namespace pos
 {
-struct MetaFileInfoDumpCxt
+class ForceFlushLockerBusyState : public ForceFlushLockerState
 {
 public:
-    std::string fileName;
-    FileDescriptorType fd;
-    FileSizeType size;
-    uint64_t ctime;
-    MetaLpnType lpnBase;
-    MetaLpnType lpnCount;
-    std::string location;
-};
-
-class MetaFileInodeInfo
-{
-public:
-    MetaFileInodeInfo(void)
+    virtual ~ForceFlushLockerBusyState(void)
     {
-        memset(data.all, 0, META_FILE_INODE_INFO_BYTE_SIZE);
     }
+    bool TryLock(uint32_t volId) override;
+    void Unlock(uint32_t volId) override;
+    bool Exists(uint32_t volId) override;
+    void Reset(uint32_t volId) override;
 
-    static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096 * 2;
-
-    union UData {
-        UData(void)
-        {
-        }
-        struct S
-        {
-            bool inUse;
-            FileDescriptorType fd;
-            char fileName[128]; // Change this to MAX_FILE_NAME_LENGTH or string *
-            FileSizeType fileByteSize;
-            FileSizeType dataChunkSize;
-            MetaStorageType dataLocation;
-            MetaFilePropertySet fileProperty;
-            uint16_t extentCnt;
-            MetaFileExtent extentMap[MetaFsConfig::MAX_PAGE_MAP_CNT];
-        } field;
-        uint8_t all[META_FILE_INODE_INFO_BYTE_SIZE];
-    } data;
+private:
+    unordered_set<uint32_t> busySet;
 };
 
-class MetaFileInodeDumpCxt
-{
-public:
-    MetaFileInodeInfo inodeInfo;
-    uint32_t inodeSize = MetaFileInodeInfo::META_FILE_INODE_INFO_BYTE_SIZE;
-};
 } // namespace pos

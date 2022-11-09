@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "mf_integrity_type.h"
+#include "meta_file_integrity_type.h"
 
 namespace pos
 {

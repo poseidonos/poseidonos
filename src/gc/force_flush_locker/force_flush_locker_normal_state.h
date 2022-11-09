@@ -31,17 +31,27 @@
  */
 
 #pragma once
+#include <unordered_set>
+
+#include "force_flush_locker_state.h"
+
+using namespace std;
 
 namespace pos
 {
-enum class MetaFileLockType
+class ForceFlushLockerNormalState : public ForceFlushLockerState
 {
-    NoFLock, // no explicit file lock. Lock will be granted while processing I/O for the byte range
-    Read,    // explicit read lock. Subsequent read request will be blocked if any single read op. is inprogress
-    Write,   // explicit read/write lock. Any subsequent i/o request will be blocked if any write op. is inprogress
+public:
+    virtual ~ForceFlushLockerNormalState(void)
+    {
+    }
+    bool TryLock(uint32_t volId) override;
+    void Unlock(uint32_t volId) override;
+    bool Exists(uint32_t volId) override;
+    void Reset(uint32_t volId) override;
 
-    Max,
-
-    Default = NoFLock,
+private:
+    unordered_multiset<uint32_t> workingSet;
 };
+
 } // namespace pos
