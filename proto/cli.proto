@@ -255,6 +255,12 @@ message PosInfo {
 	string version = 1;
 }
 
+message StartSystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
 message SystemInfoRequest {
 	string command = 1;
 	string rid = 2;
