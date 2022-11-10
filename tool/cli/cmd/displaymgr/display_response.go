@@ -151,8 +151,8 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
 		fmt.Fprintln(w, "Name\t: ", array.GetName())
-		fmt.Fprintln(w, "Index\t: "+strconv.Itoa(int(array.GetIndex())))
-		fmt.Fprintln(w, "UniqueID\t: "+strconv.Itoa(int(array.GetUniqueId())))
+		fmt.Fprintln(w, "Index\t: ", array.GetIndex())
+		fmt.Fprintln(w, "UniqueID\t: ", array.GetUniqueId())
 		fmt.Fprintln(w, "State\t: "+array.GetState())
 		fmt.Fprintln(w, "Situation\t: "+array.GetSituation())
 		fmt.Fprintln(w, "CreateDatetime\t: "+array.GetCreateDatetime())
