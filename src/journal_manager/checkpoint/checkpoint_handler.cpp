@@ -153,7 +153,6 @@ CheckpointHandler::FlushCompleted(int metaId, int logGroupId)
         assert(allocatorMetaFlushCompleted == false);
 
         allocatorMetaFlushCompleted = true;
-        contextManager->ResetFlushedInfo(logGroupId);
     }
     else
     {
