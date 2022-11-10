@@ -859,7 +859,7 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
 
     grpc_cli::Array* array = reply->mutable_result()->mutable_data();
     array->set_index(arrayInfo->GetIndex());
-    array->set_unique_id(arrayInfo->GetUniqueId());
+    array->set_uniqueid(arrayInfo->GetUniqueId());
     array->set_name(arrayName);
     array->set_state(state);
     array->set_situation(situ);
