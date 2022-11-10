@@ -54,7 +54,7 @@ TraceExporter::Init(std::string serviceName, std::string serviceVersion, std::st
     if (nullptr == provider)
     {
         POS_TRACE_INFO(EID(TRACE_PROVIDER_FAIL), "Failed to initailize trace processor");
-        return;        
+        return;
     }
 
     // Set trace provider as global

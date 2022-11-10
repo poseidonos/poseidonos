@@ -90,21 +90,34 @@ Poseidonos::Init(int argc, char** argv)
     int ret = _LoadConfiguration();
     if (ret == 0)
     {
+        POS_TRACE_TRACE(EID(POS_CONFIG_LOADED), "{}", ConfigManagerSingleton::Instance()->RawData());
+        POS_TRACE_INFO(EID(POS_INIT_SIG_HANDLER), "");
         _InitSignalHandler();
+        POS_TRACE_INFO(EID(POS_INIT_VERSION), "");
         _LoadVersion();
+        POS_TRACE_INFO(EID(POS_INIT_SPDK), "");
         _InitSpdk(argc, argv);
+        POS_TRACE_INFO(EID(POS_INIT_CPU_AFFINITY), "");
         _InitAffinity();
+        POS_TRACE_INFO(EID(POS_INIT_THREAD_MODEL), "");
         _SetupThreadModel();
+        POS_TRACE_INFO(EID(POS_INIT_QOS_POLICY), "");
         _SetPerfImpact();
+        POS_TRACE_INFO(EID(POS_INIT_DEBUG_MODULES), "");
         _InitDebugInfo();
+        POS_TRACE_INFO(EID(POS_INIT_AIR), "");
         _InitAIR();
+        POS_TRACE_INFO(EID(POS_INIT_IO_MODULES), "");
         _InitIOInterface();
+        POS_TRACE_INFO(EID(POS_INIT_MEMORY_CHECKER), "");
         _InitMemoryChecker();
+        POS_TRACE_INFO(EID(POS_INIT_RESOURCE_CHECKER), "");
         _InitResourceChecker();
 #ifdef WITH_REPLICATOR
         _InitReplicatorManager();
 #endif
         _InitTraceExporter(argv[0], pos::ConfigManagerSingleton::Instance(), pos::VersionProviderSingleton::Instance(), pos::TraceExporterSingleton::Instance(new OtlpFactory()));
+        POS_TRACE_INFO(EID(POS_INIT_EXPORTER), "");
     }
     else
     {
@@ -136,8 +149,9 @@ Poseidonos::_InitReplicatorManager(void)
 void
 Poseidonos::Run(void)
 {
+    POS_TRACE_INFO(EID(POS_INIT_CLI_SERVER), "");
     _RunCLIService();
-    POS_TRACE_TRACE(EID(POS_TRACE_INIT_SUCCESS), "{}", ConfigManagerSingleton::Instance()->RawData());
+    POS_TRACE_TRACE(EID(POS_TRACE_INIT_SUCCESS), "");
     pos_cli::Wait();
 }
 

@@ -53,7 +53,7 @@ Root:
     Solution:
 
 
-  # Trace: 1000 - 1199
+  # Trace: 1000 - 1099
   -
     Id: 1000
     Name: POS_TRACE_STARTED
@@ -167,6 +167,105 @@ Root:
     Cause:
     Solution:
 
+  # POS INIT: 1101 - 1199
+  -
+    Id: 1101
+    Name: POS_CONFIG_LOADED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1102
+    Name: POS_INIT_SIG_HANDLER
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1103
+    Name: POS_INIT_VERSION
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1104
+    Name: POS_INIT_SPDK
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1105
+    Name: POS_INIT_CPU_AFFINITY
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1106
+    Name: POS_INIT_THREAD_MODEL
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1107
+    Name: POS_INIT_QOS_POLICY
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1108
+    Name: POS_INIT_DEBUG_MODULES
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1109
+    Name: POS_INIT_AIR
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1110
+    Name: POS_INIT_IO_MODULES
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1111
+    Name: POS_INIT_MEMORY_CHECKER
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1112
+    Name: POS_INIT_RESOURCE_CHECKER
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1113
+    Name: POS_INIT_EXPORTER
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 1114
+    Name: POS_INIT_CLI_SERVER
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # CLI Server: 1200 - 1599
   -
