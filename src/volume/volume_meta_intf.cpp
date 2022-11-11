@@ -98,9 +98,14 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
                     uint64_t miniops = doc["volumes"][i]["miniops"].GetUint64();
                     uint64_t minbw = doc["volumes"][i]["minbw"].GetUint64();
-                    VolumeAttribute volumeAttribute = ((VolumeAttribute)doc["volumes"][i]["attribute"].GetInt());
-                    VolumeBase* volume = new Volume(arrayName, arrayID, name, uuid, total,
-                        maxiops, miniops, maxbw, minbw, volumeAttribute);
+                    uint32_t nsid = doc["volumes"][i]["nsid"].GetUint();
+                    DataAttribute dataAttribute = ((DataAttribute)doc["volumes"][i]["dataattribute"].GetInt());
+                    ReplicationRole volumeRole = ((ReplicationRole)doc["volumes"][i]["role"].GetInt());
+
+                    VolumeBase* volume = new Volume(arrayID, arrayName, dataAttribute, uuid,
+                                name, total, nsid,
+                                maxiops, miniops, maxbw, minbw,
+                                volumeRole);
                     volList.Add(volume, id);
                 }
             }
@@ -142,15 +147,17 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
             if (vol->IsValid() == true)
             {
                 JsonElement elem("");
-                elem.SetAttribute(JsonAttribute("name", "\"" + vol->GetName() + "\""));
+                elem.SetAttribute(JsonAttribute("name", "\"" + vol->GetVolumeName() + "\""));
                 elem.SetAttribute(JsonAttribute("uuid", "\"" + vol->GetUuid() + "\""));
                 elem.SetAttribute(JsonAttribute("id", std::to_string(vol->ID)));
-                elem.SetAttribute(JsonAttribute("total", std::to_string(vol->TotalSize())));
-                elem.SetAttribute(JsonAttribute("maxiops", std::to_string(vol->MaxIOPS())));
-                elem.SetAttribute(JsonAttribute("maxbw", std::to_string(vol->MaxBW())));
-                elem.SetAttribute(JsonAttribute("miniops", std::to_string(vol->MinIOPS())));
-                elem.SetAttribute(JsonAttribute("minbw", std::to_string(vol->MinBW())));
-                elem.SetAttribute(JsonAttribute("attribute", std::to_string(vol->GetAttribute())));
+                elem.SetAttribute(JsonAttribute("total", std::to_string(vol->GetTotalSize())));
+                elem.SetAttribute(JsonAttribute("maxiops", std::to_string(vol->GetMaxIOPS())));
+                elem.SetAttribute(JsonAttribute("maxbw", std::to_string(vol->GetMaxBW())));
+                elem.SetAttribute(JsonAttribute("miniops", std::to_string(vol->GetMinIOPS())));
+                elem.SetAttribute(JsonAttribute("minbw", std::to_string(vol->GetMinBW())));
+                elem.SetAttribute(JsonAttribute("nsid", std::to_string(vol->GetNsid())));
+                elem.SetAttribute(JsonAttribute("dataattribute", std::to_string(vol->GetDataAttribute())));
+                elem.SetAttribute(JsonAttribute("role", std::to_string(vol->GetReplicationRole())));                
                 array.AddElement(elem);
             }
         }

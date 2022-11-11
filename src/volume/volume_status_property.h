@@ -30,66 +30,43 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_BASE_H_
-#define VOLUME_BASE_H_
+#ifndef __VOLUME_STATUS_PROPERTY__
+#define __VOLUME_STATUS_PROPERTY__
 
-#include <array>
-#include <atomic>
 #include <cstdint>
-#include <mutex>
 #include <string>
 
-#include "src/volume/volume_attribute.h"
-#include "src/volume/volume_network_property.h"
-#include "src/volume/volume_perfomance_property.h"
-#include "src/volume/volume_replicate_property.h"
-#include "src/volume/volume_status_property.h"
-
-#define MAX_VOLUME_COUNT (256)
-
+using namespace std;
 namespace pos
 {
 
-enum VolumeIoType
+enum VolumeMountStatus
 {
-    UserRead,
-    UserWrite,
-    InternalIo,
-    MaxVolumeIoTypeCnt
+    Unmounted,
+    Mounted,
+    Offline,
+    MaxVolumeMountStatus
 };
 
-class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
+class StatusProperty
 {
 public:
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                ReplicationRole voluemRole);
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
-                ReplicationRole voluemRole);
-    virtual ~VolumeBase(void);
+    StatusProperty(std::string volumeName, uint64_t totalSize, VolumeMountStatus mountStatus = VolumeMountStatus::Unmounted);
+    ~StatusProperty(void);
+    std::string GetVolumeName(void) {return volumeName;}
+    uint64_t GetTotalSize(void) {return totalSize;}
+    VolumeMountStatus GetVolumeMountStatus(void) {return mountStatus;}
 
-    int Mount(void);
-    int Unmount(void);
-
-    void LockStatus(void);
-    void UnlockStatus(void);
-
-    uint64_t UsedSize(void);
-    uint64_t RemainingSize(void);
-
-    bool IsValid(void) {return isValid;}
-    void SetValid(bool valid) {isValid = valid;}
-
-    int ID;
-
-protected:  
-    bool isValid = true;
-    std::mutex statusMutex;
-    static const int INVALID_VOL_ID = -1;
+    void SetVolumeName(string name_) {volumeName = name_;}
+    void SetTotalSize(uint64_t totalSize_) {totalSize = totalSize_;}
+    void SetVolumeMountStatus(VolumeMountStatus mountStatus_) {mountStatus = mountStatus_;}
+private:    
+    std::string volumeName;
+    uint64_t totalSize;
+    VolumeMountStatus mountStatus;
 };
 
-} // namespace pos
+}
 
-#endif // VOLUME_BASE_H_
+
+#endif //__VOLUME_STATUS_PROPERTY__

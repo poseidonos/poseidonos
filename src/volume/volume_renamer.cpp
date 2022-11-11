@@ -79,12 +79,12 @@ VolumeRenamer::Do(string oldname, string newname)
         return exceptionEvent;
     }
 
-    vol->Rename(newname);
+    vol->SetVolumeName(newname);
 
     ret = _SaveVolumes();
     if (ret != EID(SUCCESS))
     {
-        vol->Rename(oldname);
+        vol->SetVolumeName(oldname);
         return ret;
     }
 

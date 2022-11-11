@@ -224,7 +224,7 @@ TEST(VolumeManager, Rename_)
     delete volumeManager;
 }
 
-TEST(VolumeManager, GetVolumeStatus_)
+TEST(VolumeManager, GetVolumeMountStatus_)
 {
     // Given
     std::string owner = "OWNER";
@@ -246,7 +246,7 @@ TEST(VolumeManager, GetVolumeStatus_)
     volumeManager->StateChanged(nullptr, &nextState);
 
     int expected = EID(VOL_NOT_FOUND);
-    int actual = volumeManager->GetVolumeStatus(0);
+    int actual = volumeManager->GetVolumeMountStatus(0);
 
     ASSERT_EQ(actual, expected);
 

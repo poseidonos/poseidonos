@@ -42,17 +42,26 @@ namespace pos
 class Volume : public VolumeBase
 {
 public:
-    Volume(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-        VolumeAttribute volumeAttribute = VolumeAttribute::UserData,
-        VolumeReplicationRoleProperty voluemRole = VolumeReplicationRoleProperty::Primary)
-    : VolumeBase(arrayName, arrayIdx, volName, volSizeByte, volumeAttribute, voluemRole)
-    {
+
+    Volume(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
+            std::string volName, uint64_t volSizeByte, uint32_t nsid,
+            ReplicationRole voluemRole = ReplicationRole::Primary)
+    : VolumeBase(arrayIdx, arrayName, dataAttribute,
+            volName, volSizeByte, nsid,
+            voluemRole)
+    {        
     }
-    Volume(std::string arrayName, int arrayIdx, std::string volName, std::string uuid, uint64_t volSizeByte,
-        uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw, VolumeAttribute volumeAttribute = VolumeAttribute::UserData,
-        VolumeReplicationRoleProperty voluemRole = VolumeReplicationRoleProperty::Primary)
-    : VolumeBase(arrayName, arrayIdx, volName, uuid, volSizeByte, maxiops, miniops, maxbw, minbw, volumeAttribute, voluemRole)
-    {
+
+
+    Volume(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
+            std::string volName, uint64_t volSizeByte, uint32_t nsid,
+            uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
+            ReplicationRole voluemRole = ReplicationRole::Primary)
+    : VolumeBase(arrayIdx, arrayName, dataAttribute, inputUuid,
+            volName, volSizeByte, nsid,
+            _maxiops, _miniops, _maxbw, _minbw,
+            voluemRole)
+    {        
     }
     ~Volume(void) override
     {
