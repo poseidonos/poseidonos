@@ -30,66 +30,42 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_BASE_H_
-#define VOLUME_BASE_H_
+#include "volume_attribute.h"
 
-#include <array>
-#include <atomic>
-#include <cstdint>
-#include <mutex>
-#include <string>
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
-#include "src/volume/volume_attribute.h"
-#include "src/volume/volume_network_property.h"
-#include "src/volume/volume_perfomance_property.h"
-#include "src/volume/volume_replicate_property.h"
-#include "src/volume/volume_status_property.h"
-
-#define MAX_VOLUME_COUNT (256)
-
+using namespace std;
 namespace pos
 {
-
-enum VolumeIoType
+VolumeAttribute::VolumeAttribute(int arrayId_, std::string arrayName_, DataAttribute dataAttribute_, std::string uuid_)
+: arrayId(arrayId_),
+arrayName(arrayName_),
+dataAttribute(dataAttribute_),
+uuid(uuid_)
 {
-    UserRead,
-    UserWrite,
-    InternalIo,
-    MaxVolumeIoTypeCnt
-};
+}
 
-class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
+VolumeAttribute::~VolumeAttribute()
 {
-public:
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                ReplicationRole voluemRole);
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
-                ReplicationRole voluemRole);
-    virtual ~VolumeBase(void);
 
-    int Mount(void);
-    int Unmount(void);
+}
 
-    void LockStatus(void);
-    void UnlockStatus(void);
+void
+VolumeAttribute::SetUuid(std::string inputUuid)
+{
+    if (uuid.empty() == false)
+    {
+        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
+            "The volume already has set uuid {}", uuid);
+    }
 
-    uint64_t UsedSize(void);
-    uint64_t RemainingSize(void);
+    if (inputUuid.empty() == false)
+    {
+        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
+            "The volume has set uuid {}", inputUuid);
+    }
 
-    bool IsValid(void) {return isValid;}
-    void SetValid(bool valid) {isValid = valid;}
-
-    int ID;
-
-protected:  
-    bool isValid = true;
-    std::mutex statusMutex;
-    static const int INVALID_VOL_ID = -1;
-};
-
-} // namespace pos
-
-#endif // VOLUME_BASE_H_
+    uuid = inputUuid;
+}
+}

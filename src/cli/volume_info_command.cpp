@@ -110,23 +110,23 @@ VolumeInfoCommand::Execute(json& doc, string rid)
     }
 
     JsonElement data("data");
-    data.SetAttribute(JsonAttribute("name", "\"" + vol->GetName() + "\""));
+    data.SetAttribute(JsonAttribute("name", "\"" + vol->GetVolumeName() + "\""));
     data.SetAttribute(JsonAttribute("uuid", "\"" + vol->GetUuid() + "\""));
-    data.SetAttribute(JsonAttribute("total", to_string(vol->TotalSize())));
+    data.SetAttribute(JsonAttribute("total", to_string(vol->GetTotalSize())));
 
-    VolumeStatus volumeStatus = vol->GetStatus();
+    VolumeMountStatus VolumeMountStatus = vol->GetVolumeMountStatus();
 
-    if (Mounted == volumeStatus)
+    if (Mounted == VolumeMountStatus)
     {
         data.SetAttribute(JsonAttribute("remain", to_string(vol->RemainingSize())));
     }
 
-    data.SetAttribute(JsonAttribute("status", "\"" + volMgr->GetStatusStr(volumeStatus) + "\""));
+    data.SetAttribute(JsonAttribute("status", "\"" + volMgr->GetStatusStr(VolumeMountStatus) + "\""));
 
-    data.SetAttribute(JsonAttribute("maxiops", to_string(vol->MaxIOPS())));
-    data.SetAttribute(JsonAttribute("maxbw", to_string(vol->MaxBW())));
-    data.SetAttribute(JsonAttribute("minbw", to_string(vol->MinBW())));
-    data.SetAttribute(JsonAttribute("miniops", to_string(vol->MinIOPS())));
+    data.SetAttribute(JsonAttribute("maxiops", to_string(vol->GetMaxIOPS())));
+    data.SetAttribute(JsonAttribute("maxbw", to_string(vol->GetMaxBW())));
+    data.SetAttribute(JsonAttribute("minbw", to_string(vol->GetMinBW())));
+    data.SetAttribute(JsonAttribute("miniops", to_string(vol->GetMinIOPS())));
     data.SetAttribute(JsonAttribute("subnqn", "\"" + vol->GetSubnqn() + "\""));
     data.SetAttribute(JsonAttribute("array_name", "\"" + vol->GetArrayName() + "\""));
 

@@ -102,7 +102,7 @@ VolumeManager::GetVolumeList(void)
 }
 
 std::string
-VolumeManager::GetStatusStr(VolumeStatus status)
+VolumeManager::GetStatusStr(VolumeMountStatus status)
 {
     return VOLUME_STATUS_STR[status];
 }
@@ -150,7 +150,7 @@ VolumeManager::EntireVolumeSize(void)
             if (vol == nullptr)
                 break;
 
-            total_size += vol->TotalSize();
+            total_size += vol->GetTotalSize();
         }
     }
 
@@ -163,7 +163,7 @@ VolumeManager::GetVolumeSize(int volId, uint64_t& volSize)
     VolumeBase* vol = volumes.GetVolume(volId);
     if (vol != nullptr)
     {
-        volSize = vol->TotalSize();
+        volSize = vol->GetTotalSize();
         return EID(SUCCESS);
     }
 
@@ -173,7 +173,7 @@ VolumeManager::GetVolumeSize(int volId, uint64_t& volSize)
 }
 
 void
-VolumeManager::_PublishTelemetryVolumeState(string name, VolumeStatus status)
+VolumeManager::_PublishTelemetryVolumeState(string name, VolumeMountStatus status)
 {
     if (tp != nullptr)
     {
@@ -243,7 +243,7 @@ VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_
     if (EID(SUCCESS) == ret)
     {
         UpdateQoSProperty(name, maxIops, maxBw, defaultMinIops, defaultMinBw);
-        _PublishTelemetryVolumeState(name, VolumeStatus::Unmounted);
+        _PublishTelemetryVolumeState(name, VolumeMountStatus::Unmounted);
         _PublishTelemetryVolumeCapacity(name, size);
         _PublishTelemetryArrayUsage();
     }
@@ -278,7 +278,7 @@ VolumeManager::Delete(std::string name)
     
     if (EID(SUCCESS) == ret)
     {
-        _PublishTelemetryVolumeState(name, VolumeStatus::Offline);
+        _PublishTelemetryVolumeState(name, VolumeMountStatus::Offline);
         _PublishTelemetryVolumeCapacity(name, 0);
         _PublishTelemetryArrayUsage();
     }
@@ -322,7 +322,7 @@ VolumeManager::Mount(std::string name, std::string subnqn)
 
     if (EID(SUCCESS) == ret)
     {
-        _PublishTelemetryVolumeState(name, VolumeStatus::Mounted);
+        _PublishTelemetryVolumeState(name, VolumeMountStatus::Mounted);
     }
 
     return ret;
@@ -368,7 +368,7 @@ VolumeManager::Unmount(std::string name)
 
     if (EID(SUCCESS) == ret)
     {
-        _PublishTelemetryVolumeState(name, VolumeStatus::Unmounted);
+        _PublishTelemetryVolumeState(name, VolumeMountStatus::Unmounted);
     }
 
     return ret;
@@ -402,7 +402,7 @@ VolumeManager::UpdateQoSProperty(std::string name, uint64_t maxIops, uint64_t ma
 }
 
 int
-VolumeManager::UpdateVolumeReplicationState(std::string name, VolumeReplicationState state)
+VolumeManager::UpdateReplicationState(std::string name, ReplicationState state)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -430,7 +430,7 @@ VolumeManager::UpdateVolumeReplicationState(std::string name, VolumeReplicationS
 }
 
 int
-VolumeManager::UpdateVolumeReplicationRoleProperty(std::string name, VolumeReplicationRoleProperty nodeProperty)
+VolumeManager::UpdateReplicationRole(std::string name, ReplicationRole nodeProperty)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -538,7 +538,7 @@ VolumeManager::CheckVolumeValidity(int volId)
 }
 
 int
-VolumeManager::GetVolumeStatus(int volId)
+VolumeManager::GetVolumeMountStatus(int volId)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -548,12 +548,12 @@ VolumeManager::GetVolumeStatus(int volId)
         return EID(VOL_NOT_FOUND);
     }
 
-    VolumeStatus status = vol->GetStatus();
+    VolumeMountStatus status = vol->GetVolumeMountStatus();
     return static_cast<int>(status);
 }
 
 int
-VolumeManager::GetVolumeReplicationState(int volId)
+VolumeManager::GetReplicationState(int volId)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -563,12 +563,12 @@ VolumeManager::GetVolumeReplicationState(int volId)
         return EID(VOL_NOT_FOUND);
     }
 
-    VolumeReplicationState status = vol->GetReplicationState();
+    ReplicationState status = vol->GetReplicationState();
     return static_cast<int>(status);
 }
 
 int
-VolumeManager::GetVolumeReplicationRoleProperty(int volId)
+VolumeManager::GetReplicationRole(int volId)
 {
     VolumeBase* vol = volumes.GetVolume(volId);
 
@@ -578,7 +578,7 @@ VolumeManager::GetVolumeReplicationRoleProperty(int volId)
         return EID(VOL_NOT_FOUND);
     }
 
-    VolumeReplicationRoleProperty status = vol->GetReplicateRoleProperty();
+    ReplicationRole status = vol->GetReplicationRole();
     return static_cast<int>(status);
 }
 
@@ -643,7 +643,7 @@ VolumeManager::GetVolumeName(int volId, std::string& name)
 
     if (vol != nullptr)
     {
-        name = vol->GetName();
+        name = vol->GetVolumeName();
         return EID(SUCCESS);
     }
 

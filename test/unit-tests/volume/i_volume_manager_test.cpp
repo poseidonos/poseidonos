@@ -56,7 +56,7 @@ TEST(IVolumeManager, GetVolumeCount_)
 {
 }
 
-TEST(IVolumeManager, GetVolumeStatus_)
+TEST(IVolumeManager, GetVolumeMountStatus_)
 {
 }
 

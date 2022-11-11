@@ -64,7 +64,7 @@ VolumeDeleter::_CheckRequestValidity(string name)
         throw EID(VOL_NOT_FOUND);
     }
 
-    if (vol->GetStatus() == VolumeStatus::Mounted)
+    if (vol->GetVolumeMountStatus() == VolumeMountStatus::Mounted)
     {
         POS_TRACE_WARN(EID(DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED),
             "vol_name: {}, array_name: {}", name, arrayName);

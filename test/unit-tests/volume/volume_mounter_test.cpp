@@ -79,7 +79,7 @@ TEST(VolumeMounter, _CheckIfExistSubsystem_)
     // When
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
 
     VolumeMounter volumeMounter(volumes, arrayName, arrayID, &mockVolumeEventPublisher, &mockNvmfTarget);
@@ -113,7 +113,7 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_)
 
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
 
     struct spdk_nvmf_subsystem* subsystem[1];
@@ -156,7 +156,7 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_1)
 
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
 
     struct spdk_nvmf_subsystem* subsystem[1];
@@ -199,7 +199,7 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_2)
 
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
 
     struct spdk_nvmf_subsystem* subsystem[1];
@@ -245,7 +245,7 @@ TEST(VolumeMounter, _MountVolume_)
 
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
     vol->Mount();
 
@@ -291,7 +291,7 @@ TEST(VolumeMounter, _MountVolume_1)
 
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
 
     struct spdk_nvmf_subsystem* subsystem[1];
@@ -336,7 +336,7 @@ TEST(VolumeMounter, _RollBackVolumeMount_)
 
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
 
     struct spdk_nvmf_subsystem* subsystem[1];

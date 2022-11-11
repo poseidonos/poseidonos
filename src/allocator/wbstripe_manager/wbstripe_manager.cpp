@@ -166,7 +166,7 @@ int
 WBStripeManager::FlushAllPendingStripesInVolume(int volumeId, FlushIoSmartPtr flushIo)
 {
     // TODO (meta) remove volume manager check and remove updating flushIo
-    if (volumeManager->GetVolumeStatus(volumeId) == Mounted)
+    if (volumeManager->GetVolumeMountStatus(volumeId) == Mounted)
     {
         Stripe* activeStripe = _FinishActiveStripe(volumeId);
         if (activeStripe != nullptr)

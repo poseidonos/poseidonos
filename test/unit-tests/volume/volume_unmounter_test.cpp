@@ -75,7 +75,7 @@ TEST(VolumeUnmounter, Do_volUnmounted)
     // When
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
 
     volumes.Add(vol);
     vol->Unmount();
@@ -108,7 +108,7 @@ TEST(VolumeUnmounter, Do_notifyFail)
     // When
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
 
     volumes.Add(vol);
     vol->Mount();

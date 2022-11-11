@@ -84,7 +84,7 @@ TelemetryAirDelegator::PublishTimeTriggeredMetric(POSMetricVector* posMetricVect
             for (uint32_t volId = 0; volId < MAX_VOLUME_COUNT; volId++)
             {
                 VolumeBase* volume = vm->GetVolume(volId);
-                if ((volume != nullptr) && (volume->GetStatus() == Mounted))
+                if ((volume != nullptr) && (volume->GetVolumeMountStatus() == Mounted))
                 {
                     uint64_t volUsage = volume->UsedSize();
                     AddUsageMetric(posMetricVector, TEL60003_VOL_USAGE_BLK_CNT,

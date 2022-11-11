@@ -185,7 +185,7 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
 
     vol->LockStatus();
 
-    if (VolumeStatus::Mounted != vol->GetStatus())
+    if (VolumeMountStatus::Mounted != vol->GetVolumeMountStatus())
     {
         _SetVolumeEventBase(vol, subnqn);
         _SetVolumeEventPerf(vol);
@@ -209,7 +209,7 @@ VolumeMounter::_MountVolume(VolumeBase* vol, string subnqn)
     else
     {
         ret = EID(MOUNT_VOL_ALREADY_MOUNTED);
-        POS_TRACE_WARN(ret, "vol_name: {}", vol->GetName());
+        POS_TRACE_WARN(ret, "vol_name: {}", vol->GetVolumeName());
     }
 
     vol->UnlockStatus();
@@ -233,7 +233,7 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
     if (done == false)
     {
         ret = EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
-        POS_TRACE_WARN(ret, "Failed to unmount volume during rollback mount: {}", vol->GetName());
+        POS_TRACE_WARN(ret, "Failed to unmount volume during rollback mount: {}", vol->GetVolumeName());
     }
 
     ret = vol->Unmount();
@@ -241,7 +241,7 @@ VolumeMounter::_RollBackVolumeMount(VolumeBase* vol, string subnqn)
     if (ret == EID(SUCCESS))
     {
         ret = EID(UNMOUNT_VOL_ALREADY_UNMOUNTED);
-        POS_TRACE_WARN(ret, "vol_name: {}", vol->GetName());
+        POS_TRACE_WARN(ret, "vol_name: {}", vol->GetVolumeName());
     }
 
     ret = EID(MOUNT_VOL_UNABLE_TO_ATTACH_TO_NVMF);

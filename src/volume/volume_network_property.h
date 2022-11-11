@@ -30,66 +30,31 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_BASE_H_
-#define VOLUME_BASE_H_
+#ifndef __VOLUME_NETWORK_PROPERTY__
+#define __VOLUME_NETWORK_PROPERTY__
 
-#include <array>
-#include <atomic>
 #include <cstdint>
-#include <mutex>
 #include <string>
 
-#include "src/volume/volume_attribute.h"
-#include "src/volume/volume_network_property.h"
-#include "src/volume/volume_perfomance_property.h"
-#include "src/volume/volume_replicate_property.h"
-#include "src/volume/volume_status_property.h"
-
-#define MAX_VOLUME_COUNT (256)
-
+using namespace std;
 namespace pos
 {
 
-enum VolumeIoType
-{
-    UserRead,
-    UserWrite,
-    InternalIo,
-    MaxVolumeIoTypeCnt
-};
-
-class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
+class NetworkProperty
 {
 public:
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                ReplicationRole voluemRole);
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
-                ReplicationRole voluemRole);
-    virtual ~VolumeBase(void);
+    NetworkProperty(uint32_t nsid, std::string subNqn = "");
+    ~NetworkProperty(void);
 
-    int Mount(void);
-    int Unmount(void);
+    uint32_t GetNsid() {return nsid;}
+    std::string GetSubnqn(void) {return subNqn;}
 
-    void LockStatus(void);
-    void UnlockStatus(void);
-
-    uint64_t UsedSize(void);
-    uint64_t RemainingSize(void);
-
-    bool IsValid(void) {return isValid;}
-    void SetValid(bool valid) {isValid = valid;}
-
-    int ID;
-
-protected:  
-    bool isValid = true;
-    std::mutex statusMutex;
-    static const int INVALID_VOL_ID = -1;
+    void SetNsid(uint32_t nsid_) {nsid = nsid_;}
+    void SetSubnqn(std::string inputSubNqn);
+private:
+    uint32_t nsid;
+    std::string subNqn = "";
 };
+}
 
-} // namespace pos
-
-#endif // VOLUME_BASE_H_
+#endif //__VOLUME_NETWORK_PROPERTY__

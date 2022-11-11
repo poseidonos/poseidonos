@@ -92,8 +92,8 @@ GrpcPosManagement::GetVolumeList(::grpc::ServerContext* context,
         }
 
         pos_rpc::VolumeInfo* info = response->add_infos();
-        info->set_volume_name(vol->GetName());
-        info->set_total_capacity(vol->TotalSize());
+        info->set_volume_name(vol->GetVolumeName());
+        info->set_total_capacity(vol->GetTotalSize());
         info->set_used_capacity(vol->UsedSize());
     }
 

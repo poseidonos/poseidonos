@@ -92,7 +92,7 @@ TEST(WBStripeManager, FlushAllPendingStripesInVolume_TestVolumeMounted)
     // given 1.
     StripeId wbLsid = 4;
     EXPECT_CALL(*allocCtx, GetActiveStripeTail).WillOnce(Return(UNMAP_VSA));
-    EXPECT_CALL(*volManager, GetVolumeStatus).WillOnce(Return(Mounted));
+    EXPECT_CALL(*volManager, GetVolumeMountStatus).WillOnce(Return(Mounted));
 
     // when
     std::shared_ptr<MockFlushIo> flushIo = std::make_shared<MockFlushIo>(0);
@@ -116,7 +116,7 @@ TEST(WBStripeManager, FlushAllPendingStripesInVolume_TestVolumeUnmounted)
     NiceMock<MockIStripeMap> stripeMap;
 
     WBStripeManager wbStripeManager(nullptr, 1, nullptr, volManager, &stripeMap, allocCtx, &addrInfo, ctxManager, blkManager, nullptr, "", 0);
-    EXPECT_CALL(*volManager, GetVolumeStatus).WillOnce(Return(Unmounted));
+    EXPECT_CALL(*volManager, GetVolumeMountStatus).WillOnce(Return(Unmounted));
     // when
     wbStripeManager.FlushAllPendingStripesInVolume(0, nullptr);
 

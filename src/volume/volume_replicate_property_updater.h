@@ -46,8 +46,8 @@ public:
         VolumeEventPublisher* volumeEventPublisher = nullptr);
     ~VolumeReplicatePropertyUpdater(void) override;
 
-    int Do(string name, VolumeReplicationState state);
-    int Do(string name, VolumeReplicationRoleProperty nodeProperty);
+    int Do(string name, ReplicationState state);
+    int Do(string name, ReplicationRole nodeProperty);
 };
 
 }  // namespace pos

@@ -30,66 +30,47 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_BASE_H_
-#define VOLUME_BASE_H_
+#ifndef __VOLUME_REPLICATE_PROPERTY__
+#define __VOLUME_REPLICATE_PROPERTY__
 
-#include <array>
-#include <atomic>
 #include <cstdint>
-#include <mutex>
 #include <string>
 
-#include "src/volume/volume_attribute.h"
-#include "src/volume/volume_network_property.h"
-#include "src/volume/volume_perfomance_property.h"
-#include "src/volume/volume_replicate_property.h"
-#include "src/volume/volume_status_property.h"
-
-#define MAX_VOLUME_COUNT (256)
-
+using namespace std;
 namespace pos
 {
 
-enum VolumeIoType
+enum ReplicationRole
 {
-    UserRead,
-    UserWrite,
-    InternalIo,
-    MaxVolumeIoTypeCnt
+    Primary,
+    Secondary,
+    MaxNodeCnt
 };
 
-class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
+enum ReplicationState
+{
+    StandAloneState,
+    VolumeCopyState,
+    LiveReplicationState,
+    MaxReplicationState
+};
+
+class ReplicationProperty
 {
 public:
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                ReplicationRole voluemRole);
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
-                ReplicationRole voluemRole);
-    virtual ~VolumeBase(void);
+    ReplicationProperty(ReplicationRole role, ReplicationState state = ReplicationState::MaxReplicationState);
+    virtual ~ReplicationProperty(void);
 
-    int Mount(void);
-    int Unmount(void);
+    ReplicationRole GetReplicationRole() {return role;}
+    ReplicationState GetReplicationState() {return state;}
 
-    void LockStatus(void);
-    void UnlockStatus(void);
+    void SetReplicationRole(ReplicationRole role_) {role = role_;}
+    void SetReplicationState(ReplicationState state_) {state = state_;}
 
-    uint64_t UsedSize(void);
-    uint64_t RemainingSize(void);
-
-    bool IsValid(void) {return isValid;}
-    void SetValid(bool valid) {isValid = valid;}
-
-    int ID;
-
-protected:  
-    bool isValid = true;
-    std::mutex statusMutex;
-    static const int INVALID_VOL_ID = -1;
+private:
+    ReplicationRole role;
+    ReplicationState state;
 };
+}
 
-} // namespace pos
-
-#endif // VOLUME_BASE_H_
+#endif //__VOLUME_REPLICATE_PROPERTY__

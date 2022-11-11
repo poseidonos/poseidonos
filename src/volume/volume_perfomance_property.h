@@ -30,66 +30,47 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_BASE_H_
-#define VOLUME_BASE_H_
+#ifndef __VOLUME_PERFOMANCE_PROPERTY__
+#define __VOLUME_PERFOMANCE_PROPERTY__
 
-#include <array>
-#include <atomic>
 #include <cstdint>
-#include <mutex>
 #include <string>
 
-#include "src/volume/volume_attribute.h"
-#include "src/volume/volume_network_property.h"
-#include "src/volume/volume_perfomance_property.h"
-#include "src/volume/volume_replicate_property.h"
-#include "src/volume/volume_status_property.h"
-
-#define MAX_VOLUME_COUNT (256)
-
+using namespace std;
 namespace pos
 {
 
-enum VolumeIoType
-{
-    UserRead,
-    UserWrite,
-    InternalIo,
-    MaxVolumeIoTypeCnt
-};
+const uint32_t KIOPS = 1000;
+const uint32_t MIB_IN_BYTE = 1024 * 1024;
+const uint64_t MIN_IOPS_LIMIT = 10;
+const uint64_t MIN_BW_LIMIT = 10;
+const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
+const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
 
-class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
+class PerfomanceProperty
 {
 public:
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                ReplicationRole voluemRole);
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
-                ReplicationRole voluemRole);
-    virtual ~VolumeBase(void);
+    PerfomanceProperty(uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw);
+    ~PerfomanceProperty(void);
+    
+    uint64_t GetMaxIOPS(void) {return maxiops;}
+    uint64_t GetMaxBW(void) {return maxbw;}
+    uint64_t GetMinIOPS(void) {return miniops;}
+    uint64_t GetMinBW(void) {return minbw;}
 
-    int Mount(void);
-    int Unmount(void);
+    void SetMaxIOPS(uint64_t val);
+    void SetMaxBW(uint64_t val);
+    void SetMinIOPS(uint64_t val);
+    void SetMinBW(uint64_t val);
 
-    void LockStatus(void);
-    void UnlockStatus(void);
-
-    uint64_t UsedSize(void);
-    uint64_t RemainingSize(void);
-
-    bool IsValid(void) {return isValid;}
-    void SetValid(bool valid) {isValid = valid;}
-
-    int ID;
-
-protected:  
-    bool isValid = true;
-    std::mutex statusMutex;
-    static const int INVALID_VOL_ID = -1;
+private:
+    // 0 == unlimited
+    uint64_t maxiops;
+    uint64_t maxbw;
+    uint64_t miniops;
+    uint64_t minbw;
 };
 
-} // namespace pos
+}
 
-#endif // VOLUME_BASE_H_
+#endif //__VOLUME_PERFOMANCE_PROPERTY__

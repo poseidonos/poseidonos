@@ -30,66 +30,66 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef VOLUME_BASE_H_
-#define VOLUME_BASE_H_
+#include "volume_perfomance_property.h"
 
-#include <array>
-#include <atomic>
-#include <cstdint>
-#include <mutex>
-#include <string>
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
 
-#include "src/volume/volume_attribute.h"
-#include "src/volume/volume_network_property.h"
-#include "src/volume/volume_perfomance_property.h"
-#include "src/volume/volume_replicate_property.h"
-#include "src/volume/volume_status_property.h"
-
-#define MAX_VOLUME_COUNT (256)
-
+using namespace std;
 namespace pos
 {
 
-enum VolumeIoType
+PerfomanceProperty::PerfomanceProperty(uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw)
+: maxiops(maxiops),
+  maxbw(maxbw),
+  miniops(miniops),
+  minbw(minbw)
 {
-    UserRead,
-    UserWrite,
-    InternalIo,
-    MaxVolumeIoTypeCnt
-};
+}
 
-class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
+PerfomanceProperty::~PerfomanceProperty(void)
 {
-public:
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                ReplicationRole voluemRole);
-    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
-                std::string volName, uint64_t volSizeByte, uint32_t nsid,
-                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
-                ReplicationRole voluemRole);
-    virtual ~VolumeBase(void);
 
-    int Mount(void);
-    int Unmount(void);
+}
 
-    void LockStatus(void);
-    void UnlockStatus(void);
+void
+PerfomanceProperty::SetMaxIOPS(uint64_t val)
+{
+    if ((val != 0 && val < MIN_IOPS_LIMIT) || val > MAX_IOPS_LIMIT)
+    {
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
+    }
+    maxiops = val;
+}
 
-    uint64_t UsedSize(void);
-    uint64_t RemainingSize(void);
+void
+PerfomanceProperty::SetMaxBW(uint64_t val)
+{
+    if ((val != 0 && val < MIN_BW_LIMIT) || val > MAX_BW_LIMIT)
+    {
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
+    }
+    maxbw = val;
+}
 
-    bool IsValid(void) {return isValid;}
-    void SetValid(bool valid) {isValid = valid;}
+void
+PerfomanceProperty::SetMinIOPS(uint64_t val)
+{
+    if (val != 0 && val > MAX_IOPS_LIMIT)
+    {
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
+    }
+    miniops = val;
+}
 
-    int ID;
+void
+PerfomanceProperty::SetMinBW(uint64_t val)
+{
+    if (val != 0 && val > MAX_BW_LIMIT)
+    {
+        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
+    }
+    minbw = val;
+}
 
-protected:  
-    bool isValid = true;
-    std::mutex statusMutex;
-    static const int INVALID_VOL_ID = -1;
-};
-
-} // namespace pos
-
-#endif // VOLUME_BASE_H_
+}
