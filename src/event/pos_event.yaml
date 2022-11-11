@@ -53,7 +53,7 @@ Root:
     Solution:
 
 
-  # Trace: 1000 - 1199
+  # Trace: 1000 - 1099
   -
     Id: 1000
     Name: POS_TRACE_STARTED
@@ -167,7 +167,112 @@ Root:
     Cause:
     Solution:
 
-
+  # POS INIT: 1101 - 1199
+  -
+    Id: 1101
+    Name: POS_CONFIG_LOADED
+    Severity:
+    Message: POS configuration is successfully loaded.
+    Cause:
+    Solution:
+  -
+    Id: 1102
+    Name: POS_INITIALIZING_SIG_HANDLER
+    Severity:
+    Message: Trying to initialize signal handler.
+    Cause:
+    Solution:
+  -
+    Id: 1103
+    Name: POS_INITIALIZING_VERSION
+    Severity:
+    Message: Trying to initialize version info.
+    Cause:
+    Solution:
+  -
+    Id: 1104
+    Name: POS_INITIALIZING_SPDK
+    Severity:
+    Message: Trying to initialize SPDK.
+    Cause:
+    Solution:
+  -
+    Id: 1105
+    Name: POS_INITIALIZING_CPU_AFFINITY
+    Severity:
+    Message: Trying to initialize CPU affinity.
+    Cause:
+    Solution:
+  -
+    Id: 1106
+    Name: POS_INITIALIZING_THREAD_MODEL
+    Severity:
+    Message: Trying to initialize thread model.
+    Cause:
+    Solution:
+  -
+    Id: 1107
+    Name: POS_INITIALIZING_QOS_POLICY
+    Severity:
+    Message: Trying to initialize QoS policy.
+    Cause:
+    Solution:
+  -
+    Id: 1108
+    Name: POS_INITIALIZING_DEBUG_MODULES
+    Severity:
+    Message: Trying to initialize debug modules.
+    Cause:
+    Solution:
+  -
+    Id: 1109
+    Name: POS_INITIALIZING_AIR
+    Severity:
+    Message: Trying to initialize AIR.
+    Cause:
+    Solution:
+  -
+    Id: 1110
+    Name: POS_INITIALIZING_IO_MODULES
+    Severity:
+    Message: Trying to initialize IO modules.
+    Cause:
+    Solution:
+  -
+    Id: 1111
+    Name: POS_INITIALIZING_MEMORY_CHECKER
+    Severity:
+    Message: Trying to initialize memory checker.
+    Cause:
+    Solution:
+  -
+    Id: 1112
+    Name: POS_INITIALIZING_RESOURCE_CHECKER
+    Severity:
+    Message: Trying to initialize resource checker.
+    Cause:
+    Solution:
+  -
+    Id: 1113
+    Name: POS_INITIALIZING_EXPORTER
+    Severity:
+    Message: Trying to initialize exporter
+    Cause:
+    Solution:
+  -
+    Id: 1114
+    Name: POS_INITIALIZING_CLI_SERVER
+    Severity:
+    Message: Trying to initialize CLI server
+    Cause:
+    Solution:
+  -
+    Id: 1119
+    Name: POS_INIT_EXCEPTIONS
+    Severity:
+    Message: An exception occurred during POS initialization.
+    Cause:
+    Solution:
   # CLI Server: 1200 - 1599
   -
     Id: 1201
