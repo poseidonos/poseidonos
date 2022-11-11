@@ -172,101 +172,107 @@ Root:
     Id: 1101
     Name: POS_CONFIG_LOADED
     Severity:
-    Message:
+    Message: POS configuration is successfully loaded.
     Cause:
     Solution:
   -
     Id: 1102
-    Name: POS_INIT_SIG_HANDLER
+    Name: POS_INITIALIZING_SIG_HANDLER
     Severity:
-    Message:
+    Message: Trying to initialize signal handler.
     Cause:
     Solution:
   -
     Id: 1103
-    Name: POS_INIT_VERSION
+    Name: POS_INITIALIZING_VERSION
     Severity:
-    Message:
+    Message: Trying to initialize version info.
     Cause:
     Solution:
   -
     Id: 1104
-    Name: POS_INIT_SPDK
+    Name: POS_INITIALIZING_SPDK
     Severity:
-    Message:
+    Message: Trying to initialize SPDK.
     Cause:
     Solution:
   -
     Id: 1105
-    Name: POS_INIT_CPU_AFFINITY
+    Name: POS_INITIALIZING_CPU_AFFINITY
     Severity:
-    Message:
+    Message: Trying to initialize CPU affinity.
     Cause:
     Solution:
   -
     Id: 1106
-    Name: POS_INIT_THREAD_MODEL
+    Name: POS_INITIALIZING_THREAD_MODEL
     Severity:
-    Message:
+    Message: Trying to initialize thread model.
     Cause:
     Solution:
   -
     Id: 1107
-    Name: POS_INIT_QOS_POLICY
+    Name: POS_INITIALIZING_QOS_POLICY
     Severity:
-    Message:
+    Message: Trying to initialize QoS policy.
     Cause:
     Solution:
   -
     Id: 1108
-    Name: POS_INIT_DEBUG_MODULES
+    Name: POS_INITIALIZING_DEBUG_MODULES
     Severity:
-    Message:
+    Message: Trying to initialize debug modules.
     Cause:
     Solution:
   -
     Id: 1109
-    Name: POS_INIT_AIR
+    Name: POS_INITIALIZING_AIR
     Severity:
-    Message:
+    Message: Trying to initialize AIR.
     Cause:
     Solution:
   -
     Id: 1110
-    Name: POS_INIT_IO_MODULES
+    Name: POS_INITIALIZING_IO_MODULES
     Severity:
-    Message:
+    Message: Trying to initialize IO modules.
     Cause:
     Solution:
   -
     Id: 1111
-    Name: POS_INIT_MEMORY_CHECKER
+    Name: POS_INITIALIZING_MEMORY_CHECKER
     Severity:
-    Message:
+    Message: Trying to initialize memory checker.
     Cause:
     Solution:
   -
     Id: 1112
-    Name: POS_INIT_RESOURCE_CHECKER
+    Name: POS_INITIALIZING_RESOURCE_CHECKER
     Severity:
-    Message:
+    Message: Trying to initialize resource checker.
     Cause:
     Solution:
   -
     Id: 1113
-    Name: POS_INIT_EXPORTER
+    Name: POS_INITIALIZING_EXPORTER
     Severity:
-    Message:
+    Message: Trying to initialize exporter
     Cause:
     Solution:
   -
     Id: 1114
-    Name: POS_INIT_CLI_SERVER
+    Name: POS_INITIALIZING_CLI_SERVER
     Severity:
-    Message:
+    Message: Trying to initialize CLI server
     Cause:
     Solution:
-
+  -
+    Id: 1119
+    Name: POS_INIT_EXCEPTIONS
+    Severity:
+    Message: An exception occurred during POS initialization.
+    Cause:
+    Solution:
   # CLI Server: 1200 - 1599
   -
     Id: 1201
