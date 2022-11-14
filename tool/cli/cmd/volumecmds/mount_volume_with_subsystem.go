@@ -1,15 +1,15 @@
 package volumecmds
 
 import (
-	"encoding/json"
-	"pnconnector/src/log"
-
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
+	"cli/cmd/grpcmgr"
 	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
+	"fmt"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var MountVolumeWithSubsystemCmd = &cobra.Command{
@@ -41,47 +41,143 @@ Example:
 		createSubsystemReq := messages.BuildReqWithParam(createSubsysCmd, uuid, createSubsysParam)
 		requestList[0] = createSubsystemReq
 
-		AddListenerCmd := "ADDLISTENER"
-		AddListenerParam := messages.AddListenerParam{
-			SUBNQN:             mount_volume_with_subsystem_subnqn,
-			TRANSPORTTYPE:      mount_volume_with_subsystem_trtype,
-			TARGETADDRESS:      mount_volume_with_subsystem_traddr,
-			TRANSPORTSERVICEID: mount_volume_with_subsystem_trsvcid,
-		}
-
-		uuid = globals.GenerateUUID()
-
-		addListenerReq := messages.BuildReqWithParam(AddListenerCmd, uuid, AddListenerParam)
-		requestList[1] = addListenerReq
-
-		mountVolCmd := "MOUNTVOLUME"
-		mountVolumeParam := messages.MountVolumeParam{
-			VOLUMENAME: mount_volume_with_subsystem_volumeName,
-			SUBNQN:     mount_volume_with_subsystem_subnqn,
-			ARRAYNAME:  mount_volume_with_subsystem_arrayName,
-		}
-
-		uuid = globals.GenerateUUID()
-
-		mountVolumeReq := messages.BuildReqWithParam(mountVolCmd, uuid, mountVolumeParam)
-		requestList[2] = mountVolumeReq
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			for _, request := range requestList {
-				reqJson, err := json.Marshal(request)
-				if err != nil {
-					log.Error("error:", err)
-				}
-
-				displaymgr.PrintRequest(string(reqJson))
-
-				resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
-
-				displaymgr.PrintResponse(request.COMMAND, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-			}
-		}
+		sendCreateSubsystemAutoWithSub()
+		sendAddListenerWithSub()
+		sendMountVolumeWithSub()
 	},
+}
+
+func sendCreateSubsystemAutoWithSub() error {
+
+	command := "CREATESUBSYSTEMAUTO"
+	req, buildErr := buildCreateSubsystemAutoReqWithSub(command)
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	reqJson, err := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+
+	res, gRpcErr := grpcmgr.SendCreateSubsystem(req)
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func sendAddListenerWithSub() error {
+	command := "ADDLISTENER"
+	req, buildErr := buildAddListenerReqWithSub(command)
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	reqJson, err := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+
+	res, gRpcErr := grpcmgr.SendAddListener(req)
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func sendMountVolumeWithSub() error {
+	command := "MOUNTVOLUME"
+
+	req, buildErr := buildMountVolumeReqWithSub(command)
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	reqJson, err := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+
+	res, gRpcErr := grpcmgr.SendMountVolume(req)
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func buildMountVolumeReqWithSub(command string) (*pb.MountVolumeRequest, error) {
+	param := &pb.MountVolumeRequest_Param{
+		Name:   mount_volume_with_subsystem_volumeName,
+		Subnqn: mount_volume_with_subsystem_subnqn,
+		Array:  mount_volume_with_subsystem_arrayName,
+	}
+	uuid := globals.GenerateUUID()
+	req := &pb.MountVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+	return req, nil
+}
+
+func buildCreateSubsystemAutoReqWithSub(command string) (*pb.CreateSubsystemRequest, error) {
+	param := &pb.CreateSubsystemRequest_Param{
+		Nqn: mount_volume_with_subsystem_subnqn,
+	}
+	uuid := globals.GenerateUUID()
+	req := &pb.CreateSubsystemRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+	return req, nil
+}
+
+func buildAddListenerReqWithSub(command string) (*pb.AddListenerRequest, error) {
+	param := &pb.AddListenerRequest_Param{
+		Subnqn:             mount_volume_with_subsystem_subnqn,
+		TransportType:      mount_volume_with_subsystem_trtype,
+		TargetAddress:      mount_volume_with_subsystem_traddr,
+		TransportServiceId: mount_volume_with_subsystem_trsvcid,
+	}
+	uuid := globals.GenerateUUID()
+	req := &pb.AddListenerRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
