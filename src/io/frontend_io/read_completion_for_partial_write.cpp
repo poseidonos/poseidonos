@@ -45,6 +45,7 @@
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/volume/volume_service.h"
 namespace pos
 {
 ReadCompletionForPartialWrite::ReadCompletionForPartialWrite(
@@ -122,8 +123,9 @@ ReadCompletionForPartialWrite::HandleCopyDone(void* argument)
                 volumeIo->SetCallback(splitCallback);
                 if (likely(copyParam->tested == false))
                 {
-                    IArrayInfo* arrayInfo = ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-                    if (true == arrayInfo->IsWriteThroughEnabled())
+                    int arrayId = volumeIo->GetArrayId();
+                    bool wtEnabled = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId)->IsWriteThroughEnabled();
+                    if (true == wtEnabled)
                     {
                         WriteForParity writeForParity(volumeIo);
                         bool ret = writeForParity.Execute();

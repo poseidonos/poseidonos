@@ -71,13 +71,13 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo)
 : WriteSubmission(volumeIo, RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId()),
       AllocatorServiceSingleton::Instance()->GetIBlockAllocator(volumeIo->GetArrayId()),
       nullptr,
-      ArrayMgr()->GetInfo(volumeIo->GetArrayId())->arrayInfo,
+      nullptr,
       EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
 WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inputRbaStateManager,
-    IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl, IArrayInfo* inputArrayInfo,
+    IBlockAllocator* inputIBlockAllocator, FlowControl* inputFlowControl, IVolumeInfoManager* inputVolumeManager,
     bool isReactorNow)
 : Event(isReactorNow),
   volumeIo(volumeIo),
@@ -90,12 +90,16 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   rbaStateManager(inputRbaStateManager),
   iBlockAllocator(inputIBlockAllocator),
   flowControl(inputFlowControl),
-  arrayInfo(inputArrayInfo)
+  volumeManager(inputVolumeManager)
 {
     airlog("RequestedUserWrite", "user", GetEventType(), 1);
+    if (nullptr == volumeManager)
+    {
+        volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayId());
+    }
     if (nullptr == flowControl)
     {
-        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(arrayInfo->GetName());
+        flowControl = FlowControlServiceSingleton::Instance()->GetFlowControl(volumeManager->GetArrayName());
     }
 }
 
@@ -213,7 +217,7 @@ void
 WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
-    bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
+    bool isWTEnabled = volumeManager->IsWriteThroughEnabled();
 
     if (false == isWTEnabled)
     {
@@ -382,7 +386,7 @@ WriteSubmission::_ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool is
 void
 WriteSubmission::_AllocateFreeWriteBuffer(void)
 {
-    bool isWTEnabled = arrayInfo->IsWriteThroughEnabled();
+    bool isWTEnabled = volumeManager->IsWriteThroughEnabled();
     int remainBlockCount = blockCount - allocatedBlockCount;
 
     if (!iBlockAllocator->TryRdLock(volumeId))
@@ -406,7 +410,7 @@ WriteSubmission::_AllocateFreeWriteBuffer(void)
             POS_TRACE_DEBUG(eventId, "No free space in write buffer");
 
             IStateControl* stateControl =
-                StateManagerSingleton::Instance()->GetStateControl(arrayInfo->GetName());
+                StateManagerSingleton::Instance()->GetStateControl(volumeManager->GetArrayName());
             if (unlikely(stateControl->GetState()->ToStateType() == StateEnum::STOP))
             {
                 POS_EVENT_ID eventId =
