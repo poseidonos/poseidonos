@@ -682,7 +682,7 @@ message UnmountArrayResponse {
 
 message Array {
 	int32 index = 1;
-	int32 unique_id = 2;
+	int32 uniqueId = 2;
 	string name = 3;
 	string status = 4;
 	string state = 5;

@@ -65,16 +65,16 @@ func TestArrayInfoResHumanReadable(t *testing.T) {
 	var command = "ARRAYINFO"
 	var resJson = `{"command":"ARRAYINFO","rid":"fromCLI",` +
 		`"result":{"status":{"code":0,"description":"DONE"},` +
-		`"data":{"index": 0,"name":"TargetArrayName", ` +
+		`"data":{"index":3,"uniqueId":13241241,"name":"TargetArrayName", ` +
 		`"state":"BUSY","situation":"REBUILDING", "rebuildingProgress":"76", ` +
 		`"capacity":120795955200, "used":107374182400, ` +
 		`"devicelist":[{"type":"BUFFER","name":"uram0"}, ` +
 		`{"type":"DATA","name":"unvme-ns-0"},{"type":"DATA","name":"unvme-ns-1"},` +
 		`{"type":"DATA","name":"unvme-ns-2"},{"type":"SPARE","name":"unvme-ns-3"}]}}}`
 
-	expected := `Name               : TargetArrayName
-Index              : 0
-UniqueID           : 0
+	expected := `Name               :  TargetArrayName
+Index              :  3
+UniqueID           :  13241241
 State              : BUSY
 Situation          : REBUILDING
 CreateDatetime     : 
