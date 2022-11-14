@@ -202,7 +202,9 @@ Poseidonos::Terminate(void)
     IoTimeoutCheckerSingleton::ResetInstance();
 
     air_deactivate();
+    POS_TRACE_INFO(EID(AIR_DEACTIVATE_SUCCEED), "");
     air_finalize();
+    POS_TRACE_INFO(EID(AIR_FINALIZE_SUCCEED), "");
     if (nullptr != telemetryAirDelegator)
     {
         telemetryAirDelegator->SetState(TelemetryAirDelegator::State::END);
@@ -249,9 +251,11 @@ Poseidonos::_InitAIR(void)
             break;
         }
     }
+    POS_TRACE_INFO(EID(AIR_TARGET_CORE), "AIR Target Core: {}", std::to_string(air_target_core).c_str());
     air_initialize(air_target_core);
+    POS_TRACE_INFO(EID(AIR_INITIALIZE_SUCCEED), "");
     air_activate();
-
+    POS_TRACE_INFO(EID(AIR_ACTIVATE_SUCCEED), "");
     if (nullptr == telemtryPublisherForAir)
     {
         telemtryPublisherForAir = new TelemetryPublisher{"air_delegator"};
@@ -262,6 +266,7 @@ Poseidonos::_InitAIR(void)
     {
         telemetryAirDelegator = new TelemetryAirDelegator{telemtryPublisherForAir};
         telemetryAirDelegator->RegisterAirEvent();
+        POS_TRACE_INFO(EID(AIR_REGISTER_EVENT_SUCCEED), "");
     }
 }
 

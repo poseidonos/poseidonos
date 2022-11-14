@@ -7767,6 +7767,54 @@ Root:
     Cause:
     Solution:
 
+  # AIR: 7000 - 7299
+  -
+    Id: 7000
+    Name: AIR_TARGET_CORE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7001
+    Name: AIR_INITIALIZE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7002
+    Name: AIR_ACTIVATE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7003
+    Name: AIR_DEACTIVATE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7004
+    Name: AIR_FINALIZE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7005
+    Name: AIR_REGISTER_EVENT_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # High-Availability Replication: 8000 - 8299
   -
