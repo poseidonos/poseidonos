@@ -424,7 +424,7 @@ ArrayManager::ResetMbr(void)
     }
     arrayList.clear();
     pthread_rwlock_unlock(&arrayListLock);
-    abrManager->ResetMbr();
+    ret = abrManager->ResetMbr();
     return ret;
 }
 

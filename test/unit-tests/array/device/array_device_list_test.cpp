@@ -44,7 +44,7 @@ TEST(ArrayDeviceList, Exists_testWhenDataDevExists)
     ArrayDeviceType actual = arrayDeviceList.Exists("mock-unvme");
     // Then
     EXPECT_EQ(ArrayDeviceType::DATA, actual);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, Exists_testWhenNvmDevExists)
@@ -62,7 +62,7 @@ TEST(ArrayDeviceList, Exists_testWhenNvmDevExists)
     ArrayDeviceType actual = arrayDeviceList.Exists("mock-uram");
     // Then
     EXPECT_EQ(ArrayDeviceType::NVM, actual);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, SetNvm_testWhenArgumentsAreValid)
@@ -79,7 +79,7 @@ TEST(ArrayDeviceList, SetNvm_testWhenArgumentsAreValid)
     // Then
     int SUCCESS = 0;
     EXPECT_EQ(SUCCESS, result);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, SetNvm_testWhenSettingNvmTwice)
@@ -97,7 +97,7 @@ TEST(ArrayDeviceList, SetNvm_testWhenSettingNvmTwice)
     // Then
     int ADD_FAIL = EID(UNABLE_TO_SET_NVM_MORE_THAN_ONE);
     EXPECT_EQ(ADD_FAIL, result);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, SetNvm_testWhenSettingWrongNvm)
@@ -112,6 +112,7 @@ TEST(ArrayDeviceList, SetNvm_testWhenSettingWrongNvm)
     // Then
     int ADD_FAIL = EID(UNABLE_TO_SET_NULL_NVM);
     EXPECT_EQ(ADD_FAIL, result);
+    arrayDeviceList.Clear();
     delete mockDev;
 }
 
@@ -130,7 +131,8 @@ TEST(ArrayDeviceList, SetNvm_testWhenSettingNvmWithDataDevice)
     // Then
     int ADD_FAIL = EID(UNABLE_TO_SET_NVM_ALREADY_OCCUPIED);
     EXPECT_EQ(ADD_FAIL, result);
-    delete mockDev;
+    arrayDeviceList.Clear();
+    fakeUblockSharedPtr = nullptr;
 }
 
 TEST(ArrayDeviceList, AddData_testWhenArgumentsAreValid)
@@ -147,7 +149,7 @@ TEST(ArrayDeviceList, AddData_testWhenArgumentsAreValid)
     // Then
     int SUCCESS = 0;
     EXPECT_EQ(SUCCESS, result);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, AddSpare_testWhenArgumentsAreValid)
@@ -164,7 +166,7 @@ TEST(ArrayDeviceList, AddSpare_testWhenArgumentsAreValid)
     // Then
     int SUCCESS = 0;
     EXPECT_EQ(SUCCESS, result);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, AddSpare_testWhenAddTwice)
@@ -182,7 +184,8 @@ TEST(ArrayDeviceList, AddSpare_testWhenAddTwice)
     // Then
     int ADD_FAIL = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
     EXPECT_EQ(ADD_FAIL, result);
-    delete mockDev;
+    arrayDeviceList.Clear();
+    fakeUblockSharedPtr = nullptr;
 }
 
 TEST(ArrayDeviceList, RemoveSpare_testWhenArgumentsAreValid)
@@ -215,6 +218,7 @@ TEST(ArrayDeviceList, RemoveSpare_testWhenNoSpare)
     // Then
     int REMOVE_FAIL = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
     EXPECT_EQ(REMOVE_FAIL, result);
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, SpareToData_testReplacingBroken)
@@ -237,6 +241,7 @@ TEST(ArrayDeviceList, SpareToData_testReplacingBroken)
     int SUCCESS = 0;
     EXPECT_EQ(SUCCESS, result);
     EXPECT_NE(nullptr, brokenDataDev);
+    arrayDeviceList.Clear();
     delete mockDev;
     delete brokenDataDev;
 }
@@ -257,7 +262,7 @@ TEST(ArrayDeviceList, SpareToData_testIfThereIsNoSpare)
     // Then
     int NOSPARE = EID(NO_SPARE_SSD_TO_REPLACE);
     EXPECT_EQ(NOSPARE, result);
-    delete brokenDataDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, Clear_testWhenArgumentsAreValid)
@@ -292,7 +297,7 @@ TEST(ArrayDeviceList, GetDevs_testWhenThereIsOneDataDevice)
     // Then
     int devNum = devs.data.size();
     EXPECT_EQ(1, devNum);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, ExportNames_testWhenThereIsOneDataDevice)
@@ -310,7 +315,7 @@ TEST(ArrayDeviceList, ExportNames_testWhenThereIsOneDataDevice)
     // Then
     int devNum = devNames.data.size();
     EXPECT_EQ(1, devNum);
-    delete mockDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, ExportNames_testWhenThereIsOneBrokenDataDevice)
@@ -328,7 +333,7 @@ TEST(ArrayDeviceList, ExportNames_testWhenThereIsOneBrokenDataDevice)
     // Then
     int devNum = devNames.data.size();
     EXPECT_EQ(1, devNum);
-    delete mockBrokenDev;
+    arrayDeviceList.Clear();
 }
 
 TEST(ArrayDeviceList, ExportNames_testWhenThereAreManyDevices)
@@ -360,9 +365,7 @@ TEST(ArrayDeviceList, ExportNames_testWhenThereAreManyDevices)
     EXPECT_EQ(1, nvmNum);
     EXPECT_EQ(1, dataNum);
     EXPECT_EQ(1, spareNum);
-    delete mockNvmDev;
-    delete mockDataDev;
-    delete mockSpareDev;
+    arrayDeviceList.Clear();
 }
 
 } // namespace pos

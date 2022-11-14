@@ -220,7 +220,7 @@ TEST(MbrManager, CreateAbr_testWithExistingAbrName)
 
     // Then: creating abr with existing abr name fails
     tempResult = m.CreateAbr(arrayMeta1);
-    ASSERT_EQ(EID(MBR_ABR_ALREADY_EXIST), tempResult);
+    ASSERT_EQ(EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS), tempResult);
 }
 
 TEST(MbrManager, CreateAbr_testWithExistingDevices)

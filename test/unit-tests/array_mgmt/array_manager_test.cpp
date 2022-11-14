@@ -77,43 +77,6 @@ TEST(ArrayManager, ArrayManager_testDestructor)
     // Then
 }
 
-TEST(ArrayManager, Create_testIfFailsToCreateArrayWithExistingName)
-{
-    // Given
-    string existingArray = "array1";
-    auto mockArrayComp = BuildMockArrayComponents(existingArray);
-    auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
-    arrayMgr->SetArrayComponentMap(arrayMap);
-
-    // When
-    int actual = arrayMgr->Create(existingArray, DeviceSet<string>(), "RAID10", "RAID5");
-
-    // Then
-    ASSERT_EQ(EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS), actual);
-}
-
-TEST(ArrayManager, Create_testIfFailsToCreateArrayWhenMaxArrayCntIsReached)
-{
-    // Given
-    NiceMock<MockStateManager> mockStateMgr;
-    map<string, ArrayComponents*> arrayMap;
-    for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
-    {
-        string arrayName = "array" + i;
-        auto mockArrayComp = BuildMockArrayComponents(arrayName);
-        arrayMap.emplace(arrayName, mockArrayComp.get());
-    }
-    ArrayManager* arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr, nullptr);
-    arrayMgr->SetArrayComponentMap(arrayMap);
-
-    // When
-    int actual = arrayMgr->Create("new-array", DeviceSet<string>(), "RAID10", "RAID5");
-
-    // Then
-    ASSERT_EQ(EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS), actual);
-}
-
 TEST(ArrayManager, Create_testIfArrayObjectIsFreedAndArrayMapNotUpdatedWhenCreationFails)
 {
     // Given
@@ -641,7 +604,7 @@ TEST(ArrayManager, ResetMbr_testIfEveryArrayCallsDeleteSuccessfullyAndAbrManager
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     int DELETE_SUCCESS = 0;
-    EXPECT_CALL(*mockArrayComp, Delete).WillOnce(Return(DELETE_SUCCESS));
+    EXPECT_CALL(*mockArrayComp, IsOffline).WillOnce(Return(true));
     int RESET_SUCCESS = 1212;
     EXPECT_CALL(*mockAbrMgr, ResetMbr).WillOnce(Return(RESET_SUCCESS));
 
@@ -667,17 +630,16 @@ TEST(ArrayManager, ResetMbr_testIfSomeArrayDeletionsFailAndAbrManagerDoesntReset
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
-    EXPECT_CALL(*mockArrayComp1Deletable, Delete).WillOnce(Return(0));
-    int DELETE_FAILURE = 1234;
-    EXPECT_CALL(*mockArrayComp2NotDeletable, Delete).WillOnce(Return(DELETE_FAILURE));
+    EXPECT_CALL(*mockArrayComp1Deletable, IsOffline).WillOnce(Return(true));
+    EXPECT_CALL(*mockArrayComp2NotDeletable, IsOffline).WillOnce(Return(false));
     EXPECT_CALL(*mockAbrMgr, ResetMbr).Times(0); // this must not be called because there's one array unable to delete
 
     // When
     int actual = arrayMgr->ResetMbr();
 
     // Then: verify the return value and make sure ResetMbr() is never called
-    ASSERT_EQ(DELETE_FAILURE, actual);
-    ASSERT_EQ(1, arrayMgr->GetArrayComponentMap().size());
+    ASSERT_EQ(EID(MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE), actual);
+    delete mockArrayComp1Deletable;
 }
 
 TEST(ArrayManager, AbrExists_testIfGivenArrayIsFoundOrNotFoundInArrayBootRecord)
