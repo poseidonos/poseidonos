@@ -91,6 +91,7 @@ public:
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual string Serialize(void);
+    virtual bool IsOffline(void);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
