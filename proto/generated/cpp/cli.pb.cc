@@ -1153,7 +1153,7 @@ constexpr Array::Array(
   , metaraid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , dataraid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , index_(0)
-  , unique_id_(0)
+  , uniqueid_(0)
   , capacity_(PROTOBUF_ULONGLONG(0))
   , used_(PROTOBUF_ULONGLONG(0))
   , writethroughenabled_(false){}
@@ -3400,7 +3400,7 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_cli_2eproto::offsets[] PROTOBU
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, index_),
-  PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, unique_id_),
+  PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, uniqueid_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, name_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, status_),
   PROTOBUF_FIELD_OFFSET(::grpc_cli::Array, state_),
@@ -27814,10 +27814,10 @@ const char* Array::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inte
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // int32 unique_id = 2;
+      // int32 uniqueId = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          unique_id_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          uniqueid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -27978,10 +27978,10 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_index(), target);
   }
 
-  // int32 unique_id = 2;
-  if (this->unique_id() != 0) {
+  // int32 uniqueId = 2;
+  if (this->uniqueid() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_unique_id(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_uniqueid(), target);
   }
 
   // string name = 3;
@@ -28210,11 +28210,11 @@ size_t Array::ByteSizeLong() const {
         this->_internal_index());
   }
 
-  // int32 unique_id = 2;
-  if (this->unique_id() != 0) {
+  // int32 uniqueId = 2;
+  if (this->uniqueid() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_unique_id());
+        this->_internal_uniqueid());
   }
 
   // uint64 capacity = 10;
@@ -28301,8 +28301,8 @@ void Array::MergeFrom(const Array& from) {
   if (from.index() != 0) {
     _internal_set_index(from._internal_index());
   }
-  if (from.unique_id() != 0) {
-    _internal_set_unique_id(from._internal_unique_id());
+  if (from.uniqueid() != 0) {
+    _internal_set_uniqueid(from._internal_uniqueid());
   }
   if (from.capacity() != 0) {
     _internal_set_capacity(from._internal_capacity());

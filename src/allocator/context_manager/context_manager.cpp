@@ -42,6 +42,7 @@
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/context_flush_completion.h"
 #include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -143,8 +144,10 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 
     logGroupIdInProgress = logGroupId;
 
+    EventSmartPtr contextFlushCompletion(new ContextFlushCompletion(this,
+     callback, logGroupIdInProgress));
     SegmentInfo* vscSegInfo = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
-    return ioManager->FlushContexts(callback, sync, reinterpret_cast<char*>(vscSegInfo));
+    return ioManager->FlushContexts(contextFlushCompletion, sync, reinterpret_cast<char*>(vscSegInfo));
 }
 
 SegmentId

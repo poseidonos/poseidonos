@@ -18,6 +18,8 @@
 #include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/allocator_file_io_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -590,5 +592,66 @@ TEST(ContextManager, StopRebuilding_TestwithFlushOrwithoutFlush)
     ret = ctxManager.StopRebuilding();
     // then 1.
     EXPECT_EQ(0, ret);
+}
+
+TEST(ContextManager, FlushContexts_testIfCallbackHasNullptr)
+{
+    // given
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
+    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
+    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
+    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
+    NiceMock<MockVersionedSegmentCtx>* vscCtx = new NiceMock<MockVersionedSegmentCtx>();
+    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
+
+    NiceMock<MockTelemetryPublisher> tc;
+
+    NiceMock<MockAllocatorFileIo>* segmentFileIo = new NiceMock<MockAllocatorFileIo>();
+    NiceMock<MockAllocatorFileIo>* allocatorFileIo = new NiceMock<MockAllocatorFileIo>();
+    NiceMock<MockAllocatorFileIo>* rebuildFileIo = new NiceMock<MockAllocatorFileIo>();
+
+    NiceMock<MockEventScheduler> eventScheduler;
+
+    ContextIoManager* ioManager =
+        new ContextIoManager(&addrInfo, &tc, &eventScheduler, segmentFileIo, allocatorFileIo, rebuildFileIo);
+
+    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, vscCtx, gcCtx, blockAllocStatus, ioManager,
+        nullptr, &addrInfo, 0);
+
+    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
+        event->Execute();
+    });
+
+    ON_CALL(*segmentFileIo, Flush)
+        .WillByDefault([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        {
+            completion();
+            return 0;
+        });
+    ON_CALL(*allocatorFileIo, Flush)
+        .WillByDefault([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        {
+            completion();
+            return 0;
+        });
+    ON_CALL(*rebuildFileIo, Flush)
+        .WillByDefault([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        {
+            completion();
+            return 0;
+        });
+
+    // Flush meta data while unmounting volume.
+    // Fluhsed info sholud be cleared after completion.
+    ctxManager.SetAllocateDuplicatedFlush(false);
+    int ret = ctxManager.FlushContexts(nullptr, true);
+    EXPECT_EQ(0, ret);
+
+    // Trigger meta data flush while volume delete sequence after mount it.
+    ret = ctxManager.FlushContexts(nullptr, true);
+    EXPECT_EQ(0, ret);
+
+    delete vscCtx;
 }
 } // namespace pos
