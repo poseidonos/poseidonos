@@ -98,7 +98,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
                     uint64_t miniops = doc["volumes"][i]["miniops"].GetUint64();
                     uint64_t minbw = doc["volumes"][i]["minbw"].GetUint64();
-                    uint32_t nsid = doc["volumes"][i]["nsid"].GetInt();
+                    uint32_t nsid = doc["volumes"][i]["nsid"].GetUint();
                     DataAttribute dataAttribute = ((DataAttribute)doc["volumes"][i]["dataattribute"].GetInt());
                     ReplicationRole volumeRole = ((ReplicationRole)doc["volumes"][i]["role"].GetInt());
 
@@ -155,9 +155,9 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
                 elem.SetAttribute(JsonAttribute("maxbw", std::to_string(vol->GetMaxBW())));
                 elem.SetAttribute(JsonAttribute("miniops", std::to_string(vol->GetMinIOPS())));
                 elem.SetAttribute(JsonAttribute("minbw", std::to_string(vol->GetMinBW())));
-                elem.SetAttribute(JsonAttribute("dataattribute", std::to_string(vol->GetDataAttribute())));
-                elem.SetAttribute(JsonAttribute("role", std::to_string(vol->GetReplicationRole())));
                 elem.SetAttribute(JsonAttribute("nsid", std::to_string(vol->GetNsid())));
+                elem.SetAttribute(JsonAttribute("dataattribute", std::to_string(vol->GetDataAttribute())));
+                elem.SetAttribute(JsonAttribute("role", std::to_string(vol->GetReplicationRole())));                
                 array.AddElement(elem);
             }
         }
