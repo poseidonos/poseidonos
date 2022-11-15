@@ -268,11 +268,12 @@ TEST(Array, Create_testIfErrorIsReturnedWhenArrayNameIsInvalid)
     string BAD_ARRAY_NAME = "This is really bad array name because it contains multiple whitespaces and is too long";
     unsigned int arrayIndex;
     MockArrayDeviceManager* mockArrDevMgr = new MockArrayDeviceManager(NULL, BAD_ARRAY_NAME);
-
+    MockIAbrControl mockAbrControl;
+    EXPECT_CALL(mockAbrControl, CreateAbr).WillOnce(Return(EID(CREATE_ARRAY_NAME_TOO_LONG)));
     EXPECT_CALL(*mockArrDevMgr, ImportByName).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
 
-    Array array(BAD_ARRAY_NAME, NULL, NULL, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
+    Array array(BAD_ARRAY_NAME, NULL, &mockAbrControl, mockArrDevMgr, NULL, NULL, mockState, NULL, NULL, NULL);
 
     // When
     int actual = array.Create(emptyDeviceSet, "RAID10", "RAID5");

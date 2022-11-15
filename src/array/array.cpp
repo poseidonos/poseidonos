@@ -35,7 +35,6 @@
 #include <string>
 #include <sstream>
 
-#include "src/array/array_name_policy.h"
 #include "src/array/interface/i_abr_control.h"
 #include "src/array/rebuild/rebuild_handler.h"
 #include "src/array/service/array_service_layer.h"
@@ -174,18 +173,11 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 
     int ret = 0;
     ArrayMeta meta;
-    ArrayNamePolicy namePolicy;
     UniqueIdGenerator uIdGen;
 
     pthread_rwlock_wrlock(&stateLock);
     ret = devMgr_->ImportByName(nameSet);
     if (ret != 0)
-    {
-        goto error;
-    }
-
-    ret = namePolicy.CheckArrayName(name_);
-    if (ret != EID(SUCCESS))
     {
         goto error;
     }
@@ -948,6 +940,12 @@ Array::Serialize(void)
         ss << str << ", ";
     }
     return ss.str();
+}
+
+bool
+Array::IsOffline(void)
+{
+    return state->IsOffline();
 }
 
 bool
