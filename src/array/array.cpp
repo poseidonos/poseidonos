@@ -550,14 +550,15 @@ Array::Rebuild(void)
 
     // Devices that have been suspended during rebuilding have priority for rebuild
     vector<IArrayDevice*> targets = devMgr_->GetRebuilding();
+    bool isResume = true;
     if (targets.size() == 0)
     {
         targets = devMgr_->GetFaulty();
+        isResume = false;
     }
 
     // Unexpected case handling: spare exists and the state is degraded, but if there is no target
     assert (targets.size() != 0);
-    bool isResume = false;
     bool forceRebuild = true;
     InvokeRebuild(targets, isResume, forceRebuild);
     pthread_rwlock_unlock(&stateLock);
