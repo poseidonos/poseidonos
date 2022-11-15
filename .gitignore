@@ -12,6 +12,7 @@
 *.so*
 *.swp
 *.cmake
+*.result
 **/CMakeFiles/**
 CMakeCache.txt
 test/Testing/
