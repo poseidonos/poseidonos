@@ -399,24 +399,6 @@ ArrayManager::ResetMbr(void)
 {
     pthread_rwlock_wrlock(&arrayListLock);
     int result = 0;
-    bool canReset = true;
-    {
-        for (auto it : arrayList)
-        {
-            if (it.second->IsOffline() == false)
-            {
-                canReset = false;
-                break;
-            }
-        }
-    }
-    if (canReset == false)
-    {
-        result = EID(MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE);
-        POS_TRACE_WARN(result, "");
-        pthread_rwlock_unlock(&arrayListLock);
-        return result;
-    }
     for (auto iter = arrayList.begin(); iter != arrayList.end();)
     {
         ArrayComponents* array = _FindArray(iter->first);

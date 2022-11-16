@@ -604,7 +604,7 @@ TEST(ArrayManager, ResetMbr_testIfEveryArrayCallsDeleteSuccessfullyAndAbrManager
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     int DELETE_SUCCESS = 0;
-    EXPECT_CALL(*mockArrayComp, IsOffline).WillOnce(Return(true));
+    EXPECT_CALL(*mockArrayComp, Delete).WillOnce(Return(DELETE_SUCCESS));
     int RESET_SUCCESS = 1212;
     EXPECT_CALL(*mockAbrMgr, ResetMbr).WillOnce(Return(RESET_SUCCESS));
 
@@ -630,16 +630,17 @@ TEST(ArrayManager, ResetMbr_testIfSomeArrayDeletionsFailAndAbrManagerDoesntReset
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
-    EXPECT_CALL(*mockArrayComp1Deletable, IsOffline).WillOnce(Return(true));
-    EXPECT_CALL(*mockArrayComp2NotDeletable, IsOffline).WillOnce(Return(false));
+    EXPECT_CALL(*mockArrayComp1Deletable, Delete).WillOnce(Return(0));
+    int DELETE_FAILURE = 1234;
+    EXPECT_CALL(*mockArrayComp2NotDeletable, Delete).WillOnce(Return(DELETE_FAILURE));
     EXPECT_CALL(*mockAbrMgr, ResetMbr).Times(0); // this must not be called because there's one array unable to delete
 
     // When
     int actual = arrayMgr->ResetMbr();
 
     // Then: verify the return value and make sure ResetMbr() is never called
-    ASSERT_EQ(EID(MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE), actual);
-    delete mockArrayComp1Deletable;
+    ASSERT_EQ(DELETE_FAILURE, actual);
+    ASSERT_EQ(1, arrayMgr->GetArrayComponentMap().size());
 }
 
 TEST(ArrayManager, AbrExists_testIfGivenArrayIsFoundOrNotFoundInArrayBootRecord)
