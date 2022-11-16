@@ -1254,12 +1254,14 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     SpdkRpcClient rpcClient;
     NvmfTarget target;
 
+    subnqn = (request->param()).nqn();
+    
     if (command == "CREATESUBSYSTEMAUTO")
     {
         if (nullptr != target.FindSubsystem(subnqn))
         {
-            POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), "subnqn:{}", subnqn);
-            _SetEventStatus(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), reply->mutable_result()->mutable_status());
+            POS_TRACE_INFO(EID(SUCCESS), "subnqn:{}", subnqn);
+            _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
             return grpc::Status::OK;
         }
@@ -1287,7 +1289,6 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
             return grpc::Status::OK;
         }
 
-        subnqn = (request->param()).nqn();
         serialNumber = (request->param()).serialnumber();
         modelNumber = (request->param()).modelnumber();
         maxNamespaces = (request->param()).maxnamespaces();
@@ -1305,7 +1306,8 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
 
     if (ret.first != SUCCESS)
     {
-        POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_FAILURE), "subnqn:{}, spdkRpcMsg:{}", subnqn, ret.second);
+        POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_FAILURE), "subnqn:{}, serialNumber:{}, modelNumber:{}, maxNamespaces:{}, allowAnyHost:{}, anaReporting:{}, spdkRpcMsg:{}",
+            subnqn, serialNumber, modelNumber, maxNamespaces,allowAnyHost, anaReporting, ret.second);
         _SetEventStatus(EID(CREATE_SUBSYSTEM_FAILURE), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
