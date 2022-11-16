@@ -1352,9 +1352,9 @@ Root:
     Solution:
   -
     Id: 2322
-    Name: MBR_FORMAT_ERROR
+    Name: MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE
     Severity:
-    Message:
+    Message: Failed to reset MBR since one or more Arrays are mounted.
     Cause:
     Solution:
   -

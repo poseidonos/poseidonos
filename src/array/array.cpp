@@ -35,7 +35,6 @@
 #include <string>
 #include <sstream>
 
-#include "src/array/array_name_policy.h"
 #include "src/array/interface/i_abr_control.h"
 #include "src/array/rebuild/rebuild_handler.h"
 #include "src/array/service/array_service_layer.h"
@@ -174,18 +173,11 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
 
     int ret = 0;
     ArrayMeta meta;
-    ArrayNamePolicy namePolicy;
     UniqueIdGenerator uIdGen;
 
     pthread_rwlock_wrlock(&stateLock);
     ret = devMgr_->ImportByName(nameSet);
     if (ret != 0)
-    {
-        goto error;
-    }
-
-    ret = namePolicy.CheckArrayName(name_);
-    if (ret != EID(SUCCESS))
     {
         goto error;
     }
@@ -558,14 +550,15 @@ Array::Rebuild(void)
 
     // Devices that have been suspended during rebuilding have priority for rebuild
     vector<IArrayDevice*> targets = devMgr_->GetRebuilding();
+    bool isResume = true;
     if (targets.size() == 0)
     {
         targets = devMgr_->GetFaulty();
+        isResume = false;
     }
 
     // Unexpected case handling: spare exists and the state is degraded, but if there is no target
     assert (targets.size() != 0);
-    bool isResume = false;
     bool forceRebuild = true;
     InvokeRebuild(targets, isResume, forceRebuild);
     pthread_rwlock_unlock(&stateLock);
@@ -948,6 +941,12 @@ Array::Serialize(void)
         ss << str << ", ";
     }
     return ss.str();
+}
+
+bool
+Array::IsOffline(void)
+{
+    return state->IsOffline();
 }
 
 bool
