@@ -58,7 +58,8 @@ private:
     {
         if (cbCxt != nullptr)
         {
-            cbCxt->callback(cbCxt);
+            auto callback = cbCxt->GetCallback();
+            callback(cbCxt);
         }
 
         return true;

@@ -130,16 +130,15 @@ RocksDBMetaFsIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* bu
 int
 RocksDBMetaFsIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
-    if (ctx->fileOffset >= size)
+    assert(ctx->IsReadyToUse() == true);
+
+    if (ctx->GetFileOffset() >= size)
     {
         POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR), "RocksDBMetaFsIntf Internal Write failed fd {} , fileOffset : {} , length : {}", fileName, fd, size);
         return ERRID(ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR);
     }
 
-    ctx->ioDoneCheckCallback =
-        std::bind(&RocksDBMetaFsIntf::ReleaseAsyncIoContext, this, std::placeholders::_1);
-
-    if (ctx->opcode == MetaFsIoOpcode::Write)
+    if (ctx->GetOpcode() == MetaFsIoOpcode::Write)
     {
         return _AsyncIOWrite(ctx);
     }
@@ -148,6 +147,12 @@ RocksDBMetaFsIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         return _AsyncIORead(ctx);
     }
     return EID(SUCCESS);
+}
+
+MetaFileIoCbPtr
+RocksDBMetaFsIntf::GetIoDoneCheckFunc(void)
+{
+    return std::bind(&RocksDBMetaFsIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 }
 
 int
@@ -298,15 +303,15 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
     for (uint64_t writtenSize = 0; writtenSize < writeSize; writtenSize += pageSize)
     {
         uint64_t fragmentSize = (writeSize - writtenSize < 4032) ? writeSize - writtenSize : pageSize;
-        std::string fragmentKey = _MakeRocksDbKey(ctx->fd, ctx->fileOffset + writtenSize); // fileoffset + writtenSize == startOffset of fragment
-        std::string fragmentValue(&ctx->buffer[writtenSize], &ctx->buffer[writtenSize + fragmentSize]);
+        std::string fragmentKey = _MakeRocksDbKey(ctx->GetFd(), ctx->GetFileOffset() + writtenSize); // fileoffset + writtenSize == startOffset of fragment
+        std::string fragmentValue(&(ctx->GetBuffer())[writtenSize], &(ctx->GetBuffer())[writtenSize + fragmentSize]);
         writeBatch.Put(fragmentKey, fragmentValue);
     }
 
     rocksdb::Status status = rocksMeta->Write(rocksdb::WriteOptions(), &writeBatch);
     if (status.ok())
     {
-        POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_WRITE_SUCCEED), "RocksDBMetaFsIntf AsyncIO write succeed, fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
+        POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_WRITE_SUCCEED), "RocksDBMetaFsIntf AsyncIO write succeed, fd : {} , offset : {}, size : {}", ctx->GetFd(), ctx->GetFileOffset(), ctx->GetLength());
         MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx, arrayId);
         aioCb->SetCallbackCount(1);
         aioCb->InvokeCallback();
@@ -314,7 +319,7 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
     }
     else
     {
-        POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_WRITE_FAILED), "RocksDBMetaFsIntf::AsyncIO error write failed fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
+        POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_WRITE_FAILED), "RocksDBMetaFsIntf::AsyncIO error write failed fd : {} , offset : {}, size : {}", ctx->GetFd(), ctx->GetFileOffset(), ctx->GetLength());
         return ERRID(ROCKSDB_MFS_ASYNCIO_WRITE_FAILED);
     }
 }
@@ -322,11 +327,11 @@ RocksDBMetaFsIntf::_AsyncIOWrite(AsyncMetaFileIoCtx* ctx)
 int
 RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
 {
-    bool isFullFileIo = (ctx->fileOffset == 0 && ctx->GetLength() == 0);
+    bool isFullFileIo = (ctx->GetFileOffset() == 0 && ctx->GetLength() == 0);
     if (isFullFileIo)
     {
-        std::string keyToStart = _MakeRocksDbKey(ctx->fd, 0);
-        std::string keyToLimit = _MakeRocksDbKey(ctx->fd + 1, 0);
+        std::string keyToStart = _MakeRocksDbKey(ctx->GetFd(), 0);
+        std::string keyToLimit = _MakeRocksDbKey(ctx->GetFd() + 1, 0);
 
         rocksdb::Iterator* it = rocksMeta->NewIterator(rocksdb::ReadOptions());
         uint64_t offset = 0;
@@ -338,16 +343,16 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
             uint64_t currOffset = _GetOffsetFromKey(it->key().ToString());
             if (currOffset != prevOffset && currOffset != offset)
             {
-                POS_TRACE_ERROR(EID(ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE), "RocksDBMetaFsIntf AsyncIO read failed current offset is not equal with expected offset, fd : {}, current offset : {}, expected offset : {}", ctx->fd, currOffset, offset);
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE), "RocksDBMetaFsIntf AsyncIO read failed current offset is not equal with expected offset, fd : {}, current offset : {}, expected offset : {}", ctx->GetFd(), currOffset, offset);
                 assert(false);
             }
             if (offset + valueSize > size)
             {
                 uint64_t bufferOverflowSize = offset + valueSize;
-                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size, fd : {}, current write size : {}, max write size : {} ", fd, bufferOverflowSize, size);
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size, fd : {}, current write size : {}, max write size : {} ", ctx->GetFd(), bufferOverflowSize, size);
                 return -1;
             }
-            memcpy((void*)(ctx->buffer + offset), itValue.c_str(), valueSize);
+            memcpy((void*)(ctx->GetBuffer() + offset), itValue.c_str(), valueSize);
             offset += valueSize;
             prevOffset = currOffset;
         }
@@ -355,26 +360,26 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
         if (it->status().ok())
         {
             MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx, arrayId);
-            POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_SUCCEED), "RocksDBMetaFsIntf AsyncIO fullio read succeed, fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
+            POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_SUCCEED), "RocksDBMetaFsIntf AsyncIO fullio read succeed, fd : {} , offset : {}, size : {}", ctx->GetFd(), ctx->GetFileOffset(), ctx->GetLength());
             aioCb->SetCallbackCount(1);
             aioCb->InvokeCallback();
             return EID(SUCCESS);
         }
         else
         {
-            POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED), "RocksDBMetaFsIntf AsyncIO fullio read failed fd : {} , offset : {}, size : {}", ctx->fd, ctx->fileOffset, ctx->GetLength());
+            POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED), "RocksDBMetaFsIntf AsyncIO fullio read failed fd : {} , offset : {}, size : {}", ctx->GetFd(), ctx->GetFileOffset(), ctx->GetLength());
             return ERRID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED);
         }
     }
     else
     {
         uint64_t readSize = ctx->GetLength();
-        std::string keyToStart = _MakeRocksDbKey(ctx->fd, ctx->fileOffset);
-        std::string keyToLimit = _MakeRocksDbKey(ctx->fd, ctx->fileOffset + readSize);
+        std::string keyToStart = _MakeRocksDbKey(ctx->GetFd(), ctx->GetFileOffset());
+        std::string keyToLimit = _MakeRocksDbKey(ctx->GetFd(), ctx->GetFileOffset() + readSize);
 
         rocksdb::Iterator* it = rocksMeta->NewIterator(rocksdb::ReadOptions());
         uint64_t offset = 0;
-        uint64_t prevOffset = ctx->fileOffset;
+        uint64_t prevOffset = ctx->GetFileOffset();
         it->Seek(keyToStart);
         for (it->Seek(keyToStart); it->Valid() && it->key().ToString() < keyToLimit; it->Next())
         {
@@ -383,28 +388,28 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
             uint64_t currOffset = _GetOffsetFromKey(it->key().ToString());
             if (currOffset != prevOffset && currOffset != offset)
             {
-                POS_TRACE_ERROR(EID(ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE), "RocksDBMetaFsIntf AsyncIO read failed current offset is not equal to expected offset, fd : {}, current offset : {}, expected offset : {}", ctx->fd, currOffset, offset);
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE), "RocksDBMetaFsIntf AsyncIO read failed current offset is not equal to expected offset, fd : {}, current offset : {}, expected offset : {}", ctx->GetFd(), currOffset, offset);
                 assert(false);
             }
             if (offset + valueSize > size)
             {
                 uint64_t bufferOverflowSize = offset + valueSize;
-                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size, fd : {}, current write size : {}, max write size : {} ", fd, bufferOverflowSize, size);
+                POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW), "RocksDBMetaFsIntf AsyncIO read failed try to read offset which is over total size, fd : {}, current write size : {}, max write size : {} ", ctx->GetFd(), bufferOverflowSize, size);
                 return -1;
             }
-            memcpy((void*)(ctx->buffer + offset), itValue.c_str(), valueSize);
+            memcpy((void*)(ctx->GetBuffer() + offset), itValue.c_str(), valueSize);
             offset += valueSize;
             prevOffset = currOffset;
         }
 
         if (offset != readSize)
         {
-            POS_TRACE_ERROR(EID(ROCKSDB_MFS_READ_SIZE_IS_NOT_EQUAL_TO_EXPECTED_READ_SIZE), "RocksDBMetaFsIntf::AsyncIO partial io read failed, expected read size is different with actual read size, fd : {}, current read size : {}, expected read size : {}", ctx->fd, offset, readSize);
+            POS_TRACE_ERROR(EID(ROCKSDB_MFS_READ_SIZE_IS_NOT_EQUAL_TO_EXPECTED_READ_SIZE), "RocksDBMetaFsIntf::AsyncIO partial io read failed, expected read size is different with actual read size, fd : {}, current read size : {}, expected read size : {}", ctx->GetFd(), offset, readSize);
         }
         assert(offset == readSize);
         if (it->status().ok())
         {
-            POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_SUCCEED), "RocksDBMetaFsIntf AsyncIO partial io read succeed , fd : {}, fileoffset : {} ", ctx->fd, ctx->fileOffset);
+            POS_TRACE_DEBUG(EID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_SUCCEED), "RocksDBMetaFsIntf AsyncIO partial io read succeed , fd : {}, fileoffset : {} ", ctx->GetFd(), ctx->GetFileOffset());
             MetaFsAioCbCxt* aioCb = new MetaFsAioCbCxt(ctx, arrayId);
             aioCb->SetCallbackCount(1);
             aioCb->InvokeCallback();
@@ -412,7 +417,7 @@ RocksDBMetaFsIntf::_AsyncIORead(AsyncMetaFileIoCtx* ctx)
         }
         else
         {
-            POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED), "RocksDBMetaFsIntf::AsyncIO partial io read failed , fd : {}, fileoffset : {} ", ctx->fd, ctx->fileOffset);
+            POS_TRACE_ERROR(EID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED), "RocksDBMetaFsIntf::AsyncIO partial io read failed , fd : {}, fileoffset : {} ", ctx->GetFd(), ctx->GetFileOffset());
             return ERRID(ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED);
         }
     }

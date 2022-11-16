@@ -34,22 +34,15 @@
 
 namespace pos
 {
-AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset,
-    uint64_t len, char* buf, MetaIoCbPtr cb)
-: AllocatorIoCtx(op, fdesc, fOffset, len, buf, cb, [](){})
+AllocatorIoCtx::AllocatorIoCtx(AllocatorCtxIoCompletion callback)
+: clientCallback(callback)
 {
 }
 
-AllocatorIoCtx::AllocatorIoCtx(MetaFsIoOpcode op, int fdesc, uint64_t fOffset,
-    uint64_t len, char* buf, MetaIoCbPtr cb, AllocatorCtxIoCompletion clientCallback_)
+AllocatorCtxIoCompletion 
+AllocatorIoCtx::GetAllocatorClientCallback(void)
 {
-    opcode = op;
-    fd = fdesc;
-    fileOffset = fOffset;
-    length = len;
-    buffer = buf;
-    callback = cb;
-    clientCallback = clientCallback_;
+    return clientCallback;
 }
 
 } // namespace pos

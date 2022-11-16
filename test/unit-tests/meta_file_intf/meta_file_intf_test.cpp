@@ -72,6 +72,10 @@ public:
     {
         return 0;
     }
+    MetaFileIoCbPtr GetIoDoneCheckFunc(void)
+    {
+        return [](void* data){ return 0; };
+    }
     int CheckIoDoneStatus(void* data)
     {
         return 0;

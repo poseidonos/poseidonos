@@ -147,7 +147,7 @@ RebuildCtx::BeforeFlush(char* buf)
 void
 RebuildCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
 {
-    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(ctx->buffer);
+    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(ctx->GetBuffer());
     ctxStoredVersion = header->ctxVersion;
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "RebuildCtx file stored, version:{}, segmentCount:{}", header->ctxVersion, header->numTargetSegments);
 }

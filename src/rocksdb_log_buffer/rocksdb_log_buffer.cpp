@@ -250,7 +250,7 @@ int
 RocksDBLogBuffer::WriteLog(LogWriteContext* context)
 {
     int logGroupId = context->GetLogGroupId();
-    uint64_t fileOffset = context->fileOffset;
+    uint64_t fileOffset = context->GetFileOffset();
     std::string key = _MakeRocksDbKey(logGroupId, fileOffset);
     POS_TRACE_DEBUG(static_cast<int>(EID(ROCKSDB_LOG_BUFFER_TRY_WRITE_LOG)),
         "RocksDB Key : {} (logGroupId : {}, fileOffset : {}) , Trying to Write Log (path : {})", key, logGroupId, fileOffset, pathName);
@@ -315,10 +315,10 @@ int
 RocksDBLogBuffer::InternalIo(LogBufferIoContext* context)
 {
     int logGroupId = context->GetLogGroupId();
-    uint64_t fileOffset = context->fileOffset;
+    uint64_t fileOffset = context->GetFileOffset();
     std::string key = _MakeRocksDbKey(logGroupId, fileOffset);
 
-    std::string value(context->buffer, context->length);
+    std::string value(context->GetBuffer(), context->GetLength());
     rocksdb::Status ret = rocksJournal->Put(rocksdb::WriteOptions(), key, value);
     if (ret.ok())
     {

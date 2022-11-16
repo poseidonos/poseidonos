@@ -243,7 +243,7 @@ TEST(JournalLogBuffer, WriteLog_testIfExecutedSuccessfully)
 
     // When
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(1));
-    EXPECT_CALL(context, SetFile);
+    EXPECT_CALL(context, SetFileInfo);
     int retCode = 0;
     EXPECT_CALL(*metaFile, AsyncIO(&context)).WillOnce(Return(retCode));
 
@@ -262,7 +262,7 @@ TEST(JournalLogBuffer, WriteLog_testIfWriteFailed)
 
     // When
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(1));
-    EXPECT_CALL(context, SetFile);
+    EXPECT_CALL(context, SetFileInfo);
     int retCode = -1;
     EXPECT_CALL(*metaFile, AsyncIO(&context)).WillOnce(Return(retCode));
 
@@ -296,9 +296,9 @@ TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
         NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
         resetContextList.push_back(resetRequest);
         EXPECT_CALL(logFactory, CreateLogGroupResetContext(_, id, logGroupSize, _, _)).WillRepeatedly(Return(resetRequest));
-        EXPECT_CALL(*resetRequest, SetInternalCallback);
+        EXPECT_CALL(*resetRequest, SetCallback);
         EXPECT_CALL(*metaFile, GetFd).WillRepeatedly(Return(fd));
-        EXPECT_CALL(*resetRequest, SetFile);
+        EXPECT_CALL(*resetRequest, SetFileInfo);
         EXPECT_CALL(*metaFile, AsyncIO).WillRepeatedly([&](AsyncMetaFileIoCtx* ctx)
             {
                 journalLogBuffer.LogGroupResetCompleted(id);
@@ -339,9 +339,9 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
     NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
     resetContextList.push_back(resetRequest);
     EXPECT_CALL(logFactory, CreateLogGroupResetContext(_, groupId, logGroupSize, _, _)).WillRepeatedly(Return(resetRequest));
-    EXPECT_CALL(*resetRequest, SetInternalCallback);
+    EXPECT_CALL(*resetRequest, SetCallback);
     EXPECT_CALL(*metaFile, GetFd).WillRepeatedly(Return(fd));
-    EXPECT_CALL(*resetRequest, SetFile);
+    EXPECT_CALL(*resetRequest, SetFileInfo);
     EXPECT_CALL(*metaFile, AsyncIO).WillRepeatedly([&](AsyncMetaFileIoCtx* ctx)
         {
             journalLogBuffer.LogGroupResetCompleted(groupId);
@@ -370,9 +370,9 @@ TEST(JournalLogBuffer, InternalIo_testIfExecutedSuccessfully)
     // When
     int fd = 1;
     int retCode = 0;
-    EXPECT_CALL(resetRequest, SetInternalCallback);
+    EXPECT_CALL(resetRequest, SetCallback);
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(fd));
-    EXPECT_CALL(resetRequest, SetFile);
+    EXPECT_CALL(resetRequest, SetFileInfo);
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
 
     int result = journalLogBuffer.InternalIo(&resetRequest);
@@ -392,9 +392,9 @@ TEST(JournalLogBuffer, InternalIo_testIfAsycIoFailed)
     // When
     int fd = 1;
     int retCode = -1;
-    EXPECT_CALL(resetRequest, SetInternalCallback);
+    EXPECT_CALL(resetRequest, SetCallback);
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(fd));
-    EXPECT_CALL(resetRequest, SetFile);
+    EXPECT_CALL(resetRequest, SetFileInfo);
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
 
     int result = journalLogBuffer.InternalIo(&resetRequest);

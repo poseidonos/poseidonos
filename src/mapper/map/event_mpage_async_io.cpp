@@ -63,15 +63,14 @@ EventMpageAsyncIo::Execute(void)
         mpageNum = mapHeader->GetMpageMap()->FindFirstSet(mpageNum);
         char* mpage = map->AllocateMpage(mpageNum);
 
-        MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext();
-        mPageLoadRequest->opcode = MetaFsIoOpcode::Read;
-        mPageLoadRequest->fd = file->GetFd();
-        mPageLoadRequest->fileOffset = mapHeader->GetSize() + (mpageNum * map->GetSize());
-        mPageLoadRequest->length = map->GetSize();
-        mPageLoadRequest->buffer = mpage;
-        mPageLoadRequest->callback = asyncIoReqCB;
-        mPageLoadRequest->startMpage = mpageNum;
-        mPageLoadRequest->numMpages = 1;
+        MapFlushIoContext* mPageLoadRequest = new MapFlushIoContext(mpageNum, 1);
+
+        uint64_t fileOffset = mapHeader->GetSize() + (mpageNum * map->GetSize());
+        uint64_t length = map->GetSize();
+
+        mPageLoadRequest->SetIoInfo(MetaFsIoOpcode::Read, fileOffset, length, mpage);
+        mPageLoadRequest->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
+        mPageLoadRequest->SetCallback(asyncIoReqCB);
 
         if (file->AsyncIO(mPageLoadRequest) < 0) // MFS_FAILED_DUE_TO_ERR
         {

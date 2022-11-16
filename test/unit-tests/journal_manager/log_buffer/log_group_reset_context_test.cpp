@@ -16,9 +16,9 @@ TEST(LogGroupResetContext, SetIoRequest_testIfExecutedSuccessfully)
     logGroupResetContext.SetIoRequest(fileOffset, length, buffer);
 
     // Then
-    EXPECT_EQ(fileOffset, logGroupResetContext.fileOffset);
-    EXPECT_EQ(length, logGroupResetContext.length);
-    EXPECT_EQ(buffer, logGroupResetContext.buffer);
+    EXPECT_EQ(fileOffset, logGroupResetContext.GetFileOffset());
+    EXPECT_EQ(length, logGroupResetContext.GetLength());
+    EXPECT_EQ(buffer, logGroupResetContext.GetBuffer());
 
     delete buffer;
 }

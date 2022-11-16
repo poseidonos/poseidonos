@@ -46,7 +46,7 @@ public:
     explicit LogGroupResetContext(int logGroupId, EventSmartPtr callbackEvent);
     virtual ~LogGroupResetContext(void) = default;
 
-    void SetIoRequest(uint64_t offset, uint64_t len, char* buf);
+    virtual void SetIoRequest(uint64_t offset, uint64_t len, char* buf);
 };
 
 } // namespace pos

@@ -169,13 +169,12 @@ protected:
     AsyncMetaFileIoCtx* CreateRequest(MetaFsIoOpcode opcode, const int arrayId, const FileSizeType startOffset, const FileSizeType byteSize, void* buffer)
     {
         AsyncMetaFileIoCtx* req = new AsyncMetaFileIoCtx();
-        req->opcode = opcode;
-        req->fd = files[arrayId][MetaVolumeType::SsdVolume].fd;
-        req->fileOffset = startOffset;
-        req->length = byteSize;
-        req->buffer = (char*)buffer;
-        req->callback = std::bind(&RocksDbTestMetaFs::DoneCallback,
-            this, std::placeholders::_1);
+        int fd = files[arrayId][MetaVolumeType::SsdVolume].fd;
+        req->SetIoInfo(opcode, startOffset, byteSize, (char*)buffer);
+        req->SetFileInfo(fd, [](void* data){ return 0; });
+        req->SetCallback(std::bind(&RocksDbTestMetaFs::DoneCallback,
+            this, std::placeholders::_1));
+
         return req;
     }
 };

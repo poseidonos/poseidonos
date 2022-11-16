@@ -52,18 +52,18 @@ void TestCallback(AsyncMetaFileIoCtx* ctx)
 TEST(AsyncMetaFileIoCtx, HandleIoComplete_NoDeathEvenIfCallbackIsNullptr)
 {
     AsyncMetaFileIoCtx ctx;
-    ctx.ioDoneCheckCallback = TestHandler;
-    ctx.callback = nullptr;
+    ctx.SetFileInfo(0, TestHandler);
+    ctx.SetCallback(nullptr);
 
     EXPECT_NO_FATAL_FAILURE(ctx.HandleIoComplete(nullptr));
-    EXPECT_EQ(ctx.error, 1);
+    EXPECT_EQ(ctx.GetError(), 1);
 }
 
 TEST(AsyncMetaFileIoCtx, HandleIoComplete_NoDeathEvenIfDonecallbackIsNullptr)
 {
     AsyncMetaFileIoCtx ctx;
-    ctx.ioDoneCheckCallback = nullptr;
-    ctx.callback = TestCallback;
+    ctx.SetFileInfo(0, TestHandler);
+    ctx.SetCallback(nullptr);
 
     EXPECT_NO_FATAL_FAILURE(ctx.HandleIoComplete(nullptr));
 }
@@ -71,8 +71,8 @@ TEST(AsyncMetaFileIoCtx, HandleIoComplete_NoDeathEvenIfDonecallbackIsNullptr)
 TEST(AsyncMetaFileIoCtx, HandleIoComplete_NoDeathEvenIfCallbacksAreNullptr)
 {
     AsyncMetaFileIoCtx ctx;
-    ctx.ioDoneCheckCallback = nullptr;
-    ctx.callback = nullptr;
+    ctx.SetFileInfo(0, nullptr);
+    ctx.SetCallback(nullptr);
 
     EXPECT_NO_FATAL_FAILURE(ctx.HandleIoComplete(nullptr));
 }
@@ -84,15 +84,6 @@ TEST(AsyncMetaFileIoCtx, GetError_testIfTheMethodCanReturnError)
     ctx.error = error;
 
     EXPECT_EQ(ctx.GetError(), error);
-}
-
-TEST(AsyncMetaFileIoCtx, GetLength_testIfTheMethodCanReturnTheLength)
-{
-    const uint64_t length = 20;
-    AsyncMetaFileIoCtx ctx;
-    ctx.length = length;
-
-    EXPECT_EQ(ctx.GetLength(), length);
 }
 
 void TestFunction(pos::AsyncMetaFileIoCtx* ctx)
@@ -112,15 +103,11 @@ TEST(AsyncMetaFileIoCtx, ToString_testIfTheMethodReturnsInternalFieldAsStringCor
     const uint32_t expectedVsid = 2;
 
     AsyncMetaFileIoCtx ctx;
-    ctx.opcode = MetaFsIoOpcode::Read;
-    ctx.fd = expectedFd;
-    ctx.fileOffset = expectedFileOffset;
-    ctx.length = expectedLength;
-    ctx.buffer = &expectedBuffer;
-    ctx.callback = expectedMetaIoCb;
+    ctx.SetIoInfo(MetaFsIoOpcode::Read, expectedFileOffset, expectedLength, &expectedBuffer);
+    ctx.SetFileInfo(expectedFd, expectedFileIoCb);
+    ctx.SetCallback(expectedMetaIoCb);
+
     ctx.error = expectedError;
-    ctx.ioDoneCheckCallback = expectedFileIoCb;
-    ctx.vsid = expectedVsid;
 
     // opcode:1, fd:1, fileOffset:11, length:10, buffer:0x7ffe9b99fe8f, callback:not nullptr, error:3, ioDoneCheckCallback:nullptr, vsid:2
     std::string expectedStr;
@@ -132,8 +119,7 @@ TEST(AsyncMetaFileIoCtx, ToString_testIfTheMethodReturnsInternalFieldAsStringCor
     expectedStr = expectedStr.append("callback:").append((expectedMetaIoCb == nullptr) ? "nullptr" : "not nullptr").append(", ");
     expectedStr = expectedStr.append("error:").append(std::to_string((int)expectedError)).append(", ");
     expectedStr = expectedStr.append("ioDoneCheckCallback:").append((expectedFileIoCb == nullptr) ? "nullptr" : "not nullptr").append(", ");
-    expectedStr = expectedStr.append("vsid:").append(std::to_string((int)expectedVsid));
 
-    EXPECT_FALSE(ctx.ToString().compare(expectedStr));
+    EXPECT_EQ(ctx.ToString(), expectedStr);
 }
 } // namespace pos

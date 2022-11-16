@@ -88,7 +88,7 @@ TEST(RebuildCtx, FinalizeIo_TestSimpleSetter)
     RebuildCtx rebuildCtx(nullptr, nullptr);
     AsyncMetaFileIoCtx ctx;
     char buf[100];
-    ctx.buffer = buf;
+    ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), buf);
     // when
     rebuildCtx.FinalizeIo(&ctx);
 }

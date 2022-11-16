@@ -119,7 +119,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 {
     uint64_t allocatedOffset = 0;
 
-    int result = bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
+    int result = bufferAllocator->AllocateBuffer(context->GetLogSize(), allocatedOffset);
 
     if (EID(SUCCESS) == result)
     {
@@ -128,7 +128,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
 
         context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
-        context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
+        context->SetCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
 
         EventSmartPtr metaUpdateEvent = context->GetClientCallback();
         MetaUpdateCallback* metaUpdateCb = dynamic_cast<MetaUpdateCallback*>(metaUpdateEvent.get());

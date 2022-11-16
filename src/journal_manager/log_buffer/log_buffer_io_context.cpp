@@ -43,18 +43,6 @@ LogBufferIoContext::LogBufferIoContext(int logGroupId, EventSmartPtr clientCallb
 }
 
 void
-LogBufferIoContext::SetInternalCallback(MetaIoCbPtr cb)
-{
-    this->callback = cb;
-}
-
-void
-LogBufferIoContext::SetFile(int fileDesc)
-{
-    this->fd = fileDesc;
-}
-
-void
 LogBufferIoContext::IoDone(void)
 {
     bool executionSuccessful = clientCallback->Execute();

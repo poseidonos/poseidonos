@@ -72,11 +72,11 @@ TEST(ReverseMapIo, Load_testLoadSinglePage)
     int ret = reverseMapIo->Load();
     EXPECT_EQ(ret, 0);
 
-    EXPECT_THAT(req->opcode, MetaFsIoOpcode::Read);
-    EXPECT_THAT(req->fd, fd);
-    EXPECT_THAT(req->fileOffset, offset);
-    EXPECT_THAT(req->length, length);
-    EXPECT_THAT(req->mpageNum, 0);
+    EXPECT_THAT(req->GetOpcode(), MetaFsIoOpcode::Read);
+    EXPECT_THAT(req->GetFd(), fd);
+    EXPECT_THAT(req->GetFileOffset(), offset);
+    EXPECT_THAT(req->GetLength(), length);
+    EXPECT_THAT(req->GetMpageNum(), 0);
 
     EXPECT_EQ(reverseMapIo->GetNumIssuedIoCnt(), 1);
 
@@ -113,17 +113,17 @@ TEST(ReverseMapIo, Load_testLoadRevmapPages)
     int ret = reverseMapIo->Load();
     EXPECT_EQ(ret, 0);
 
-    EXPECT_THAT(req1->opcode, MetaFsIoOpcode::Read);
-    EXPECT_THAT(req1->fd, fd);
-    EXPECT_THAT(req1->fileOffset, offset);
-    EXPECT_THAT(req1->length, length);
-    EXPECT_THAT(req1->mpageNum, 0);
+    EXPECT_THAT(req1->GetOpcode(), MetaFsIoOpcode::Read);
+    EXPECT_THAT(req1->GetFd(), fd);
+    EXPECT_THAT(req1->GetFileOffset(), offset);
+    EXPECT_THAT(req1->GetLength(), length);
+    EXPECT_THAT(req1->GetMpageNum(), 0);
 
-    EXPECT_THAT(req2->opcode, MetaFsIoOpcode::Read);
-    EXPECT_THAT(req2->fd, fd);
-    EXPECT_THAT(req2->fileOffset, offset + length);
-    EXPECT_THAT(req2->length, length);
-    EXPECT_THAT(req2->mpageNum, 1);
+    EXPECT_THAT(req2->GetOpcode(), MetaFsIoOpcode::Read);
+    EXPECT_THAT(req2->GetFd(), fd);
+    EXPECT_THAT(req2->GetFileOffset(), offset + length);
+    EXPECT_THAT(req2->GetLength(), length);
+    EXPECT_THAT(req2->GetMpageNum(), 1);
 
     EXPECT_EQ(reverseMapIo->GetNumIssuedIoCnt(), 2);
 
@@ -158,11 +158,11 @@ TEST(ReverseMapIo, Flush_testFlushSinglePage)
     int ret = reverseMapIo->Flush();
     EXPECT_EQ(ret, 0);
 
-    EXPECT_THAT(req->opcode, MetaFsIoOpcode::Write);
-    EXPECT_THAT(req->fd, fd);
-    EXPECT_THAT(req->fileOffset, offset);
-    EXPECT_THAT(req->length, length);
-    EXPECT_THAT(req->mpageNum, 0);
+    EXPECT_THAT(req->GetOpcode(), MetaFsIoOpcode::Write);
+    EXPECT_THAT(req->GetFd(), fd);
+    EXPECT_THAT(req->GetFileOffset(), offset);
+    EXPECT_THAT(req->GetLength(), length);
+    EXPECT_THAT(req->GetMpageNum(), 0);
 
     EXPECT_EQ(reverseMapIo->GetNumIssuedIoCnt(), 1);
 
@@ -199,17 +199,17 @@ TEST(ReverseMapIo, Flush_testLoadRevmapPages)
     int ret = reverseMapIo->Flush();
     EXPECT_EQ(ret, 0);
 
-    EXPECT_THAT(req1->opcode, MetaFsIoOpcode::Write);
-    EXPECT_THAT(req1->fd, fd);
-    EXPECT_THAT(req1->fileOffset, offset);
-    EXPECT_THAT(req1->length, length);
-    EXPECT_THAT(req1->mpageNum, 0);
+    EXPECT_THAT(req1->GetOpcode(), MetaFsIoOpcode::Write);
+    EXPECT_THAT(req1->GetFd(), fd);
+    EXPECT_THAT(req1->GetFileOffset(), offset);
+    EXPECT_THAT(req1->GetLength(), length);
+    EXPECT_THAT(req1->GetMpageNum(), 0);
 
-    EXPECT_THAT(req2->opcode, MetaFsIoOpcode::Write);
-    EXPECT_THAT(req2->fd, fd);
-    EXPECT_THAT(req2->fileOffset, offset + length);
-    EXPECT_THAT(req2->length, length);
-    EXPECT_THAT(req2->mpageNum, 1);
+    EXPECT_THAT(req2->GetOpcode(), MetaFsIoOpcode::Write);
+    EXPECT_THAT(req2->GetFd(), fd);
+    EXPECT_THAT(req2->GetFileOffset(), offset + length);
+    EXPECT_THAT(req2->GetLength(), length);
+    EXPECT_THAT(req2->GetMpageNum(), 1);
 
     EXPECT_EQ(reverseMapIo->GetNumIssuedIoCnt(), 2);
 
@@ -242,7 +242,7 @@ TEST(ReverseMapIo, _RevMapPageIoDone_testIfFlushCompletedSuccessfully)
     ON_CALL(file, GetFd).WillByDefault(Return(fd));
 
     EXPECT_CALL(file, AsyncIO).WillRepeatedly([&](AsyncMetaFileIoCtx* ctx) {
-        ctx->callback(ctx);
+        (ctx->GetCallback())(ctx);
         return 0;
     });
 
@@ -277,7 +277,7 @@ TEST(ReverseMapIo, _RevMapPageIoDone_testIfLoadCompletedSuccessfully)
     ON_CALL(file, GetFd).WillByDefault(Return(fd));
 
     EXPECT_CALL(file, AsyncIO).WillRepeatedly([&](AsyncMetaFileIoCtx* ctx) {
-        ctx->callback(ctx);
+        (ctx->GetCallback())(ctx);
         return 0;
     });
 
