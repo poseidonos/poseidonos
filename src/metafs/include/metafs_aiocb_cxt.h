@@ -76,12 +76,12 @@ public:
     }
 
     MetaFsAioCbCxt(AsyncMetaFileIoCtx* ctx, int arrayId)
-    : opcode(ctx->opcode),
-      fd(ctx->fd),
+    : opcode(ctx->GetOpcode()),
+      fd(ctx->GetFd()),
       arrayId(arrayId),
-      soffset(ctx->fileOffset),
-      nbytes(ctx->length),
-      buf((void*)ctx->buffer),
+      soffset(ctx->GetFileOffset()),
+      nbytes(ctx->GetLength()),
+      buf((void*)ctx->GetBuffer()),
       callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
       rc(EID(SUCCESS)),
       tagId(0)

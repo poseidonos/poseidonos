@@ -154,11 +154,15 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
     // When
     auto createdContexts = factory.CreateGcBlockMapLogWriteContexts(mapUpdates, nullptr);
 
+    auto context = createdContexts.front();
+    // AsyncMetaIoContext is updated when log buffer offset allocated    
+    context->SetBufferAllocated(0, 0, 0); 
+
     // Then
     EXPECT_EQ(createdContexts.size(), 1);
     EXPECT_TRUE(createdContexts.front()->GetLength() < MAX_LOG_SIZE);
 
-    GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(createdContexts.front()->buffer);
+    GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(createdContexts.front()->GetBuffer());
     EXPECT_EQ(log.volId, mapUpdates.volumeId);
     EXPECT_EQ(log.vsid, mapUpdates.vsid);
     EXPECT_EQ(log.numBlockMaps, numBlocks);
@@ -171,7 +175,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
                 .stripeId = 1023,
                 .offset = index}};
         GcBlockMapUpdate actual = *reinterpret_cast<GcBlockMapUpdate*>
-            (createdContexts.front()->buffer + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
+            (createdContexts.front()->GetBuffer() + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
 
         EXPECT_EQ(expected.rba, actual.rba);
         EXPECT_EQ(expected.vsa, actual.vsa);
@@ -211,9 +215,12 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
     uint64_t numBlockMaps = 0;
     for (auto context : createdContexts)
     {
+        // AsyncMetaIoContext is updated when log buffer offset allocated
+        context->SetBufferAllocated(0, 0, 0);
+
         EXPECT_TRUE(context->GetLength() < MAX_LOG_SIZE);
 
-        GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(context->buffer);
+        GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(context->GetBuffer());
         EXPECT_EQ(log.volId, mapUpdates.volumeId);
         EXPECT_EQ(log.vsid, mapUpdates.vsid);
 
@@ -225,7 +232,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
                     .stripeId = 1023,
                     .offset = numBlockMaps + index}};
             GcBlockMapUpdate actual = *reinterpret_cast<GcBlockMapUpdate*>
-                (context->buffer + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
+                (context->GetBuffer() + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
 
             EXPECT_EQ(expected.rba, actual.rba);
             EXPECT_EQ(expected.vsa, actual.vsa);
@@ -314,8 +321,8 @@ TEST(LogWriteContextFactory, CreateLogGroupResetContext_testIfExecutedSuccessful
     // Then
     EXPECT_EQ(logGroupId, logWriteContext->GetLogGroupId());
     EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(offset, logWriteContext->fileOffset);
+    EXPECT_EQ(offset, logWriteContext->GetFileOffset());
     EXPECT_EQ(groupSize, logWriteContext->GetLength());
-    EXPECT_EQ(initializedDataBuffer, logWriteContext->buffer);
+    EXPECT_EQ(initializedDataBuffer, logWriteContext->GetBuffer());
 }
 } // namespace pos

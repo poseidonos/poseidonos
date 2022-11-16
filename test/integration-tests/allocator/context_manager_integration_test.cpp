@@ -366,8 +366,9 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
 
     // Expects flushing allocator contexts to wait for rebuild context flush done
     AsyncMetaFileIoCtx* allocCtxFlush = new AsyncMetaFileIoCtx();
-    allocCtxFlush->buffer = (char*)(new CtxHeader());
-    ((CtxHeader*)(allocCtxFlush->buffer))->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    auto allocCtxHeader = new CtxHeader();
+    allocCtxHeader->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    allocCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, 0, (char*)allocCtxHeader);
     EXPECT_CALL(*allocatorCtxIo, Flush)
         .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
@@ -385,8 +386,9 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
             return 0;
         });
     AsyncMetaFileIoCtx* segCtxFlush = new AsyncMetaFileIoCtx();
-    segCtxFlush->buffer = (char*)(new CtxHeader());
-    ((CtxHeader*)(segCtxFlush->buffer))->sig = SegmentCtx::SIG_SEGMENT_CTX;
+    auto segCtxHeader = new CtxHeader();
+    segCtxHeader->sig = SegmentCtx::SIG_SEGMENT_CTX;
+    segCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)segCtxHeader);
     EXPECT_CALL(*segmentCtxIo, Flush)
         .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
@@ -410,8 +412,9 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
     // Test set-up for testing FlushRebuildContext
     // Expects flushing segment context to be completed right away
     AsyncMetaFileIoCtx* rebuildCtxFlush = new AsyncMetaFileIoCtx();
-    rebuildCtxFlush->buffer = (char*)(new CtxHeader());
-    ((CtxHeader*)(rebuildCtxFlush->buffer))->sig = RebuildCtx::SIG_REBUILD_CTX;
+    auto rebuildCtxHeader = new CtxHeader();
+    rebuildCtxHeader->sig = RebuildCtx::SIG_REBUILD_CTX;
+    rebuildCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)rebuildCtxHeader);
     EXPECT_CALL(*rebuildCtxIo, Flush)
         .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {

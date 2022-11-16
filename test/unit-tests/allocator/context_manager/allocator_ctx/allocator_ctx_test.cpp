@@ -154,7 +154,7 @@ TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
     buf->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     buf->ctxVersion = 12;
     AsyncMetaFileIoCtx ctx;
-    ctx.buffer = (char*)buf;
+    ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), (char*)buf);
 
     // when
     allocCtx.FinalizeIo(&ctx);

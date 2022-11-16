@@ -56,9 +56,6 @@ LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbac
   logFilledNotifier(notifier),
   log(log)
 {
-    this->opcode = MetaFsIoOpcode::Write;
-    this->length = log->GetSize();
-    this->buffer = log->GetData();
 }
 
 LogWriteContext::~LogWriteContext(void)
@@ -78,10 +75,16 @@ LogWriteContext::GetLogGroupId(void)
     return logGroupId;
 }
 
+uint64_t
+LogWriteContext::GetLogSize(void)
+{
+    return log->GetSize();
+}
+
 void
 LogWriteContext::SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum)
 {
-    this->fileOffset = offset;
+    this->SetIoInfo(MetaFsIoOpcode::Write, offset, log->GetSize(), log->GetData());
     this->logGroupId = groupId;
 
     log->SetSeqNum(seqNum);

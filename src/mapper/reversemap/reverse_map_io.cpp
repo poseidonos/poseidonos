@@ -40,15 +40,10 @@ ReverseMapIo::Load(void)
     totalIoCnt = revMapPages.size();
     for (auto& page : revMapPages)
     {
-        RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = new RevMapPageAsyncIoCtx();
-        revMapPageAsyncIoReq->opcode = MetaFsIoOpcode::Read;
-        revMapPageAsyncIoReq->fd = revMapFile->GetFd();
-        revMapPageAsyncIoReq->fileOffset = offset;
-        revMapPageAsyncIoReq->length = page.length;
-        revMapPageAsyncIoReq->buffer = page.buffer;
-        revMapPageAsyncIoReq->callback = std::bind(&ReverseMapIo::_RevMapPageIoDone, this, std::placeholders::_1);
-        revMapPageAsyncIoReq->mpageNum = pageNum++;
-        revMapPageAsyncIoReq->vsid = revMapPack->GetVsid();
+        RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = new RevMapPageAsyncIoCtx(pageNum++, revMapPack->GetVsid());
+        revMapPageAsyncIoReq->SetIoInfo(MetaFsIoOpcode::Read, offset, page.length, page.buffer);
+        revMapPageAsyncIoReq->SetFileInfo(revMapFile->GetFd(), revMapFile->GetIoDoneCheckFunc());
+        revMapPageAsyncIoReq->SetCallback(std::bind(&ReverseMapIo::_RevMapPageIoDone, this, std::placeholders::_1));
 
         int ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
@@ -87,16 +82,11 @@ ReverseMapIo::Flush(void)
 
     for (auto& page : revMapPages)
     {
-        RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = new RevMapPageAsyncIoCtx();
-        revMapPageAsyncIoReq->opcode = MetaFsIoOpcode::Write;
-        revMapPageAsyncIoReq->fd = revMapFile->GetFd();
-        revMapPageAsyncIoReq->fileOffset = offset;
-        revMapPageAsyncIoReq->length = page.length;
-        revMapPageAsyncIoReq->buffer = page.buffer;
-        revMapPageAsyncIoReq->callback = std::bind(&ReverseMapIo::_RevMapPageIoDone,
-            this, std::placeholders::_1);
-        revMapPageAsyncIoReq->mpageNum = pageNum++;
-        revMapPageAsyncIoReq->vsid = revMapPack->GetVsid();
+        RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = new RevMapPageAsyncIoCtx(pageNum++, revMapPack->GetVsid());
+        revMapPageAsyncIoReq->SetIoInfo(MetaFsIoOpcode::Write, offset, page.length, page.buffer);
+        revMapPageAsyncIoReq->SetFileInfo(revMapFile->GetFd(), revMapFile->GetIoDoneCheckFunc());
+        revMapPageAsyncIoReq->SetCallback(std::bind(&ReverseMapIo::_RevMapPageIoDone,
+            this, std::placeholders::_1));
 
         int ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
@@ -132,7 +122,7 @@ ReverseMapIo::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     {
         ioError = revMapPageAsyncIoReq->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
-            "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->mpageNum);
+            "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->GetMpageNum());
     }
 
     if (telemetryPublisher)
@@ -144,7 +134,7 @@ ReverseMapIo::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
 
     uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
 
-    if ((ioDirection == IO_LOAD) && (revMapPageAsyncIoReq->mpageNum == 0))
+    if ((ioDirection == IO_LOAD) && (revMapPageAsyncIoReq->GetMpageNum() == 0))
     {
         int ret = revMapPack->HeaderLoaded();
         if (ret < 0)
@@ -182,6 +172,18 @@ ReverseMapIo::WaitPendingIoDone(void)
     {
         usleep(1);
     }
+}
+
+RevMapPageAsyncIoCtx::RevMapPageAsyncIoCtx(int num, StripeId vsid_)
+: mpageNum(num),
+  vsid(vsid_)
+{
+}
+
+int
+RevMapPageAsyncIoCtx::GetMpageNum(void) const
+{
+    return mpageNum;
 }
 
 } // namespace pos

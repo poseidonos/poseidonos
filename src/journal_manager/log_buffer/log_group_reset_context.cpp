@@ -39,15 +39,12 @@ namespace pos
 LogGroupResetContext::LogGroupResetContext(int id, EventSmartPtr callbackEvent)
 : LogBufferIoContext(id, callbackEvent)
 {
-    this->opcode = MetaFsIoOpcode::Write;
 }
 
 void
 LogGroupResetContext::SetIoRequest(uint64_t offset, uint64_t len, char* buf)
 {
-    this->fileOffset = offset;
-    this->length = len;
-    this->buffer = buf;
+    this->SetIoInfo(MetaFsIoOpcode::Write, offset, len, buf);
 }
 
 } // namespace pos

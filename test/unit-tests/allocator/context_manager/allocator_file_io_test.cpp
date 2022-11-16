@@ -181,6 +181,7 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
         EXPECT_CALL(client, GetSectionSize(sectionId)).WillOnce(Return(100));
     }
 
+    EXPECT_CALL(*file, GetIoDoneCheckFunc).WillOnce(Return([](void* ctx) { return 0; }));
     fileManager.Init();
 
     EXPECT_CALL(*file, AsyncIO)
@@ -192,15 +193,14 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
             CtxHeader header = {
                 .sig = 0xAFAFAFAF,
                 .ctxVersion = 0 };
-            memcpy(ctx->buffer, &header, sizeof(header));
+            memcpy(ctx->GetBuffer(), &header, sizeof(header));
 
-            char* ptr = ctx->buffer + sizeof(header);
+            char* ptr = ctx->GetBuffer() + sizeof(header);
             for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
             {
                 memset(ptr + 100 * (sectionId - 1), 'a' + sectionId, 100);
             }
 
-            ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
 
             return 0;
@@ -262,22 +262,22 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
     EXPECT_CALL(client, FinalizeIo);
     EXPECT_CALL(client, BeforeFlush).Times(1);
 
+    EXPECT_CALL(*file, GetIoDoneCheckFunc).WillOnce(Return([](void* ctx) { return 0; }));
     EXPECT_CALL(*file, AsyncIO)
         .WillOnce([&](AsyncMetaFileIoCtx* ctx)
         {
             EXPECT_EQ(fileManager.GetNumFilesFlushing(), 1);
 
-            EXPECT_EQ(((CtxHeader*)ctx->buffer)->sig, 0xAFAFAFAF);
-            EXPECT_EQ(((CtxHeader*)ctx->buffer)->ctxVersion, 0);
+            EXPECT_EQ(((CtxHeader*)ctx->GetBuffer())->sig, 0xAFAFAFAF);
+            EXPECT_EQ(((CtxHeader*)ctx->GetBuffer())->ctxVersion, 0);
 
-            char* ptr = ctx->buffer + sizeof(CtxHeader);
+            char* ptr = ctx->GetBuffer() + sizeof(CtxHeader);
             for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
             {
                 EXPECT_EQ(*ptr, 'a' + sectionId);
                 ptr += 100;
             }
 
-            ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
 
             return 0;

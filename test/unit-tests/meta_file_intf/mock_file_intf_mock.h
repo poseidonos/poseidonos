@@ -31,11 +31,9 @@
  */
 
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/meta_file_intf/mock_file_intf.h"
 
 namespace pos
@@ -48,7 +46,8 @@ public:
     MOCK_METHOD(bool, DoesFileExist, (), (override));
     MOCK_METHOD(int, Delete, (), (override));
     MOCK_METHOD(uint64_t, GetFileSize, (), (override));
-    MOCK_METHOD(int, AsyncIO, (AsyncMetaFileIoCtx * ctx), (override));
+    MOCK_METHOD(int, AsyncIO, (AsyncMetaFileIoCtx* ctx), (override));
+    MOCK_METHOD(MetaFileIoCbPtr, GetIoDoneCheckFunc, (), (override));
     MOCK_METHOD(int, CheckIoDoneStatus, (void* data), (override));
     MOCK_METHOD(int, Open, (), (override));
     MOCK_METHOD(int, Close, (), (override));

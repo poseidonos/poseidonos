@@ -90,7 +90,7 @@ RocksDBLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 
     LogWriteContext* context =
         factory.CreateBlockMapLogWriteContext(volumeIo, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+    context->SetCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
     return context;
 }
@@ -107,7 +107,7 @@ RocksDBLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
 
     LogWriteContext* context =
         factory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+    context->SetCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
     return context;
 }
@@ -134,7 +134,7 @@ RocksDBLogBufferIntegrationTest::_CreateContextForGcBlockWriteDoneLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcBlockMapLogWriteContext(mapUpdates, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+    context->SetCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
     return context;
 }
@@ -161,7 +161,7 @@ RocksDBLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
+    context->SetCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
     return context;
 }

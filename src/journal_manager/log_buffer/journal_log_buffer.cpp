@@ -213,13 +213,12 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     }
 
     AsyncMetaFileIoCtx* logBufferReadReq = new AsyncMetaFileIoCtx();
-    logBufferReadReq->opcode = MetaFsIoOpcode::Read;
-    logBufferReadReq->fd = logFile->GetFd();
-    logBufferReadReq->fileOffset = _GetFileOffset(groupId, 0);
-    logBufferReadReq->length = groupSize;
-    logBufferReadReq->buffer = (char*)buffer;
-    logBufferReadReq->callback = std::bind(&JournalLogBuffer::_LogBufferReadDone,
-        this, std::placeholders::_1);
+    uint64_t fileOffset = _GetFileOffset(groupId, 0);
+    auto callback = std::bind(&JournalLogBuffer::_LogBufferReadDone, this, std::placeholders::_1);
+
+    logBufferReadReq->SetIoInfo(MetaFsIoOpcode::Read, fileOffset, groupSize, (char*)buffer);
+    logBufferReadReq->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+    logBufferReadReq->SetCallback(callback);
 
     logBufferReadDone = false;
     int ret = logFile->AsyncIO(logBufferReadReq);
@@ -256,7 +255,8 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 int
 JournalLogBuffer::WriteLog(LogWriteContext* context)
 {
-    context->SetFile(logFile->GetFd());
+    context->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+
     int ret = logFile->AsyncIO(context);
 
     if (ret != 0)
@@ -320,9 +320,8 @@ JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 int
 JournalLogBuffer::InternalIo(LogBufferIoContext* context)
 {
-    MetaIoCbPtr callbackFunc = std::bind(&JournalLogBuffer::InternalIoDone, this, std::placeholders::_1);
-    context->SetInternalCallback(callbackFunc);
-    context->SetFile(logFile->GetFd());
+    context->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+    context->SetCallback(std::bind(&JournalLogBuffer::InternalIoDone, this, std::placeholders::_1));
 
     int ret = logFile->AsyncIO(context);
     if (ret != 0)

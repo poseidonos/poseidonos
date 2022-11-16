@@ -20,26 +20,6 @@ TEST(LogBufferIoContext, LogBufferIoContext_testIfConstructedSuccessfully)
     EXPECT_EQ(logGroupId, logBufferIoContext.GetLogGroupId());
 }
 
-TEST(LogBufferIoContext, SetInternalCallback_testIfExecutedSuccessfully)
-{
-    // Given
-    LogBufferIoContext logBufferIoContext(0, nullptr);
-    MetaIoCbPtr callback;
-
-    // When, Then
-    logBufferIoContext.SetInternalCallback(callback);
-}
-
-TEST(LogBufferIoContext, SetFile_testIfExecutedSuccessfully)
-{
-    // Given
-    LogBufferIoContext logBufferIoContext(0, nullptr);
-    int fileDescriptor = 0;
-
-    // When, Then
-    logBufferIoContext.SetFile(fileDescriptor);
-}
-
 TEST(LogBufferIoContext, IoDone_testIfExecutedSuccessfully)
 {
     // Given

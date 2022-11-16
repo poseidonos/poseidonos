@@ -175,6 +175,9 @@ TEST_F(MetaFsFileIntfFixture, IssueAsyncIO)
     EXPECT_CALL(*io, SubmitIO).WillRepeatedly(Return(EID(SUCCESS)));
 
     AsyncMetaFileIoCtx ctx;
+    ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, 0, nullptr);
+    ctx.SetFileInfo(0, nullptr);
+    ctx.SetCallback([](AsyncMetaFileIoCtx* ctx){});
 
     EXPECT_EQ(metaFile->AsyncIO(&ctx), 0);
 }

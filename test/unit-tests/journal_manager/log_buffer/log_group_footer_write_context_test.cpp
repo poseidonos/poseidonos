@@ -23,9 +23,9 @@ TEST(LogGroupFooterWriteContext, SetIoRequest_testIfContextUpdatedCorrectly)
     context.SetIoRequest(offset, footer);
 
     // Then
-    EXPECT_EQ(context.length, sizeof(LogGroupFooter));
-    EXPECT_EQ(context.fileOffset, offset);
-    EXPECT_EQ(std::memcmp((void*)context.buffer, (void*)(&footer), sizeof(LogGroupFooter)), 0);
+    EXPECT_EQ(context.GetLength(), sizeof(LogGroupFooter));
+    EXPECT_EQ(context.GetFileOffset(), offset);
+    EXPECT_EQ(std::memcmp((void*)context.GetBuffer(), (void*)(&footer), sizeof(LogGroupFooter)), 0);
 }
 
 } // namespace pos

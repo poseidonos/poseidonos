@@ -53,11 +53,25 @@ public:
 // LCOV_EXCL_STOP
 
     virtual void HandleIoComplete(void* data);
+    virtual char* GetBuffer(void);
+    virtual MetaIoCbPtr GetCallback(void);
     virtual int GetError(void) const;
     virtual uint64_t GetLength(void) const;
+    virtual MetaFsIoOpcode GetOpcode(void) const;
+    virtual int GetFd(void) const;
+    virtual uint64_t GetFileOffset(void) const;
 
     virtual std::string ToString(void) const;
 
+    virtual bool IsReadyToUse(void) const;
+
+    virtual void SetIoInfo(MetaFsIoOpcode opcode, uint64_t fileOffset, uint64_t length, char* buffer);
+    virtual void SetFileInfo(int fd, MetaFileIoCbPtr ioDoneCheckCallback);
+    virtual void SetCallback(MetaIoCbPtr callback);
+
+    int error; // TODO remove this
+
+private:
     MetaFsIoOpcode opcode;
     int fd;
     uint64_t fileOffset;
@@ -65,9 +79,11 @@ public:
     char* buffer;
     MetaIoCbPtr callback;
 
-    int error;
     MetaFileIoCbPtr ioDoneCheckCallback;
-    uint32_t vsid;
+
+    bool fileInfoUpdated;
+    bool ioInfoUpdated;
+    bool callbackUpdated;
 };
 
 } // namespace pos

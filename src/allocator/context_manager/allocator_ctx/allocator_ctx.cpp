@@ -176,7 +176,7 @@ AllocatorCtx::BeforeFlush(char* buf)
 void
 AllocatorCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
 {
-    ctxStoredVersion = ((AllocatorCtxHeader*)ctx->buffer)->ctxVersion;
+    ctxStoredVersion = ((AllocatorCtxHeader*)ctx->GetBuffer())->ctxVersion;
 }
 
 char*

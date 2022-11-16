@@ -62,6 +62,7 @@ public:
     virtual LogHandlerInterface* GetLog(void);
     virtual int GetLogGroupId(void);
 
+    virtual uint64_t GetLogSize(void);
     virtual void SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum);
 
     virtual void IoDone(void) override;

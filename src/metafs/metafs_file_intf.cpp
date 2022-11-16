@@ -141,27 +141,29 @@ MetaFsFileIntf::_CalculateByteAddress(uint64_t pageNumber, uint64_t offset,
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
+    assert(ctx->IsReadyToUse() == true);
+
     POS_EVENT_ID rc = EID(SUCCESS);
 
     if (BYTE_ACCESS_ENABLED &&
-        ctx->opcode == MetaFsIoOpcode::Write &&
+        ctx->GetOpcode() == MetaFsIoOpcode::Write &&
         volumeType == MetaVolumeType::NvRamVolume &&
-        ctx->length < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
+        ctx->GetLength() < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
     {
         MetaLpnType pageNumber = _GetBaseLpn(MetaVolumeType::NvRamVolume) +
-            (ctx->fileOffset / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
+            (ctx->GetFileOffset() / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
         pageNumber = pageNumber * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES /
             ArrayConfig::BLOCK_SIZE_BYTE;
 
         pos::LogicalByteAddr byteAddr = _CalculateByteAddress(pageNumber,
-            ctx->fileOffset % MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
-            ctx->length);
+            ctx->GetFileOffset() % MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
+            ctx->GetLength());
 
         CallbackSmartPtr callback(new NvramIoCompletion(ctx));
 
         IOSubmitHandlerStatus ioStatus =
             IIOSubmitHandler::GetInstance()->SubmitAsyncByteIO(
-                IODirection::WRITE, (void*)ctx->buffer, byteAddr,
+                IODirection::WRITE, (void*)ctx->GetBuffer(), byteAddr,
                 PartitionType::META_NVM, callback, arrayId);
 
         if (IOSubmitHandlerStatus::SUCCESS != ioStatus)
@@ -174,9 +176,6 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     }
     else
     {
-        ctx->ioDoneCheckCallback =
-            std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
-
         rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
     }
 
@@ -184,6 +183,12 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
         return -(int)rc;
 
     return EID(SUCCESS);
+}
+
+MetaFileIoCbPtr
+MetaFsFileIntf::GetIoDoneCheckFunc(void)
+{
+    return std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 }
 
 int

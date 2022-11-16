@@ -65,8 +65,7 @@ MockFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 int
 MockFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
-    ctx->ioDoneCheckCallback =
-        std::bind(&MockFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
+    assert(ctx->IsReadyToUse() == true);
 
     _MockAsyncIo(ctx);
 
@@ -76,12 +75,12 @@ MockFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 void
 MockFileIntf::_MockAsyncIo(AsyncMetaFileIoCtx* ctx)
 {
-    if (ctx->opcode == MetaFsIoOpcode::Read)
+    if (ctx->GetOpcode() == MetaFsIoOpcode::Read)
     {
         std::thread asyncIo(&MockFileIntf::_MockAsyncRead, this, ctx);
         asyncIo.detach();
     }
-    else if (ctx->opcode == MetaFsIoOpcode::Write)
+    else if (ctx->GetOpcode() == MetaFsIoOpcode::Write)
     {
         if (volumeType == MetaVolumeType::NvRamVolume)
         {
@@ -98,7 +97,7 @@ MockFileIntf::_MockAsyncIo(AsyncMetaFileIoCtx* ctx)
 void
 MockFileIntf::_MockAsyncRead(AsyncMetaFileIoCtx* ctx)
 {
-    ssize_t ret = pread(fd, ctx->buffer, ctx->length, ctx->fileOffset);
+    ssize_t ret = pread(fd, ctx->GetBuffer(), ctx->GetLength(), ctx->GetFileOffset());
 
     int* ioError = new int;
     if (ret < 0)
@@ -116,7 +115,7 @@ MockFileIntf::_MockAsyncRead(AsyncMetaFileIoCtx* ctx)
 void
 MockFileIntf::_MockAsyncWrite(AsyncMetaFileIoCtx* ctx)
 {
-    ssize_t ret = pwrite(fd, ctx->buffer, ctx->length, ctx->fileOffset);
+    ssize_t ret = pwrite(fd, ctx->GetBuffer(), ctx->GetLength(), ctx->GetFileOffset());
 
     int* ioError = new int;
     if (ret < 0)
@@ -129,6 +128,12 @@ MockFileIntf::_MockAsyncWrite(AsyncMetaFileIoCtx* ctx)
     }
 
     ctx->HandleIoComplete(ioError);
+}
+
+MetaFileIoCbPtr
+MockFileIntf::GetIoDoneCheckFunc(void)
+{
+    return std::bind(&MockFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 }
 
 int

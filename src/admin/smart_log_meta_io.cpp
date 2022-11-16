@@ -215,15 +215,18 @@ SmartLogMetaIo::_DoMfsOperation(int direction)
         _OpenFile();
     }
     LogPageFlushIoCtx* logpageFlushReq = new LogPageFlushIoCtx();
-    if (direction == FLUSH)
-        logpageFlushReq->opcode = MetaFsIoOpcode::Write;
-    else
-        logpageFlushReq->opcode = MetaFsIoOpcode::Read;
-    logpageFlushReq->fd = smartLogFile->GetFd();
-    logpageFlushReq->fileOffset = 0;
-    logpageFlushReq->length = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
-    logpageFlushReq->buffer = (char*)smartLogMgr->GetLogPages(arrayId);
-    logpageFlushReq->callback = std::bind(&SmartLogMetaIo::_CompleteSmartLogIo, this, std::placeholders::_1);
+
+    MetaFsIoOpcode opcode = [direction]() -> MetaFsIoOpcode {
+        if (direction == FLUSH)
+            return MetaFsIoOpcode::Write;
+        else
+            return MetaFsIoOpcode::Read;
+    }();
+
+    uint64_t length = MAX_VOLUME_COUNT * sizeof(struct SmartLogEntry);
+    logpageFlushReq->SetIoInfo(opcode, 0, length, (char*)smartLogMgr->GetLogPages(arrayId));
+    logpageFlushReq->SetFileInfo(smartLogFile->GetFd(), smartLogFile->GetIoDoneCheckFunc());
+    logpageFlushReq->SetCallback(std::bind(&SmartLogMetaIo::_CompleteSmartLogIo, this, std::placeholders::_1));
 
     int ret = smartLogFile->AsyncIO(logpageFlushReq);
     if (ret < 0)

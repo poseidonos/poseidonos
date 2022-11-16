@@ -130,7 +130,7 @@ TEST_F(SegmentCtxTestFixture, FinalizeIo_TestSimpleSetter)
     buf->sig = SegmentCtx::SIG_SEGMENT_CTX;
 
     AsyncMetaFileIoCtx ctx;
-    ctx.buffer = (char*)buf;
+    ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), (char*)buf);
 
     // when
     segCtx->FinalizeIo(&ctx);

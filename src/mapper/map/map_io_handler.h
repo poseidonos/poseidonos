@@ -62,6 +62,13 @@ class EventScheduler;
 class MapFlushIoContext : public AsyncMetaFileIoCtx
 {
 public:
+    MapFlushIoContext(MpageNum start, int num);
+    virtual ~MapFlushIoContext(void) = default;
+
+    MpageNum GetStartMpage(void) const;
+    int GetNumMpages(void) const;
+
+private:
     MpageNum startMpage;
     int numMpages;
 };

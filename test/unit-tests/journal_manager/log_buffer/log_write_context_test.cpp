@@ -49,12 +49,17 @@ TEST(LogWriteContext, SetBufferAllocated_testIfExecutedSuccessfully)
     uint64_t fileOffset = 0;
     int logGroupId = 1;
     uint32_t seqNum = 1;
+    
+    ON_CALL(*log, GetSize).WillByDefault(Return(10));
+    ON_CALL(*log, GetData).WillByDefault(Return(nullptr));
+
     EXPECT_CALL(*log, SetSeqNum(seqNum));
 
     logWriteContext.SetBufferAllocated(fileOffset, logGroupId, seqNum);
 
     // Then
-    EXPECT_EQ(fileOffset, logWriteContext.fileOffset);
+    EXPECT_EQ(MetaFsIoOpcode::Write, logWriteContext.GetOpcode());
+    EXPECT_EQ(fileOffset, logWriteContext.GetFileOffset());
     EXPECT_EQ(logGroupId, logWriteContext.GetLogGroupId());
 }
 

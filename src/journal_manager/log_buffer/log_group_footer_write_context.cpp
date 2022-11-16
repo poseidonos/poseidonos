@@ -50,9 +50,7 @@ LogGroupFooterWriteContext::SetIoRequest(uint64_t offset, LogGroupFooter footer)
 {
     *data = footer;
 
-    this->fileOffset = offset;
-    this->length = sizeof(*data);
-    this->buffer = (char*)data;
+    SetIoInfo(MetaFsIoOpcode::Write, offset, sizeof(*data), (char*)data);
 }
 
 } // namespace pos
