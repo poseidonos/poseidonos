@@ -1,35 +1,42 @@
 ```mermaid
 classDiagram
+    class POSInterface {
+        <<enumeration>>
+        GRPC
+    }
+    class HAInterface {
+        <<enumeration>>
+        GRPC
+    }
     class Kouros {
         <<package>>
-        NewPOSManager(string) POSManager
-        NewHAManager(string) HAManager
+        NewPOSManager(interfaceType: POSInterface) POSManager
+        NewHAManager(interfaceType: HAInterface) HAManager
     }
     class POSManager {
         <<interface>>
-        createArray([]byte): ([]byte, Error)
-        createVolume ([]byte): ([]byte, Error)
-        deleteArray([]byte): ([]byte, Error)
-        deleteVolume([]byte): ([]byte, Error)
+        Init(string, any): error
+        CreateArray(CreateArrayRequest_Param): (CreateArrayResponse, CreateArrayRequest, error)
+        CreateVolume (CreateVolumeRequest_Param): (CreateVolumeResponse, CreateVolumeRequest, error)
+        DeleteArray(DeleteArrayRequest_Param): (DeleteArrayResponse, DeleteArrayRequest, error)
+        DeleteVolume(DeleteVolumeRequest_Param): (DeleteVolumeResponse, DeleteVolumeRequest, error)
     }
     class HAManager {
         <<interface>>
-        listNodes(): ([]byte, Error)
-        listVolumes(): ([]byte, Error)
-        listReplication(): ([]byte, Error)
-        startReplication([]byte): ([]byte, Error)
-        stopReplication([]byte): ([]byte, Error)
+        Init(string, any): error
+        listNodes(): (ListNodeResponse, ListNodeRequest, error)
+        listVolumes(): (ListVolumesResponse, ListVolumesRequest, error)
+        listReplication(): (ListReplicationResponse, ListReplicationRequest, error)
+        startReplication(): (StartReplicationResponse, StartReplicationRequest, error)
+        stopReplication(): (StopReplicationResponse, StopReplicationRequest, error)
     }
     class POSGRPCManager {
         connection: POSGRPCConnection
-        init(POSGRPCConnection)
-        connect(POSGRPCConnection) Error
+        requestor: string
     }
 
     class HAPostgresManager {
         connection: PostgresConnection
-        init(POSGRPCConnection)
-        connect(PostgresConnection) Error
     }
     class CreateArrayResponse {
         <<proto message>>
@@ -54,14 +61,14 @@ classDiagram
         cause: string
         solution: string
     }
-    class CreateArrayCommand {
+    class CreateArrayRequest {
         <<proto message>>
         command: string
         rid: string
         requestor: string
-        Param: CreateArrayParam
+        Param: CreateArrayRequest_Param
     }
-    class CreateArrayParam {
+    class CreateArrayRequest_Param {
         <<proto message>>
         name: string
         raidtype: string
@@ -86,19 +93,19 @@ classDiagram
 
     class GRPCService {
         dial() (*grpc.ClientConn, err)
-        createArray(*pb.CreateArrayRequest) (*pb.CreateArrayResponse, Error)
-        createVolume(*pb.CreateVolumeRequest) (*pb.CreateVolumeResponse, Error))
-        deleteArray(*pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, Error))
-        deleteVolume(*pb.DeleteVolumeRequest) (*pb.DeleteVolumeResponse, Error))
+        createArray(CreateArrayRequest) (CreateArrayResponse, Error)
+        createVolume(CreateVolumeRequest) (CreateVolumeResponse, Error))
+        deleteArray(DeleteArrayRequest) (DeleteArrayResponse, Error))
+        deleteVolume(DeleteVolumeRequest) (DeleteVolumeResponse, Error))
     }
 
     class PostgresDBService {
         connect() (*sql.DB, error)
-        listNodes(*pb.ListNodeRequest): (*pb.ListNodeResponse, Error)
-        listVolumes(*pb.ListHAVolumeRequest): (*pb.ListHAVolumeResponse, Error)
-        listReplication(*pb.ListHAReplicationRequest): (*pb.ListHAReplicationResponse, Error)
-        startReplication(*pb.startReplicationRequest): (*pb.startReplicationResponse, Error)
-        stopReplication(*pb.stopReplicationRequest): (*pb.stopReplicationResponse, Error)
+        listNodes(ListNodeRequest): (ListNodeResponse, Error)
+        listVolumes(ListHAVolumeRequest): (ListHAVolumeResponse, Error)
+        listReplication(ListHAReplicationRequest): (ListHAReplicationResponse, Error)
+        startReplication(startReplicationRequest): (startReplicationResponse, Error)
+        stopReplication(stopReplicationRequest): (stopReplicationResponse, Error)
     }
 
 
@@ -108,14 +115,21 @@ classDiagram
     Status --* Result : Composition
     Result --* CreateArrayResponse : Composition
     CreateArrayResponse --> GRPCService
-    Device --o CreateArrayParam
-    CreateArrayParam --* CreateArrayCommand
+    Device --o CreateArrayRequest_Param
+    CreateArrayRequest_Param --* CreateArrayRequest
     POSInfo --* Result
-    CreateArrayCommand --> GRPCService
+    CreateArrayRequest --> GRPCService
     POSGRPCConnection --* POSGRPCManager
     PostgresConnection --* HAPostgresManager
     POSGRPCManager --> GRPCService : uses
     HAPostgresManager --> PostgresDBService : uses
+    POSManager --> CreateArrayRequest_Param : uses
+    POSManager --> CreateArrayRequest : uses
+    POSManager --> CreateArrayResponse : uses
+    Kouros --> POSInterface : uses
+    Kouros --> HAInterface : uses
+    Kouros --> POSManager : uses
+    Kouros --> HAManager : uses
 ```
 
 The above class diagram for Kuoros module shows how the Kuoros module will be structured.
@@ -131,35 +145,36 @@ posGRPCConnection := kouros.POSGRPCConnection{
 }
 posConnector.init(posGRPCConnection);
 
+posMngr, _ := kouros.NewPOSManager(pos.GRPC)
+posMngr.Init("CLI", globals.GrpcServerAddress)
 
-
-createArrayCommand := []byte(`{
-    param: {
-        "name": "POSArray",
-        "raidtype": "RAID0",
-        "buffer": {
-            "device": {
-                "deviceName": "uram0"
-            }
-        }
-        "data": {
-            {
-                deviceName: "unvme-ns-0"
-            }
-        }
-        "spare": {
-            {
-                deviceName: "unvme-ns-1"
-            }
-        }
+createArrayParam := &api.CreateArrayRequest_Param{
+        Name: "POSArray",
+        Raidtype: "RAID0",
+        Buffer: []*pb.DeviceNameList{
+            &pb.DeviceNameList{
+                DeviceName: "uram0",
+            },
+        },
+        Data: []*pb.DeviceNameList{
+            &pb.DeviceNameList{
+                DeviceName: "unvme-ns-0",
+            },
+        },
+        Spare: []*pb.DeviceNameList{
+            &pb.DeviceNameList{
+                DeviceName: "unvme-ns-1",
+            },
+        },
     }
-}`)
 
-res, err := posConnector.CreateArray(createArrayCommand)
+
+res, req, err := posMngr.CreateArray(createArrayParam)
+
 if err != nil {
     log.Fatalf("Error in Array Creation: %v", err)
 }
-log.Println(string(res))
+
 ```
 
 Similarly user can create an object for HAManager and use it to call HA commands
@@ -168,4 +183,3 @@ For Adding a new POS function, the following steps need to be done:
 1. Create a message structure for GRPC Protobuf message
 2. Add the function signature to POSManager
 3. Implement the function in POSGRPCManager
-
