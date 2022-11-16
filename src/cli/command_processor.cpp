@@ -1254,12 +1254,14 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     SpdkRpcClient rpcClient;
     NvmfTarget target;
 
+    subnqn = (request->param()).nqn();
+    
     if (command == "CREATESUBSYSTEMAUTO")
     {
         if (nullptr != target.FindSubsystem(subnqn))
         {
-            POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), "subnqn:{}", subnqn);
-            _SetEventStatus(EID(CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST), reply->mutable_result()->mutable_status());
+            POS_TRACE_INFO(EID(SUCCESS), "subnqn:{}", subnqn);
+            _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
             return grpc::Status::OK;
         }
@@ -1287,7 +1289,6 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
             return grpc::Status::OK;
         }
 
-        subnqn = (request->param()).nqn();
         serialNumber = (request->param()).serialnumber();
         modelNumber = (request->param()).modelnumber();
         maxNamespaces = (request->param()).maxnamespaces();
@@ -1305,7 +1306,8 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
 
     if (ret.first != SUCCESS)
     {
-        POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_FAILURE), "subnqn:{}, spdkRpcMsg:{}", subnqn, ret.second);
+        POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_FAILURE), "subnqn:{}, serialNumber:{}, modelNumber:{}, maxNamespaces:{}, allowAnyHost:{}, anaReporting:{}, spdkRpcMsg:{}",
+            subnqn, serialNumber, modelNumber, maxNamespaces,allowAnyHost, anaReporting, ret.second);
         _SetEventStatus(EID(CREATE_SUBSYSTEM_FAILURE), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1736,6 +1738,68 @@ CommandProcessor::ExecuteDeleteVolumeCommand(const DeleteVolumeRequest* request,
     }
 
     int eventId = EID(DELETE_VOL_INTERNAL_ERROR);
+    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteMountVolumeCommand(const MountVolumeRequest* request, MountVolumeResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    string volumeName = "";
+    string subnqn = "";
+    string arrayName = "";
+
+    volumeName = (request->param()).name();
+    subnqn = (request->param()).subnqn();
+    arrayName = (request->param()).array();
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(MOUNT_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(MOUNT_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IVolumeEventManager* volMgr =
+        VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+
+    if (volMgr != nullptr)
+    {
+        int ret = volMgr->Mount(volumeName, subnqn);
+        if (ret == SUCCESS)
+        {
+            int eventId = EID(SUCCESS);
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            int eventId = ret;
+            _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+
+    int eventId = EID(MOUNT_VOL_INTERNAL_ERROR);
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
