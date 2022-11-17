@@ -131,7 +131,7 @@ private:
         {"retry_count_frontend_io", "3"}
     };
     vector<ConfigKeyValue> perfImpactData = {
-        {"rebuild", "\"highest\""}
+        {"rebuild", "\"high\""}
     };
     vector<ConfigKeyValue> feQosData = {
         {"enable", "false"}
