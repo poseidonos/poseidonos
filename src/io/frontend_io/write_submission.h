@@ -45,6 +45,7 @@
 #include "src/io/general_io/io_controller.h"
 #include "src/lib/block_alignment.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/volume/i_volume_info_manager.h"
 
 namespace pos
 {
@@ -61,7 +62,7 @@ class WriteSubmission : public IOController, public Event
 public:
     explicit WriteSubmission(VolumeIoSmartPtr volumeIo);
     WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* rbaStateManager,
-        IBlockAllocator* iBlockAllocator, FlowControl* flowControl, IArrayInfo* arrayInfo,
+        IBlockAllocator* iBlockAllocator, FlowControl* flowControl, IVolumeInfoManager* volumeManager,
         bool isReactorNow);
     ~WriteSubmission(void) override;
 
@@ -79,7 +80,7 @@ private:
     RBAStateManager* rbaStateManager;
     IBlockAllocator* iBlockAllocator;
     FlowControl* flowControl;
-    IArrayInfo* arrayInfo;
+    IVolumeInfoManager* volumeManager;
 
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);

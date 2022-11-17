@@ -34,13 +34,13 @@
 
 #include <air/Air.h>
 
-#include "src/array_mgmt/array_manager.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/core_const.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_list.h"
+#include "src/volume/volume_service.h"
 
 namespace pos
 {
@@ -51,11 +51,11 @@ const VirtualBlkAddr VolumeIo::INVALID_VSA = {.stripeId = UNMAP_STRIPE,
 const uint64_t VolumeIo::INVALID_RBA = UINT64_MAX;
 
 VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId)
-: VolumeIo(buffer, unitCount, arrayId, ArrayMgr())
+: VolumeIo(buffer, unitCount, arrayId, nullptr)
 {
 }
 
-VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* arrayMgmt)
+VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IVolumeInfoManager* inputVolumeManager)
 : Ubio(buffer, unitCount, arrayId),
   volumeId(MAX_VOLUME_COUNT),
   originCore(EventFrameworkApiSingleton::Instance()->GetCurrentReactor()),
@@ -64,16 +64,15 @@ VolumeIo::VolumeIo(void* buffer, uint32_t unitCount, int arrayId, IArrayMgmt* ar
   vsa(INVALID_VSA),
   sectorRba(INVALID_RBA),
   stripeId(UNMAP_STRIPE),
-  arrayMgmt(arrayMgmt)
+  volumeManager(inputVolumeManager)
 {
+    if (nullptr == volumeManager)
+    {
+        volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
+    }
 }
 
 VolumeIo::VolumeIo(const VolumeIo& volumeIo)
-: VolumeIo(volumeIo, ArrayMgr())
-{
-}
-
-VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
 : Ubio(volumeIo),
   volumeId(volumeIo.volumeId),
   originCore(volumeIo.originCore),
@@ -82,7 +81,7 @@ VolumeIo::VolumeIo(const VolumeIo& volumeIo, IArrayMgmt* arrayMgmt)
   vsa(INVALID_VSA),
   sectorRba(volumeIo.sectorRba),
   stripeId(UNMAP_STRIPE),
-  arrayMgmt(arrayMgmt)
+  volumeManager(volumeIo.volumeManager)
 {
 }
 
@@ -119,8 +118,8 @@ VolumeIo::GetOriginVolumeIo(void)
 bool
 VolumeIo::IsPollingNecessary(void)
 {
-    IArrayInfo* arrayInfo = arrayMgmt->GetInfo(this->GetArrayId())->arrayInfo;
-    if (arrayInfo->IsWriteThroughEnabled())
+    bool isWTEnable = volumeManager->IsWriteThroughEnabled();
+    if (isWTEnable)
     {
         return true;
     }

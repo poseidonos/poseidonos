@@ -78,7 +78,6 @@ public:
     virtual void RaidStateUpdated(RaidState rs);
     virtual bool Exists(void);
     virtual bool IsMounted(void);
-    virtual bool IsOffline(void);
     virtual bool IsBroken(void);
     virtual int WaitShutdownDone(void);
     virtual ArrayStateType GetState(void);
