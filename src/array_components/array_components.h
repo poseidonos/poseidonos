@@ -96,7 +96,6 @@ public:
     virtual TelemetryPublisher* GetTelemetryPublisher(void) { return telPublisher; }
     virtual void SetTargetAddress(string targetAddress);
     virtual string GetTargetAddress(void);
-    virtual bool IsOffline(void);
 
 private:
     void _SetMountSequence(void);

@@ -23,7 +23,6 @@ public:
     MOCK_METHOD(ComponentsInfo*, GetInfo, (), (override));
     MOCK_METHOD(void, SetTargetAddress, (string targetAddress), (override));
     MOCK_METHOD(string, GetTargetAddress, (), (override));
-    MOCK_METHOD(bool, IsOffline, (), (override));
 };
 
 } // namespace pos
