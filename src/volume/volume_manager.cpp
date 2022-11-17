@@ -64,7 +64,8 @@ namespace pos
 VolumeManager::VolumeManager(IArrayInfo* i, IStateControl* s)
 :arrayInfo(i),
 state(s),
-tp(nullptr)
+tp(nullptr),
+wtEnabled(false)
 {
     state->Subscribe(this, typeid(*this).name());
 }
