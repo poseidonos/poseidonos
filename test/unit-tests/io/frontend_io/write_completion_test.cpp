@@ -11,6 +11,7 @@
 #include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/mapper/i_reversemap_mock.h"
+#include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using namespace std;
 using ::testing::_;
@@ -48,7 +49,6 @@ TEST(WriteCompletion, WriteCompletion_OneArgument_Heap)
 TEST(WriteCompletion, WriteCompletion_FiveArgument_Stack)
 {
     //Given
-    NiceMock<MockIArrayMgmt> mockIArrayMgmt;
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(new NiceMock<MockVolumeIo>(nullptr, 1, 0));
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
 
@@ -76,7 +76,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
 {
     //Given
     bool actual;
-    NiceMock<MockIArrayMgmt> mockIArrayMgmt;
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -91,7 +91,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     //When: Execute WriteCompletion with null stripe
     ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(nullptr));
 
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockIArrayMgmt);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
@@ -102,8 +102,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
 {
     //Given
     bool actual;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
-    NiceMock<MockIArrayMgmt> mockIArrayMgmt;
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -113,17 +112,15 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     Stripe stripe(&rev, true, 1);
     VirtualBlkAddr startVsa;
     int arrayId = 0;
-    ComponentsInfo info{&mockIArrayInfo, nullptr};
     ON_CALL(rev, Flush).WillByDefault(Return(0));
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
-    ON_CALL(mockIArrayMgmt, GetInfo(arrayId)).WillByDefault(Return(&info));
-    ON_CALL(mockIArrayInfo, IsWriteThroughEnabled()).WillByDefault(Return(false));
+    ON_CALL(mockVolumeInfoManager, IsWriteThroughEnabled()).WillByDefault(Return(false));
 
     //When: Execute WriteCompletion with dummy stripe
     ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&stripe));
 
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockIArrayMgmt);
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
@@ -134,8 +131,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
 {
     //Given
     bool actual;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
-    NiceMock<MockIArrayMgmt> mockIArrayMgmt;
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -144,7 +140,6 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     StripeAddr stripeAddr;
     VirtualBlkAddr startVsa;
     int arrayId = 0;
-    ComponentsInfo info{&mockIArrayInfo, nullptr};
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
@@ -154,9 +149,8 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, IsActiveFlushTarget).WillByDefault(Return(true));
     ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&mockStripe));
-    ON_CALL(mockIArrayMgmt, GetInfo(arrayId)).WillByDefault(Return(&info));
-    ON_CALL(mockIArrayInfo, IsWriteThroughEnabled()).WillByDefault(Return(false));
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockIArrayMgmt);
+    ON_CALL(mockVolumeInfoManager, IsWriteThroughEnabled()).WillByDefault(Return(false));
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
@@ -167,8 +161,7 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
 {
     //Given
     bool actual;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
-    NiceMock<MockIArrayMgmt> mockIArrayMgmt;
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
     auto mockVolIo = new NiceMock<MockVolumeIo>(nullptr, 1, 0);
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
@@ -179,7 +172,6 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     VirtualBlkAddr startVsa;
     StripeId stripeId = 1;
     int arrayId = 0;
-    ComponentsInfo info{&mockIArrayInfo, nullptr};
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
@@ -188,9 +180,8 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
     ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(-1));
     ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&mockStripe));
-    ON_CALL(mockIArrayMgmt, GetInfo(arrayId)).WillByDefault(Return(&info));
-    ON_CALL(mockIArrayInfo, IsWriteThroughEnabled()).WillByDefault(Return(false));
-    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockIArrayMgmt);
+    ON_CALL(mockVolumeInfoManager, IsWriteThroughEnabled()).WillByDefault(Return(false));
+    WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();
 
     //Then: WriteCompletion should return success
