@@ -75,7 +75,7 @@ VolumeDetacher::DoAll(void)
     VolumeBase* vol = volumeList.Next(idx);
     while (vol != nullptr)
     {
-        if (vol->GetStatus() != VolumeStatus::Unmounted)
+        if (vol->GetVolumeMountStatus() != VolumeMountStatus::Unmounted)
         {
             if (nvmfTarget->CheckVolumeAttached(vol->ID, arrayName) == true)
             {

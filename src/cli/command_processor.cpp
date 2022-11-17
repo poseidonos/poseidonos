@@ -1862,8 +1862,8 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
 
         if (updatePrimaryVol == true)
         {
-            int ret = isPrimaryVol ? volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Primary)
-                                   : volMgr->UpdateVolumeReplicationRoleProperty(volumeName, VolumeReplicationRoleProperty::Secondary);
+            int ret = isPrimaryVol ? volMgr->UpdateReplicationRole(volumeName, ReplicationRole::Primary)
+                                   : volMgr->UpdateReplicationRole(volumeName, ReplicationRole::Secondary);
 
             if (ret != SUCCESS)
             {

@@ -18,19 +18,19 @@ TEST(VolumeBase, VolumeBase_)
 
     std::string actual;
     std::string expected;
-    VolumeStatus actualstatus;
-    VolumeStatus expectedstatus;
+    VolumeMountStatus actualstatus;
+    VolumeMountStatus expectedstatus;
     uint64_t actualvalue;
     uint64_t expectedvalue;
 
     // When
-    VolumeBase* vol = new VolumeBase(arrayName, arrayID, name, size, VolumeAttribute::UserData, VolumeReplicationRoleProperty::Primary);
+    VolumeBase* vol = new VolumeBase(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF, ReplicationRole::Primary);
     vol->SetUuid(uuid);
     vol->SetMaxIOPS(maxBw);
     vol->SetMaxBW(maxIops);
 
     // Then
-    actual = vol->GetName();
+    actual = vol->GetVolumeName();
     expected = "volumetest";
     ASSERT_EQ(actual, expected);
 
@@ -42,21 +42,21 @@ TEST(VolumeBase, VolumeBase_)
     expected = arrayName;
     ASSERT_EQ(actual, expected);
 
-    actualstatus = vol->GetStatus();
-    expectedstatus = VolumeStatus::Unmounted;
+    actualstatus = vol->GetVolumeMountStatus();
+    expectedstatus = VolumeMountStatus::Unmounted;
     ASSERT_EQ(actualstatus, expectedstatus);
 
-    actualvalue = vol->MaxIOPS();
+    actualvalue = vol->GetMaxIOPS();
     expectedvalue = maxIops;
     ASSERT_EQ(actualvalue, expectedvalue);
 
-    actualvalue = vol->MaxBW();
+    actualvalue = vol->GetMaxBW();
     expectedvalue = maxBw;
     ASSERT_EQ(actualvalue, expectedvalue);
 
-    vol->Rename(newName);
+    vol->SetVolumeName(newName);
     actual = newName;
-    expected = vol->GetName();
+    expected = vol->GetVolumeName();
     ASSERT_EQ(actual, expected);
 
     delete vol;

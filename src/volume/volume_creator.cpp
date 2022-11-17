@@ -88,11 +88,14 @@ VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw, bool checkWalVolume, std::string uuid,
         uint32_t nsid, bool isPrimary)
 {
-    VolumeAttribute volumeAttribute = (checkWalVolume ? VolumeAttribute::HAJournalData : VolumeAttribute::UserData);
-    VolumeReplicationRoleProperty volumeRole =
-                        (isPrimary ? VolumeReplicationRoleProperty::Primary : VolumeReplicationRoleProperty::Secondary);
+    DataAttribute dataAttribute = (checkWalVolume ? DataAttribute::HAJournalData : DataAttribute::UserData);
+    ReplicationRole volumeRole =
+                        (isPrimary ? ReplicationRole::Primary : ReplicationRole::Secondary);
 
-    vol = new Volume(arrayName, arrayID, name, uuid, size, maxIops, minIops, maxBw, minBw, volumeAttribute, volumeRole);
+    vol = new Volume(arrayID, arrayName, dataAttribute, uuid,
+                    name, size, nsid,
+                    maxIops, minIops, maxBw, minBw,
+                    volumeRole);
     if (vol == nullptr)
     {
         POS_TRACE_ERROR(EID(CREATE_VOL_MEM_ALLOC_FAIL), "Fail to allocate memory");

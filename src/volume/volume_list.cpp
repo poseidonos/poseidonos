@@ -155,7 +155,7 @@ VolumeList::GetID(std::string volName)
 {
     for (int i = 0; i < MAX_VOLUME_COUNT; i++)
     {
-        if (items[i] != nullptr && items[i]->GetName() == volName)
+        if (items[i] != nullptr && items[i]->GetVolumeName() == volName)
         {
             return i;
         }
