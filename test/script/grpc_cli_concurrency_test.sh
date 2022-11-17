@@ -14,7 +14,7 @@ for ((i = 0; i < $NUM_OF_TESTS; i++))
 do
     nohup $bindir/poseidonos-cli system set-property --rebuild-impact medium --json-res &
     nohup $bindir/poseidonos-cli system get-property --json-res &
-    nohup $bindir/poseidonos-cli system set-property --rebuild-impact highest --json-res &
+    nohup $bindir/poseidonos-cli system set-property --rebuild-impact high --json-res &
     nohup $bindir/poseidonos-cli system get-property --json-res &
     nohup $bindir/poseidonos-cli system get-property --json-res &
     nohup $bindir/poseidonos-cli system set-property --rebuild-impact false_value --json-res &
