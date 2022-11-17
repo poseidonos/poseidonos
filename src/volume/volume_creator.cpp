@@ -88,11 +88,11 @@ VolumeCreator::_CreateVolume(string name, uint64_t size, uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw, bool checkWalVolume, std::string uuid,
         uint32_t nsid, bool isPrimary)
 {
-    DataAttribute volumeAttribute = (checkWalVolume ? DataAttribute::HAJournalData : DataAttribute::UserData);
+    DataAttribute dataAttribute = (checkWalVolume ? DataAttribute::HAJournalData : DataAttribute::UserData);
     ReplicationRole volumeRole =
                         (isPrimary ? ReplicationRole::Primary : ReplicationRole::Secondary);
 
-    vol = new Volume(arrayID, arrayName, volumeAttribute, uuid,
+    vol = new Volume(arrayID, arrayName, dataAttribute, uuid,
                     name, size, nsid,
                     maxIops, minIops, maxBw, minBw,
                     volumeRole);
