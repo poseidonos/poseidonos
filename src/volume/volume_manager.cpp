@@ -67,6 +67,7 @@ state(s),
 tp(nullptr)
 {
     state->Subscribe(this, typeid(*this).name());
+    wtEnabled = arrayInfo->IsWriteThroughEnabled();
 }
 
 VolumeManager::~VolumeManager(void)
@@ -90,7 +91,6 @@ VolumeManager::Init(void)
         TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
     }
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
-    wtEnabled = arrayInfo->IsWriteThroughEnabled();
  
     _PublishTelemetryArrayUsage();
     return result;
