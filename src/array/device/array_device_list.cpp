@@ -49,7 +49,6 @@ ArrayDeviceList::ArrayDeviceList()
 
 ArrayDeviceList::~ArrayDeviceList()
 {
-    Clear();
     delete mtx;
 }
 
