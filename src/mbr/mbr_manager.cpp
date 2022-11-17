@@ -47,7 +47,6 @@
 #include "src/helper/time/time_helper.h"
 #include "src/include/array_device_state.h"
 #include "src/include/pos_event_id.h"
-#include "src/include/array_mgmt_policy.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
 #include "version_provider.h"
@@ -483,28 +482,26 @@ MbrManager::CreateAbr(ArrayMeta& meta)
     ret = arrayNamePolicy.CheckArrayName(meta.arrayName);
     if (ret != EID(SUCCESS))
     {
-        POS_TRACE_WARN(ret, "array_name:{}", meta.arrayName);
+        POS_TRACE_ERROR(ret, "Array name double check failed");
         return ret;
     }
 
-    if (systeminfo.arrayNum >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    if (systeminfo.arrayNum > MAX_ARRAY_CNT)
     {
-        POS_TRACE_WARN(ret, "array_cnt:{}", systeminfo.arrayNum);
-        return EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS);
+        return EID(MBR_MAX_ARRAY_CNT_EXCEED);
     }
 
     pthread_rwlock_wrlock(&mbrLock);
     if (arrayIndexMap.find(meta.arrayName) != arrayIndexMap.end())
     {
-        ret = EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
-        POS_TRACE_WARN(ret, "array_name:{}", meta.arrayName);
         pthread_rwlock_unlock(&mbrLock);
-        return ret;
+        return EID(MBR_ABR_ALREADY_EXIST);
     }
 
     ret = mapMgr->CheckAllDevices(meta);
     if (ret != 0)
     {
+        POS_TRACE_ERROR(ret, "");
         pthread_rwlock_unlock(&mbrLock);
         return ret;
     }

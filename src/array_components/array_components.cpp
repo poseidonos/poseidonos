@@ -422,10 +422,4 @@ ArrayComponents::GetTargetAddress(void)
     return array->GetTargetAddress();
 }
 
-bool
-ArrayComponents::IsOffline(void)
-{
-    return array->IsOffline();
-}
-
 } // namespace pos

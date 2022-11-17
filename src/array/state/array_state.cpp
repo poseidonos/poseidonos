@@ -223,13 +223,6 @@ ArrayState::IsDeletable(void)
 }
 
 bool
-ArrayState::IsOffline(void)
-{
-    bool isOffline = state < ArrayStateEnum::TRY_MOUNT;
-    return isOffline;
-}
-
-bool
 ArrayState::Exists(void)
 {
     bool isExist = state > ArrayStateEnum::NOT_EXIST;

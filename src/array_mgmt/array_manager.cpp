@@ -104,13 +104,29 @@ ArrayManager::~ArrayManager()
 int
 ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string dataFt)
 {
+    pthread_rwlock_wrlock(&arrayListLock);
+    if (_FindArray(name) != nullptr)
+    {
+        int event = EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
+        POS_TRACE_WARN(event, "name duplicated: {}", name);
+        pthread_rwlock_unlock(&arrayListLock);
+        return event;
+    }
+
+    if (arrayList.size() >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+    {
+        int event = EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS);
+        POS_TRACE_WARN(event,
+            "Current num of Arrays: {}", arrayList.size());
+        pthread_rwlock_unlock(&arrayListLock);
+        return event;
+    }
+
     ArrayComponents* array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
     int ret = array->Create(devs, metaFt, dataFt);
     if (ret == EID(SUCCESS))
     {
-        pthread_rwlock_wrlock(&arrayListLock);
         arrayList.emplace(name, array);
-        pthread_rwlock_unlock(&arrayListLock);
     }
     else
     {
@@ -118,15 +134,18 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
             "ArrayManager is cleaning up ArrayComponents of {} because of array creation failure", name);
         delete array;
     }
+    pthread_rwlock_unlock(&arrayListLock);
     return ret;
 }
 
 int
 ArrayManager::Delete(string name)
 {
+    pthread_rwlock_wrlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
     {
+        pthread_rwlock_unlock(&arrayListLock);
         if (AbrExists(name))
         {
             int result = _DeleteFaultArray(name);
@@ -140,12 +159,10 @@ ArrayManager::Delete(string name)
     int ret = array->Delete();
     if (ret == EID(SUCCESS))
     {
-        pthread_rwlock_wrlock(&arrayListLock);
-        arrayList.erase(name);
         delete array;
-        array = nullptr;
-        pthread_rwlock_unlock(&arrayListLock);
+        arrayList.erase(name);
     }
+    pthread_rwlock_unlock(&arrayListLock);
     return ret;
 }
 
@@ -398,34 +415,28 @@ int
 ArrayManager::ResetMbr(void)
 {
     pthread_rwlock_wrlock(&arrayListLock);
-    bool canReset = true;
+    int result = 0;
+    for (auto iter = arrayList.begin(); iter != arrayList.end();)
     {
-        for (auto it : arrayList)
+        ArrayComponents* array = _FindArray(iter->first);
+        if (array != nullptr)
         {
-            if (it.second->IsOffline() == false)
+            result = array->Delete();
+            if (result == 0)
             {
-                canReset = false;
-                break;
+                delete array;
+                iter = arrayList.erase(iter);
+                continue;
             }
         }
-    }
-    int ret = 0;
-    if (canReset == false)
-    {
-        ret = EID(MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE);
-        POS_TRACE_WARN(ret, "");
         pthread_rwlock_unlock(&arrayListLock);
-        return ret;
+        POS_TRACE_WARN(result, "Unable to delete array during reset mbr " + iter->first);
+        return result;
     }
-    for (auto it : arrayList)
-    {
-        delete it.second;
-        it.second = nullptr;
-    }
-    arrayList.clear();
+
     pthread_rwlock_unlock(&arrayListLock);
-    ret = abrManager->ResetMbr();
-    return ret;
+    result = abrManager->ResetMbr();
+    return result;
 }
 
 ArrayComponents*
