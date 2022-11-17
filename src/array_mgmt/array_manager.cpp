@@ -398,7 +398,6 @@ int
 ArrayManager::ResetMbr(void)
 {
     pthread_rwlock_wrlock(&arrayListLock);
-    int result = 0;
     bool canReset = true;
     {
         for (auto it : arrayList)
@@ -410,34 +409,23 @@ ArrayManager::ResetMbr(void)
             }
         }
     }
+    int ret = 0;
     if (canReset == false)
     {
-        result = EID(MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE);
-        POS_TRACE_WARN(result, "");
+        ret = EID(MBR_RESET_ERROR_DUE_TO_ARRAY_IS_NOT_OFFLINE);
+        POS_TRACE_WARN(ret, "");
         pthread_rwlock_unlock(&arrayListLock);
-        return result;
+        return ret;
     }
-    for (auto iter = arrayList.begin(); iter != arrayList.end();)
+    for (auto it : arrayList)
     {
-        ArrayComponents* array = _FindArray(iter->first);
-        if (array != nullptr)
-        {
-            result = array->Delete();
-            if (result == 0)
-            {
-                delete array;
-                iter = arrayList.erase(iter);
-                continue;
-            }
-        }
-        pthread_rwlock_unlock(&arrayListLock);
-        POS_TRACE_WARN(result, "Unable to delete array during reset mbr " + iter->first);
-        return result;
+        delete it.second;
+        it.second = nullptr;
     }
-
+    arrayList.clear();
     pthread_rwlock_unlock(&arrayListLock);
-    result = abrManager->ResetMbr();
-    return result;
+    ret = abrManager->ResetMbr();
+    return ret;
 }
 
 ArrayComponents*
