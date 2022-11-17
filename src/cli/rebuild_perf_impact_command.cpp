@@ -52,13 +52,13 @@ string
 RebuildPerfImpactCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
-    string level = "lowest";
+    string level = "low";
 
     if (doc["param"].contains("level"))
     {
         level = doc["param"]["level"].get<std::string>();
         qos_backend_policy newBackendPolicy;
-        if (level.compare("highest") == 0)
+        if (level.compare("high") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_HIGH;
         }
@@ -66,7 +66,7 @@ RebuildPerfImpactCommand::Execute(json& doc, string rid)
         {
             newBackendPolicy.priorityImpact = PRIORITY_MEDIUM;
         }
-        else if (level.compare("lowest") == 0)
+        else if (level.compare("low") == 0)
         {
             newBackendPolicy.priorityImpact = PRIORITY_LOW;
         }
