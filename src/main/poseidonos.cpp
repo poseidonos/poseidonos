@@ -85,7 +85,7 @@ namespace pos
 int
 Poseidonos::Init(int argc, char** argv)
 {
-    POS_TRACE_TRACE(EID(POS_TRACE_STARTED), "[SHPOS923] 22-11-16 20:00");
+    POS_TRACE_TRACE(EID(POS_TRACE_STARTED), "");
     int ret = _LoadConfiguration();
     if (ret == 0)
     {
