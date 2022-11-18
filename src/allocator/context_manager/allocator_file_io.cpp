@@ -319,7 +319,7 @@ AllocatorFileIo::_AfterFlush(AsyncMetaFileIoCtx* ctx)
     int result = numFilesFlushing.fetch_sub(1) - 1;
     assert(result >= 0);
 
-    client->FinalizeIo(ctx);
+    client->FinalizeIo(ctx->GetBuffer());
 }
 
 void

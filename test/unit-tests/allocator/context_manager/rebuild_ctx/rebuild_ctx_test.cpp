@@ -90,7 +90,7 @@ TEST(RebuildCtx, FinalizeIo_TestSimpleSetter)
     char buf[100];
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), buf);
     // when
-    rebuildCtx.FinalizeIo(&ctx);
+    rebuildCtx.FinalizeIo(ctx.GetBuffer());
 }
 
 TEST(RebuildCtx, BeforeFlush_TestSimpleSetter)

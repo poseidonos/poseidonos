@@ -335,9 +335,9 @@ SegmentCtx::BeforeFlush(char* buf)
 }
 
 void
-SegmentCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
+SegmentCtx::FinalizeIo(char* buf)
 {
-    ctxStoredVersion = ((SegmentCtxHeader*)ctx->GetBuffer())->ctxVersion;
+    ctxStoredVersion = (reinterpret_cast<SegmentCtxHeader*>(buf))->ctxVersion;
     POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG), "FinalizeIo, array_id: {}, context_version: {}", arrayId, ctxStoredVersion);
 }
 
