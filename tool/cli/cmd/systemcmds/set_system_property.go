@@ -6,6 +6,7 @@ import (
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -64,7 +65,7 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 func buildSetSystemPropertyReq(command string) (*pb.SetSystemPropertyRequest, error) {
 	uuid := globals.GenerateUUID()
 
-	param := &pb.SetSystemPropertyRequest_Param{Level: set_system_property_level}
+	param := &pb.SetSystemPropertyRequest_Param{Level: strings.ToLower(set_system_property_level)}
 	req := &pb.SetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
 	return req, nil
