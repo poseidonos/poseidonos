@@ -157,7 +157,7 @@ TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), (char*)buf);
 
     // when
-    allocCtx.FinalizeIo(&ctx);
+    allocCtx.FinalizeIo(ctx.GetBuffer());
 
     // then
     EXPECT_EQ(allocCtx.GetStoredVersion(), 12);

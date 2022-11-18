@@ -133,7 +133,7 @@ TEST_F(SegmentCtxTestFixture, FinalizeIo_TestSimpleSetter)
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), (char*)buf);
 
     // when
-    segCtx->FinalizeIo(&ctx);
+    segCtx->FinalizeIo(ctx.GetBuffer());
 
     delete buf;
 }
