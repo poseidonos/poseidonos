@@ -268,12 +268,12 @@ Raid6::_MakeKeyforGFMap(vector<uint32_t>& excluded)
 #endif
 
 void
-Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
+Raid6::_MakeDecodingGFTable(vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
 {
     uint32_t destCnt = excluded.size();
-    unsigned char* tempMatrix = new unsigned char[dataCnt * dataCnt];
-    unsigned char* invertMatrix = new unsigned char[dataCnt * dataCnt];
-    unsigned char* decodeMatrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* tempMatrix = new unsigned char[chunkCnt * dataCnt];
+    unsigned char* invertMatrix = new unsigned char[chunkCnt * dataCnt];
+    unsigned char* decodeMatrix = new unsigned char[chunkCnt * dataCnt];
 
     unsigned char err_index[chunkCnt];
     memset(err_index, 0, sizeof(err_index));
@@ -285,7 +285,7 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
     }
 
     // Construct matrix that encoded remaining frags by removing erased rows
-    for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
+    for (uint32_t i = 0, r = 0; i < dataCnt; i++, r++)
     {
         //r is the index of the survived buffers
         while (err_index[r])
@@ -402,8 +402,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         {
             // Make Galois field table with given device indices and insert to Map
             rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
-            uint32_t rebuildCnt = chunkCnt - destCnt;
-            _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
+            _MakeDecodingGFTable(excluded, rebuildGaloisTable);
             POS_TRACE_WARN(EID(RAID_DEBUG_MSG), "a new galois table is inserted, key:{}", key);
             galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
         }
@@ -415,7 +414,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     }
 #else
     unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
-    _MakeDecodingGFTable(chunkCnt - destCnt, excluded, rebuildGaloisTable);
+    _MakeDecodingGFTable(excluded, rebuildGaloisTable);
 #endif
     ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
     for (auto mem : tmpAlloc)
