@@ -995,3 +995,24 @@ func SendVolumeProperty(req *pb.SetVolumePropertyRequest) (*pb.SetVolumeProperty
 
 	return res, err
 }
+
+func SendListVolume(req *pb.ListVolumeRequest) (*pb.ListVolumeResponse, error) {
+	conn, err := grpc.Dial(globals.GrpcServerAddress, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Error("cannot send a request to cli server: not connected")
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.ListVolume(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}

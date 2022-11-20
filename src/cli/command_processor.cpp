@@ -25,6 +25,7 @@
 #include "src/resource_checker/smart_collector.h"
 #include "src/sys_info/space_info.h"
 #include "src/volume/volume_manager.h"
+#include "src/volume/volume_status_property.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -1867,6 +1868,87 @@ CommandProcessor::ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* reques
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
+}
+
+grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply)
+{
+    string command = request->command();
+    string volumeName = "";
+    string arrayName = "";
+
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    arrayName = (request->param()).array();
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int eventId = EID(LIST_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    IArrayInfo* array = info->arrayInfo;
+    ArrayStateType arrayState = array->GetState();
+    if (arrayState == ArrayStateEnum::BROKEN)
+    {
+        int eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+        POS_TRACE_WARN(eventId, "arrayName: {}, arrayState: {}", arrayName, arrayState.ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+
+    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName); 
+
+    int vol_cnt = 0;
+
+    if (volMgr == nullptr)
+    {
+        POS_TRACE_WARN(EID(VOL_NOT_FOUND), "The requested volume does not exist");
+    }
+    else
+    {
+        vol_cnt = volMgr->GetVolumeCount();
+    }
+    if (vol_cnt > 0)
+    {
+        VolumeList* volList = volMgr->GetVolumeList();
+        int idx = -1;
+        while (true)
+        {
+            VolumeBase* vol = volList->Next(idx);
+            if (nullptr == vol)
+            {
+                break;
+            }
+            grpc_cli::Volume* volume = reply->mutable_result()->mutable_data()->add_volumes();
+			volume->set_name(vol->GetVolumeName());
+			volume->set_index(idx);
+			volume->set_uuid(vol->GetUuid());
+			volume->set_total(vol->GetTotalSize());
+            
+            VolumeMountStatus volumeStatus = vol->GetVolumeMountStatus();
+            if (Mounted == volumeStatus)
+            {
+                volume->set_remain(vol->RemainingSize());
+            }
+            volume->set_status(volMgr->GetStatusStr(volumeStatus));
+            volume->set_maxiops(vol->GetMaxIOPS());
+            volume->set_miniops(vol->GetMinIOPS());
+            volume->set_maxbw(vol->GetMaxBW());
+            volume->set_minbw(vol->GetMinBW());
+        }
+        
+        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+
 }
 
 grpc::Status

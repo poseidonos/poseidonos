@@ -137,6 +137,8 @@ using grpc_cli::UnmountVolumeRequest;
 using grpc_cli::UnmountVolumeResponse;
 using grpc_cli::SetVolumePropertyRequest;
 using grpc_cli::SetVolumePropertyResponse;
+using grpc_cli::ListVolumeRequest;
+using grpc_cli::ListVolumeResponse;
 
 class CommandProcessor
 {
@@ -203,6 +205,7 @@ public:
     grpc::Status ExecuteMountVolumeCommand(const MountVolumeRequest* request, MountVolumeResponse* reply);
     grpc::Status ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* request, UnmountVolumeResponse* reply);
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
+    grpc::Status ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply);
 
 private:
     bool _isPosTerminating {false};
