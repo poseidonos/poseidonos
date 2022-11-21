@@ -135,7 +135,7 @@ TEST(ArrayRebuilder, StopRebuild_testIfJobInProgressInvokesStopMethod)
     rebuilder->Rebuild(arrayName, 0, vector<IArrayDevice*>{&arrayDev}, nullptr, targetPartitions);
 
     // When
-    rebuilder->StopRebuild(arrayName);
+    rebuilder->StopRebuild(arrayName, 0);
 
     // Then
     bool ret = rebuilder->IsRebuilding(arrayName);

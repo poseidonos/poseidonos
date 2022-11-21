@@ -2103,7 +2103,35 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2701
+    Name: REBUILD_STOPPED_OTHER_DEVS_DETACHMENT
+    Severity:
+    Message: Rebuild stopped due to detachment of other devices
+    Cause:
+    Solution:
+  -
+    Id: 2702
+    Name: REBUILD_STOPPED_USER_REQUEST
+    Severity:
+    Message: Rebuild stopped due to user request
+    Cause:
+    Solution:
+  -
+    Id: 2703
+    Name: REBUILD_STOPPED_ARRAY_BROKEN
+    Severity:
+    Message: Rebuild is stopped due to array broken
+    Cause:
+    Solution:
+  -
+    Id: 2704
+    Name: REBUILD_CANCELLED_RESTORATION_FAILURE
+    Severity:
+    Message: Rebuild is cancelled due to restoration failure
+    Cause:
+    Solution:
   # Rebuild: 2800 - 2899
+  -
     Id: 2800
     Name: REBUILD_REQUEST
     Severity:

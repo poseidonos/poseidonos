@@ -108,14 +108,14 @@ ArrayRebuilder::QuickRebuild(string array, uint32_t arrayId, QuickRebuildPair re
 }
 
 void
-ArrayRebuilder::StopRebuild(string array)
+ArrayRebuilder::StopRebuild(string array, int reason)
 {
     mtxStart.lock();
     ArrayRebuild* jobInProg = _Find(array);
     if (jobInProg != nullptr)
     {
         jobInProg->Stop();
-        POS_TRACE_INFO(EID(REBUILD_JOB_STOP),
+        POS_TRACE_INFO(reason,
             "array_name:{}", array);
     }
     mtxStart.unlock();
