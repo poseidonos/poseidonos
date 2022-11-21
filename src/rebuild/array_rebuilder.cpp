@@ -125,6 +125,7 @@ void
 ArrayRebuilder::RebuildDone(RebuildResult result)
 {
     string array = result.array;
+    POS_TRACE_INFO(EID(REBUILD_JOB_COMPLETED), "array_name:{}", array);
     iRebuildNoti->RebuildDone(array);
     unique_lock<mutex> lock(mtxStart);
     ArrayRebuild* job = _Find(array);
@@ -178,7 +179,7 @@ ArrayRebuilder::_PrepareRebuild(string arrayname, list<RebuildTarget*>& tgt)
     int ret = iRebuildNoti->PrepareRebuild(arrayname, resume);
     if (ret == 0)
     {
-        POS_TRACE_INFO(EID(REBUILD_JOB_PREPARE),
+        POS_TRACE_INFO(EID(REBUILD_JOB_PREPARED),
             "Rebuild prepared successfully, array_name:{}, resume:{}", arrayname, resume);
     }
     else
