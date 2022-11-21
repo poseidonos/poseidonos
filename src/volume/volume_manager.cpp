@@ -64,7 +64,8 @@ namespace pos
 VolumeManager::VolumeManager(IArrayInfo* i, IStateControl* s)
 :arrayInfo(i),
 state(s),
-tp(nullptr)
+tp(nullptr),
+wtEnabled(false)
 {
     state->Subscribe(this, typeid(*this).name());
 }
@@ -90,7 +91,8 @@ VolumeManager::Init(void)
         TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
     }
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
-
+    wtEnabled = arrayInfo->IsWriteThroughEnabled();
+ 
     _PublishTelemetryArrayUsage();
     return result;
 }
@@ -712,6 +714,12 @@ std::string
 VolumeManager::GetArrayName(void)
 {
     return arrayInfo->GetName();
+}
+
+bool
+VolumeManager::IsWriteThroughEnabled(void)
+{
+    return wtEnabled;
 }
 
 } // namespace pos

@@ -6,6 +6,7 @@ import (
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -17,13 +18,12 @@ var SetSystemPropCmd = &cobra.Command{
 	Short: "Set the property of PoseidonOS.",
 	Long: `
 Set the property of PoseidonOS.
-(Note: this command might cause an error as it is supported unofficially.)
 
 Syntax:
-	poseidonos-cli system set-property [--rebuild-impact (highest | medium | lowest)]
+	poseidonos-cli system set-property [--rebuild-impact (high | medium | low)]
 
 Example (To set the impact of rebuilding process on the I/O performance to low):
-	poseidonos-cli system set-property --rebuild-impact lowest
+	poseidonos-cli system set-property --rebuild-impact low
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// TODO(mj): now the message format is for REBUILDPERFIMPACT only.
@@ -61,7 +61,7 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 func buildSetSystemPropertyReq(command string) (*pb.SetSystemPropertyRequest, error) {
 	uuid := globals.GenerateUUID()
 
-	param := &pb.SetSystemPropertyRequest_Param{Level: set_system_property_level}
+	param := &pb.SetSystemPropertyRequest_Param{Level: strings.ToLower(set_system_property_level)}
 	req := &pb.SetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
 	return req, nil

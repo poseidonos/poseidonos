@@ -61,6 +61,7 @@ public:
     virtual VolumeBase* GetVolume(int volId) = 0;
 
     virtual std::string GetArrayName(void) = 0;
+    virtual bool IsWriteThroughEnabled(void) = 0;
 
     virtual int CheckVolumeValidity(std::string name) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;
