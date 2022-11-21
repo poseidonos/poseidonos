@@ -55,17 +55,17 @@ WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 : WriteCompletion(input,
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayId()),
       EventFrameworkApiSingleton::Instance()->IsReactorNow(),
-      ArrayMgr())
+      VolumeServiceSingleton::Instance()->GetVolumeManager(input.get()->GetArrayId()))
 {
 }
 
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
     IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow,
-    IArrayMgmt* arrayMgr)
+    IVolumeInfoManager* iVolumeInfoManager)
 : Callback(isReactorNow, CallbackType_WriteCompletion),
   volumeIo(input),
   iWBStripeAllocator(iWBStripeAllocator),
-  arrayMgr(arrayMgr)
+  volumeManager(iVolumeInfoManager)
 {
 }
 
@@ -142,8 +142,7 @@ bool
 WriteCompletion::_RequestFlush(StripeSmartPtr stripe)
 {
     bool requestFlushSuccessful = true;
-    IArrayInfo* arrayInfo = arrayMgr->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-    bool parityOnly = arrayInfo->IsWriteThroughEnabled();
+    bool parityOnly = volumeManager->IsWriteThroughEnabled();
     if (stripe->IsActiveFlushTarget() == true)
     {
         parityOnly = false;

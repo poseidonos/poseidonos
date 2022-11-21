@@ -470,7 +470,7 @@ Poseidonos::_SetPerfImpact(void)
         {
             newRebuildPolicy.priorityImpact = PRIORITY_LOW;
             POS_TRACE_INFO(EID(QOS_SET_EVENT_POLICY),
-                "Rebuild Perf Impact not supported, Set to default lowest");
+                "Rebuild Perf Impact not supported, Set to default low");
         }
         newRebuildPolicy.policyChange = true;
         retVal = QosManagerSingleton::Instance()->UpdateBackendPolicy(BackendEvent_UserdataRebuild, newRebuildPolicy);

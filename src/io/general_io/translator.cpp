@@ -36,14 +36,13 @@
 
 #include "src/allocator_service/allocator_service.h"
 #include "src/array/service/array_service_layer.h"
-#include "src/array_mgmt/array_manager.h"
-#include "src/array_models/interface/i_array_info.h"
 #include "src/include/address_type.h"
 #include "src/include/array_mgmt_policy.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/volume/volume_service.h"
 #include "src/volume/volume_list.h"
 
 namespace pos
@@ -54,11 +53,12 @@ thread_local int Translator::recentArrayId = ArrayMgmtPolicy::MAX_ARRAY_CNT;
 
 Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
     int arrayId, bool isRead, IVSAMap* iVSAMap_, IStripeMap* iStripeMap_, IWBStripeAllocator* iWBStripeAllocator_,
-    IIOTranslator* iTranslator_, IArrayInfo* arrayInfo_)
+    IIOTranslator* iTranslator_, IVolumeInfoManager* iVolumeManager_)
 : iVSAMap(iVSAMap_),
   iStripeMap(iStripeMap_),
   iWBStripeAllocator(iWBStripeAllocator_),
   iTranslator(iTranslator_),
+  iVolumeManager(iVolumeManager_),
   startRba(startRba),
   blockCount(blockCount),
   lastVsa(UNMAP_VSA),
@@ -66,8 +66,7 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
   isRead(isRead),
   volumeId(volumeId),
   arrayId(arrayId),
-  userLsid(UNMAP_STRIPE),
-  arrayInfo(arrayInfo_)
+  userLsid(UNMAP_STRIPE)
 {
     if (nullptr == iVSAMap)
     {
@@ -84,6 +83,11 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
     if (nullptr == iTranslator)
     {
         iTranslator = ArrayService::Instance()->Getter()->GetTranslator();
+    }
+
+    if (nullptr == iVolumeManager)
+    {
+        iVolumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
     }
 
     if (unlikely(volumeId >= MAX_VOLUME_COUNT))
@@ -110,13 +114,9 @@ Translator::Translator(uint32_t volumeId, BlkAddr startRba, uint32_t blockCount,
             lsidRefResults[blockIndex] = _GetLsidRefResult(rba, vsa);
         }
     }
-    if (nullptr == arrayInfo)
-    {
-        arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
-    }
 }
 
-Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid, IArrayInfo* arrayInfo_)
+Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid)
 : iTranslator(ArrayService::Instance()->Getter()->GetTranslator()),
   startRba(0),
   blockCount(ONLY_ONE),
@@ -125,8 +125,7 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid
   isRead(false),
   volumeId(UINT32_MAX),
   arrayId(arrayId),
-  userLsid(userLsid),
-  arrayInfo(arrayInfo_)
+  userLsid(userLsid)
 {
     if (nullptr == iVSAMap)
     {
@@ -140,6 +139,10 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid
     {
         iWBStripeAllocator = AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(arrayId);
     }
+    if (nullptr == iVolumeManager)
+    {
+        iVolumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
+    }
 
     vsaArray.fill(UNMAP_VSA);
 
@@ -147,10 +150,6 @@ Translator::Translator(const VirtualBlkAddr& vsa, int arrayId, StripeId userLsid
     if (likely(iStripeMap != nullptr))
     {
         lsidRefResults[0] = _GetLsidRefResult(startRba, vsaArray[0]);
-    }
-    if (nullptr == arrayInfo)
-    {
-        arrayInfo = ArrayMgr()->GetInfo(arrayId)->arrayInfo;
     }
 }
 
@@ -301,7 +300,7 @@ Translator::_GetLsa(uint32_t blockIndex)
         vsa = iVSAMap->GetRandomVSA(startRba + blockIndex);
     }
     StripeId stripeId;
-    if (arrayInfo->IsWriteThroughEnabled() && (isRead == false))
+    if (iVolumeManager->IsWriteThroughEnabled() && (isRead == false))
     {
         stripeId = userLsid;
     }
@@ -346,7 +345,7 @@ Translator::GetPba(void)
 PartitionType
 Translator::_GetPartitionType(uint32_t blockIndex)
 {
-    if (arrayInfo->IsWriteThroughEnabled() && (isRead == false))
+    if (iVolumeManager->IsWriteThroughEnabled() && (isRead == false))
     {
         return USER_DATA;
     }

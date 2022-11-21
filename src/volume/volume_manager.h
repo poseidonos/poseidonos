@@ -101,6 +101,7 @@ public:
     int DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted = 1) override;
     VolumeBase* GetVolume(int volId) override;
     std::string GetArrayName(void) override;
+    bool IsWriteThroughEnabled(void) override;
 
     void StateChanged(StateContext* prev, StateContext* next) override;
 
@@ -127,6 +128,8 @@ private:
 
     std::mutex volumeEventLock;
     std::mutex volumeExceptionLock;
+
+    bool wtEnabled;
 };
 
 } // namespace pos

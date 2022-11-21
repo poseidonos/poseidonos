@@ -419,10 +419,10 @@ index 000000000..35b3df73b
 +#endif /* SPDK_POS_APP_H_ */
 diff --git include/spdk/pos_nvmf.h include/spdk/pos_nvmf.h
 new file mode 100644
-index 000000000..2f8b93c50
+index 000000000..652176410
 --- /dev/null
 +++ include/spdk/pos_nvmf.h
-@@ -0,0 +1,120 @@
+@@ -0,0 +1,122 @@
 +/*-
 + *   BSD LICENSE
 + *
@@ -537,6 +537,8 @@ index 000000000..2f8b93c50
 +
 +void spdk_bdev_pos_register_poller(void *arg1);
 +void spdk_bdev_pos_unregister_poller(void *arg1);
++
++bool reactor_should_skipped(uint32_t core);
 +
 +#ifdef __cplusplus
 +}
@@ -1234,7 +1236,7 @@ index 91d940c20..c8fd49081 100644
  	rc = spdk_bdev_writev_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
  				     nvmf_bdev_ctrlr_complete_cmd, req);
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
-index 28c552f3e..be1b3f3a9 100644
+index 28c552f3e..7ad44ab8a 100644
 --- lib/nvmf/nvmf.c
 +++ lib/nvmf/nvmf.c
 @@ -38,6 +38,8 @@
@@ -1246,7 +1248,7 @@ index 28c552f3e..be1b3f3a9 100644
  #include "spdk/endian.h"
  #include "spdk/string.h"
  #include "spdk/log.h"
-@@ -843,11 +845,23 @@ _nvmf_poll_group_add(void *_ctx)
+@@ -843,24 +845,41 @@ _nvmf_poll_group_add(void *_ctx)
  
  void
  spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair)
@@ -1269,9 +1271,36 @@ index 28c552f3e..be1b3f3a9 100644
  
 -	group = spdk_nvmf_get_optimal_poll_group(qpair);
  	if (group == NULL) {
- 		if (tgt->next_poll_group == NULL) {
- 			tgt->next_poll_group = TAILQ_FIRST(&tgt->poll_groups);
-@@ -1106,7 +1120,6 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
+-		if (tgt->next_poll_group == NULL) {
+-			tgt->next_poll_group = TAILQ_FIRST(&tgt->poll_groups);
++		// We will check infinite loop via round_poll_groups.
++		int round_poll_groups = 0;
++		do
++		{
+ 			if (tgt->next_poll_group == NULL) {
+-				SPDK_ERRLOG("No poll groups exist.\n");
+-				spdk_nvmf_qpair_disconnect(qpair, NULL, NULL);
+-				return;
++				tgt->next_poll_group = TAILQ_FIRST(&tgt->poll_groups);
++				round_poll_groups++;
++				if (tgt->next_poll_group == NULL || round_poll_groups >= 2) {
++					SPDK_ERRLOG("No poll groups exist.\n");
++					spdk_nvmf_qpair_disconnect(qpair, NULL, NULL);
++					return;
++				}
+ 			}
+-		}
+-		group = tgt->next_poll_group;
+-		tgt->next_poll_group = TAILQ_NEXT(group, link);
++			group = tgt->next_poll_group;
++			tgt->next_poll_group = TAILQ_NEXT(group, link);
++		} while(reactor_should_skipped(group->core) == true);
+ 	}
+-
+ 	ctx = calloc(1, sizeof(*ctx));
+ 	if (!ctx) {
+ 		SPDK_ERRLOG("Unable to send message to poll group.\n");
+@@ -1106,7 +1125,6 @@ spdk_nvmf_qpair_disconnect(struct spdk_nvmf_qpair *qpair, nvmf_qpair_disconnect_
  	SPDK_DTRACE_PROBE2(nvmf_qpair_disconnect, qpair, spdk_thread_get_id(group->thread));
  	assert(qpair->state == SPDK_NVMF_QPAIR_ACTIVE);
  	nvmf_qpair_set_state(qpair, SPDK_NVMF_QPAIR_DEACTIVATING);
@@ -1303,10 +1332,10 @@ index e5842b03f..1ad89d7db 100644
  	const struct spdk_nvme_transport_id *trid);
 diff --git lib/nvmf/pos_nvmf.c lib/nvmf/pos_nvmf.c
 new file mode 100644
-index 000000000..0244cb8d4
+index 000000000..0bfb871a9
 --- /dev/null
 +++ lib/nvmf/pos_nvmf.c
-@@ -0,0 +1,260 @@
+@@ -0,0 +1,270 @@
 +/*
 + *   BSD LICENSE
 + *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -1494,18 +1523,28 @@ index 000000000..0244cb8d4
 +	numa_dedicated_config = true;
 +}
 +
++bool
++reactor_should_skipped(uint32_t core)
++{
++	if (use_reactor_only)
++	{
++		if (CPU_ISSET(core, &event_reactor_core))
++		{
++			return true;
++		}
++	}
++	return false;
++}
++
 +static bool
 +initialize_poll_group_information(struct spdk_nvmf_tgt *tgt)
 +{
 +	struct spdk_nvmf_poll_group *group = NULL;
 +	for (group = TAILQ_FIRST(&tgt->poll_groups); group != NULL; group = TAILQ_NEXT(group, link))
 +	{
-+		if (use_reactor_only)
++		if (reactor_should_skipped(group->core))
 +		{
-+			if (CPU_ISSET(group->core, &event_reactor_core))
-+			{
-+				continue;
-+			}
++			continue;
 +		}
 +
 +		uint32_t numa = spdk_env_get_socket_id(group->core);

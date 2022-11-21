@@ -81,7 +81,7 @@ EventCpuPolicy::_SetRebuildPolicyWeight(void)
     QosUserPolicy& userPolicy = qosContext->GetQosUserPolicy();
     RebuildUserPolicy& rebuildUserPolicy = userPolicy.GetRebuildUserPolicy();
     uint8_t priority = rebuildUserPolicy.GetRebuildImpact();
-    // initialise with default priority weight(highest)
+    // initialise with default priority weight(high)
     QosCorrectionDir rebuildCorrection = QosCorrectionDir_PriorityHighest;
     switch (priority)
     {
