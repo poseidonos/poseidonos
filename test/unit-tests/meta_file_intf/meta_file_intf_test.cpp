@@ -72,7 +72,7 @@ public:
     {
         return 0;
     }
-    MetaFileIoCbPtr GetIoDoneCheckFunc(void)
+    MetaFileIoDoneCheckFunc GetIoDoneCheckFunc(void)
     {
         return [](void* data){ return 0; };
     }

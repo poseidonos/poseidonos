@@ -210,7 +210,7 @@ AllocatorFileIo::_Load(char* buf)
 
         numFilesReading++;
 
-        MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_LoadCompletedThenCB, this, std::placeholders::_1);
+        MetaFileIoCbPtr callback = std::bind(&AllocatorFileIo::_LoadCompletedThenCB, this, std::placeholders::_1);
         AsyncMetaFileIoCtx* request = new AsyncMetaFileIoCtx();
         request->SetIoInfo(MetaFsIoOpcode::Read, 0, fileSize, buf);
         request->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
@@ -274,7 +274,7 @@ AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId
     }
 
     numFilesFlushing++;
-    MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);
+    MetaFileIoCbPtr callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);
     AsyncMetaFileIoCtx* request = new AllocatorIoCtx(clientCallback);
     request->SetIoInfo(MetaFsIoOpcode::Write, 0, fileSize, buf);
     request->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());

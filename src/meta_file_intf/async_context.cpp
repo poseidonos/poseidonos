@@ -45,7 +45,7 @@ AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
   length(0),
   buffer(nullptr),
   callback(nullptr),
-  ioDoneCheckCallback(nullptr),
+  ioDoneCheckFunc(nullptr),
   fileInfoUpdated(false),
   ioInfoUpdated(false),
   callbackUpdated(false)
@@ -55,8 +55,8 @@ AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
 void
 AsyncMetaFileIoCtx::HandleIoComplete(void* data)
 {
-    if (ioDoneCheckCallback)
-        error = ioDoneCheckCallback(data);
+    if (ioDoneCheckFunc)
+        error = ioDoneCheckFunc(data);
     if (callback)
         callback(this);
 }
@@ -67,7 +67,7 @@ AsyncMetaFileIoCtx::GetBuffer(void)
     return buffer;
 }
 
-MetaIoCbPtr
+MetaFileIoCbPtr
 AsyncMetaFileIoCtx::GetCallback(void)
 {
     return callback;
@@ -114,16 +114,16 @@ AsyncMetaFileIoCtx::ToString(void) const
     oss << "buffer:" << ((buffer == nullptr) ? "nullptr" : "0x" + (boost::format("%x") % (uint64_t)(uint64_t*)buffer).str()) << ", ";
     oss << "callback:" << ((callback == nullptr) ? "nullptr" : "not nullptr") << ", ";
     oss << "error:" << error << ", ";
-    oss << "ioDoneCheckCallback:" << ((ioDoneCheckCallback == nullptr) ? "nullptr" : "not nullptr") << ", ";
+    oss << "ioDoneCheckCallback:" << ((ioDoneCheckFunc == nullptr) ? "nullptr" : "not nullptr") << ", ";
 
     return oss.str();
 }
 
 void
-AsyncMetaFileIoCtx::SetFileInfo(int fd_, MetaFileIoCbPtr ioDoneCallback_)
+AsyncMetaFileIoCtx::SetFileInfo(int fd_, MetaFileIoDoneCheckFunc ioDoneCallback_)
 {
     this->fd = fd_;
-    this->ioDoneCheckCallback = ioDoneCallback_;
+    this->ioDoneCheckFunc = ioDoneCallback_;
 
     fileInfoUpdated = true;
 }
@@ -141,7 +141,7 @@ AsyncMetaFileIoCtx::SetIoInfo(MetaFsIoOpcode opcode_, uint64_t fileOffset_,
 }
 
 void
-AsyncMetaFileIoCtx::SetCallback(MetaIoCbPtr callback_)
+AsyncMetaFileIoCtx::SetCallback(MetaFileIoCbPtr callback_)
 {
     this->callback = callback_;
 
