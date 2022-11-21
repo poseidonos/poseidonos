@@ -372,7 +372,7 @@ MapIoHandler::_HeaderAsyncLoaded(AsyncMetaFileIoCtx* ctx)
     // Mpages Async-load Request by Event
     numPagesToAsyncIo = mapHeader->GetNumValidMpages();
     numPagesAsyncIoDone = 0;
-    MetaIoCbPtr mpageAsyncLoadReqCB = std::bind(&MapIoHandler::_MpageAsyncLoaded, this, std::placeholders::_1);
+    MetaFileIoCbPtr mpageAsyncLoadReqCB = std::bind(&MapIoHandler::_MpageAsyncLoaded, this, std::placeholders::_1);
 
     EventSmartPtr mpageLoadRequest = std::make_shared<EventMpageAsyncIo>(mapHeader, map, file, mpageAsyncLoadReqCB);
     eventScheduler->EnqueueEvent(mpageLoadRequest);

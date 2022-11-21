@@ -185,7 +185,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     return EID(SUCCESS);
 }
 
-MetaFileIoCbPtr
+MetaFileIoDoneCheckFunc
 MetaFsFileIntf::GetIoDoneCheckFunc(void)
 {
     return std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);

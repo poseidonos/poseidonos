@@ -16,7 +16,7 @@ public:
     MOCK_METHOD(void, SetBufferAllocated, (uint64_t offset, int groupId, uint32_t seqNum), (override));
     MOCK_METHOD(void, IoDone, (), (override));
     MOCK_METHOD(int, GetError, (), (const, override));
-    MOCK_METHOD(void, SetFileInfo, (int fd, MetaFileIoCbPtr ioDoneCheckCallback), (override));
+    MOCK_METHOD(void, SetFileInfo, (int fd, MetaFileIoDoneCheckFunc ioDoneCheckCallback), (override));
 };
 
 } // namespace pos

@@ -55,7 +55,7 @@ public:
     virtual uint64_t GetFileSize(void) = 0;
 
     virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) = 0;
-    virtual MetaFileIoCbPtr GetIoDoneCheckFunc(void) = 0;
+    virtual MetaFileIoDoneCheckFunc GetIoDoneCheckFunc(void) = 0;
     virtual int CheckIoDoneStatus(void* data) = 0;
 
     virtual int Open(void);

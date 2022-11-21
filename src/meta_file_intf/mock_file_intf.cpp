@@ -130,7 +130,7 @@ MockFileIntf::_MockAsyncWrite(AsyncMetaFileIoCtx* ctx)
     ctx->HandleIoComplete(ioError);
 }
 
-MetaFileIoCbPtr
+MetaFileIoDoneCheckFunc
 MockFileIntf::GetIoDoneCheckFunc(void)
 {
     return std::bind(&MockFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
