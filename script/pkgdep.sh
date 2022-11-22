@@ -24,15 +24,12 @@ if [ -f /etc/debian_version ]; then
     # Additional RDMA
     apt-get install -y libnuma-dev uuid-dev ibverbs-utils perftest
     # Additional dependencies for iBOF OS
-    apt-get install -y python3 python-pip
-    apt-get install -y python3 python3-pip
+    apt-get install -y python3 python-pip python3-pip
     apt-get install -y iperf
     # for ibof logging
     apt-get install -y cmake libsystemd-dev
     # for json
     apt-get install -y jq rapidjson-dev
-    # for python3
-    apt-get install -y python3
     # for psutil
     apt-get install -y python3-psutil
     # Compiler cache
