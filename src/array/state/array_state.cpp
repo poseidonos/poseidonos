@@ -406,6 +406,7 @@ ArrayState::IsRecoverable(void)
     {
         case ArrayStateEnum::EXIST_DEGRADED:
         case ArrayStateEnum::DEGRADED:
+        case ArrayStateEnum::REBUILD:
         {
             return true;
         }
