@@ -153,7 +153,7 @@ MetaAsyncRunnable<CallbackCxtT, AsyncStateT, AsyncStateExecutionEntry>::ExecuteA
             prevState = currState;
             currState = stateInExec;
 
-            if (currState == AsyncStateT::Complete)
+            if ((currState == AsyncStateT::Complete) || (currState == AsyncStateT::Error))
             {
                 InvokeClientCallback();
                 completed = true;

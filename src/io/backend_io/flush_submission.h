@@ -41,7 +41,6 @@
 
 namespace pos
 {
-class Stripe;
 class IWBStripeAllocator;
 class IIOSubmitHandler;
 class IIOTranslator;
@@ -49,8 +48,8 @@ class IIOTranslator;
 class FlushSubmission : public Callback
 {
 public:
-    FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled = false);
-    FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
+    FlushSubmission(StripeSmartPtr inputStripe, int arrayId, bool isWTEnabled = false);
+    FlushSubmission(StripeSmartPtr inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
         IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled);
     ~FlushSubmission(void) override;
     uint32_t GetBufferListSize(void);
@@ -58,7 +57,7 @@ public:
 private:
     virtual bool _DoSpecificJob(void) override;
     
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     IIOSubmitHandler* iIOSubmitHandler;
     std::list<BufferEntry> bufferList;
     int arrayId;

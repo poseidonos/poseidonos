@@ -56,10 +56,10 @@ VolumeQosUpdater::Do(string name, uint64_t maxiops, uint64_t maxbw, uint64_t min
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    uint64_t originalMaxIops = vol->MaxIOPS();
-    uint64_t originalMaxBw = vol->MaxBW();
-    uint64_t originalMinIops = vol->MinIOPS();
-    uint64_t originalMinBw = vol->MinBW();
+    uint64_t originalMaxIops = vol->GetMaxIOPS();
+    uint64_t originalMaxBw = vol->GetMaxBW();
+    uint64_t originalMinIops = vol->GetMinIOPS();
+    uint64_t originalMinBw = vol->GetMinBW();
 
     try
     {

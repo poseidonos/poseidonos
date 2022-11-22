@@ -32,13 +32,12 @@
 
 #pragma once
 
-#include "src/array_mgmt/interface/i_array_mgmt.h"
 #include "src/bio/volume_io.h"
 #include "src/event_scheduler/callback.h"
+#include "src/volume/i_volume_info_manager.h"
 
 namespace pos
 {
-class Stripe;
 class VolumeIo;
 class IWBStripeAllocator;
 
@@ -47,16 +46,16 @@ class WriteCompletion : public Callback
 public:
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo);
     WriteCompletion(VolumeIoSmartPtr inputVolumeIo,
-        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow, IArrayMgmt* arrayMgr);
+        IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow, IVolumeInfoManager* volumeManager);
     ~WriteCompletion(void) override;
 
 private:
-    bool _UpdateStripe(Stripe*& stripeToFlush);
-    bool _RequestFlush(Stripe* stripe);
+    bool _UpdateStripe(StripeSmartPtr& stripeToFlush);
+    bool _RequestFlush(StripeSmartPtr stripe);
     bool _DoSpecificJob(void) override;
 
     VolumeIoSmartPtr volumeIo;
     IWBStripeAllocator* iWBStripeAllocator;
-    IArrayMgmt* arrayMgr;
+    IVolumeInfoManager* volumeManager;
 };
 } // namespace pos

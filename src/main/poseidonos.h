@@ -33,8 +33,10 @@
 #pragma once
 
 #include <cstdint>
-#include <thread>
 #include <string>
+#include <thread>
+
+#include "mk/ibof_config.h"
 #include "src/debug/debug_info.h"
 #include "src/master_context/config_manager.h"
 #include "src/master_context/version_provider.h"
@@ -71,7 +73,7 @@ private:
     void _InitAIR(void);
     void _InitMemoryChecker(void);
     void _InitResourceChecker(void);
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     void _InitReplicatorManager(void);
 #endif
     void _SetPerfImpact(void);

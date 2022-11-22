@@ -8,7 +8,7 @@
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
 #include "test/unit-tests/allocator/i_segment_ctx_mock.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"

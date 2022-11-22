@@ -16,7 +16,7 @@
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 #include "test/integration-tests/journal/utils/test_info.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 
 namespace pos
 {
@@ -49,7 +49,7 @@ RocksDBLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(NUM_LOG_GROUPS));
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
 
-    factory.Init(&config, new LogBufferWriteDoneNotifier());
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks = new RocksDBLogBuffer(GetLogDirName());
     journalRocks->Init(&config, &factory, 0, nullptr);
 
@@ -106,7 +106,7 @@ RocksDBLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateStripeMapLogWriteContext(stripe, oldAddr, callback);
+        factory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callback);
     context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
         this, std::placeholders::_1));
     return context;
@@ -290,7 +290,7 @@ TEST_F(RocksDBLogBufferIntegrationTest, CreateAndClose)
     // Given : array name and When JournalRocks opened
     RocksDBLogBuffer journalRocks("OpenAndClose");
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
-    factory.Init(&config, new LogBufferWriteDoneNotifier());
+    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks.Init(&config, &factory, 0, nullptr);
 
     uint64_t logBufferSize = LOG_BUFFER_SIZE;

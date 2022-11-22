@@ -36,7 +36,7 @@
 
 #include <thread>
 
-#include "src/pos_replicator/dummy_ha/dummy_ha_server.h"
+#include "mock_grpc/mock_replicator_server.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 
 using ::testing::_;
@@ -57,7 +57,7 @@ protected:
     void SetUp(void) override;
     void TearDown(void) override;
 
-    DummyHaServer* haServer;
+    MockReplicatorServer* haServer;
     GrpcPublisher* posClient;
     NiceMock<MockConfigManager>* configManager;
 };
@@ -69,9 +69,9 @@ GrpcPublisherTestFixture::SetUp(void)
     ON_CALL(*configManager, GetValue("replicator", "ha_publisher_address", _, _)).WillByDefault(SetArg2ToStringAndReturn0("0.0.0.0:50003"));
     
     // new Server : HA side
-    haServer = new DummyHaServer();
+    haServer = new MockReplicatorServer();
     string serverAddress(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
-    new std::thread(&DummyHaServer::RunServer, haServer, serverAddress);
+    new std::thread(&MockReplicatorServer::RunServer, haServer, serverAddress);
     sleep(1);
 
     posClient = new GrpcPublisher(nullptr, configManager);
@@ -135,14 +135,15 @@ TEST_F(GrpcPublisherTestFixture, DISABLED_GrpcPublisher_CompleteWrite)
 TEST_F(GrpcPublisherTestFixture, DISABLED_GrpcPublisher_CompleteRead)
 {
     // Given
-    uint64_t lsn = 10;
-    uint64_t size = 10;
-    string volumeName = "";
     string arrayName = "";
-    void* buf = nullptr;
+    string volumeName = "";
+    uint64_t rba = 0;
+    uint64_t numBlocks = 8;
+    uint64_t lsn = 10;
+    void* buffer = nullptr;
 
     // When
-    int ret = posClient->CompleteRead(lsn, size, volumeName, arrayName, buf);
+    int ret = posClient->CompleteRead(arrayName, volumeName, rba, numBlocks, lsn, buffer);
 
     // Then: Do Nothing
     EXPECT_EQ(EID(SUCCESS), ret);

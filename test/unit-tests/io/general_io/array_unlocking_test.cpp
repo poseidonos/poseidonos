@@ -14,7 +14,7 @@ TEST(ArrayUnlocking, ArrayUnlocking_Constructor)
     StripeId stripeId = 0;
     MockIIOLocker mockIIOLocker;
     // When : Constructor
-    ArrayUnlocking arrayUnlocking(devs, stripeId, &mockIIOLocker);
+    ArrayUnlocking arrayUnlocking(devs, stripeId, &mockIIOLocker, 0);
 }
 
 TEST(ArrayUnlocking, ArrayUnlocking_DoSpecificJob)
@@ -24,7 +24,7 @@ TEST(ArrayUnlocking, ArrayUnlocking_DoSpecificJob)
     StripeId stripeId = 0;
     MockIIOLocker mockIIOLocker;
     // Then : Execute and check result
-    ArrayUnlocking arrayUnlocking(devs, stripeId, &mockIIOLocker);
+    ArrayUnlocking arrayUnlocking(devs, stripeId, &mockIIOLocker, 0);
     Callback* callback = &arrayUnlocking;
     EXPECT_CALL(mockIIOLocker, Unlock(devs, _));
     bool actual = callback->Execute();

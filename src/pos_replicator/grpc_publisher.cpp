@@ -34,49 +34,73 @@
 
 #include <memory>
 #include <string>
+#include <thread>
 
+#include "src/include/array_config.h"
 #include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 
-namespace std
-{
-class thread;
-}
-
 namespace pos
 {
 GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigManager* configManager)
 {
-    std::string serverAddr;
+    std::string serverAddress;
     int ret = configManager->GetValue("replicator", "ha_publisher_address",
-        static_cast<void*>(&serverAddr), CONFIG_TYPE_STRING);
+        static_cast<void*>(&serverAddress), CONFIG_TYPE_STRING);
     if (ret != 0)
     {
-        POS_TRACE_INFO(static_cast<int>(EID(HA_DEBUG_MSG)),
-            "Failed to read grpc publisher address from config file, Address will be set defined in the \"grpc_server_socket_address.h\"");
-        serverAddr = GRPC_HA_PUB_SERVER_SOCKET_ADDRESS;
+        serverAddress = GRPC_HA_PUB_SERVER_SOCKET_ADDRESS;
+        POS_TRACE_WARN(static_cast<int>(EID(HA_DEBUG_MSG)),
+            "Cannot read address of grpc publisher from pos config file, Address will be set as the default vaule. POS_HA_PUBLISHER: {}", serverAddress);
     }
-
-    std::shared_ptr<grpc::Channel> channel = channel_;
-    if (channel == nullptr)
-    {
-        channel = grpc::CreateChannel(serverAddr, grpc::InsecureChannelCredentials());
-    }
-
-    stub = ::replicator_rpc::ReplicatorIo::NewStub(channel);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator publisher has been initialized with the channel newly established on {}", serverAddr);
+    new std::thread(&GrpcPublisher::_ConnectGrpcServer, this, serverAddress);
 }
 
 GrpcPublisher::~GrpcPublisher(void)
 {
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "GrpcPublisher has been destructed");
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator publisher has been destructed");
+}
+
+void
+GrpcPublisher::_ConnectGrpcServer(std::string targetAddress)
+{
+    if (channel == nullptr)
+    {
+        channel = grpc::CreateChannel(targetAddress, grpc::InsecureChannelCredentials());
+        if (_WaitUntilReady() != true)
+        {
+            POS_TRACE_ERROR(EID(HA_COMPLETION_FAIL), "Failed to initialize replicator publisher");
+        }
+    }
+
+    stub = ::replicator_rpc::ReplicatorIoService::NewStub(channel);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator publisher has been initialized with the channel newly established on {}", targetAddress);
+}
+
+bool
+GrpcPublisher::_WaitUntilReady()
+{
+    // TODO (cheolho.kang): check functionality. Should wait until grpc channel is ready
+    /*
+    auto state = channel->GetState(true);
+    while (state != GRPC_CHANNEL_READY)
+    {
+        if (!channel->WaitForStateChange(state, gpr_inf_future(GPR_CLOCK_REALTIME)))
+        {
+            POS_TRACE_ERROR(EID(HA_COMPLETION_FAIL), "Failed to wait for state change due to grpc error");
+            return false;
+        }
+        state = channel->GetState(true);
+    }
+    */
+    return true;
 }
 
 int
 GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
-    string arrayName, void* buf, uint64_t& lsn)
+    string arrayName, void* buffer, uint64_t& lsn)
 {
     ::grpc::ClientContext cliContext;
     replicator_rpc::PushHostWriteRequest* request = new replicator_rpc::PushHostWriteRequest;
@@ -93,13 +117,12 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
         replicator_rpc::Chunk* dataChunk = request->add_data();
         request->CopyFrom(buf);
     }
-*/
+    */
 
     grpc::Status status = stub->PushHostWrite(&cliContext, *request, &response);
-
     if (status.ok() == false)
     {
-        POS_TRACE_WARN(EID(HA_INVALID_RETURN_LSN), "Fail PushHostWrite");
+        POS_TRACE_ERROR(EID(HA_INVALID_RETURN_LSN), "Failed to send PushHostWrite");
         return EID(HA_INVALID_RETURN_LSN);
     }
     lsn = response.lsn();
@@ -150,24 +173,44 @@ GrpcPublisher::CompleteWrite(uint64_t lsn, string volumeName, string arrayName)
 }
 
 int
-GrpcPublisher::CompleteRead(uint64_t lsn, uint64_t size, string volumeName, string arrayName, void* buf)
+GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer)
 {
     ::grpc::ClientContext cliContext;
     replicator_rpc::CompleteReadRequest* request = new replicator_rpc::CompleteReadRequest;
     replicator_rpc::CompleteReadResponse response;
+    struct Chunk
+    {
+        char contents[ArrayConfig::BLOCK_SIZE_BYTE];
+    };
 
-    request->set_lsn(lsn);
     request->set_array_name(arrayName);
     request->set_volume_name(volumeName);
-    // to do set buffer
+    request->set_rba(rba);
+    request->set_num_blocks(numBlocks);
 
-    grpc::Status status = stub->CompleteRead(&cliContext, *request, &response);
-
-    if (status.ok() == false)
+    for (uint64_t index = 0; index < numBlocks; index++)
     {
-        return EID(HA_COMPLETION_FAIL);
+        char* dataPtr = (char*)buffer + index * ArrayConfig::BLOCK_SIZE_BYTE;
+        Chunk* chunkPtr = reinterpret_cast<Chunk*>(dataPtr);
+
+        replicator_rpc::Chunk* data = request->add_data();
+        data->set_content((char*)chunkPtr);
     }
 
+    grpc::Status status;
+    if (_WaitUntilReady() == true)
+    {
+        status = stub->CompleteRead(&cliContext, *request, &response);
+        if (status.ok() == true)
+        {
+            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::REPLICATOR, EID(HA_DEBUG_MSG), "Complete to send CompleteRead response to replicator. volume name: {}, rba:{}, num_block: {}", volumeName, rba, numBlocks);
+        }
+        else
+        {
+            POS_TRACE_ERROR(EID(HA_COMPLETION_FAIL), "Failed to send CompleteRead response to replicator due to grpc error, status: {}", status.error_code());
+            return EID(HA_COMPLETION_FAIL);
+        }
+    }
     return EID(SUCCESS);
 }
 } // namespace pos

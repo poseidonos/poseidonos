@@ -10,7 +10,7 @@ import (
 func TestSetSystemProperty(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
-	_, err := testmgr.ExecuteCommand(rootCmd, "system", "set-property", "--rebuild-impact", "lowest")
+	_, err := testmgr.ExecuteCommand(rootCmd, "system", "set-property", "--rebuild-impact", "low")
 	if err != nil {
 		t.Errorf("Expected: nil Output: %q", err.Error())
 	}

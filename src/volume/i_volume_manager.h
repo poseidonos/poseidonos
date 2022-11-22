@@ -46,14 +46,15 @@ class IVolumeManager : public IVolumeEventManager, public IVolumeInfoManager, pu
 {
 public:
     public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid = "") = 0;
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
+                        int32_t nsid, bool isPrimary, std::string uuid = "") = 0;
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;
     virtual int Unmount(int volId) = 0;
     virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
-    virtual int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) = 0;
-    virtual int UpdateVolumeReplicationRoleProperty(std::string name, VolumeReplicationRoleProperty nodeProperty) = 0;
+    virtual int UpdateReplicationState(std::string name, ReplicationState state) = 0;
+    virtual int UpdateReplicationRole(std::string name, ReplicationRole nodeProperty) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual int SaveVolumeMeta(void) = 0;
 
@@ -62,14 +63,14 @@ public:
     virtual int GetVolumeName(int volId, std::string& volName) = 0;
     virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
-    virtual int GetVolumeStatus(int volId) = 0;
-    virtual int GetVolumeReplicationState(int volId) = 0;
-    virtual int GetVolumeReplicationRoleProperty(int volId) = 0;
+    virtual int GetVolumeMountStatus(int volId) = 0;
+    virtual int GetReplicationState(int volId) = 0;
+    virtual int GetReplicationRole(int volId) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;
     virtual uint64_t EntireVolumeSize(void) = 0;
     virtual int GetVolumeSize(int volId, uint64_t& volSize) = 0;
     virtual VolumeList* GetVolumeList(void) = 0;
-    virtual std::string GetStatusStr(VolumeStatus status) = 0;
+    virtual std::string GetStatusStr(VolumeMountStatus status) = 0;
 
     virtual int IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit = 1) = 0;
     virtual int DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted = 1) = 0;

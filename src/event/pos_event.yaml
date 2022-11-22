@@ -53,7 +53,7 @@ Root:
     Solution:
 
 
-  # Trace: 1000 - 1199
+  # Trace: 1000 - 1099
   -
     Id: 1000
     Name: POS_TRACE_STARTED
@@ -167,7 +167,112 @@ Root:
     Cause:
     Solution:
 
-
+  # POS INIT: 1101 - 1199
+  -
+    Id: 1101
+    Name: POS_CONFIG_LOADED
+    Severity:
+    Message: POS configuration is successfully loaded.
+    Cause:
+    Solution:
+  -
+    Id: 1102
+    Name: POS_INITIALIZING_SIG_HANDLER
+    Severity:
+    Message: Trying to initialize signal handler.
+    Cause:
+    Solution:
+  -
+    Id: 1103
+    Name: POS_INITIALIZING_VERSION
+    Severity:
+    Message: Trying to initialize version info.
+    Cause:
+    Solution:
+  -
+    Id: 1104
+    Name: POS_INITIALIZING_SPDK
+    Severity:
+    Message: Trying to initialize SPDK.
+    Cause:
+    Solution:
+  -
+    Id: 1105
+    Name: POS_INITIALIZING_CPU_AFFINITY
+    Severity:
+    Message: Trying to initialize CPU affinity.
+    Cause:
+    Solution:
+  -
+    Id: 1106
+    Name: POS_INITIALIZING_THREAD_MODEL
+    Severity:
+    Message: Trying to initialize thread model.
+    Cause:
+    Solution:
+  -
+    Id: 1107
+    Name: POS_INITIALIZING_QOS_POLICY
+    Severity:
+    Message: Trying to initialize QoS policy.
+    Cause:
+    Solution:
+  -
+    Id: 1108
+    Name: POS_INITIALIZING_DEBUG_MODULES
+    Severity:
+    Message: Trying to initialize debug modules.
+    Cause:
+    Solution:
+  -
+    Id: 1109
+    Name: POS_INITIALIZING_AIR
+    Severity:
+    Message: Trying to initialize AIR.
+    Cause:
+    Solution:
+  -
+    Id: 1110
+    Name: POS_INITIALIZING_IO_MODULES
+    Severity:
+    Message: Trying to initialize IO modules.
+    Cause:
+    Solution:
+  -
+    Id: 1111
+    Name: POS_INITIALIZING_MEMORY_CHECKER
+    Severity:
+    Message: Trying to initialize memory checker.
+    Cause:
+    Solution:
+  -
+    Id: 1112
+    Name: POS_INITIALIZING_RESOURCE_CHECKER
+    Severity:
+    Message: Trying to initialize resource checker.
+    Cause:
+    Solution:
+  -
+    Id: 1113
+    Name: POS_INITIALIZING_EXPORTER
+    Severity:
+    Message: Trying to initialize exporter
+    Cause:
+    Solution:
+  -
+    Id: 1114
+    Name: POS_INITIALIZING_CLI_SERVER
+    Severity:
+    Message: Trying to initialize CLI server
+    Cause:
+    Solution:
+  -
+    Id: 1119
+    Name: POS_INIT_EXCEPTIONS
+    Severity:
+    Message: An exception occurred during POS initialization.
+    Cause:
+    Solution:
   # CLI Server: 1200 - 1599
   -
     Id: 1201
@@ -341,9 +446,9 @@ Root:
     Id: 1225
     Name: CLI_LIST_ARRAY_NO_ARRAY_EXISTS
     Severity:
-    Message:
+    Message: There is no array created.
     Cause:
-    Solution:
+    Solution: Create an array and try again.
   -
     Id: 1226
     Name: CLI_LIST_ARRAY_FAILURE
@@ -2170,35 +2275,35 @@ Root:
     Id: 2810
     Name: INVOKE_REBUILD_DUE_TO_SPARE_ADDED
     Severity:
-    Message:
+    Message: A spare device is added in the degraded state and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2811
     Name: INVOKE_REBUILD_DUE_TO_DEVICE_DETACHED
     Severity:
-    Message:
+    Message: Device failure detected and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2812
     Name: INVOKE_REBUILD_DUE_TO_ARRAY_MOUNTED
     Severity:
-    Message:
+    Message: The rebuild target was found at the time of array mount and the rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2813
     Name: INVOKE_RESUME_REBUILD
     Severity:
-    Message:
-    Cause:
+    Message: A suspended rebuild operation has been found and rebuild execution conditions are being checked.
+    Cause: The rebuild operation might have been canceled during the rebuild or the process might have been forcibly terminated.
     Solution:
   -
     Id: 2814
     Name: INVOKE_REBUILD_DUE_TO_USER_REQUEST
     Severity:
-    Message:
+    Message: The user has requested the rebuild and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
@@ -2825,7 +2930,7 @@ Root:
     Solution:
   -
     Id: 3031
-    Name: JOURNAL_FLUSH_LOG_GROUP
+    Name: JOURNAL_RELEASE_LOG_GROUP_STARTED
     Severity:
     Message:
     Cause:
@@ -2839,7 +2944,7 @@ Root:
     Solution:
   -
     Id: 3033
-    Name: JOURNAL_CHECKPOINT_STATUS
+    Name: JOURNAL_CHECKPOINT_STATUS_CHANGED
     Severity:
     Message:
     Cause:
@@ -2860,7 +2965,7 @@ Root:
     Solution:
   -
     Id: 3036
-    Name: JOUNRAL_WRITE_LOG_GROUP_FOOTER
+    Name: JOURNAL_WRITE_LOG_GROUP_FOOTER
     Severity:
     Message:
     Cause:
@@ -2879,7 +2984,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3039
+    Name: JOURNAL_LOG_GROUP_ALLOCATED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 3040
     Name: JOURNAL_HANDLE_VOLUME_DELETION
@@ -2887,7 +2998,27 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3041
+    Name: JOURNAL_CHECKPOINT_FLUSH_METADATA
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3042
+    Name: JOURNAL_CHECKPOINT_FLUSH_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3043
+    Name: JOURNAL_RELEASE_LOG_GROUP_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 3050
     Name: JOURNAL_REPLAY_STARTED
@@ -3000,7 +3131,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3068
+    Name: VERSIONED_SEGMENT_INFO
+    Severity:
+    Message:
+    Cause:
+    Solution:
   -
     Id: 3070
     Name: ROCKSDB_LOG_BUFFER_OPENED
@@ -3293,7 +3430,7 @@ Root:
     Solution:
   -
     Id: 3116
-    Name: REVMAP_GET_MFS_ALIGNED_IOSIZE_FAILURE
+    Name: COPY_MAP_HEADER
     Severity:
     Message:
     Cause:
@@ -3307,7 +3444,7 @@ Root:
     Solution:
   -
     Id: 3118
-    Name: REVMAP_NOT_LINKED_PACK
+    Name: REVMAP_RESERVED
     Severity:
     Message:
     Cause:
@@ -3335,7 +3472,7 @@ Root:
     Solution:
   -
     Id: 3122
-    Name: REVMAP_MFS_IO_ERROR
+    Name: REVMAP_IO_ERROR
     Severity:
     Message:
     Cause:
@@ -3515,7 +3652,13 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3148
+    Name: MAP_FLUSH_FAILED
+    Severity:
+    Message:
+    Cause:
+    Solution:
   # Allocator: 3150 - 3299
   -
     Id: 3150
@@ -3862,7 +4005,7 @@ Root:
     Solution: but it's not the rebuilding target.
   -
     Id: 3199
-    Name: ALLOCATOR_FAILED_TO_ASSIGN_STRIPE
+    Name: ALLOCATOR_RESERVED
     Severity:
     Message:
     Cause:
@@ -3979,7 +4122,20 @@ Root:
     Message:
     Cause:
     Solution:
-
+  -
+    Id: 3216
+    Name: ALLOCATOR_META_ARCHIVE_STORE_COMPLETED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3217
+    Name: WBSTRIPE_MANAGER_FAILED_TO_GET_BUFFER
+    Severity:
+    Message:
+    Cause:
+    Solution:
   # Metadata: 3300 - 3399
   -
     Id: 3300
@@ -4229,6 +4385,55 @@ Root:
     Message: A flush occurred before the GC force flush timer expired, and the timer was reset.
     Cause:
     Solution:
+  -
+    Id: 3437
+    Name: GC_STRIPE_FORCIBLY_FLUSHED
+    Severity:
+    Message: The GC stripe forcibly flushed because the timer expired.
+    Cause:
+    Solution:
+  -
+    Id: 3440
+    Name: GC_NORMAL_FLUSH_TRYLOCK_FAILED
+    Severity:
+    Message: GC normal flush lock acquisition failed
+    Cause: Forced flushing
+    Solution:
+  -
+    Id: 3441
+    Name: GC_FORCE_FLUSH_LOCK_ACQUIRED
+    Severity:
+    Message: GC force flush lock acquired
+    Cause:
+    Solution:
+  -
+    Id: 3442
+    Name: GC_FORCE_FLUSH_TRYLOCK_FAILED
+    Severity:
+    Message: GC force flush lock acquisition failed
+    Cause:
+    Solution: It will be retried
+  -
+    Id: 3443
+    Name: GC_FORCE_FLUSH_LOCK_RELEASED
+    Severity:
+    Message: GC force flush lock released
+    Cause:
+    Solution:
+  -
+    Id: 3444
+    Name: GC_FORCE_FLUSH_TRYLOCK_WAITING
+    Severity:
+    Message: Waiting for GC force flush lock acquisition
+    Cause: The volume is deleted and need to reset flush lock
+    Solution:
+  -
+    Id: 3445
+    Name: GC_FLUSH_LOCK_RESET
+    Severity:
+    Message: GC flush lock reset
+    Cause: The volume is deleted
+    Solution:
 
   # WBTGC: 3470 - 3499
   -
@@ -4344,6 +4549,13 @@ Root:
     Name: FLOW_CONTROL_NO_MATCHING_REQ_ARRAY_NAME
     Severity:
     Message:
+    Cause:
+    Solution:
+  -
+    Id: 3511
+    Name: FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH
+    Severity:
+    Message: Tokens are reset due to force flush.
     Cause:
     Solution:
 
@@ -5139,7 +5351,49 @@ Root:
     Message: The mpio is enqueued twice
     Cause: It is possible that the mpio is enqueued twice
     Solution: Need to debug
-  
+  -
+    Id: 4092
+    Name: MFS_INVALID_CRC
+    Severity:
+    Message: It is failed to find to match crc values between written crc and generated crc from data buffer
+    Cause: Written crc or data might be damaged
+    Solution:
+  -
+    Id: 4093
+    Name: MFS_INVALID_META_LPN
+    Severity:
+    Message: It is failed to find to match lpn numbers between expected one and written
+    Cause: Written lpn number or data might be damaged
+    Solution:
+  -
+    Id: 4094
+    Name: MFS_INVALID_FILE_DESCRIPTOR
+    Severity:
+    Message: It is failed to find to match crc values between expected one and written
+    Cause: Written file descriptor or data might be damaged
+    Solution:
+  -
+    Id: 4095
+    Name: MFS_INVALID_SIGNATURE
+    Severity:
+    Message: It is failed to find to match signatures between expected one and written
+    Cause: Written signature or data might be damaged
+    Solution:
+  -
+    Id: 4096
+    Name: MFS_INVALID_EPOCH_SIGNATURE
+    Severity:
+    Message: It is failed to find to match epoch signatures between expected one and written
+    Cause: Written epoch signature or data might be damaged
+    Solution:
+  -
+    Id: 4097
+    Name: MFS_FAILED_TO_CHECK_INTEGRITY
+    Severity:
+    Message: There are some problems with data integrity
+    Cause: Data may be damaged
+    Solution:
+
   -
     Id: 4500
     Name: VOLUME_EVENT
@@ -7520,6 +7774,54 @@ Root:
     Cause:
     Solution:
 
+  # AIR: 7000 - 7299
+  -
+    Id: 7000
+    Name: AIR_TARGET_CORE
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7001
+    Name: AIR_INITIALIZE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7002
+    Name: AIR_ACTIVATE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7003
+    Name: AIR_DEACTIVATE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7004
+    Name: AIR_FINALIZE_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+
+  -
+    Id: 7005
+    Name: AIR_REGISTER_EVENT_SUCCEED
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # High-Availability Replication: 8000 - 8299
   -
@@ -7853,6 +8155,27 @@ Root:
     Message: Failed to set telemetry property.
     Cause: Could not open the file.
     Solution: Check if the file path is correct, or you have the permission.
+  -
+    Id: 9529
+    Name: TELEMETRY_INTERVAL_HAS_NOT_BEEN_LOADED
+    Severity:
+    Message: Failed to load time interval for easy telemetry.
+    Cause: Could not load the time interval.
+    Solution: Check if the file is correct, or the interval_in_millisecond_for_easy_telemetry_publisher is in the file.
+  -
+    Id: 9530
+    Name: TELEMETRY_THREAD_IS_NOT_EXIST
+    Severity:
+    Message: Failed to stop the worker to publish metrics.
+    Cause: Could not stop the worker thread.
+    Solution: Check if the worker has been run.
+  -
+    Id: 9531
+    Name: TELEMETRY_NOT_SUPPORT_TYPE
+    Severity:
+    Message: The metric type is not supported currently.
+    Cause: Could not publish the metric.
+    Solution: Need to implement
 
 
   # DEBUG: 10000 - 10199

@@ -49,18 +49,19 @@ public:
     virtual int GetVolumeName(int volId, std::string& volName) = 0;
     virtual int GetVolumeID(std::string volName) = 0;
     virtual int GetVolumeCount(void) = 0;
-    virtual int GetVolumeStatus(int volId) = 0;
-    virtual int GetVolumeReplicationState(int volId) = 0;
-    virtual int GetVolumeReplicationRoleProperty(int volId) = 0;
+    virtual int GetVolumeMountStatus(int volId) = 0;
+    virtual int GetReplicationState(int volId) = 0;
+    virtual int GetReplicationRole(int volId) = 0;
     virtual uint64_t EntireVolumeSize(void) = 0;
     virtual int GetVolumeSize(int volId, uint64_t& volSize) = 0;
     virtual VolumeList* GetVolumeList(void) = 0;
-    virtual std::string GetStatusStr(VolumeStatus status) = 0;
+    virtual std::string GetStatusStr(VolumeMountStatus status) = 0;
     virtual int CancelVolumeReplay(int volId) = 0;
 
     virtual VolumeBase* GetVolume(int volId) = 0;
 
     virtual std::string GetArrayName(void) = 0;
+    virtual bool IsWriteThroughEnabled(void) = 0;
 
     virtual int CheckVolumeValidity(std::string name) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;

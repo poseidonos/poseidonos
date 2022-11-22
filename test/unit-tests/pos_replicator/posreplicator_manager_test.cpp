@@ -40,8 +40,8 @@
 
 #include "spdk/pos.h"
 #include "src/include/pos_event_id.h"
-#include "src/pos_replicator/dummy_ha/dummy_ha_client.h"
-#include "src/pos_replicator/dummy_ha/dummy_ha_server.h"
+#include "mock_grpc/mock_replicator_client.h"
+#include "mock_grpc/mock_replicator_server.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/pos_replicator/grpc_publisher_mock.h"
@@ -66,8 +66,8 @@ protected:
     void SetUp(void) override;
     void TearDown(void) override;
 
-    DummyHaServer* haServer;
-    DummyHaClient* haClient;
+    MockReplicatorServer* haServer;
+    MockReplicatorClient* haClient;
     NiceMock<MockConfigManager>* configManager;
     PosReplicatorManager* posReplicatorManager;
     NiceMock<MockGrpcPublisher>* grpcPublisher;
@@ -78,9 +78,9 @@ void
 PosReplicatorManagerTestFixture::SetUp(void)
 {
     // new Server : HA side
-    haServer = new DummyHaServer();
+    haServer = new MockReplicatorServer();
     string serverAddress(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
-    new std::thread(&DummyHaServer::RunServer, haServer, serverAddress);
+    new std::thread(&MockReplicatorServer::RunServer, haServer, serverAddress);
     sleep(1);
 
     // new PosReplicator : POS side
@@ -95,7 +95,7 @@ PosReplicatorManagerTestFixture::SetUp(void)
     sleep(1);
 
     // new Client : HA side
-    haClient = new DummyHaClient(nullptr);
+    haClient = new MockReplicatorClient(nullptr);
 }
 
 void
@@ -174,11 +174,9 @@ TEST_F(PosReplicatorManagerTestFixture, HAIOCompletion_)
 
     // Then
     uint64_t lsn;
-    pos_io io;
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
-    VolumeIoSmartPtr volumeIo(mockVolumeIo);
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
 
-    posReplicatorManager->HAIOCompletion(lsn, io, volumeIo);
+    posReplicatorManager->HAIOCompletion(lsn, volumeIo);
 }
 
 TEST_F(PosReplicatorManagerTestFixture, HAWriteCompletion_)
@@ -187,8 +185,9 @@ TEST_F(PosReplicatorManagerTestFixture, HAWriteCompletion_)
 
     // Then
     uint64_t lsn;
-    pos_io io;
-    posReplicatorManager->HAWriteCompletion(lsn, io);
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
+
+    posReplicatorManager->HAWriteCompletion(lsn, volumeIo);
 }
 
 TEST_F(PosReplicatorManagerTestFixture, HAReadCompletion_)
@@ -197,11 +196,9 @@ TEST_F(PosReplicatorManagerTestFixture, HAReadCompletion_)
 
     // Then
     uint64_t lsn;
-    pos_io io;
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
-    VolumeIoSmartPtr volumeIo(mockVolumeIo);
+    VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
 
-    posReplicatorManager->HAReadCompletion(lsn, io, volumeIo);
+    posReplicatorManager->HAReadCompletion(lsn, volumeIo);
 }
 
 TEST_F(PosReplicatorManagerTestFixture, ConvertArrayIdtoArrayName_)

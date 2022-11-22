@@ -39,40 +39,16 @@
 #include <mutex>
 #include <string>
 
+#include "src/volume/volume_attribute.h"
+#include "src/volume/volume_network_property.h"
+#include "src/volume/volume_perfomance_property.h"
+#include "src/volume/volume_replicate_property.h"
+#include "src/volume/volume_status_property.h"
+
 #define MAX_VOLUME_COUNT (256)
 
 namespace pos
 {
-
-enum VolumeAttribute
-{
-    UserData,
-    HAJournalData,
-    MaxVolumeAttributes
-};
-
-enum VolumeStatus
-{
-    Unmounted,
-    Mounted,
-    Offline,
-    MaxVolumeStatus
-};
-
-enum VolumeReplicationState
-{
-    StandAloneState,
-    VolumeCopyState,
-    LiveReplicationState,
-    MaxVolumeReplicationState
-};
-
-enum VolumeReplicationRoleProperty
-{
-    Primary,
-    Secondary,
-    MaxNodeCnt
-};
 
 enum VolumeIoType
 {
@@ -82,145 +58,34 @@ enum VolumeIoType
     MaxVolumeIoTypeCnt
 };
 
-const uint32_t KIOPS = 1000;
-const uint32_t MIB_IN_BYTE = 1024 * 1024;
-const uint64_t MIN_IOPS_LIMIT = 10;
-const uint64_t MIN_BW_LIMIT = 10;
-const uint64_t MAX_IOPS_LIMIT = UINT64_MAX / KIOPS;
-const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
-
-class VolumeBase
+class VolumeBase : public VolumeAttribute, public StatusProperty, public NetworkProperty, public PerfomanceProperty, public ReplicationProperty
 {
 public:
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-        VolumeAttribute volumeAttribute);
-    VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
-        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute);
+    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
+                std::string volName, uint64_t volSizeByte, uint32_t nsid,
+                ReplicationRole voluemRole);
+    VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
+                std::string volName, uint64_t volSizeByte, uint32_t nsid,
+                uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
+                ReplicationRole voluemRole);
     virtual ~VolumeBase(void);
+
     int Mount(void);
     int Unmount(void);
+
     void LockStatus(void);
     void UnlockStatus(void);
-    uint64_t TotalSize(void);
+
     uint64_t UsedSize(void);
     uint64_t RemainingSize(void);
 
-    std::string
-    GetName(void)
-    {
-        return name;
-    }
-    std::string
-    GetUuid(void)
-    {
-        return uuid;
-    }
-    std::string
-    GetArrayName(void)
-    {
-        return array;
-    }
-    int
-    GetArray(void)
-    {
-        return arrayId;
-    }
-    std::string
-    GetSubnqn(void)
-    {
-        return subNqn;
-    }
-    void SetSubnqn(std::string inputSubNqn);
-    void SetUuid(std::string inputUuid);
-    VolumeAttribute
-    GetAttribute(void)
-    {
-        return attribute;
-    }
-    VolumeStatus
-    GetStatus(void)
-    {
-        return status;
-    }
-    VolumeReplicationState
-    GetReplicationState(void)
-    {
-        return replicationState;
-    }
-    void        
-    SetReplicationState(VolumeReplicationState state)
-    {
-        replicationState = state;
-    }
-    VolumeReplicationRoleProperty
-    GetReplicateRoleProperty(void)
-    {
-        return replicationRole;
-    }
-    void        
-    SetReplicateRoleProperty(VolumeReplicationRoleProperty roleProperty)
-    {
-        replicationRole = roleProperty;
-    }
-
-    bool
-    IsValid(void)
-    {
-        return isValid;
-    }
-    void
-    SetValid(bool valid)
-    {
-        isValid = valid;
-    }
-    uint64_t
-    MaxIOPS(void)
-    {
-        return maxiops;
-    }
-    uint64_t
-    MaxBW(void)
-    {
-        return maxbw;
-    }
-    uint64_t
-    MinIOPS(void)
-    {
-        return miniops;
-    }
-    uint64_t
-    MinBW(void)
-    {
-        return minbw;
-    }
-    void SetMaxIOPS(uint64_t val);
-    void SetMaxBW(uint64_t val);
-    void SetMinIOPS(uint64_t val);
-    void SetMinBW(uint64_t val);
-    void
-    Rename(std::string val)
-    {
-        name = val;
-    }
+    bool IsValid(void) {return isValid;}
+    void SetValid(bool valid) {isValid = valid;}
 
     int ID;
 
-protected:
-    VolumeAttribute attribute;
-    VolumeStatus status;
-    VolumeReplicationState replicationState;
-    VolumeReplicationRoleProperty replicationRole;
-    std::string name;
-    std::string uuid;
-    std::string array;
-    int arrayId;
-    std::string subNqn = "";
-    uint64_t maxiops = 0; // 0 == unlimited
-    uint64_t maxbw = 0;   // 0 == unlimited
-    uint64_t miniops = 0; // 0 == unlimited
-    uint64_t minbw = 0;   // 0 == unlimited
+protected:  
     bool isValid = true;
-    uint64_t totalSize;
     std::mutex statusMutex;
     static const int INVALID_VOL_ID = -1;
 };

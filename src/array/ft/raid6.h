@@ -73,8 +73,10 @@ private:
     BufferEntry _AllocChunk();
     void _ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src);
     void _MakeEncodingGFTable();
-    void _MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* g_tbls_rebuild);
+    void _MakeDecodingGFTable(vector<uint32_t> excluded, unsigned char* g_tbls_rebuild);
+#if USE_RAID6_DECODE_CACHING
     uint32_t _MakeKeyforGFMap(vector<uint32_t>& excluded);
+#endif
 
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
@@ -88,8 +90,11 @@ private:
     uint32_t galoisTableSize = 32;
     unsigned char* encodeMatrix = nullptr;
     unsigned char* galoisTable = nullptr;
+
+#if USE_RAID6_DECODE_CACHING
     mutex rebuildMutex;
     map<uint32_t, unsigned char*> galoisTableMap;
+#endif
 };
 
 } // namespace pos

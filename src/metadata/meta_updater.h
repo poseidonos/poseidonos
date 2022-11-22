@@ -61,7 +61,7 @@ public:
     virtual ~MetaUpdater(void);
 
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
-    virtual int UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback) override;
+    virtual int UpdateStripeMap(StripeSmartPtr stripe, CallbackSmartPtr callback) override;
     virtual int UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) override;
 
 private:

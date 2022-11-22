@@ -26,11 +26,14 @@ Syntax:
 	(--data-devs | -d) DeviceNameList (--spare | -s) DeviceName [--raid RAID0 | RAID5 | RAID10 | RAID6] 
 	[--no-raid]
 
+Note: RAID6 is currently provided as an experimental feature.
+We do not have any responsibility for any consequences due to RAID6.
+
 Example 1 (creating an array with RAID5):  
 	poseidonos-cli array create --array-name Array0 --buffer device0 
 	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID5
 	
-Eample 2 (creating an array with RAID6): 	
+Example 2 (creating an array with RAID6): 	
 	poseidonos-cli array create --array-name Array0 --buffer device0 
 	--data-devs nvme-device0,nvme-device1,nvme-device2,nvme-device3 --spare nvme-device4 --raid RAID6
 `,
@@ -45,7 +48,9 @@ Eample 2 (creating an array with RAID6):
 			return buildErr
 		}
 
-		reqJson, err := protojson.Marshal(req)
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
 		if err != nil {
 			fmt.Printf("failed to marshal the protobuf request: %v", err)
 			return err

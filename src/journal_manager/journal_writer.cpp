@@ -125,7 +125,7 @@ JournalWriter::AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr ca
 }
 
 int
-JournalWriter::AddStripeMapUpdatedLog(Stripe* stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent)
+JournalWriter::AddStripeMapUpdatedLog(StripeSmartPtr stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent)
 {
     int result = _CanBeWritten();
     if (result == 0)

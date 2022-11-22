@@ -32,8 +32,10 @@
 
 #include "flush_completion.h"
 
+#include <air/Air.h>
+
 #include "src/allocator/event/stripe_put_event.h"
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/branch_prediction.h"
 #include "src/include/pos_event_id.hpp"
@@ -43,13 +45,13 @@
 
 namespace pos
 {
-FlushCompletion::FlushCompletion(Stripe* stripe, int arrayId)
+FlushCompletion::FlushCompletion(StripeSmartPtr stripe, int arrayId)
 : FlushCompletion(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
       EventSchedulerSingleton::Instance(), arrayId)
 {
 }
 
-FlushCompletion::FlushCompletion(Stripe* stripe,
+FlushCompletion::FlushCompletion(StripeSmartPtr stripe,
     IStripeMap* stripeMap,
     EventScheduler* eventScheduler,
     int arrayId)
@@ -83,13 +85,14 @@ FlushCompletion::_DoSpecificJob(void)
     if (likely(true == userArea))
     {
         StripeId nvmStripeId = stripe->GetWbLsid();
-        StripePutEvent event(*stripe, nvmStripeId, arrayId);
+        StripePutEvent event(stripe, nvmStripeId, arrayId);
 
         bool done = event.Execute();
         FlushCountSingleton::Instance()->pendingFlush--;
+        airlog("Pending_Flush", "internal", arrayId, -1);
         if (false == done)
         {
-            EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));
+            EventSmartPtr eventForSchedule(new StripePutEvent(stripe, nvmStripeId, arrayId));
             eventScheduler->EnqueueEvent(eventForSchedule);
         }
     }

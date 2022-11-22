@@ -32,12 +32,13 @@
 
 #include "stripe_map_update_request.h"
 
+#include <air/Air.h>
 #include <memory>
 #include <sstream>
 
 #include "flush_completion.h"
 #include "src/allocator/event/stripe_put_event.h"
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
@@ -50,14 +51,14 @@
 
 namespace pos
 {
-StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, int arrayIdInput)
+StripeMapUpdateRequest::StripeMapUpdateRequest(StripeSmartPtr stripe, int arrayIdInput)
 : StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayIdInput),
       MetaServiceSingleton::Instance()->GetMetaUpdater(arrayIdInput),
       EventSchedulerSingleton::Instance(), make_shared<FlushCompletion>(stripe, arrayIdInput), arrayIdInput)
 {
 }
 
-StripeMapUpdateRequest::StripeMapUpdateRequest(Stripe* stripe, IStripeMap* stripeMap,
+StripeMapUpdateRequest::StripeMapUpdateRequest(StripeSmartPtr stripe, IStripeMap* stripeMap,
     IMetaUpdater* metaUpdater, EventScheduler* eventScheduler, CallbackSmartPtr event, int arrayIdInput)
 : Callback(false, CallbackType_StripeMapUpdateRequest),
   stripe(stripe),
@@ -90,13 +91,14 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
     if (_GetErrorCount() > 0)
     {
         StripeId nvmStripeId = stripe->GetWbLsid();
-        StripePutEvent event(*stripe, nvmStripeId, arrayId);
+        StripePutEvent event(stripe, nvmStripeId, arrayId);
 
         bool done = event.Execute();
         FlushCountSingleton::Instance()->pendingFlush--;
+        airlog("Pending_Flush", "internal", arrayId, -1);
         if (false == done)
         {
-            EventSmartPtr eventForSchedule(new StripePutEvent(*stripe, nvmStripeId, arrayId));
+            EventSmartPtr eventForSchedule(new StripePutEvent(stripe, nvmStripeId, arrayId));
             eventScheduler->EnqueueEvent(eventForSchedule);
         }
         POS_EVENT_ID eventId =
@@ -104,6 +106,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to proceed stripe map update request event: {}", _GetErrorCount());
         FlushCountSingleton::Instance()->pendingFlush--;
+        airlog("Pending_Flush", "internal", arrayId, -1);
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
@@ -114,6 +117,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Stripe #{} is not in WriteBuffer.", stripe->GetVsid());
         FlushCountSingleton::Instance()->pendingFlush--;
+        airlog("Pending_Flush", "internal", arrayId, -1);
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }
@@ -127,6 +131,7 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
         POS_TRACE_ERROR(static_cast<int>(eventId),
             "Failed to allocate event: {}", message.str());
         FlushCountSingleton::Instance()->pendingFlush--;
+        airlog("Pending_Flush", "internal", arrayId, -1);
         FlushCountSingleton::Instance()->callbackNotCalledCount++;
         return true;
     }

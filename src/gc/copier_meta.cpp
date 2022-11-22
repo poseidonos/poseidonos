@@ -35,6 +35,7 @@
 #include "src/include/meta_const.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
+#include "src/include/array_config.h"
 
 #include <string>
 
@@ -51,7 +52,7 @@ CopierMeta::CopierMeta(IArrayInfo* array)
 CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
                        BitMapMutex* inputInUseBitmap, GcStripeManager* inputGcStripeManager,
                        std::vector<std::vector<VictimStripe*>>* inputVictimStripes,
-                       std::vector<BufferPool*>* inputGcBufferPool,
+                       BufferPool* inputGcBufferPool,
                        MemoryManager* memoryManager)
 : inUseBitmap(inputInUseBitmap),
   gcStripeManager(inputGcStripeManager),
@@ -78,18 +79,11 @@ CopierMeta::CopierMeta(IArrayInfo* array, const PartitionLogicalSize* udSize,
 
 CopierMeta::~CopierMeta(void)
 {
-    for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
+    if (gcBufferPool != nullptr)
     {
-        if (nullptr != (*gcBufferPool)[index])
-        {
-            memoryManager->DeleteBufferPool((*gcBufferPool)[index]);
-        }
+        memoryManager->DeleteBufferPool(gcBufferPool);
+        gcBufferPool = nullptr;
     }
-    if (nullptr != gcBufferPool)
-    {
-        delete gcBufferPool;
-    }
-
     for (uint32_t stripeIndex = 0; stripeIndex < GC_VICTIM_SEGMENT_COUNT; stripeIndex++)
     {
         for (uint32_t i = 0 ; i < stripesPerSegment; i++)
@@ -118,13 +112,13 @@ CopierMeta::~CopierMeta(void)
 void*
 CopierMeta::GetBuffer(StripeId stripeId)
 {
-    return (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->TryGetBuffer();
+    return gcBufferPool->TryGetBuffer();
 }
 
 void
 CopierMeta::ReturnBuffer(StripeId stripeId, void* buffer)
 {
-    (*gcBufferPool)[stripeId % GC_BUFFER_COUNT]->ReturnBuffer(buffer);
+    gcBufferPool->ReturnBuffer(buffer);
 }
 
 void
@@ -268,18 +262,15 @@ CopierMeta::GetGcStripeManager(void)
 }
 
 void
-CopierMeta::_CreateBufferPool(uint64_t maxBufferCount, uint32_t bufferSize)
+CopierMeta::_CreateBufferPool(uint32_t chunkCnt, uint32_t chunkSize)
 {
-    gcBufferPool = new std::vector<BufferPool*>;
-    for (uint32_t index = 0; index < GC_BUFFER_COUNT; index++)
-    {
-        BufferInfo info = {
-            .owner = typeid(this).name() + to_string(index),
-            .size = bufferSize,
-            .count = maxBufferCount
-        };
-        gcBufferPool->push_back(memoryManager->CreateBufferPool(info));
-    }
+    BufferInfo info = {
+        .owner = typeid(this).name(),
+        .size = chunkSize,
+        .count = chunkCnt * ArrayConfig::GC_BUFFER_COUNT
+    };
+    gcBufferPool = memoryManager->CreateBufferPool(info);
+    assert(gcBufferPool != nullptr);
 }
 
 void

@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(stripe_it stripe_integration_test.cpp)

@@ -930,6 +930,28 @@ func SendDeleteVolume(req *pb.DeleteVolumeRequest) (*pb.DeleteVolumeResponse, er
 	return res, err
 }
 
+func SendMountVolume(req *pb.MountVolumeRequest) (*pb.MountVolumeResponse, error) {
+	conn, err := dialToCliServer()
+	if err != nil {
+		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
+			dialErrorMsg, err.Error()))
+		return nil, err
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+
+	res, err := c.MountVolume(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendUnmountVolume(req *pb.UnmountVolumeRequest) (*pb.UnmountVolumeResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {

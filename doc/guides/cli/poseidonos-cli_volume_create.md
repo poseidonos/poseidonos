@@ -9,11 +9,12 @@ Create a volume from an array in PoseidonOS.
 
 Syntax: 
 	poseidonos-cli volume create (--volume-name | -v) VolumeName 
-	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth] [--iswalvol]
+	(--array-name | -a) ArrayName --size VolumeSize [--maxiops" IOPS] [--maxbw Bandwidth]
+	[--iswalvol] [--nsid NSID] [--primary] [--secondary]
 
 Example: 
 	poseidonos-cli volume create --volume-name Volume0 --array-name volume0 
-	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol
+	--size 1024GB --maxiops 1000 --maxbw 100GB/s --iswalvol --primary
 
 
 ```
@@ -28,6 +29,9 @@ poseidonos-cli volume create [flags]
       --iswalvol             If specified, the volume to be created will be a wal volume for HA.
       --maxbw uint           The maximum bandwidth for the volume in MB/s.
       --maxiops uint         The maximum IOPS for the volume in Kilo.
+      --nsid int32           Namespace ID for the volume to be created. (default -1)
+      --secondary            If specified, the volume to be created will be a secondary volume for HA.
+                             If not specified, this volume will be created as a primary volume.
       --size string          The size of the volume in B, K, KB, G, GB, ... (binary units (base-2))
                              If you do not specify the unit, it will be B in default. (Note: the size must be an integer number.) (default "0")
       --uuid string          UUID for the volume to be created.

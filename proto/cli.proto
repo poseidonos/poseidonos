@@ -235,6 +235,12 @@ service PosCli {
     	};
 	}
 
+	rpc MountVolume (MountVolumeRequest) returns (MountVolumeResponse) {
+		option (google.api.http) = {
+      		post: "/v1/Mountvolume"
+    	};
+	}
+
 	rpc SetVolumeProperty (SetVolumePropertyRequest) returns (SetVolumePropertyResponse) {
 		option (google.api.http) = {
       		post: "/v1/setvolumeproperty"
@@ -253,6 +259,12 @@ message Status {
 
 message PosInfo {
 	string version = 1;
+}
+
+message StartSystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
 }
 
 message SystemInfoRequest {
@@ -676,7 +688,7 @@ message UnmountArrayResponse {
 
 message Array {
 	int32 index = 1;
-	int32 unique_id = 2;
+	int32 uniqueId = 2;
 	string name = 3;
 	string status = 4;
 	string state = 5;
@@ -1247,6 +1259,8 @@ message CreateVolumeRequest {
 		uint64 maxbw = 5;
 		bool iswalvol = 6;
 		string uuid = 7;
+		int32 nsid = 8;
+		bool isprimary = 9;
 	}
 	Param param = 4;
 }
@@ -1298,6 +1312,28 @@ message UnmountVolumeRequest {
 }
 
 message UnmountVolumeResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message MountVolumeRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string name = 1;
+		string subnqn = 2;
+		string array = 3;
+	}
+	Param param = 4;
+}
+
+message MountVolumeResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

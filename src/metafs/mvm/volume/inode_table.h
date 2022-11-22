@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "mf_inode.h"
+#include "meta_file_inode.h"
 #include "on_volume_meta_region.h"
 #include "meta_region_type.h"
 

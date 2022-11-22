@@ -246,6 +246,7 @@ Raid6::_ComputePQParities(list<BufferEntry>& dst, const list<BufferEntry>& src)
     ec_encode_data(chunkSize, dataCnt, parityCnt, galoisTable, sources, &sources[dataCnt]);
 }
 
+#if USE_RAID6_DECODE_CACHING
 uint32_t
 Raid6::_MakeKeyforGFMap(vector<uint32_t>& excluded)
 {
@@ -264,14 +265,15 @@ Raid6::_MakeKeyforGFMap(vector<uint32_t>& excluded)
 
     return key;
 }
+#endif
 
 void
-Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
+Raid6::_MakeDecodingGFTable(vector<uint32_t> excluded, unsigned char* rebuildGaloisTable)
 {
     uint32_t destCnt = excluded.size();
-    unsigned char* tempMatrix = new unsigned char[dataCnt * dataCnt];
-    unsigned char* invertMatrix = new unsigned char[dataCnt * dataCnt];
-    unsigned char* decodeMatrix = new unsigned char[dataCnt * dataCnt];
+    unsigned char* tempMatrix = new unsigned char[chunkCnt * dataCnt];
+    unsigned char* invertMatrix = new unsigned char[chunkCnt * dataCnt];
+    unsigned char* decodeMatrix = new unsigned char[chunkCnt * dataCnt];
 
     unsigned char err_index[chunkCnt];
     memset(err_index, 0, sizeof(err_index));
@@ -283,7 +285,7 @@ Raid6::_MakeDecodingGFTable(uint32_t rebuildCnt, vector<uint32_t> excluded, unsi
     }
 
     // Construct matrix that encoded remaining frags by removing erased rows
-    for (uint32_t i = 0, r = 0; i < rebuildCnt; i++, r++)
+    for (uint32_t i = 0, r = 0; i < dataCnt; i++, r++)
     {
         //r is the index of the survived buffers
         while (err_index[r])
@@ -383,6 +385,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
     }
 
     // Make key for Galois field table caching during rebuild
+#if USE_RAID6_DECODE_CACHING
     uint32_t key = _MakeKeyforGFMap(excluded);
     unsigned char* rebuildGaloisTable = nullptr;
     auto iter = galoisTableMap.find(key);
@@ -399,8 +402,7 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
         {
             // Make Galois field table with given device indices and insert to Map
             rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
-            uint32_t rebuildCnt = chunkCnt - destCnt;
-            _MakeDecodingGFTable(rebuildCnt, excluded, rebuildGaloisTable);
+            _MakeDecodingGFTable(excluded, rebuildGaloisTable);
             POS_TRACE_WARN(EID(RAID_DEBUG_MSG), "a new galois table is inserted, key:{}", key);
             galoisTableMap.insert(make_pair(key, rebuildGaloisTable));
         }
@@ -410,12 +412,19 @@ Raid6::_RebuildData(void* dst, void* src, uint32_t dstSize, vector<uint32_t> tar
             rebuildGaloisTable = iter->second;
         }
     }
-
+#else
+    unsigned char* rebuildGaloisTable = new unsigned char[dataCnt * parityCnt * galoisTableSize];
+    _MakeDecodingGFTable(excluded, rebuildGaloisTable);
+#endif
     ec_encode_data(dstSize, dataCnt, destCnt, rebuildGaloisTable, rebuildInput, rebuildOutp);
     for (auto mem : tmpAlloc)
     {
         delete mem;
     }
+#if !USE_RAID6_DECODE_CACHING
+    delete[] rebuildGaloisTable;
+#endif
+
 }
 
 bool
@@ -469,10 +478,12 @@ Raid6::~Raid6()
     delete[] encodeMatrix;
     delete[] galoisTable;
 
+#if USE_RAID6_DECODE_CACHING
     for (auto iter = galoisTableMap.begin(); iter != galoisTableMap.end(); iter++)
     {
         delete[](iter->second);
     }
+#endif
 }
 
 int

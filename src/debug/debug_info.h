@@ -33,6 +33,7 @@
 #ifndef DEBUG_INFO_H_
 #define DEBUG_INFO_H_
 
+#include "mk/ibof_config.h"
 #include "src/debug/debug_info_updater.h"
 
 namespace pos
@@ -72,7 +73,7 @@ class TelemetryClient;
 class TelemetryManagerService;
 class TelemetryConfig;
 class MemoryManager;
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
 class PosReplicatorManager;
 #endif
 class ResourceChecker;
@@ -121,7 +122,7 @@ private:
     TelemetryClient* telemetryClient;
     TelemetryConfig* telemetryConfig;
     MemoryManager* memoryManager;
-#ifdef WITH_REPLICATOR
+#ifdef IBOF_CONFIG_REPLICATOR
     PosReplicatorManager* posReplicatorManager;
 #endif
     ResourceChecker* resourceChecker;

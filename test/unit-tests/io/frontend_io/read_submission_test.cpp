@@ -27,6 +27,7 @@
 #include "test/unit-tests/lib/block_alignment_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
+#include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -53,9 +54,9 @@ TEST(ReadSubmission, ReadSubmission_Stack)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
 
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockIArrayInfo);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
 
     // When: Try to create new ReadSubmission object with 4 arguments
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
@@ -78,8 +79,9 @@ TEST(ReadSubmission, ReadSubmission_Heap)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockIArrayInfo);
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
+
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
 
     // When: Try to create new ReadSubmission object with 4 arguments
     ReadSubmission* readSubmission = new ReadSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
@@ -106,8 +108,9 @@ TEST(ReadSubmission, Execute_SingleBlock)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockIArrayInfo);
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
+
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(1));
@@ -157,8 +160,8 @@ TEST(ReadSubmission, Execute_MultiBlocks)
     NiceMock<MockIVSAMap> mockIVSAMap;
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
-    NiceMock<MockIArrayInfo> mockIArrayInfo;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockIArrayInfo);
+    NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(2));

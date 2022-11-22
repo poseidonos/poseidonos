@@ -34,7 +34,8 @@ constexpr CompleteReadRequest::CompleteReadRequest(
   : data_()
   , array_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , volume_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , lsn_(PROTOBUF_ULONGLONG(0)){}
+  , rba_(PROTOBUF_ULONGLONG(0))
+  , num_blocks_(PROTOBUF_ULONGLONG(0)){}
 struct CompleteReadRequestDefaultTypeInternal {
   constexpr CompleteReadRequestDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -220,7 +221,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_replicator_5frpc_2eproto::offs
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadRequest, array_name_),
   PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadRequest, volume_name_),
-  PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadRequest, lsn_),
+  PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadRequest, rba_),
+  PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadRequest, num_blocks_),
   PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadRequest, data_),
   PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadResponse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::replicator_rpc::CompleteReadResponse, _internal_metadata_),
@@ -327,17 +329,17 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_replicator_5frpc_2eproto::offs
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::replicator_rpc::Chunk)},
   { 6, -1, sizeof(::replicator_rpc::CompleteReadRequest)},
-  { 15, 22, sizeof(::replicator_rpc::CompleteReadResponse)},
-  { 24, -1, sizeof(::replicator_rpc::CompleteWriteRequest)},
-  { 32, 39, sizeof(::replicator_rpc::CompleteWriteResponse)},
-  { 41, -1, sizeof(::replicator_rpc::PushHostWriteRequest)},
-  { 51, 59, sizeof(::replicator_rpc::PushHostWriteResponse)},
-  { 62, -1, sizeof(::replicator_rpc::PushDirtyLogRequest)},
-  { 71, 78, sizeof(::replicator_rpc::PushDirtyLogResponse)},
-  { 80, -1, sizeof(::replicator_rpc::TransferDirtyLogRequest)},
-  { 89, 96, sizeof(::replicator_rpc::TransferDirtyLogResponse)},
-  { 98, -1, sizeof(::replicator_rpc::TransferHostWriteRequest)},
-  { 107, 114, sizeof(::replicator_rpc::TransferHostWriteResponse)},
+  { 16, 23, sizeof(::replicator_rpc::CompleteReadResponse)},
+  { 25, -1, sizeof(::replicator_rpc::CompleteWriteRequest)},
+  { 33, 40, sizeof(::replicator_rpc::CompleteWriteResponse)},
+  { 42, -1, sizeof(::replicator_rpc::PushHostWriteRequest)},
+  { 52, 60, sizeof(::replicator_rpc::PushHostWriteResponse)},
+  { 63, -1, sizeof(::replicator_rpc::PushDirtyLogRequest)},
+  { 72, 79, sizeof(::replicator_rpc::PushDirtyLogResponse)},
+  { 81, -1, sizeof(::replicator_rpc::TransferDirtyLogRequest)},
+  { 90, 97, sizeof(::replicator_rpc::TransferDirtyLogResponse)},
+  { 99, -1, sizeof(::replicator_rpc::TransferHostWriteRequest)},
+  { 108, 115, sizeof(::replicator_rpc::TransferHostWriteResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -358,57 +360,58 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_replicator_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\024replicator_rpc.proto\022\016replicator_rpc\"\030"
-  "\n\005Chunk\022\017\n\007content\030\001 \001(\014\"p\n\023CompleteRead"
-  "Request\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_na"
-  "me\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004\022#\n\004data\030\004 \003(\0132\025.re"
-  "plicator_rpc.Chunk\"a\n\024CompleteReadRespon"
-  "se\022)\n\006result\030\001 \001(\0162\031.replicator_rpc.PosR"
-  "esult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"L\n"
-  "\024CompleteWriteRequest\022\022\n\narray_name\030\001 \001("
-  "\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004\"b\n\025C"
-  "ompleteWriteResponse\022)\n\006result\030\001 \001(\0162\031.r"
-  "eplicator_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH"
-  "\000\210\001\001B\t\n\007_reason\"\205\001\n\024PushHostWriteRequest"
-  "\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001("
-  "\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\022#\n\004da"
-  "ta\030\005 \003(\0132\025.replicator_rpc.Chunk\"o\n\025PushH"
-  "ostWriteResponse\022)\n\006result\030\001 \001(\0162\031.repli"
-  "cator_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001"
-  "\022\013\n\003lsn\030\003 \001(\004B\t\n\007_reason\"_\n\023PushDirtyLog"
-  "Request\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_na"
-  "me\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001("
-  "\004\"J\n\024PushDirtyLogResponse\022\022\n\nsuccessful\030"
-  "\001 \001(\010\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"c\n"
-  "\027TransferDirtyLogRequest\022\022\n\narray_name\030\001"
-  " \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022"
-  "\n\nnum_blocks\030\004 \001(\004\"N\n\030TransferDirtyLogRe"
+  "\n\005Chunk\022\017\n\007content\030\001 \001(\014\"\204\001\n\023CompleteRea"
+  "dRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_n"
+  "ame\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001"
+  "(\004\022#\n\004data\030\005 \003(\0132\025.replicator_rpc.Chunk\""
+  "a\n\024CompleteReadResponse\022)\n\006result\030\001 \001(\0162"
+  "\031.replicator_rpc.PosResult\022\023\n\006reason\030\002 \001"
+  "(\tH\000\210\001\001B\t\n\007_reason\"L\n\024CompleteWriteReque"
+  "st\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 "
+  "\001(\t\022\013\n\003lsn\030\003 \001(\004\"b\n\025CompleteWriteRespons"
+  "e\022)\n\006result\030\001 \001(\0162\031.replicator_rpc.PosRe"
+  "sult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"\205\001\n"
+  "\024PushHostWriteRequest\022\022\n\narray_name\030\001 \001("
+  "\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nn"
+  "um_blocks\030\004 \001(\004\022#\n\004data\030\005 \003(\0132\025.replicat"
+  "or_rpc.Chunk\"o\n\025PushHostWriteResponse\022)\n"
+  "\006result\030\001 \001(\0162\031.replicator_rpc.PosResult"
+  "\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022\013\n\003lsn\030\003 \001(\004B\t\n\007_r"
+  "eason\"_\n\023PushDirtyLogRequest\022\022\n\narray_na"
+  "me\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001"
+  "(\004\022\022\n\nnum_blocks\030\004 \001(\004\"J\n\024PushDirtyLogRe"
   "sponse\022\022\n\nsuccessful\030\001 \001(\010\022\023\n\006reason\030\002 \001"
-  "(\tH\000\210\001\001B\t\n\007_reason\"d\n\030TransferHostWriteR"
-  "equest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_nam"
-  "e\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004"
-  "\"O\n\031TransferHostWriteResponse\022\022\n\nsuccess"
-  "ful\030\001 \001(\010\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reaso"
-  "n*\"\n\tPosResult\022\013\n\007SUCCESS\020\000\022\010\n\004FAIL\020\0012\335\004"
-  "\n\014ReplicatorIo\022[\n\014CompleteRead\022#.replica"
-  "tor_rpc.CompleteReadRequest\032$.replicator"
-  "_rpc.CompleteReadResponse\"\000\022^\n\rCompleteW"
-  "rite\022$.replicator_rpc.CompleteWriteReque"
-  "st\032%.replicator_rpc.CompleteWriteRespons"
-  "e\"\000\022^\n\rPushHostWrite\022$.replicator_rpc.Pu"
-  "shHostWriteRequest\032%.replicator_rpc.Push"
-  "HostWriteResponse\"\000\022[\n\014PushDirtyLog\022#.re"
-  "plicator_rpc.PushDirtyLogRequest\032$.repli"
-  "cator_rpc.PushDirtyLogResponse\"\000\022g\n\020Tran"
-  "sferDirtyLog\022\'.replicator_rpc.TransferDi"
-  "rtyLogRequest\032(.replicator_rpc.TransferD"
-  "irtyLogResponse\"\000\022j\n\021TransferHostWrite\022("
-  ".replicator_rpc.TransferHostWriteRequest"
-  "\032).replicator_rpc.TransferHostWriteRespo"
-  "nse\"\000b\006proto3"
+  "(\tH\000\210\001\001B\t\n\007_reason\"c\n\027TransferDirtyLogRe"
+  "quest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name"
+  "\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\""
+  "N\n\030TransferDirtyLogResponse\022\022\n\nsuccessfu"
+  "l\030\001 \001(\010\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\""
+  "d\n\030TransferHostWriteRequest\022\022\n\narray_nam"
+  "e\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001("
+  "\004\022\022\n\nnum_blocks\030\004 \001(\004\"O\n\031TransferHostWri"
+  "teResponse\022\022\n\nsuccessful\030\001 \001(\010\022\023\n\006reason"
+  "\030\002 \001(\tH\000\210\001\001B\t\n\007_reason*\"\n\tPosResult\022\013\n\007S"
+  "UCCESS\020\000\022\010\n\004FAIL\020\0012\344\004\n\023ReplicatorIoServi"
+  "ce\022[\n\014CompleteRead\022#.replicator_rpc.Comp"
+  "leteReadRequest\032$.replicator_rpc.Complet"
+  "eReadResponse\"\000\022^\n\rCompleteWrite\022$.repli"
+  "cator_rpc.CompleteWriteRequest\032%.replica"
+  "tor_rpc.CompleteWriteResponse\"\000\022^\n\rPushH"
+  "ostWrite\022$.replicator_rpc.PushHostWriteR"
+  "equest\032%.replicator_rpc.PushHostWriteRes"
+  "ponse\"\000\022[\n\014PushDirtyLog\022#.replicator_rpc"
+  ".PushDirtyLogRequest\032$.replicator_rpc.Pu"
+  "shDirtyLogResponse\"\000\022g\n\020TransferDirtyLog"
+  "\022\'.replicator_rpc.TransferDirtyLogReques"
+  "t\032(.replicator_rpc.TransferDirtyLogRespo"
+  "nse\"\000\022j\n\021TransferHostWrite\022(.replicator_"
+  "rpc.TransferHostWriteRequest\032).replicato"
+  "r_rpc.TransferHostWriteResponse\"\000b\006proto"
+  "3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_replicator_5frpc_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_replicator_5frpc_2eproto = {
-  false, false, 1893, descriptor_table_protodef_replicator_5frpc_2eproto, "replicator_rpc.proto", 
+  false, false, 1921, descriptor_table_protodef_replicator_5frpc_2eproto, "replicator_rpc.proto", 
   &descriptor_table_replicator_5frpc_2eproto_once, nullptr, 0, 13,
   schemas, file_default_instances, TableStruct_replicator_5frpc_2eproto::offsets,
   file_level_metadata_replicator_5frpc_2eproto, file_level_enum_descriptors_replicator_5frpc_2eproto, file_level_service_descriptors_replicator_5frpc_2eproto,
@@ -659,14 +662,19 @@ CompleteReadRequest::CompleteReadRequest(const CompleteReadRequest& from)
     volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_volume_name(), 
       GetArena());
   }
-  lsn_ = from.lsn_;
+  ::memcpy(&rba_, &from.rba_,
+    static_cast<size_t>(reinterpret_cast<char*>(&num_blocks_) -
+    reinterpret_cast<char*>(&rba_)) + sizeof(num_blocks_));
   // @@protoc_insertion_point(copy_constructor:replicator_rpc.CompleteReadRequest)
 }
 
 void CompleteReadRequest::SharedCtor() {
 array_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 volume_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-lsn_ = PROTOBUF_ULONGLONG(0);
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&rba_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&num_blocks_) -
+    reinterpret_cast<char*>(&rba_)) + sizeof(num_blocks_));
 }
 
 CompleteReadRequest::~CompleteReadRequest() {
@@ -700,7 +708,9 @@ void CompleteReadRequest::Clear() {
   data_.Clear();
   array_name_.ClearToEmpty();
   volume_name_.ClearToEmpty();
-  lsn_ = PROTOBUF_ULONGLONG(0);
+  ::memset(&rba_, 0, static_cast<size_t>(
+      reinterpret_cast<char*>(&num_blocks_) -
+      reinterpret_cast<char*>(&rba_)) + sizeof(num_blocks_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -729,23 +739,30 @@ const char* CompleteReadRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAME
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint64 lsn = 3;
+      // uint64 rba = 3;
       case 3:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          lsn_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          rba_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // repeated .replicator_rpc.Chunk data = 4;
+      // uint64 num_blocks = 4;
       case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          num_blocks_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // repeated .replicator_rpc.Chunk data = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           ptr -= 1;
           do {
             ptr += 1;
             ptr = ctx->ParseMessage(_internal_add_data(), ptr);
             CHK_(ptr);
             if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<34>(ptr));
+          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<42>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -796,18 +813,24 @@ failure:
         2, this->_internal_volume_name(), target);
   }
 
-  // uint64 lsn = 3;
-  if (this->lsn() != 0) {
+  // uint64 rba = 3;
+  if (this->rba() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_lsn(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(3, this->_internal_rba(), target);
   }
 
-  // repeated .replicator_rpc.Chunk data = 4;
+  // uint64 num_blocks = 4;
+  if (this->num_blocks() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt64ToArray(4, this->_internal_num_blocks(), target);
+  }
+
+  // repeated .replicator_rpc.Chunk data = 5;
   for (unsigned int i = 0,
       n = static_cast<unsigned int>(this->_internal_data_size()); i < n; i++) {
     target = stream->EnsureSpace(target);
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(4, this->_internal_data(i), target, stream);
+      InternalWriteMessage(5, this->_internal_data(i), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -826,7 +849,7 @@ size_t CompleteReadRequest::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // repeated .replicator_rpc.Chunk data = 4;
+  // repeated .replicator_rpc.Chunk data = 5;
   total_size += 1UL * this->_internal_data_size();
   for (const auto& msg : this->data_) {
     total_size +=
@@ -847,11 +870,18 @@ size_t CompleteReadRequest::ByteSizeLong() const {
         this->_internal_volume_name());
   }
 
-  // uint64 lsn = 3;
-  if (this->lsn() != 0) {
+  // uint64 rba = 3;
+  if (this->rba() != 0) {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
-        this->_internal_lsn());
+        this->_internal_rba());
+  }
+
+  // uint64 num_blocks = 4;
+  if (this->num_blocks() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
+        this->_internal_num_blocks());
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -892,8 +922,11 @@ void CompleteReadRequest::MergeFrom(const CompleteReadRequest& from) {
   if (from.volume_name().size() > 0) {
     _internal_set_volume_name(from._internal_volume_name());
   }
-  if (from.lsn() != 0) {
-    _internal_set_lsn(from._internal_lsn());
+  if (from.rba() != 0) {
+    _internal_set_rba(from._internal_rba());
+  }
+  if (from.num_blocks() != 0) {
+    _internal_set_num_blocks(from._internal_num_blocks());
   }
 }
 
@@ -921,7 +954,12 @@ void CompleteReadRequest::InternalSwap(CompleteReadRequest* other) {
   data_.InternalSwap(&other->data_);
   array_name_.Swap(&other->array_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   volume_name_.Swap(&other->volume_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(lsn_, other->lsn_);
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CompleteReadRequest, num_blocks_)
+      + sizeof(CompleteReadRequest::num_blocks_)
+      - PROTOBUF_FIELD_OFFSET(CompleteReadRequest, rba_)>(
+          reinterpret_cast<char*>(&rba_),
+          reinterpret_cast<char*>(&other->rba_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata CompleteReadRequest::GetMetadata() const {

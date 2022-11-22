@@ -41,6 +41,7 @@ namespace pos
 class ConfigManager;
 class GrpcHealth;
 class GrpcReplicationController;
+class GrpcPosIo;
 class GrpcPosManagement;
 
 class GrpcSubscriber
@@ -55,6 +56,7 @@ private:
     ConfigManager* configManager;
     GrpcHealth* healthChecker;
     GrpcReplicationController* replicationController;
+    GrpcPosIo* posIo;
     GrpcPosManagement* posManagement;
 
     std::unique_ptr<::grpc::Server> haGrpcServer;

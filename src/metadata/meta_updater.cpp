@@ -92,7 +92,7 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
 }
 
 int
-MetaUpdater::UpdateStripeMap(Stripe* stripe, CallbackSmartPtr callback)
+MetaUpdater::UpdateStripeMap(StripeSmartPtr stripe, CallbackSmartPtr callback)
 {
     int result = 0;
 

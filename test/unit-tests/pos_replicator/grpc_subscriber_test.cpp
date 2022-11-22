@@ -34,7 +34,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/pos_replicator/dummy_ha/dummy_ha_client.h"
+#include "mock_grpc/mock_replicator_client.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 
 using ::testing::_;
@@ -57,7 +57,7 @@ protected:
 
     NiceMock<MockConfigManager>* configManager;
     GrpcSubscriber* grpcSubscriber;
-    DummyHaClient* haClient;
+    MockReplicatorClient* haClient;
 };
 
 void
@@ -68,7 +68,7 @@ GrpcSubscriberTestFixture::SetUp(void)
 
     grpcSubscriber = new GrpcSubscriber(configManager);
     sleep(1);
-    haClient = new DummyHaClient(nullptr);
+    haClient = new MockReplicatorClient(nullptr);
 }
 
 void

@@ -10,8 +10,7 @@ context_manager/allocator_ctx \
 context_manager/rebuild_ctx \
 context_manager/segment_ctx \
 event \
-stripe \
-wbstripe_manager
+stripe_manager
 
 SRCS += $(notdir $(wildcard $(foreach dir, $(ALLOCATOR_SUB_DIR), $(dir)/*.cpp)))
 VPATH += $(foreach dir, $(ALLOCATOR_SUB_DIR), $(abspath $(dir)))

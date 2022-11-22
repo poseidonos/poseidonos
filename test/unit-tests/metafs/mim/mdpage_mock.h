@@ -42,14 +42,17 @@ public:
     using MDPage::MDPage;
 
     MOCK_METHOD(void, AttachControlInfo, ());
-    MOCK_METHOD(void, Make, (const MetaLpnType metaLpn, const FileDescriptorType fd, const int arrayId, const uint64_t signature));
-    MOCK_METHOD(bool, CheckValid, (const int arrayId), (const));
-    MOCK_METHOD(bool, CheckFileMismatch, (const FileDescriptorType fd), (const));
-    MOCK_METHOD(bool, CheckLpnMismatch, (const MetaLpnType srcLpn), (const));
-    MOCK_METHOD(void, ClearCtrlInfo, ());
-    MOCK_METHOD(uint8_t*, GetDataBuf, (), (const));
+    MOCK_METHOD(void, ClearControlInfo, ());
+    MOCK_METHOD(void, BuildControlInfo, (const MetaLpnType metaLpn,
+        const FileDescriptorType fd, const int arrayId, const uint64_t signature));
+    MOCK_METHOD(void, WriteCrcToControlInfo, ());
+    MOCK_METHOD(bool, IsValidSignature, (const uint64_t signature), (const));
+    MOCK_METHOD(uint32_t, GenerateCrcFromDataBuffer, (), (const));
+    MOCK_METHOD(uint8_t*, GetDataBuffer, (), (const));
     MOCK_METHOD(size_t, GetDefaultDataChunkSize, (), (const));
     MOCK_METHOD(uint32_t, GetMfsSignature, (), (const));
+    MOCK_METHOD(int, CheckDataIntegrity, (const MetaLpnType srcLpn,
+        const FileDescriptorType fd, const bool skipCheckingCrc), (const));
 };
 
 } // namespace pos

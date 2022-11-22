@@ -69,14 +69,15 @@ public:
     void Shutdown(void) override;
     void Flush(void) override;
 
-    int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid) override;
+    int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
+                int32_t nsid, bool isPrimary, std::string uuid) override;
     int Delete(std::string name) override;
     int Mount(std::string name, std::string subnqn) override;
     int Unmount(std::string name) override;
     int Unmount(int volId) override;
     int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) override;
-    int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) override;
-    int UpdateVolumeReplicationRoleProperty(std::string name, VolumeReplicationRoleProperty nodeProperty) override;
+    int UpdateReplicationState(std::string name, ReplicationState state) override;
+    int UpdateReplicationRole(std::string name, ReplicationRole nodeProperty) override;
     int Rename(std::string oldname, std::string newname) override;
     int SaveVolumeMeta(void) override;
     int CheckVolumeValidity(std::string name) override;
@@ -86,20 +87,21 @@ public:
     int GetVolumeName(int volId, std::string& volName) override;
     int GetVolumeID(std::string volName) override;
     int GetVolumeCount(void) override;
-    int GetVolumeStatus(int volId) override;
-    int GetVolumeReplicationState(int volId) override;
-    int GetVolumeReplicationRoleProperty(int volId) override;
+    int GetVolumeMountStatus(int volId) override;
+    int GetReplicationState(int volId) override;
+    int GetReplicationRole(int volId) override;
     int CheckVolumeValidity(int volId) override;
     uint64_t EntireVolumeSize(void) override;
     int GetVolumeSize(int volId, uint64_t& volSize) override;
     VolumeList* GetVolumeList(void) override;
-    std::string GetStatusStr(VolumeStatus status) override;
+    std::string GetStatusStr(VolumeMountStatus status) override;
     int CancelVolumeReplay(int volId) override;
 
     int IncreasePendingIOCountIfNotZero(int volId, VolumeIoType volumeIoType, uint32_t ioCountToSubmit = 1) override;
     int DecreasePendingIOCount(int volId, VolumeIoType volumeIoType, uint32_t ioCountCompleted = 1) override;
     VolumeBase* GetVolume(int volId) override;
     std::string GetArrayName(void) override;
+    bool IsWriteThroughEnabled(void) override;
 
     void StateChanged(StateContext* prev, StateContext* next) override;
 
@@ -107,7 +109,7 @@ private:
     int _LoadVolumes(void);
     int _CheckPrerequisite(void);
     void _ClearLock(void);
-    void _PublishTelemetryVolumeState(std::string name, VolumeStatus status);
+    void _PublishTelemetryVolumeState(std::string name, VolumeMountStatus status);
     void _PublishTelemetryVolumeCapacity(std::string name, uint64_t size);
     void _PublishTelemetryArrayUsage(void);
 
@@ -126,6 +128,8 @@ private:
 
     std::mutex volumeEventLock;
     std::mutex volumeExceptionLock;
+
+    bool wtEnabled;
 };
 
 } // namespace pos

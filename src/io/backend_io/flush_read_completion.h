@@ -33,25 +33,25 @@
 #pragma once
 
 #include <string>
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/event_scheduler/callback.h"
 #include "src/io/general_io/io_submit_handler.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class Stripe;
 class EventScheduler;
 
 class FlushReadCompletion : public Callback
 {
 public:
-    explicit FlushReadCompletion(Stripe* stripe, int arrayId, EventScheduler* eventScheduler = nullptr);
+    explicit FlushReadCompletion(StripeSmartPtr stripe, int arrayId, EventScheduler* eventScheduler = nullptr);
     ~FlushReadCompletion(void);
 
 private:
     bool _DoSpecificJob(void) override;
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     int arrayId;
     EventScheduler* eventScheduler;
 };

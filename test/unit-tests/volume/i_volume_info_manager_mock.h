@@ -17,15 +17,16 @@ public:
     MOCK_METHOD(int, GetVolumeCount, (), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (int volId), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (std::string name), (override));
-    MOCK_METHOD(int, GetVolumeStatus, (int volId), (override));
-    MOCK_METHOD(int, GetVolumeReplicationState, (int volId), (override));
-    MOCK_METHOD(int, GetVolumeReplicationRoleProperty, (int volId), (override));
+    MOCK_METHOD(int, GetVolumeMountStatus, (int volId), (override));
+    MOCK_METHOD(int, GetReplicationState, (int volId), (override));
+    MOCK_METHOD(int, GetReplicationRole, (int volId), (override));
     MOCK_METHOD(uint64_t, EntireVolumeSize, (), (override));
     MOCK_METHOD(int, GetVolumeSize, (int volId, uint64_t& volSize), (override));
     MOCK_METHOD(VolumeList*, GetVolumeList, (), (override));
-    MOCK_METHOD(std::string, GetStatusStr, (VolumeStatus status), (override));
+    MOCK_METHOD(std::string, GetStatusStr, (VolumeMountStatus status), (override));
     MOCK_METHOD(VolumeBase*, GetVolume, (int volId), (override));
     MOCK_METHOD(std::string, GetArrayName, (), (override));
+    MOCK_METHOD(bool, IsWriteThroughEnabled, (), (override));
     MOCK_METHOD(int, CancelVolumeReplay, (int volId), (override));
 };
 

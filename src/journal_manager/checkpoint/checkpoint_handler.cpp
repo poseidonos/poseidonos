@@ -98,20 +98,18 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
     }
     else
     {
-        int eventId = static_cast<int>(EID(JOURNAL_CHECKPOINT_STARTED));
-        POS_TRACE_INFO(eventId, "Checkpoint started with {} maps to flush, arrayId:{}", numMapsToFlush, arrayId);
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_FLUSH_METADATA),
+            "logGroupId:{}, numMapsToFlush:{}, arrayId:{}", logGroupIdInProgress, numMapsToFlush, arrayId);
 
         for (auto mapId : pendingDirtyMaps)
         {
-            eventId = static_cast<int>(EID(JOURNAL_DEBUG));
-
             EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId, logGroupIdInProgress));
             ret = mapFlush->FlushDirtyMpages(mapId, eventMapFlush);
             if (ret != 0)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
                 POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
-                    "Failed to start flushing dirty map pages, arrayId:{}", arrayId);
+                    "mapId:{}, arrayId:{}", mapId, arrayId);
                 return ret;
             }
         }
@@ -152,19 +150,18 @@ CheckpointHandler::FlushCompleted(int metaId, int logGroupId)
 {
     if (metaId == ALLOCATOR_META_ID)
     {
-        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
-            "Allocator meta flush completed, arrayId:{}", arrayId);
         assert(allocatorMetaFlushCompleted == false);
 
         allocatorMetaFlushCompleted = true;
-        contextManager->ResetFlushedInfo(logGroupId);
     }
     else
     {
-        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STATUS),
-            "Map {} flush completed, arrayId:{}", metaId, arrayId);
         _CheckMapFlushCompleted();
     }
+
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_FLUSH_COMPLETED),
+        "metaId:{}, numMapsFlushed:{}, allocatorCompleted:{}, arrayId:{}",
+        metaId, mapFlushCompleted, allocatorMetaFlushCompleted, arrayId);
 
     _TryToComplete();
     return 0;
@@ -173,14 +170,13 @@ CheckpointHandler::FlushCompleted(int metaId, int logGroupId)
 void
 CheckpointHandler::_TryToComplete(void)
 {
-    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS),
-        "Try to complete CP, mapCompleted {} allocatorCompleted {}, arrayId:{}",
-        mapFlushCompleted, allocatorMetaFlushCompleted, arrayId);
-
     std::unique_lock<std::mutex> lock(completionLock);
     if ((mapFlushCompleted == true) && (allocatorMetaFlushCompleted == true)
         && (status != COMPLETED))
     {
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED),
+            "logGroupId:{}, arrayId:{}", logGroupIdInProgress, arrayId);
+
         // check status to complete checkpoint only once
         _SetStatus(COMPLETED);
 
@@ -193,7 +189,6 @@ CheckpointHandler::_TryToComplete(void)
         _Reset();
 
         scheduler->EnqueueEvent(tempCheckpointCompletionCallback);
-        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "Checkpoint completed, arrayId:{}", arrayId);
     }
 }
 
@@ -212,8 +207,8 @@ CheckpointHandler::_Reset(void)
 void
 CheckpointHandler::_SetStatus(CheckpointStatus to)
 {
-    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS),
-        "Checkpoint status changed from {} to {}, arrayId:{}", status, to, arrayId);
+    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STATUS_CHANGED),
+        "from:{}, to:{}, arrayId:{}", status, to, arrayId);
 
     status = to;
 }

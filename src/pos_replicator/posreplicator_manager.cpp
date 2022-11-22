@@ -31,6 +31,7 @@
  */
 #include "posreplicator_manager.h"
 
+#include "pos_replicator_io_completion.h"
 #include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/aio.h"
 #include "src/logger/logger.h"
@@ -102,8 +103,8 @@ PosReplicatorManager::Register(int arrayId, ReplicatorVolumeSubscriber* volumeSu
     if (arrayId < 0)
     {
         POS_TRACE_ERROR(EID(HA_VOLUME_SUBSCRIBER_REGISTER_FAIL), "Fail to Register Replicator Volume Subscriber for Array {}",
-                            volumeSubscriber->GetArrayName());
-        return -1;
+            volumeSubscriber->GetArrayName());
+        return EID(HA_INVALID_INPUT_ARGUMENT);
     }
 
     std::unique_lock<std::mutex> lock(listMutex);
@@ -111,18 +112,18 @@ PosReplicatorManager::Register(int arrayId, ReplicatorVolumeSubscriber* volumeSu
     if (items[arrayId] != nullptr)
     {
         POS_TRACE_ERROR(EID(HA_VOLUME_SUBSCRIBER_REGISTER_FAIL), "Replicator Volume Subscriber for array {} already exists",
-                            volumeSubscriber->GetArrayName());
-        return -1;
+            volumeSubscriber->GetArrayName());
+        return EID(HA_INVALID_INPUT_ARGUMENT);
     }
 
     items[arrayId] = volumeSubscriber;
     volumeSubscriberCnt++;
     POS_TRACE_DEBUG(EID(HA_VOLUME_SUBSCRIBER_REGISTER_FAIL), "Replicator Volume Subscriber for array {} is registered",
-                        volumeSubscriber->GetArrayName());
+        volumeSubscriber->GetArrayName());
 
     arrayConvertTable.push_back(std::pair<int, string>(arrayId, volumeSubscriber->GetArrayName()));
 
-    return 0;
+    return EID(SUCCESS);
 }
 
 void
@@ -170,13 +171,13 @@ PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
     ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
     if (ret != EID(SUCCESS))
     {
-        POS_TRACE_WARN(ret, "Invalid Input volume name, volume_id:{}", io.volume_id);
+        POS_TRACE_WARN(ret, "Invalid Input. Volume_ID: {}", io.volume_id);
         return ret;
     }
     ret = ConvertArrayIdtoArrayName(io.array_id, arrayName);
     if (ret != EID(SUCCESS))
     {
-        POS_TRACE_WARN(ret, "Invalid Input array name, array_id:{}", io.array_id);
+        POS_TRACE_WARN(ret, "Invalid Input. Array_ID: {}", io.array_id);
         return ret;
     }
 
@@ -231,7 +232,8 @@ PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int v
         return EID(HA_REQUESTED_NOT_FOUND);
     }
 
-    _MakeIoRequest(GrpcCallbackType::WaitGrpc, userRequest, lsn);
+    // TODO (cheolho.kang): Check funtionality later
+    // _MakeIoRequest(GrpcCallbackType::WaitGrpc, &userRequest, lsn);
 
     waitPosIoRequest[arrayId][volumeId].erase(lsn);
 
@@ -239,84 +241,91 @@ PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int v
 }
 
 int
-PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks, void* data)
+PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, void* data)
 {
     //IO_TYPE::WRITE
     //IO_TYPE::READ
-    pos_io posIo;
-
-    posIo = _MakePosIo(ioType, arrayId, volumeId, rba, num_blocks);
-
-    _MakeIoRequest(GrpcCallbackType::GrpcReply, posIo, REPLICATOR_INVALID_LSN);
+    VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numBlocks);
+    _RequestVolumeIo(GrpcCallbackType::GrpcReply, volumeIo, REPLICATOR_INVALID_LSN);
 
     return EID(SUCCESS);
 }
 
-pos_io
-PosReplicatorManager::_MakePosIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks)
+VolumeIoSmartPtr
+PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks)
 {
+    AIO aio;
     pos_io posIo;
-    string array_name;
-    ConvertArrayIdtoArrayName(arrayId, array_name);
 
     posIo.ioType = ioType;
     posIo.array_id = arrayId;
-    strncpy(posIo.arrayName, array_name.c_str(), array_name.size());
     posIo.volume_id = volumeId;
-    posIo.offset = ChangeByteToSector(rba);
-    posIo.length = ChangeSectorToByte(num_blocks);
+    posIo.offset = ChangeSectorToByte(rba);
+    posIo.length = ChangeSectorToByte(numBlocks);
+    posIo.iov = nullptr;
 
-    return posIo;
+    return aio.CreatePosReplicatorVolumeIo(posIo, REPLICATOR_INVALID_LSN);
 }
 
 void
-PosReplicatorManager::HAWriteCompletion(uint64_t lsn, pos_io io)
+PosReplicatorManager::HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
+{
+    switch (volumeIo->dir)
+    {
+        case UbioDir::Read:
+            HAReadCompletion(lsn, volumeIo);
+            break;
+        case UbioDir::Write:
+            HAWriteCompletion(lsn, volumeIo);
+            break;
+        default:
+            std::string errorMsg = "Wrong IO direction (only read/write types are supported). input dir: " + std::to_string((uint32_t)volumeIo->dir);
+            throw errorMsg.c_str();
+            break;
+    }
+}
+
+void
+PosReplicatorManager::HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
+{
+    // TODO (cheolho.kang): Need to combine HAWriteCompletion() and HAReadCompletion()
+    std::string volumeName;
+    std::string arrayName;
+    int ret = ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
+    if (ret == EID(SUCCESS))
+    {
+        ret = ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
+        if (ret != EID(SUCCESS))
+        {
+            // TODO (cheolho.kang): Need to handle the error case
+            POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
+                lsn, volumeIo->GetArrayId(), volumeIo->GetVolumeId());
+            return;
+        }
+    }
+
+    grpcPublisher->CompleteWrite(lsn, volumeName, arrayName);
+}
+
+void
+PosReplicatorManager::HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
 {
     std::string volumeName;
-    int ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
-
-    if (ret != EID(SUCCESS))
+    std::string arrayName;
+    int ret = ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
+    if (ret == EID(SUCCESS))
     {
-        POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
-            lsn, io.array_id, io.volume_id);
-        return;
-    }
-
-    grpcPublisher->CompleteWrite(lsn, volumeName, io.arrayName);
-}
-
-void
-PosReplicatorManager::HAReadCompletion(uint64_t lsn, pos_io io, VolumeIoSmartPtr volumeIo)
-{
-    std::string volumeName;
-    int ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
-
-    if (ret != EID(SUCCESS))
-    {
-        POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
-            lsn, io.array_id, io.volume_id);
-        return;
-    }
-
-    grpcPublisher->CompleteRead(lsn, io.length, volumeName, io.arrayName, io.iov->iov_base);
-}
-
-void
-PosReplicatorManager::HAIOCompletion(uint64_t lsn, pos_io io, VolumeIoSmartPtr volumeIo)
-{
-    switch (io.ioType)
-    {
-        case IO_TYPE::READ:
+        ret = ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
+        if (ret != EID(SUCCESS))
         {
-            HAReadCompletion(lsn, io, volumeIo);
+            POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
+                lsn, volumeIo->GetArrayId(), volumeIo->GetVolumeId());
+            return;
         }
-        break;
-        case IO_TYPE::WRITE:
-        {
-            HAWriteCompletion(lsn, io);
-        }
-        break;
     }
+    uint64_t numBlocks = ChangeByteToSector(volumeIo->GetSize());
+
+    grpcPublisher->CompleteRead(arrayName, volumeName, volumeIo->GetSectorRba(), numBlocks, lsn, volumeIo->GetBuffer());
 }
 
 int
@@ -402,60 +411,39 @@ PosReplicatorManager::AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeI
 }
 
 void
-PosReplicatorManager::_MakeIoRequest(GrpcCallbackType callbackType, pos_io io, uint64_t lsn)
+PosReplicatorManager::_RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn)
 {
     AIO aio;
-    VolumeIoSmartPtr volumeIo = aio.CreatePosReplicatorVolumeIo(io, lsn);
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG),
+        "Io Submmit from replicator, rba: {}", volumeIo->GetSectorRba());
 
-    CallbackSmartPtr posReplicatorIOCompletion(new PosReplicatorIOCompletion(callbackType, volumeIo, lsn, io, volumeIo->GetCallback()));
+    CallbackSmartPtr posReplicatorIOCompletion(new PosReplicatorIOCompletion(callbackType, volumeIo, lsn, volumeIo->GetCallback()));
+
     volumeIo->SetCallback(posReplicatorIOCompletion);
 
     aio.SubmitAsyncIO(volumeIo);
 }
 
 int
-PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int> arraySet, std::pair<std::string, int> volumeSet)
+PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int>& arraySet, std::pair<std::string, int>& volumeSet)
 {
     arraySet.second = ConvertArrayNametoArrayId(arraySet.first);
     volumeSet.second = ConvertVolumeNametoVolumeId(volumeSet.first, arraySet.second);
 
     int ret = EID(SUCCESS);
 
-    if ((arraySet.second == HA_INVALID_ARRAY_IDX) || (volumeSet.second == HA_INVALID_VOLUME_IDX))
+    if (arraySet.second == HA_INVALID_ARRAY_IDX)
     {
+        POS_TRACE_WARN(EID(HA_DEBUG_MSG),
+            "Cannot find array. Name: {}, ID: {}", arraySet.first, arraySet.second);
+        ret = EID(HA_INVALID_INPUT_ARGUMENT);
+    }
+    else if (volumeSet.second == HA_INVALID_VOLUME_IDX)
+    {
+        POS_TRACE_WARN(EID(HA_DEBUG_MSG),
+            "Cannot find volume. Name: {}, ID: {}", volumeSet.first, volumeSet.second);
         ret = EID(HA_INVALID_INPUT_ARGUMENT);
     }
     return ret;
 }
-
-PosReplicatorIOCompletion::PosReplicatorIOCompletion(GrpcCallbackType callbackType, VolumeIoSmartPtr inputVolumeIo, uint64_t lsn_, pos_io& posIo, CallbackSmartPtr originCallback_)
-: Callback(true, CallbackType_PosReplicatorIOCompletion),
-  grpcCallbackType(callbackType),
-  volumeIo(inputVolumeIo),
-  lsn(lsn_),
-  posIo(posIo),
-  originCallback(originCallback_)
-{
-}
-
-PosReplicatorIOCompletion::~PosReplicatorIOCompletion(void)
-{
-}
-
-bool
-PosReplicatorIOCompletion::_DoSpecificJob(void)
-{
-    if (grpcCallbackType == GrpcCallbackType::WaitGrpc)
-    {
-        volumeIo->SetCallback(originCallback);
-        PosReplicatorManagerSingleton::Instance()->AddDonePOSIoRequest(lsn, volumeIo);
-    }
-    else
-    {
-        PosReplicatorManagerSingleton::Instance()->HAIOCompletion(lsn, posIo, volumeIo);
-    }
-
-    return false;
-}
-
 } // namespace pos

@@ -32,6 +32,8 @@
 
 #include "flush_submission.h"
 
+#include <air/Air.h>
+
 #include <list>
 #include <string>
 
@@ -51,7 +53,7 @@
 
 namespace pos
 {
-FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled)
+FlushSubmission::FlushSubmission(StripeSmartPtr inputStripe, int arrayId, bool isWTEnabled)
 : FlushSubmission(inputStripe,
       IIOSubmitHandler::GetInstance(), arrayId,
       ArrayMgr()->GetInfo(arrayId) != nullptr ? ArrayMgr()->GetInfo(arrayId)->arrayInfo : nullptr,
@@ -59,7 +61,7 @@ FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnab
 {
 }
 
-FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
+FlushSubmission::FlushSubmission(StripeSmartPtr inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
     IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled)
 : Callback(false, CallbackType_FlushSubmission),
   stripe(inputStripe),
@@ -113,6 +115,7 @@ FlushSubmission::_DoSpecificJob(void)
         .blkCnt = 1};
 
     FlushCountSingleton::Instance()->pendingFlush++;
+    airlog("Pending_Flush", "internal", arrayId, 1);
 
     if (likely(translator != nullptr))
     {
@@ -124,6 +127,7 @@ FlushSubmission::_DoSpecificJob(void)
             POS_TRACE_ERROR(eventId, "translator in Flush Submission has error code : {} stripeId : {}", stripe->GetVsid(), logicalStripeId);
             // No retry
             FlushCountSingleton::Instance()->pendingFlush--;
+            airlog("Pending_Flush", "internal", arrayId, -1);
             FlushCountSingleton::Instance()->callbackNotCalledCount++;
             return true;
         }

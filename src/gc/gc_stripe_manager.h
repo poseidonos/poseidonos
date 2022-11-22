@@ -33,9 +33,10 @@
 #pragma once
 #include <vector>
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/gc/victim_stripe.h"
+#include "src/gc/force_flush_locker/force_flush_locker.h"
 #include "src/sys_event/volume_event.h"
 #include "src/resource_manager/memory_manager.h"
 #include "src/lib/system_timeout_checker.h"
@@ -93,8 +94,9 @@ public:
     virtual void SetFlushed(uint32_t volumeId, bool force = false);
     virtual bool IsAllFinished(void);
     void CheckTimeout(void);
+    virtual bool TryFlushLock(uint32_t volId);
+    virtual void ReleaseFlushLock(uint32_t volId);
 
-    static const uint32_t GC_WRITE_BUFFER_COUNT = 512;
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
 private:
@@ -107,11 +109,11 @@ private:
     GcAllocateBlks _AllocateBlks(uint32_t volumeId, uint32_t numBlks);
     bool _IsWriteBufferFull(uint32_t volumeId);
     void _CreateBlkInfoList(uint32_t volumeId);
-    bool _SetBufferPool(void);
+    void _SetBufferPool(void);
     void _SetForceFlushInterval(void);
     void _StartTimer(uint32_t volumeId);
+    void _ResetFlushLock(uint32_t volId);
 
-    std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
 
     BufferPool* gcWriteBufferPool = nullptr;
@@ -130,6 +132,7 @@ private:
     unordered_map<uint32_t, SystemTimeoutChecker*> timer;
     uint64_t timeoutInterval = 10;
     mutex timerMtx;
+    ForceFlushLocker ffLocker;
 };
 
 } // namespace pos

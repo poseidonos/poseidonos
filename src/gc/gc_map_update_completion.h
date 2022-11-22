@@ -47,7 +47,6 @@
 
 namespace pos
 {
-class Stripe;
 class IStripeMap;
 class EventScheduler;
 class GcStripeManager;

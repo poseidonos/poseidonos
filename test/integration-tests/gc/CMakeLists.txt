@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(victim_stripe_it victim_stripe_integration_test.cpp)

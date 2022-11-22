@@ -43,6 +43,7 @@
 
 #include "grpc_service/grpc_health.h"
 #include "grpc_service/grpc_replication_controller.h"
+#include "grpc_service/grpc_pos_io.h"
 #include "grpc_service/grpc_pos_management.h"
 #include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
@@ -58,13 +59,14 @@ GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
         static_cast<void*>(&address), CONFIG_TYPE_STRING);
     if (ret != 0)
     {
-        POS_TRACE_INFO(EID(HA_DEBUG_MSG),
+        POS_TRACE_WARN(EID(HA_DEBUG_MSG),
             "Failed to read grpc subscriber address from config file, Address will be set defined in the \"grpc_server_socket_address.h\"");
         address = GRPC_HA_SUB_SERVER_SOCKET_ADDRESS;
     }
 
     healthChecker = new GrpcHealth();
     replicationController = new GrpcReplicationController();
+    posIo = new GrpcPosIo();
     posManagement = new GrpcPosManagement();
     new std::thread(&GrpcSubscriber::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator subscriber has been initialized successfully");
@@ -83,6 +85,10 @@ GrpcSubscriber::~GrpcSubscriber(void)
         delete replicationController;
         replicationController = nullptr;
     }
+    if (posIo != nullptr)
+    {
+        delete posIo;
+    }
     if (posManagement != nullptr)
     {
         delete posManagement;
@@ -99,8 +105,9 @@ GrpcSubscriber::RunServer(std::string address)
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
     builder.RegisterService(healthChecker)
         .RegisterService(replicationController)
+        .RegisterService(posIo)
         .RegisterService(posManagement);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Registering HealthCheck, PosControler, PosManagement service and Starting GrpcServer at {}", address);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Registering HealthCheck, ReplicationController, PosIo, PosManagement service and Starting GrpcServer at {}", address);
 
     haGrpcServer = builder.BuildAndStart();
     std::cout << "Grpc Replicator server listening on " << address << std::endl;

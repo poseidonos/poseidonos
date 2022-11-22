@@ -46,15 +46,16 @@ class VolumeBase;
 class IVolumeEventManager : public IVolumeChecker
 {
 public:
-    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume, std::string uuid = "") = 0;
+    virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
+                        int32_t nsid, bool isPrimary, std::string uuid = "") = 0;
     virtual int Delete(std::string name) = 0;
     virtual int Mount(std::string name, std::string subnqn) = 0;
     virtual int Unmount(std::string name) = 0;
     virtual int Unmount(int volId) = 0;
     virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;
-    virtual int UpdateVolumeReplicationState(std::string name, VolumeReplicationState state) = 0;
-    virtual int UpdateVolumeReplicationRoleProperty(std::string name, 
-    VolumeReplicationRoleProperty nodeProperty) = 0;
+    virtual int UpdateReplicationState(std::string name, ReplicationState state) = 0;
+    virtual int UpdateReplicationRole(std::string name, 
+    ReplicationRole nodeProperty) = 0;
     virtual int Rename(std::string oldname, std::string newname) = 0;
     virtual int SaveVolumeMeta(void) = 0;
 

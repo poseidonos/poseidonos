@@ -521,6 +521,7 @@ Array::ReplaceDevice(string devName)
 int
 Array::Rebuild(void)
 {
+    POS_TRACE_INFO(EID(INVOKE_REBUILD_DUE_TO_USER_REQUEST), "array_name:{}", name_);
     pthread_rwlock_rdlock(&stateLock);
     int eid = 0;
 
@@ -555,12 +556,18 @@ Array::Rebuild(void)
         return eid;
     }
 
-    vector<IArrayDevice*> targets = devMgr_->GetFaulty();
+    // Devices that have been suspended during rebuilding have priority for rebuild
+    vector<IArrayDevice*> targets = devMgr_->GetRebuilding();
+    bool isResume = true;
+    if (targets.size() == 0)
+    {
+        targets = devMgr_->GetFaulty();
+        isResume = false;
+    }
+
+    // Unexpected case handling: spare exists and the state is degraded, but if there is no target
     assert (targets.size() != 0);
-    bool isResume = false;
     bool forceRebuild = true;
-    POS_TRACE_INFO(EID(INVOKE_REBUILD_DUE_TO_USER_REQUEST), "array_name:{}, targetCnt:{}",
-        name_, targets.size());
     InvokeRebuild(targets, isResume, forceRebuild);
     pthread_rwlock_unlock(&stateLock);
     return 0;
@@ -1082,6 +1089,8 @@ Array::InvokeRebuild(vector<IArrayDevice*> targets, bool isResume, bool force)
             return;
         }
     }
+    POS_TRACE_INFO(EID(TRIGGER_REBUILD_DEBUG), "array_name:{}, targetCnt:{}, isForce:{}, isResume:{}",
+        name_, targets.size(), force, isResume);
     EventSmartPtr event(new RebuildHandler(this, targets, isResume));
     eventScheduler->EnqueueEvent(event);
 }

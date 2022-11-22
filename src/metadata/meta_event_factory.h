@@ -45,7 +45,6 @@ class ISegmentCtx;
 class IWBStripeAllocator;
 class IContextManager;
 class IArrayInfo;
-class Stripe;
 
 class MetaEventFactory
 {
@@ -57,7 +56,7 @@ public:
     virtual ~MetaEventFactory(void) = default;
 
     virtual CallbackSmartPtr CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo);
-    virtual CallbackSmartPtr CreateStripeMapUpdateEvent(Stripe* stripe);
+    virtual CallbackSmartPtr CreateStripeMapUpdateEvent(StripeSmartPtr stripe);
     virtual CallbackSmartPtr CreateGcMapUpdateEvent(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt);
 
 private:

@@ -55,17 +55,17 @@ WriteCompletion::WriteCompletion(VolumeIoSmartPtr input)
 : WriteCompletion(input,
       AllocatorServiceSingleton::Instance()->GetIWBStripeAllocator(input.get()->GetArrayId()),
       EventFrameworkApiSingleton::Instance()->IsReactorNow(),
-      ArrayMgr())
+      VolumeServiceSingleton::Instance()->GetVolumeManager(input.get()->GetArrayId()))
 {
 }
 
 WriteCompletion::WriteCompletion(VolumeIoSmartPtr input,
     IWBStripeAllocator* iWBStripeAllocator, bool isReactorNow,
-    IArrayMgmt* arrayMgr)
+    IVolumeInfoManager* iVolumeInfoManager)
 : Callback(isReactorNow, CallbackType_WriteCompletion),
   volumeIo(input),
   iWBStripeAllocator(iWBStripeAllocator),
-  arrayMgr(arrayMgr)
+  volumeManager(iVolumeInfoManager)
 {
 }
 
@@ -86,7 +86,7 @@ WriteCompletion::_DoSpecificJob()
         *RBAStateServiceSingleton::Instance()->GetRBAStateManager(volumeIo->GetArrayId());
     rbaStateManager.BulkReleaseOwnership(volumeId, startRba, blockCount);
 
-    Stripe* stripeToFlush = nullptr;
+    StripeSmartPtr stripeToFlush = nullptr;
     executionSuccessful = _UpdateStripe(stripeToFlush);
     if (unlikely(nullptr != stripeToFlush))
     {
@@ -109,11 +109,11 @@ WriteCompletion::_DoSpecificJob()
 }
 
 bool
-WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
+WriteCompletion::_UpdateStripe(StripeSmartPtr& stripeToFlush)
 {
     bool stripeUpdateSuccessful = true;
     StripeAddr lsidEntry = volumeIo->GetLsidEntry();
-    Stripe* stripe = iWBStripeAllocator->GetStripe(lsidEntry.stripeId);
+    StripeSmartPtr stripe = iWBStripeAllocator->GetStripe(lsidEntry.stripeId);
     if (likely(nullptr != stripe))
     {
         uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
@@ -139,11 +139,10 @@ WriteCompletion::_UpdateStripe(Stripe*& stripeToFlush)
 }
 
 bool
-WriteCompletion::_RequestFlush(Stripe* stripe)
+WriteCompletion::_RequestFlush(StripeSmartPtr stripe)
 {
     bool requestFlushSuccessful = true;
-    IArrayInfo* arrayInfo = arrayMgr->GetInfo(volumeIo->GetArrayId())->arrayInfo;
-    bool parityOnly = arrayInfo->IsWriteThroughEnabled();
+    bool parityOnly = volumeManager->IsWriteThroughEnabled();
     if (stripe->IsActiveFlushTarget() == true)
     {
         parityOnly = false;

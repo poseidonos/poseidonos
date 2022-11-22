@@ -34,8 +34,8 @@
 
 namespace pos
 {
-WriteMpio::WriteMpio(void* mdPageBuf, const bool directAccessEnabled)
-: Mpio(mdPageBuf, directAccessEnabled),
+WriteMpio::WriteMpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading)
+: Mpio(mdPageBuf, directAccessEnabled, checkingCrcWhenReading),
   prevLpn(0),
   currLpn(0),
   prevBuf(nullptr),
@@ -145,6 +145,7 @@ bool
 WriteMpio::_Write(const MpAioState expNextState)
 {
     StoreTimestamp(MpioTimestampStage::Write);
+
     return Mpio::DoIO(expNextState);
 }
 

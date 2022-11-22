@@ -32,7 +32,7 @@
 
 #include "log_write_context_factory.h"
 
-#include "src/allocator/stripe/stripe.h"
+#include "src/allocator/stripe_manager/stripe.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
@@ -45,7 +45,8 @@ namespace pos
 {
 LogWriteContextFactory::LogWriteContextFactory(void)
 : config(nullptr),
-  notifier(nullptr)
+  notifier(nullptr),
+  sequenceController(nullptr)
 {
 }
 
@@ -54,10 +55,12 @@ LogWriteContextFactory::~LogWriteContextFactory(void)
 }
 
 void
-LogWriteContextFactory::Init(JournalConfiguration* journalConfig, LogBufferWriteDoneNotifier* target)
+LogWriteContextFactory::Init(JournalConfiguration* journalConfig,
+    LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
 {
     config = journalConfig;
     notifier = target;
+    sequenceController = sequencer;
 }
 
 LogWriteContext*
@@ -77,14 +80,13 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
     MapList dirtyMap;
     dirtyMap.emplace(volId);
 
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap,
-        callbackEvent, notifier);
+    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
 
 LogWriteContext*
-LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
+LogWriteContextFactory::CreateStripeMapLogWriteContext(StripeSmartPtr stripe,
     StripeAddr oldAddr, EventSmartPtr callbackEvent)
 {
     StripeAddr newAddr = {
@@ -96,8 +98,7 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(Stripe* stripe,
     MapList dirtyMap;
     dirtyMap.emplace(STRIPE_MAP_ID);
 
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap,
-        callbackEvent, notifier);
+    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
@@ -106,12 +107,11 @@ LogWriteContext*
 LogWriteContextFactory::CreateGcBlockMapLogWriteContext(GcStripeMapUpdateList mapUpdates,
     EventSmartPtr callbackEvent)
 {
-    GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId,
-        mapUpdates.vsid, mapUpdates.blockMapUpdateList);
+    GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, mapUpdates.blockMapUpdateList);
 
     MapList dummyDirty;
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dummyDirty, callbackEvent, notifier);
+        dummyDirty, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }
@@ -137,12 +137,11 @@ LogWriteContextFactory::CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList m
             list.push_back(mapUpdates.blockMapUpdateList[startOffset + offset]);
         }
 
-        GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId,
-            mapUpdates.vsid, list);
+        GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, list);
 
         MapList dummyDirty;
         MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-            dummyDirty, callbackEvent, notifier);
+            dummyDirty, callbackEvent, notifier, sequenceController);
 
         returnList.push_back(logWriteContext);
 
@@ -174,7 +173,7 @@ LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(GcStripeMapUpdateLi
     dirtyMap.emplace(STRIPE_MAP_ID);
     dirtyMap.emplace(mapUpdates.volumeId);
     MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dirtyMap, callbackEvent, notifier);
+        dirtyMap, callbackEvent, notifier, sequenceController);
 
     return logWriteContext;
 }

@@ -35,3 +35,6 @@ CONFIG_FPIC=n
 
 # Build with Address Sanitizer enabled
 CONFIG_ASAN=n
+
+# Build with Replicator enabled
+CONFIG_REPLICATOR=n

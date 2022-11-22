@@ -44,7 +44,6 @@
 
 namespace pos
 {
-class Stripe;
 class VolumeIo;
 
 using WriteCompletionFunc = std::function<bool(VolumeIoSmartPtr, CallbackSmartPtr)>;

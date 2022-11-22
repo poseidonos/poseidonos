@@ -41,7 +41,7 @@
 
 namespace pos
 {
-FlushReadCompletion::FlushReadCompletion(Stripe* stripe, int arrayId, EventScheduler* eventSchedulerArg)
+FlushReadCompletion::FlushReadCompletion(StripeSmartPtr stripe, int arrayId, EventScheduler* eventSchedulerArg)
 : Callback(false, CallbackType_FlushReadCompletion),
   stripe(stripe),
   arrayId(arrayId),

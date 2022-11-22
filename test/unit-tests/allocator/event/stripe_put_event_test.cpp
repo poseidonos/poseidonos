@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -21,7 +21,7 @@ TEST(StripePutEvent, Execute_TestIfOkToFree)
     // given
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockIWBStripeAllocator>* wbAllocator = new NiceMock<MockIWBStripeAllocator>();
-    StripePutEvent stripePutEvent(wbAllocator, *stripe, 5);
+    StripePutEvent stripePutEvent(wbAllocator, StripeSmartPtr(stripe), 5);
 
     // given 1.
     EXPECT_CALL(*stripe, IsOkToFree).WillOnce(Return(true));
@@ -39,7 +39,6 @@ TEST(StripePutEvent, Execute_TestIfOkToFree)
     EXPECT_EQ(false, ret);
 
     delete wbAllocator;
-    delete stripe;
 }
 
 } // namespace pos

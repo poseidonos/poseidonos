@@ -40,7 +40,7 @@
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/i_allocator_wbt.h"
 #include "src/allocator/i_context_replayer.h"
-#include "src/allocator/wbstripe_manager/wbstripe_manager.h"
+#include "src/allocator/stripe_manager/wbstripe_manager.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/include/meta_const.h"
 #include "src/lib/singleton.h"
@@ -54,6 +54,8 @@ class TelemetryPublisher;
 class ISegmentCtx;
 class IVersionedSegmentContext;
 
+class StripeManager;
+
 const uint32_t BUFFER_ALLOCATION_SIZE = 2 * 1024 * 1024;
 const uint32_t CHUNK_PER_BUFFER_ALLOCATION = BUFFER_ALLOCATION_SIZE / CHUNK_SIZE;
 const int BLOCKS_PER_GROUP = 8;
@@ -63,7 +65,7 @@ class Allocator : public IAllocatorWbt, public IMountSequence
 public:
     Allocator(void) = default;
     Allocator(TelemetryPublisher* telPublisher, AllocatorAddressInfo* addrInfo, ContextManager* contextManager, BlockManager* blockManager,
-        WBStripeManager* wbStripeManager, IArrayInfo* info, IStateControl* iState);
+        WBStripeManager* wbStripeManager, StripeManager* stripeManager, IArrayInfo* info, IStateControl* iState);
     Allocator(IArrayInfo* info, IStateControl* iState);
     virtual ~Allocator(void);
 
@@ -100,6 +102,7 @@ private:
     ContextManager* contextManager;
     BlockManager* blockManager;
     WBStripeManager* wbStripeManager;
+    StripeManager* stripeManager;
     bool isInitialized;
 
     IArrayInfo* iArrayInfo;

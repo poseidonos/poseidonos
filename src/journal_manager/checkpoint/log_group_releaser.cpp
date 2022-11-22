@@ -112,8 +112,8 @@ LogGroupReleaser::_FlushNextLogGroup(void)
         {
             logGroups[nextLogGroupId].SetReleasing();
 
-            POS_TRACE_INFO(EID(JOURNAL_FLUSH_LOG_GROUP),
-                "Flush next log group {}, seq number {}", nextLogGroupId, logGroups[nextLogGroupId].GetSeqNum());
+            POS_TRACE_INFO(EID(JOURNAL_RELEASE_LOG_GROUP_STARTED),
+                "logGroupId:{}, sequenceNumber:{}", nextLogGroupId, logGroups[nextLogGroupId].GetSeqNum());
 
             _TriggerCheckpoint();
         }
@@ -131,8 +131,8 @@ LogGroupReleaser::_TriggerCheckpoint(void)
     LogGroupFooter footer;
     uint64_t footerOffset;
 
-    POS_TRACE_DEBUG(EID(JOURNAL_CHECKPOINT_STARTED),
-        "Submit checkpoint start for log group {}", nextLogGroupId);
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STARTED),
+        "logGroupId:{}", nextLogGroupId);
 
     _CreateFlushingLogGroupFooter(footer, footerOffset);
 
@@ -176,6 +176,9 @@ LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t
 void
 LogGroupReleaser::LogGroupResetCompleted(int logGroupId)
 {
+    POS_TRACE_INFO(EID(JOURNAL_RELEASE_LOG_GROUP_COMPLETED),
+        "logGroupId:{}", logGroupId);
+
     releaseNotifier->NotifyLogBufferReseted(logGroupId);
 
     logGroups[nextLogGroupId].Reset();
