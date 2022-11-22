@@ -189,7 +189,7 @@ MetaFsService::_CreateScheduler(const uint32_t totalCoreCount,
 
             int numaId = needToIgnoreNuma ? 0 : _GetNumaId(coreId);
             POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "MetaScheduler #{} is created, coreId: {}, numaId: [}",
+                "MetaScheduler #{} is created, coreId: {}, numaId: {}",
                 numOfSchedulersCreated, coreId, numaId);
 
             if (ioScheduler_.find(numaId) == ioScheduler_.end())
