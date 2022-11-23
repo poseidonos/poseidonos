@@ -70,6 +70,7 @@ public:
 
     virtual LogGroupStatus GetBufferStatus(int logGroupId) override;
     virtual uint32_t GetSequenceNumber(int logGroupId) override;
+    virtual uint64_t GetNumLogsFilled(int logGroupId) override;
 
     virtual int GetLogGroupId(uint64_t fileOffset);
 

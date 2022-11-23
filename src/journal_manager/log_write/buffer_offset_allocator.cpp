@@ -242,6 +242,12 @@ BufferOffsetAllocator::GetSequenceNumber(int logGroupId)
     return statusList[logGroupId]->GetSeqNum();
 }
 
+uint64_t
+BufferOffsetAllocator::GetNumLogsFilled(int logGroupId)
+{
+    return statusList[logGroupId]->GetNumLogsFilled();
+}
+
 int
 BufferOffsetAllocator::GetLogGroupId(uint64_t fileOffset)
 {

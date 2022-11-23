@@ -121,6 +121,7 @@ JournalStatusProvider::_CreateBuferStatusElement(void)
         JsonElement logInfo("");
         logInfo.SetAttribute(JsonAttribute("seqNum", std::to_string(bufferStatus->GetSequenceNumber(groupId))));
         logInfo.SetAttribute(JsonAttribute("status", "\"" + logGroupStatusMap[bufferStatus->GetBufferStatus(groupId)] + "\""));
+        logInfo.SetAttribute(JsonAttribute("numLogsFilled", std::to_string(bufferStatus->GetNumLogsFilled(groupId))));
         logGroupElement.AddElement(logInfo);
     }
     bufferElement.SetArray(logGroupElement);
