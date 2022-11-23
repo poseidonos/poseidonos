@@ -473,4 +473,45 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     EXPECT_EQ(countArray[(size_t)MetaStorageType::NVRAM], 0);
     EXPECT_EQ(countArray[(size_t)MetaStorageType::JOURNAL_SSD], 0);
 }
+
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_TheCurrentExtentShouldBeUpdatedOnlyWhenTheExtentIsUsed)
+{
+    // given
+    MetaFileExtent extents[2];
+    extents[0].SetStartLpn(0);
+    extents[0].SetCount(10);
+    extents[1].SetStartLpn(100);
+    extents[1].SetCount(10);
+    MetaFileContext fileCtx;
+    fileCtx.chunkSize = 4032;
+    fileCtx.fileBaseLpn = 0;
+    fileCtx.extentsCount = 2;
+    fileCtx.CopyExtentsFrom(extents, fileCtx.extentsCount);
+    MetaFsIoRequest originReq;
+    MetaFsIoRequest* req;
+
+    // when, 1st
+    req = new MetaFsIoRequest;
+    req->fileCtx = &fileCtx;
+    req->extents = req->fileCtx->extents;
+    req->extentsCount = req->fileCtx->extentsCount;
+    req->originalMsg = &originReq;
+    req->byteOffsetInFile = 4032 * 9;
+    req->byteSize = 4032;
+    req->targetMediaType = MetaStorageType::SSD;
+
+    // then
+    scheduler->IssueRequestAndDelete(req);
+    EXPECT_EQ(originReq.requestCount, 1);
+    EXPECT_EQ(metaIoWorker.GetRequestedCount(), 1);
+    EXPECT_EQ(metaIoWorker.GetTheFirstLpn(), 9);
+    EXPECT_EQ(metaIoWorker.GetTheLastLpn(), 9);
+    EXPECT_EQ(metaIoWorker.GetRequestedSize(), 4032);
+
+    // currentExtent_ has to be 0
+    // if the scheduler uses the last lpn of the first extent then the operation is over,
+    // currentExtent_ should not point to the next extent
+    // if the value is 1, metafs io scheduler could have a problem of buffer indexing
+    EXPECT_EQ(scheduler->GetCurrentExtent(), 0);
+}
 } // namespace pos
