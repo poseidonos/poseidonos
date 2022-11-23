@@ -474,7 +474,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     EXPECT_EQ(countArray[(size_t)MetaStorageType::JOURNAL_SSD], 0);
 }
 
-TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIf)
+TEST_F(MetaFsIoSchedulerTexture, IssueRequest_TheCurrentExtentShouldBeUpdatedOnlyWhenTheExtentIsUsed)
 {
     // given
     MetaFileExtent extents[2];
@@ -508,7 +508,9 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIf)
     EXPECT_EQ(metaIoWorker.GetTheLastLpn(), 9);
     EXPECT_EQ(metaIoWorker.GetRequestedSize(), 4032);
 
-    // currentExtent_ have to be 0
+    // currentExtent_ has to be 0
+    // if the scheduler uses the last lpn of the first extent then the operation is over,
+    // currentExtent_ should not point to the next extent
     // if the value is 1, metafs io scheduler could have a problem of buffer indexing
     EXPECT_EQ(scheduler->GetCurrentExtent(), 0);
 }
