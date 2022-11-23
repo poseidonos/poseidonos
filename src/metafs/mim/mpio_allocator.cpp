@@ -191,10 +191,19 @@ MpioAllocator::_ReleaseCache(void)
     if (!victim)
         return;
 
-    victim->ChangeCacheStateTo(MpioCacheState::Init);
-    if (victim->GetCurrState() == MpAioState::First)
+    if (victim->IsRemovable())
     {
-        Release(victim);
+        victim->ChangeCacheStateTo(MpioCacheState::Init);
+        if (victim->GetCurrState() == MpAioState::First)
+        {
+            Release(victim);
+        }
+    }
+    else
+    {
+        // if the state of the victim is not in write done state
+        // the victim do not be released
+        writeCache_->Push({victim->io.arrayId, victim->io.metaLpn}, victim);
     }
 }
 } // namespace pos

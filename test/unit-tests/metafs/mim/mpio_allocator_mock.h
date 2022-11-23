@@ -50,6 +50,7 @@ public:
     MOCK_METHOD(void, Release, (Mpio* mpio), (override));
     MOCK_METHOD(void, TryReleaseTheOldestCache, (), (override));
     MOCK_METHOD(void, ReleaseAllCache, (), (override));
+    MOCK_METHOD(size_t, GetCacheSize, (), (const));
 };
 
 } // namespace pos
