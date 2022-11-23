@@ -112,21 +112,31 @@ public:
             // We won't log this event when its ID and message are
             // the same as the previous ones.
             std::string currMsg = fmt::format(fmt, args...);
-            if (IsSameLog(eventId, currMsg, prevEventId, prevMsg))
-            {
-                repeatCount++;
-                return;
-            }
 
-            // Log the previous event if there was a repetition.
-            if (repeatCount > 0)
+            if (preferences.IsBurstFilterEnabled())
             {
-                _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
-                repeatCount = 0;
-            }
+                if (IsSameLog(eventId, currMsg, prevEventId, prevMsg))
+                {
+                    if (repeatCount >= preferences.GetBurstFilterWindowSize())
+                    {
+                        _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
+                        repeatCount = 0;
+                        return;
+                    }
             
-            prevEventId = eventId;
-            prevMsg = currMsg;
+                    repeatCount++;
+                    return;
+                }
+
+                if (repeatCount > 0)
+                {
+                    _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
+                    repeatCount = 0;
+                }
+
+                prevEventId = eventId;
+                prevMsg = currMsg;
+            }
 
             _Log(loc, lvl, eventId, currMsg, 0);            
         }
@@ -258,7 +268,7 @@ private:
     pos_logger::Preferences preferences;
     int prevEventId = NO_PREV_EVENT;
     std::string prevMsg;
-    unsigned int repeatCount = 0;
+    uint32_t repeatCount = 0;
     // LCOV_EXCL_STOP
 };
 

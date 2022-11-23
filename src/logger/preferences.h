@@ -37,6 +37,8 @@
 #include "spdlog/spdlog.h"
 #include "src/helper/json/json_helper.h"
 
+#define DEFAULT_BURST_FILTER_WINDOW_SIZE 1000
+
 using namespace std;
 namespace pos_logger
 {
@@ -104,6 +106,9 @@ public:
     bool ShouldLog(spdlog::level::level_enum lvl, int id);
     string LogLevelToString(spdlog::level::level_enum lvl);
     spdlog::level::level_enum StringToLogLevel(string lvl);
+    bool IsBurstFilterEnabled() { return EnableBurstFilter; }
+    uint32_t GetBurstFilterWindowSize() { return burstFilterWindowSize; }
+    void SetBurstFilterWindowSize(uint32_t size) { burstFilterWindowSize = size; } 
 
 private:
     const string LOG_PATH = "/var/log/pos/";
@@ -119,5 +124,7 @@ private:
     spdlog::level::level_enum logLevel;
     Filter filter;
     bool EnableStructuredLogging;
+    bool EnableBurstFilter;
+    uint32_t burstFilterWindowSize = DEFAULT_BURST_FILTER_WINDOW_SIZE;
 };
 } // namespace pos_logger

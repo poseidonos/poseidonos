@@ -46,6 +46,8 @@ Preferences::Preferences()
     logRotation = conf.NumOfLogFilesForRotation();
     logLevel = StringToLogLevel(conf.LogLevel());
     EnableStructuredLogging = conf.IsStrLoggingEnabled();
+    EnableBurstFilter = conf.IsBurstFilterEnabled();
+    burstFilterWindowSize = conf.GetBurstFilterWindowSize();
 
     ApplyFilter();
 }
