@@ -109,6 +109,8 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldFilter(lvl, eventId) == false)
         {
+            loggerMtx.lock();
+
             std::string currMsg = "";
             try
             {
@@ -129,10 +131,14 @@ public:
                     {
                         _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
                         repeatCount = 0;
+
+                        loggerMtx.unlock();
                         return;
                     }
             
                     repeatCount++;
+
+                    loggerMtx.unlock();
                     return;
                 }
 
@@ -146,7 +152,9 @@ public:
                 prevMsg = currMsg;
             }
 
-            _Log(loc, lvl, eventId, currMsg, 0);            
+            _Log(loc, lvl, eventId, currMsg, 0);
+
+            loggerMtx.unlock();          
         }
 #endif
     }
@@ -277,6 +285,7 @@ private:
     int prevEventId = NO_PREV_EVENT;
     std::string prevMsg;
     uint32_t repeatCount = 0;
+    mutex loggerMtx;
     // LCOV_EXCL_STOP
 };
 
