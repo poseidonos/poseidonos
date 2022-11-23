@@ -68,17 +68,6 @@ TEST(MetaFileUtil, Convert_StorageOpt_To_MetaStorageType)
     EXPECT_EQ(storageType, MetaStorageType::SSD);
 }
 
-TEST(MetaFileUtil, Convert_MetaVolumeType_To_String)
-{
-    std::string result = "";
-
-    result = MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType::NvRamVolume);
-    EXPECT_EQ(result, std::string("NVRAM/NVDIMM"));
-
-    result = MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType::SsdVolume);
-    EXPECT_EQ(result, std::string("SSD array"));
-}
-
 TEST(MetaFileUtil, Convert_MetaStorageType_To_MetaVolumeType)
 {
     MetaVolumeType volumeType = MetaVolumeType::Max;
@@ -111,4 +100,22 @@ TEST(MetaFileUtil, Check_EpochSignature)
     std::cout << result << std::endl;
     EXPECT_NE(0, result);
 }
+
+TEST(MetaFileUtil, ConvertToMediaTypeName_testIfMetaVolumeTypesMatcheToTheirNames)
+{
+    std::unordered_map<MetaVolumeType, std::string> expectedResult =
+    {
+        {MetaVolumeType::SsdVolume, "SSD"},
+        {MetaVolumeType::NvRamVolume, "NVRAM/NVDIMM"},
+        {MetaVolumeType::JournalVolume, "Journal SSD"}};
+
+    for (int i = 0; i < (int)MetaVolumeType::Max; i++)
+    {
+        MetaVolumeType type = (MetaVolumeType)i;
+        EXPECT_EQ(expectedResult[type], MetaFileUtil::ConvertToMediaTypeName(type));
+    }
+    EXPECT_EQ(MetaFileUtil::UNKNOWN_VOLUME_NAME,
+            MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType::Max));
+}
+
 } // namespace pos
