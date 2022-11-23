@@ -37,6 +37,7 @@ TEST(JournalStatusProvider, GetJournalStatus_testIfGetConfigElementSuccess)
     int numLogGroup = 2;
     int logBufferSize = 1024;
     int sequenceNumber = 0;
+    int numFilled = 100;
     int flushingLogGroupId = -1;
     std::list<int> fullLogGroups;
     fullLogGroups.push_back(0);
@@ -47,6 +48,7 @@ TEST(JournalStatusProvider, GetJournalStatus_testIfGetConfigElementSuccess)
 
     ON_CALL(logBufferStatus, GetSequenceNumber).WillByDefault(Return(sequenceNumber));
     ON_CALL(logBufferStatus, GetBufferStatus).WillByDefault(Return(LogGroupStatus::FULL));
+    ON_CALL(logBufferStatus, GetNumLogsFilled).WillByDefault(Return(numFilled));
 
     ON_CALL(checkpointStatus, GetFlushingLogGroupId).WillByDefault(Return(flushingLogGroupId));
     ON_CALL(checkpointStatus, GetFullLogGroups).WillByDefault(Return(fullLogGroups));
@@ -59,8 +61,8 @@ TEST(JournalStatusProvider, GetJournalStatus_testIfGetConfigElementSuccess)
     std::string expect = "\"config\":{\"numLogGroups\":" + std::to_string(numLogGroup) +
         "}\"logBufferStatus\":{\"logBufferSizeInBytes\":" + std::to_string(logBufferSize) +
         ",\"logGroups\":[{\"seqNum\":" + std::to_string(sequenceNumber) +
-        ",\"status\":\"FULL\"},{\"seqNum\":" + std::to_string(sequenceNumber) +
-        ",\"status\":\"FULL\"}]}\"checkpointStatus\":{\"flushingLogGroupId\":" + to_string(flushingLogGroupId) +
+        ",\"status\":\"FULL\",\"numLogsFilled\":" + std::to_string(numFilled) + "},{\"seqNum\":" + std::to_string(sequenceNumber) +
+        ",\"status\":\"FULL\",\"numLogsFilled\":" + std::to_string(numFilled) + "}]}\"checkpointStatus\":{\"flushingLogGroupId\":" + to_string(flushingLogGroupId) +
         ",\"status\":\"INIT\",\"fullLogGroups\":[{\"ID\":0},{\"ID\":1}]}";
 
     std::string actualString;

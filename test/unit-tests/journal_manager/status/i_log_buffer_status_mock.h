@@ -14,6 +14,7 @@ public:
     using ILogBufferStatus::ILogBufferStatus;
     MOCK_METHOD(LogGroupStatus, GetBufferStatus, (int logGroupId), (override));
     MOCK_METHOD(uint32_t, GetSequenceNumber, (int logGroupId), (override));
+    MOCK_METHOD(uint64_t, GetNumLogsFilled, (int logGroupId), (override));
 };
 
 } // namespace pos
