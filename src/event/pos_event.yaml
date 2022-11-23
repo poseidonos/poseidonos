@@ -1511,7 +1511,7 @@ Root:
     Name: CREATE_ARRAY_NO_AVAILABLE_DEVICE
     Severity:
     Message: Failed to create an array.
-    Cause: The devices you entered are not available.
+    Cause: There are no devices available in the requested device list.
     Solution: Enter available devices.
   -
     Id: 2513
@@ -1823,11 +1823,11 @@ Root:
     Solution: Please enter only one write buffer device and try again
   -
     Id: 2557
-    Name: UNABLE_TO_SET_NULL_NVM
+    Name: UNABLE_TO_SET_NVM_NO_OR_NULL
     Severity:
     Message: Failed to configure an array.
-    Cause: The write buffer device you entered exist but are not available.
-    Solution: Check write buffer status and try again
+    Cause: The write buffer is not entered or is not available.
+    Solution: Check the input and status of write buffer and try again.
   -
     Id: 2558
     Name: UNABLE_TO_SET_NVM_ALREADY_OCCUPIED
