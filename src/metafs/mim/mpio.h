@@ -63,10 +63,11 @@ enum class MpioType
 
 enum class MpioCacheState
 {
-    Init,   // mpio is not cached
-    Read,   // cached, need to read
-    Merge,  // cached, need to merge after reading
-    Write,  // cached, mergeable, all other data in the meta lpn have been already read
+    Init,       // mpio is not cached
+    Read,       // cached, need to read
+    Merge,      // cached, need to merge after reading
+    Write,      // cached, mergeable, all other data in the meta lpn have been already read
+    WriteDone,  // cached, all data is stored in nvm, good to be evicted
 };
 
 class Mpio;
@@ -99,13 +100,21 @@ public:
     {
         return (MpioCacheState::Init != cacheState);
     }
-    virtual bool IsMergeable(void) const
+    virtual bool IsRemovable(void) const
     {
-        return (MpioCacheState::Write == cacheState);
+        return (MpioCacheState::WriteDone == cacheState);
+    }
+    MpioCacheState GetCacheState(void) const
+    {
+        return cacheState;
     }
     virtual void ChangeCacheStateTo(const MpioCacheState state)
     {
         cacheState = state;
+    }
+    virtual void SetMergedRequestList(std::vector<MetaFsIoRequest*>* list)
+    {
+        mergedRequestList = list;
     }
 
     virtual void BuildCompositeMDPage(void);
@@ -147,11 +156,13 @@ protected:
     MetaAsyncCbCxt aioCbCxt;
 
     MpioCacheState cacheState;
+    std::vector<MetaFsIoRequest*>* mergedRequestList;
     MetaFileType fileType;
 
     virtual void _InitStateHandler(void) = 0;
     bool _DoMemCpy(void* dst, void* src, const size_t nbytes);
     bool _DoMemSetZero(void* addr, const size_t nbytes);
+    void _CopyDataFromMergedRequestListAndRemoveTheListConditionally(void);
 
     static void _HandleAsyncMemOpDone(void* obj);
     void _HandlePartialDone(void* notused = nullptr);

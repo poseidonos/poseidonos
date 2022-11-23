@@ -82,6 +82,10 @@ public:
     }
     virtual void TryReleaseTheOldestCache(void);
     virtual void ReleaseAllCache(void);
+    virtual size_t GetCacheSize(void) const
+    {
+        return writeCache_->GetSize();
+    }
 
 private:
     Mpio* _CreateMpio(const MpioType type, const bool directAccessEnabled);
