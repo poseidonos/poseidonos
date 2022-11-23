@@ -52,8 +52,7 @@ BufferPool::BufferPool(const BufferInfo info,
             "Faild to get hugepageAllocator");
         return;
     }
-
-    if (_Alloc() == false)
+    if (_Init() == false)
     {
         _Clear();
     }
@@ -68,29 +67,50 @@ BufferPool::~BufferPool(void)
     _Clear();
 }
 
-void
-BufferPool::_Clear()
+void*
+BufferPool::TryGetBuffer(void)
 {
-    unique_lock<mutex> lock(freeBufferLock);
-    freeBuffers.clear();
-    freeBufferSize = 0;
-    initSize = 0;
-    while (allocatedHugepages.size() != 0)
+    unique_lock<mutex> lock(consumerLock);
+    if (consumerPool->empty())
     {
-        void* mem = allocatedHugepages.front();
-        if(mem != nullptr)
+        if (producerPool->size() > swapSize)
         {
-            hugepageAllocator->Free(mem);
+            producerLock.lock();
+            _Swap();
+            producerLock.unlock();
         }
-        allocatedHugepages.pop_front();
+        else
+        {
+            return nullptr;
+        }
     }
-    isAllocated = false;
+    void* buffer = nullptr;
+    buffer = consumerPool->front();
+    consumerPool->pop_front();
+    return buffer;
+}
+
+void
+BufferPool::ReturnBuffer(void* buffer)
+{
+    if (buffer == nullptr)
+    {
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+            "Failed to return buffer. Buffer is Null");
+        return;
+    }
+
+    unique_lock<mutex> lock(producerLock);
+    producerPool->push_back(buffer);
 }
 
 bool
-BufferPool::_Alloc(void)
+BufferPool::_Init(void)
 {
-    unique_lock<mutex> lock(freeBufferLock);
+    unique_lock<mutex> lock1(consumerLock);
+    unique_lock<mutex> lock2(producerLock);
+    bufferList1.clear();
+    bufferList2.clear();
     uint32_t remainBufferCount = 0;
     uint8_t* buffer = 0;
     // 2MB allocation for avoiding buddy allocation overhead
@@ -117,42 +137,47 @@ BufferPool::_Alloc(void)
             allocatedHugepages.push_back(buffer);
         }
 
-        freeBuffers.push_back(buffer);
+        bufferList1.push_back(buffer);
         buffer += BUFFER_INFO.size;
         remainBufferCount--;
     }
-    freeBufferSize = initSize = freeBuffers.size();
+    swapSize = (size_t)((bufferList1.size() * SWAP_THRESHOLD_PERCENT) / 100);
+    consumerPool = &bufferList1;
+    producerPool = &bufferList2;
+    POS_TRACE_INFO(EID(RESOURCE_MANAGER_DEBUG_MSG),
+        "BufferPool initialized, size:{}, swapSize:{}, owner:{}", bufferList1.size(), swapSize, BUFFER_INFO.owner);
     return true;
 }
 
-void*
-BufferPool::TryGetBuffer(void)
+void
+BufferPool::_Clear()
 {
-    unique_lock<mutex> lock(freeBufferLock);
-
-    if (freeBuffers.empty())
+    unique_lock<mutex> lock1(consumerLock);
+    unique_lock<mutex> lock2(producerLock);
+    consumerPool = nullptr;
+    producerPool = nullptr;
+    bufferList1.clear();
+    bufferList2.clear();
+    while (allocatedHugepages.size() != 0)
     {
-        return nullptr;
+        void* mem = allocatedHugepages.front();
+        if(mem != nullptr)
+        {
+            hugepageAllocator->Free(mem);
+        }
+        allocatedHugepages.pop_front();
     }
-
-    void* buffer = nullptr;
-    buffer = freeBuffers.front();
-    freeBuffers.pop_front();
-    freeBufferSize--;
-    return buffer;
+    isAllocated = false;
 }
 
 void
-BufferPool::ReturnBuffer(void* buffer)
+BufferPool::_Swap(void)
 {
-    if (buffer == nullptr)
-    {
-        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
-            "Failed to return buffer. Buffer is Null");
-        return;
-    }
-
-    unique_lock<mutex> lock(freeBufferLock);
-    freeBuffers.push_back(buffer);
-    freeBufferSize++;
+    // This method must be performed in a thread-safe state.
+    std::list<void*>* temp;
+    temp = consumerPool;
+    consumerPool = producerPool;
+    producerPool = temp;
+    POS_TRACE_INFO(EID(RESOURCE_MANAGER_DEBUG_MSG),
+        "Bufferpool swapped, size:{}, owner:{}", consumerPool->size(), BUFFER_INFO.owner);
 }

@@ -53,26 +53,31 @@ public:
         HugepageAllocator* hugepageAllocator =
             HugepageAllocatorSingleton::Instance());
     virtual ~BufferPool(void);
-
     virtual void* TryGetBuffer(void);
     virtual void ReturnBuffer(void*);
-    virtual bool IsFull(void) { return freeBufferSize == initSize; }
     virtual bool IsAllocated(void) { return isAllocated; }
     std::string GetOwner(void) { return BUFFER_INFO.owner; }
+
 private:
-    bool _Alloc(void);
+    bool _Init(void);
     void _Clear(void);
+    void _Swap(void);
 
     const BufferInfo BUFFER_INFO;
     const uint32_t SOCKET;
 
-    std::mutex freeBufferLock;
-    std::list<void*> freeBuffers;
+    HugepageAllocator* hugepageAllocator = nullptr;
     std::list<void*> allocatedHugepages;
-    uint32_t freeBufferSize = 0;
-    uint32_t initSize = 0;
+    std::list<void*>* consumerPool = nullptr;
+    std::list<void*>* producerPool = nullptr;
+    std::list<void*> bufferList1;
+    std::list<void*> bufferList2;
+
+    std::mutex consumerLock;
+    std::mutex producerLock;
     bool isAllocated = false;
-    HugepageAllocator* hugepageAllocator;
+    size_t swapSize;
+    const static size_t SWAP_THRESHOLD_PERCENT = 25;
 };
 
 } // namespace pos

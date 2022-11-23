@@ -45,7 +45,6 @@ public:
     using BufferPool::BufferPool;
     MOCK_METHOD(void*, TryGetBuffer, (), (override));
     MOCK_METHOD(void, ReturnBuffer, (void*), (override));
-    MOCK_METHOD(bool, IsFull, (), (override));
 };
 
 } // namespace pos
