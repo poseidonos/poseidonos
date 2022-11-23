@@ -103,10 +103,16 @@ TEST(MetaFileUtil, Check_EpochSignature)
 
 TEST(MetaFileUtil, ConvertToMediaTypeName_testIfMetaVolumeTypesMatcheToTheirNames)
 {
+    std::unordered_map<MetaVolumeType, std::string> expectedResult =
+    {
+        {MetaVolumeType::SsdVolume, "SSD"},
+        {MetaVolumeType::NvRamVolume, "NVRAM/NVDIMM"},
+        {MetaVolumeType::JournalVolume, "Journal SSD"}};
+
     for (int i = 0; i < (int)MetaVolumeType::Max; i++)
     {
-        EXPECT_NE(MetaFileUtil::UNKNOWN_VOLUME_NAME,
-            MetaFileUtil::ConvertToMediaTypeName((MetaVolumeType)i));
+        MetaVolumeType type = (MetaVolumeType)i;
+        EXPECT_EQ(expectedResult[type], MetaFileUtil::ConvertToMediaTypeName(type));
     }
     EXPECT_EQ(MetaFileUtil::UNKNOWN_VOLUME_NAME,
             MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType::Max));
