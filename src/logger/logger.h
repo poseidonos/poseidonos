@@ -109,9 +109,10 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldFilter(lvl, eventId) == false)
         {
-            loggerMtx.lock();
-
+            // We won't log this event when its ID and message are
+            // the same as the previous ones.
             std::string currMsg = fmt::format(fmt, args...);
+
             if (preferences.IsBurstFilterEnabled())
             {
                 if (IsSameLog(eventId, currMsg, prevEventId, prevMsg))
@@ -120,14 +121,10 @@ public:
                     {
                         _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
                         repeatCount = 0;
-
-                        loggerMtx.unlock();
                         return;
                     }
             
                     repeatCount++;
-
-                    loggerMtx.unlock();
                     return;
                 }
 
@@ -141,9 +138,7 @@ public:
                 prevMsg = currMsg;
             }
 
-            _Log(loc, lvl, eventId, currMsg, 0);
-
-            loggerMtx.unlock();          
+            _Log(loc, lvl, eventId, currMsg, 0);            
         }
 #endif
     }
@@ -274,7 +269,6 @@ private:
     int prevEventId = NO_PREV_EVENT;
     std::string prevMsg;
     uint32_t repeatCount = 0;
-    mutex loggerMtx;
     // LCOV_EXCL_STOP
 };
 
