@@ -109,10 +109,18 @@ public:
 #ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldFilter(lvl, eventId) == false)
         {
-            // We won't log this event when its ID and message are
-            // the same as the previous ones.
-            std::string currMsg = fmt::format(fmt, args...);
+            std::string currMsg = "";
+            try
+            {
+                currMsg = fmt::format(fmt, args...);
+            }
+            catch(const std::exception& e)
+            {
+                // Proceed when an exception occurs in fmt::format()
+            }           
 
+            // BurstFilter: we won't log this event when its ID and message are
+            // the same as the previous ones.
             if (preferences.IsBurstFilterEnabled())
             {
                 if (IsSameLog(eventId, currMsg, prevEventId, prevMsg))
