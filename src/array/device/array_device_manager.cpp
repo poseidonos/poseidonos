@@ -104,7 +104,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::SSD)
         {
-            int eventId = EID(ARRAY_SSD_NOT_FOUND);
+            int eventId = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
