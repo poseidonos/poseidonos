@@ -71,8 +71,10 @@ StripeCopySubmission::_DoSpecificJob(void)
     if (_GetErrorCount() != 0)
     {
         // TODO(jg121.lim) : reverse map load error handling
+        POS_TRACE_ERROR(EID(GC_REVERSE_MAP_LOAD_ERROR), "victim_segment:{}", copyIndex);
+        assert(false);
     }
-
+    POS_TRACE_DEBUG(EID(GC_REVERSE_MAP_LOADED), "victim_segment:{}", copyIndex);
     if (isLoaded == false)
     {
         for (uint32_t index = 0; index < meta->GetStripePerSegment(); index++)
@@ -80,8 +82,7 @@ StripeCopySubmission::_DoSpecificJob(void)
             meta->GetVictimStripe(copyIndex, index)->LoadValidBlock();
         }
 
-        POS_TRACE_DEBUG(EID(GC_LOAD_VALID_BLOCKS),
-            "valid blocks loaded, startStripeId:{}", baseStripeId);
+        POS_TRACE_DEBUG(EID(GC_VALID_BLOCKS_LOADED), "victim_segment:{}", copyIndex);
 
         isLoaded = true;
     }
@@ -106,9 +107,7 @@ StripeCopySubmission::_DoSpecificJob(void)
         eventScheduler->EnqueueEvent(stripeCopier);
     }
 
-    POS_TRACE_DEBUG(EID(GC_STRIPE_COPIER_SUBMIT),
-        "stripe copier submit, startStripeId:{}", baseStripeId);
-
+    POS_TRACE_DEBUG(EID(GC_COPY_SUBMISSION), "victim_segment:{}", copyIndex);
     return true;
 }
 

@@ -194,9 +194,8 @@ Copier::_CompareThresholdState(void)
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
             int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-            POS_TRACE_DEBUG(EID(GC_GET_VICTIM_SEGMENT),
-                "trigger start, cnt:{}, victimId:{}",
-                numFreeSegments, victimId);
+            POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
+                victimId, numFreeSegments);
         }
         meta->GetGcStripeManager()->CheckTimeout();
     }
@@ -238,10 +237,6 @@ Copier::_CopyPrepareState(void)
         callback->SetCallee(callee);
         meta->GetVictimStripe(victimIndex, index)->Load(baseStripe + index, callback);
     }
-
-    POS_TRACE_DEBUG(EID(GC_LOAD_REVERSE_MAP),
-        "load reverse map, victimSegmentId:{}", victimId);
-
     _ChangeEventState(CopierStateType::COPIER_COPY_COMPLETE_STATE);
 }
 
@@ -254,8 +249,7 @@ Copier::_CopyCompleteState(void)
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_COPY_COMPLETE),
-        "copy complete, id:{}", victimId);
+    POS_TRACE_DEBUG(EID(GC_COPY_COMPLETION), "victim_segment_id:{}", victimId);
 
     uint32_t invalidBlkCnt = userDataMaxBlks - meta->GetDoneCopyBlks();
 
@@ -311,11 +305,11 @@ Copier::_CleanUpVictimSegments(void)
         if (0 == validCount && UNMAP_SEGMENT != victimSegId)
         {
             // Push to free list among the victim lists
-            POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
-                "Move to free list among the victim lists, VictimSegid:{}, validCount:{}", victimSegId, validCount);
             segmentCtx->MoveToFreeState(victimSegId);
             SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
             segmentCtxUpdater->ResetInfos(victimSegId);
+            POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
+                "victim_segment_id:{}, count:{}", victimSegId, validCount);
         }
     }
 }

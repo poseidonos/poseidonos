@@ -92,7 +92,7 @@ GcFlushCompletion::_DoSpecificJob(void)
         gcStripeManager->ReturnBuffer(dataBuffer);
         dataBuffer = nullptr;
         POS_TRACE_DEBUG(EID(GC_STRIPE_FLUSH_COMPLETION),
-            "arrayName:{}, stripeUserLsid:{}",
+            "array_name:{}, stripe_id:{}",
             arrayName, stripe->GetUserLsid());
     }
 
@@ -120,10 +120,21 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId,
         rbaList);
+    StripeId userLsid = stripe->GetUserLsid();
     if (false == ownershipAcquired)
     {
+        ownershipAcquisitionRetryCnt++;
+        if (ownershipAcquisitionRetryCnt % 100 == 0)
+        {
+            POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
+                "array_name:{}, stripe_id:{}, retried:{}",
+                arrayName, userLsid, ownershipAcquisitionRetryCnt);
+        }
         return false;
     }
+    ownershipAcquisitionRetryCnt = 0;
+    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED),
+        "array_name:{}, stripe_id:{}", arrayName, userLsid);
 
     airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);
 
@@ -136,14 +147,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     {
         event = inputEvent;
     }
-
-    StripeId userLsid = stripe->GetUserLsid();
     stripe->Flush(event);
-
-    POS_TRACE_DEBUG(EID(GC_ACQUIRE_OWNERSHIP_RBA_LIST),
-        "acquire ownership copied rba list, arrayName:{}, stripeUserLsid:{}",
-        arrayName, userLsid);
-
     return true;
 }
 

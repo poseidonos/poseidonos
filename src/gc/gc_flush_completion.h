@@ -68,6 +68,7 @@ private:
     EventSmartPtr inputEvent;
     RBAStateManager* rbaStateManager;
     IArrayInfo* iArrayInfo;
+    uint32_t ownershipAcquisitionRetryCnt = 0;
 };
 
 } // namespace pos

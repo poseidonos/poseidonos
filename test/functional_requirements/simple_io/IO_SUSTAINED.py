@@ -39,12 +39,13 @@ def execute():
     fio.wait_fio(fio_proc1)
     fio.wait_fio(fio_proc2)
     print("sequential write end")
-    print("mixed i/o begin")
-    fio_proc1 = fio.start_fio(0, time_mix, "randrw")
-    fio_proc2 = fio.start_fio(1, time_mix, "randrw")
+    print("random write begin")
+    fio_proc1 = fio.start_fio(0, time_mix, "randwrite")
+    fio_proc2 = fio.start_fio(1, time_mix, "randwrite")
     fio.wait_fio(fio_proc1)
     fio.wait_fio(fio_proc2)
-    print("mixed i/o end")
+    print("random write end")
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
