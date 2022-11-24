@@ -241,18 +241,19 @@ PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int v
 }
 
 int
-PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, void* data)
+PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, std::shared_ptr<char*> dataList)
 {
-    //IO_TYPE::WRITE
-    //IO_TYPE::READ
     VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numBlocks);
+    if (ioType == IO_TYPE::WRITE)
+    {
+        _InsertChunkToBlock(volumeIo, dataList, numBlocks);
+    }
     _RequestVolumeIo(GrpcCallbackType::GrpcReply, volumeIo, REPLICATOR_INVALID_LSN);
-
     return EID(SUCCESS);
 }
 
 VolumeIoSmartPtr
-PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks)
+PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, std::shared_ptr<char*> dataList)
 {
     AIO aio;
     pos_io posIo;
@@ -445,5 +446,16 @@ PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int>& arraySet, st
         ret = EID(HA_INVALID_INPUT_ARGUMENT);
     }
     return ret;
+}
+
+void
+PosReplicatorManager::_InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numBlocks)
+{
+    for (uint64_t index = 0; index < numBlocks; index++)
+    {
+        char* bufferPtr = (char*)volumeIo.get()->GetBuffer() + index * ArrayConfig::SECTOR_SIZE_BYTE;
+        char* targetPtr = dataList.get()[index];
+        memcpy((void*)bufferPtr, (void*)(targetPtr), ArrayConfig::SECTOR_SIZE_BYTE);
+    }
 }
 } // namespace pos
