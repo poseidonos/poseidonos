@@ -171,10 +171,12 @@ MpioAllocator::_TryAlloc(const MpioType type)
 }
 
 void
-MpioAllocator::TryReleaseTheOldestCache(void)
+MpioAllocator::TryReleaseTheOldestCache(const bool forceReleaseCacheEntry)
 {
-    if (0 == pool_[(uint32_t)MpioType::Write]->GetFreeCount())
+    if ((0 == pool_[(uint32_t)MpioType::Write]->GetFreeCount()) || forceReleaseCacheEntry)
+    {
         _ReleaseCache();
+    }
 }
 
 void

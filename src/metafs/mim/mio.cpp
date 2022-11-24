@@ -255,6 +255,27 @@ Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo, MetaLpnType lpn,
     mpioIoInfo.signature = originReq->fileCtx->signature;
 }
 
+void
+Mio::_WaitingForFreeMpio(const MpioType ioType, const MetaStorageType type) const
+{
+    // no more Mpio operations
+    while (mpioAllocator->IsEmpty(ioType))
+    {
+        // Complete Process, MpioHandler::BottomhalfMioProcessing()
+        mpioDonePoller();
+    }
+
+    if (_IsJournalRequest(type))
+    {
+        // waiting for free cache space
+        while (mpioAllocator->IsFullyCached())
+        {
+            mpioDonePoller();
+            mpioAllocator->TryReleaseTheOldestCache(true);
+        }
+    }
+}
+
 // FIXME: for better parallel execution, let's issue io request for each mpio as soon as mio builds mpio contexta
 /* 
 The host I/O issued as Mio data structure, and the Mio is consisted with several Mpio moudled by fileDataChunkSize(4032Byte) that the other 64Byte is page control info such as signature, version, and so on. 
@@ -285,12 +306,7 @@ Mio::_BuildMpioMap(void)
     // issue Mpios
     do
     {
-        // no more Mpio operations
-        while (mpioAllocator->IsEmpty(ioType))
-        {
-            // Complete Process, MpioHandler::BottomhalfMioProcessing()
-            mpioDonePoller();
-        }
+        _WaitingForFreeMpio(ioType, originReq->targetMediaType);
 
         // Build Mpio data structure
         MpioIoInfo mpioIoInfo;

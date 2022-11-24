@@ -80,11 +80,15 @@ public:
     {
         return (0 == pool_[(uint32_t)type]->GetFreeCount());
     }
-    virtual void TryReleaseTheOldestCache(void);
+    virtual void TryReleaseTheOldestCache(const bool forceReleaseCacheEntry = false);
     virtual void ReleaseAllCache(void);
     virtual size_t GetCacheSize(void) const
     {
         return writeCache_->GetSize();
+    }
+    virtual bool IsFullyCached(void) const
+    {
+        return writeCache_->IsFull();
     }
 
 private:
