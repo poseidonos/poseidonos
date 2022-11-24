@@ -70,6 +70,12 @@ BufferPool::~BufferPool(void)
 void*
 BufferPool::TryGetBuffer(void)
 {
+    if (isAllocated == false)
+    {
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+            "Failed to get buffer before init, owner:{}", BUFFER_INFO.owner);
+        return nullptr;
+    }
     unique_lock<mutex> lock(consumerLock);
     if (consumerPool->empty())
     {
@@ -96,7 +102,7 @@ BufferPool::ReturnBuffer(void* buffer)
     if (buffer == nullptr)
     {
         POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
-            "Failed to return buffer. Buffer is Null");
+            "Failed to return buffer. Buffer is nullptr");
         return;
     }
 
@@ -178,6 +184,6 @@ BufferPool::_Swap(void)
     temp = consumerPool;
     consumerPool = producerPool;
     producerPool = temp;
-    POS_TRACE_INFO(EID(RESOURCE_MANAGER_DEBUG_MSG),
+    POS_TRACE_DEBUG(EID(RESOURCE_MANAGER_DEBUG_MSG),
         "Bufferpool swapped, size:{}, owner:{}", consumerPool->size(), BUFFER_INFO.owner);
 }

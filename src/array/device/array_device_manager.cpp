@@ -70,7 +70,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::NVRAM)
         {
-            int eventId = EID(ARRAY_NVM_NOT_FOUND);
+            int eventId = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
@@ -87,7 +87,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::SSD)
         {
-            int eventId = EID(ARRAY_SSD_NOT_FOUND);
+            int eventId = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
@@ -104,7 +104,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
         if (nullptr == uBlock || uBlock->GetType() != DeviceType::SSD)
         {
-            int eventId = EID(ARRAY_SSD_NOT_FOUND);
+            int eventId = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
@@ -362,14 +362,17 @@ ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
     {
         return ret;
     }
-
-    if (devSet.nvm.size() > 0)
+    if (devSet.nvm.size() == 1)
     {
         ret = _CheckNvmCapacity(devSet);
         if (0 != ret)
         {
             return ret;
         }
+    }
+    else
+    {
+        return EID(UNABLE_TO_SET_NVM_NO_OR_NULL);
     }
 
     ret = _CheckSsdsCapacity(devSet);

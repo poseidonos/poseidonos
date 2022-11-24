@@ -76,7 +76,7 @@ private:
     std::mutex consumerLock;
     std::mutex producerLock;
     bool isAllocated = false;
-    size_t swapSize;
+    size_t swapSize = 0;
     const static size_t SWAP_THRESHOLD_PERCENT = 25;
 };
 
