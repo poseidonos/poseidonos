@@ -74,7 +74,7 @@ public:
 
     int UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId);
 
-    int HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks, void* data);
+    int HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t num_blocks, std::shared_ptr<char*> data);
     void HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
     void HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
     void HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
@@ -95,8 +95,9 @@ protected:
 private:
     void _AddWaitPOSIoRequest(uint64_t lsn, pos_io io);
 
-    VolumeIoSmartPtr _MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks);
+    VolumeIoSmartPtr _MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, std::shared_ptr<char*> dataList = nullptr);
     void _RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn);
+    void _InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numBlocks);
 
     std::unordered_map<uint64_t, pos_io> waitPosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
     std::unordered_map<uint64_t, VolumeIoSmartPtr> donePosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];

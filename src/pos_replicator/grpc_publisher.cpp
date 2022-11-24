@@ -178,24 +178,14 @@ GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, u
     ::grpc::ClientContext cliContext;
     replicator_rpc::CompleteReadRequest* request = new replicator_rpc::CompleteReadRequest;
     replicator_rpc::CompleteReadResponse response;
-    struct Chunk
-    {
-        char contents[ArrayConfig::BLOCK_SIZE_BYTE];
-    };
 
     request->set_array_name(arrayName);
     request->set_volume_name(volumeName);
     request->set_rba(rba);
     request->set_num_blocks(numBlocks);
 
-    for (uint64_t index = 0; index < numBlocks; index++)
-    {
-        char* dataPtr = (char*)buffer + index * ArrayConfig::BLOCK_SIZE_BYTE;
-        Chunk* chunkPtr = reinterpret_cast<Chunk*>(dataPtr);
+    _InsertBlockToChunk(request, buffer, numBlocks);
 
-        replicator_rpc::Chunk* data = request->add_data();
-        data->set_content((char*)chunkPtr);
-    }
 
     grpc::Status status;
     if (_WaitUntilReady() == true)
@@ -212,5 +202,31 @@ GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, u
         }
     }
     return EID(SUCCESS);
+}
+
+void
+GrpcPublisher::_InsertBlockToChunk(replicator_rpc::CompleteReadRequest* request, void* data, uint64_t numBlocks)
+{
+    struct Chunk
+    {
+        char contents[ArrayConfig::BLOCK_SIZE_BYTE];
+    };
+
+    for (uint64_t index = 0; index < numBlocks; index++)
+    {
+        char* dataPtr = (char*)data + index * ArrayConfig::SECTOR_SIZE_BYTE;
+        Chunk* chunkPtr = reinterpret_cast<Chunk*>(dataPtr);
+        char lastData = dataPtr[ArrayConfig::SECTOR_SIZE_BYTE];
+        if (index < numBlocks - 1)
+        {
+            dataPtr[ArrayConfig::SECTOR_SIZE_BYTE] = 0;
+        }
+        replicator_rpc::Chunk* data = request->add_data();
+        data->set_content((char*)chunkPtr);
+        if (index < numBlocks - 1)
+        {
+            dataPtr[ArrayConfig::SECTOR_SIZE_BYTE] = lastData;
+        }
+    }
 }
 } // namespace pos

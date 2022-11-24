@@ -79,6 +79,13 @@ GrpcPosIo::WriteBlocks(::grpc::ServerContext* context,
     std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
+    int dataSize = request->data_size();
+    std::shared_ptr<char*> dataList(new char*[dataSize]);
+    for (int index = 0; index < dataSize; index++)
+    {
+        dataList.get()[index] = const_cast<char*>(request->data(index).content().c_str());
+    }
+
     ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get WriteBlocks from grpc client");
 
@@ -87,9 +94,8 @@ GrpcPosIo::WriteBlocks(::grpc::ServerContext* context,
         return ret;
     }
 
-    char buffer[4096];
     PosReplicatorManagerSingleton::Instance()->HAIOSubmission(IO_TYPE::WRITE, arraySet.second, volumeSet.second,
-        request->rba(), request->num_blocks(), buffer);
+        request->rba(), request->num_blocks(), dataList);
     return ::grpc::Status::OK;
 }
 
