@@ -4161,6 +4161,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 3404
+    Name: GC_NORMAL_THRESHOLD_IS_SET
+    Severity:
+    Message: GC threshold is set
+    Cause:
+    Solution:
+  -
     Id: 3410
     Name: GC_VICTIM_SELECTED
     Severity:

@@ -95,6 +95,8 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
         EventSchedulerSingleton::Instance(),
         metaEventFactory,
         arrayInfo);
+
+    _SetGCThreshold();
 }
 
 Metadata::~Metadata(void)
@@ -277,4 +279,18 @@ Metadata::StopRebuilding(void)
     }
 }
 
+void
+Metadata::_SetGCThreshold(void)
+{
+    const PartitionLogicalSize* dataPartitionSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    if (dataPartitionSize != nullptr)
+    {
+        uint32_t normalGcThreshold = (uint32_t)(dataPartitionSize->totalSegments / 100);
+        if (normalGcThreshold < 20)
+        {
+            normalGcThreshold = 20;
+        }
+        allocator->SetNormalGcThreshold(normalGcThreshold);
+    }
+}
 } // namespace pos

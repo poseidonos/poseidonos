@@ -276,6 +276,7 @@ Allocator::PrepareRebuild(void)
 void
 Allocator::SetNormalGcThreshold(uint32_t inputThreshold)
 {
+    POS_TRACE_TRACE(EID(GC_NORMAL_THRESHOLD_IS_SET), "threshold:{}", inputThreshold);
     contextManager->GetGcCtx()->SetNormalGcThreshold(inputThreshold);
 }
 
