@@ -36,6 +36,8 @@
 
 #include "spdlog/spdlog.h"
 #include "src/include/pos_event_id.h"
+#define DEFAULT_BURST_FILTER_WINDOW_SIZE 1000
+
 using namespace pos;
 namespace pos_logger
 {
@@ -100,4 +102,34 @@ Configuration::IsStrLoggingEnabled()
     }
     return ENABLE_STRUCTURED_LOGGING;
 }
+
+bool
+Configuration::IsBurstFilterEnabled()
+{
+    int SUCCESS = EID(SUCCESS);
+    bool enable_burst_filter = false;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "enable_burst_filter",
+        &enable_burst_filter, ConfigType::CONFIG_TYPE_BOOL);
+    if (ret == SUCCESS)
+    {
+        return enable_burst_filter;
+    }
+    return ENABLE_BURST_FILTER;
+}
+
+uint32_t
+Configuration::GetBurstFilterWindowSize()
+{
+    int SUCCESS = EID(SUCCESS);
+    uint32_t windowSize = 0;
+    int ret = ConfigManagerSingleton::Instance()->GetValue("logger", "burst_filter_window_size",
+        &windowSize, ConfigType::CONFIG_TYPE_UINT32);
+    if (ret == SUCCESS)
+    {
+        return windowSize;
+    }
+
+    return DEFAULT_BURST_FILTER_WINDOW_SIZE;
+}
+
 } // namespace pos_logger
