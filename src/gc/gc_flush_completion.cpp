@@ -124,11 +124,11 @@ GcFlushCompletion::_DoSpecificJob(void)
     if (false == ownershipAcquired)
     {
         ownershipAcquisitionRetryCnt++;
-        if (ownershipAcquisitionRetryCnt % 100 == 0)
+        if (ownershipAcquisitionRetryCnt % 1000 == 0)
         {
             POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
-                "array_name:{}, stripe_id:{}, retried:{}",
-                arrayName, userLsid, ownershipAcquisitionRetryCnt);
+                "array_name:{}, stripe_id:{}, retried:{}, rbaCount:{}",
+                arrayName, userLsid, ownershipAcquisitionRetryCnt, rbaList.size());
         }
         return false;
     }
