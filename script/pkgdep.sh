@@ -10,7 +10,7 @@ if [ -f /etc/debian_version ]; then
     ${POS_ROOT}/script/install_go.sh
 
     # Includes Ubuntu, Debian
-    apt-get install -y gcc g++ make git 
+    apt-get install -y gcc g++ make git
     # Additional dependencies for NVMe over Fabrics
     apt-get install -y libibverbs-dev librdmacm-dev
     # Additional dependencies for JSON
@@ -24,15 +24,12 @@ if [ -f /etc/debian_version ]; then
     # Additional RDMA
     apt-get install -y libnuma-dev uuid-dev ibverbs-utils perftest
     # Additional dependencies for iBOF OS
-    apt-get install -y python3 python-pip
-    apt-get install -y python3 python3-pip
+    apt-get install -y python3 python-pip python3-pip
     apt-get install -y iperf
     # for ibof logging
     apt-get install -y cmake libsystemd-dev
     # for json
     apt-get install -y jq rapidjson-dev
-    # for python3
-    apt-get install -y python3
     # for psutil
     apt-get install -y python3-psutil
     # Compiler cache
@@ -84,6 +81,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libasan4-dbg
     # for crc
     apt install -y libboost-dev
+    # for opentelemetry
+    apt install -y libssl-dev
 elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
     set -e # exit immediately on any fail
 
