@@ -34,9 +34,7 @@
 
 #include <air/Air.h>
 
-#include <list>
 #include <memory>
-#include <string>
 
 #include "src/allocator/allocator.h"
 #include "src/allocator/stripe/stripe.h"
@@ -52,23 +50,23 @@
 #include "src/io/general_io/rba_state_manager.h"
 #include "src/io/general_io/rba_state_service.h"
 #include "src/logger/logger.h"
-#include "src/mapper/mapper.h"
-#include "src/mapper_service/mapper_service.h"
 
 namespace pos
 {
-GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer)
+GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, string arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer)
 : GcFlushCompletion(stripe, arrayName, gcStripeManager, dataBuffer,
       nullptr,
       RBAStateServiceSingleton::Instance()->GetRBAStateManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()),
-      ArrayMgr()->GetInfo(arrayName)->arrayInfo)
+      ArrayMgr()->GetInfo(arrayName)->arrayInfo,
+      MapperServiceSingleton::Instance()->GetIVSAMap(arrayName))
 {
 }
 
-GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
+GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, string arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
     EventSmartPtr inputEvent,
     RBAStateManager* inputRbaStateManager,
-    IArrayInfo* inputIArrayInfo)
+    IArrayInfo* inputIArrayInfo,
+    IVSAMap* iVSAMap)
 : Callback(false, CallbackType_GcFlushCompletion),
   stripe(stripe),
   arrayName(arrayName),
@@ -76,7 +74,8 @@ GcFlushCompletion::GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayNa
   dataBuffer(dataBuffer),
   inputEvent(inputEvent),
   rbaStateManager(inputRbaStateManager),
-  iArrayInfo(inputIArrayInfo)
+  iArrayInfo(inputIArrayInfo),
+  iVSAMap(iVSAMap)
 {
 }
 
@@ -96,58 +95,114 @@ GcFlushCompletion::_DoSpecificJob(void)
             arrayName, stripe->GetUserLsid());
     }
 
-    const PartitionLogicalSize* udSize =
-        iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    uint32_t totalBlksPerUserStripe = udSize->blksPerStripe;
-
-    BlkAddr rba;
-    uint32_t volId;
-    std::list<RbaAndSize> rbaList;
-    int cnt = 0;
-
-    for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
+    if (isInit == false)
     {
-        std::tie(rba, volId) = stripe->GetReverseMapEntry(i);
-        if (likely(rba != INVALID_RBA))
-        {
-            RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK,
-                BLOCK_SIZE};
-            rbaList.push_back(rbaAndSize);
-            cnt++;
-        }
+        _Init();
     }
-    std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
 
-    bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId,
-        rbaList);
-    StripeId userLsid = stripe->GetUserLsid();
-    if (false == ownershipAcquired)
+    if (false == _AcquireOwnership())
     {
-        ownershipAcquisitionRetryCnt++;
-        if (ownershipAcquisitionRetryCnt % 1000 == 0)
-        {
-            POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
-                "array_name:{}, stripe_id:{}, retried:{}, rbaCount:{}",
-                arrayName, userLsid, ownershipAcquisitionRetryCnt, rbaList.size());
-        }
         return false;
     }
-    ownershipAcquisitionRetryCnt = 0;
-    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED),
-        "array_name:{}, stripe_id:{}", arrayName, userLsid);
+
+    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, retried:{}",
+        arrayName, lsid, retryCnt);
+    retryCnt = 0;
 
     airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);
-
     EventSmartPtr event;
     if (nullptr == inputEvent)
     {
-        event = std::make_shared<GcMapUpdateRequest>(stripe, arrayName, gcStripeManager);
+        event = make_shared<GcMapUpdateRequest>(stripe, arrayName, gcStripeManager, sectorRbaList);
     }
     else
     {
         event = inputEvent;
     }
     stripe->Flush(event);
+    return true;
+}
+
+void
+GcFlushCompletion::_Init(void)
+{
+    totalBlksPerUserStripe = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
+    for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
+    {
+        BlkAddr rba;
+        tie(rba, volId) = stripe->GetReverseMapEntry(i);
+        if (likely(rba != INVALID_RBA))
+        {
+            if (_IsValidRba(rba, i) == true)
+            {
+                RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK, BLOCK_SIZE};
+                auto it = sectorRbaList.insert(sectorRbaList.end(), rbaAndSize);
+                VictimRba victimRba = {rba, i, it};
+                victimBlockList.push_back(victimRba);
+            }
+        }
+    }
+    lsid = stripe->GetUserLsid();
+    isInit = true;
+}
+
+bool
+GcFlushCompletion::_IsValidRba(BlkAddr rba, uint32_t offset)
+{
+    int shouldRetry = OK_READY;
+    VirtualBlkAddr currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
+    if (NEED_RETRY != shouldRetry)
+    {
+        VirtualBlkAddr oldVsa = stripe->GetVictimVsa(offset);
+        bool isValid = currentVsa == oldVsa;
+        return isValid;
+    }
+    return true;
+}
+
+void
+GcFlushCompletion::_RemoveInvalidRba(void)
+{
+    uint32_t removedCnt = 0;
+    for (auto i = victimBlockList.begin(); i != victimBlockList.end(); )
+    {
+        BlkAddr rba = i->rba;
+        uint32_t offset = i->offset;
+        if (_IsValidRba(rba, offset) == false)
+        {
+            sectorRbaList.erase(i->iter);
+            i = victimBlockList.erase(i);
+            removedCnt++;
+        }
+        else
+        {
+            i++;
+        }
+    }
+    if (removedCnt > 0)
+    {
+        POS_TRACE_DEBUG(EID(GC_INVALID_RBA_REMOVED),
+            "array_name:{}, stripe_id:{}, removed:{}, remaining_rba_count:{}",
+            arrayName, lsid, removedCnt, victimBlockList.size());
+    }
+}
+
+bool
+GcFlushCompletion::_AcquireOwnership(void)
+{
+    bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId, sectorRbaList);
+    if (false == ownershipAcquired)
+    {
+        retryCnt++;
+        if (retryCnt % 1000 == 0)
+        {
+            POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
+                "array_name:{}, stripe_id:{}, retried:{}, rba_count:{}",
+                arrayName, lsid, retryCnt, victimBlockList.size());
+            _RemoveInvalidRba();
+        }
+        return false;
+    }
     return true;
 }
 

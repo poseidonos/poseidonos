@@ -34,12 +34,17 @@
 
 #include <atomic>
 #include <cstdint>
-#include <map>
 #include <string>
+#include <list>
 
 #include "src/event_scheduler/callback.h"
 #include "src/gc/gc_stripe_manager.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/include/address_type.h"
+#include "src/mapper/mapper.h"
+#include "src/mapper_service/mapper_service.h"
+
+using namespace std;
 
 namespace pos
 {
@@ -47,28 +52,46 @@ class GcStripeManager;
 class RBAStateManager;
 class IArrayInfo;
 
+struct VictimRba
+{
+    uint64_t rba;
+    uint32_t offset;
+    list<RbaAndSize>::iterator iter;
+};
+
 class GcFlushCompletion : public Callback
 {
 public:
-    explicit GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
-    GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
+    explicit GcFlushCompletion(StripeSmartPtr stripe, string arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
+    GcFlushCompletion(StripeSmartPtr stripe, string arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
                     EventSmartPtr inputEvent,
                     RBAStateManager* inputRbaStateManager,
-                    IArrayInfo* inputIArrayInfo);
+                    IArrayInfo* inputIArrayInfo,
+                    IVSAMap* iVSAMap);
     ~GcFlushCompletion(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
+    void _Init(void);
+    bool _IsValidRba(BlkAddr rba, uint32_t offset);
+    void _RemoveInvalidRba(void);
+    bool _AcquireOwnership(void);
 
     StripeSmartPtr stripe;
-    std::string arrayName;
+    string arrayName;
     GcStripeManager* gcStripeManager;
     GcWriteBuffer* dataBuffer;
 
     EventSmartPtr inputEvent;
     RBAStateManager* rbaStateManager;
     IArrayInfo* iArrayInfo;
-    uint32_t ownershipAcquisitionRetryCnt = 0;
+    IVSAMap* iVSAMap;
+    list<VictimRba> victimBlockList;
+    list<RbaAndSize> sectorRbaList;
+    uint32_t volId = 0;
+    uint32_t retryCnt = 0;
+    bool isInit = false;
+    StripeId lsid = 0;
+    uint32_t totalBlksPerUserStripe = 0;
 };
-
 } // namespace pos

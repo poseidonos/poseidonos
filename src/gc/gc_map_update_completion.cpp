@@ -47,21 +47,21 @@
 #include "src/include/branch_prediction.h"
 #include "src/io/backend_io/flush_completion.h"
 #include "src/io/backend_io/stripe_map_update_request.h"
-#include "src/io/general_io/rba_state_manager.h"
 #include "src/io/general_io/rba_state_service.h"
+#include "src/volume/volume_service.h"
 #include "src/logger/logger.h"
 #include "src/mapper/mapper.h"
 #include "src/mapper_service/mapper_service.h"
-#include "src/volume/volume_service.h"
 
 namespace pos
 {
 GcMapUpdateCompletion::GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
-    EventScheduler* eventScheduler, GcStripeManager* gcStripeManager)
+    EventScheduler* eventScheduler, GcStripeManager* gcStripeManager, std::list<RbaAndSize> rbaList)
 : GcMapUpdateCompletion(stripe, arrayName, iStripeMap, eventScheduler, gcStripeManager,
       ArrayMgr()->GetInfo(arrayName)->arrayInfo,
       RBAStateServiceSingleton::Instance()->GetRBAStateManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()),
-      VolumeServiceSingleton::Instance()->GetVolumeManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()))
+      VolumeServiceSingleton::Instance()->GetVolumeManager(ArrayMgr()->GetInfo(arrayName)->arrayInfo->GetIndex()),
+      rbaList)
 {
 }
 
@@ -69,7 +69,8 @@ GcMapUpdateCompletion::GcMapUpdateCompletion(StripeSmartPtr stripe, std::string 
     EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
     IArrayInfo* inputIArrayInfo,
     RBAStateManager* inputRbaStateManager,
-    IVolumeIoManager* inputVolumeManager)
+    IVolumeIoManager* inputVolumeManager,
+    std::list<RbaAndSize> rbaList)
 : Callback(false),
   stripe(stripe),
   arrayName(arrayName),
@@ -78,7 +79,8 @@ GcMapUpdateCompletion::GcMapUpdateCompletion(StripeSmartPtr stripe, std::string 
   gcStripeManager(gcStripeManager),
   iArrayInfo(inputIArrayInfo),
   rbaStateManager(inputRbaStateManager),
-  volumeManager(inputVolumeManager)
+  volumeManager(inputVolumeManager),
+  rbaList(rbaList)
 {
     const PartitionLogicalSize* udSize =
         iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
@@ -94,19 +96,6 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
 {
     BlkAddr rba;
     uint32_t volId;
-
-    std::list<RbaAndSize> rbaList;
-
-    for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
-    {
-        std::tie(rba, volId) = stripe->GetReverseMapEntry(i);
-        if (likely(rba != INVALID_RBA))
-        {
-            RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK,
-                BLOCK_SIZE};
-            rbaList.push_back(rbaAndSize);
-        }
-    }
     std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
     rbaStateManager->ReleaseOwnershipRbaList(volId, rbaList);
 

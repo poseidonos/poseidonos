@@ -57,9 +57,10 @@
 
 namespace pos
 {
-GcMapUpdateRequest::GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName, GcStripeManager* gcStripeManager)
+GcMapUpdateRequest::GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName,
+    GcStripeManager* gcStripeManager, std::list<RbaAndSize> rbaList)
 : GcMapUpdateRequest(stripe,
-      std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName), EventSchedulerSingleton::Instance(), gcStripeManager),
+      std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName), EventSchedulerSingleton::Instance(), gcStripeManager, rbaList),
       MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
       ArrayMgr()->GetInfo(arrayName)->arrayInfo,
       MetaServiceSingleton::Instance()->GetMetaUpdater(arrayName))

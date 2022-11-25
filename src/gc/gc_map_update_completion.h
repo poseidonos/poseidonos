@@ -37,6 +37,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <list>
 
 #include "src/include/address_type.h"
 #include "src/event_scheduler/callback.h"
@@ -44,6 +45,7 @@
 #include "src/mapper/include/mpage_info.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/io/general_io/rba_state_manager.h"
 
 namespace pos
 {
@@ -59,12 +61,14 @@ class GcMapUpdateCompletion : public Callback
 {
 public:
     explicit GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
-                               EventScheduler* eventScheduler, GcStripeManager* gcStripeManager);
+                               EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
+                               std::list<RbaAndSize> rbaList);
     GcMapUpdateCompletion(StripeSmartPtr stripe, std::string arrayName, IStripeMap* iStripeMap,
                         EventScheduler* eventScheduler, GcStripeManager* gcStripeManager,
                         IArrayInfo* inputIArrayInfo,
                         RBAStateManager* inputRbaStateManager,
-                        IVolumeIoManager* inputVolumeManager);
+                        IVolumeIoManager* inputVolumeManager,
+                        std::list<RbaAndSize> rbaList);
     ~GcMapUpdateCompletion(void) override;
 
 private:
@@ -81,6 +85,7 @@ private:
     IArrayInfo* iArrayInfo;
     RBAStateManager* rbaStateManager;
     IVolumeIoManager* volumeManager;
+    std::list<RbaAndSize> rbaList;
 };
 
 } // namespace pos
