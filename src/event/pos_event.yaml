@@ -4134,154 +4134,147 @@ Root:
   # Garbage Collector: 3400 - 3450
   -
     Id: 3400
-    Name: GC_TRIGGERED
+    Name: GC_STARTED
     Severity:
-    Message:
+    Message: GC started
     Cause:
     Solution:
   -
     Id: 3401
-    Name: GC_STARTED
+    Name: GC_DONE
     Severity:
-    Message:
+    Message: GC done
     Cause:
     Solution:
   -
     Id: 3402
-    Name: GC_DONE
+    Name: GC_ALREADY_STARTED
     Severity:
-    Message:
+    Message: GC is already in operation
     Cause:
     Solution:
   -
     Id: 3403
-    Name: GC_CANNOT_START
+    Name: GC_CANNOT_BE_STARTED
     Severity:
-    Message:
+    Message: GC cannot be started due to Array's state
     Cause:
     Solution:
   -
     Id: 3410
-    Name: GC_VICTIM_STRIPE_CONSTRUCTOR
+    Name: GC_VICTIM_SELECTED
     Severity:
-    Message:
+    Message: Victim segment is selected
     Cause:
     Solution:
   -
     Id: 3411
-    Name: GC_LOAD_REVERSE_MAP
+    Name: GC_REVERSE_MAP_LOADED
     Severity:
-    Message:
+    Message: Reversemap is loaded
     Cause:
     Solution:
   -
     Id: 3412
-    Name: GC_LOAD_VALID_BLOCKS
+    Name: GC_VALID_BLOCKS_LOADING
     Severity:
-    Message:
+    Message: Loading valid blocks
     Cause:
     Solution:
   -
     Id: 3413
-    Name: GC_GET_UNMAP_VSA
+    Name: GC_VALID_BLOCKS_LOADED
     Severity:
-    Message: The current VSA map is in unmap state
+    Message: Valid blocks are loaded from a victim segment.
     Cause:
     Solution:
   -
     Id: 3414
-    Name: GC_GET_UNMAP_LSA
+    Name: GC_UNMAPPED_VSA
     Severity:
-    Message: The current LSA map is in unmap state
+    Message: Unmapped VSA was found
     Cause:
     Solution:
   -
     Id: 3415
-    Name: GC_GET_VICTIM_SEGMENT
+    Name: GC_UNMAPPED_LSA
     Severity:
-    Message:
+    Message: Unmapped LSA was found
     Cause:
     Solution:
   -
     Id: 3416
-    Name: GC_GET_VALID_BLOCKS
+    Name: GC_COPY_SUBMISSION
     Severity:
-    Message:
+    Message: Copy event for victim was submitted
     Cause:
     Solution:
   -
     Id: 3417
-    Name: GC_GET_VALID_BLOCK_INFO
+    Name: GC_COPY_COMPLETION
     Severity:
-    Message:
+    Message: Copy event for victim is completed
     Cause:
     Solution:
   -
     Id: 3418
-    Name: GC_COPY_COMPLETE
+    Name: GC_GET_READ_BUFFER_FAILED
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 3419
-    Name: GC_GET_BUFFER_FAILED
+    Name: GC_GET_WRITE_BUFFER_FAILED
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 3420
-    Name: GC_STRIPE_COPIER_SUBMIT
+    Name: GC_STRIPE_FLUSH_SUBMISSION
     Severity:
-    Message:
+    Message: GC flush event submitted
     Cause:
     Solution:
   -
     Id: 3421
-    Name: GC_STRIPE_FLUSH_SUBMIT
+    Name: GC_STRIPE_FLUSH_COMPLETION
     Severity:
-    Message: "GC flush submission"
+    Message: GC flush event completed
     Cause:
     Solution:
   -
     Id: 3422
-    Name: GC_STRIPE_FLUSH_COMPLETION
+    Name: GC_RBA_OWNERSHIP_ACQUIRED
     Severity:
-    Message: "GC flush completion"
+    Message: RBA ownership acquired
     Cause:
     Solution:
   -
     Id: 3423
-    Name: GC_ACQUIRE_OWNERSHIP_RBA_LIST
+    Name: GC_RBA_OWNERSHIP_ACQUISITION_FAILED
     Severity:
-    Message:
+    Message: Failed to acquire RBA ownership
     Cause:
     Solution:
   -
     Id: 3424
-    Name: GC_MAP_UPDATE_REQUEST
+    Name: GC_MAP_UPDATE_SUCCESS
     Severity:
     Message:
     Cause:
     Solution:
   -
     Id: 3425
-    Name: GC_MAP_UPDATE
+    Name: GC_MAP_UPDATE_FAILED
     Severity:
-    Message:
+    Message: Failed to update GC map
     Cause:
     Solution:
   -
     Id: 3426
     Name: GC_MAP_UPDATE_COMPLETION
-    Severity:
-    Message:
-    Cause:
-    Solution:
-  -
-    Id: 3427
-    Name: GC_MAP_UPDATE_FAILED
     Severity:
     Message:
     Cause:
@@ -4302,16 +4295,16 @@ Root:
     Solution:
   -
     Id: 3430
-    Name: GC_ERROR_MSG
+    Name: GC_REVERSE_MAP_LOAD_ERROR
     Severity:
-    Message:
+    Message: Errors occurred during the reverse map load
     Cause:
     Solution:
   -
     Id: 3431
     Name: GC_RELEASE_VICTIM_SEGMENT
     Severity:
-    Message:
+    Message: Victim segment is released 
     Cause:
     Solution:
   -

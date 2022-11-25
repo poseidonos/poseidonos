@@ -193,7 +193,7 @@ GcFlushSubmission::Execute(void)
         iArrayInfo->GetIndex(),
         false);
 
-    POS_TRACE_DEBUG(EID(GC_STRIPE_FLUSH_SUBMIT),
+    POS_TRACE_DEBUG(EID(GC_STRIPE_FLUSH_SUBMISSION),
         "arrayName:{}, validCnt:{}, stripeUserLsid:{}, result:{}",
         arrayName,
         validCnt,

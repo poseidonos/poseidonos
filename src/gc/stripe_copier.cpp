@@ -84,9 +84,6 @@ StripeCopier::Execute(void)
         }
 
         loadedValidBlock = true;
-        POS_TRACE_DEBUG(EID(GC_GET_VALID_BLOCKS),
-            "Get valid blocks, (victimStripeId:{})",
-            victimStripeId);
     }
 
     uint32_t listSize = meta->GetVictimStripe(copyIndex, stripeOffset)->GetBlkInfoListSize();
@@ -102,7 +99,7 @@ StripeCopier::Execute(void)
             if (nullptr == buffer)
             {
                 meta->SetStartCopyBlks(requestCount);
-                POS_TRACE_DEBUG(EID(GC_GET_BUFFER_FAILED), "stipe_id:{}", victimStripeId);
+                POS_TRACE_DEBUG(EID(GC_GET_READ_BUFFER_FAILED), "stipe_id:{}", victimStripeId);
                 return false;
             }
 

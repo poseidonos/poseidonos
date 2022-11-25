@@ -151,14 +151,13 @@ GcMapUpdateRequest::_UpdateMeta(void)
     if (unlikely(0 != result))
     {
         POS_EVENT_ID eventId = EID(GC_MAP_UPDATE_FAILED);
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            "gc map update failed, arrayName:{}, stripeUserLsid:{}",
+        POS_TRACE_ERROR(static_cast<int>(eventId), "array_name:{}, stripe_id:{}",
             iArrayInfo->GetName(), mapUpdates.userLsid);
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_REQUEST),
-        "gc map update request, arrayName:{}, stripeUserLsid:{}",
+    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_SUCCESS),
+        "array_name:{}, stripe_id:{}",
         iArrayInfo->GetName(), mapUpdates.userLsid);
     return true;
 }
