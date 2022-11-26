@@ -35,6 +35,7 @@
 #include <air/Air.h>
 
 #include <memory>
+#include <unordered_set>
 
 #include "src/allocator/allocator.h"
 #include "src/allocator/stripe/stripe.h"
@@ -127,6 +128,7 @@ void
 GcFlushCompletion::_Init(void)
 {
     totalBlksPerUserStripe = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
+    unordered_set<BlkAddr> uniqueRba;
     for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
     {
         BlkAddr rba;
@@ -135,10 +137,14 @@ GcFlushCompletion::_Init(void)
         {
             if (_IsValidRba(rba, i) == true)
             {
-                RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK, BLOCK_SIZE};
-                auto it = sectorRbaList.insert(sectorRbaList.end(), rbaAndSize);
-                VictimRba victimRba = {rba, i, it};
-                victimBlockList.push_back(victimRba);
+                auto result = uniqueRba.insert(rba);
+                if (result.second == true)
+                {
+                    RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK, BLOCK_SIZE};
+                    auto it = sectorRbaList.insert(sectorRbaList.end(), rbaAndSize);
+                    VictimRba victimRba = {rba, i, it};
+                    victimBlockList.push_back(victimRba);
+                }
             }
         }
     }
@@ -182,7 +188,7 @@ GcFlushCompletion::_RemoveInvalidRba(void)
     if (removedCnt > 0)
     {
         POS_TRACE_DEBUG(EID(GC_INVALID_RBA_REMOVED),
-            "array_name:{}, stripe_id:{}, removed:{}, remaining_rba_count:{}",
+            "array_name:{}, stripe_id:{}, removed_rba_count:{}, remaining_rba_count:{}",
             arrayName, lsid, removedCnt, victimBlockList.size());
     }
 }
@@ -196,8 +202,8 @@ GcFlushCompletion::_AcquireOwnership(void)
         retryCnt++;
         if (retryCnt % 1000 == 0)
         {
-            POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
-                "array_name:{}, stripe_id:{}, retried:{}, rba_count:{}",
+            POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
+                "array_name:{}, stripe_id:{}, retried:{}, requested_rba_count:{}",
                 arrayName, lsid, retryCnt, victimBlockList.size());
             _RemoveInvalidRba();
         }

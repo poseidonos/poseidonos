@@ -120,12 +120,11 @@ RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
 
 bool
 RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& sectorRbaList)
+        const VolumeIo::RbaList& uniqueRbaList)
 {
-    VolumeIo::RbaList uniqueList = sectorRbaList;
-    uniqueList.sort();
-    uniqueList.unique();
-    for (auto& rbaAndSize : uniqueList)
+    VolumeIo::RbaList acquiredList;
+    bool result = true;
+    for (auto& rbaAndSize : uniqueRbaList)
     {
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);
@@ -133,26 +132,29 @@ RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
                 blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount());
         if (success == false)
         {
-            auto iterator =
-                std::find(uniqueList.cbegin(), uniqueList.cend(), rbaAndSize);
-            VolumeIo::RbaList rbaList;
-            rbaList.insert(rbaList.begin(), uniqueList.cbegin(), iterator);
-            ReleaseOwnershipRbaList(volumeId, rbaList);
-
-            return false;
+            result = false;
+            break;
+        }
+        else
+        {
+            acquiredList.push_back(rbaAndSize);
         }
     }
-    return true;
+
+    if (result == false)
+    {
+        // POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED), "requested_rba_count:{}, acquired_count:{}",
+        //     uniqueRbaList.size(), acquiredList.size());
+        ReleaseOwnershipRbaList(volumeId, acquiredList);
+    }
+    return result;
 }
 
 void
 RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& sectorRbaList)
+        const VolumeIo::RbaList& uniqueRbaList)
 {
-    VolumeIo::RbaList uniqueList = sectorRbaList;
-    uniqueList.sort();
-    uniqueList.unique();
-    for (auto& rbaAndSize : uniqueList)
+    for (auto& rbaAndSize : uniqueRbaList)
     {
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);

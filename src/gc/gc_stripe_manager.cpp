@@ -289,8 +289,8 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
         auto it = timer.find(volumeId);
         if (it != timer.end())
         {
-            POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_RESET), "vol_id:{}, elapsed(ns):{}",
-                volumeId, (*it).second->Elapsed());
+            // POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_RESET), "vol_id:{}, elapsed(ns):{}",
+            //     volumeId, (*it).second->Elapsed());
             (*it).second->Reset();
         }
     }
@@ -390,23 +390,14 @@ bool
 GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
 {
     gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
-
-    for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; ++chunkCnt)
+    uint32_t bufCount = udSize->chunksPerStripe;
+    bool ret = gcWriteBufferPool->TryGetBuffers(bufCount, gcActiveWriteBuffers[volumeId]);
+    if (ret == false)
     {
-        void* buffer = gcWriteBufferPool->TryGetBuffer();
-        if (nullptr == buffer)
-        {
-            for (auto it = gcActiveWriteBuffers[volumeId]->begin(); it != gcActiveWriteBuffers[volumeId]->end(); it++)
-            {
-                gcWriteBufferPool->ReturnBuffer(*it);
-            }
-            delete gcActiveWriteBuffers[volumeId];
-            POS_TRACE_DEBUG(EID(GC_GET_WRITE_BUFFER_FAILED), "vol_id:{}", volumeId);
-            return false;
-        }
-        gcActiveWriteBuffers[volumeId]->push_back(buffer);
+        delete gcActiveWriteBuffers[volumeId];
+        POS_TRACE_DEBUG(EID(GC_GET_WRITE_BUFFER_FAILED), "vol_id:{}", volumeId);
     }
-    return true;
+    return ret;
 }
 
 bool
@@ -486,9 +477,9 @@ GcStripeManager::_StartTimer(uint32_t volumeId)
     }
     if (t->IsActive() == false)
     {
-        POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_START),
-            "vol_id:{}, interval(ns):{}",
-            volumeId, timeoutInterval);
+        // POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_START),
+        //     "vol_id:{}, interval(ns):{}",
+        //     volumeId, timeoutInterval);
         t->SetTimeout(timeoutInterval);
     }
     timerMtx.unlock();
