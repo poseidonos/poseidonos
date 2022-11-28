@@ -17,10 +17,9 @@ import (
 const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running?"
 const dialTimeout = 10
 
-// TODO (mj): temporarily set the timeout for unmount array command to 30 minutes
-// because the command exceptionally takes too long.
-// However, the timeout needs to be systemically set in the future.
+// TODO (mj): We temporarily set long timeout values for mount/unmount array commands.
 const unmountArrayCmdTimeout = 1800
+const mountArrayCmdTimeout = 600
 
 func dialToCliServer() (*grpc.ClientConn, error) {
 	nodeName := globals.NodeName
@@ -456,7 +455,7 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(mountArrayCmdTimeout))
 	defer cancel()
 
 	res, err := c.MountArray(ctx, req)
