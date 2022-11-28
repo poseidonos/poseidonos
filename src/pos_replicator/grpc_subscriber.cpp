@@ -53,6 +53,7 @@
 namespace pos
 {
 GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
+: haGrpcServer(nullptr)
 {
     std::string address;
     int ret = configManager->GetValue("replicator", "ha_subscriber_address",
@@ -74,7 +75,10 @@ GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
 
 GrpcSubscriber::~GrpcSubscriber(void)
 {
-    haGrpcServer->Shutdown();
+    if ( haGrpcServer != nullptr)
+    {
+        haGrpcServer->Shutdown();    
+    }
     if (healthChecker != nullptr)
     {
         delete healthChecker;
