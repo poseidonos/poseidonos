@@ -39,7 +39,13 @@
 namespace pos
 {
 PosReplicatorManager::PosReplicatorManager(void)
-: volumeSubscriberCnt(0)
+: PosReplicatorManager(new AIO())
+{
+}
+
+PosReplicatorManager::PosReplicatorManager(AIO* aio)
+: aio(aio),
+  volumeSubscriberCnt(0)
 {
     for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
     {
@@ -241,31 +247,31 @@ PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int v
 }
 
 int
-PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, std::shared_ptr<char*> dataList)
+PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList)
 {
-    VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numBlocks);
+    VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numChunks);
+    // TODO (cheolho.kang): Should add the error handling. if nullptr return 
+
     if (ioType == IO_TYPE::WRITE)
     {
-        _InsertChunkToBlock(volumeIo, dataList, numBlocks);
+        _InsertChunkToBlock(volumeIo, dataList, numChunks);
     }
     _RequestVolumeIo(GrpcCallbackType::GrpcReply, volumeIo, REPLICATOR_INVALID_LSN);
     return EID(SUCCESS);
 }
 
 VolumeIoSmartPtr
-PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numBlocks, std::shared_ptr<char*> dataList)
+PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList)
 {
-    AIO aio;
     pos_io posIo;
-
     posIo.ioType = ioType;
     posIo.array_id = arrayId;
     posIo.volume_id = volumeId;
     posIo.offset = ChangeSectorToByte(rba);
-    posIo.length = ChangeSectorToByte(numBlocks);
+    posIo.length = ChangeSectorToByte(numChunks);
     posIo.iov = nullptr;
 
-    return aio.CreatePosReplicatorVolumeIo(posIo, REPLICATOR_INVALID_LSN);
+    return aio->CreatePosReplicatorVolumeIo(posIo, REPLICATOR_INVALID_LSN);
 }
 
 void
@@ -414,7 +420,6 @@ PosReplicatorManager::AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeI
 void
 PosReplicatorManager::_RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn)
 {
-    AIO aio;
     POS_TRACE_DEBUG(EID(HA_DEBUG_MSG),
         "Io Submmit from replicator, rba: {}", volumeIo->GetSectorRba());
 
@@ -422,7 +427,7 @@ PosReplicatorManager::_RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSm
 
     volumeIo->SetCallback(posReplicatorIOCompletion);
 
-    aio.SubmitAsyncIO(volumeIo);
+    aio->SubmitAsyncIO(volumeIo);
 }
 
 int
@@ -449,9 +454,9 @@ PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int>& arraySet, st
 }
 
 void
-PosReplicatorManager::_InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numBlocks)
+PosReplicatorManager::_InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numChunks)
 {
-    for (uint64_t index = 0; index < numBlocks; index++)
+    for (uint64_t index = 0; index < numChunks; index++)
     {
         char* bufferPtr = (char*)volumeIo.get()->GetBuffer() + index * ArrayConfig::SECTOR_SIZE_BYTE;
         char* targetPtr = dataList.get()[index];
