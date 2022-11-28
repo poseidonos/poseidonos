@@ -57,6 +57,7 @@ public:
     virtual void* TryGetBuffer(void);
     virtual bool TryGetBuffers(uint32_t count, std::vector<void*>* retBuffers);
     virtual void ReturnBuffer(void*);
+    virtual void ReturnBuffers(std::vector<void*>* buffers);
     virtual bool IsAllocated(void) { return isAllocated; }
     std::string GetOwner(void) { return BUFFER_INFO.owner; }
 

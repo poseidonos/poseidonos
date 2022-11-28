@@ -144,6 +144,25 @@ BufferPool::ReturnBuffer(void* buffer)
     producerPool->push_back(buffer);
 }
 
+void
+BufferPool::ReturnBuffers(std::vector<void*>* buffers)
+{
+    if (buffers->size() > 0)
+    {
+        unique_lock<mutex> lock(producerLock);
+        for (void* buffer : *buffers)
+        {
+            if (buffer == nullptr)
+            {
+                POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+                    "Failed to return buffer. Buffer is nullptr");
+                continue;
+            }
+            producerPool->push_back(buffer);
+        }
+    }
+}
+
 bool
 BufferPool::_Init(void)
 {

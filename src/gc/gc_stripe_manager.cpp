@@ -233,10 +233,7 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 void
 GcStripeManager::_ReturnBuffer(GcWriteBuffer* buffer)
 {
-    for (auto it = buffer->begin(); it != buffer->end(); it++)
-    {
-        gcWriteBufferPool->ReturnBuffer(*it);
-    }
+    gcWriteBufferPool->ReturnBuffers(buffer);
 }
 
 void
