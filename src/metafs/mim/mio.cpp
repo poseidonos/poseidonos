@@ -255,6 +255,27 @@ Mio::_PrepareMpioInfo(MpioIoInfo& mpioIoInfo, MetaLpnType lpn,
     mpioIoInfo.signature = originReq->fileCtx->signature;
 }
 
+void
+Mio::_WaitingForFreeMpio(const MpioType ioType, const MetaStorageType type) const
+{
+    // no more Mpio operations
+    while (mpioAllocator->IsEmpty(ioType))
+    {
+        // Complete Process, MpioHandler::BottomhalfMioProcessing()
+        mpioDonePoller();
+    }
+
+    if (_IsJournalRequest(type))
+    {
+        // waiting for free cache space
+        while (mpioAllocator->IsFullyCached())
+        {
+            mpioDonePoller();
+            mpioAllocator->TryReleaseTheOldestCache(true);
+        }
+    }
+}
+
 // FIXME: for better parallel execution, let's issue io request for each mpio as soon as mio builds mpio contexta
 /* 
 The host I/O issued as Mio data structure, and the Mio is consisted with several Mpio moudled by fileDataChunkSize(4032Byte) that the other 64Byte is page control info such as signature, version, and so on. 
@@ -285,12 +306,7 @@ Mio::_BuildMpioMap(void)
     // issue Mpios
     do
     {
-        // no more Mpio operations
-        while (mpioAllocator->IsEmpty(ioType))
-        {
-            // Complete Process, MpioHandler::BottomhalfMioProcessing()
-            mpioDonePoller();
-        }
+        _WaitingForFreeMpio(ioType, originReq->targetMediaType);
 
         // Build Mpio data structure
         MpioIoInfo mpioIoInfo;
@@ -300,22 +316,25 @@ Mio::_BuildMpioMap(void)
         Mpio* mpio = _AllocMpio(mpioIoInfo, byteSize != fileDataChunkSize /* partialIO */);
         mpio->SetPartialDoneNotifier(partialMpioDoneNotifier);
 
-        if (mpio->IsMergeable())
+        if (mpio->IsCached())
         {
             if (!mergedRequestList)
             {
-                // when there is nothing to merge, just write own data
-                mpio->ChangeCacheStateTo(MpioCacheState::Merge);
+                // just write my data, other data is already in the buffer
+                if (mpio->GetCacheState() != MpioCacheState::Read)
+                {
+                    mpio->ChangeCacheStateTo(MpioCacheState::Merge);
+                }
+                // else
+                // if the mpio cache state is not read,
+                // other data is already in the buffer
+                // so do nothing
             }
             else
             {
-                // copy data for merged requests
-                for (auto& request : *mergedRequestList)
-                {
-                    FileBufType targetBuf = (uint8_t*)(mpio->GetMDPageDataBuf()) + (request->byteOffsetInFile % fileDataChunkSize);
-                    FileBufType originBuf = request->buf;
-                    memcpy(targetBuf, originBuf, request->byteSize);
-                }
+                // doesn't matter mpio cache state
+                // just need to copy data in requests to buffer
+                mpio->SetMergedRequestList(mergedRequestList);
             }
         }
 

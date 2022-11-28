@@ -73,15 +73,16 @@ public:
 
     // for test
     const int64_t* GetIssueCount(size_t& size /* output */) const;
+    int GetCurrentExtent(void) const;
+    // for test
 
 private:
     MetaFsIoRequest* _FetchPendingNewReq(void);
     void _CreateMioThread(void);
     void _SetRequestCountOrCallbackCountOfCurrentRequest(int count);
     void _SetCurrentContextFrom(MetaFsIoRequest* reqMsg);
-    void _ClearCurrentContext(void);
-    void _UpdateCurrentLpnToNextExtent(void);
-    void _UpdateCurrentLpnToNextExtentConditionally(void);
+    void _UpdateCurrentLpnAndExtentConditionally(void);
+    void _UpdateCurrentExtentToNextExtentConditionally(void);
     void _PushToMioThreadList(const uint32_t coreId, ScalableMetaIoWorker* worker);
     void _IssueRequestToMioWorker(MetaFsIoRequest* reqMsg);
     bool _DoesMioWorkerForNumaExist(const int numaId);
