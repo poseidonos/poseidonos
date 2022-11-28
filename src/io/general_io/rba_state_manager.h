@@ -64,8 +64,9 @@ public:
 
     virtual void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
     virtual void DeleteRBAState(uint32_t volumeID);
-    virtual bool AcquireOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& uniqueRbaList);
+    virtual VolumeIo::RbaList::iterator AcquireOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& uniqueRbaList, VolumeIo::RbaList::iterator startIter,
+        uint32_t& acquiredCnt);
     virtual void ReleaseOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& uniqueRbaList);
     virtual bool BulkAcquireOwnership(uint32_t volumeID,

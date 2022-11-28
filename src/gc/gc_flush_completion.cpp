@@ -98,17 +98,16 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     if (isInit == false)
     {
-        _Init();
+        Init();
     }
 
-    if (false == _AcquireOwnership())
+    if (false == AcquireOwnership())
     {
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, retried:{}",
-        arrayName, lsid, retryCnt);
-    retryCnt = 0;
+    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried:{}",
+        arrayName, lsid, tryCnt);
 
     airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);
     EventSmartPtr event;
@@ -125,10 +124,11 @@ GcFlushCompletion::_DoSpecificJob(void)
 }
 
 void
-GcFlushCompletion::_Init(void)
+GcFlushCompletion::Init(void)
 {
     totalBlksPerUserStripe = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA)->blksPerStripe;
     unordered_set<BlkAddr> uniqueRba;
+    uint32_t invalidRbaCnt = 0;
     for (uint32_t i = 0; i < totalBlksPerUserStripe; i++)
     {
         BlkAddr rba;
@@ -141,15 +141,23 @@ GcFlushCompletion::_Init(void)
                 if (result.second == true)
                 {
                     RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK, BLOCK_SIZE};
-                    auto it = sectorRbaList.insert(sectorRbaList.end(), rbaAndSize);
-                    VictimRba victimRba = {rba, i, it};
-                    victimBlockList.push_back(victimRba);
+                    sectorRbaList.push_back(rbaAndSize);
+                }
+                else
+                {
+                    invalidRbaCnt++;
                 }
             }
         }
     }
+    sectorRbaList.sort();
+    currPos = sectorRbaList.begin();
     lsid = stripe->GetUserLsid();
+    ownershipProgress = 0;
     isInit = true;
+    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_INIT),
+        "array_name:{}, stripe_id:{}, invalid_rba_count:{}, remaining_rba_count:{}",
+        arrayName, lsid, invalidRbaCnt, sectorRbaList.size());
 }
 
 bool
@@ -166,47 +174,31 @@ GcFlushCompletion::_IsValidRba(BlkAddr rba, uint32_t offset)
     return true;
 }
 
-void
-GcFlushCompletion::_RemoveInvalidRba(void)
-{
-    uint32_t removedCnt = 0;
-    for (auto i = victimBlockList.begin(); i != victimBlockList.end(); )
-    {
-        BlkAddr rba = i->rba;
-        uint32_t offset = i->offset;
-        if (_IsValidRba(rba, offset) == false)
-        {
-            sectorRbaList.erase(i->iter);
-            i = victimBlockList.erase(i);
-            removedCnt++;
-        }
-        else
-        {
-            i++;
-        }
-    }
-    if (removedCnt > 0)
-    {
-        POS_TRACE_DEBUG(EID(GC_INVALID_RBA_REMOVED),
-            "array_name:{}, stripe_id:{}, removed_rba_count:{}, remaining_rba_count:{}",
-            arrayName, lsid, removedCnt, victimBlockList.size());
-    }
-}
-
 bool
-GcFlushCompletion::_AcquireOwnership(void)
+GcFlushCompletion::AcquireOwnership(void)
 {
-    bool ownershipAcquired = rbaStateManager->AcquireOwnershipRbaList(volId, sectorRbaList);
-    if (false == ownershipAcquired)
+    tryCnt++;
+    bool needLogging = tryCnt % 1000 == 0;
+    currPos = rbaStateManager->AcquireOwnershipRbaList(volId, sectorRbaList, currPos, ownershipProgress);
+    if (currPos != sectorRbaList.end())
     {
-        retryCnt++;
-        if (retryCnt % 1000 == 0)
+        if (needLogging == true)
         {
-            POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
-                "array_name:{}, stripe_id:{}, retried:{}, requested_rba_count:{}",
-                arrayName, lsid, retryCnt, victimBlockList.size());
-            _RemoveInvalidRba();
+            bool needWarnLogging = tryCnt % 10000 == 0;
+            if (needWarnLogging)
+            {
+                POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
+                    "want:{}, array_name:{}, vol_id:{}, stripe_id:{}, tried:{}, total:{}, acquired:{}, want:{}",
+                    currPos->sectorRba, arrayName, volId, lsid, tryCnt, sectorRbaList.size(), ownershipProgress);
+            }
+            else
+            {
+                POS_TRACE_INFO(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
+                    "want:{}, array_name:{}, vol_id:{}, stripe_id:{}, tried:{}, total:{}, acquired:{}",
+                    currPos->sectorRba, arrayName, volId, lsid, tryCnt, sectorRbaList.size(), ownershipProgress);
+            }
         }
+        usleep(1);
         return false;
     }
     return true;

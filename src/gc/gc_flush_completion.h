@@ -52,13 +52,6 @@ class GcStripeManager;
 class RBAStateManager;
 class IArrayInfo;
 
-struct VictimRba
-{
-    uint64_t rba;
-    uint32_t offset;
-    list<RbaAndSize>::iterator iter;
-};
-
 class GcFlushCompletion : public Callback
 {
 public:
@@ -69,13 +62,13 @@ public:
                     IArrayInfo* inputIArrayInfo,
                     IVSAMap* iVSAMap);
     ~GcFlushCompletion(void) override;
+    void Init(void);
+    bool AcquireOwnership(void);
+    list<RbaAndSize>* GetRbaList(void) { return &sectorRbaList; }
 
 private:
     bool _DoSpecificJob(void) override;
-    void _Init(void);
     bool _IsValidRba(BlkAddr rba, uint32_t offset);
-    void _RemoveInvalidRba(void);
-    bool _AcquireOwnership(void);
 
     StripeSmartPtr stripe;
     string arrayName;
@@ -86,10 +79,11 @@ private:
     RBAStateManager* rbaStateManager;
     IArrayInfo* iArrayInfo;
     IVSAMap* iVSAMap;
-    list<VictimRba> victimBlockList;
     list<RbaAndSize> sectorRbaList;
+    list<RbaAndSize>::iterator currPos;
+    uint32_t ownershipProgress = 0;
     uint32_t volId = 0;
-    uint32_t retryCnt = 0;
+    uint32_t tryCnt = 0;
     bool isInit = false;
     StripeId lsid = 0;
     uint32_t totalBlksPerUserStripe = 0;

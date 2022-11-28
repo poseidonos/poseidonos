@@ -84,24 +84,24 @@ Logger::Logger(void)
     }
 
     std::vector<spdlog::sink_ptr> sinks;
-    auto console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
+    // auto console_sink = make_shared<spdlog::sinks::stdout_color_sink_mt>();
     auto minor_sink = make_shared<spdlog::sinks::rotating_file_sink_mt>(
         preferences.MinorLogFilePath(), preferences.LogFileSize() * SZ_1MB, preferences.LogRotation());
     auto major_sink = make_shared<spdlog::sinks::rotating_file_sink_mt>(
         preferences.MajorLogFilePath(), preferences.LogFileSize() * SZ_1MB, preferences.LogRotation());
 
-    console_sink->set_level(spdlog::level::trace);
+    // console_sink->set_level(spdlog::level::trace);
     minor_sink->set_level(spdlog::level::debug);
     major_sink->set_level(spdlog::level::trace);
 
     // Console log is always displayed in plain text form
-    console_sink->set_pattern(BuildPattern(false));
+    // console_sink->set_pattern(BuildPattern(false));
     // Minor and major logs will be displayed
     // according to preference (plain text or json)
     minor_sink->set_pattern(BuildPattern(preferences.IsStrLoggingEnabled()));
     major_sink->set_pattern(BuildPattern(preferences.IsStrLoggingEnabled()));
 
-    sinks.push_back(console_sink);
+    // sinks.push_back(console_sink);
     sinks.push_back(minor_sink);
     sinks.push_back(major_sink);
 

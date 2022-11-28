@@ -194,8 +194,17 @@ Copier::_CompareThresholdState(void)
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
             int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-            POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
-                victimId, numFreeSegments);
+            bool isUrgent = numFreeSegments <= 5;
+            if (isUrgent == true)
+            {
+                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED_IN_URGENT), "victim_segment_id:{}, free_segment_count:{}",
+                    victimId, numFreeSegments);
+            }
+            else
+            {
+                POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
+                    victimId, numFreeSegments);
+            }
         }
         meta->GetGcStripeManager()->CheckTimeout();
     }

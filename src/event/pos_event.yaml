@@ -4175,10 +4175,17 @@ Root:
     Cause:
     Solution:
   -
-    Id: 3407
+    Id: 3405
     Name: GC_VICTIM_SELECTED
     Severity:
     Message: Victim segment is selected
+    Cause:
+    Solution:
+  -
+    Id: 3405
+    Name: GC_VICTIM_SELECTED_IN_URGENT
+    Severity:
+    Message: Victim segment is selected in urgent
     Cause:
     Solution:
   -
@@ -4274,9 +4281,9 @@ Root:
     Solution:
   -
     Id: 3421
-    Name: GC_INVALID_RBA_REMOVED
+    Name: GC_MAP_UPDATE_INIT
     Severity:
-    Message: Invalid RBAs are removed
+    Message:
     Cause:
     Solution:
   -

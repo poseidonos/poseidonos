@@ -118,36 +118,29 @@ RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
     _ReleaseOwnership(volumeID, startRba, count);
 }
 
-bool
+VolumeIo::RbaList::iterator
 RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& uniqueRbaList)
+        const VolumeIo::RbaList& uniqueRbaList, VolumeIo::RbaList::iterator startIter,
+        uint32_t& acquiredCnt)
 {
-    VolumeIo::RbaList acquiredList;
-    bool result = true;
-    for (auto& rbaAndSize : uniqueRbaList)
+    auto it = startIter;
+    for ( ; it != uniqueRbaList.end(); ++it)
     {
+        RbaAndSize rbaAndSize = *it;
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);
         bool success = _AcquireOwnership(volumeId,
                 blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount());
-        if (success == false)
+        if (success == true)
         {
-            result = false;
-            break;
+            acquiredCnt++;
         }
         else
         {
-            acquiredList.push_back(rbaAndSize);
+            break;
         }
     }
-
-    if (result == false)
-    {
-        // POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED), "requested_rba_count:{}, acquired_count:{}",
-        //     uniqueRbaList.size(), acquiredList.size());
-        ReleaseOwnershipRbaList(volumeId, acquiredList);
-    }
-    return result;
+    return it;
 }
 
 void

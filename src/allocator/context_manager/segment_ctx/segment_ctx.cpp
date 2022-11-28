@@ -438,7 +438,7 @@ SegmentCtx::AllocateFreeSegment(void)
 
             int numFreeSegment = _OnNumFreeSegmentChanged();
             POS_TRACE_DEBUG(EID(ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS),
-                "segment_id:{}, num_free_segments:{}", segId, numFreeSegment);
+                "segment_id:{}, free_segment_count:{}", segId, numFreeSegment);
 
             return segId;
         }
@@ -494,7 +494,7 @@ SegmentCtx::_FindMostInvalidSSDSegment(void)
         }
     }
 
-    POS_TRACE_DEBUG(EID(ALLOCATOR_START),
+    POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM),
         "victim_segment:{}, min_valid_count:{}",
         victimSegment, minValidCount);
 
@@ -571,7 +571,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-        "segment_id:{}, num_of_free_segments:{}", segmentId, numOfFreeSegments);
+        "segment_id:{}, free_segment_count:{}", segmentId, numOfFreeSegments);
 }
 
 int
