@@ -64,7 +64,8 @@ GcStripeManager::_SetBufferPool(void)
     BufferInfo info = {
         .owner = typeid(this).name(),
         .size = CHUNK_SIZE,
-        .count = udSize->chunksPerStripe * ArrayConfig::GC_BUFFER_COUNT};
+        // Assign a buffer that is four times the size of the GC read buffer
+        .count = udSize->chunksPerStripe * ArrayConfig::GC_BUFFER_COUNT * 4};
 
     gcWriteBufferPool = memoryManager->CreateBufferPool(info);
     assert(gcWriteBufferPool != nullptr);
