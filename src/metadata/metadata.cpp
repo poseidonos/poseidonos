@@ -283,21 +283,21 @@ Metadata::StopRebuilding(void)
 void
 Metadata::_SetGCThreshold(void)
 {
-    uint32_t normal_gc_ratio;
-    uint32_t urgent_gc_ratio;
-    uint32_t normal_gc_lb;
-    uint32_t urgent_gc_lb;
+    uint32_t normal_gc_ratio = 0;
+    uint32_t urgent_gc_ratio = 0;
+    uint32_t normal_gc_lb = 0;
+    uint32_t urgent_gc_lb = 0;
 
-    bool ret = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
+    int ret = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
         &normal_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
-    ret &= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
+    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
         &normal_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
-    ret &= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
+    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
         &urgent_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
-    ret &= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
+    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
         &urgent_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
 
-    if (ret == true)
+    if (ret == 0)
     {
         const PartitionLogicalSize* dataPartitionSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
         if (dataPartitionSize != nullptr)
