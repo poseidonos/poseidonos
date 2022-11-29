@@ -34,6 +34,7 @@
 
 #include <string>
 
+#include "src/master_context/config_manager.h"
 #include "src/allocator/allocator.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/journal_manager.h"
@@ -147,7 +148,7 @@ Metadata::~Metadata(void)
 int
 Metadata::Init(void)
 {
-    int eventId = static_cast<int>(EID(MOUNT_ARRAY_DEBUG_MSG));
+    int eventId = EID(MOUNT_ARRAY_DEBUG_MSG);
     int result = 0;
 
     std::string arrayName = arrayInfo->GetName();
@@ -203,7 +204,7 @@ Metadata::Init(void)
 void
 Metadata::Dispose(void)
 {
-    int eventId = static_cast<int>(EID(UNMOUNT_ARRAY_DEBUG_MSG));
+    int eventId = EID(UNMOUNT_ARRAY_DEBUG_MSG);
     std::string arrayName = arrayInfo->GetName();
 
     POS_TRACE_INFO(eventId, "Start disposing allocator of array {}", arrayName);
@@ -221,7 +222,7 @@ Metadata::Dispose(void)
 void
 Metadata::Shutdown(void)
 {
-    int eventId = static_cast<int>(EID(UNMOUNT_ARRAY_DEBUG_MSG));
+    int eventId = EID(UNMOUNT_ARRAY_DEBUG_MSG);
     std::string arrayName = arrayInfo->GetName();
 
     POS_TRACE_INFO(eventId, "Start shutdown allocator of array {}", arrayName);
@@ -252,7 +253,7 @@ Metadata::NeedRebuildAgain(void)
     }
     else
     {
-        int eventId = static_cast<int>(EID(UNKNOWN_ALLOCATOR_ERROR));
+        int eventId = EID(UNKNOWN_ALLOCATOR_ERROR);
         POS_TRACE_ERROR(eventId, "Can't find context manager to check if rebuild is needed");
         return false;
     }
@@ -274,7 +275,7 @@ Metadata::StopRebuilding(void)
     }
     else
     {
-        int eventId = static_cast<int>(EID(UNKNOWN_ALLOCATOR_ERROR));
+        int eventId = EID(UNKNOWN_ALLOCATOR_ERROR);
         POS_TRACE_ERROR(eventId, "Can't find context manager to check if rebuild is needed");
     }
 }
@@ -282,15 +283,40 @@ Metadata::StopRebuilding(void)
 void
 Metadata::_SetGCThreshold(void)
 {
-    const PartitionLogicalSize* dataPartitionSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    if (dataPartitionSize != nullptr)
+    uint32_t normal_gc_ratio;
+    uint32_t urgent_gc_ratio;
+    uint32_t normal_gc_lb;
+    uint32_t urgent_gc_lb;
+
+    bool ret = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
+        &normal_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
+    ret &= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
+        &normal_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
+    ret &= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
+        &urgent_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
+    ret &= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
+        &urgent_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
+
+    if (ret == true)
     {
-        uint32_t normalGcThreshold = (uint32_t)(dataPartitionSize->totalSegments / 100);
-        if (normalGcThreshold < 20)
+        const PartitionLogicalSize* dataPartitionSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+        if (dataPartitionSize != nullptr)
         {
-            normalGcThreshold = 20;
+            uint32_t normalGcThreshold = (uint32_t)(dataPartitionSize->totalSegments * normal_gc_ratio / 100);
+            if (normalGcThreshold < normal_gc_lb)
+            {
+                normalGcThreshold = normal_gc_lb;
+            }
+            uint32_t urgentGcThreshold = (uint32_t)(normalGcThreshold * urgent_gc_ratio / 100);
+            if (urgentGcThreshold < urgent_gc_lb)
+            {
+                urgentGcThreshold = urgent_gc_lb;
+            }
+            allocator->SetNormalGcThreshold(normalGcThreshold);
+            allocator->SetUrgentThreshold(urgentGcThreshold);
+            return;
         }
-        allocator->SetNormalGcThreshold(normalGcThreshold);
     }
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "The gc threshold is not set and operates as the default value.");
 }
 } // namespace pos
