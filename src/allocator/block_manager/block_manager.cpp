@@ -142,6 +142,12 @@ BlockManager::PermitUserBlkAlloc(void)
 }
 
 bool
+BlockManager::IsProhibitedUserBlkAlloc(void)
+{
+    return allocStatus->IsProhibitedUserBlockAllocation();
+}
+
+bool
 BlockManager::BlockAllocating(uint32_t volumeId)
 {
     return allocStatus->TryProhibitBlockAllocation(volumeId);
