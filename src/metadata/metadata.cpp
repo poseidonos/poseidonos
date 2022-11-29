@@ -317,6 +317,6 @@ Metadata::_SetGCThreshold(void)
             return;
         }
     }
-    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "The gc threshold is not set and operates as the default value.");
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_NOT_SET), "The gc threshold is not set and operates as the default value.");
 }
 } // namespace pos

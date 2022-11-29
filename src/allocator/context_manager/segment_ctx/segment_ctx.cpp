@@ -725,6 +725,12 @@ SegmentCtx::GetVictimSegmentList(void)
     return segmentList[SegmentState::VICTIM]->GetList();
 }
 
+uint32_t
+SegmentCtx::GetVictimSegmentCount(void)
+{
+    return segmentList[SegmentState::VICTIM]->GetNumSegments();
+}
+
 void
 SegmentCtx::_BuildRebuildSegmentList(void)
 {

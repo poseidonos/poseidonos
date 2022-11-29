@@ -184,6 +184,17 @@ Copier::_CompareThresholdState(void)
 
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
+        const uint32_t gcBusyThreshold = 20;
+        uint32_t victimCnt = segmentCtx->GetVictimSegmentCount();
+        uint64_t numFreeSegments = segmentCtx->GetNumOfFreeSegment();
+        if(victimCnt > gcBusyThreshold)
+        {
+            POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
+                "victim_count:{}, free_segment_count:{}",
+                victimCnt, numFreeSegments);
+            return;
+        }
+
         airlog("LAT_GetVictimSegment", "begin", 0, objAddr);
         victimId = iContextManager->AllocateGCVictimSegment();
         airlog("LAT_GetVictimSegment", "end", 0, objAddr);
@@ -193,11 +204,10 @@ Copier::_CompareThresholdState(void)
             _InitVariables();
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
-            int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-            bool isUrgent = numFreeSegments <= 5;
-            if (isUrgent == true)
+            bool isWarn = (numFreeSegments <= 5);
+            if (isWarn == true)
             {
-                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED_IN_URGENT), "victim_segment_id:{}, free_segment_count:{}",
+                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
                     victimId, numFreeSegments);
             }
             else

@@ -4176,16 +4176,23 @@ Root:
     Solution:
   -
     Id: 3405
-    Name: GC_VICTIM_SELECTED
+    Name: GC_THRESHOLD_IS_NOT_SET
     Severity:
-    Message: Victim segment is selected
+    Message: The gc threshold is not set and operates as the default value
     Cause:
     Solution:
   -
-    Id: 3405
-    Name: GC_VICTIM_SELECTED_IN_URGENT
+    Id: 3406
+    Name: GC_IS_BUSY_IN_VICTIM_SELECTION
     Severity:
-    Message: Victim segment is selected in urgent
+    Message: GC is busy, so victim selection has been postponed.
+    Cause:
+    Solution:
+  -
+    Id: 3407
+    Name: GC_VICTIM_SELECTED
+    Severity:
+    Message: Victim segment is selected
     Cause:
     Solution:
   -
