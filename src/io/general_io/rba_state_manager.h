@@ -114,7 +114,7 @@ private:
 
     RBAStatesInArray rbaStatesInArray;
 
-    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count, string owner = "HOST");
+    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
     void _ReleaseOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
     unordered_map<BlkAddr, string> ownerInfo[MAX_VOLUME_COUNT];
 };

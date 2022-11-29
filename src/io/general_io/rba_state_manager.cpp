@@ -141,9 +141,10 @@ RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);
         bool success = _AcquireOwnership(volumeId,
-                blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount(), "GC");
+                blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount());
         if (success == true)
         {
+            ownerInfo[volumeId].emplace(rbaAndSize.sectorRba, "GC");
             acquiredCnt++;
         }
         else
@@ -164,12 +165,13 @@ RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
                 rbaAndSize.size);
         _ReleaseOwnership(volumeId, blockAlignment.GetHeadBlock(),
                 blockAlignment.GetBlockCount());
+        ownerInfo[volumeId].erase(rbaAndSize.sectorRba);
     }
 }
 
 bool
 RBAStateManager::_AcquireOwnership(uint32_t volumeID, BlkAddr startRba,
-        uint32_t count, string owner)
+        uint32_t count)
 {
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
@@ -178,16 +180,8 @@ RBAStateManager::_AcquireOwnership(uint32_t volumeID, BlkAddr startRba,
         throw eventIdWithLevel;
     }
 
-
     RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
     bool acquired = targetVolume.AcquireOwnership(startRba, count);
-    if (acquired == true)
-    {
-        for (uint32_t i = 0; i < count; i++)
-        {
-            ownerInfo[volumeID].emplace(startRba + i, owner);
-        }
-    }
     return acquired;
 }
 
@@ -203,10 +197,6 @@ RBAStateManager::_ReleaseOwnership(uint32_t volumeID, BlkAddr startRba,
 
     RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
     targetVolume.ReleaseOwnership(startRba, count);
-    for (uint32_t i = 0; i < count; i++)
-    {
-        ownerInfo[volumeID].erase(startRba + i);
-    }
 }
 
 RBAStateManager::RBAState::RBAState(void)
@@ -299,7 +289,6 @@ RBAStateManager::RBAStatesInVolume::_IsAccessibleRba(BlkAddr endRba)
 int
 RBAStateManager::VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    ownerInfo[volEventBase->volId].clear();
     CreateRBAState(volEventBase->volId, ChangeByteToBlock(volEventBase->volSizeByte));
     return EID(VOL_EVENT_OK);
 }
@@ -308,6 +297,7 @@ int
 RBAStateManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     DeleteRBAState(volEventBase->volId);
+    ownerInfo[volEventBase->volId].clear();
     return EID(VOL_EVENT_OK);
 }
 
@@ -326,7 +316,6 @@ RBAStateManager::VolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo*
 int
 RBAStateManager::VolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
-    ownerInfo[volEventBase->volId].clear();
     CreateRBAState(volEventBase->volId, ChangeByteToBlock(volEventBase->volSizeByte));
     return EID(VOL_EVENT_OK);
 }
