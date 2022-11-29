@@ -34,9 +34,15 @@
                     "RUN": true,
                     "HUGE_EVEN_ALLOC": "yes",
                     "NRHUGE": 65536
+                },
+                "DEBUG": {
+                    "RUN": true,
+                    "ULIMIT": "unlimited",
+                    "APPORT": "disable"
                 }
             },
             "POS": {
+                "ASAN_OPTIONS": "detect_leaks=0:disable_coredump=0:abort_on_error=1:log_path=/var/log/pos/asan_pos.log",
                 "DIR": "/home/psd/ibofos",
                 "BIN": "poseidonos",
                 "CLI": "poseidonos-cli",

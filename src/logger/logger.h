@@ -54,6 +54,7 @@
 #include "src/lib/singleton.h"
 
 #define POS_EVENT_FILE_PATH "/etc/pos/pos_event.yaml"
+#define NO_PREV_EVENT -1
 
 using namespace std;
 
@@ -88,7 +89,7 @@ public:
         int id, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        if (ShouldLog(lvl, id))
+        if (ShouldFilter(lvl, id) == false)
         {
             uint32_t moduleId = static_cast<uint32_t>(module);
             fmt::memory_buffer buf;
@@ -106,47 +107,54 @@ public:
         int eventId, spdlog::string_view_t fmt, const Args&... args)
     {
 #ifndef POS_UT_SUPPRESS_LOGMSG
-        if (ShouldLog(lvl, eventId))
+        if (ShouldFilter(lvl, eventId) == false)
         {
-            auto event_info = eventManager.GetEventInfo();
-            auto it = event_info->find(eventId);
+            loggerMtx.lock();
+
+            std::string currMsg = "";
             try
             {
-                if (it == event_info->end())
-                {
-                    // TODO (mj): currently, we print raw message
-                    // when there is no information about the event in PosEventInfo.
-                    // A method is required to enforce to add event information to
-                    // PoSEventInfo.(e.g., invoking a compile error if eventId does not
-                    // match with PosEventInfo)
-                    logger->iboflog_sink(loc, lvl, eventId,
-                        fmt::format(
-                            preferences.IsStrLoggingEnabled() ? "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\"" : "\tN/A - {} (cause: N/A, solution: N/A, variables: N/A)",
-                            fmt),
-                        args...);
-                }
-                else
-                {
-                    logger->iboflog_sink(loc, lvl, eventId,
-                        fmt::format(
-                            preferences.IsStrLoggingEnabled() ? "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" : "\t{} - {} (cause: {}, solution: {}, variables: {})",
-                            it->second.GetEventName(), it->second.GetMessage(),
-                            it->second.GetCause(), it->second.GetSolution(),
-                            fmt),
-                        args...);
-                }
+                currMsg = fmt::format(fmt, args...);
             }
-            catch (const std::exception& e)
+            catch(const std::exception& e)
             {
-                try
+                // Proceed when an exception occurs in fmt::format()
+            }           
+
+            // BurstFilter: we won't log this event when its ID and message are
+            // the same as the previous ones.
+            if (preferences.IsBurstFilterEnabled())
+            {
+                if (IsSameLog(eventId, currMsg, prevEventId, prevMsg))
                 {
-                    logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"", e.what(), fmt), args...);
+                    if (repeatCount >= preferences.GetBurstFilterWindowSize())
+                    {
+                        _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
+                        repeatCount = 0;
+
+                        loggerMtx.unlock();
+                        return;
+                    }
+            
+                    repeatCount++;
+
+                    loggerMtx.unlock();
+                    return;
                 }
-                catch (const std::exception& e)
+
+                if (repeatCount > 0)
                 {
-                    logger->iboflog_sink(loc, lvl, eventId, "expection has occured while parsing the event log: " + std::string(e.what()));
+                    _Log(loc, lvl, prevEventId, prevMsg, repeatCount);
+                    repeatCount = 0;
                 }
+
+                prevEventId = eventId;
+                prevMsg = currMsg;
             }
+
+            _Log(loc, lvl, eventId, currMsg, 0);
+
+            loggerMtx.unlock();          
         }
 #endif
     }
@@ -186,17 +194,98 @@ public:
         return preferences.LogDir();
     }
 
-    bool ShouldLog(spdlog::level::level_enum lvl, int id)
+    bool ShouldFilter(spdlog::level::level_enum lvl, int id)
     {
-        return preferences.ShouldLog(lvl, id);
+        return !preferences.ShouldLog(lvl, id);
+    }
+
+    bool IsSameLog(int event1Id, std::string event1Msg, int event2Id, std::string event2Msg)
+    {
+        if ((event1Id == event2Id) && (event1Msg == event2Msg))
+        {
+            return true;
+        }
+
+        return false;
     }
 
 private:
+    std::string _ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+        size_t startPos = 0;
+        while((startPos = str.find(from, startPos)) != std::string::npos) {
+            str.replace(startPos, from.length(), to);
+            startPos += to.length();
+        }
+        return str;
+    }
+
+    // Replace special characters that may cause problems in iboflog_sink()
+    std::string _ReplaceSpecialChars(std::string msg)
+    {
+        std::string newMsg = msg;
+
+        newMsg = _ReplaceAll(newMsg, "{", "{{");
+        newMsg = _ReplaceAll(newMsg, "}", "}}");
+
+        return newMsg;
+    }
+
+    void _Log(spdlog::source_loc loc, spdlog::level::level_enum lvl, int eventId,
+    std::string msg, int repeatCount)
+    {
+        auto event_info = eventManager.GetEventInfo();
+        auto it = event_info->find(eventId);
+        try
+        {
+            msg = _ReplaceSpecialChars(msg);
+            
+            if (it == event_info->end())
+            {                
+                // TODO (mj): currently, we print raw message
+                // when there is no information about the event in PosEventInfo.
+                // A method is required to enforce to add event information to
+                // PoSEventInfo.(e.g., invoking a compile error if eventId does not
+                // match with PosEventInfo)
+                logger->iboflog_sink(loc, lvl, eventId,
+                    fmt::format(
+                        preferences.IsStrLoggingEnabled() ?
+                            "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\",\"repetition\":{}"
+                            : "\tN/A - {} (cause: N/A, solution: N/A, variables: N/A, repetition: {})",
+                        msg, repeatCount));
+            }
+            else
+            {
+                logger->iboflog_sink(loc, lvl, eventId,
+                    fmt::format(
+                        preferences.IsStrLoggingEnabled() ?
+                            "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\",\"repetition\":{}"
+                            : "\t{} - {} (cause: {}, solution: {}, variables: {}, repetition: {})",
+                        it->second.GetEventName(), it->second.GetMessage(),
+                        it->second.GetCause(), it->second.GetSolution(),
+                        msg, repeatCount));
+            }
+        }
+        catch (const std::exception& e)
+        {
+            try
+            {
+                logger->iboflog_sink(loc, lvl, eventId, fmt::format("\"exception\":\"{}\",\"message\":\"{}\"", e.what(), msg));
+            }
+            catch (const std::exception& e)
+            {
+                logger->iboflog_sink(loc, lvl, eventId, "expection has occured while parsing the event log: " + std::string(e.what()));
+            }
+        }
+    }
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
     pos_logger::Preferences preferences;
+    int prevEventId = NO_PREV_EVENT;
+    std::string prevMsg;
+    uint32_t repeatCount = 0;
+    mutex loggerMtx;
     // LCOV_EXCL_STOP
 };
 
