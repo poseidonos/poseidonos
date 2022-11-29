@@ -143,10 +143,10 @@ GcFlushCompletion::Init(void)
                     RbaAndSize rbaAndSize = {rba * VolumeIo::UNITS_PER_BLOCK, BLOCK_SIZE};
                     sectorRbaList.push_back(rbaAndSize);
                 }
-                else
-                {
-                    invalidRbaCnt++;
-                }
+            }
+            else
+            {
+                invalidRbaCnt++;
             }
         }
     }
