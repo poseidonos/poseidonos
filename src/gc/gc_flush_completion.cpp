@@ -184,19 +184,18 @@ GcFlushCompletion::AcquireOwnership(void)
     {
         if (needLogging == true)
         {
-            string owner = rbaStateManager->GetOwner(volId, currPos->sectorRba);
             bool needWarnLogging = tryCnt % 50000 == 0;
             if (needWarnLogging)
             {
                 POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
-                    "want:{}, owned_by:{}, array_name:{}, vol_id:{}, stripe_id:{}, tried:{}, total:{}, acquired:{}",
-                    currPos->sectorRba, owner, arrayName, volId, lsid, tryCnt, sectorRbaList.size(), ownershipProgress);
+                    "want:{}, array_name:{}, vol_id:{}, stripe_id:{}, tried:{}, total:{}, acquired:{}",
+                    currPos->sectorRba, arrayName, volId, lsid, tryCnt, sectorRbaList.size(), ownershipProgress);
             }
             else
             {
                 POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
-                    "want:{}, owned_by:{}, array_name:{}, vol_id:{}, stripe_id:{}, tried:{}, total:{}, acquired:{}",
-                    currPos->sectorRba, owner, arrayName, volId, lsid, tryCnt, sectorRbaList.size(), ownershipProgress);
+                    "want:{}, array_name:{}, vol_id:{}, stripe_id:{}, tried:{}, total:{}, acquired:{}",
+                    currPos->sectorRba, arrayName, volId, lsid, tryCnt, sectorRbaList.size(), ownershipProgress);
             }
         }
         return false;

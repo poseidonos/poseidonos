@@ -118,17 +118,6 @@ RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
     _ReleaseOwnership(volumeID, startRba, count);
 }
 
-string
-RBAStateManager::GetOwner(uint32_t volumeId, BlkAddr rba)
-{
-    auto it = ownerInfo[volumeId].find(rba);
-    if (it != ownerInfo[volumeId].end())
-    {
-        return it->second;
-    }
-    return "";
-}
-
 VolumeIo::RbaList::iterator
 RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
         const VolumeIo::RbaList& uniqueRbaList, VolumeIo::RbaList::iterator startIter,
@@ -144,7 +133,6 @@ RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
                 blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount());
         if (success == true)
         {
-            ownerInfo[volumeId].emplace(rbaAndSize.sectorRba, "GC");
             acquiredCnt++;
         }
         else
@@ -165,7 +153,6 @@ RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
                 rbaAndSize.size);
         _ReleaseOwnership(volumeId, blockAlignment.GetHeadBlock(),
                 blockAlignment.GetBlockCount());
-        ownerInfo[volumeId].erase(rbaAndSize.sectorRba);
     }
 }
 
@@ -297,7 +284,6 @@ int
 RBAStateManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     DeleteRBAState(volEventBase->volId);
-    ownerInfo[volEventBase->volId].clear();
     return EID(VOL_EVENT_OK);
 }
 

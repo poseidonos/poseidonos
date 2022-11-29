@@ -75,7 +75,6 @@ public:
     virtual void BulkReleaseOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
-    virtual string GetOwner(uint32_t volumeId, BlkAddr rba);
 
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
@@ -116,7 +115,6 @@ private:
 
     bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
     void _ReleaseOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
-    unordered_map<BlkAddr, string> ownerInfo[MAX_VOLUME_COUNT];
 };
 
 } // namespace pos

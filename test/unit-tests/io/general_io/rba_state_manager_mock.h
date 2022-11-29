@@ -17,7 +17,6 @@ public:
     MOCK_METHOD(VolumeIo::RbaList::iterator, AcquireOwnershipRbaList, (uint32_t volumeID, const VolumeIo::RbaList& sectorRbaList,
         VolumeIo::RbaList::iterator startIter, uint32_t& acquiredCnt), (override));
     MOCK_METHOD(void, ReleaseOwnershipRbaList, (uint32_t volumeID, const VolumeIo::RbaList& sectorRbaList), (override));
-    MOCK_METHOD(string, GetOwner, (uint32_t volumeId, BlkAddr rba), (override));
     MOCK_METHOD(int, VolumeCreated, (VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo), (override));
     MOCK_METHOD(int, VolumeLoaded, (VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo), (override));
     MOCK_METHOD(int, VolumeUpdated, (VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo), (override));
