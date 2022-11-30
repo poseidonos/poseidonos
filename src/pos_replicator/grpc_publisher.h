@@ -55,13 +55,15 @@ public:
     int CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
     int CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer);
 
+    void WaitClientConnected(void);
+
 private:
     void _ConnectGrpcServer(std::string targetAddress);
     bool _WaitUntilReady(void);
     void _InsertBlockToChunk(replicator_rpc::CompleteReadRequest* request, void* data, uint64_t numBlocks);
 
-    ConfigManager* configManager;
     std::shared_ptr<grpc::Channel> channel;
+    ConfigManager* configManager;
     std::unique_ptr<replicator_rpc::ReplicatorIoService::Stub> stub;
 };
 } // namespace pos

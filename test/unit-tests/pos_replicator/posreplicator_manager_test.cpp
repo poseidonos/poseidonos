@@ -108,7 +108,7 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_NotifyNewUserIORequest_)
     io.ioType = IO_TYPE::WRITE;
     io.array_id = 0;
     io.volume_id = 0;
-    io.arrayName = "ARR0";
+    io.arrayName = const_cast<char*>("ARR0");
 
     // Then
     int ret = posReplicatorManager->NotifyNewUserIORequest(io);

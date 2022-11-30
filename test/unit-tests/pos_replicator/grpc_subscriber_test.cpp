@@ -36,6 +36,7 @@
 
 #include "mock_grpc/mock_replicator_client.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
+#include "mock_grpc/mock_replicator_server.h"
 
 using ::testing::_;
 using testing::NiceMock;

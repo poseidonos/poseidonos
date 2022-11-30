@@ -35,6 +35,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <time.h>
 
 #include "src/include/array_config.h"
 #include "src/include/grpc_server_socket_address.h"
@@ -45,6 +46,8 @@
 namespace pos
 {
 GrpcPublisher::GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigManager* configManager)
+: channel(channel_),
+  configManager(configManager)
 {
     std::string serverAddress;
     int ret = configManager->GetValue("replicator", "ha_publisher_address",
@@ -80,7 +83,7 @@ GrpcPublisher::_ConnectGrpcServer(std::string targetAddress)
 }
 
 bool
-GrpcPublisher::_WaitUntilReady()
+GrpcPublisher::_WaitUntilReady(void)
 {
     // TODO (cheolho.kang): check functionality. Should wait until grpc channel is ready
     /*
@@ -96,6 +99,15 @@ GrpcPublisher::_WaitUntilReady()
     }
     */
     return true;
+}
+
+void
+GrpcPublisher::WaitClientConnected(void)
+{
+    while (channel == nullptr)
+    {
+    }
+    channel.get()->WaitForConnected(gpr_inf_future(GPR_CLOCK_REALTIME));
 }
 
 int
