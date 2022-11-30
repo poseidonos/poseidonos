@@ -93,14 +93,22 @@ StripeCopier::Execute(void)
 
         for (; listIndex < listSize;)
         {
-            void* buffer;
+            void* buffer = nullptr;
             buffer = meta->GetBuffer(victimStripeId);
-
             if (nullptr == buffer)
             {
                 meta->SetStartCopyBlks(requestCount);
-                POS_TRACE_DEBUG(EID(GC_GET_READ_BUFFER_FAILED), "stipe_id:{}", victimStripeId);
+                bufAllocRetryCnt++;
+                if (bufAllocRetryCnt % 100 == 0)
+                {
+                    POS_TRACE_DEBUG(EID(GC_GET_READ_BUFFER_FAILED), "stipe_id:{}, failure_count:{}",
+                        victimStripeId, bufAllocRetryCnt);
+                }
                 return false;
+            }
+            else
+            {
+                bufAllocRetryCnt = 0;
             }
 
             std::list<BlkInfo> blkInfoList = meta->GetVictimStripe(copyIndex, stripeOffset)->GetBlkInfoList(listIndex);

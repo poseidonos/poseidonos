@@ -99,6 +99,7 @@ private:
     EventSmartPtr inputCopyEvent;
     EventSmartPtr inputStripeCopier;
     EventScheduler* eventScheduler;
+    uint32_t bufAllocRetryCnt = 0;
 };
 
 } // namespace pos

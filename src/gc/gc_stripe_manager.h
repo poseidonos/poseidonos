@@ -134,6 +134,7 @@ private:
     uint64_t timeoutInterval = 10;
     mutex timerMtx;
     ForceFlushLocker ffLocker;
+    uint32_t bufAllocRetryCnt = 0;
 };
 
 } // namespace pos

@@ -287,8 +287,6 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
         auto it = timer.find(volumeId);
         if (it != timer.end())
         {
-            // POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_RESET), "vol_id:{}, elapsed(ns):{}",
-            //     volumeId, (*it).second->Elapsed());
             (*it).second->Reset();
         }
     }
@@ -392,8 +390,17 @@ GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
     bool ret = gcWriteBufferPool->TryGetBuffers(bufCount, gcActiveWriteBuffers[volumeId]);
     if (ret == false)
     {
+        bufAllocRetryCnt++;
         delete gcActiveWriteBuffers[volumeId];
-        POS_TRACE_DEBUG(EID(GC_GET_WRITE_BUFFER_FAILED), "vol_id:{}", volumeId);
+        if (bufAllocRetryCnt % 100 == 0)
+        {
+            POS_TRACE_DEBUG(EID(GC_GET_WRITE_BUFFER_FAILED), "vol_id:{}, failure_count:{}",
+                volumeId, bufAllocRetryCnt);
+        }
+    }
+    else
+    {
+        bufAllocRetryCnt = 0;
     }
     return ret;
 }
@@ -475,9 +482,6 @@ GcStripeManager::_StartTimer(uint32_t volumeId)
     }
     if (t->IsActive() == false)
     {
-        // POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_START),
-        //     "vol_id:{}, interval(ns):{}",
-        //     volumeId, timeoutInterval);
         t->SetTimeout(timeoutInterval);
     }
     timerMtx.unlock();

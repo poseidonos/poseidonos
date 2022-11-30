@@ -186,7 +186,7 @@ Copier::_CompareThresholdState(void)
     {
         const uint32_t gcBusyThreshold = 20;
         uint32_t victimCnt = segmentCtx->GetVictimSegmentCount();
-        uint64_t numFreeSegments = segmentCtx->GetNumOfFreeSegment();
+        uint32_t numFreeSegments = (uint32_t)segmentCtx->GetNumOfFreeSegment();
         if(victimCnt > gcBusyThreshold)
         {
             POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
@@ -204,8 +204,8 @@ Copier::_CompareThresholdState(void)
             _InitVariables();
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
-            bool isWarn = (numFreeSegments <= 5);
-            if (isWarn == true)
+            bool isUrgent = (numFreeSegments <= (uint32_t)gcCtx->GetUrgentThreshold());
+            if (isUrgent == true)
             {
                 POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
                     victimId, numFreeSegments);

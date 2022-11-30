@@ -51,6 +51,13 @@ namespace pos
 class RBAStateService;
 class VolumeEventPublisher;
 
+enum class RBAOwnerType
+{
+    Ownerlessness = 0,
+    HOST = 1,
+    GC = 2
+};
+
 class RBAStateManager : public VolumeEvent, public IMountSequence
 {
 public:
@@ -75,7 +82,7 @@ public:
     virtual void BulkReleaseOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
-
+    virtual RBAOwnerType GetOwner(uint32_t volumeID, BlkAddr rba);
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
     int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
@@ -89,19 +96,22 @@ private:
     {
     public:
         RBAState(void);
-        bool AcquireOwnership(void);
+        bool AcquireOwnership(RBAOwnerType owner);
         void ReleaseOwnership(void);
+        RBAOwnerType GetOwner(void) { return owner; }
 
     private:
         std::atomic_flag ownered;
+        RBAOwnerType owner = RBAOwnerType::Ownerlessness;
     };
 
     class RBAStatesInVolume
     {
     public:
         RBAStatesInVolume(void);
-        bool AcquireOwnership(BlkAddr startRba, uint32_t cnt);
+        bool AcquireOwnership(BlkAddr startRba, uint32_t cnt, RBAOwnerType owner);
         void ReleaseOwnership(BlkAddr startRba, uint32_t cnt);
+        RBAOwnerType GetOwner(BlkAddr rba);
         void SetSize(uint64_t newSize);
 
     private:
@@ -113,7 +123,7 @@ private:
 
     RBAStatesInArray rbaStatesInArray;
 
-    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
+    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count, RBAOwnerType owner = RBAOwnerType::HOST);
     void _ReleaseOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
 };
 
