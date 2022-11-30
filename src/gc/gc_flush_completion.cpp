@@ -184,7 +184,7 @@ GcFlushCompletion::AcquireOwnership(void)
     {
         if (needLogging == true)
         {
-            RBAOwnerType owner = rbaStateManager->GetOwner(volId, currPos->sectorRba);
+            RBAOwnerType owner = rbaStateManager->GetOwner(volId, *currPos);
             bool needWarnLogging = tryCnt % 50000 == 0;
             if (needWarnLogging)
             {

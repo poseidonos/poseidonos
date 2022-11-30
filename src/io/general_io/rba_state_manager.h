@@ -53,9 +53,9 @@ class VolumeEventPublisher;
 
 enum class RBAOwnerType
 {
-    Ownerlessness = 0,
-    HOST = 1,
-    GC = 2
+    Ownerlessness,
+    HOST,
+    GC
 };
 
 class RBAStateManager : public VolumeEvent, public IMountSequence
@@ -82,7 +82,7 @@ public:
     virtual void BulkReleaseOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
-    virtual RBAOwnerType GetOwner(uint32_t volumeID, BlkAddr rba);
+    virtual RBAOwnerType GetOwner(uint32_t volumeID, RbaAndSize rbaAndSize);
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
     int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;

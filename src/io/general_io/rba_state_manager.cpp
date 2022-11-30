@@ -119,8 +119,10 @@ RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
 }
 
 RBAOwnerType
-RBAStateManager::GetOwner(uint32_t volumeID, BlkAddr rba)
+RBAStateManager::GetOwner(uint32_t volumeID, RbaAndSize rbaAndSize)
 {
+    BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba), rbaAndSize.size);
+    BlkAddr rba = blockAlignment.GetHeadBlock();
     RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
     return targetVolume.GetOwner(rba);
 }
@@ -202,7 +204,10 @@ bool
 RBAStateManager::RBAState::AcquireOwnership(RBAOwnerType owner)
 {
     bool acquired = (ownered.test_and_set(memory_order_relaxed) == false);
-    this->owner = owner;
+    if (acquired == true)
+    {
+        this->owner = owner;
+    }
     return acquired;
 }
 
