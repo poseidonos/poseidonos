@@ -4150,6 +4150,41 @@ Root:
     Description:
     Cause:
     Solution:
+  -
+    Id: 3218
+    Name: ALLOCATOR_FAILED_TO_LOAD_CONTEXT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 3219
+    Name: CONTEXT_MANAGER_FAILED_TO_INIT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 3220
+    Name: SUCCEED_TO_OPEN_WITH_CREATION
+    Severity:
+    Description: succeeded to open a meta file after creating the file
+    Cause: none
+    Solution: none
+  -
+    Id: 3221
+    Name: SUCCEED_TO_OPEN_WITHOUT_CREATION
+    Severity:
+    Description: succeeded to open a meta file existed already
+    Cause: none
+    Solution: none
+  -
+    Id: 3222
+    Name: SUCCEED_TO_OPEN_WITHOUT_CREATION
+    Severity:
+    Description: succeeded to open a meta file existed already
+    Cause: none
+    Solution: none
   # Metadata: 3300 - 3399
   -
     Id: 3300
@@ -7311,7 +7346,7 @@ Root:
     Description:
     Cause:
     Solution:
-
+  -
     Id: 5373
     Name: IODISPATCHER_STATE_CHANGE
     Severity:

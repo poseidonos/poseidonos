@@ -70,49 +70,50 @@ ContextIoManager::~ContextIoManager(void)
     }
 }
 
-void
+int
 ContextIoManager::Init(void)
 {
     int ret = 0;
-    POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] start to init and load allocator files");
+    POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "start to init and load allocator files");
     for (int owner = 0; owner < NUM_FILES; owner++)
     {
         fileIo[owner]->Init();
 
         ret = fileIo[owner]->LoadContext();
-        if (ret == 0) // new file created
+        if (ret == EID(SUCCEED_TO_OPEN_WITH_CREATION)) // new file created
         {
             AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
             uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
             ret = fileIo[owner]->Flush(completion, dstSectionId);
-            if (ret == 0)
+            if (ret == EID(SUCCESS))
             {
                 WaitPendingIo(IOTYPE_ALL);
                 POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD),
-                    "[AllocatorLoad] initial flush allocator file:{}", owner);
+                    "initial flush allocator file:{}", owner);
             }
             else
             {
+                POS_TRACE_WARN(EID(ALLOCATOR_META_ASYNCLOAD),
+                    "failed to flush allocator file:{}, error:{}", owner, ret);
                 break;
             }
         }
-        else if (ret == 1) // loading
+        else if (ret == EID(SUCCEED_TO_OPEN_WITHOUT_CREATION)) // loading
         {
+            POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD),
+                "succeeded to open alocator file:{}", owner);
+            ret = EID(SUCCESS);
             WaitPendingIo(IOTYPE_READ);
         }
         else
         {
+            POS_TRACE_ERROR(EID(ALLOCATOR_FAILED_TO_LOAD_CONTEXT),
+                "failed to load allocator file:{}, error:{}", owner, ret);
             break;
         }
     }
 
-    if (ret < 0)
-    {
-        while (addrInfo->IsUT() != true)
-        {
-            usleep(1); // assert(false);
-        }
-    }
+    return ret;
 }
 
 void

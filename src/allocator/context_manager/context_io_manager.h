@@ -60,7 +60,7 @@ public:
         AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo);
     virtual ~ContextIoManager(void);
 
-    virtual void Init(void);
+    virtual int Init(void);
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync,

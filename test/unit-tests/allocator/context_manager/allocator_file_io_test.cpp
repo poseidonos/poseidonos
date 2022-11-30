@@ -109,7 +109,7 @@ TEST(AllocatorFileIo, LoadContext_testFileNotExist)
     EXPECT_CALL(file, Open);
 
     int ret = fileManager.LoadContext();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITH_CREATION));
 }
 
 TEST(AllocatorFileIo, LoadContext_testFileCreationFail)
@@ -135,9 +135,10 @@ TEST(AllocatorFileIo, LoadContext_testFileLoad)
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(file, AsyncIO).WillOnce(Return(0));
+    EXPECT_CALL(file, Open).WillOnce(Return(0));
 
     int ret = fileManager.LoadContext();
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITHOUT_CREATION));
     EXPECT_EQ(fileManager.GetNumFilesReading(), 1);
 }
 
@@ -150,6 +151,7 @@ TEST(AllocatorFileIo, LoadContext_testFileLoadFail)
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(file, AsyncIO).WillOnce(Return(-1));
+    EXPECT_CALL(file, Open).WillOnce(Return(0));
 
     int ret = fileManager.LoadContext();
     EXPECT_TRUE(ret < 0);
@@ -209,7 +211,7 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
     EXPECT_CALL(client, AfterLoad);
 
     int ret = fileManager.LoadContext();
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITHOUT_CREATION));
 
     EXPECT_EQ(fileManager.GetNumFilesReading(), 0);
 

@@ -63,16 +63,6 @@ TEST(ContextIoManager, Init_testFileCreate)
     ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
-    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(0));
-    EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
-
-    EXPECT_CALL(*allocatorCtxIo, Init);
-    EXPECT_CALL(*allocatorCtxIo, LoadContext).WillOnce(Return(0));
-    EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
-
-    EXPECT_CALL(*rebuildCtxIo, Init);
-    EXPECT_CALL(*rebuildCtxIo, LoadContext).WillOnce(Return(0));
-    EXPECT_CALL(*rebuildCtxIo, Flush).WillOnce(Return(0));
 
     EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
 
@@ -94,12 +84,6 @@ TEST(ContextIoManager, Init_testFileLoad)
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(1));
 
-    EXPECT_CALL(*allocatorCtxIo, Init);
-    EXPECT_CALL(*allocatorCtxIo, LoadContext).WillOnce(Return(1));
-
-    EXPECT_CALL(*rebuildCtxIo, Init);
-    EXPECT_CALL(*rebuildCtxIo, LoadContext).WillOnce(Return(1));
-
     ioManager.Init();
 }
 
@@ -117,9 +101,7 @@ TEST(ContextIoManager, Init_testFileFlushFail)
 
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(0));
-    EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(-1));
 
-    EXPECT_CALL(info, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     ioManager.Init();
 }
 
@@ -138,7 +120,6 @@ TEST(ContextIoManager, Init_testFileLoadFail)
     EXPECT_CALL(*segmentCtxIo, Init);
     EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(-1));
 
-    EXPECT_CALL(info, IsUT).WillOnce(Return(false)).WillOnce(Return(true));
     ioManager.Init();
 }
 

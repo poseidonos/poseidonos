@@ -199,15 +199,15 @@ std::string
 MetaFsIoRequest::GetLogString(void) const
 {
     std::string log;
-    log.append("reqType: " + (int)reqType);
-    log.append(", ioMode: " + (int)ioMode);
-    log.append(", tagId: " + tagId);
+    log.append("reqType: " + std::to_string((int)reqType));
+    log.append(", ioMode: " + std::to_string((int)ioMode));
+    log.append(", tagId: " + std::to_string(tagId));
     log.append(", fd: " + std::to_string(fd));
-    log.append(", targetMediaType: " + (int)targetMediaType);
+    log.append(", targetMediaType: " + std::to_string((int)targetMediaType));
     log.append(", arrayId: " + std::to_string(arrayId));
     log.append(", byteOffsetInFile: " + std::to_string(byteOffsetInFile));
     log.append(", byteSize: " + std::to_string(byteSize));
-    log.append(", priority: " + (int)priority);
+    log.append(", priority: " + std::to_string((int)priority));
     return log;
 }
 

@@ -53,7 +53,7 @@ TEST(ContextManager, Init_TestCaseFormatFormat)
     EXPECT_CALL(*ioManager, Init);
 
     // when 1.
-    ctxManager.Init();
+    EXPECT_EQ(EID(SUCCESS), ctxManager.Init());
 }
 
 TEST(ContextManager, Close_TestAllClosed)
