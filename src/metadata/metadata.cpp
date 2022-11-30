@@ -34,7 +34,6 @@
 
 #include <string>
 
-#include "src/master_context/config_manager.h"
 #include "src/allocator/allocator.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/journal_manager.h"
@@ -96,8 +95,6 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
         EventSchedulerSingleton::Instance(),
         metaEventFactory,
         arrayInfo);
-
-    _SetGCThreshold();
 }
 
 Metadata::~Metadata(void)
@@ -280,43 +277,4 @@ Metadata::StopRebuilding(void)
     }
 }
 
-void
-Metadata::_SetGCThreshold(void)
-{
-    uint32_t normal_gc_ratio = 0;
-    uint32_t urgent_gc_ratio = 0;
-    uint32_t normal_gc_lb = 0;
-    uint32_t urgent_gc_lb = 0;
-
-    int ret = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
-        &normal_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
-    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
-        &normal_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
-    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
-        &urgent_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
-    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
-        &urgent_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
-
-    if (ret == 0)
-    {
-        const PartitionLogicalSize* dataPartitionSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-        if (dataPartitionSize != nullptr)
-        {
-            uint32_t normalGcThreshold = (uint32_t)(dataPartitionSize->totalSegments * normal_gc_ratio / 100);
-            if (normalGcThreshold < normal_gc_lb)
-            {
-                normalGcThreshold = normal_gc_lb;
-            }
-            uint32_t urgentGcThreshold = (uint32_t)(normalGcThreshold * urgent_gc_ratio / 100);
-            if (urgentGcThreshold < urgent_gc_lb)
-            {
-                urgentGcThreshold = urgent_gc_lb;
-            }
-            allocator->SetNormalGcThreshold(normalGcThreshold);
-            allocator->SetUrgentThreshold(urgentGcThreshold);
-            return;
-        }
-    }
-    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_NOT_SET), "The gc threshold is not set and operates as the default value.");
-}
 } // namespace pos

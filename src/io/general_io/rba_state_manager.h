@@ -53,7 +53,7 @@ class VolumeEventPublisher;
 
 enum class RBAOwnerType
 {
-    Ownerlessness,
+    NoOwner,
     HOST,
     GC
 };
@@ -102,7 +102,7 @@ private:
 
     private:
         std::atomic_flag ownered;
-        RBAOwnerType owner = RBAOwnerType::Ownerlessness;
+        RBAOwnerType owner = RBAOwnerType::NoOwner;
     };
 
     class RBAStatesInVolume

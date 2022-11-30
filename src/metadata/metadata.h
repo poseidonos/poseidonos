@@ -66,7 +66,6 @@ public:
     virtual void StopRebuilding(void);
 
 private:
-    void _SetGCThreshold(void);
     IArrayInfo* arrayInfo;
     Mapper* mapper;
     Allocator* allocator;

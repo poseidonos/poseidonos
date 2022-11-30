@@ -215,7 +215,7 @@ void
 RBAStateManager::RBAState::ReleaseOwnership(void)
 {
     ownered.clear(memory_order_relaxed);
-    this->owner = RBAOwnerType::Ownerlessness;
+    this->owner = RBAOwnerType::NoOwner;
 }
 
 RBAStateManager::RBAStatesInVolume::RBAStatesInVolume(void)
@@ -286,7 +286,7 @@ RBAStateManager::RBAStatesInVolume::GetOwner(BlkAddr rba)
     {
         return rbaStates[rba].GetOwner();
     }
-    return RBAOwnerType::Ownerlessness;
+    return RBAOwnerType::NoOwner;
 }
 
 bool
