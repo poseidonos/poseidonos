@@ -105,11 +105,6 @@ Callback::~Callback(void)
     airlog("Callback_Destructor", "internal", type, 1);
     if (unlikely(executed == false))
     {
-        POS_EVENT_ID eventId = EID(CALLBACK_DESTROY_WITHOUT_EXECUTED);
-        POS_TRACE_WARN(
-            eventId,
-            "Callback destroy without executed : {}",
-            static_cast<uint32_t>(type));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
         dumpCallbackError.AddDump(buffer, 0);
     }

@@ -112,6 +112,10 @@ WriteSubmission::Execute(void)
 {
     try
     {
+        if (iBlockAllocator->IsProhibitedUserBlkAlloc() == true)
+        {
+            return false;
+        }
         int token = flowControl->GetToken(FlowControlType::USER, blockCount);
         if (0 >= token)
         {
