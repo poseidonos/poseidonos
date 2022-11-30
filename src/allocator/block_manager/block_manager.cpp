@@ -106,7 +106,6 @@ BlockManager::AllocateGcDestStripe(uint32_t volumeId)
     StripeId arrayLsid = _AllocateSsdStripe();
     if (IsUnMapStripe(arrayLsid))
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE), "failed to allocate gc stripe!");
         return nullptr;
     }
 
@@ -139,6 +138,12 @@ BlockManager::PermitUserBlkAlloc(void)
     v.gauge = 0;
     tp->PublishData(TEL30011_ALCT_PROHIBIT_USERBLK_ALLOCATION_ONOFF, v, MT_GAUGE);
     allocStatus->PermitUserBlockAllocation();
+}
+
+bool
+BlockManager::IsProhibitedUserBlkAlloc(void)
+{
+    return allocStatus->IsProhibitedUserBlockAllocation();
 }
 
 bool

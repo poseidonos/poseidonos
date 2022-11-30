@@ -17,6 +17,7 @@ public:
     MOCK_METHOD((std::pair<VirtualBlks, StripeId>), AllocateWriteBufferBlks, (uint32_t volumeId, uint32_t numBlks), (override));
     MOCK_METHOD(Stripe*, AllocateGcDestStripe, (uint32_t volumeId), (override));
     MOCK_METHOD(void, ProhibitUserBlkAlloc, (), (override));
+    MOCK_METHOD(bool, IsProhibitedUserBlkAlloc, (), (override));
     MOCK_METHOD(void, PermitUserBlkAlloc, (), (override));
     MOCK_METHOD(bool, BlockAllocating, (uint32_t volumeId), (override));
     MOCK_METHOD(void, UnblockAllocating, (uint32_t volumeId), (override));
