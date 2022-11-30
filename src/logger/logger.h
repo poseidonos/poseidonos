@@ -106,7 +106,7 @@ public:
     Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int eventId, spdlog::string_view_t fmt, const Args&... args)
     {
-#ifndef POS_UT_SUPPRESS_LOGMSG
+#ifndef Pgit staOS_UT_SUPPRESS_LOGMSG
         if (ShouldFilter(lvl, eventId) == false)
         {
             loggerMtx.lock();
@@ -250,7 +250,7 @@ private:
                     fmt::format(
                         preferences.IsStrLoggingEnabled() ?
                             "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\",\"repetition\":{}"
-                            : "\tN/A - {} (cause: N/A, solution: N/A, variables: N/A, repetition: {})",
+                            : "\tnone - {} (cause: none, solution: none, variables: none, repetition: {})",
                         msg, repeatCount));
             }
             else

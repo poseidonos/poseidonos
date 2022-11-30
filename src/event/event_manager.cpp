@@ -85,10 +85,10 @@ EventManager::_LoadPosEvent()
         {
             YAML::Node event = events[i];
             id = event["Id"].IsNull() ? -1 : event["Id"].as<int>();
-            name = event["Name"].IsNull() ? "NONE" : event["Name"].as<std::string>();
-            message = event["Message"].IsNull() ? "NONE" : event["Message"].as<std::string>();
-            cause = event["Cause"].IsNull() ? "NONE" : event["Cause"].as<std::string>();
-            solution = event["Solution"].IsNull() ? "NONE" : event["Solution"].as<std::string>();
+            name = event["Name"].IsNull() ? "none" : event["Name"].as<std::string>();
+            message = event["Message"].IsNull() ? "none" : event["Message"].as<std::string>();
+            cause = event["Cause"].IsNull() ? "none" : event["Cause"].as<std::string>();
+            solution = event["Solution"].IsNull() ? "none" : event["Solution"].as<std::string>();
 
             result.insert({id, EventInfoEntry{name, message, cause, solution}});
         }
