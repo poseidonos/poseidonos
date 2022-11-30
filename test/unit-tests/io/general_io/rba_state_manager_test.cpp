@@ -114,24 +114,32 @@ TEST_F(RBAStateManagerFixture, AcquireAndReleaseOwnershipRbaListTest)
 
     //When: acquire ownership with empty rba range
     VolumeIo::RbaList emptySectorRbas;
+    VolumeIo::RbaList::iterator emptySectorRbasIter = emptySectorRbas.begin();
+    uint32_t acqCount = 0;
     //Then: returns success
-    EXPECT_TRUE(rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, emptySectorRbas));
+    auto iter1 = rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, emptySectorRbas, emptySectorRbasIter, acqCount);
+    EXPECT_TRUE(iter1 == emptySectorRbas.end());
+    EXPECT_TRUE(acqCount == 0);
 
     //When: acquire ownership with invalid rba range
-    VolumeIo::RbaList invalidSectorRbas{{0, ChangeBlockToSector(RBA_AMOUNT)},
-        {ChangeBlockToSector(RBA_AMOUNT), ChangeBlockToByte(RBA_AMOUNT)}};
+    VolumeIo::RbaList invalidSectorRbas{{ChangeBlockToSector(RBA_AMOUNT), ChangeBlockToSector(RBA_AMOUNT)},
+        {ChangeBlockToSector(RBA_AMOUNT + 8), ChangeBlockToByte(RBA_AMOUNT)}};
+    VolumeIo::RbaList::iterator invalidSectorRbasIter = invalidSectorRbas.begin();
+    acqCount = 0;
     //Then: returns failure
-    EXPECT_FALSE(rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, invalidSectorRbas));
+    auto iter2 = rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, invalidSectorRbas, invalidSectorRbasIter, acqCount);
+    EXPECT_TRUE(iter2 == invalidSectorRbas.begin());
+    EXPECT_TRUE(acqCount == 0);
 
     //When: acquire ownership with valid rba range
     VolumeIo::RbaList validSectorRbas{{0, ChangeBlockToSector(RBA_AMOUNT / 2)},
         {ChangeBlockToSector(RBA_AMOUNT / 2), ChangeBlockToByte(RBA_AMOUNT / 2)}};
+    acqCount = 0;
+    VolumeIo::RbaList::iterator validSectorRbasIter = validSectorRbas.begin();
+    auto iter3 = rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, validSectorRbas, validSectorRbasIter, acqCount);
     //Then: owership is aquired
-    EXPECT_TRUE(rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, validSectorRbas));
-
-    //When: try to acquire ownership again
-    //Then: returns failure
-    EXPECT_FALSE(rbaStateManager->AcquireOwnershipRbaList(VOLUME_ID, validSectorRbas));
+    EXPECT_TRUE(iter3 == validSectorRbas.end());
+    EXPECT_TRUE(acqCount == 2);
 }
 
 TEST_F(RBAStateManagerFixture, BulkAcquireOwnershipTest)

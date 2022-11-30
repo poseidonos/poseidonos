@@ -123,7 +123,7 @@ public:
                 std::set<SegmentId> sets = {UNMAP_SEGMENT};
                 return sets;
             });
-
+        EXPECT_CALL(*segCtx, GetVictimSegmentCount).WillRepeatedly(Return(1));
         EXPECT_CALL(*iContextManager, GetSegmentCtx).WillRepeatedly(Return(segCtx));
         EXPECT_CALL(*iContextManager, GetGcCtx).WillRepeatedly(Return(gcCtx));
         EXPECT_CALL(*meta, GetGcStripeManager).WillRepeatedly(Return(gcStripeManager));

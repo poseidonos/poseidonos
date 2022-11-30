@@ -44,6 +44,7 @@ class MockBufferPool : public BufferPool
 public:
     using BufferPool::BufferPool;
     MOCK_METHOD(void*, TryGetBuffer, (), (override));
+    MOCK_METHOD(bool, TryGetBuffers, (uint32_t count, std::vector<void*>* retBuffers), (override));
     MOCK_METHOD(void, ReturnBuffer, (void*), (override));
 };
 

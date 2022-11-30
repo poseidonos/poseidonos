@@ -81,7 +81,7 @@ public:
 
         metaUpdater = new NiceMock<MockIMetaUpdater>;
 
-        completionCallback = std::make_shared<MockGcMapUpdateCompletion>(stripeSmartPtr, arrayName, stripeMap, nullptr, nullptr, array, nullptr, nullptr);
+        completionCallback = std::make_shared<MockGcMapUpdateCompletion>(stripeSmartPtr, arrayName, stripeMap, nullptr, nullptr, array, nullptr, nullptr, std::list<RbaAndSize>{});
     }
 
     virtual void

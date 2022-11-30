@@ -1934,6 +1934,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2573
+    Name: FORMAT_PARTITION_TRIM_FAILED
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
     Id: 2574
     Name: IO_RECOVER_DEBUG_MSG
     Severity:
@@ -4161,101 +4168,129 @@ Root:
     Cause:
     Solution:
   -
-    Id: 3410
+    Id: 3404
+    Name: GC_THRESHOLD_IS_SET
+    Severity:
+    Message: GC threshold is set
+    Cause:
+    Solution:
+  -
+    Id: 3405
+    Name: GC_THRESHOLD_IS_NOT_SET
+    Severity:
+    Message: The gc threshold is not set and operates as the default value
+    Cause:
+    Solution:
+  -
+    Id: 3406
+    Name: GC_IS_BUSY_IN_VICTIM_SELECTION
+    Severity:
+    Message: GC is busy, so victim selection has been postponed.
+    Cause:
+    Solution:
+  -
+    Id: 3407
     Name: GC_VICTIM_SELECTED
     Severity:
     Message: Victim segment is selected
     Cause:
     Solution:
   -
-    Id: 3411
+    Id: 3408
     Name: GC_REVERSE_MAP_LOADED
     Severity:
     Message: Reversemap is loaded
     Cause:
     Solution:
   -
-    Id: 3412
+    Id: 3409
     Name: GC_VALID_BLOCKS_LOADING
     Severity:
     Message: Loading valid blocks
     Cause:
     Solution:
   -
-    Id: 3413
+    Id: 3410
     Name: GC_VALID_BLOCKS_LOADED
     Severity:
     Message: Valid blocks are loaded from a victim segment.
     Cause:
     Solution:
   -
-    Id: 3414
+    Id: 3411
     Name: GC_UNMAPPED_VSA
     Severity:
     Message: Unmapped VSA was found
     Cause:
     Solution:
   -
-    Id: 3415
+    Id: 3412
     Name: GC_UNMAPPED_LSA
     Severity:
     Message: Unmapped LSA was found
     Cause:
     Solution:
   -
-    Id: 3416
+    Id: 3413
     Name: GC_COPY_SUBMISSION
     Severity:
     Message: Copy event for victim was submitted
     Cause:
     Solution:
   -
-    Id: 3417
+    Id: 3414
     Name: GC_COPY_COMPLETION
     Severity:
     Message: Copy event for victim is completed
     Cause:
     Solution:
   -
-    Id: 3418
+    Id: 3415
     Name: GC_GET_READ_BUFFER_FAILED
     Severity:
     Message:
     Cause:
     Solution:
   -
-    Id: 3419
+    Id: 3416
     Name: GC_GET_WRITE_BUFFER_FAILED
     Severity:
     Message:
     Cause:
     Solution:
   -
-    Id: 3420
+    Id: 3417
     Name: GC_STRIPE_FLUSH_SUBMISSION
     Severity:
     Message: GC flush event submitted
     Cause:
     Solution:
   -
-    Id: 3421
+    Id: 3418
     Name: GC_STRIPE_FLUSH_COMPLETION
     Severity:
     Message: GC flush event completed
     Cause:
     Solution:
   -
-    Id: 3422
+    Id: 3419
     Name: GC_RBA_OWNERSHIP_ACQUIRED
     Severity:
     Message: RBA ownership acquired
     Cause:
     Solution:
   -
-    Id: 3423
+    Id: 3420
     Name: GC_RBA_OWNERSHIP_ACQUISITION_FAILED
     Severity:
     Message: Failed to acquire RBA ownership
+    Cause:
+    Solution:
+  -
+    Id: 3421
+    Name: GC_MAP_UPDATE_INIT
+    Severity:
+    Message:
     Cause:
     Solution:
   -
@@ -4661,7 +4696,20 @@ Root:
     Message: Command execution error.
     Cause: Could not process get log page(02h-smart)
     Solution: Please device scan again
-
+  -
+    Id: 3703
+    Name: SMART_COLLECTOR_EXT_CMD_DBG
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3704
+    Name: SMART_COLLECTOR_EXT_CMD_EXEC_SKIP
+    Severity:
+    Message:
+    Cause:
+    Solution:
 
   # Meta File System: 4000 - 4499
   -

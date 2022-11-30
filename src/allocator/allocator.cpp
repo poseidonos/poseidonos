@@ -43,6 +43,7 @@
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
+#include "src/master_context/config_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
@@ -70,6 +71,7 @@ Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     _CreateSubmodules();
+    _SetGCThreshold();
     POS_TRACE_INFO(EID(ALLOCATOR_INFO), "Allocator in Array:{} was Created", arrayName);
 }
 
@@ -276,12 +278,14 @@ Allocator::PrepareRebuild(void)
 void
 Allocator::SetNormalGcThreshold(uint32_t inputThreshold)
 {
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "normal threshold:{}", inputThreshold);
     contextManager->GetGcCtx()->SetNormalGcThreshold(inputThreshold);
 }
 
 void
 Allocator::SetUrgentThreshold(uint32_t inputThreshold)
 {
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "urgent threshold:{}", inputThreshold);
     contextManager->GetGcCtx()->SetUrgentThreshold(inputThreshold);
 }
 
@@ -498,6 +502,46 @@ Allocator::_CreateSubmodules(void)
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
     blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
+}
+
+void
+Allocator::_SetGCThreshold(void)
+{
+    uint32_t normal_gc_ratio = 0;
+    uint32_t urgent_gc_ratio = 0;
+    uint32_t normal_gc_lb = 0;
+    uint32_t urgent_gc_lb = 0;
+
+    int ret = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
+        &normal_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
+    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
+        &normal_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
+    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
+        &urgent_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
+    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
+        &urgent_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
+
+    if (ret == 0)
+    {
+        const PartitionLogicalSize* dataPartitionSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+        if (dataPartitionSize != nullptr)
+        {
+            uint32_t normalGcThreshold = (uint32_t)(dataPartitionSize->totalSegments * normal_gc_ratio / 100);
+            if (normalGcThreshold < normal_gc_lb)
+            {
+                normalGcThreshold = normal_gc_lb;
+            }
+            uint32_t urgentGcThreshold = (uint32_t)(normalGcThreshold * urgent_gc_ratio / 100);
+            if (urgentGcThreshold < urgent_gc_lb)
+            {
+                urgentGcThreshold = urgent_gc_lb;
+            }
+            SetNormalGcThreshold(normalGcThreshold);
+            SetUrgentThreshold(urgentGcThreshold);
+            return;
+        }
+    }
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_NOT_SET), "The gc threshold is not set and operates as the default value.");
 }
 
 void

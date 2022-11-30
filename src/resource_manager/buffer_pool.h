@@ -34,6 +34,7 @@
 #define BUFFER_POOL_H_
 
 #include <list>
+#include <vector>
 #include <mutex>
 #include <string>
 
@@ -54,7 +55,9 @@ public:
             HugepageAllocatorSingleton::Instance());
     virtual ~BufferPool(void);
     virtual void* TryGetBuffer(void);
+    virtual bool TryGetBuffers(uint32_t count, std::vector<void*>* retBuffers);
     virtual void ReturnBuffer(void*);
+    virtual void ReturnBuffers(std::vector<void*>* buffers);
     virtual bool IsAllocated(void) { return isAllocated; }
     std::string GetOwner(void) { return BUFFER_INFO.owner; }
 

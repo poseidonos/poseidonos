@@ -35,6 +35,7 @@
 #include "src/dpdk_wrapper/hugepage_allocator.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
+#include <cassert>
 
 using namespace pos;
 using namespace std;
@@ -96,6 +97,39 @@ BufferPool::TryGetBuffer(void)
     return buffer;
 }
 
+bool
+BufferPool::TryGetBuffers(uint32_t count, std::vector<void*>* retBuffers)
+{
+    if (isAllocated == false)
+    {
+        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+            "Failed to get buffer before init, owner:{}", BUFFER_INFO.owner);
+        return false;
+    }
+    unique_lock<mutex> lock(consumerLock);
+    if (count > consumerPool->size())
+    {
+        if (producerPool->size() >= count)
+        {
+            producerLock.lock();
+            _Swap();
+            producerLock.unlock();
+        }
+        else
+        {
+            return false;
+        }
+    }
+    assert(count <= consumerPool->size());
+    for (uint32_t i = 0; i < count; i++)
+    {
+        void* buffer = consumerPool->front();
+        consumerPool->pop_front();
+        retBuffers->push_back(buffer);
+    }
+    return true;
+}
+
 void
 BufferPool::ReturnBuffer(void* buffer)
 {
@@ -108,6 +142,25 @@ BufferPool::ReturnBuffer(void* buffer)
 
     unique_lock<mutex> lock(producerLock);
     producerPool->push_back(buffer);
+}
+
+void
+BufferPool::ReturnBuffers(std::vector<void*>* buffers)
+{
+    if (buffers->size() > 0)
+    {
+        unique_lock<mutex> lock(producerLock);
+        for (void* buffer : *buffers)
+        {
+            if (buffer == nullptr)
+            {
+                POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+                    "Failed to return buffer. Buffer is nullptr");
+                continue;
+            }
+            producerPool->push_back(buffer);
+        }
+    }
 }
 
 bool
