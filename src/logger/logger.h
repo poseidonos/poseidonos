@@ -106,7 +106,7 @@ public:
     Poslog(spdlog::source_loc loc, spdlog::level::level_enum lvl,
         int eventId, spdlog::string_view_t fmt, const Args&... args)
     {
-#ifndef Pgit staOS_UT_SUPPRESS_LOGMSG
+#ifndef POS_UT_SUPPRESS_LOGMSG
         if (ShouldFilter(lvl, eventId) == false)
         {
             loggerMtx.lock();
@@ -249,8 +249,8 @@ private:
                 logger->iboflog_sink(loc, lvl, eventId,
                     fmt::format(
                         preferences.IsStrLoggingEnabled() ?
-                            "\"event_name:\":\"\",\"message\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"variables\":\"\",\"repetition\":{}"
-                            : "\tnone - {} (cause: none, solution: none, variables: none, repetition: {})",
+                            "\"name:\":\"\",\"description\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"message\":\"\",\"repetition\":{}"
+                            : "\tnone - {} MESSAGE: none CAUSE: none REPETITION: {}",
                         msg, repeatCount));
             }
             else
@@ -258,11 +258,10 @@ private:
                 logger->iboflog_sink(loc, lvl, eventId,
                     fmt::format(
                         preferences.IsStrLoggingEnabled() ?
-                            "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\",\"repetition\":{}"
-                            : "\t{} - {} (cause: {}, solution: {}, variables: {}, repetition: {})",
-                        it->second.GetEventName(), it->second.GetMessage(),
-                        it->second.GetCause(), it->second.GetSolution(),
-                        msg, repeatCount));
+                            "\"name:\":\"{}\",\"description\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"message\":\"{}\",\"repetition\":{}"
+                            : "\t{} - {} MESSAGE: {} CAUSE: {} REPETITION: {}",
+                        it->second.GetEventName(), it->second.GetDescription(), msg,
+                        it->second.GetCause(), repeatCount));
             }
         }
         catch (const std::exception& e)
