@@ -53,6 +53,7 @@ class MockReplicatorServer final : public replicator_rpc::ReplicatorIoService::S
 {
 public:
     MockReplicatorServer(void);
+    MockReplicatorServer(std::string _address);
     ~MockReplicatorServer(void);
 
     void RunServer(std::string address);
@@ -84,5 +85,6 @@ public:
 
 private:
     std::unique_ptr<::grpc::Server> server;
+    std::string address;
 };
 } // namespace pos

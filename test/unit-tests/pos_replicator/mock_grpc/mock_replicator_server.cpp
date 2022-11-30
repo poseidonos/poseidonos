@@ -46,16 +46,24 @@
 namespace pos
 {
 MockReplicatorServer::MockReplicatorServer(void)
+: server(nullptr),
+  address("0.0.0.0:0")
 {
-    // new grpc server setting
-    string address(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
+}    
 
-    // new std::thread(&MockReplicatorServer::RunServer, this, address);
+MockReplicatorServer::MockReplicatorServer(std::string _address)
+: MockReplicatorServer()
+{
+    address = _address;
+    new std::thread(&MockReplicatorServer::RunServer, this, address);
 }
 
 MockReplicatorServer::~MockReplicatorServer(void)
 {
-    server->Shutdown();
+    if (server != nullptr)
+    {
+        server->Shutdown();
+    }
 }
 
 void
@@ -73,6 +81,12 @@ MockReplicatorServer::RunServer(std::string address)
 MockReplicatorServer::CompleteRead(
     ::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response)
 {
+    int numChunks = request->num_blocks();
+    for (int index = 0; index < numChunks; index++)
+    {
+        std::cout << request->data(index).content().c_str() << std::endl;
+    }
+
     return ::grpc::Status::OK;
 }
 
