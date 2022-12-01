@@ -50,4 +50,40 @@ GrpcReplicationController::StartVolumeSync(
 
     return ::grpc::Status::OK;
 }
+
+::grpc::Status
+GrpcReplicationController::FinishVolumeSync(
+    ::grpc::ServerContext* context,
+    const pos_rpc::FinishVolumeSyncRequest* request,
+    pos_rpc::FinishVolumeSyncResponse* response)
+{
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get FinishVolumeSync from grpc client");
+    response->set_result(pos_rpc::PosResult::SUCCESS);
+
+    return ::grpc::Status::OK;
+}
+
+::grpc::Status
+GrpcReplicationController::SuspendWrite(
+    ::grpc::ServerContext* context,
+    const pos_rpc::SuspendWriteRequest* request,
+    pos_rpc::SuspendWriteResponse* response)
+{
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get SuspendWrite from grpc client");
+    response->set_result(pos_rpc::PosResult::SUCCESS);
+
+    return ::grpc::Status::OK;
+}
+
+::grpc::Status
+GrpcReplicationController::ResumeWrite(
+    ::grpc::ServerContext* context,
+    const pos_rpc::ResumeWriteRequest* request,
+    pos_rpc::ResumeWriteResponse* response)
+{
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get ResumeWrite from grpc client");
+    response->set_result(pos_rpc::PosResult::SUCCESS);
+
+    return ::grpc::Status::OK;
+}
 } // namespace pos

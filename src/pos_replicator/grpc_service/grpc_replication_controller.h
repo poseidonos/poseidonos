@@ -52,5 +52,21 @@ public:
         ::grpc::ServerContext* context,
         const pos_rpc::StartVolumeSyncRequest* request,
         pos_rpc::StartVolumeSyncResponse* response) override;
+
+    virtual ::grpc::Status FinishVolumeSync(
+        ::grpc::ServerContext* context,
+        const pos_rpc::FinishVolumeSyncRequest* request,
+        pos_rpc::FinishVolumeSyncResponse* response) override;
+    
+    virtual ::grpc::Status SuspendWrite(
+        ::grpc::ServerContext* context,
+        const pos_rpc::SuspendWriteRequest* request,
+        pos_rpc::SuspendWriteResponse* response) override;
+
+    virtual ::grpc::Status ResumeWrite(
+        ::grpc::ServerContext* context,
+        const pos_rpc::ResumeWriteRequest* request,
+        pos_rpc::ResumeWriteResponse* response) override;
+    
 };
 } // namespace pos
