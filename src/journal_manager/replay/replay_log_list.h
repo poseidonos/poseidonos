@@ -64,7 +64,6 @@ public:
     virtual void EraseReplayLogGroup(uint32_t seqNum);
     virtual ReplayLogGroup PopReplayLogGroup(void);
     std::vector<ReplayLog>& GetDeletingLogs(void);
-    void Print(void);
 
 private:
     uint64_t _GetTime(void);

@@ -133,8 +133,6 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
         _GetNextSearchOffset(searchOffset, foundOffset);
     }
 
-    _PrintFoundLogTypes();
-
     return 0;
 }
 
@@ -213,7 +211,7 @@ LogBufferParser::_GetLatestSequenceNumber(void)
 }
 
 void
-LogBufferParser::_PrintFoundLogTypes(void)
+LogBufferParser::PrintFoundLogTypes(void)
 {
     for (auto it = logsFound.cbegin(); it != logsFound.cend(); it++)
     {
@@ -221,7 +219,7 @@ LogBufferParser::_PrintFoundLogTypes(void)
         int numStripeMapUpdatedLogs = it->second[(int)LogType::STRIPE_MAP_UPDATED];
         int numGcStripeFlushedLogs = it->second[(int)LogType::GC_STRIPE_FLUSHED];
         int numVolumeDeletedLogs = it->second[(int)LogType::VOLUME_DELETED];
-        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
+        POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
             "Logs found: SeqNum: {}, total: {}, block_map: {}, stripe_map: {}, gc_stripes: {}, volumes_deleted: {}",
             it->first, numBlockMapUpdatedLogs + numStripeMapUpdatedLogs + numGcStripeFlushedLogs + numVolumeDeletedLogs, numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
     }

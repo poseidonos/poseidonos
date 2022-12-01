@@ -280,12 +280,6 @@ AllocatorCtx::GetNumTotalWbStripe(void)
     return allocWbLsidBitmap->GetNumBits();
 }
 
-uint64_t
-AllocatorCtx::GetNumTotalEntry(void)
-{
-    return allocWbLsidBitmap->GetNumEntry();
-}
-
 std::vector<VirtualBlkAddr>
 AllocatorCtx::GetAllActiveStripeTail(void)
 {
