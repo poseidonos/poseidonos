@@ -45,7 +45,8 @@ PosReplicatorManager::PosReplicatorManager(void)
 
 PosReplicatorManager::PosReplicatorManager(AIO* aio)
 : aio(aio),
-  volumeSubscriberCnt(0)
+  volumeSubscriberCnt(0),
+  status(VOLUMECOPY_None)
 {
     for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
     {
