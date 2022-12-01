@@ -65,11 +65,11 @@ BuildPattern(bool isStrLoggingEnabled)
 
     // Plain-text log entry format
     // [datetime][process_id][thread_id][pos_id][event_id]][level]
-    // message, cause, source: file:line function_name(), pos_version: version
+    // message, SOURCE: file:line function_name(), VERSION: version
     const std::string plainTextpattern =
         std::string("[%Y-%m-%d %H:%M:%S.%F][%P][%t]") +
         "[" + std::to_string(instanceId) + "]" +
-         "[%q][%=7l] %v, source: %@ %!(), pos_version: " + version;
+         "[%q][%=7l] %v SOURCE: %@ %!() VERSION: " + version;
 
     pattern = isStrLoggingEnabled ? strLogPattern : plainTextpattern;
 
