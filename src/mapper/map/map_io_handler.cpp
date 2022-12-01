@@ -427,7 +427,7 @@ MapIoHandler::CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequential
     while (sequentialPages->IsRemaining())
     {
         MpageSet mpageSet = sequentialPages->PopNextMpageSet();
-        EventSmartPtr event(new MapFlushEvent(this, mpageSet));
+        EventSmartPtr event(new MapFlushEvent(this, mpageSet)); 
         eventScheduler->EnqueueEvent(event);
     }
 }
@@ -435,10 +435,10 @@ MapIoHandler::CreateFlushEvents(std::unique_ptr<SequentialPageFinder> sequential
 void
 MapIoHandler::_Flush(std::unique_ptr<SequentialPageFinder> sequentialPages)
 {
-    if (sequentialPages->IsRemaining())
+    while (sequentialPages->IsRemaining())
     {
-        EventSmartPtr event(new CreateMapFlushEvent(this, std::move(sequentialPages)));
-        eventScheduler->EnqueueEvent(event);
+        MpageSet mpageSet = sequentialPages->PopNextMpageSet();
+        _FlushMpages(mpageSet.startMpage, mpageSet.numMpages);
     }
 }
 
