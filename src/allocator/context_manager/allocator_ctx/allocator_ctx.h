@@ -76,6 +76,7 @@ public:
     virtual void SetAllocatedWbStripeCount(int count);
     virtual uint64_t GetAllocatedWbStripeCount(void);
     virtual uint64_t GetNumTotalWbStripe(void);
+    virtual uint64_t GetNumTotalEntry(void);
 
     virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
     virtual VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);

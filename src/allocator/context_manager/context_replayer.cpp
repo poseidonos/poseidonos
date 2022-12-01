@@ -134,6 +134,7 @@ ContextReplayer::GetAllActiveStripeTail(void)
 void
 ContextReplayer::ResetSegmentsStates(void)
 {
+    POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS), "Before ResetSegmentsStates, allocWbBitmapNumBits: {}, allocWbBitmapNumBits: {}", allocatorCtx->GetNumTotalWbStripe(), allocatorCtx->GetNumTotalEntry());
     segmentCtx->ResetSegmentsStates();
 }
 

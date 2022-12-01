@@ -282,7 +282,7 @@ Callback::_RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount
     {
         POS_EVENT_ID eventId = EID(CALLBACK_INVALID_COUNT);
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-            "CompletionCount exceeds WaitingCount");
+            "CompletionCount exceeds WaitingCount, event_type: {}, buffer_addr: {},  increasedCompletionCount: {}, localWaitingCount: {}", type, (void*)this, increasedCompletionCount, localWaitingCount);
     }
 
     return isOkToBeCalled;

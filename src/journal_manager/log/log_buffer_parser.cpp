@@ -222,8 +222,8 @@ LogBufferParser::_PrintFoundLogTypes(void)
         int numGcStripeFlushedLogs = it->second[(int)LogType::GC_STRIPE_FLUSHED];
         int numVolumeDeletedLogs = it->second[(int)LogType::VOLUME_DELETED];
         POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "Logs for SeqNum {} found: {} block map, {} stripe map, {} gc stripes, {} volumes deleted",
-            it->first, numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
+            "Logs found: SeqNum: {}, total: {}, block_map: {}, stripe_map: {}, gc_stripes: {}, volumes_deleted: {}",
+            it->first, numBlockMapUpdatedLogs + numStripeMapUpdatedLogs + numGcStripeFlushedLogs + numVolumeDeletedLogs, numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
     }
 }
 

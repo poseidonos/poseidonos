@@ -320,7 +320,7 @@ SegmentCtx::_RebuildSegmentList(void)
         SegmentState state = segmentInfos[segId].GetState();
         segmentList[state]->AddToList(segId);
         POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_ADDED_TO_LIST),
-            "segment_id:{}, state:{}", segId, state);
+            "array_id: {}, segment_id:{}, state:{}, valid_block_count: {}, occupied_stripe_count: {}", arrayId, segId, state, segmentInfos[segId].GetValidBlockCount(), segmentInfos[segId].GetOccupiedStripeCount());
     }
 }
 
@@ -334,6 +334,7 @@ void
 SegmentCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
 {
     ctxStoredVersion = ((SegmentCtxHeader*)ctx->buffer)->ctxVersion;
+    POS_TRACE_DEBUG(9999, "FinalizeIo, array_id: {}, context_version: {}", arrayId, ctxStoredVersion);
 }
 
 char*

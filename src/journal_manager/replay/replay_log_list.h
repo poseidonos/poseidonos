@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <set>
 #include <map>
 #include <vector>
 
@@ -44,6 +45,14 @@ namespace pos
 {
 class ReplayLogList : public LogList
 {
+struct BlockLogInfo {
+    uint32_t seqNum;
+    uint32_t type;
+    StripeId vsid;
+    BlkAddr startRba;
+    uint32_t numBlks;
+};
+
 public:
     ReplayLogList(void);
     virtual ~ReplayLogList(void);
@@ -55,6 +64,7 @@ public:
     virtual void EraseReplayLogGroup(uint32_t seqNum);
     virtual ReplayLogGroup PopReplayLogGroup(void);
     std::vector<ReplayLog>& GetDeletingLogs(void);
+    void Print(void);
 
 private:
     uint64_t _GetTime(void);
@@ -63,5 +73,7 @@ private:
     std::vector<ReplayLog> deletingLogs;
 
     uint64_t time;
+
+    std::map<uint64_t, std::vector<BlockLogInfo>> blockLogsFoundByVSID;
 };
 } // namespace pos
