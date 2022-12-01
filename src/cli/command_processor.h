@@ -139,6 +139,9 @@ using grpc_cli::SetVolumePropertyRequest;
 using grpc_cli::SetVolumePropertyResponse;
 using grpc_cli::ListVolumeRequest;
 using grpc_cli::ListVolumeResponse;
+using grpc_cli::QosCreateVolumePolicyRequest;
+using grpc_cli::QosCreateVolumePolicyRequest_Param;
+using grpc_cli::QosCreateVolumePolicyResponse;
 
 class CommandProcessor
 {
@@ -207,6 +210,9 @@ public:
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
     grpc::Status ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply);
 
+    // QoS Commands
+    grpc::Status ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolicyRequest* request, QosCreateVolumePolicyResponse* reply);
+
 private:
     bool _isPosTerminating {false};
     bool _IsPosTerminating(void) { return _isPosTerminating; }
@@ -220,6 +226,10 @@ private:
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
     bool _IsValidIpAddress(const std::string &ipAddress);
+    int _HandleInputVolumes(
+        const QosCreateVolumePolicyRequest_Param param,
+        std::vector<std::string>& volumeNames,
+        std::vector<std::pair<std::string, uint32_t>>& validVolumes);
 
     typedef struct BiosInfo {
         std::string vendor;

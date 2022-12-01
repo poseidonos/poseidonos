@@ -1016,3 +1016,26 @@ func SendListVolume(req *pb.ListVolumeRequest) (*pb.ListVolumeResponse, error) {
 
 	return res, err
 }
+
+func SendQosCreateVolumePolicy(req *pb.QosCreateVolumePolicyRequest) (*pb.QosCreateVolumePolicyResponse, error) {
+    conn, err := dialToCliServer()
+    if err != nil {
+        log.Error(err)
+        errToReturn := errors.New(dialErrorMsg)
+        return nil, errToReturn
+    }
+    defer conn.Close()
+
+    c := pb.NewPosCliClient(conn)
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+    defer cancel()
+
+    res, err := c.QosCreateVolumePolicy(ctx, req)
+    if err != nil {
+        log.Error("error: ", err.Error())
+        return nil, err
+    }
+
+    return res, err
+}
+
