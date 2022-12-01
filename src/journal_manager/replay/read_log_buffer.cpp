@@ -123,7 +123,7 @@ ReadLogBuffer::Start(void)
             result = eventId;
         }
     }
-
+    logList.Print();
     return result;
 }
 

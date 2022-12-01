@@ -86,6 +86,7 @@ AllocatorCtx::Init(void)
     }
 
     allocWbLsidBitmap = new BitMapMutex(addrInfo->GetnumWbStripes());
+    POS_TRACE_DEBUG(EID(ALLOCATOR_INFO), "Init bitmap, allocWbBitmapNumBits: {}, allocWbBitmapNumBits: {}", allocWbLsidBitmap->GetNumBitsSet(), allocWbLsidBitmap->GetNumEntry());
     for (ASTailArrayIdx asTailArrayIdx = 0; asTailArrayIdx < ACTIVE_STRIPE_TAIL_ARRAYLEN; ++asTailArrayIdx)
     {
         activeStripeTail[asTailArrayIdx] = UNMAP_VSA;
@@ -277,6 +278,12 @@ uint64_t
 AllocatorCtx::GetNumTotalWbStripe(void)
 {
     return allocWbLsidBitmap->GetNumBits();
+}
+
+uint64_t
+AllocatorCtx::GetNumTotalEntry(void)
+{
+    return allocWbLsidBitmap->GetNumEntry();
 }
 
 std::vector<VirtualBlkAddr>
