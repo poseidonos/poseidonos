@@ -52,6 +52,7 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/i_volume_info_manager.h"
 #include "src/volume/volume_base.h"
+#include "posreplicator_volumecopy_status.h"
 
 namespace pos
 {
@@ -114,6 +115,8 @@ private:
 
     GrpcPublisher* grpcPublisher;
     GrpcSubscriber* grpcSubscriber;
+
+    ReplicatorVolumeCopyStatus status;
 };
 // [To do] grpc contact point for 2node-HA
 using PosReplicatorManagerSingleton = Singleton<PosReplicatorManager>;
