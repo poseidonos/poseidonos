@@ -47,11 +47,11 @@ public:
     class EventInfoEntry
     {
     public:
-        EventInfoEntry(std::string eventName, std::string message,
+        EventInfoEntry(std::string eventName, std::string description,
             std::string cause, std::string solution)
         {
             this->eventName = eventName;
-            this->message = message;
+            this->description = description;
             this->cause = cause;
             this->solution = solution;
         }
@@ -59,9 +59,9 @@ public:
         {
             return eventName;
         }
-        std::string GetMessage()
+        std::string GetDescription()
         {
-            return message;
+            return description;
         }
         std::string GetCause()
         {
@@ -74,7 +74,7 @@ public:
 
     private:
         std::string eventName = "";
-        std::string message = "";
+        std::string description = "";
         // mj: Fill in cause and solution for erroneous events only.
         std::string cause = "";
         std::string solution = "";

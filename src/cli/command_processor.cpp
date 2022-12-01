@@ -2058,7 +2058,7 @@ CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status* status)
     if (it != event_info->end())
     {
         eventName = it->second.GetEventName();
-        message = it->second.GetMessage();
+        message = it->second.GetDescription();
         cause = it->second.GetCause();
         solution = it->second.GetSolution();
     }

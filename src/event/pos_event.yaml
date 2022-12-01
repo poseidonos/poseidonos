@@ -6,49 +6,49 @@ Root:
     Id: 0
     Name: SUCCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1
     Name: POS_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2
     Name: POS_TERMINATION_TRIGGERED
     Severity:
-    Message: PoseidonOS termination has been requested. Entering a termination process..
+    Description: PoseidonOS termination has been requested. Entering a termination process..
     Cause:
     Solution:
   -
     Id: 3
     Name: POS_STOP_FAILURE_BEING_TERMINATED
     Severity:
-    Message: Failed to stop PoseidonOS.
+    Description: Failed to stop PoseidonOS.
     Cause: PoseidonOS is already in termination process.
     Solution: Please wait a moment.
   -
     Id: 4
     Name: POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS
     Severity:
-    Message: Failed to terminate PoseidonOS.
+    Description: Failed to terminate PoseidonOS.
     Cause: An array is mounted.
     Solution: Please try the command after a while.
   -
     Id: 5
     Name: POS_TERMINATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6
     Name: POS_SYSTEMINFO_GET_VERSION
     Severity:
-    Message: PoseidonOS version has been loaded.
+    Description: PoseidonOS version has been loaded.
     Cause:
     Solution:
 
@@ -58,112 +58,112 @@ Root:
     Id: 1000
     Name: POS_TRACE_STARTED
     Severity: Trace
-    Message: The Poseidon OS started.
+    Description: The Poseidon OS started.
     Cause:
     Solution:
   -
     Id: 1001
     Name: POS_TRACE_INIT_SUCCESS
     Severity: Trace
-    Message: The Poseidon OS successfully initialized.
+    Description: The Poseidon OS successfully initialized.
     Cause:
     Solution:
   -
     Id: 1002
     Name: POS_TRACE_INIT_WITH_ERRORS
     Severity: Trace
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1003
     Name: POS_TRACE_INIT_FAIL
     Severity: Trace
-    Message: The Poseidon OS Failed to initialize.
+    Description: The Poseidon OS Failed to initialize.
     Cause:
     Solution:
   -
     Id: 1004
     Name: POS_TRACE_TERMINATING
     Severity: Trace
-    Message: The Poseidon OS is shutting down.
+    Description: The Poseidon OS is shutting down.
     Cause:
     Solution:
   -
     Id: 1005
     Name: POS_TRACE_TERMINATED
     Severity: Trace
-    Message: The Poseidon OS successfully terminated.
+    Description: The Poseidon OS successfully terminated.
     Cause:
     Solution:
   -
     Id: 1006
     Name: POS_TRACE_ARRAY_CREATED
     Severity: Trace
-    Message: The array successfully created.
+    Description: The array successfully created.
     Cause:
     Solution:
   -
     Id: 1007
     Name: POS_TRACE_ARRAY_LOADED
     Severity: Trace
-    Message: The array successfully loaded.
+    Description: The array successfully loaded.
     Cause:
     Solution:
   -
     Id: 1008
     Name: POS_TRACE_ARRAY_DELETED
     Severity: Trace
-    Message: The array successfully deleted.
+    Description: The array successfully deleted.
     Cause:
     Solution:
   -
     Id: 1009
     Name: POS_TRACE_ARRAY_MOUNTED
     Severity: Trace
-    Message: The array successfully mounted.
+    Description: The array successfully mounted.
     Cause:
     Solution:
   -
     Id: 1010
     Name: POS_TRACE_ARRAY_UNMOUNTED
     Severity: Trace
-    Message: The array successfully unmounted.
+    Description: The array successfully unmounted.
     Cause:
     Solution:
   -
     Id: 1011
     Name: POS_TRACE_ARRAY_SHUTDOWN
     Severity: Trace
-    Message: The array successfully shutdown.
+    Description: The array successfully shutdown.
     Cause:
     Solution:
   -
     Id: 1012
     Name: POS_TRACE_ARRAY_STATE_CHANGED
     Severity: Trace
-    Message: The array state changed.
+    Description: The array state changed.
     Cause:
     Solution:
   -
     Id: 1013
     Name: POS_TRACE_DEVICE_ATTACHED
     Severity: Trace
-    Message: A new device is hot-attached.
+    Description: A new device is hot-attached.
     Cause:
     Solution:
   -
     Id: 1014
     Name: POS_TRACE_DEVICE_DETACHED
     Severity: Trace
-    Message: A device is hot-detached.
+    Description: A device is hot-detached.
     Cause:
     Solution:
   -
     Id: 1015
     Name: POS_TRACE_MBR_LOADED
     Severity: Trace
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -172,105 +172,105 @@ Root:
     Id: 1101
     Name: POS_CONFIG_LOADED
     Severity:
-    Message: POS configuration is successfully loaded.
+    Description: POS configuration is successfully loaded.
     Cause:
     Solution:
   -
     Id: 1102
     Name: POS_INITIALIZING_SIG_HANDLER
     Severity:
-    Message: Trying to initialize signal handler.
+    Description: Trying to initialize signal handler.
     Cause:
     Solution:
   -
     Id: 1103
     Name: POS_INITIALIZING_VERSION
     Severity:
-    Message: Trying to initialize version info.
+    Description: Trying to initialize version info.
     Cause:
     Solution:
   -
     Id: 1104
     Name: POS_INITIALIZING_SPDK
     Severity:
-    Message: Trying to initialize SPDK.
+    Description: Trying to initialize SPDK.
     Cause:
     Solution:
   -
     Id: 1105
     Name: POS_INITIALIZING_CPU_AFFINITY
     Severity:
-    Message: Trying to initialize CPU affinity.
+    Description: Trying to initialize CPU affinity.
     Cause:
     Solution:
   -
     Id: 1106
     Name: POS_INITIALIZING_THREAD_MODEL
     Severity:
-    Message: Trying to initialize thread model.
+    Description: Trying to initialize thread model.
     Cause:
     Solution:
   -
     Id: 1107
     Name: POS_INITIALIZING_QOS_POLICY
     Severity:
-    Message: Trying to initialize QoS policy.
+    Description: Trying to initialize QoS policy.
     Cause:
     Solution:
   -
     Id: 1108
     Name: POS_INITIALIZING_DEBUG_MODULES
     Severity:
-    Message: Trying to initialize debug modules.
+    Description: Trying to initialize debug modules.
     Cause:
     Solution:
   -
     Id: 1109
     Name: POS_INITIALIZING_AIR
     Severity:
-    Message: Trying to initialize AIR.
+    Description: Trying to initialize AIR.
     Cause:
     Solution:
   -
     Id: 1110
     Name: POS_INITIALIZING_IO_MODULES
     Severity:
-    Message: Trying to initialize IO modules.
+    Description: Trying to initialize IO modules.
     Cause:
     Solution:
   -
     Id: 1111
     Name: POS_INITIALIZING_MEMORY_CHECKER
     Severity:
-    Message: Trying to initialize memory checker.
+    Description: Trying to initialize memory checker.
     Cause:
     Solution:
   -
     Id: 1112
     Name: POS_INITIALIZING_RESOURCE_CHECKER
     Severity:
-    Message: Trying to initialize resource checker.
+    Description: Trying to initialize resource checker.
     Cause:
     Solution:
   -
     Id: 1113
     Name: POS_INITIALIZING_EXPORTER
     Severity:
-    Message: Trying to initialize exporter
+    Description: Trying to initialize exporter
     Cause:
     Solution:
   -
     Id: 1114
     Name: POS_INITIALIZING_CLI_SERVER
     Severity:
-    Message: Trying to initialize CLI server
+    Description: Trying to initialize CLI server
     Cause:
     Solution:
   -
     Id: 1119
     Name: POS_INIT_EXCEPTIONS
     Severity:
-    Message: An exception occurred during POS initialization.
+    Description: An exception occurred during POS initialization.
     Cause:
     Solution:
   # CLI Server: 1200 - 1599
@@ -278,406 +278,406 @@ Root:
     Id: 1201
     Name: CLI_SERVER_INITIALIZED
     Severity:
-    Message: The CLI server has been initialized successfully.
+    Description: The CLI server has been initialized successfully.
     Cause:
     Solution:
   -
     Id: 1202
     Name: CLI_CLIENT_CREATED
     Severity:
-    Message: CLI server has created a thread for CLI.
+    Description: CLI server has created a thread for CLI.
     Cause:
     Solution:
   -
     Id: 1203
     Name: CLI_CLIENT_CREATION_FAILURE
     Severity:
-    Message: CLI server could not create a thread.
+    Description: CLI server could not create a thread.
     Cause:
     Solution:
   -
     Id: 1204
     Name: CLI_CLIENT_DETACHED
     Severity:
-    Message: CLI server has detached a thread for CLI.
+    Description: CLI server has detached a thread for CLI.
     Cause:
     Solution:
   -
     Id: 1205
     Name: CLI_CLIENT_DETACHEMENT_FAILURE
     Severity:
-    Message: CLI server could not detach a thread for CLI.
+    Description: CLI server could not detach a thread for CLI.
     Cause:
     Solution:
   -
     Id: 1206
     Name: CLI_CLIENT_ACCEPTED
     Severity:
-    Message: A new client has been accepted (connected).
+    Description: A new client has been accepted (connected).
     Cause:
     Solution:
   -
     Id: 1207
     Name: CLI_CLIENT_DISCONNECTED
     Severity:
-    Message: A client has been disconnected.
+    Description: A client has been disconnected.
     Cause:
     Solution:
   -
     Id: 1208
     Name: CLI_MSG_RECEIVED
     Severity:
-    Message: CLI server has recieved a message from a CLI client.
+    Description: CLI server has recieved a message from a CLI client.
     Cause:
     Solution:
   -
     Id: 1209
     Name: CLI_MSG_SENT
     Severity:
-    Message: CLI server has sent a message to a client.
+    Description: CLI server has sent a message to a client.
     Cause:
     Solution:
   -
     Id: 1210
     Name: CLI_MSG_SENDING_FAILURE
     Severity:
-    Message: CLI server has Failed to send a message to a client.
+    Description: CLI server has Failed to send a message to a client.
     Cause: 0
     Solution:
   -
     Id: 1211
     Name: CLI_TIMEOUT_OR_CANCELLED
     Severity:
-    Message: Detected a timeout or a cancellation from the CLI client.
+    Description: Detected a timeout or a cancellation from the CLI client.
     Cause: 0
     Solution:
   -
     Id: 1212
     Name: CLI_SERVER_FINISH
     Severity:
-    Message: CLI server has finished successfully.
+    Description: CLI server has finished successfully.
     Cause:
     Solution:
   -
     Id: 1213
     Name: CLI_SERVER_THREAD_JOINED
     Severity:
-    Message: A CLI server thread has joined. The main thread is blocked until the CLI processing finishes.
+    Description: A CLI server thread has joined. The main thread is blocked until the CLI processing finishes.
     Cause:
     Solution:
   -
     Id: 1214
     Name: CLI_REUSE_ADDR_ENABLED
     Severity:
-    Message: CLI server has enabled to reuse address.
+    Description: CLI server has enabled to reuse address.
     Cause:
     Solution:
   -
     Id: 1215
     Name: CLI_REUSE_ADDR_FAILURE
     Severity:
-    Message: CLI server has Failed to reuse address.
+    Description: CLI server has Failed to reuse address.
     Cause:
     Solution:
   -
     Id: 1216
     Name: CLI_SOCK_CREATE_FAILURE
     Severity:
-    Message: CLI server has Failed to create a socket.
+    Description: CLI server has Failed to create a socket.
     Cause:
     Solution:
   -
     Id: 1217
     Name: CLI_SOCK_BIND_FAILURE
     Severity:
-    Message: CLI server has Failed to bind a socket.
+    Description: CLI server has Failed to bind a socket.
     Cause:
     Solution:
   -
     Id: 1218
     Name: CLI_SOCK_LISTEN_FAILURE
     Severity:
-    Message: CLI server has Failed to listen to a socket.
+    Description: CLI server has Failed to listen to a socket.
     Cause:
     Solution:
   -
     Id: 1219
     Name: CLI_EPOLL_CREATE_FAILURE
     Severity:
-    Message: CLI server has Failed to create a epoll.
+    Description: CLI server has Failed to create a epoll.
     Cause:
     Solution:
   -
     Id: 1220
     Name: CLI_SOCK_ACCEPT_FAILURE
     Severity:
-    Message: CLI server has Failed to accept the client socket.
+    Description: CLI server has Failed to accept the client socket.
     Cause:
     Solution:
   -
     Id: 1221
     Name: CLI_ADD_CLIENT_FAILURE_MAX_CLIENT
     Severity:
-    Message: CLI server has Failed to add a client.
+    Description: CLI server has Failed to add a client.
     Cause: The number of clients exceeds the maximum.
     Solution:
   -
     Id: 1222
     Name: CLI_MSG_RECEIVE_FAILURE
     Severity:
-    Message: CLI server has Failed to receive a message from a client.
+    Description: CLI server has Failed to receive a message from a client.
     Cause:
     Solution:
   -
     Id: 1223
     Name: CLI_SERVER_TIMED_OUT
     Severity:
-    Message: CLI server has timed out.
+    Description: CLI server has timed out.
     Cause: Command processing takes too long.
     Solution:
   -
     Id: 1224
     Name: CLI_SERVER_BUSY
     Severity:
-    Message: CLI server could not receive the command.
+    Description: CLI server could not receive the command.
     Cause: POS is processing a previously receieved command.
     Solution: Please try after a while.
   -
     Id: 1225
     Name: CLI_LIST_ARRAY_NO_ARRAY_EXISTS
     Severity:
-    Message: There is no array created.
+    Description: There is no array created.
     Cause:
     Solution: Create an array and try again.
   -
     Id: 1226
     Name: CLI_LIST_ARRAY_FAILURE
     Severity:
-    Message: Failed to retrieve array list.
+    Description: Failed to retrieve array list.
     Cause: unable to read the array configuration.
     Solution: try device scanning first
   -
     Id: 1227
     Name: CLI_ADD_DEVICE_FAILURE_NO_DEVICE_SPECIFIED
     Severity:
-    Message: Failed to add a spare device.
+    Description: Failed to add a spare device.
     Cause: spare device is not specified
     Solution: please specify the spare device
   -
     Id: 1228
     Name: CLI_ADD_DEVICE_SUCCESS
     Severity:
-    Message: A spare device has been added to an array.
+    Description: A spare device has been added to an array.
     Cause:
     Solution:
   -
     Id: 1229
     Name: CLI_ADD_LISTENER_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1230
     Name: CLI_ADD_LISTENER_SUCCESS
     Severity:
-    Message: A lisenter has been added.
+    Description: A lisenter has been added.
     Cause:
     Solution:
   -
     Id: 1231
     Name: CLI_APPLY_FILTER_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1232
     Name: CLI_APPLY_FILTER_SUCCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1233
     Name: CLI_ARRAY_INFO_NO_ARRAY_NAME
     Severity:
-    Message: Failed to retrieve array info.
+    Description: Failed to retrieve array info.
     Cause: Array name is not specified.
     Solution: Specify the array name.
   -
     Id: 1234
     Name: CLI_ARRAY_INFO_ARRAY_NOT_EXIST
     Severity:
-    Message: Failed to retrieve array info.
+    Description: Failed to retrieve array info.
     Cause: array does not exist
     Solution:
   -
     Id: 1235
     Name: CLI_AUTOCREATE_ARRAY_SUCCESS
     Severity:
-    Message: An array has been created via autocreate.
+    Description: An array has been created via autocreate.
     Cause:
     Solution:
   -
     Id: 1236
     Name: CLI_COMMAND_FAILURE_ARRAY_BROKEN
     Severity:
-    Message: Failed to process the command.
+    Description: Failed to process the command.
     Cause: The array is not in normal state.
     Solution:
   -
     Id: 1237
     Name: CLI_SET_SYSTEM_PROPERTY_LEVEL_NOT_SUPPORTED
     Severity:
-    Message: Failed to set rebuild performance impact.
+    Description: Failed to set rebuild performance impact.
     Cause: The specified level is not supported.
     Solution: Check the supported levels using the --help option.
   -
     Id: 1238
     Name: CLI_SET_SYSTEM_PROPERTY_FAILURE
     Severity:
-    Message: Failed to update rebuild performance impact.
+    Description: Failed to update rebuild performance impact.
     Cause:
     Solution:
   -
     Id: 1239
     Name: CLI_DEVEL_RESET_MBR_FAILURE
     Severity:
-    Message: Failed to reset MBR.
+    Description: Failed to reset MBR.
     Cause:
     Solution:
   -
     Id: 1240
     Name: CLI_DEVEL_RESET_MBR_SUCCESS
     Severity:
-    Message: MBR has been reset.
+    Description: MBR has been reset.
     Cause:
     Solution:
   -
     Id: 1241
     Name: CLI_UPDATE_EVENT_WRR_FAILURE_WEIGHT_VALUE_RANGE_VIOLATION
     Severity:
-    Message: Failed to update event WRR.
+    Description: Failed to update event WRR.
     Cause: Weight value is out of the valid range.
     Solution: Please input a valid weight value.
   -
     Id: 1242
     Name: CLI_UPDATE_EVENT_WRR_FAILURE_NO_EVENT_NAME
     Severity:
-    Message: Failed to update event WRR.
+    Description: Failed to update event WRR.
     Cause: Event name is not specified.
     Solution: Please input event name to update.
   -
     Id: 1243
     Name: CLI_UPDATE_EVENT_WRR_FAILURE_UNKNOWN_EVENT
     Severity:
-    Message: Failed to update event WRR.
+    Description: Failed to update event WRR.
     Cause: The input event does not exist.
     Solution: Please check the event name.
   -
     Id: 1244
     Name: CLI_SET_LOG_LEVEL_FAILURE_LEVEL_NOT_SPECIFIED
     Severity:
-    Message: Failed to set log level.
+    Description: Failed to set log level.
     Cause: The log level is not specified.
     Solution: Please input the log level to set.
   -
     Id: 1245
     Name: CLI_SET_LOG_PREFERENCE_FAILURE_STR_LOG_NOT_SPECIFIED
     Severity:
-    Message: Failed to set preference.
+    Description: Failed to set preference.
     Cause: The structured logging is not specified.
     Solution: Please input the structured logging.
   -
     Id: 1246
     Name: CLI_CREATE_DEVICE_FAILURE
     Severity:
-    Message: Failed to create a device.
+    Description: Failed to create a device.
     Cause:
     Solution: Check out the PoseidonOS log.
   -
     Id: 1247
     Name: CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL
     Severity:
-    Message: Failed to create a device.
+    Description: Failed to create a device.
     Cause: The input NUMA number is equal to or greater than the total number of existing NUMAs.
     Solution: Please check the existing NUMAs.
   -
     Id: 1248
     Name: CLI_LIST_DEVICE_NO_DEVICE_FOUND
     Severity:
-    Message: No device found.
+    Description: No device found.
     Cause:
     Solution:
   -
     Id: 1249
     Name: CLI_GET_SMART_LOG_NO_DEVICE_NAME
     Severity:
-    Message: Device name is not specified.
+    Description: Device name is not specified.
     Cause:
     Solution: Please input the device name to get the SMART log.
   -
     Id: 1250
     Name: CLI_GET_SMART_LOG_DEVICE_NOT_FOUND
     Severity:
-    Message: Could not find the device.
+    Description: Could not find the device.
     Cause:
     Solution: Please check the device name.
   -
     Id: 1251
     Name: CLI_GET_SMART_LOG_FAILURE
     Severity:
-    Message: Failed to get the SMART log of a device.
+    Description: Failed to get the SMART log of a device.
     Cause:
     Solution:
   -
     Id: 1600
     Name: INVALID_PARAM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1601
     Name: SYSTEM_RECOVERY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1602
     Name: STATE_CONTEXT_UPDATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1603
     Name: STATE_CHANGED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1604
     Name: STATE_CONTROL_ADDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1605
     Name: STATE_CONTROL_REMOVED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1606
     Name: STATE_CONTROL_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
@@ -685,546 +685,546 @@ Root:
     Id: 1800
     Name: CREATE_VOL_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1801
     Name: DELETE_VOL_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1802
     Name: MOUNT_VOL_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1803
     Name: UNMOUNT_VOL_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1804
     Name: VOL_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1805
     Name: VOL_MGR_NOT_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1806
     Name: VOL_MGR_BUSY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1807
     Name: VOL_NOT_FOUND
     Severity:
-    Message: Failed to find a volume.
+    Description: Failed to find a volume.
     Cause: The volume of the requested name or ID could not be found
     Solution: Please check volume name or ID and try again
   -
     Id: 1808
     Name: CREATE_VOL_NAME_TOO_SHORT
     Severity:
-    Message: Failed to create volume.
+    Description: Failed to create volume.
     Cause: The volume name is too short.
     Solution: Enter the volume name between 2 and 255 letters.
   -
     Id: 1809
     Name: CREATE_VOL_NAME_TOO_LONG
     Severity:
-    Message: Failed to create volume.
+    Description: Failed to create volume.
     Cause: The volume name is too long.
     Solution: Enter the volume name between 2 and 255 letters.
   -
     Id: 1810
     Name: CREATE_VOL_SAME_VOL_NAME_EXISTS
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: Volume with the same name already exists.
     Solution: Please use another name.
   -
     Id: 1811
     Name: CREATE_VOL_NAME_INCLUDES_SPECIAL_CHAR
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: The volume name contains special characters.
     Solution: Remove the special character from the volume name and try again.
   -
     Id: 1812
     Name: CREATE_VOL_NAME_START_OR_END_WITH_SPACE
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: There is a space at the front or back of the volume name
     Solution: Remove the space from the front or back Array name and try again.
   -
     Id: 1813
     Name: CREATE_VOL_SIZE_NOT_ALIGNED
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: The volume size should be divided into 1MB units.
     Solution: Please check volume size and try again.
   -
     Id: 1814
     Name: CREATE_VOL_SIZE_EXCEEDED
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: The requested volume size is larger than the remaining space.
     Solution: Please check the volume size and remaining Array space and try again
   -
     Id: 1815
     Name: CREATE_VOL_EXCEED_MAX_NUM_OF_VOLS
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: The maximum number of possible volumes has been exceeded.
     Solution: Remove the existing volume to create a new volume.
   -
     Id: 1816
     Name: CREATE_VOL_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: The volume cannot be created because the array is not mounted.
     Solution: Please mount the Array and try again
   -
     Id: 1817
     Name: CREATE_VOL_MEM_ALLOC_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1818
     Name: CREATE_VOL_LOCK_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1819
     Name: CREATE_VOL_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to create a volume.
+    Description: Failed to create a volume.
     Cause: The requested array name does not exist.
     Solution: Please check the array name where the volume will be created and try again
   -
     Id: 1820
     Name: CREATE_VOL_INTERNAL_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1821
     Name: DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED
     Severity:
-    Message: Failed to delete a volume.
+    Description: Failed to delete a volume.
     Cause: Mounted volume cannot be deleted.
     Solution: First unmount the volume and then try again.
   -
     Id: 1822
     Name: DELETE_VOL_LOCK_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1823
     Name: DELETE_VOL_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to delete a volume.
+    Description: Failed to delete a volume.
     Cause: The volume cannot be deleted because the array is not mounted.
     Solution: Please mount the array and try again
   -
     Id: 1824
     Name: DELETE_VOL_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to delete a volume.
+    Description: Failed to delete a volume.
     Cause: The requested array name does not exist.
     Solution: Please check the array name where the volume exists and try again
   -
     Id: 1825
     Name: DELETE_VOL_INTERNAL_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1826
     Name: VOL_UNABLE_TO_LOAD_OPEN_FAILED
     Severity:
-    Message: Failed to load volumes.
+    Description: Failed to load volumes.
     Cause: Failed to open volume meta information.
     Solution: Please report the errors.
   -
     Id: 1827
     Name: VOL_UNABLE_TO_LOAD_READ_FAILED
     Severity:
-    Message: Failed to load volumes.
+    Description: Failed to load volumes.
     Cause: Failed to read volume meta information.
     Solution: Please report the errors.
   -
     Id: 1828
     Name: VOL_UNABLE_TO_LOAD_CONTENT_BROKEN
     Severity:
-    Message: Failed to load volumes.
+    Description: Failed to load volumes.
     Cause: Failed to parse volume meta information.
     Solution: Please report the errors.
   -
     Id: 1829
     Name: VOL_UNABLE_TO_SAVE_CREATION_FAILED
     Severity:
-    Message: Failed to save volumes.
+    Description: Failed to save volumes.
     Cause: Failed to create volume meta information.
     Solution: Please report the errors.
   -
     Id: 1830
     Name: VOL_UNABLE_TO_SAVE_OPEN_FAILED
     Severity:
-    Message: Failed to save volumes.
+    Description: Failed to save volumes.
     Cause: Failed to open volume meta information.
     Solution: Please report the errors.
   -
     Id: 1831
     Name: VOL_UNABLE_TO_SAVE_READ_FAILED
     Severity:
-    Message: Failed to save volumes.
+    Description: Failed to save volumes.
     Cause: Failed to read volume meta information.
     Solution: Please report the errors.
   -
     Id: 1832
     Name: VOL_UNABLE_TO_SAVE_WRITE_FAILED
     Severity:
-    Message: Failed to save volumes.
+    Description: Failed to save volumes.
     Cause: Failed to write volume meta information.
     Solution: Please report the errors.
   -
     Id: 1833
     Name: VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW
     Severity:
-    Message: Failed to save volumes.
+    Description: Failed to save volumes.
     Cause: Volume meta information is too large to save.
     Solution: Please report the errors.
   -
     Id: 1834
     Name: RENAME_VOL_NAME_TOO_SHORT
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: volume name is too short.
     Solution: Enter the volume name between 2 and 255 letters.
   -
     Id: 1835
     Name: RENAME_VOL_NAME_TOO_LONG
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: volume name is too long.
     Solution: Enter the volume name between 2 and 255 letters.
   -
     Id: 1836
     Name: RENAME_VOL_SAME_VOL_NAME_EXISTS
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: Volume with the same name already exists.
     Solution: Please use another name.
   -
     Id: 1837
     Name: RENAME_VOL_NAME_INCLUDES_SPECIAL_CHAR
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: Volume name contains special characters
     Solution: Remove the special character of volume name and try again
   -
     Id: 1838
     Name: RENAME_VOL_NAME_START_OR_END_WITH_SPACE
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: There is a space at the front or back of the volume name
     Solution: Remove the space from the front or back Array name and try again
   -
     Id: 1839
     Name: RENAME_VOL_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: The requested volume name to change does not exist.
     Solution: Please check volume name to delete and try again
   -
     Id: 1840
     Name: RENAME_VOL_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: Volume renaming is possible only when array is online.
     Solution: Please mount array and try again
   -
     Id: 1841
     Name: RENAME_VOL_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to change volume name.
+    Description: Failed to change volume name.
     Cause: The requested array name does not exist.
     Solution: Please check array name and try again
   -
     Id: 1842
     Name: RENAME_VOL_INTERNAL_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1843
     Name: MOUNT_VOL_ALREADY_MOUNTED
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: The volume is already mounted.
     Solution: Check the status of the volume in the volume list.
   -
     Id: 1844
     Name: MOUNT_VOL_UNABLE_TO_ATTACH_TO_NVMF
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: An error occurred during the NVMe-oF attach process.
     Solution: Please report the errors.
   -
     Id: 1845
     Name: MOUNT_VOL_SUBSYSTEM_NOT_FOUND
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: Failed to find the subsystem to mount the volume.
     Solution: Please check if the subsystem is created correctly and try again.
   -
     Id: 1846
     Name: MOUNT_VOL_SUBSYSTEM_MISMATCH
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: Volume and Array's subsystem do not match
     Solution: Please correct the subsystem configuration and try again.
   -
     Id: 1847
     Name: MOUNT_VOL_SUBSYSTEM_ALREADY_OCCUPIED
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: The subsystem is already being used by another Array.
     Solution: Please check the subsystem configuration and try again.
   -
     Id: 1848
     Name: MOUNT_VOL_LOCK_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1849
     Name: MOUNT_VOL_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: The volume cannot be mounted because the array is not mounted.
     Solution: Please mount the array and try again
   -
     Id: 1850
     Name: MOUNT_VOL_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to mount a volume.
+    Description: Failed to mount a volume.
     Cause: The requested array name does not exist.
     Solution: Please check the array name where the volume exists and try again
   -
     Id: 1851
     Name: MOUNT_VOL_INTERNAL_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1852
     Name: UNMOUNT_VOL_ALREADY_UNMOUNTED
     Severity:
-    Message: Failed to unmount a volume.
+    Description: Failed to unmount a volume.
     Cause: The volume is already unmounted
     Solution: Check the status of the volume in the volume list.
   -
     Id: 1853
     Name: UNMOUNT_VOL_UNABLE_TO_DETACH_FROM_NVMF
     Severity:
-    Message: Failed to unmount volumes.
+    Description: Failed to unmount volumes.
     Cause: An error occurred during the NVMe-oF detach process.
     Solution: Please report the errors.
   -
     Id: 1854
     Name: UNMOUNT_VOL_LOCK_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1855
     Name: UNMOUNT_VOL_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to unmount a volume.
+    Description: Failed to unmount a volume.
     Cause: The volume cannot be unmounted because the array is not mounted.
     Solution: Please mount the array and try again
   -
     Id: 1856
     Name: UNMOUNT_VOL_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to unmount a volume.
+    Description: Failed to unmount a volume.
     Cause: The requested array name does not exist.
     Solution: Please check the array name where the volume exists and try again
   -
     Id: 1857
     Name: UNMOUNT_VOL_INTERNAL_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1858
     Name: VOL_REQ_QOS_OUT_OF_RANGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1859
     Name: VOL_REQ_REJECTED_IN_BROKEN_ARRAY
     Severity:
-    Message: Failed to find volumes.
+    Description: Failed to find volumes.
     Cause: The volume cannot be mounted on broken array.
     Solution: Please try again in mounted array.
   -
     Id: 1860
     Name: VOL_REQ_PROCESSED_BUT_ERROR_OCCURED
     Severity:
-    Message: Failed to process the volume request perfectly.
+    Description: Failed to process the volume request perfectly.
     Cause: Some requests were successful
     Solution: but an error occurred during execution.
   -
     Id: 1861
     Name: VOL_INTERNAL_INVALID_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1862
     Name: VOL_INTERNAL_ID_ALLOC_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1863
     Name: VOL_INTERNAL_ID_DUPLICATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1864
     Name: VOL_INTERNAL_UNEXPECTED_PENDING_IO_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1865
     Name: VOL_UPDATE_LOCK_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1866
     Name: VOL_UPDATE_META_SAVE_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1867
     Name: VOL_EVENT_OK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1868
     Name: VOL_EVENT_ABORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1869
     Name: VOL_EVENT_DATA_LOSS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1870
     Name: VOL_EVENT_DEAD_LINE_EXCEEDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1871
     Name: VOL_EVENT_RETRY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1872
     Name: VOL_EVENT_UNIMPLEMENTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1873
     Name: VOL_EVENT_UNKNOWN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1874
     Name: VOL_EVENT_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1875
     Name: VOL_EVENT_ROLLBACK_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 1876
     Name: SET_VOLUME_PROPERTY_FAILURE_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to set the property of a volume.
+    Description: Failed to set the property of a volume.
     Cause: Could not find the input array.
     Solution:
   -
     Id: 1877
     Name: SET_VOLUME_PROPERTY_FAILURE_ARRAY_NOT_ONLINE
     Severity:
-    Message: Failed to set the property of a volume.
+    Description: Failed to set the property of a volume.
     Cause: State of the input array is not online.
     Solution:
 
@@ -1240,70 +1240,70 @@ Root:
     Id: 2200
     Name: CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST
     Severity:
-    Message: Input subsystem already exists.
+    Description: Input subsystem already exists.
     Cause:
     Solution:
   -
     Id: 2201
     Name: CREATE_SUBSYSTEM_FAILURE
     Severity:
-    Message: Failed to create a subsystem.
+    Description: Failed to create a subsystem.
     Cause:
     Solution:
   -
     Id: 2202
     Name: DELETE_SUBSYSTEM_FAILURE_SUBNQN_NAME_NOT_SPECIFIED
     Severity:
-    Message: Failed to delete a subsystem.
+    Description: Failed to delete a subsystem.
     Cause: No subnqn is specified.
     Solution:
   -
     Id: 2203
     Name: DELETE_SUBSYSTEM_FAILURE_NO_SUBNQN
     Severity:
-    Message: Failed to delete a subsystem.
+    Description: Failed to delete a subsystem.
     Cause: Could not find the subsystem with the subnqn.
     Solution:
   -
     Id: 2204
     Name: DELETE_SUBSYSTEM_FAILURE_VOLUME_NOT_FOUND
     Severity:
-    Message: Failed to delete a subsystem.
+    Description: Failed to delete a subsystem.
     Cause: Failed to unmount the associated volume (failed to find the volume).
     Solution:
   -
     Id: 2205
     Name: DELETE_SUBSYSTEM_FAILURE_VOLUME_UNMOUNT_FAILURE
     Severity:
-    Message: Failed to delete a subsystem.
+    Description: Failed to delete a subsystem.
     Cause: Failed to unmount the associated volume.
     Solution:
   -
     Id: 2206
     Name: DELETE_SUBSYSTEM_FAILURE_SPDK_FAILURE
     Severity:
-    Message: Failed to delete a subsystem.
+    Description: Failed to delete a subsystem.
     Cause: An error occurred during RPC to SPDK.
     Solution:
   -
     Id: 2207
     Name: ADD_LISTENER_FAILURE_NO_SUBNQN
     Severity:
-    Message: Failed to add a listener.
+    Description: Failed to add a listener.
     Cause: Could not find the subsystem with the subnqn.
     Solution:
   -
     Id: 2208
     Name: ADD_LISTENER_FAILURE_SPDK_FAILURE
     Severity:
-    Message: Failed to add a listener.
+    Description: Failed to add a listener.
     Cause: An error occurred during RPC to SPDK.
     Solution:
   -
     Id: 2209
     Name: ADD_TRANSPORT_FAILURE_SPDK_FAILURE
     Severity:
-    Message: Failed to add a transport.
+    Description: Failed to add a transport.
     Cause: An error occurred during RPC to SPDK.
     Solution:
 
@@ -1313,182 +1313,182 @@ Root:
     Id: 2300
     Name: MBR_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2301
     Name: MBR_CREATE_AND_WRITE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2302
     Name: MBR_ADD_AND_WRITE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2303
     Name: MBR_WRITE_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2304
     Name: MBR_READ_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2305
     Name: MBR_PARITY_CHECK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2306
     Name: MBR_SYSTEM_UUID_CHECK_SUCCESS
     Severity:
-    Message: Successfully verified the system UUID.
+    Description: Successfully verified the system UUID.
     Cause:
     Solution:
   -
     Id: 2307
     Name: MBR_DEVICE_NOT_FOUND
     Severity:
-    Message: Could not find a device.
+    Description: Could not find a device.
     Cause:
     Solution:
   -
     Id: 2308
     Name: MBR_PARITY_CHECK_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2309
     Name: MBR_SYSTEM_UUID_CHECK_FAILURE
     Severity:
-    Message: Failed to verify the system UUID.
+    Description: Failed to verify the system UUID.
     Cause:
     Solution:
   -
     Id: 2310
     Name: MBR_DATA_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2311
     Name: MBR_KEY_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2312
     Name: MBR_ABR_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2313
     Name: MBR_DELETE_ABR_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2314
     Name: MBR_MAX_ARRAY_CNT_EXCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2315
     Name: MBR_ABR_ALREADY_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2316
     Name: MBR_WRONG_ARRAY_VALID_FLAG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2317
     Name: MBR_WRONG_ARRAY_INDEX_MAP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2318
     Name: MBR_DEVICE_ALREADY_IN_ARRAY
     Severity:
-    Message: Device already belongs to an array.
+    Description: Device already belongs to an array.
     Cause:
     Solution: Select another device.
   -
     Id: 2319
     Name: MBR_ABR_GET_LIST_SUCCESS
     Severity:
-    Message: ABR list has been loaded.
+    Description: ABR list has been loaded.
     Cause:
     Solution:
   -
     Id: 2320
     Name: MBR_ALLOCATE_MEMORY_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2321
     Name: MBR_DATA_SIZE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2322
     Name: MBR_FORMAT_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2323
     Name: MBR_GET_SYSTEM_UUID_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2324
     Name: MBR_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2325
     Name: MBR_WRITE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -1498,721 +1498,721 @@ Root:
     Id: 2500
     Name: CREATE_ARRAY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2501
     Name: CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS
     Severity:
-    Message: Failed to create array.
+    Description: Failed to create array.
     Cause: The maximum number of possible arrays has been exceeded.
     Solution: If you remove the existing array
   -
     Id: 2502
     Name: CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS
     Severity:
-    Message: Failed to create array.
+    Description: Failed to create array.
     Cause: Array with the same name already exists.
     Solution: Please use another name.
   -
     Id: 2503
     Name: CREATE_ARRAY_NAME_TOO_SHORT
     Severity:
-    Message: Failed to create array.
+    Description: Failed to create array.
     Cause: Array name is too short.
     Solution: Array name must be at least 2 characters long.
   -
     Id: 2504
     Name: CREATE_ARRAY_NAME_TOO_LONG
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: Array name is too long.
     Solution: Array name must be at most 63 characters long.
   -
     Id: 2505
     Name: CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: Array name contains a special character.
     Solution: Array name must not have any special character.
   -
     Id: 2506
     Name: CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: A whitespace exists at the beginning or end of the name.
     Solution: Remove the whitespace from the name.
   -
     Id: 2507
     Name: CREATE_ARRAY_SSD_NAME_NOT_FOUND
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: Failed to find the device with the given name.
     Solution: Please check the data device list.
   -
     Id: 2508
     Name: CREATE_ARRAY_NVM_NAME_NOT_FOUND
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: Failed to find the write buffer with the given name.
     Solution: Please check the write buffer device name.
   -
     Id: 2509
     Name: CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The RAID type is not supported.
     Solution: Please check the supported RAID types.
   -
     Id: 2510
     Name: CREATE_ARRAY_RAID_INVALID_SSD_CNT
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The number of devices to build the RAID you entered does not meet the requirement.
     Solution: Check the device requirement for the RAID type.
   -
     Id: 2511
     Name: CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The RAID type entered does not support spare devices.
     Solution: Please try again without spare device.
   -
     Id: 2512
     Name: CREATE_ARRAY_NO_AVAILABLE_DEVICE
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The devices you entered are not available.
     Solution: Enter available devices.
   -
     Id: 2513
     Name: CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The total capacity of data devices is smaller than the minimum requirement.
     Solution: Please checkout the minimum requirement for data devices.
   -
     Id: 2514
     Name: CREATE_ARRAY_NVM_CAPACITY_IS_LT_MIN
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The total capacity of the write buffer is smaller than the minimum requirement.
     Solution: Please checkout the minimum requirement for a write buffer.
   -
     Id: 2515
     Name: CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The capacity of the spare device is smaller than or equal to that of the smallest data device.
     Solution: Please use another spare device.
   -
     Id: 2516
     Name: CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: Failed to create buffer pool for parity calculation.
     Solution: Please check if there is enough huge page memory space.
   -
     Id: 2517
     Name: CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The number of SSDs requested on the same NUMA is insufficient.
     Solution: Please check the number of unoccupied SSDs on the same NUMA with the same capacity.
   -
     Id: 2518
     Name: CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS
     Severity:
-    Message: Failed to create an array.
+    Description: Failed to create an array.
     Cause: The number of SSDs requested with the same capacity on the same NUMA is insufficient
     Solution: Please check the number of unoccupied SSDs on the same NUMA with the same capacity.
   -
     Id: 2519
     Name: LOAD_ARRAY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2520
     Name: LOAD_ARRAY_NVM_DOES_NOT_EXIST
     Severity:
-    Message: Failed to load an array.
+    Description: Failed to load an array.
     Cause: Write buffer device could not be found.
     Solution: Please try again after checking there is a write buffer in the array.
   -
     Id: 2521
     Name: LOAD_ARRAY_ALREADY_LOADED
     Severity:
-    Message: Failed to load an array.
+    Description: Failed to load an array.
     Cause: The array has already been loaded.
     Solution:
   -
     Id: 2522
     Name: DELETE_ARRAY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2523
     Name: DELETE_ARRAY_CAN_ONLY_BE_WHILE_OFFLINE
     Severity:
-    Message: Failed to delete an array.
+    Description: Failed to delete an array.
     Cause: An mounted array cannot be deleted.
     Solution: Unmount the array first.
   -
     Id: 2524
     Name: DELETE_ARRAY_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to delete an array.
+    Description: Failed to delete an array.
     Cause: Array of the requested name could not be found.
     Solution: Please check the array name to delete.
   -
     Id: 2525
     Name: DELETE_ARRAY_TIMED_OUT
     Severity:
-    Message: Failed to delete an array.
+    Description: Failed to delete an array.
     Cause: A broken array's internal resource cleanup has not been complete.
     Solution: Please try after a while.
   -
     Id: 2526
     Name: MOUNT_ARRAY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2527
     Name: MOUNT_ARRAY_UNABLE_TO_INVOKE_MOUNT_STATE
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Unable to acquire mount state
     Solution: Please try after a while.
   -
     Id: 2528
     Name: MOUNT_ARRAY_ALREADY_MOUNTED
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: The array is already mounted.
     Solution:
   -
     Id: 2529
     Name: MOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Array of the requested name could not be found
     Solution: Please check the array's name to mount.
   -
     Id: 2530
     Name: MOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_MOUNTED
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Broken array cannot be mounted
     Solution: Please delete the array and create a new one.
   -
     Id: 2531
     Name: MOUNT_ARRAY_UNABLE_TO_REGISTER_TRANSLATOR
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Internal translator service registration was failed during the mounting process.
     Solution: Please try again and report the error if the problem occurs repeatedly.
   -
     Id: 2532
     Name: MOUNT_ARRAY_UNABLE_TO_REGISTER_RECOVER
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Internal recover service registration failed during the mounting process
     Solution: Please try again and report the error if the problem occurs repeatedly.
   -
     Id: 2533
     Name: MOUNT_ARRAY_UNABLE_TO_REGISTER_DEVICECHECKER
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Internal device checker service registration failed during the mounting process
     Solution: Please try again and report the error if the problem occurs repeatedly.
   -
     Id: 2534
     Name: MOUNT_ARRAY_UNABLE_TO_REGISTER_IOLOCKER
     Severity:
-    Message: Failed to mount an array.
+    Description: Failed to mount an array.
     Cause: Internal io locker service registration failed during the mounting process.
     Solution: Please try again and report the error if the problem occurs repeatedly.
   -
     Id: 2535
     Name: UNMOUNT_ARRAY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2536
     Name: UNMOUNT_ARRAY_ALREADY_UNMOUNTED
     Severity:
-    Message: Failed to unmount an array.
+    Description: Failed to unmount an array.
     Cause: The array is already unmounted.
     Solution: Check the status of the array in the array list.
   -
     Id: 2537
     Name: UNMOUNT_ARRAY_UNABLE_TO_INVOKE_UNMOUNT_STATE
     Severity:
-    Message: Failed to unmount an array.
+    Description: Failed to unmount an array.
     Cause: Unable to acquire unmount state.
     Solution: Unable to acquire unmount state.
   -
     Id: 2538
     Name: UNMOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to unmount an array.
+    Description: Failed to unmount an array.
     Cause: Array of the requested name could not be found.
     Solution: Please check the array's name to unmount and try again.
   -
     Id: 2539
     Name: UNMOUNT_ARRAY_REJECTED_DUE_TO_REBUILD_INPROGRESS
     Severity:
-    Message: Failed to unmount an array.
+    Description: Failed to unmount an array.
     Cause: The array is in the process of rebuilding
     Solution: Please try again after the rebuild is completed
   -
     Id: 2540
     Name: UNMOUNT_ARRAY_BROKEN_ARRAY_CANNOT_BE_UNMOUNTED
     Severity:
-    Message: Failed to unmount an array.
+    Description: Failed to unmount an array.
     Cause: Broken array cannot be unmounted.
     Solution: Broken array can be deleted without unmount.
   -
     Id: 2541
     Name: UNMOUNT_BROKEN_ARRAY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2542
     Name: ADD_SPARE_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2543
     Name: ADD_SPARE_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to add a spare device.
+    Description: Failed to add a spare device.
     Cause: Spare device addition is possible only when array is online
     Solution: Please mount array and try again
   -
     Id: 2544
     Name: ADD_SPARE_SSD_NAME_NOT_FOUND
     Severity:
-    Message: Failed to add a spare device.
+    Description: Failed to add a spare device.
     Cause: The SSD of the requested name could not be found
     Solution: Please check the ssd name in the device list and try again
   -
     Id: 2545
     Name: ADD_SPARE_CAPACITY_IS_TOO_SMALL
     Severity:
-    Message: Failed to add a spare device.
+    Description: Failed to add a spare device.
     Cause: SSD capacity does not meet minimum capacity condition
     Solution: Please try again with SSDs of 20GB or more.
   -
     Id: 2546
     Name: ADD_SPARE_RAID_DOES_NOT_SUPPORT_SPARE_DEV
     Severity:
-    Message: Failed to add a spare device.
+    Description: Failed to add a spare device.
     Cause: The Array does not support spare devices
     Solution: Spare cannot be added to the Array
   -
     Id: 2547
     Name: ADD_SPARE_DEVICE_ALREADY_OCCUPIED
     Severity:
-    Message: Failed to add spare device.
+    Description: Failed to add spare device.
     Cause: The device is occupied by another array.
     Solution: Please try again with a device that does not belong to another array.
   -
     Id: 2548
     Name: ADD_SPARE_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to add spare device.
+    Description: Failed to add spare device.
     Cause: The requested array name does not exist.
     Solution: Please check array name to add a device and try again
   -
     Id: 2549
     Name: REMOVE_DEV_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2550
     Name: REMOVE_DEV_CAN_ONLY_BE_WHILE_ONLINE
     Severity:
-    Message: Failed to remove a spare device from array.
+    Description: Failed to remove a spare device from array.
     Cause: Spare device removal is possible only when array is online
     Solution: Please mount array and try again
   -
     Id: 2551
     Name: REMOVE_DEV_SSD_NAME_NOT_FOUND
     Severity:
-    Message: Failed to remove a spare device from array.
+    Description: Failed to remove a spare device from array.
     Cause: The SSD of the requested name could not be found
     Solution: Please check the ssd name in the device list and try again
   -
     Id: 2552
     Name: REMOVE_DEV_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to remove spare device from array.
+    Description: Failed to remove spare device from array.
     Cause: The requested array name does not exist.
     Solution: Please check array name to remove a device and try again
   -
     Id: 2553
     Name: ARRAY_DEV_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2554
     Name: ARRAY_SSD_NOT_FOUND
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: SSD of the requested name could not be found
     Solution: Please check SSD name and try again
   -
     Id: 2555
     Name: ARRAY_NVM_NOT_FOUND
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: Write buffer device of the requested name could not be found
     Solution: Please check the write buffer device name and try again
   -
     Id: 2556
     Name: UNABLE_TO_SET_NVM_MORE_THAN_ONE
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: Up to one write buffer device is allowed for each array
     Solution: Please enter only one write buffer device and try again
   -
     Id: 2557
     Name: UNABLE_TO_SET_NULL_NVM
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: The write buffer device you entered exist but are not available.
     Solution: Check write buffer status and try again
   -
     Id: 2558
     Name: UNABLE_TO_SET_NVM_ALREADY_OCCUPIED
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: Write buffer device is already in use elsewhere
     Solution: Try again with a write buffer device that is not in use
   -
     Id: 2559
     Name: UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: Write buffer device capacity does not meet minimum capacity condition
     Solution: Please try again after securing enough size.
   -
     Id: 2560
     Name: UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED
     Severity:
-    Message: Failed to configure an array.
+    Description: Failed to configure an array.
     Cause: One or more SSDs are already in use elsewhere
     Solution: Try again with SSDs those are not in use
   -
     Id: 2561
     Name: REPLACE_DEV_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2562
     Name: REPLACE_DEV_CAN_ONLY_BE_IN_NORMAL_STATE
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: Data device replacement is possible only when array state is normal
     Solution: Please check array state and try again
   -
     Id: 2563
     Name: REPLACE_DEV_REQUIRES_SPARE_DEV
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: Spare device is essential to replace data device.
     Solution: Please add spare devices and try again
   -
     Id: 2564
     Name: REPLACE_DEV_UNSUPPORTED_RAID_TYPE
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: The RAID type applied to the requested array does not support restoration, so device replacement cannot be performed.
     Solution:
   -
     Id: 2565
     Name: REPLACE_DEV_ONLY_NORMAL_DEV_CAN_BE_REMOVED
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: Only normal status devices can be replacement target.
     Solution: Please check a target device status and try again.
   -
     Id: 2566
     Name: REPLACE_DEV_SSD_NAME_NOT_FOUND
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: The SSD of the requested name could not be found in the data device list
     Solution: Please check the ssd name you in the device list and try again
   -
     Id: 2567
     Name: REPLACE_DEV_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: The requested array name does not exist.
     Solution: Please check array name to remove a device and try again
   -
     Id: 2568
     Name: REPLACE_DEV_NO_AVAILABLE_SPARE
     Severity:
-    Message: Failed to replace a data device.
+    Description: Failed to replace a data device.
     Cause: There is no available spare device to replace the data device.
     Solution: Please add spare devices and try again.
   -
     Id: 2569
     Name: UPDATE_ABR_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2570
     Name: ARRAY_COMPO_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2571
     Name: RAID_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2572
     Name: FORMAT_PARTITION_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2574
     Name: IO_RECOVER_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2575
     Name: LOCKER_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2576
     Name: IO_TRANSLATOR_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2577
     Name: IO_RECOVER_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2578
     Name: ARRAY_MGR_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2579
     Name: ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2580
     Name: ARRAY_MGR_NO_ARRAY_OWNING_REQ_DEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2581
     Name: ARRAY_MGR_NO_ARRAY_MATCHING_REQ_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2582
     Name: ARRAY_MGR_NO_ARRAY_MATCHING_NAME
     Severity:
-    Message: Failed to get the array info.
+    Description: Failed to get the array info.
     Cause: Could not find the array with the given name
     Solution: Please check the array name again
   -
     Id: 2583
     Name: RECOVER_INVALID_LBA
     Severity:
-    Message: Unable to restore requested LBA
+    Description: Unable to restore requested LBA
     Cause: The requested LBA is out of the partition range
     Solution: Please check the partition address range
   -
     Id: 2584
     Name: RECOVER_REQ_DEV_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2585
     Name: ADDRESS_TRANSLATE_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2586
     Name: ADDRESS_TRANSLATION_INVALID_LBA
     Severity:
-    Message: Failed to translate
+    Description: Failed to translate
     Cause: The requested LBA is out of the partition range
     Solution: Please check the partition address range
   -
     Id: 2587
     Name: ADDRESS_TRANSLATION_INVALID_BLK_CNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2588
     Name: ADDRESS_BYTE_TRANSLATION_INVALID_LBA
     Severity:
-    Message: Failed to translate
+    Description: Failed to translate
     Cause: The requested LBA is out of the partition range
     Solution: Please check the partition address range
   -
     Id: 2589
     Name: ADDRESS_BYTE_TRANSLATION_IS_NOT_SUPPORTED
     Severity:
-    Message: Failed to translate
+    Description: Failed to translate
     Cause: Address byte translation is not supported in this partition
     Solution: Please check again if the partition supports byte injection.
   -
     Id: 2590
     Name: ARRAY_EVENT_STATE_CHANGED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2591
     Name: ARRAY_EVENT_UNHANDLED_STATE_TRANSITION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2592
     Name: ARRAY_EVENT_BROKEN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2593
     Name: ARRAY_EVENT_DEV_STATE_CHANGED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2594
     Name: ARRAY_EVENT_DEV_DETACHED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2595
     Name: ARRAY_EVENT_DATA_SSD_DETACHED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2596
     Name: ARRAY_EVENT_SPARE_SSD_DETACHED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2597
     Name: ARRAY_EVENT_NVM_DETACHED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2598
     Name: ARRAY_EVENT_SSD_REPLACED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2599
     Name: NO_SPARE_SSD_TO_REPLACE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2600
     Name: ARRAY_TELEMETRY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2601
     Name: WBT_CMD_NEED_ARRAY_MOUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2602
     Name: MOUNT_ARRAY_FAILURE_TARGET_ADDRESS_INVALID
     Severity:
-    Message: Failed to mount array.
+    Description: Failed to mount array.
     Cause: Input target address is invalid.
     Solution: Please check the format of the target address.
   -
     Id: 2603
     Name: AUTO_CREATE_ARRAY_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
@@ -2220,462 +2220,462 @@ Root:
     Id: 2800
     Name: REBUILD_REQUEST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2801
     Name: REBUILD_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2802
     Name: REBUILD_BEHAVIOR_CREATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2804
     Name: REBUILD_PROGRESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2805
     Name: REBUILD_PROGRESS_DETAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2806
     Name: REBUILD_RESULT_PASS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2807
     Name: REBUILD_RESULT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2808
     Name: REBUILD_RESULT_CANCELLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2809
     Name: TRIGGER_REBUILD_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2810
     Name: INVOKE_REBUILD_DUE_TO_SPARE_ADDED
     Severity:
-    Message: A spare device is added in the degraded state and rebuild execution conditions are being checked.
+    Description: A spare device is added in the degraded state and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2811
     Name: INVOKE_REBUILD_DUE_TO_DEVICE_DETACHED
     Severity:
-    Message: Device failure detected and rebuild execution conditions are being checked.
+    Description: Device failure detected and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2812
     Name: INVOKE_REBUILD_DUE_TO_ARRAY_MOUNTED
     Severity:
-    Message: The rebuild target was found at the time of array mount and the rebuild execution conditions are being checked.
+    Description: The rebuild target was found at the time of array mount and the rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2813
     Name: INVOKE_RESUME_REBUILD
     Severity:
-    Message: A suspended rebuild operation has been found and rebuild execution conditions are being checked.
+    Description: A suspended rebuild operation has been found and rebuild execution conditions are being checked.
     Cause: The rebuild operation might have been canceled during the rebuild or the process might have been forcibly terminated.
     Solution:
   -
     Id: 2814
     Name: INVOKE_REBUILD_DUE_TO_USER_REQUEST
     Severity:
-    Message: The user has requested the rebuild and rebuild execution conditions are being checked.
+    Description: The user has requested the rebuild and rebuild execution conditions are being checked.
     Cause:
     Solution:
   -
     Id: 2815
     Name: INVOKE_REBUILD_AFTER_REBUILD_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2816
     Name: REBUILD_CTX_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2817
     Name: REBUILD_PAIR_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2820
     Name: REBUILD_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to rebuild an array.
+    Description: Failed to rebuild an array.
     Cause: Array of the requested name could not be found.
     Solution: Please check the array's name to rebuild and try again.
   -
     Id: 2821
     Name: REBUILD_ARRAY_SPARE_DOES_NOT_EXIST
     Severity:
-    Message: Failed to rebuild an array.
+    Description: Failed to rebuild an array.
     Cause: There is no spare device.
     Solution: Please add spare devices and try again.
   -
     Id: 2822
     Name: REBUILD_ARRAY_OFFLINED
     Severity:
-    Message: Failed to rebuild an array.
+    Description: Failed to rebuild an array.
     Cause: Rebuild requests are not allowed in array that is not mounted.
     Solution: Please retry after array mount.
   -
     Id: 2823
     Name: REBUILD_ARRAY_ALREADY_IN_PROGRESS
     Severity:
-    Message: Failed to rebuild an array.
+    Description: Failed to rebuild an array.
     Cause: The requested array is already in the process of rebuilding.
     Solution: Please try again after completing the rebuilding process.
   -
     Id: 2824
     Name: REBUILD_ARRAY_IS_NORMAL
     Severity:
-    Message: Failed to rebuild an array.
+    Description: Failed to rebuild an array.
     Cause: There is no device to rebuild in array.
     Solution: Please check the state of array.
   -
     Id: 2825
     Name: REBUILD_ARRAY_RAID_NOT_SUPPORTED
     Severity:
-    Message: Failed to rebuild an array.
+    Description: Failed to rebuild an array.
     Cause: The RAID of array does not support rebuild .
     Solution: Please check the RAID type of array.
   -
     Id: 2826
     Name: RECOMMEND_PERFORM_REBUILD
     Severity:
-    Message: There is a rebuild operation to be performed, but it has been suspended.
+    Description: There is a rebuild operation to be performed, but it has been suspended.
     Cause: Rebuild auto start option is turned off in settings.
     Solution: If you want to start rebuild operation immediately, issue a rebuild command.
   -
     Id: 2840
     Name: REBUILD_INVALIDATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2841
     Name: REBUILD_JOB_REQUEST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2842
     Name: REBUILD_JOB_REJECT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2843
     Name: REBUILD_JOB_STOP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2844
     Name: REBUILD_JOB_DISPOSE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2845
     Name: REBUILD_JOB_PREPARE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2846
     Name: REBUILD_JOB_PREPARE_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2851
     Name: ARRAY_REBUILD_INIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2852
     Name: ARRAY_REBUILD_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2853
     Name: ARRAY_REBUILD_END
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2854
     Name: ARRAY_REBUILD_DISCARD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2855
     Name: PARTITION_REBUILD_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2856
     Name: PARTITION_REBUILD_STOP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2857
     Name: REBUILD_NEXT_PARTITION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2858
     Name: PARTITION_REBUILD_END
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2859
     Name: PARTITION_REBUILD_SKIP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2860
     Name: STRIPES_REBUILD_INIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2861
     Name: STRIPES_REBUILD_BEGIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2862
     Name: STRIPES_REBUILD_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2863
     Name: STRIPES_REBUILD_FINISH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2864
     Name: REBUILD_BUFFER_INIT_OK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2865
     Name: REBUILD_BUFFER_INIT_FAIL
     Severity:
-    Message: Rebuild cannot be performed due to initialization failure.
+    Description: Rebuild cannot be performed due to initialization failure.
     Cause: There are not enough buffers for rebuild.
     Solution: Please request technical support for error.
   -
     Id: 2866
     Name: REBUILD_BUFFER_INIT_RETRY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2867
     Name: REBUILD_GET_BUFFER_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2868
     Name: REBUILD_BUFFER_WARN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2870
     Name: REBUILD_METHOD_INIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2871
     Name: REBUILD_READ_BEGIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2872
     Name: REBUILD_READ_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2873
     Name: REBUILD_READ_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2874
     Name: REBUILD_RECOVER_BEGIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2875
     Name: REBUILD_RECOVER_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2876
     Name: REBUILD_RECOVER_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2877
     Name: REBUILD_WRITE_BEGIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2878
     Name: REBUILD_WRITE_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2879
     Name: REBUILD_WRITE_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2880
     Name: REBUILD_FAILOVER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2890
     Name: REBUILD_TRY_LOCK_RETRY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2891
     Name: REBUILD_TRY_LOCK_FAILED
     Severity:
-    Message: Rebuild is stopped due to failure of continuous lock acquisition.
+    Description: Rebuild is stopped due to failure of continuous lock acquisition.
     Cause: Maybe Meta I/O is busy or deadlock.
     Solution: Please request technical support for error.
   -
     Id: 2892
     Name: REBUILD_FORCED_RESET_LOCK
     Severity:
-    Message: The maximum number of retry attempts is exceeded to reset the busy lock range.
+    Description: The maximum number of retry attempts is exceeded to reset the busy lock range.
     Cause: Maybe Meta I/O is busy or deadlock.
     Solution: Please request technical support for error.
   -
     Id: 2893
     Name: REBUILD_RESET_LOCK_RETRY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2894
     Name: REBUILD_RESET_LOCK_OK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2895
     Name: BUSY_LOCKER_WARN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   # Config: 2900 - 2950
@@ -2683,98 +2683,98 @@ Root:
     Id: 2901
     Name: CONFIG_FILE_READ_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2902
     Name: CONFIG_REQUEST_CONFIG_TYPE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2903
     Name: CONFIG_REQUEST_KEY_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2904
     Name: CONFIG_REQUEST_MODULE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2905
     Name: CONFIG_FILE_OPEN_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2906
     Name: CONFIG_FILE_SIZE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2907
     Name: CONFIG_FILE_READ_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2908
     Name: CONFIG_FILE_FORMAT_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2909
     Name: CONFIG_JSON_DOC_IS_NOT_OBJECT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2910
     Name: CONFIG_VALUE_TYPE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2996
     Name: CONFIG_UPDATED_VIA_WBT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2997
     Name: WBT_UPDATE_CONFIG_CONVERT_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2998
     Name: WBT_UPDATE_CONFIG_MISSING_ARGS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 2999
     Name: WBT_UPDATE_CONFIG_UNKNOWN_TYPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -2783,49 +2783,49 @@ Root:
     Id: 3000
     Name: JOURNAL_MANAGER_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3001
     Name: JOURNAL_MANAGER_NOT_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3002
     Name: JOURNAL_CONFIGURATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3003
     Name: JOURNAL_NOT_READY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3004
     Name: JOURNAL_ALREADY_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3005
     Name: JOURNAL_INVALID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3006
     Name: JOURNAL_READY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -2833,63 +2833,63 @@ Root:
     Id: 3010
     Name: JOURNAL_LOG_BUFFER_CREATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3011
     Name: JOURNAL_LOG_BUFFER_CREATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3012
     Name: JOURNAL_LOG_BUFFER_LOADED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3013
     Name: JOURNAL_LOG_BUFFER_RESET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3014
     Name: JOURNAL_LOG_BUFFER_RESET_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3015
     Name: JOURNAL_LOG_BUFFER_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3016
     Name: JOURNAL_LOG_BUFFER_CLOSE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3017
     Name: JOURNAL_LOG_BUFFER_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3018
     Name: JOURNAL_LOG_BUFFER_INITIATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -2897,35 +2897,35 @@ Root:
     Id: 3020
     Name: JOURNAL_LOG_WRITE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3021
     Name: JOURNAL_INVALID_SIZE_LOG_REQUESTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3022
     Name: ADD_TO_JOURNAL_WAITING_LIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3023
     Name: JOURNAL_CALLBACK_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3024
     Name: JOURNAL_NO_LOG_BUFFER_AVAILABLE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -2933,392 +2933,392 @@ Root:
     Id: 3030
     Name: JOURNAL_LOG_GROUP_FULL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3031
     Name: JOURNAL_RELEASE_LOG_GROUP_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3032
     Name: JOURNAL_CHECKPOINT_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3033
     Name: JOURNAL_CHECKPOINT_STATUS_CHANGED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3034
     Name: JOURNAL_CHECKPOINT_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3035
     Name: JOURNAL_CHECKPOINT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3036
     Name: JOURNAL_WRITE_LOG_GROUP_FOOTER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3037
     Name: JOURNAL_CHECKPOINT_IN_PROGRESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3038
     Name: JOURNAL_LOG_GROUP_STATUS_CHANGED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3039
     Name: JOURNAL_LOG_GROUP_ALLOCATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3040
     Name: JOURNAL_HANDLE_VOLUME_DELETION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3041
     Name: JOURNAL_CHECKPOINT_FLUSH_METADATA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3042
     Name: JOURNAL_CHECKPOINT_FLUSH_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3043
     Name: JOURNAL_RELEASE_LOG_GROUP_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3050
     Name: JOURNAL_REPLAY_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3051
     Name: JOURNAL_REPLAY_STATUS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3052
     Name: JOURNAL_REPLAY_STOPPED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3053
     Name: JOURNAL_REPLAY_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3054
     Name: JOURNAL_REPLAY_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3055
     Name: JOURNAL_INVALID_LOG_FOUND
     Severity:
-    Message:
+    Description:
     Cause: Some of the old logs can not be erased becuase log offset can be additionally increased for mpage align. align.
     Solution: Ignore the old logs by sequence number
   -
     Id: 3056
     Name: MULTIPLE_SEQ_NUM_FOUND_WITHOUT_CHECKPOINT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3057
     Name: JOURNAL_LOG_GROUP_FOOTER_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3060
     Name: JOURNAL_REPLAY_STRIPE_FLUSH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3061
     Name: JOURNAL_REPLAY_STRIPE_FLUSH_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3062
     Name: JOURNAL_REPLAY_WB_TAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3063
     Name: JOURNAL_REPLAY_USER_STRIPE_TAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3064
     Name: JOURNAL_REPLAY_VOLUME_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3065
     Name: JOURNAL_REPLAY_WB_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3066
     Name: JOURNAL_MANAGER_DISPOSE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3067
     Name: JOURNAL_WRITE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3068
     Name: VERSIONED_SEGMENT_INFO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3070
     Name: ROCKSDB_LOG_BUFFER_OPENED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3071
     Name: ROCKSDB_LOG_BUFFER_CLOSED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3072
     Name: ROCKSDB_LOG_BUFFER_DIR_EXISTS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3073
     Name: ROCKSDB_LOG_BUFFER_DIR_CREATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3074
     Name: ROCKSDB_LOG_BUFFER_DIR_CREATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3075
     Name: ROCKSDB_LOG_BUFFER_DIR_DELETION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3076
     Name: ROCKSDB_LOG_BUFFER_DIR_DELETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3077
     Name: ROCKSDB_LOG_BUFFER_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3078
     Name: ROCKSDB_LOG_BUFFER_TRY_WRITE_LOG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3079
     Name: ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3080
     Name: ROCKSDB_LOG_BUFFER_WRITE_LOG_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3081
     Name: ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3082
     Name: ROCKSDB_LOG_BUFFER_LOG_GROUP_RESET_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3083
     Name: ROCKSDB_LOG_BUFFER_CREATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3084
     Name: ROCKSDB_LOG_BUFFER_CREATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3085
     Name: ROCKSDB_LOG_BUFFER_DELETE_DB
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3086
     Name: ROCKSDB_LOG_BUFFER_DELETE_DB_FAILED_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3087
     Name: ROCKSDB_LOG_BUFFER_INTERNAL_IO_CONTEXT_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3088
     Name: ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3089
     Name: ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_ROCKSDB_SCAN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3090
     Name: ROCKSDB_LOG_BUFFER_READ_LOG_BUFFER_FAILED_WRONG_BUFFER_OFFSET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3091
     Name: ROCKSDB_LOG_BUFFER_DISPOSED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3092
     Name: ROCKSDB_LOG_BUFFER_INTERNAL_IO_DONE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3093
     Name: ROCKSDB_LOG_BUFFER_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3099
     Name: JOURNAL_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -3328,343 +3328,343 @@ Root:
     Id: 3100
     Name: MAPPER_SUCCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3101
     Name: MAP_FLUSH_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3102
     Name: MAP_FLUSH_IN_PROGRESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3103
     Name: MAP_FLUSH_ONGOING
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3104
     Name: MAP_FLUSH_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3105
     Name: MAP_LOAD_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3106
     Name: MAP_LOAD_ONGOING
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3107
     Name: MAP_LOAD_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3108
     Name: MPAGE_NULLPTR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3109
     Name: MPAGE_ALREADY_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3110
     Name: MPAGE_MEMORY_ALLOC_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3111
     Name: VSAMAP_NULL_PTR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3112
     Name: VSAMAP_SET_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3113
     Name: STRIPEMAP_SET_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3114
     Name: MAPCONTENT_HEADER_NOT_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3115
     Name: INVALID_VOLUME_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3116
     Name: COPY_MAP_HEADER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3117
     Name: REVMAP_PACK_ALREADY_LINKED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3118
     Name: REVMAP_RESERVED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3119
     Name: REVMAP_FILE_SIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3120
     Name: REVMAP_VOLUME_ID_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3121
     Name: REVMAP_VOLUME_ID_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3122
     Name: REVMAP_IO_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3123
     Name: MAP_UPDATE_HANDLER_EVENT_ALLOCATE_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3124
     Name: TRIED_TO_LOAD_WITHOUT_MFSFILE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3125
     Name: NO_BLOCKMAP_MFS_FILE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3126
     Name: VSAMAP_HEADER_LOAD_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3127
     Name: VSAMAP_LOAD_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3128
     Name: VSAMAP_NOT_LOADED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3129
     Name: VSAMAP_UNMOUNT_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3130
     Name: VSAMAP_INVALIDATE_ALLBLKS_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3131
     Name: VSAMAP_UNLOAD_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3132
     Name: VSAMAP_STORE_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3133
     Name: STRIPEMAP_STORE_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3134
     Name: MFS_SYNCIO_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3135
     Name: MFS_ASYNCIO_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3136
     Name: VSAMAP_NOT_ACCESSIBLE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3137
     Name: DELETE_VOLUME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3138
     Name: FILE_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3139
     Name: NEED_TO_INITIAL_STORE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3140
     Name: WRONG_MAP_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3141
     Name: MAPPER_ALREADY_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3142
     Name: MAPPER_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3143
     Name: MAPPER_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3144
     Name: MAPPER_INITIALIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3145
     Name: MAPPER_DISPOSE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3146
     Name: MPAGE_MEMORY_DESTRUCT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3147
     Name: MAPPER_INFO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3148
     Name: MAP_FLUSH_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   # Allocator: 3150 - 3299
@@ -3672,476 +3672,476 @@ Root:
     Id: 3150
     Name: ALLOCATOR_META_ARCHIVE_STORE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3151
     Name: ALLOCATOR_META_ARCHIVE_LOAD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3152
     Name: ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3153
     Name: ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3154
     Name: ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3155
     Name: ALLOCATOR_MAKE_REBUILD_TARGET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3156
     Name: ALLOCATOR_FILE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3157
     Name: ALLOCATOR_NO_FREE_SEGMENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3158
     Name: VALID_COUNT_UNDERFLOWED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3159
     Name: ALLOCATOR_MAKE_REBUILD_TARGET_DONE
     Severity:
-    Message: Succeeded to build a list for rebuild target segments.
+    Description: Succeeded to build a list for rebuild target segments.
     Cause:
     Solution:
   -
     Id: 3160
     Name: ALLOCATOR_MAKE_REBUILD_TARGET_START
     Severity:
-    Message: Started to rebuild a segment.
+    Description: Started to rebuild a segment.
     Cause:
     Solution:
   -
     Id: 3161
     Name: ALLOCATOR_MAKE_REBUILD_TARGET_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3162
     Name: ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3163
     Name: ALLOCATOR_TARGET_SEGMENT_FREE_DONE
     Severity:
-    Message: Garbage collector has successfully freed a segment.
+    Description: Garbage collector has successfully freed a segment.
     Cause:
     Solution:
   -
     Id: 3164
     Name: ALLOCATOR_TARGET_SEGMENT_UNDER_REBUILDING
     Severity:
-    Message: Garbage collector has reclaimed a segment
+    Description: Garbage collector has reclaimed a segment
     Cause: but it cannot be done.
     Solution: The segement is in rebuilding.
   -
     Id: 3165
     Name: ALLOCATOR_REBUILD_TARGET_SET_NOT_EMPTY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3166
     Name: ALLOCATOR_REBUILD_TARGET_SET_EMPTY
     Severity:
-    Message: Rebuild has already done or not occured.
+    Description: Rebuild has already done or not occured.
     Cause:
     Solution:
   -
     Id: 3167
     Name: ALLOCATOR_NO_FREE_WB_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3168
     Name: ALLOCATOR_REBUILD_CTX_LOAD_SUCCESS
     Severity:
-    Message: Succeeded to load the rebuild list.
+    Description: Succeeded to load the rebuild list.
     Cause:
     Solution:
   -
     Id: 3169
     Name: ALLOCATOR_REBUILD_SEGMENT_COMPLETED
     Severity:
-    Message: Succeeded to release a segment rebuild.
+    Description: Succeeded to release a segment rebuild.
     Cause:
     Solution:
   -
     Id: 3170
     Name: ALLOCATOR_SEGMENT_ADDED_TO_REBUILD_TARGET
     Severity:
-    Message: A segment has been added to the rebuild target list.
+    Description: A segment has been added to the rebuild target list.
     Cause:
     Solution:
   -
     Id: 3171
     Name: ALLOCATOR_SEGMENT_ADDED_TO_LIST
     Severity:
-    Message: A segment has been added to a list.
+    Description: A segment has been added to a list.
     Cause:
     Solution:
   -
     Id: 3172
     Name: ALLOCATOR_ALLOCATE_FAILURE_NO_FREE_SEGMENT
     Severity:
-    Message: Failed to allocate a segment.
+    Description: Failed to allocate a segment.
     Cause:
     Solution:
   -
     Id: 3173
     Name: ALLOCATOR_WRONG_STRIPE_REFERENCE_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3174
     Name: ALLOCATOR_CANNOT_ALLOCATE_USER_BLOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3175
     Name: ALLOCATOR_CANNOT_ALLOCATE_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3176
     Name: ALLOCATOR_CANNOT_LINK_REVERSE_MAP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3177
     Name: ALLOCATOR_STRIPE_WITHOUT_REVERSEMAP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3178
     Name: ALLOCATOR_RECONSTRUCT_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3179
     Name: ALLOCATOR_REPLAYED_STRIPE_IS_FULL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3180
     Name: ALLOCATOR_REPLAY_SEGMENT_STATUS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3181
     Name: ALLOCATOR_TRIGGER_FLUSH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3182
     Name: REVMAP_RECONSTRUCT_FOUND_RBA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3183
     Name: REVMAP_RECONSTRUCT_NOT_FOUND_RBA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3184
     Name: GET_VOLUMESIZE_FAILURE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3185
     Name: WRONG_BLOCK_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3186
     Name: PICKUP_ACTIVE_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3187
     Name: SEGMENT_WAS_VICTIM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3188
     Name: SEGMENT_WAS_NOT_VICTIM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3189
     Name: ALLOCATOR_VALID_BLOCK_COUNT_UNDERFLOW
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3190
     Name: ALLOCATOR_VALID_BLOCK_COUNT_OVERFLOW
     Severity:
-    Message: An overflow occurred with valid block count.
+    Description: An overflow occurred with valid block count.
     Cause:
     Solution:
   -
     Id: 3191
     Name: FAILED_TO_ISSUE_ASYNC_METAIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3192
     Name: ERROR_REINIT_WITHOUT_DISPOSE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3193
     Name: ALLOCATOR_FILE_LOAD_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3194
     Name: GC_STRIPE_ALLOCATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3195
     Name: ALLOCATE_GC_VICTIM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3196
     Name: ALLOCATOR_CURRENT_GC_MODE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3197
     Name: ALLOCATOR_META_ASYNCLOAD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3198
     Name: UNKNOWN_ALLOCATOR_ERROR
     Severity:
-    Message: An unknown error occured during rebuild.
+    Description: An unknown error occured during rebuild.
     Cause: Rebuild has been completed
     Solution: but it's not the rebuilding target.
   -
     Id: 3199
     Name: ALLOCATOR_RESERVED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3200
     Name: BLOCK_ALLOCATION_UNLOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3201
     Name: BLOCK_ALLOCATION_LOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3202
     Name: ALLOCATOR_NO_MATCHING_REQ_ARRAY_NAME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3203
     Name: ALLOCATOR_FILE_IO_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3204
     Name: REVMAP_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3205
     Name: ALLOCATOR_COPIER_FREE_SEGMENT_SUCCESS
     Severity:
-    Message: Copier has successfully freed a segment. The segement has been removed from the victim list.
+    Description: Copier has successfully freed a segment. The segement has been removed from the victim list.
     Cause:
     Solution:
   -
     Id: 3206
     Name: ALLOCATOR_SEGMENT_REMOVAL_FAILURE_VALID_COUNT_NOT_ZERO
     Severity:
-    Message: Failed to remove a segment from the victim list. PoseidonOS will be asserted.
+    Description: Failed to remove a segment from the victim list. PoseidonOS will be asserted.
     Cause: Valid count is not zero.
     Solution:
   -
     Id: 3207
     Name: ALLOCATOR_SEGMENT_REMOVAL_FAILURE_ALREADY_FREE_SEGMENT
     Severity:
-    Message: Failed to remove a segment from the victim list.
+    Description: Failed to remove a segment from the victim list.
     Cause: Segement has been already freed.
     Solution:
   -
     Id: 3208
     Name: ALLOCATOR_REBUILD_STOP
     Severity:
-    Message: Rebuild has stopped.
+    Description: Rebuild has stopped.
     Cause:
     Solution:
   -
     Id: 3209
     Name: ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS
     Severity:
-    Message: Succeeded to allocate a free segment.
+    Description: Succeeded to allocate a free segment.
     Cause:
     Solution:
   -
     Id: 3210
     Name: ALLOCATOR_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3211
     Name: ALLOCATOR_INITIALIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3212
     Name: ALLOCATOR_DISPOSE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3213
     Name: ALLOCATOR_RESET_SEGMENTS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3214
     Name: ALLOCATOR_INFO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3215
     Name: ALLOCATOR_FAILED_TO_CREATE_FILE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3216
     Name: ALLOCATOR_META_ARCHIVE_STORE_COMPLETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3217
     Name: WBSTRIPE_MANAGER_FAILED_TO_GET_BUFFER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   # Metadata: 3300 - 3399
@@ -4149,28 +4149,28 @@ Root:
     Id: 3300
     Name: META_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3301
     Name: META_NOT_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3302
     Name: META_ALREADY_REGISTERED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3303
     Name: META_STRIPE_FAILED_TO_ASSIGN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -4180,266 +4180,266 @@ Root:
     Id: 3400
     Name: GC_TRIGGERED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3401
     Name: GC_STARTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3402
     Name: GC_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3403
     Name: GC_CANNOT_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3410
     Name: GC_VICTIM_STRIPE_CONSTRUCTOR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3411
     Name: GC_LOAD_REVERSE_MAP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3412
     Name: GC_LOAD_VALID_BLOCKS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3413
     Name: GC_GET_UNMAP_VSA
     Severity:
-    Message: The current VSA map is in unmap state
+    Description: The current VSA map is in unmap state
     Cause:
     Solution:
   -
     Id: 3414
     Name: GC_GET_UNMAP_LSA
     Severity:
-    Message: The current LSA map is in unmap state
+    Description: The current LSA map is in unmap state
     Cause:
     Solution:
   -
     Id: 3415
     Name: GC_GET_VICTIM_SEGMENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3416
     Name: GC_GET_VALID_BLOCKS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3417
     Name: GC_GET_VALID_BLOCK_INFO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3418
     Name: GC_COPY_COMPLETE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3419
     Name: GC_GET_BUFFER_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3420
     Name: GC_STRIPE_COPIER_SUBMIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3421
     Name: GC_STRIPE_FLUSH_SUBMIT
     Severity:
-    Message: "GC flush submission"
+    Description: "GC flush submission"
     Cause:
     Solution:
   -
     Id: 3422
     Name: GC_STRIPE_FLUSH_COMPLETION
     Severity:
-    Message: "GC flush completion"
+    Description: "GC flush completion"
     Cause:
     Solution:
   -
     Id: 3423
     Name: GC_ACQUIRE_OWNERSHIP_RBA_LIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3424
     Name: GC_MAP_UPDATE_REQUEST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3425
     Name: GC_MAP_UPDATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3426
     Name: GC_MAP_UPDATE_COMPLETION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3427
     Name: GC_MAP_UPDATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3428
     Name: GC_COPIER_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3429
     Name: GC_CANNOT_CREATE_COPIER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3430
     Name: GC_ERROR_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3431
     Name: GC_RELEASE_VICTIM_SEGMENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3432
     Name: GC_THRESHOLD_CHECK_DISABLE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3433
     Name: GC_FORCE_FLUSH_TIMER_INIT
     Severity:
-    Message: The GC force flush timer interval is set.
+    Description: The GC force flush timer interval is set.
     Cause:
     Solution:
   -
     Id: 3434
     Name: GC_FORCE_FLUSH_TIMER_START
     Severity:
-    Message: The GC force flush timer is started.
+    Description: The GC force flush timer is started.
     Cause:
     Solution:
   -
     Id: 3435
     Name: GC_FORCE_FLUSH_TIMER_TIMEOUT
     Severity:
-    Message: The GC force flush timer expired and the GC stripe is force flushed.
+    Description: The GC force flush timer expired and the GC stripe is force flushed.
     Cause:
     Solution:
   -
     Id: 3436
     Name: GC_FORCE_FLUSH_TIMER_RESET
     Severity:
-    Message: A flush occurred before the GC force flush timer expired, and the timer was reset.
+    Description: A flush occurred before the GC force flush timer expired, and the timer was reset.
     Cause:
     Solution:
   -
     Id: 3437
     Name: GC_STRIPE_FORCIBLY_FLUSHED
     Severity:
-    Message: The GC stripe forcibly flushed because the timer expired.
+    Description: The GC stripe forcibly flushed because the timer expired.
     Cause:
     Solution:
   -
     Id: 3440
     Name: GC_NORMAL_FLUSH_TRYLOCK_FAILED
     Severity:
-    Message: GC normal flush lock acquisition failed
+    Description: GC normal flush lock acquisition failed
     Cause: Forced flushing
     Solution:
   -
     Id: 3441
     Name: GC_FORCE_FLUSH_LOCK_ACQUIRED
     Severity:
-    Message: GC force flush lock acquired
+    Description: GC force flush lock acquired
     Cause:
     Solution:
   -
     Id: 3442
     Name: GC_FORCE_FLUSH_TRYLOCK_FAILED
     Severity:
-    Message: GC force flush lock acquisition failed
+    Description: GC force flush lock acquisition failed
     Cause:
     Solution: It will be retried
   -
     Id: 3443
     Name: GC_FORCE_FLUSH_LOCK_RELEASED
     Severity:
-    Message: GC force flush lock released
+    Description: GC force flush lock released
     Cause:
     Solution:
   -
     Id: 3444
     Name: GC_FORCE_FLUSH_TRYLOCK_WAITING
     Severity:
-    Message: Waiting for GC force flush lock acquisition
+    Description: Waiting for GC force flush lock acquisition
     Cause: The volume is deleted and need to reset flush lock
     Solution:
   -
     Id: 3445
     Name: GC_FLUSH_LOCK_RESET
     Severity:
-    Message: GC flush lock reset
+    Description: GC flush lock reset
     Cause: The volume is deleted
     Solution:
 
@@ -4448,35 +4448,35 @@ Root:
     Id: 3470
     Name: GC_WBT_ARGUMENT_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3471
     Name: GC_WBT_INVALID_ARRAY_NAME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3472
     Name: GC_WBT_CANNOT_ENABLE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3473
     Name: GC_WBT_CANNOT_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3474
     Name: GC_WBT_UNNECESSARY_GC
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -4486,84 +4486,84 @@ Root:
     Id: 3500
     Name: FLOW_CONTROL_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3501
     Name: FLOW_CONTROL_TOKEN_DISTRIBUTED
     Severity:
-    Message: Create each token for user io and garbage collector.
+    Description: Create each token for user io and garbage collector.
     Cause:
     Solution:
   -
     Id: 3502
     Name: FLOW_CONTROL_TOKEN_DISTRIBUTED_INIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3503
     Name: FLOW_CONTROL_TOKEN_DISTRIBUTED_TRY_INIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3504
     Name: FLOW_CONTROL_TOKEN_DISTRIBUTED_SKIP_INIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3505
     Name: FLOW_CONTROL_TOKEN_OVERFLOW
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3506
     Name: FLOW_CONTROL_REQUESTED_TOKEN_NEGATIVE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3507
     Name: FLOW_CONTROL_WRONG_STRATEGY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3508
     Name: FLOW_CONTROL_FORCERESET_DONE
     Severity:
-    Message: Force reset is completed normally.
+    Description: Force reset is completed normally.
     Cause:
     Solution:
   -
     Id: 3509
     Name: FLOW_CONTROL_CONFIGURATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3510
     Name: FLOW_CONTROL_NO_MATCHING_REQ_ARRAY_NAME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3511
     Name: FLOW_CONTROL_TOKEN_RESET_DUE_TO_FORCE_FLUSH
     Severity:
-    Message: Tokens are reset due to force flush.
+    Description: Tokens are reset due to force flush.
     Cause:
     Solution:
 
@@ -4573,119 +4573,119 @@ Root:
     Id: 3600
     Name: RESOURCE_CHECKER_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3601
     Name: RESOURCE_CHECKER_CONSTRUCTOR_IN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3602
     Name: RESOURCE_CHECKER_CONSTRUCTOR_OUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3603
     Name: RESOURCE_CHECKER_DESTRUCTOR_IN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3604
     Name: RESOURCE_CHECKER_DESTRUCTOR_OUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3605
     Name: RESOURCE_CHECKER_DELETE_EVENT_CHECKER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3606
     Name: RESOURCE_CHECKER_DELETE_THREAD_IN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3607
     Name: RESOURCE_CHECKER_DELETE_THREAD_OUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3608
     Name: RESOURCE_CHECKER_ENABLE_THREAD_IN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3609
     Name: RESOURCE_CHECKER_MAKE_THREAD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3610
     Name: RESOURCE_CHECKER_ENABLE_THREAD_OUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3611
     Name: RESOURCE_CHECKER_EXECUTE_IN
     Severity:
-    Message: Periodic execution of host side resource check has begun.
+    Description: Periodic execution of host side resource check has begun.
     Cause:
     Solution:
   -
     Id: 3612
     Name: RESOURCE_CHECKER_EXECUTE_EVENT_DELETED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3613
     Name: RESOURCE_CHECKER_EXECUTE_OUT
     Severity:
-    Message: Periodic execution of host side resource check has been completed.
+    Description: Periodic execution of host side resource check has been completed.
     Cause:
     Solution:
   -
     Id: 3614
     Name: RESOURCE_CHECKER_THREAD_DISABLE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3615
     Name: RESOURCE_CHECKER_SET_SLEEP_TIME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3616
     Name: RESOURCE_CHECKER_END
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -4695,21 +4695,21 @@ Root:
     Id: 3700
     Name: SMART_COLLECTOR_CONSTRUCTOR_EXECUTION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3701
     Name: SMART_COLLECTOR_DESTRUCTOR_EXECUTION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 3702
     Name: SMART_COLLECTOR_CMD_EXEC_ERR
     Severity:
-    Message: Command execution error.
+    Description: Command execution error.
     Cause: Could not process get log page(02h-smart)
     Solution: Please device scan again
 
@@ -4719,686 +4719,686 @@ Root:
     Id: 4000
     Name: MFS_DEBUG_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4001
     Name: MFS_DEBUG_MESSAGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4002
     Name: MFS_INFO_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4003
     Name: MFS_INFO_MESSAGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4004
     Name: MFS_CREATE_META_FILE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4005
     Name: MFS_WARNING_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4006
     Name: MFS_WARNING_INIT_AGAIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4007
     Name: MFS_SYSTEM_MOUNT_AGAIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4008
     Name: MFS_SYSTEM_UNMOUNT_AGAIN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4009
     Name: MFS_MSG_ENQUEUE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4010
     Name: MFS_COMPACTION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4011
     Name: MFS_WARNING_MESSAGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4012
     Name: MFS_ERROR_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4013
     Name: MFS_ERROR_MOUNTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4014
     Name: MFS_ERROR_UNMOUNTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4015
     Name: MFS_ERROR_MESSAGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4016
     Name: MFS_INVALID_PARAMETER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4017
     Name: MFS_MODULE_NOT_READY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4018
     Name: MFS_MODULE_ALREADY_READY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4019
     Name: MFS_MODULE_INIT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4020
     Name: MFS_MODULE_BRINGUP_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4021
     Name: MFS_MODULE_NO_MEDIA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4022
     Name: MFS_SYSTEM_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4023
     Name: MFS_INVALID_INFORMATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4024
     Name: MFS_FILE_CREATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4025
     Name: MFS_FILE_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4026
     Name: MFS_FILE_NOT_OPENED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4027
     Name: MFS_FILE_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4028
     Name: MFS_FILE_OPEN_REPETITIONARY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4029
     Name: MFS_FILE_CLOSE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4030
     Name: MFS_FILE_FORMAT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4031
     Name: MFS_FILE_DELETE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4032
     Name: MFS_FILE_ALREADY_LOCKED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4033
     Name: MFS_FILE_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4034
     Name: MFS_FILE_WRITE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4035
     Name: MFS_MEDIA_WROTE_SIZE_NOT_MATCHED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4036
     Name: MFS_MEDIA_SEEK_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4037
     Name: MFS_MEDIA_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4038
     Name: MFS_MEDIA_WRITE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4039
     Name: MFS_FILE_TRIM_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4040
     Name: MFS_MEDIA_MOUNT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4041
     Name: MFS_MEDIA_UNMOUNT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4042
     Name: MFS_MEDIA_NULL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4043
     Name: MFS_META_STORAGE_CREATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4044
     Name: MFS_META_STORAGE_CLOSE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4045
     Name: MFS_META_STORAGE_NOT_READY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4046
     Name: MFS_META_VOLUME_CREATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4047
     Name: MFS_META_VOLUME_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4048
     Name: MFS_META_VOLUME_CLOSE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4049
     Name: MFS_META_VOLUME_CLOSE_FAILED_DUE_TO_ACTIVE_FILE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4050
     Name: MFS_META_VOLUME_NOT_ENOUGH_SPACE
     Severity:
-    Message: The target meta volume does not have enough space.
+    Description: The target meta volume does not have enough space.
     Cause: The target meta volume is almost full.
     Solution:
   -
     Id: 4051
     Name: MFS_META_VOLUME_ALMOST_FULL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4052
     Name: MFS_META_VOLUME_ALREADY_CLOSED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4053
     Name: MFS_META_VOLUME_CATALOG_INVALID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4054
     Name: MFS_META_VOLUME_INVALID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4055
     Name: MFS_META_VOLUME_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4056
     Name: MFS_META_SAVE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4057
     Name: MFS_META_LOAD_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4058
     Name: MFS_IO_FAILED_DUE_TO_ENQUEUE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4059
     Name: MFS_IO_FAILED_DUE_TO_STOP_STATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4060
     Name: MFS_IO_FAILED_DUE_TO_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4061
     Name: MFS_QUEUE_POP_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4062
     Name: MFS_QUEUE_PUSH_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4063
     Name: MFS_MAX_FILE_SIZE_NOT_SET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4064
     Name: MFS_ARRAY_CREATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4065
     Name: MFS_ARRAY_ADD_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4066
     Name: MFS_ARRAY_REMOVE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4067
     Name: MFS_ARRAY_DELETE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4068
     Name: MFS_INVALID_MBR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4069
     Name: MFS_NEED_MORE_CONTEXT_SLOT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4070
     Name: MFS_FILE_DESCRIPTOR_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4071
     Name: MFS_FILE_INACTIVATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4072
     Name: MFS_DATA_CORRUPTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4073
     Name: MFS_INVALID_CONFIG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4074
     Name: MFS_FILE_NAME_EXISTED
     Severity:
-    Message: The file name requested for creation has already existed.
+    Description: The file name requested for creation has already existed.
     Cause: The file name requested for creation has already existed.
     Solution: Please change the name requested.
   -
     Id: 4075
     Name: MFS_UNNECESSARY_SCHEDULER_SET
     Severity:
-    Message: The number of meta schedulers is unnecessarily large
+    Description: The number of meta schedulers is unnecessarily large
     Cause: the number of meta schedulers is unnecessarily large
     Solution: Please reduce the number of meta_scheduler in pos.conf
   -
     Id: 4076
     Name: MFS_MAX_SCHEDULER_EXCEEDED
     Severity:
-    Message: Only up to two meta schedulers can be set
+    Description: Only up to two meta schedulers can be set
     Cause: Only up to two meta schedulers can be set
     Solution: Please reduce the number of meta_scheduler in pos.conf
   -
     Id: 4077
     Name: MFS_MIO_HANDLER_NOT_EXIST
     Severity:
-    Message: There is no meta worker set in the same numa
+    Description: There is no meta worker set in the same numa
     Cause: There is no meta worker set in the same numa
     Solution: Please check meta_io in pos.conf
   -
     Id: 4078
     Name: MFS_CRITICAL_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4079
     Name: MFS_RECOVERY_CATALOG_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4080
     Name: MFS_TEST_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4081
     Name: MFS_ARRAY_CREATE_SUCCEEDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4082
     Name: MFS_ARRAY_ADD_SUCCEEDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4083
     Name: MFS_ARRAY_REMOVE_SUCCEEDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4084
     Name: MFS_ARRAY_DELETE_SUCCEEDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4085
     Name: MFS_TRY_TO_CREATE_SCHEDULER_IN_THE_SAME_NUMA
     Severity:
-    Message: Only one scheduler can be created for each NUMA
+    Description: Only one scheduler can be created for each NUMA
     Cause: Remove core id belonging to the same NUMA
     Solution: Please check meta_scheduler in pos.conf
   -
     Id: 4086
     Name: MFS_SCHEDULER_COUNT_SMALLER_THAN_EXPECTED
     Severity:
-    Message: Numa_dedicated is set but the count of metafs io scheduler is not more than one
+    Description: Numa_dedicated is set but the count of metafs io scheduler is not more than one
     Cause: When numa_dedicated is set, the count of scheduler is expected two
     Solution: Please check meta_scheduler in pos.conf
   -
     Id: 4087
     Name: MFS_SCHEDULER_NONE
     Severity:
-    Message: A scheduler needs to be created at least
+    Description: A scheduler needs to be created at least
     Cause: There is no metafs io scheduler
     Solution: Please check meta_scheduler in pos.conf
   -
     Id: 4088
     Name: MFS_NEED_TO_CHECK_SCHEDULER_SETTING
     Severity:
-    Message: Need to check metafs io scheduler setting in pos.conf
+    Description: Need to check metafs io scheduler setting in pos.conf
     Cause: There is some problem in scheduler setting
     Solution: Please check meta_scheduler in pos.conf
   -
     Id: 4089
     Name: MFS_IO_FAILED_DUE_TO_TRYLOCK_FAIL
     Severity:
-    Message: Waiting for lock resource
+    Description: Waiting for lock resource
     Cause: Write operation has been failed due to IOSubmitHandlerStatus::TRYLOCK_FAIL
     Solution: MetaFs will try again
   -
     Id: 4090
     Name: MFS_IO_FAILED_DUE_TO_BUSY
     Severity:
-    Message: Waiting for io resource
+    Description: Waiting for io resource
     Cause: Write operation has been failed due to IOSubmitHandlerStatus::FAIL
     Solution: MetaFs will try again
   -
     Id: 4091
     Name: MFS_MPIO_ENQUEUED_TWICE
     Severity:
-    Message: The mpio is enqueued twice
+    Description: The mpio is enqueued twice
     Cause: It is possible that the mpio is enqueued twice
     Solution: Need to debug
   -
     Id: 4092
     Name: MFS_INVALID_CRC
     Severity:
-    Message: It is failed to find to match crc values between written crc and generated crc from data buffer
+    Description: It is failed to find to match crc values between written crc and generated crc from data buffer
     Cause: Written crc or data might be damaged
     Solution:
   -
     Id: 4093
     Name: MFS_INVALID_META_LPN
     Severity:
-    Message: It is failed to find to match lpn numbers between expected one and written
+    Description: It is failed to find to match lpn numbers between expected one and written
     Cause: Written lpn number or data might be damaged
     Solution:
   -
     Id: 4094
     Name: MFS_INVALID_FILE_DESCRIPTOR
     Severity:
-    Message: It is failed to find to match crc values between expected one and written
+    Description: It is failed to find to match crc values between expected one and written
     Cause: Written file descriptor or data might be damaged
     Solution:
   -
     Id: 4095
     Name: MFS_INVALID_SIGNATURE
     Severity:
-    Message: It is failed to find to match signatures between expected one and written
+    Description: It is failed to find to match signatures between expected one and written
     Cause: Written signature or data might be damaged
     Solution:
   -
     Id: 4096
     Name: MFS_INVALID_EPOCH_SIGNATURE
     Severity:
-    Message: It is failed to find to match epoch signatures between expected one and written
+    Description: It is failed to find to match epoch signatures between expected one and written
     Cause: Written epoch signature or data might be damaged
     Solution:
   -
     Id: 4097
     Name: MFS_FAILED_TO_CHECK_INTEGRITY
     Severity:
-    Message: There are some problems with data integrity
+    Description: There are some problems with data integrity
     Cause: Data may be damaged
     Solution:
 
@@ -5406,21 +5406,21 @@ Root:
     Id: 4500
     Name: VOLUME_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4510
     Name: DEVICE_DETACH_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4520
     Name: STATE_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -5428,28 +5428,28 @@ Root:
     Id: 4580
     Name: LOGGER_FILTER_POLICY_DECODE_FAIL
     Severity:
-    Message: Failed to decode logger filter policy.
+    Description: Failed to decode logger filter policy.
     Cause:
     Solution:
   -
     Id: 4581
     Name: LOGGER_FILTER_POLICY_FILE_NOT_FOUND
     Severity:
-    Message: Failed to find a logger filter policy file.
+    Description: Failed to find a logger filter policy file.
     Cause:
     Solution: Check out the instructions in the help message of the command.
   -
     Id: 4582
     Name: LOGGER_SET_LEVEL_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4583
     Name: LOGGER_FILTER_APPLY_SUCCESS
     Severity:
-    Message: Log filter has been applied.
+    Description: Log filter has been applied.
     Cause:
     Solution:
 
@@ -5459,91 +5459,91 @@ Root:
     Id: 4600
     Name: QOS_CLI_WRONG_MISSING_PARAMETER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4601
     Name: QOS_CLI_FE_QOS_DISABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4602
     Name: QOS_SET_EVENT_POLICY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4603
     Name: QOS_NOT_SUPPORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4604
     Name: QOS_FINALIZATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4605
     Name: QOS_POLLER_REGISTRATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4606
     Name: QOS_POLLER_REGISTRATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4607
     Name: QOS_POLLER_UNREGISTRATION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4608
     Name: QOS_POLLER_UNREGISTRATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4609
     Name: QOS_MINIMUM_NOT_MET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4610
     Name: QOS_MAX_ARRAYS_EXCEEDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4611
     Name: QOS_ARRAY_DOES_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 4612
     Name: QOS_NOT_GUARANTEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -5553,231 +5553,231 @@ Root:
     Id: 5000
     Name: IONVMF_1H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5001
     Name: IONVMF_2H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5002
     Name: IONVMF_3H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5003
     Name: IONVMF_4H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5004
     Name: IONVMF_5H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5005
     Name: IONVMF_6H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5006
     Name: IONVMF_7H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5007
     Name: IONVMF_8H
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5008
     Name: IONVMF_NAMESPACE_ATTACH_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5009
     Name: IONVMF_FAIL_TO_FIND_VOLID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5010
     Name: IONVMF_FAIL_TO_FIND_ARRAYNAME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5011
     Name: IONVMF_OVERRIDE_UNVMF_IO_HANDLER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5012
     Name: IONVMF_VOL_CREATE_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5013
     Name: IONVMF_VOL_DELETE_TIMEOUT
     Severity:
-    Message: Failed to delete volumes.
+    Description: Failed to delete volumes.
     Cause: A timeout has occured.
     Solution: Please report the errors.
   -
     Id: 5014
     Name: IONVMF_VOL_MOUNT_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5015
     Name: IONVMF_VOLUME_DETACH_COUNT_OVERFLOW
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5016
     Name: IONVMF_FAIL_TO_CREATE_POS_BDEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5017
     Name: IONVMF_FAIL_TO_DELETE_POS_BDEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5018
     Name: IONVMF_FAIL_TO_DETACH_NAMESPACE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5019
     Name: IONVMF_BDEV_DOES_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5020
     Name: IONVMF_BDEV_UUID_DOES_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5021
     Name: IONVMF_FAIL_TO_CONVERT_UUID_INTO_STRING
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5022
     Name: IONVMF_FAIL_TO_PARSE_UUID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5023
     Name: IONVMF_FAIL_TO_FIND_SUBSYSTEM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5024
     Name: IONVMF_BDEV_ALREADY_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5025
     Name: IONVMF_FAIL_TO_READ_TRANSPORT_CONFIG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5026
     Name: IONVMF_FAIL_TO_CREATE_TRANSPORT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5027
     Name: IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5028
     Name: IONVMF_FAIL_TO_CREATE_SUBSYSTEM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5029
     Name: IONVMF_SET_ARRAY_TO_SUBSYSTEM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5030
     Name: IONVMF_NO_CONFIG_MGR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5031
     Name: IONVMF_FAIL_TO_INIT_POS_BDEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5032
     Name: IONVMF_SPDK_NVMF_CALLER_NULLPTR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -5787,994 +5787,994 @@ Root:
     Id: 5100
     Name: AFTMGR_CPU_COUNT_NOT_ENOUGH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5101
     Name: AFTMGR_DISABLED_CORE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5102
     Name: AFTMGR_FAIL_TO_FIND_MASTER_REACTOR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5103
     Name: AFTMGR_FAIL_TO_ALLOCATE_ALL_CPU
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5104
     Name: AFTMGR_FAIL_TO_OVERLAP_MASK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5105
     Name: AFTMGR_FAIL_TO_PARSING_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5106
     Name: AFTMGR_CORE_NOT_SUFFICIENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5107
     Name: AFTMGR_NO_EVENT_WORKER_ALLOCATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5108
     Name: AFTMGR_NO_USE_CONFIG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5109
     Name: AFTMGR_USE_CONFIG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5110
     Name: AIO_CONTEXT_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5111
     Name: AIO_FAIL_TO_ALLOCATE_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5112
     Name: AIO_FAIL_TO_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5113
     Name: AIO_INVALID_AIO_CONTEXT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5114
     Name: AIO_INVALID_AIO_PRIVATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5115
     Name: AIO_INVALID_BDEV_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5116
     Name: AIO_INVALID_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5117
     Name: AIO_IO_FROM_INVALID_THREAD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5118
     Name: AIO_DEBUG_COMPLETION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5119
     Name: AIO_DEBUG_SUBMISSION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5120
     Name: AIO_FLUSH_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5121
     Name: AIO_FLUSH_END
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5122
     Name: BLKALGN_INVALID_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5123
     Name: BLKHDLR_FAIL_TO_ALLOCATE_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5124
     Name: BLKHDLR_WRONG_IO_DIRECTION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5125
     Name: CALLBACK_INVALID_CALLEE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5126
     Name: CALLBACK_INVALID_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5127
     Name: CALLBACK_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5128
     Name: CALLBACK_DESTROY_WITHOUT_EXECUTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5129
     Name: CALLBACK_DESTROY_WITH_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5130
     Name: EVENTFRAMEWORK_FAIL_TO_ALLOCATE_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5131
     Name: EVENTFRAMEWORK_INVALID_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5132
     Name: EVENTFRAMEWORK_INVALID_REACTOR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5133
     Name: EVENTSCHEDULER_NOT_MATCH_WORKER_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5134
     Name: EVTARG_WRONG_ARGUMENT_ACCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5135
     Name: EVTARG_WRONG_ARGUMENT_ADD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5136
     Name: EVTQ_INVALID_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5137
     Name: EVTSCHDLR_INVALID_WORKER_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5138
     Name: FLUSHREAD_DEBUG_SUBMIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5139
     Name: FLUSHREAD_FAIL_TO_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5140
     Name: FLUSH_DEBUG_SUBMIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5141
     Name: FLUSH_DEBUG_COMPLETION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5142
     Name: FREEBUFPOOL_FAIL_TO_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5143
     Name: IOAT_CONFIG_INVALID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5144
     Name: IOATAPI_FAIL_TO_FINALIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5145
     Name: IOATAPI_FAIL_TO_INITIALIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5146
     Name: IOATAPI_FAIL_TO_SUBMIT_COPY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5147
     Name: IOATAPI_DISABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5148
     Name: IOATAPI_ENABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5149
     Name: IODISPATCHER_INVALID_CPU_INDEX
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5150
     Name: IODISPATCHER_INVALID_PARM
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5151
     Name: MERGER_INVALID_SPLIT_REQUESTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5152
     Name: RBAMGR_WRONG_VOLUME_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5153
     Name: RDCMP_INVALID_ORIGIN_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5154
     Name: RDCMP_INVALID_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5155
     Name: RDCMP_READ_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5156
     Name: RDHDLR_INVALID_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5157
     Name: RDHDLR_READ_DURING_REBUILD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5158
     Name: SCHEDAPI_COMPLETION_POLLING_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5159
     Name: SCHEDAPI_NULL_COMMAND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5160
     Name: SCHEDAPI_SUBMISSION_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5161
     Name: SCHEDAPI_WRONG_BUFFER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5162
     Name: STRIPE_INVALID_VOLUME_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5163
     Name: REF_COUNT_RAISE_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5164
     Name: TRANSLATE_CONVERT_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5165
     Name: TRANSLATE_CONVERT_FAIL_IN_SYSTEM_STOP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5166
     Name: TRSLTR_INVALID_BLOCK_INDEX
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5167
     Name: TRSLTR_WRONG_ACCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5168
     Name: TRSLTR_WRONG_VOLUME_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5169
     Name: VOLUMEIO_DEBUG_SUBMIT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5170
     Name: UBIO_DEBUG_CHECK_VALID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5171
     Name: UBIO_DEBUG_COMPLETE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5172
     Name: UBIO_ALREADY_SYNC_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5173
     Name: UBIO_CALLBACK_EVENT_ALREADY_SET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5174
     Name: UBIO_DUPLICATE_IO_ABSTRACTION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5175
     Name: UBIO_FAIL_TO_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5176
     Name: UBIO_FREE_UNALLOWED_BUFFER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5177
     Name: UBIO_INVALID_GC_PROGRESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5178
     Name: UBIO_INVALID_POS_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5179
     Name: UBIO_INVALID_IO_STATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5180
     Name: UBIO_INVALID_LSID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5181
     Name: UBIO_INVALID_ORIGIN_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5182
     Name: UBIO_INVALID_ORIGINAL_CORE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5183
     Name: UBIO_INVALID_PBA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5184
     Name: UBIO_INVALID_RBA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5185
     Name: UBIO_INVALID_UBIO_HANDLER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5186
     Name: UBIO_INVALID_VOLUME_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5187
     Name: UBIO_INVALID_VSA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5188
     Name: UBIO_INVALID_ARRAY_NAME
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5189
     Name: UBIO_INVALID_DEVICE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5190
     Name: UBIO_NO_COMPLETION_FOR_FRONT_END_EVENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5191
     Name: UBIO_REMAINING_COUNT_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5192
     Name: UBIO_REQUEST_NULL_BUFFER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5193
     Name: UBIO_REQUEST_OUT_RANGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5194
     Name: UBIO_SYNC_FLAG_NOT_SET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5195
     Name: UBIO_WRONG_SPLIT_SIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5196
     Name: URAM_BACKUP_FILE_NOT_EXISTS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5197
     Name: URAM_BACKUP_FILE_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5198
     Name: URAM_BACKUP_FILE_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5199
     Name: URAM_BACKUP_FILE_STAT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5200
     Name: URAM_CONFIG_FILE_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5201
     Name: URAM_COMPLETION_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5202
     Name: URAM_COMPLETION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5203
     Name: URAM_FAIL_TO_CLOSE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5204
     Name: URAM_FAIL_TO_OPEN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5205
     Name: URAM_FAIL_TO_REQUEST_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5206
     Name: URAM_FAIL_TO_RETRY_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5207
     Name: URAM_PENDING_IO_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5208
     Name: URAM_RESTORING_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5209
     Name: URAM_RESTORING_PAGE_DONE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5210
     Name: URAM_SUBMISSION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5211
     Name: URAM_SUBMISSION_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5212
     Name: WRCMP_FAIL_TO_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5213
     Name: WRCMP_INVALID_SPLIT_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5214
     Name: WRCMP_INVALID_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5215
     Name: WRCMP_IO_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5216
     Name: WRCMP_WRITE_WRAPUP_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5217
     Name: WRCMP_MAP_UPDATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5218
     Name: IOCONTROL_REBUILD_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5219
     Name: WRHDLR_ALLOC_WRITE_BUFFER_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5220
     Name: WRHDLR_FAIL_TO_ALLOCATE_MEMORY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5221
     Name: WRHDLR_FAIL_BY_SYSTEM_STOP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5222
     Name: WRHDLR_INVALID_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5223
     Name: WRHDLR_NO_FREE_SPACE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5224
     Name: WRHDLR_DEBUG_READ_OLD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5225
     Name: WRHDLR_DEBUG_READ_OLD_COMPLETE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5226
     Name: WRWRAPUP_EVENT_ALLOC_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5227
     Name: WRWRAPUP_STRIPE_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5228
     Name: WRWRAPUP_DEBUG_STRIPE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5229
     Name: BLKMAP_DEBUG_UPDATE_REQUEST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5230
     Name: BLKMAP_DEBUG_UPDATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5231
     Name: FLUSH_HANDLING_ENABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5232
     Name: FLUSH_HANDLING_DISABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5233
     Name: FLUSH_CMD_MAPPER_FLUSH_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5234
     Name: FLUSH_CMD_ALLOCATOR_FLUSH_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5235
     Name: FLUSH_CMD_ONGOING
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5236
     Name: PARITY_ONLY_NOT_SUPPORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5237
     Name: WRITE_FOR_PARITY_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5238
     Name: WRHDLR_FAIL_TO_LOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5239
     Name: WRHDLR_FAIL_TO_UNLOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5240
     Name: PENDING_IO_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5241
     Name: INVALID_RANGE_OF_PENDING_IO_CHECKING
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -6783,112 +6783,112 @@ Root:
     Id: 5300
     Name: IOWORKER_OPERATION_NOT_SUPPORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5301
     Name: IOWORKER_DEVICE_ADDED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5302
     Name: IOWORKER_UNDERFLOW_HAPPENED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5303
     Name: IOSMHDLR_BUFFER_NOT_ENOUGH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5304
     Name: IOSMHDLR_BUFFER_NOT_ALIGNED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5305
     Name: IOSMHDLR_OPERATION_NOT_SUPPORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5306
     Name: IOSMHDLR_DEBUG_ASYNC_READ
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5307
     Name: IOSMHDLR_COUNT_DIFFERENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5308
     Name: IOSMHDLR_DEBUG_ASYNC_WRITE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5309
     Name: IOSMHDLR_ARRAY_LOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5310
     Name: IOSMHDLR_ARRAY_UNLOCK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5311
     Name: IOSMHDLR_BYTEIO_BUFFER_NULLPTR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5312
     Name: IOSMHDLR_BYTEIO_PARTITION_IS_NOT_BYTE_ACCESSIBLE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5313
     Name: IOSMHDLR_BYTEIO_DIR_NOT_SUPORTTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5314
     Name: IOSMHDLR_BYTEIO_PARTITION_TRANSLATE_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5315
     Name: I_IOSMHDLR_NULLPTR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -6897,630 +6897,630 @@ Root:
     Id: 5316
     Name: DEVICE_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5317
     Name: DEVICE_CLOSE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5318
     Name: DEVICE_SCAN_FAILED
     Severity:
-    Message: Failed to scan a device.
+    Description: Failed to scan a device.
     Cause:
     Solution:
   -
     Id: 5319
     Name: DEVICE_SCAN_IGNORED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5320
     Name: DEVICE_SUBMISSION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5321
     Name: DEVICE_SUBMISSION_QUEUE_FULL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5322
     Name: DEVICE_SUBMISSION_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5323
     Name: DEVICE_COMPLETION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5324
     Name: DEVICE_THREAD_REGISTERED_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5325
     Name: DEVICE_THREAD_UNREGISTERED_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5326
     Name: DEVICE_OPERATION_NOT_SUPPORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5327
     Name: DEVICE_PENDING_IO_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5328
     Name: DEVICE_UNEXPECTED_PENDING_ERROR_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5329
     Name: DEVICE_OVERLAPPED_SET_IOWORKER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5330
     Name: DEVICE_NULLPTR_IOWORKER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5331
     Name: UNVME_SSD_DEBUG_CREATED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5332
     Name: UNVME_SSD_SCAN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5333
     Name: UNVME_SSD_SCANNED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5334
     Name: UNVME_SSD_ATTACH_NOTIFICATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5335
     Name: UNVME_SSD_DETACH_NOTIFICATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5336
     Name: UNVME_SSD_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5337
     Name: UNVME_SSD_CLOSE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5338
     Name: UNVME_SSD_UNDERFLOW_HAPPENED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5339
     Name: UNVME_SUBMISSION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5340
     Name: UNVME_SUBMISSION_QUEUE_FULL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5341
     Name: UNVME_SUBMISSION_RETRY_EXCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5342
     Name: UNVME_COMPLETION_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5343
     Name: UNVME_COMPLETION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5344
     Name: UNVME_OPERATION_NOT_SUPPORTED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5345
     Name: UNVME_CONTROLLER_FATAL_STATUS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5346
     Name: UNVME_CONTROLLER_RESET_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5347
     Name: UNVME_CONTROLLER_RESET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5348
     Name: UNVME_SUBMITTING_CMD_ABORT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5349
     Name: UNVME_ABORT_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5350
     Name: UNVME_ABORT_SUBMISSION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5351
     Name: UNVME_ABORT_COMPLETION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5352
     Name: UNVME_ABORT_COMPLETION
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5353
     Name: UNVME_DO_NOTHING_ON_TIMEOUT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5354
     Name: UNVME_ABORT_TIMEOUT_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5355
     Name: UNVME_NOT_SUPPORTED_DEVICE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5356
     Name: UNVME_DEBUG_RETRY_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5357
     Name: UNVME_DEBUG_REQUEST_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5358
     Name: UNVME_DEBUG_COMPLETE_IO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5359
     Name: DEVICE_CONTEXT_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5360
     Name: DEVCTX_ALLOC_TIMEOUT_CHECKER_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5361
     Name: IOCTX_ERROR_KEY_NOT_SET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5362
     Name: IOCTX_IO_KEY_NOT_SET
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5363
     Name: IOQ_ENQUEUE_NULL_UBIO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5364
     Name: BUFFER_ENTRY_OUT_OF_RANGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5365
     Name: NFLSH_ERROR_DETECT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5366
     Name: NFLSH_EVENT_ALLOCATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5367
     Name: NFLSH_EVENT_MAP_UPDATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5368
     Name: NFLSH_STRIPE_NOT_IN_WRITE_BUFFER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5369
     Name: NFLSH_STRIPE_DEBUG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5370
     Name: NFLSH_STRIPE_DEBUG_UPDATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5371
     Name: FLUSH_WRAPUP_STRIPE_NOT_IN_USER_AREA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5372
     Name: STRIPEPUTEVT_STRIPE_NOT_IN_NORMAL_POOL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
     Id: 5373
     Name: IODISPATCHER_STATE_CHANGE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5500
     Name: UNVME_DAEMON_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5501
     Name: UNVME_DAEMON_FINISH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5502
     Name: UNVME_REGISTER_CTRL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5503
     Name: UNVME_REGISTER_NS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5504
     Name: UNVME_PROBE_CALLBACK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5505
     Name: UNVME_INIT_SCAN_CALLBACK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5506
     Name: UNVME_ATTACH_CALLBACK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5507
     Name: UNVME_DETACH_CALLBACK
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5508
     Name: UNVME_SPDK_DETACH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5509
     Name: UNVME_CLEAN_UP
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5510
     Name: UNVME_INIT_CONTROLLER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5511
     Name: UNVME_MAX_RETRY_EXCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5512
     Name: UNVME_MAX_TIMEOUT_EXCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5513
     Name: DEVICEMGR_ATTACH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5514
     Name: DEVICEMGR_CLEAR_DEVICE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5515
     Name: DEVICEMGR_START_MONITOR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5516
     Name: DEVICEMGR_STOP_MONITOR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5517
     Name: DEVICEMGR_CHK_DUPLICATE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5518
     Name: DEVICEMGR_INIT_SCAN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5519
     Name: DEVICEMGR_REMOVE_DEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5520
     Name: DEVICEMGR_RESCAN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5521
     Name: DEVICEMGR_GETDEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5522
     Name: DEVICEMGR_LISTDEV
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5523
     Name: DEVICEMGR_DETACH
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5524
     Name: DEVICEMGR_SETUPMODEL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5525
     Name: DEVICEMGR_DEVICE_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5526
     Name: DEVICE_CREATION_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5527
     Name: DEVICE_DETACH_TRIGGER_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5528
     Name: URAM_INVALID_NUMA
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5529
     Name: DEVICE_INFO_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5530
     Name: DEVICE_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5531
     Name: DEVICE_WARN_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7530,21 +7530,21 @@ Root:
     Id: 5700
     Name: RESOURCE_MANAGER_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5701
     Name: RESOURCE_BUFFER_POOL_EMPTY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 5702
     Name: RESOURCE_HUGEPAGE_ALLOCATION_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7554,231 +7554,231 @@ Root:
     Id: 6000
     Name: ROCKSDB_MFS_INTERNAL_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6001
     Name: ROCKSDB_MFS_INTERNAL_READ_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6002
     Name: ROCKSDB_MFS_INTERNAL_WRITE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6003
     Name: ROCKSDB_MFS_INTERNAL_WRITE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6004
     Name: ROCKSDB_MFS_ASYNCIO_OFFSET_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6005
     Name: ROCKSDB_MFS_ASYNCIO_WRITE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6006
     Name: ROCKSDB_MFS_ASYNCIO_WRITE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6007
     Name: ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_OVERFLOW
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6008
     Name: ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6009
     Name: ROCKSDB_MFS_ASYNCIO_READ_FULLIO_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6010
     Name: ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6011
     Name: ROCKSDB_MFS_ASYNCIO_PARTIAL_READ_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6012
     Name: ROCKSDB_MFS_CREATE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6013
     Name: ROCKSDB_MFS_CREATE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6014
     Name: ROCKSDB_MFS_OPEN_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6015
     Name: ROCKSDB_MFS_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6016
     Name: ROCKSDB_MFS_FILE_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6017
     Name: ROCKSDB_MFS_FILE_NOT_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6018
     Name: ROCKSDB_MFS_FILE_DELETE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6019
     Name: ROCKSDB_MFS_FILE_DELETE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6020
     Name: ROCKSDB_MFS_GET_FILE_SIZE_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6021
     Name: ROCKSDB_MFS_DIR_EXIST
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6022
     Name: ROCKSDB_MFS_DIR_CREATION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6023
     Name: ROCKSDB_MFS_DIR_CREATION_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6024
     Name: ROCKSDB_MFS_DIR_DELETION_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6025
     Name: ROCKSDB_MFS_DIR_DELETION_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6026
     Name: ROCKSDB_MFS_SET_ROCKS_META_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6027
     Name: ROCKSDB_MFS_SET_ROCKS_META_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6028
     Name: ROCKSDB_MFS_DB_OPEN_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6029
     Name: ROCKSDB_MFS_DB_OPEN_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6030
     Name: ROCKSDB_MFS_DELETE_ROCKS_META
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6031
     Name: ROCKSDB_MFS_OFFSET_IS_NOT_CONSECUTIVE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 6032
     Name: ROCKSDB_MFS_READ_SIZE_IS_NOT_EQUAL_TO_EXPECTED_READ_SIZE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7787,7 +7787,7 @@ Root:
     Id: 7000
     Name: AIR_TARGET_CORE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7795,7 +7795,7 @@ Root:
     Id: 7001
     Name: AIR_INITIALIZE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7803,7 +7803,7 @@ Root:
     Id: 7002
     Name: AIR_ACTIVATE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7811,7 +7811,7 @@ Root:
     Id: 7003
     Name: AIR_DEACTIVATE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7819,7 +7819,7 @@ Root:
     Id: 7004
     Name: AIR_FINALIZE_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7827,7 +7827,7 @@ Root:
     Id: 7005
     Name: AIR_REGISTER_EVENT_SUCCEED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7836,63 +7836,63 @@ Root:
     Id: 8000
     Name: HA_INVALID_INPUT_ARGUMENT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8001
     Name: HA_INVALID_RETURN_LSN
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8002
     Name: HA_INSERT_REQUEST_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8003
     Name: HA_REQUESTED_NOT_FOUND
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8004
     Name: HA_COMPLETION_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8005
     Name: HA_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8006
     Name: HA_COUNT
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8007
     Name: HA_VOLUME_SUBSCRIBER_REGISTER_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8008
     Name: HA_VOLUME_SUBSCRIBER_UNREGISTER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7902,42 +7902,42 @@ Root:
     Id: 8500
     Name: SMART_LOG_INVALID_BUFFER
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8501
     Name: SMART_LOG_NO_DISK_IN_ARRAY
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8502
     Name: SMART_LOG_INVALID_LOG_PAGE_ID
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8503
     Name: SMART_LOG_ENABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8504
     Name: SMART_LOG_DISABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 8505
     Name: SMART_LOG_META_INITIALIZED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7947,14 +7947,14 @@ Root:
     Id: 9000
     Name: SYSTEM_SPACE_INFO
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9001
     Name: SYSTEM_VERSION_LOAD_SUCCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -7964,224 +7964,224 @@ Root:
     Id: 9500
     Name: TELEMETRY_DEBUG_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9501
     Name: TELEMETRY_DISABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9502
     Name: TELEMETRY_START_FAILURE
     Severity:
-    Message: Failed to start telemetry.
+    Description: Failed to start telemetry.
     Cause:
     Solution:
   -
     Id: 9503
     Name: TELEMETRY_START_FAILURE_CONFIG_ERROR
     Severity:
-    Message: Failed to start telemetry.
+    Description: Failed to start telemetry.
     Cause: Failed to update config.
     Solution:
   -
     Id: 9504
     Name: TELEMETRY_STOP_FAILURE
     Severity:
-    Message: Failed to stop telemetry.
+    Description: Failed to stop telemetry.
     Cause:
     Solution:
   -
     Id: 9505
     Name: TELEMETRY_STOP_FAILURE_CONFIG_ERROR
     Severity:
-    Message: Failed to stop telemetry.
+    Description: Failed to stop telemetry.
     Cause: Failed to update config.
     Solution:
   -
     Id: 9506
     Name: TELEMETRY_ERROR_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9507
     Name: TELEMETRY_CONFIG_BAD_FILE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9508
     Name: TELEMETRY_CONFIG_INVALID_FIELD
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9509
     Name: TELEMETRY_CLIENT_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9510
     Name: TELEMETRY_CLIENT_PUBLISHER_REGISTRATION_SUCCESS
     Severity:
-    Message: A publisher has been newly registered.
+    Description: A publisher has been newly registered.
     Cause:
     Solution:
   -
     Id: 9511
     Name: TELEMETRY_CLIENT_PUBLISHREQUEST_SEND_FAILURE
     Severity:
-    Message: Failed to send PublishRequest by gRPC.
+    Description: Failed to send PublishRequest by gRPC.
     Cause:
     Solution:
   -
     Id: 9512
     Name: TELEMETRY_CLIENT_PUBLISHRESPONSE_COUNT_NOT_MATCH
     Severity:
-    Message: The number of received data is different from that expected.
+    Description: The number of received data is different from that expected.
     Cause:
     Solution:
   -
     Id: 9513
     Name: TELEMETRY_PUBLISHER_LABEL_ADD_FAILURE_MAXNUM_VIOLATION
     Severity:
-    Message: Failed to add a default label.
+    Description: Failed to add a default label.
     Cause: The default label list is full.
     Solution:
   -
     Id: 9514
     Name: TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_FAILURE
     Severity:
-    Message: Failed to load the file for metric list. Turning off selective publication...
+    Description: Failed to load the file for metric list. Turning off selective publication...
     Cause:
     Solution:
   -
     Id: 9515
     Name: TELEMETRY_PUBLISHER_PUBLICATION_LIST_LOAD_SUCCESS
     Severity:
-    Message: Succeeded to load a publication list for telemetry metrics!
+    Description: Succeeded to load a publication list for telemetry metrics!
     Cause:
     Solution:
   -
     Id: 9516
     Name: TELEMETRY_CLIENT_DEREGISTRATION_FAILURE
     Severity:
-    Message: Failed to deregistered a publisher.
+    Description: Failed to deregistered a publisher.
     Cause:
     Solution:
   -
     Id: 9517
     Name: TELEMETRY_CLIENT_DEREGISTRATION_SUCCESS
     Severity:
-    Message: A publisher has been deregistered.
+    Description: A publisher has been deregistered.
     Cause:
     Solution:
   -
     Id: 9518
     Name: TELEMETRY_CLIENT_PUBLISH_START
     Severity:
-    Message: A publisher has started.
+    Description: A publisher has started.
     Cause:
     Solution:
   -
     Id: 9519
     Name: TELEMETRY_CLIENT_PUBLISH_STOP
     Severity:
-    Message: A publisher has stopped.
+    Description: A publisher has stopped.
     Cause:
     Solution:
   -
     Id: 9520
     Name: TELEMETRY_CLIENT_PUBLISH_START_ALL
     Severity:
-    Message: Starting all publishers has been triggered.
+    Description: Starting all publishers has been triggered.
     Cause:
     Solution:
   -
     Id: 9521
     Name: TELEMETRY_CLIENT_PUBLISH_STOP_ALL
     Severity:
-    Message: Stoping all publishers has been triggered.
+    Description: Stoping all publishers has been triggered.
     Cause:
     Solution:
   -
     Id: 9522
     Name: TELEMETRY_CLIENT_START_USING_DATA_POOL
     Severity:
-    Message: A publisher starts to use a data pool.
+    Description: A publisher starts to use a data pool.
     Cause:
     Solution:
   -
     Id: 9523
     Name: TELEMETRY_CLIENT_STOP_USING_DATA_POOL
     Severity:
-    Message: A publisher stops to use a data pool.
+    Description: A publisher stops to use a data pool.
     Cause:
     Solution:
   -
     Id: 9524
     Name: TELEMETRY_CLIENT_START_USING_DATA_POOL_ALL
     Severity:
-    Message: All publishers start to use a data pool.
+    Description: All publishers start to use a data pool.
     Cause:
     Solution:
   -
     Id: 9525
     Name: TELEMETRY_CLIENT_STOP_USING_DATA_POOL_ALL
     Severity:
-    Message: All publishers stop to use a data pool.
+    Description: All publishers stop to use a data pool.
     Cause:
     Solution:
   -
     Id: 9526
     Name: TELEMETRY_AIR_DATA_PARSING_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9527
     Name: TELEMETRY_WARNING_MSG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 9528
     Name: TELEMETRY_SET_PROPERTY_FAILURE_INVALID_FILE
     Severity:
-    Message: Failed to set telemetry property.
+    Description: Failed to set telemetry property.
     Cause: Could not open the file.
     Solution: Check if the file path is correct, or you have the permission.
   -
     Id: 9529
     Name: TELEMETRY_INTERVAL_HAS_NOT_BEEN_LOADED
     Severity:
-    Message: Failed to load time interval for easy telemetry.
+    Description: Failed to load time interval for easy telemetry.
     Cause: Could not load the time interval.
     Solution: Check if the file is correct, or the interval_in_millisecond_for_easy_telemetry_publisher is in the file.
   -
     Id: 9530
     Name: TELEMETRY_THREAD_IS_NOT_EXIST
     Severity:
-    Message: Failed to stop the worker to publish metrics.
+    Description: Failed to stop the worker to publish metrics.
     Cause: Could not stop the worker thread.
     Solution: Check if the worker has been run.
   -
     Id: 9531
     Name: TELEMETRY_NOT_SUPPORT_TYPE
     Severity:
-    Message: The metric type is not supported currently.
+    Description: The metric type is not supported currently.
     Cause: Could not publish the metric.
     Solution: Need to implement
 
@@ -8191,84 +8191,84 @@ Root:
     Id: 10000
     Name: DEBUG_MEMORY_CHECK_DOUBLE_FREE
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10001
     Name: DEBUG_MEMORY_CHECK_INVALID_ACCESS
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10002
     Name: DEBUG_CORE_DUMP_SETTING_FAILED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10003
     Name: DEBUG_ATOMIC_UNDERFLOW
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10004
     Name: DEBUG_SIGNAL_HANDLING
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10500
     Name: TRACE_START
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10501
     Name: TRACE_ENABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10502
     Name: TRACE_NOT_ENABLED
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10503
     Name: TRACE_CONFIG_ERROR
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10504
     Name: TRACE_EXPORTER_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10505
     Name: TRACE_PROCESSOR_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
   -
     Id: 10506
     Name: TRACE_PROVIDER_FAIL
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
 
@@ -8277,6 +8277,6 @@ Root:
     Id:  0x7FFFFFFE
     Name: EVENT_ID_MAPPING_WRONG
     Severity:
-    Message:
+    Description:
     Cause:
     Solution:
