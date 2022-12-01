@@ -49,6 +49,8 @@ public:
     virtual ~LogBufferParser(void);
     virtual int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
 
+    void PrintFoundLogTypes(void);
+
 private:
     class ValidMarkFinder
     {
@@ -64,7 +66,6 @@ private:
     void _LogFound(LogHandlerInterface* log);
     void _LogResetFound(uint32_t seqNumber);
     uint32_t _GetLatestSequenceNumber(void);
-    void _PrintFoundLogTypes(void);
     void _GetNextSearchOffset(uint64_t& searchOffset, uint64_t foundOffset);
 
     LogHandlerInterface* _GetLogHandler(char* ptr);

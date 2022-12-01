@@ -136,38 +136,4 @@ ReplayLogList::GetDeletingLogs(void)
     return deletingLogs;
 }
 
-void
-ReplayLogList::Print(void)
-{
-    for (auto it = logGroups.cbegin(); it != logGroups.cend(); it++)
-    {
-        for (auto logIt = it->second.logs.begin(); logIt != it->second.logs.end(); logIt++)
-        {
-            if (logIt->log->GetType() == LogType::BLOCK_WRITE_DONE)
-            {
-                BlockWriteDoneLogHandler* foundLog = (BlockWriteDoneLogHandler*)logIt->log;
-                StripeId vsid = logIt->log->GetVsid();
-                BlockWriteDoneLog* logData = (BlockWriteDoneLog*)foundLog->GetData();
-                BlockLogInfo info;
-                info.numBlks = logData->numBlks;
-                info.seqNum = foundLog->GetSeqNum();
-                info.startRba = logData->startRba;
-                blockLogsFoundByVSID[vsid].push_back(info);
-            }
-            else if(logIt->log->GetType() == LogType::STRIPE_MAP_UPDATED)
-            {
-                blockLogsFoundByVSID.erase(logIt->log->GetVsid());
-            }
-        }
-    }
-
-    for (auto it = blockLogsFoundByVSID.cbegin(); it != blockLogsFoundByVSID.cend(); it++)
-    {
-        POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "unflushed_stripe_vsid: {}, num_logs: {}", it->first, it->second.size());
-    }
-
-    POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-        "Num_unflushed_stripes: {}", blockLogsFoundByVSID.size());
-}
 } // namespace pos

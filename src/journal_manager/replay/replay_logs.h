@@ -100,6 +100,8 @@ private:
 
     ActiveWBStripeReplayer* wbStripeReplayer;
     ActiveUserStripeReplayer* userStripeReplayer;
+
+    std::vector<ReplayLog> replayLogs;
 };
 
 } // namespace pos

@@ -535,9 +535,6 @@ WBStripeManager::LoadPendingStripesToWriteBuffer(void)
         StripeAddr addr = iStripeMap->GetLSA(stripe->GetVsid());
         if (IsUnMapStripe(addr.stripeId))
         {
-            POS_TRACE_DEBUG(9999, "Skip loading unmap stripe, vsid {}, wbLsid {}, userLsid {}",
-                stripe->GetVsid(), stripe->GetWbLsid(), stripe->GetUserLsid());
-
             continue;
         }
 
