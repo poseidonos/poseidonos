@@ -1232,7 +1232,7 @@ Root:
     Id: 1878
     Name: LIST_VOL_ARRAY_NAME_DOES_NOT_EXIST
     Severity:
-    Message: Failed to retrieve volume list.
+    Description: Failed to retrieve volume list.
     Cause: Try again after creating an array and volume.
     Solution:
 
