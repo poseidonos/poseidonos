@@ -4176,9 +4176,9 @@ Root:
     Solution:
   -
     Id: 3405
-    Name: GC_THRESHOLD_IS_NOT_SET
+    Name: GC_THRESHOLD_SETTING_DEBUG
     Severity:
-    Message: The gc threshold is not set and operates as the default value
+    Message:
     Cause:
     Solution:
   -
