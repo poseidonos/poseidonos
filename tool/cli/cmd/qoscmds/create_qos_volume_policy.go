@@ -80,7 +80,6 @@ func formVolumePolicyReq(command string) *pb.QosCreateVolumePolicyRequest {
 		Minbw:   int64(volumePolicy_minBandwidth),
 		Maxbw:   int64(volumePolicy_maxBandwidth),
 	}
-	fmt.Println(param)
 	req := &pb.QosCreateVolumePolicyRequest{
 		Command:   command,
 		Rid:       uuid,

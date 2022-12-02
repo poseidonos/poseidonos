@@ -115,12 +115,12 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_SubsystemInfo_(PosCli_method_names[36], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_CreateTransport_(PosCli_method_names[37], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_CreateVolume_(PosCli_method_names[38], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_DeleteVolume_(PosCli_method_names[39], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_UnmountVolume_(PosCli_method_names[40], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_MountVolume_(PosCli_method_names[41], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_ListVolume_(PosCli_method_names[42], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_QosCreateVolumePolicy_(PosCli_method_names[39], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetVolumeProperty_(PosCli_method_names[43], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_DeleteVolume_(PosCli_method_names[40], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_UnmountVolume_(PosCli_method_names[41], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_MountVolume_(PosCli_method_names[42], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListVolume_(PosCli_method_names[43], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetVolumeProperty_(PosCli_method_names[44], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -1600,7 +1600,7 @@ PosCli::Service::Service() {
                return service->ListVolume(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      PosCli_method_names[43],
+      PosCli_method_names[44],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,

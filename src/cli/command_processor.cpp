@@ -2047,7 +2047,7 @@ CommandProcessor::ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolic
         return grpc::Status::OK;
     }
 
-    int paramValidity = _HandleInputVolumes(request->param(), volumeNames, validVolumes);
+    int paramValidity = _HandleInputVolumes(request, volumeNames, validVolumes);
     if (paramValidity != EID(SUCCESS))
     {
         _SetEventStatus(paramValidity, reply->mutable_result()->mutable_status());
@@ -2471,7 +2471,7 @@ CommandProcessor::_IsValidFile(const std::string& path)
 
 int
 CommandProcessor::_HandleInputVolumes(
-    const QosCreateVolumePolicyRequest_Param param,
+    const QosCreateVolumePolicyRequest *request,
     std::vector<string>& volumeNames,
     std::vector<std::pair<string, uint32_t>>& validVolumes)
 {
@@ -2479,15 +2479,15 @@ CommandProcessor::_HandleInputVolumes(
     volumeNames.clear();
     validVolumes.clear();
 
-    std::string arrayName = param.array();
+    std::string arrayName = (request->param()).array();
 
     if (0 == arrayName.compare(""))
     {
         return EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
     }
 
-    for(int i = 0; i < param.vol().size(); i++) {
-        string volName = param.vol()[i].volumename();
+    for(int i = 0; i < (request->param()).vol().size(); i++) {
+        string volName = (request->param()).vol()[i].volumename();
         volumeNames.push_back(volName);
     }
 
