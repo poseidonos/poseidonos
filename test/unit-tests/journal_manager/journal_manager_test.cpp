@@ -35,6 +35,8 @@
 #include <gtest/gtest.h>
 
 #include "journal_manager_spy.h"
+#include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_manager_mock.h"
@@ -43,11 +45,12 @@
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/journal_writer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/i_journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_buffer_io_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_event_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_volume_event_handler_mock.h"
@@ -55,8 +58,6 @@
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
-#include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::DoAll;
@@ -76,6 +77,7 @@ public:
       statusProvider(nullptr),
       logWriteHandler(nullptr),
       logWriteContextFactory(nullptr),
+      logBufferIoContextFactory(nullptr),
       journalEventFactory(nullptr),
       volumeEventHandler(nullptr),
       logBuffer(nullptr),
@@ -101,6 +103,7 @@ public:
         journalWriter = new NiceMock<MockJournalWriter>;
         logWriteContextFactory = new NiceMock<MockLogWriteContextFactory>;
         journalEventFactory = new NiceMock<MockJournalEventFactory>;
+        logBufferIoContextFactory = new NiceMock<MockLogBufferIoContextFactory>;
         volumeEventHandler = new NiceMock<MockJournalVolumeEventHandler>;
         logBuffer = new NiceMock<MockIJournalLogBuffer>;
         bufferAllocator = new NiceMock<MockBufferOffsetAllocator>;
@@ -121,7 +124,7 @@ public:
         EXPECT_CALL(*contextManager, GetSegmentCtx()).WillRepeatedly(Return(segmentCtxManager));
 
         journal = new JournalManager(config, statusProvider,
-            logWriteContextFactory, journalEventFactory, logWriteHandler,
+            logWriteContextFactory, logBufferIoContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
             logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
             versionedSegmentCtx, dirtyMapManager, logFilledNotifier,
@@ -147,6 +150,7 @@ protected:
     NiceMock<MockLogWriteHandler>* logWriteHandler;
     NiceMock<MockJournalWriter>* journalWriter;
     NiceMock<MockLogWriteContextFactory>* logWriteContextFactory;
+    NiceMock<MockLogBufferIoContextFactory>* logBufferIoContextFactory;
     NiceMock<MockJournalEventFactory>* journalEventFactory;
     NiceMock<MockJournalVolumeEventHandler>* volumeEventHandler;
     NiceMock<MockIJournalLogBuffer>* logBuffer;
@@ -307,7 +311,7 @@ TEST(JournalManager, _DoRecovery_testIfExecutedWithoutInialization)
     // Given
     NiceMock<MockJournalConfiguration>* config = new NiceMock<MockJournalConfiguration>;
     JournalManagerSpy journal(config, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ON_CALL(*config, IsEnabled()).WillByDefault(Return(true));
 
     // When: Recovery is executed without journal initiailization

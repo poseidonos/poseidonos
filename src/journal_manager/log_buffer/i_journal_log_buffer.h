@@ -44,8 +44,7 @@ namespace pos
 {
 class LogWriteContext;
 class LogBufferIoContext;
-class LogGroupResetContext;
-class LogWriteContextFactory;
+class LogBufferIoContextFactory;
 
 class IJournalLogBuffer : public ILogGroupResetCompleted
 {
@@ -53,7 +52,8 @@ public:
     virtual ~IJournalLogBuffer(void)
     {
     }
-    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+    virtual int Init(JournalConfiguration* journalConfiguration,
+        LogBufferIoContextFactory* logWriteContextFactory,
         int arrayId, TelemetryPublisher* tp) = 0;
     virtual void InitDataBuffer(void) = 0;
     virtual void Dispose(void) = 0;
@@ -61,14 +61,13 @@ public:
     virtual int Create(uint64_t logBufferSize) = 0;
     virtual int Open(uint64_t& logBufferSize) = 0;
 
+    virtual int WriteLog(LogWriteContext* context, uint64_t offset, MetaFileIoCbPtr func) = 0;
     virtual int ReadLogBuffer(int groupId, void* buffer) = 0;
-    virtual int WriteLog(LogWriteContext* context) = 0;
 
     virtual int SyncResetAll(void) = 0;
     virtual int AsyncReset(int id, EventSmartPtr callbackEvent) = 0;
 
-    virtual int InternalIo(LogBufferIoContext* context) = 0;
-    virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx) = 0;
+    virtual int WriteLogGroupFooter(uint64_t offset, LogGroupFooter footer, int logGroupId, EventSmartPtr callback) = 0;
 
     virtual int Delete(void) = 0;
 

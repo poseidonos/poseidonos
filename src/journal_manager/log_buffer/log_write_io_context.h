@@ -32,21 +32,45 @@
 
 #pragma once
 
-#include <functional>
-
 #include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/log_buffer/log_buffer_io_context.h"
+#include "src/metafs/common/metafs_stopwatch.h"
 
 namespace pos
 {
-class LogGroupResetContext : public LogBufferIoContext
+class LogWriteContext;
+class LogBufferWriteDoneNotifier;
+
+// TODO stopwatch
+enum class LogStage
+{
+    Issue,
+    Complete,
+    Count
+};
+
+class LogWriteIoContext : public LogBufferIoContext
 {
 public:
-    LogGroupResetContext(void) = default;
-    explicit LogGroupResetContext(int logGroupId, EventSmartPtr callbackEvent);
-    virtual ~LogGroupResetContext(void) = default;
+    LogWriteIoContext(void) = default;
 
-    virtual void SetIoRequest(uint64_t offset, uint64_t len, char* buf);
+    LogWriteIoContext(LogWriteContext* logWriteContext,
+        LogBufferWriteDoneNotifier* notifier);
+    virtual ~LogWriteIoContext(void) = default;
+
+    virtual void IoDone(void) override;
+
+    // This two methods are for log write statistics
+    virtual LogHandlerInterface* GetLog(void);
+    virtual LogWriteContext* GetLogWriteContext(void);
+    virtual int GetLogGroupId(void);
+
+    MetaFsStopwatch<LogStage> stopwatch;
+
+protected:
+    LogBufferWriteDoneNotifier* logFilledNotifier;
+    LogWriteContext* logWriteContext;
 };
 
 } // namespace pos

@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,41 +30,35 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "log_write_context_factory.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
 
 #include "src/allocator/stripe_manager/stripe.h"
+#include "src/bio/volume_io.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
-#include "src/journal_manager/log_buffer/log_group_reset_context.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 
 namespace pos
 {
 LogWriteContextFactory::LogWriteContextFactory(void)
-: config(nullptr),
-  notifier(nullptr),
-  sequenceController(nullptr)
-{
-}
-
-LogWriteContextFactory::~LogWriteContextFactory(void)
+: config(nullptr)
 {
 }
 
 void
-LogWriteContextFactory::Init(JournalConfiguration* journalConfig,
-    LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
+LogWriteContextFactory::Init(JournalConfiguration* journalConfiguration)
 {
-    config = journalConfig;
-    notifier = target;
-    sequenceController = sequencer;
+    config = journalConfiguration;
 }
 
 LogWriteContext*
-LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent)
+LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callback)
 {
     uint32_t volId = volumeIo->GetVolumeId();
     BlkAddr startRba = ChangeSectorToBlock(volumeIo->GetSectorRba());
@@ -80,14 +74,12 @@ LogWriteContextFactory::CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo,
     MapList dirtyMap;
     dirtyMap.emplace(volId);
 
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
-
-    return logWriteContext;
+    return new LogWriteContext(log, dirtyMap, callback);
 }
 
 LogWriteContext*
 LogWriteContextFactory::CreateStripeMapLogWriteContext(StripeSmartPtr stripe,
-    StripeAddr oldAddr, EventSmartPtr callbackEvent)
+    StripeAddr oldAddr, EventSmartPtr callback)
 {
     StripeAddr newAddr = {
         .stripeLoc = IN_USER_AREA,
@@ -98,27 +90,24 @@ LogWriteContextFactory::CreateStripeMapLogWriteContext(StripeSmartPtr stripe,
     MapList dirtyMap;
     dirtyMap.emplace(STRIPE_MAP_ID);
 
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log, dirtyMap, callbackEvent, notifier, sequenceController);
-
-    return logWriteContext;
+    return new LogWriteContext(log, dirtyMap, callback);
 }
 
 LogWriteContext*
 LogWriteContextFactory::CreateGcBlockMapLogWriteContext(GcStripeMapUpdateList mapUpdates,
-    EventSmartPtr callbackEvent)
+    EventSmartPtr callback)
 {
-    GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, mapUpdates.blockMapUpdateList);
+    GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId,
+        mapUpdates.vsid, mapUpdates.blockMapUpdateList);
 
     MapList dummyDirty;
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dummyDirty, callbackEvent, notifier, sequenceController);
 
-    return logWriteContext;
+    return new LogWriteContext(log, callback);
 }
 
 std::vector<LogWriteContext*>
 LogWriteContextFactory::CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList mapUpdates,
-    EventSmartPtr callbackEvent)
+    EventSmartPtr callback)
 {
     std::vector<LogWriteContext*> returnList;
 
@@ -140,10 +129,8 @@ LogWriteContextFactory::CreateGcBlockMapLogWriteContexts(GcStripeMapUpdateList m
         GcBlockWriteDoneLogHandler* log = new GcBlockWriteDoneLogHandler(mapUpdates.volumeId, mapUpdates.vsid, list);
 
         MapList dummyDirty;
-        MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-            dummyDirty, callbackEvent, notifier, sequenceController);
 
-        returnList.push_back(logWriteContext);
+        returnList.push_back(new LogWriteContext(log, callback));
 
         remainingBlocks -= numBlocks;
     }
@@ -172,10 +159,8 @@ LogWriteContextFactory::CreateGcStripeFlushedLogWriteContext(GcStripeMapUpdateLi
     MapList dirtyMap;
     dirtyMap.emplace(STRIPE_MAP_ID);
     dirtyMap.emplace(mapUpdates.volumeId);
-    MapUpdateLogWriteContext* logWriteContext = new MapUpdateLogWriteContext(log,
-        dirtyMap, callbackEvent, notifier, sequenceController);
 
-    return logWriteContext;
+    return new LogWriteContext(log, dirtyMap, callbackEvent);
 }
 
 LogWriteContext*
@@ -183,16 +168,7 @@ LogWriteContextFactory::CreateVolumeDeletedLogWriteContext(int volId,
     uint64_t contextVersion, EventSmartPtr callback)
 {
     LogHandlerInterface* log = new VolumeDeletedLogEntry(volId, contextVersion);
-    LogWriteContext* logWriteContext = new LogWriteContext(log, callback, notifier);
-
-    return logWriteContext;
+    return new LogWriteContext(log, callback);
 }
 
-LogGroupResetContext*
-LogWriteContextFactory::CreateLogGroupResetContext(uint64_t offset, int id, uint64_t groupSize, EventSmartPtr callbackEvent, char* dataBuffer)
-{
-    LogGroupResetContext* resetRequest = new LogGroupResetContext(id, callbackEvent);
-    resetRequest->SetIoRequest(offset, groupSize, dataBuffer);
-    return resetRequest;
-}
 } // namespace pos

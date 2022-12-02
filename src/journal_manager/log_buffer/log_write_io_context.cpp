@@ -30,23 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_io_context.h"
+
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 
 namespace pos
 {
-LogGroupFooterWriteContext::LogGroupFooterWriteContext(int id,
-    EventSmartPtr callback, LogGroupFooter footer, uint64_t offset)
-: LogBufferIoContext(id, callback)
+LogWriteIoContext::LogWriteIoContext(LogWriteContext* context,
+    LogBufferWriteDoneNotifier* notifier)
+: LogBufferIoContext(context->GetLogGroupId(), context->GetCallback()),
+  logFilledNotifier(notifier),
+  logWriteContext(context)
 {
-    data = new LogGroupFooter();
-    *data = footer;
-
-    SetIoInfo(MetaFsIoOpcode::Write, offset, sizeof(*data), (char*)data);
 }
 
-LogGroupFooterWriteContext::~LogGroupFooterWriteContext(void)
+LogHandlerInterface*
+LogWriteIoContext::GetLog(void)
 {
-    delete data;
+    return logWriteContext->GetLog();
+}
+
+LogWriteContext*
+LogWriteIoContext::GetLogWriteContext(void)
+{
+    return logWriteContext;
+}
+
+int
+LogWriteIoContext::GetLogGroupId(void)
+{
+    return logWriteContext->GetLogGroupId();
+}
+
+void
+LogWriteIoContext::IoDone(void)
+{
+    MapList emptyDirtyList;
+    logFilledNotifier->NotifyLogFilled(logWriteContext->GetLogGroupId(), emptyDirtyList);
+
+    LogBufferIoContext::IoDone();
 }
 
 } // namespace pos

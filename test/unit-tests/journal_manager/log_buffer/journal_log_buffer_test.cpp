@@ -5,10 +5,14 @@
 
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/log_group_reset_context_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_buffer_io_context_factory_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_buffer_io_context_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/map_update_log_write_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+
 using testing::_;
 using testing::NiceMock;
 using testing::Return;
@@ -205,6 +209,7 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfExecutedSuccessfully)
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce([&](AsyncMetaFileIoCtx* ctx)
                 {
                     journalLogBuffer.SetLogBufferReadDone(true);
+                    delete ctx;
                     return retCode;
                 });
     int result = journalLogBuffer.ReadLogBuffer(logGroupId, nullptr);
@@ -230,7 +235,6 @@ TEST(JournalLogBuffer, ReadLogBuffer_testIfReadFail)
     int result = journalLogBuffer.ReadLogBuffer(logGroupId, nullptr);
 
     // Then: journalLogBuffer will be return error code
-    retCode = -1 * (EID(JOURNAL_LOG_BUFFER_READ_FAILED));
     EXPECT_EQ(retCode, result);
 }
 
@@ -238,16 +242,24 @@ TEST(JournalLogBuffer, WriteLog_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
+    NiceMock<MockJournalConfiguration> journalConfig;
+    NiceMock<MockLogBufferIoContextFactory> ioContextFactory;
+    NiceMock<MockTelemetryPublisher> telemetry;
+
     JournalLogBuffer journalLogBuffer(metaFile);
+    journalLogBuffer.Init(&journalConfig, &ioContextFactory, 0, &telemetry);
+
     NiceMock<MockLogWriteContext> context;
+    auto callback = [](AsyncMetaFileIoCtx* ctx) {};
 
     // When
+    NiceMock<MockMapUpdateLogWriteContext> ioContext;
+    EXPECT_CALL(ioContextFactory, CreateMapUpdateLogWriteIoContext).WillOnce(Return(&ioContext));
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(1));
-    EXPECT_CALL(context, SetFileInfo);
     int retCode = 0;
-    EXPECT_CALL(*metaFile, AsyncIO(&context)).WillOnce(Return(retCode));
+    EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
 
-    int result = journalLogBuffer.WriteLog(&context);
+    int result = journalLogBuffer.WriteLog(&context, 0, callback);
 
     // Then: journalLogBuffer will be return error code
     EXPECT_EQ(retCode, result);
@@ -257,16 +269,24 @@ TEST(JournalLogBuffer, WriteLog_testIfWriteFailed)
 {
     // Given
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
+    NiceMock<MockJournalConfiguration> journalConfig;
+    NiceMock<MockLogBufferIoContextFactory> ioContextFactory;
+    NiceMock<MockTelemetryPublisher> telemetry;
+
     JournalLogBuffer journalLogBuffer(metaFile);
-    NiceMock<MockLogWriteContext> context;
+    journalLogBuffer.Init(&journalConfig, &ioContextFactory, 0, &telemetry);
+
+    NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
+    auto callback = [](AsyncMetaFileIoCtx* ctx) {};
 
     // When
+    NiceMock<MockMapUpdateLogWriteContext>* ioContext = new NiceMock<MockMapUpdateLogWriteContext>;
+    EXPECT_CALL(ioContextFactory, CreateMapUpdateLogWriteIoContext).WillOnce(Return(ioContext));
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(1));
-    EXPECT_CALL(context, SetFileInfo);
     int retCode = -1;
-    EXPECT_CALL(*metaFile, AsyncIO(&context)).WillOnce(Return(retCode));
+    EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
 
-    int result = journalLogBuffer.WriteLog(&context);
+    int result = journalLogBuffer.WriteLog(context, 0, callback);
 
     // Then
     retCode = -1 * EID(JOURNAL_LOG_WRITE_FAILED);
@@ -278,9 +298,11 @@ TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
     // Given
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
-    NiceMock<MockLogWriteContextFactory> logFactory;
+    NiceMock<MockLogBufferIoContextFactory> ioContextFactory;
+    NiceMock<MockTelemetryPublisher> telemetry;
+
     JournalLogBuffer journalLogBuffer(metaFile);
-    journalLogBuffer.Init(&journalConfig, &logFactory, 0, nullptr);
+    journalLogBuffer.Init(&journalConfig, &ioContextFactory, 0, &telemetry);
 
     // When: Async reset request as much as number of log groups, and Reset completed successfully
     int numLogGroups = 2;
@@ -290,15 +312,13 @@ TEST(JournalLogBuffer, SyncResetAll_testIfExecutedSuccessfully)
 
     int fd = 1;
     int retCode = 0;
-    std::vector<NiceMock<MockLogGroupResetContext>*> resetContextList;
+    std::vector<NiceMock<MockLogBufferIoContext>*> resetContextList;
     for (int id = 0; id < numLogGroups; id++)
     {
-        NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
+        NiceMock<MockLogBufferIoContext>* resetRequest = new NiceMock<MockLogBufferIoContext>;
         resetContextList.push_back(resetRequest);
-        EXPECT_CALL(logFactory, CreateLogGroupResetContext(_, id, logGroupSize, _, _)).WillRepeatedly(Return(resetRequest));
-        EXPECT_CALL(*resetRequest, SetCallback);
+        EXPECT_CALL(ioContextFactory, CreateLogBufferIoContext(id, _)).WillRepeatedly(Return(resetRequest));
         EXPECT_CALL(*metaFile, GetFd).WillRepeatedly(Return(fd));
-        EXPECT_CALL(*resetRequest, SetFileInfo);
         EXPECT_CALL(*metaFile, AsyncIO).WillRepeatedly([&](AsyncMetaFileIoCtx* ctx)
             {
                 journalLogBuffer.LogGroupResetCompleted(id);
@@ -322,9 +342,11 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
     // Given
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
     NiceMock<MockJournalConfiguration> journalConfig;
-    NiceMock<MockLogWriteContextFactory> logFactory;
+    NiceMock<MockLogBufferIoContextFactory> ioContextFactory;
+    NiceMock<MockTelemetryPublisher> telemetry;
+
     JournalLogBuffer journalLogBuffer(metaFile);
-    journalLogBuffer.Init(&journalConfig, &logFactory, 0, nullptr);
+    journalLogBuffer.Init(&journalConfig, &ioContextFactory, 0, &telemetry);
 
     // When: Async reset failed
     int numLogGroups = 2;
@@ -335,13 +357,9 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
     int fd = 1;
     int retCode = -1;
     int groupId = 0;
-    std::vector<NiceMock<MockLogGroupResetContext>*> resetContextList;
-    NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
-    resetContextList.push_back(resetRequest);
-    EXPECT_CALL(logFactory, CreateLogGroupResetContext(_, groupId, logGroupSize, _, _)).WillRepeatedly(Return(resetRequest));
-    EXPECT_CALL(*resetRequest, SetCallback);
+
+    EXPECT_CALL(ioContextFactory, CreateLogBufferIoContext(groupId, _)).WillRepeatedly(Return(new NiceMock<MockLogBufferIoContext>));
     EXPECT_CALL(*metaFile, GetFd).WillRepeatedly(Return(fd));
-    EXPECT_CALL(*resetRequest, SetFileInfo);
     EXPECT_CALL(*metaFile, AsyncIO).WillRepeatedly([&](AsyncMetaFileIoCtx* ctx)
         {
             journalLogBuffer.LogGroupResetCompleted(groupId);
@@ -352,76 +370,40 @@ TEST(JournalLogBuffer, SyncResetAll_testIfAsyncIOFailed)
 
     // Then
     EXPECT_EQ(retCode, result);
-
-    for (auto resetContext : resetContextList)
-    {
-        delete resetContext;
-    }
 }
 
-TEST(JournalLogBuffer, InternalIo_testIfExecutedSuccessfully)
+TEST(JournalLogBuffer, WriteLogGroupFooter_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    int groupId = 0;
-    NiceMock<MockLogGroupResetContext> resetRequest(groupId, nullptr);
+    NiceMock<MockJournalConfiguration> journalConfig;
+    NiceMock<MockLogBufferIoContextFactory> ioContextFactory;
+    NiceMock<MockTelemetryPublisher> telemetry;
+
     JournalLogBuffer journalLogBuffer(metaFile);
+    journalLogBuffer.Init(&journalConfig, &ioContextFactory, 0, &telemetry);
+
+    int groupId = 0;
+    NiceMock<CallbackSmartPtr> callback;
 
     // When
     int fd = 1;
     int retCode = 0;
-    EXPECT_CALL(resetRequest, SetCallback);
+    uint64_t footerOffset = 10;
+    LogGroupFooter footer;
+    footer.isReseted = false;
+    footer.lastCheckpointedSeginfoVersion = 3;
+    footer.resetedSequenceNumber = 4;
+
+    NiceMock<MockLogBufferIoContext> resetRequest;
+    EXPECT_CALL(ioContextFactory, CreateLogGroupFooterWriteContext).WillOnce(Return(&resetRequest));
     EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(fd));
-    EXPECT_CALL(resetRequest, SetFileInfo);
     EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
 
-    int result = journalLogBuffer.InternalIo(&resetRequest);
+    int result = journalLogBuffer.WriteLogGroupFooter(footerOffset, footer, groupId, callback);
 
     // Then
     EXPECT_EQ(retCode, result);
-}
-
-TEST(JournalLogBuffer, InternalIo_testIfAsycIoFailed)
-{
-    // Given
-    NiceMock<MockMetaFileIntf>* metaFile = new NiceMock<MockMetaFileIntf>;
-    int groupId = 0;
-    NiceMock<MockLogGroupResetContext> resetRequest;
-    JournalLogBuffer journalLogBuffer(metaFile);
-
-    // When
-    int fd = 1;
-    int retCode = -1;
-    EXPECT_CALL(resetRequest, SetCallback);
-    EXPECT_CALL(*metaFile, GetFd).WillOnce(Return(fd));
-    EXPECT_CALL(resetRequest, SetFileInfo);
-    EXPECT_CALL(*metaFile, AsyncIO).WillOnce(Return(retCode));
-
-    int result = journalLogBuffer.InternalIo(&resetRequest);
-
-    // Then
-    EXPECT_EQ(retCode, result);
-}
-
-TEST(JournalLogBuffer, InternalIoDone_testIfExecutedSuccessfully)
-{
-    // Given
-    int groupId = 0;
-    NiceMock<MockLogGroupResetContext>* resetRequest = new NiceMock<MockLogGroupResetContext>;
-    JournalLogBuffer journalLogBuffer(nullptr);
-
-    // When, Then
-    EXPECT_CALL(*resetRequest, IoDone);
-    journalLogBuffer.InternalIoDone(resetRequest);
-}
-
-TEST(JournalLogBuffer, InternalIoDone_testIfContextDoesNotExist)
-{
-    // Given
-    JournalLogBuffer journalLogBuffer(nullptr);
-
-    // When, Then
-    journalLogBuffer.InternalIoDone(nullptr);
 }
 
 TEST(JournalLogBuffer, Delete_testIfExecutedSuccessfully)

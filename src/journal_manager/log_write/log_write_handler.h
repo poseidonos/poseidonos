@@ -49,6 +49,7 @@ class IJournalLogBuffer;
 class JournalConfiguration;
 class LogWriteStatistics;
 class EasyTelemetryPublisher;
+class LogWriteIoContext;
 
 class LogWriteHandler : public LogBufferWriteDoneEvent
 {
@@ -71,7 +72,7 @@ public:
 
 private:
     void _StartWaitingIos(void);
-    void _PublishPeriodicMetrics(LogWriteContext* context);
+    void _PublishPeriodicMetrics(LogWriteIoContext* context);
 
     IJournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;

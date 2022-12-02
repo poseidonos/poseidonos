@@ -35,7 +35,6 @@
 
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
-#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
 #include "src/logger/logger.h"
 
 namespace pos
@@ -54,10 +53,7 @@ LogGroupFooterWriteEvent::LogGroupFooterWriteEvent(IJournalLogBuffer* logBuffer,
 bool
 LogGroupFooterWriteEvent::Execute(void)
 {
-    LogGroupFooterWriteContext* context = new LogGroupFooterWriteContext(logGroupId, callback);
-    context->SetIoRequest(offset, footer);
-
-    int result = logBuffer->InternalIo(context);
+    int result = logBuffer->WriteLogGroupFooter(offset, footer, logGroupId, callback);
     if (result != 0)
     {
         POS_TRACE_WARN(EID(JOURNAL_WRITE_LOG_GROUP_FOOTER),
