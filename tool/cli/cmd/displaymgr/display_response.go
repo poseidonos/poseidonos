@@ -196,15 +196,13 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		w.Flush()
 
 	case "LISTVOLUME":
-		res := messages.ListVolumeResponse{}
+		res := &pb.ListVolumeResponse{}
 		json.Unmarshal([]byte(resJson), &res)
-
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
-
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
 		// Header
@@ -236,19 +234,19 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"---------")
 
 		// Data
-		for _, volume := range res.RESULT.DATA.VOLUMELIST {
+		for _, volume := range res.GetResult().GetData().GetVolumes() {
 			fmt.Fprintln(w,
-				volume.VOLUMENAME+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.INDEX)+"\t"+
-					globals.FieldSeparator+volume.UUID+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
-					globals.FieldSeparator+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10)+"\t"+
-					globals.FieldSeparator+volume.STATUS+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MAXBW)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MINIOPS)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MINBW))
+				volume.GetName()+"\t"+
+					globals.FieldSeparator+strconv.Itoa(int(volume.GetIndex()))+"\t"+
+					globals.FieldSeparator+volume.GetUuid()+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, volume.GetTotal())+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, volume.GetRemain())+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(100-(volume.GetRemain()*100/volume.GetTotal()), 10)+"\t"+
+					globals.FieldSeparator+volume.GetStatus()+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMaxiops(), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMaxbw(), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMiniops(), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMinbw(), 10))
 		}
 		w.Flush()
 

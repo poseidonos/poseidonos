@@ -217,6 +217,7 @@ service PosCli {
     	};
 	}
 
+    // Volume Commands
 	rpc CreateVolume (CreateVolumeRequest) returns (CreateVolumeResponse) {
 		option (google.api.http) = {
       		post: "/v1/createvolume"
@@ -240,6 +241,11 @@ service PosCli {
       		post: "/v1/Mountvolume"
     	};
 	}
+        rpc ListVolume (ListVolumeRequest) returns (ListVolumeResponse) {
+            option (google.api.http) = {
+                post: "/v1/listvolume"
+            };
+        }
 
 	rpc SetVolumeProperty (SetVolumePropertyRequest) returns (SetVolumePropertyResponse) {
 		option (google.api.http) = {
@@ -1369,3 +1375,43 @@ message SetVolumePropertyResponse {
 	Result result = 3;
 	PosInfo info = 4;
 }
+
+message Volume {
+    string name = 1;
+    int32    index = 2;
+    uint64   total = 3;
+    uint64   remain = 4;
+    string   status = 5;
+    uint64   maxiops = 6;
+    uint64   maxbw = 7;
+    uint64   miniops = 8;
+    uint64   minbw = 9;
+    string   subnqn = 10;
+    string   uuid = 11;
+    string   arrayname = 12;
+}
+
+message ListVolumeRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+    message Param {
+            string array = 1;
+    }
+    Param param = 4;
+}
+
+message ListVolumeResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+        Status status = 1;
+        message VolumeList {
+            repeated Volume volumes = 1;
+        }
+        VolumeList data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+

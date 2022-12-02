@@ -1229,6 +1229,14 @@ Root:
     Solution:
 
   -
+    Id: 1878
+    Name: LIST_VOL_ARRAY_NAME_DOES_NOT_EXIST
+    Severity:
+    Description: Failed to retrieve volume list.
+    Cause: Try again after creating an array and volume.
+    Solution:
+
+  -
     Id: 2200
     Name: CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST
     Severity:

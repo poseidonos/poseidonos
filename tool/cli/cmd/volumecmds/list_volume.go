@@ -1,16 +1,13 @@
 package volumecmds
 
 import (
-	"encoding/json"
-	"fmt"
-	"pnconnector/src/log"
-
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
-
+	"cli/cmd/grpcmgr"
+	"fmt"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 //TODO(mj): function for --detail flag needs to be implemented.
@@ -31,54 +28,69 @@ Example1 (listing volumes of an array):
 Example2 (displaying a detailed information of a volume):
 	poseidonos-cli volume list --array-name Array0 --volume-name Volume0
           `,
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var (
-			command = ""
-			param   interface{}
+			command string
+			err     error
 		)
 
 		if list_volume_volumeName != "" {
-			command = "VOLUMEINFO"
-
-			param = messages.VolumeInfoParam{
-				ARRAYNAME:  list_volume_arrayName,
-				VOLUMENAME: list_volume_volumeName,
-			}
-
+			//command = "VOLUMEINFO"
+			//err = executeVolumeInfoCmd(command)
 		} else {
 			command = "LISTVOLUME"
-
-			param = messages.ListVolumeParam{
-				ARRAYNAME: list_volume_arrayName,
-			}
-
+			err = executeListVolumeCmd(command)
 		}
 
-		req := messages.BuildReqWithParam(command, globals.GenerateUUID(), param)
-
-		reqJson, err := json.Marshal(req)
-		if err != nil {
-			log.Error("error:", err)
-		}
-
-		displaymgr.PrintRequest(string(reqJson))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-		}
+		return err
 	},
+}
+
+func executeListVolumeCmd(command string) error {
+	req, buildErr := buildListVolumeReq(command)
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	reqJson, err := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+
+	res, gRpcErr := grpcmgr.SendListVolume(req)
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func buildListVolumeReq(command string) (*pb.ListVolumeRequest, error) {
+	uuid := globals.GenerateUUID()
+	param := &pb.ListVolumeRequest_Param{Array: list_volume_arrayName}
+	req := &pb.ListVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
-var (
-	list_volume_arrayName  = ""
-	list_volume_volumeName = ""
-)
+var list_volume_arrayName = ""
+var list_volume_volumeName = ""
 
 func init() {
 	ListVolumeCmd.Flags().StringVarP(&list_volume_arrayName,

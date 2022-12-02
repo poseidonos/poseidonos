@@ -64,6 +64,7 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/DeleteVolume",
   "/grpc_cli.PosCli/UnmountVolume",
   "/grpc_cli.PosCli/MountVolume",
+  "/grpc_cli.PosCli/ListVolume",
   "/grpc_cli.PosCli/SetVolumeProperty",
 };
 
@@ -116,7 +117,8 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_DeleteVolume_(PosCli_method_names[39], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_UnmountVolume_(PosCli_method_names[40], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_MountVolume_(PosCli_method_names[41], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_SetVolumeProperty_(PosCli_method_names[42], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListVolume_(PosCli_method_names[42], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_SetVolumeProperty_(PosCli_method_names[43], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -1085,6 +1087,29 @@ void PosCli::Stub::experimental_async::MountVolume(::grpc::ClientContext* contex
   return result;
 }
 
+::grpc::Status PosCli::Stub::ListVolume(::grpc::ClientContext* context, const ::grpc_cli::ListVolumeRequest& request, ::grpc_cli::ListVolumeResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::ListVolumeRequest, ::grpc_cli::ListVolumeResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ListVolume_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::ListVolume(::grpc::ClientContext* context, const ::grpc_cli::ListVolumeRequest* request, ::grpc_cli::ListVolumeResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::ListVolumeRequest, ::grpc_cli::ListVolumeResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ListVolume_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::ListVolume(::grpc::ClientContext* context, const ::grpc_cli::ListVolumeRequest* request, ::grpc_cli::ListVolumeResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ListVolume_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ListVolumeResponse>* PosCli::Stub::PrepareAsyncListVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::ListVolumeRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::ListVolumeResponse, ::grpc_cli::ListVolumeRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ListVolume_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ListVolumeResponse>* PosCli::Stub::AsyncListVolumeRaw(::grpc::ClientContext* context, const ::grpc_cli::ListVolumeRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncListVolumeRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ::grpc::Status PosCli::Stub::SetVolumeProperty(::grpc::ClientContext* context, const ::grpc_cli::SetVolumePropertyRequest& request, ::grpc_cli::SetVolumePropertyResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_SetVolumeProperty_, context, request, response);
 }
@@ -1532,6 +1557,16 @@ PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[42],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ListVolumeRequest, ::grpc_cli::ListVolumeResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::ListVolumeRequest* req,
+             ::grpc_cli::ListVolumeResponse* resp) {
+               return service->ListVolume(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[43],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::SetVolumePropertyRequest, ::grpc_cli::SetVolumePropertyResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](PosCli::Service* service,
              ::grpc::ServerContext* ctx,
@@ -1832,6 +1867,13 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::MountVolume(::grpc::ServerContext* context, const ::grpc_cli::MountVolumeRequest* request, ::grpc_cli::MountVolumeResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::ListVolume(::grpc::ServerContext* context, const ::grpc_cli::ListVolumeRequest* request, ::grpc_cli::ListVolumeResponse* response) {
   (void) context;
   (void) request;
   (void) response;
