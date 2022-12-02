@@ -40,10 +40,11 @@
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/log/log_event.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
-#include "src/journal_manager/log_buffer/log_group_reset_context.h"
 #include "src/journal_manager/log_buffer/log_write_context.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_buffer/log_write_io_context.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -53,7 +54,7 @@ RocksDBLogBuffer::RocksDBLogBuffer(void)
 : pathName(""),
   isOpened(false),
   config(nullptr),
-  logFactory(nullptr),
+  ioContextFactory(nullptr),
   rocksJournal(nullptr),
   logBufferSize(0),
   telemetryPublisher(nullptr),
@@ -79,11 +80,11 @@ RocksDBLogBuffer::~RocksDBLogBuffer(void)
 // LCOV_EXCL_STOP
 
 int
-RocksDBLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+RocksDBLogBuffer::Init(JournalConfiguration* journalConfiguration, LogBufferIoContextFactory* contextFactory,
     int arrayId, TelemetryPublisher* tp)
 {
     config = journalConfiguration;
-    logFactory = logWriteContextFactory;
+    ioContextFactory = contextFactory;
     telemetryPublisher = tp;
     basePathName = config->GetRocksdbPath();
     pathName = basePathName + "/" + this->arrayName + "_RocksJournal";
@@ -247,28 +248,38 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 }
 
 int
-RocksDBLogBuffer::WriteLog(LogWriteContext* context)
+RocksDBLogBuffer::WriteLog(LogWriteContext* context, uint64_t fileOffset, MetaFileIoCbPtr func)
 {
+    // TODO do not use log write io context (it's needed for now because of callback func)
+    LogWriteIoContext* ioContext = ioContextFactory->CreateMapUpdateLogWriteIoContext(context);
+    ioContext->SetIoInfo(MetaFsIoOpcode::Write, fileOffset, context->GetLogSize(), context->GetBuffer());
+    ioContext->SetFileInfo(0, [](void* data) { return 0; });
+    ioContext->SetCallback(func);
+
     int logGroupId = context->GetLogGroupId();
-    uint64_t fileOffset = context->GetFileOffset();
     std::string key = _MakeRocksDbKey(logGroupId, fileOffset);
     POS_TRACE_DEBUG(static_cast<int>(EID(ROCKSDB_LOG_BUFFER_TRY_WRITE_LOG)),
         "RocksDB Key : {} (logGroupId : {}, fileOffset : {}) , Trying to Write Log (path : {})", key, logGroupId, fileOffset, pathName);
 
-    std::string value(context->GetLog()->GetData(), context->GetLog()->GetSize());
+    int result = EID(SUCCESS);
+
+    std::string value((char*)context->GetBuffer(), context->GetLogSize());
     rocksdb::Status ret = rocksJournal->Put(rocksdb::WriteOptions(), key, value);
     if (ret.ok())
     {
         POS_TRACE_DEBUG(static_cast<int>(EID(ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE)), "RocksDB Key : {} insertion succeed", key);
-        context->HandleIoComplete(context);
-        return 0;
+        ioContext->HandleIoComplete(context);
     }
     else
     {
         POS_TRACE_ERROR(static_cast<int>(EID(ROCKSDB_LOG_BUFFER_WRITE_LOG_FAILED)),
             "RocksDB Key : {} (logGroupId : {}, fileOffset : {}) insertion failed by RocksDB, status code : {} (path : {})", key, logGroupId, fileOffset, ret.code(), pathName);
-        return -1 * EID(ROCKSDB_LOG_BUFFER_WRITE_LOG_FAILED);
+        result = -1 * EID(ROCKSDB_LOG_BUFFER_WRITE_LOG_FAILED);
+
+        delete ioContext;
     }
+
+    return result;
 }
 
 int
@@ -312,29 +323,35 @@ RocksDBLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 }
 
 int
-RocksDBLogBuffer::InternalIo(LogBufferIoContext* context)
+RocksDBLogBuffer::WriteLogGroupFooter(uint64_t fileOffset, LogGroupFooter footer,
+    int logGroupId, EventSmartPtr callback)
 {
-    int logGroupId = context->GetLogGroupId();
-    uint64_t fileOffset = context->GetFileOffset();
+    LogBufferIoContext* ioContext = ioContextFactory->CreateLogGroupFooterWriteContext(
+        fileOffset, footer, logGroupId, callback);
     std::string key = _MakeRocksDbKey(logGroupId, fileOffset);
 
-    std::string value(context->GetBuffer(), context->GetLength());
+    int result = EID(SUCCESS);
+
+    std::string value((char*)ioContext->GetBuffer(), ioContext->GetLength());
     rocksdb::Status ret = rocksJournal->Put(rocksdb::WriteOptions(), key, value);
     if (ret.ok())
     {
         POS_TRACE_DEBUG(static_cast<int>(EID(ROCKSDB_LOG_BUFFER_WRITE_LOG_DONE)), "RocksDB Key : {} insertion succeed", key);
-        InternalIoDone(context);
-        return 0;
+        _InternalIoDone(ioContext);
     }
     else
     {
         POS_TRACE_ERROR(static_cast<int>(EID(ROCKSDB_LOG_BUFFER_INTERNAL_IO_CONTEXT_NOT_EXIST)), "RocksDB Context does not exist (path : {})", pathName);
-        return -1 * EID(ROCKSDB_LOG_BUFFER_INTERNAL_IO_CONTEXT_NOT_EXIST);
+        result = -1 * EID(ROCKSDB_LOG_BUFFER_INTERNAL_IO_CONTEXT_NOT_EXIST);
+
+        delete ioContext;
     }
+
+    return result;
 }
 
 void
-RocksDBLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
+RocksDBLogBuffer::_InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
     LogBufferIoContext* context = dynamic_cast<LogBufferIoContext*>(ctx);
     if (context != nullptr)

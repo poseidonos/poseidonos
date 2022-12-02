@@ -37,27 +37,23 @@
 #include "src/bio/volume_io.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log_buffer/log_buffer_io_context.h"
-#include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_io_context.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
+class LogWriteContext;
 class LogHandlerInterface;
 class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
 
-class MapUpdateLogWriteContext : public LogWriteContext
+class MapUpdateLogWriteContext : public LogWriteIoContext
 {
 public:
     MapUpdateLogWriteContext(void) = default;
 
-    // For UT
-    MapUpdateLogWriteContext(MapList dirtyList, EventSmartPtr callback,
-        LogBufferWriteDoneNotifier* logFilledNotifier, CallbackSequenceController* sequencer);
-
-    MapUpdateLogWriteContext(LogHandlerInterface* log, MapList dirtyList,
-        EventSmartPtr callback, LogBufferWriteDoneNotifier* notifier,
-        CallbackSequenceController* sequencer);
+    MapUpdateLogWriteContext(LogWriteContext* logWriteContext,
+        LogBufferWriteDoneNotifier* notifier, CallbackSequenceController* sequencer);
     virtual ~MapUpdateLogWriteContext(void) = default;
 
     MapList& GetDirtyList(void);
@@ -72,7 +68,6 @@ public:
 
 protected:
     CallbackSequenceController* sequenceController;
-    MapList dirty;
 };
 
 } // namespace pos

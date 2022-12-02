@@ -30,23 +30,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
+
 #include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 
 namespace pos
 {
-LogGroupFooterWriteContext::LogGroupFooterWriteContext(int id,
-    EventSmartPtr callback, LogGroupFooter footer, uint64_t offset)
-: LogBufferIoContext(id, callback)
+LogBufferIoContextFactory::LogBufferIoContextFactory(void)
+: config(nullptr),
+  notifier(nullptr),
+  sequenceController(nullptr)
 {
-    data = new LogGroupFooter();
-    *data = footer;
-
-    SetIoInfo(MetaFsIoOpcode::Write, offset, sizeof(*data), (char*)data);
 }
 
-LogGroupFooterWriteContext::~LogGroupFooterWriteContext(void)
+LogBufferIoContextFactory::~LogBufferIoContextFactory(void)
 {
-    delete data;
+}
+
+void
+LogBufferIoContextFactory::Init(JournalConfiguration* journalConfig,
+    LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
+{
+    config = journalConfig;
+    notifier = target;
+    sequenceController = sequencer;
+}
+
+LogBufferIoContext*
+LogBufferIoContextFactory::CreateLogBufferIoContext(int groupId, EventSmartPtr event)
+{
+    return new LogBufferIoContext(groupId, event);
+}
+
+MapUpdateLogWriteContext*
+LogBufferIoContextFactory::CreateMapUpdateLogWriteIoContext(LogWriteContext* context)
+{
+    return new MapUpdateLogWriteContext(context, notifier, sequenceController);
+}
+
+LogWriteIoContext*
+LogBufferIoContextFactory::CreateLogWriteIoContext(LogWriteContext* context)
+{
+    return new LogWriteIoContext(context, notifier);
+}
+
+LogBufferIoContext*
+LogBufferIoContextFactory::CreateLogGroupFooterWriteContext(uint64_t offset,
+    LogGroupFooter footer, int logGroupId, EventSmartPtr callback)
+{
+    return new LogGroupFooterWriteContext(logGroupId, callback, footer, offset);
 }
 
 } // namespace pos

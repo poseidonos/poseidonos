@@ -8,12 +8,6 @@
 
 namespace pos
 {
-class MockLogPageFlushIoCtx : public LogPageFlushIoCtx
-{
-public:
-    using LogPageFlushIoCtx::LogPageFlushIoCtx;
-};
-
 class MockMetaIoDoneChecker : public MetaIoDoneChecker
 {
 public:

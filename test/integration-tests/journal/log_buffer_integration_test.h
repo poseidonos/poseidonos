@@ -7,6 +7,7 @@
 #include "src/event_scheduler/event.h"
 #include "src/journal_manager/log/log_list.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 #include "test/integration-tests/journal/journal_configuration_spy.h"
@@ -20,10 +21,7 @@ using ::testing::NiceMock;
 class LogBufferWriteDone : public Event
 {
 public:
-    LogBufferWriteDone(void)
-    {
-    }
-
+    LogBufferWriteDone(void) = default;
     bool
     Execute(void)
     {
@@ -64,7 +62,8 @@ protected:
 
     NiceMock<MockJournalConfiguration> config;
 
-    LogWriteContextFactory factory;
+    LogWriteContextFactory contextFactory;
+    LogBufferIoContextFactory ioContextFactory;
     JournalLogBuffer* logBuffer;
 
     std::list<LogHandlerInterface*> addedLogs;

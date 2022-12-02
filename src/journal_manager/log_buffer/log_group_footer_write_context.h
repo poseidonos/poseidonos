@@ -41,12 +41,11 @@ namespace pos
 class LogGroupFooterWriteContext : public LogBufferIoContext
 {
 public:
-    LogGroupFooterWriteContext(int id, EventSmartPtr callback);
-// LCOV_EXCL_START
+    LogGroupFooterWriteContext(int id, EventSmartPtr callback, LogGroupFooter footer,
+        uint64_t offset);
+    // LCOV_EXCL_START
     virtual ~LogGroupFooterWriteContext(void);
 // LCOV_EXCL_STOP
-
-    void SetIoRequest(uint64_t offset, LogGroupFooter footer);
 
     bool operator==(const LogGroupFooterWriteContext& input) const
     {

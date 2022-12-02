@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,21 +30,49 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log_buffer/log_group_reset_context.h"
+#pragma once
 
+#include <vector>
+
+#include "src/bio/volume_io.h"
 #include "src/event_scheduler/event.h"
+#include "src/include/address_type.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-LogGroupResetContext::LogGroupResetContext(int id, EventSmartPtr callbackEvent)
-: LogBufferIoContext(id, callbackEvent)
-{
-}
+class LogWriteContext;
+class LogBufferIoContext;
+class LogGroupFooterWriteContext;
 
-void
-LogGroupResetContext::SetIoRequest(uint64_t offset, uint64_t len, char* buf)
+class JournalConfiguration;
+class LogGroupFooter;
+
+class LogBufferIoContextFactory
 {
-    this->SetIoInfo(MetaFsIoOpcode::Write, offset, len, buf);
-}
+public:
+    LogBufferIoContextFactory(void);
+    virtual ~LogBufferIoContextFactory(void);
+
+    virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target,
+        CallbackSequenceController* sequencer);
+
+    virtual LogBufferIoContext* CreateLogBufferIoContext(int groupId, EventSmartPtr event);
+    virtual MapUpdateLogWriteContext* CreateMapUpdateLogWriteIoContext(LogWriteContext* context);
+    virtual LogWriteIoContext* CreateLogWriteIoContext(LogWriteContext* context);
+    virtual LogBufferIoContext* CreateLogGroupFooterWriteContext(
+        uint64_t offset, LogGroupFooter footer, int logGroupId, EventSmartPtr callback);
+
+private:
+    uint64_t _GetMaxNumGcBlockMapUpdateInAContext(void);
+
+    JournalConfiguration* config;
+    LogBufferWriteDoneNotifier* notifier;
+    CallbackSequenceController* sequenceController;
+};
 
 } // namespace pos

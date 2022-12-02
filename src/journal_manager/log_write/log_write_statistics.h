@@ -36,12 +36,13 @@
 #include <mutex>
 #include <vector>
 
-#include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/include/address_type.h"
 
 namespace pos
 {
 class StripeLogWriteStatus;
 class StripeInfo;
+class LogWriteContext;
 
 using ContextList = std::list<LogWriteContext*>;
 

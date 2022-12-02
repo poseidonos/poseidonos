@@ -33,6 +33,7 @@
 #include "src/journal_manager/log_write/log_write_statistics.h"
 
 #include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 #include "src/journal_manager/statistics/stripe_info.h"
 #include "src/journal_manager/statistics/stripe_log_write_status.h"
 

@@ -4,9 +4,8 @@
 
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 
-using ::testing::Field;
+using ::testing::_;
 using ::testing::NiceMock;
-using ::testing::Pointee;
 using ::testing::Return;
 
 namespace pos
@@ -20,7 +19,7 @@ TEST(LogGroupFooterWriteEvent, Execute_testIfSuccessWhenWriteSuccess)
     LogGroupFooterWriteEvent event(&logBuffer, footer, 0, 0, nullptr);
 
     // When
-    EXPECT_CALL(logBuffer, InternalIo).WillOnce(Return(0));
+    EXPECT_CALL(logBuffer, WriteLogGroupFooter(0, footer, 0, _)).WillOnce(Return(0));
     bool result = event.Execute();
 
     // Then
@@ -36,7 +35,7 @@ TEST(LogGroupFooterWriteEvent, Execute_testIfFailsWhenWriteFails)
     LogGroupFooterWriteEvent event(&logBuffer, footer, 0, 0, nullptr);
 
     // When
-    EXPECT_CALL(logBuffer, InternalIo).WillOnce(Return(-1));
+    EXPECT_CALL(logBuffer, WriteLogGroupFooter(0, footer, 0, _)).WillOnce(Return(-1));
     bool result = event.Execute();
 
     // Then
