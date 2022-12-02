@@ -514,20 +514,23 @@ Allocator::_SetGCThreshold(void)
     uint32_t normalGcThreshold = normal_gc_lb;
     uint32_t urgentGcThreshold = urgent_gc_lb;
 
-    int ret = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
+    int retNormalRatio = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
         &normal_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
-    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
+    int retNormalLb = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
         &normal_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
-    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
+    int retUrgentRatio = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
         &urgent_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
-    ret += ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
+    int retUrgentLb= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
         &urgent_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
 
+    int ret = retNormalRatio + retNormalLb + retUrgentRatio + retUrgentLb;
     if (ret != 0)
     {
-        POS_TRACE_WARN(EID(GC_THRESHOLD_SETTING_DEBUG), "GC threshold setting cannot be found in the pos.conf file");
+        POS_TRACE_WARN(EID(GC_THRESHOLD_SETTING_NOT_FOUND),
+            "retNormalRatio:{}, retNormalLb:{}, retUrgentRatio:{}, retUrgentLb:{}",
+            retNormalRatio, retNormalLb, retUrgentRatio, retUrgentLb);
     }
-    POS_TRACE_INFO(EID(GC_THRESHOLD_SETTING_DEBUG), "normal_gc_ratio:{}, urgent_gc_ratio:{}, normal_gc_lb:{}, urgent_gc_lb:{}",
+    POS_TRACE_INFO(EID(GC_THREHOLD_SETTING_PRINT), "normal_gc_ratio:{}, urgent_gc_ratio:{}, normal_gc_lb:{}, urgent_gc_lb:{}",
         normal_gc_ratio, urgent_gc_ratio, normal_gc_lb, urgent_gc_lb);
 
     const PartitionLogicalSize* dataPartitionSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
@@ -546,7 +549,7 @@ Allocator::_SetGCThreshold(void)
     }
     else
     {
-        assert(false);
+        POS_TRACE_ERROR(EID(GC_THRESHOLD_SETTING_ERROR_INVALID_ARRAY_SIZE), "");
     }
     SetNormalGcThreshold(normalGcThreshold);
     SetUrgentThreshold(urgentGcThreshold);

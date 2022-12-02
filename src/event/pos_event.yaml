@@ -4136,6 +4136,41 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3390
+    Name: GC_THRESHOLD_IS_SET
+    Severity:
+    Message: GC threshold is set
+    Cause:
+    Solution:
+  -
+    Id: 3391
+    Name: GC_THRESHOLD_SETTING_NOT_FOUND
+    Severity:
+    Message: Failed to retrieve GC threshold setting from Config, so all or some values were replaced with default settings.
+    Cause:
+    Solution:
+  -
+    Id: 3392
+    Name: GC_THRESHOLD_IS_SET_TO_LOWER_BOUND
+    Severity:
+    Message: The GC threshold has been replaced by the lower bound value, since the Array size is smaller than the setting.
+    Cause:
+    Solution:
+  -
+    Id: 3393
+    Name: GC_THREHOLD_SETTING_PRINT
+    Severity:
+    Message:
+    Cause:
+    Solution:
+  -
+    Id: 3394
+    Name: GC_THRESHOLD_SETTING_ERROR_INVALID_ARRAY_SIZE
+    Severity:
+    Message: The GC threshold setting failed because the Array size is invalid.
+    Cause:
+    Solution:
 
 
   # Garbage Collector: 3400 - 3450
@@ -4165,20 +4200,6 @@ Root:
     Name: GC_CANNOT_BE_STARTED
     Severity:
     Message: GC cannot be started due to Array's state
-    Cause:
-    Solution:
-  -
-    Id: 3404
-    Name: GC_THRESHOLD_IS_SET
-    Severity:
-    Message: GC threshold is set
-    Cause:
-    Solution:
-  -
-    Id: 3405
-    Name: GC_THRESHOLD_SETTING_DEBUG
-    Severity:
-    Message:
     Cause:
     Solution:
   -
