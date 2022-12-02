@@ -184,6 +184,7 @@ Copier::_CompareThresholdState(void)
 
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
+        meta->GetGcStripeManager()->CheckTimeout();
         const uint32_t gcBusyThreshold = 20;
         uint32_t victimCnt = segmentCtx->GetVictimSegmentCount();
         uint32_t numFreeSegments = (uint32_t)segmentCtx->GetNumOfFreeSegment();
@@ -216,7 +217,6 @@ Copier::_CompareThresholdState(void)
                     victimId, numFreeSegments);
             }
         }
-        meta->GetGcStripeManager()->CheckTimeout();
     }
 }
 
