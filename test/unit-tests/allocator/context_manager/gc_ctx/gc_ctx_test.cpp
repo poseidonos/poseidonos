@@ -12,7 +12,7 @@ TEST(GcCtx, GetCurrentGcMode_TestModeNoGC)
 {
     // given
     NiceMock<MockBlockAllocationStatus> allocStatus;
-    GcCtx gcCtx(&allocStatus);
+    GcCtx gcCtx(&allocStatus, 0);
 
     gcCtx.SetNormalGcThreshold(10);
     gcCtx.SetUrgentThreshold(5);
