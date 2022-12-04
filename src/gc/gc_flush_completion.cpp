@@ -106,8 +106,16 @@ GcFlushCompletion::_DoSpecificJob(void)
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
-        arrayName, lsid, tryCnt);
+    if (tryCnt >= RETRY_WARN_FREQUENCY)
+    {
+        POS_TRACE_TRACE(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
+            arrayName, lsid, tryCnt);
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
+            arrayName, lsid, tryCnt);
+    }
 
     airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);
     EventSmartPtr event;
@@ -185,7 +193,7 @@ GcFlushCompletion::AcquireOwnership(void)
         if (needLogging == true)
         {
             RBAOwnerType owner = rbaStateManager->GetOwner(volId, *currPos);
-            bool needWarnLogging = tryCnt % 50000 == 0;
+            bool needWarnLogging = tryCnt % RETRY_WARN_FREQUENCY == 0;
             if (needWarnLogging)
             {
                 POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
