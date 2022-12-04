@@ -42,7 +42,7 @@ class GcCtx
 {
 public:
     GcCtx(void) = default;
-    explicit GcCtx(BlockAllocationStatus* allocStatus);
+    explicit GcCtx(BlockAllocationStatus* allocStatus, uint32_t arrayId);
     virtual ~GcCtx(void) = default;
     uint32_t GetNormalGcThreshold(void);
     uint32_t GetUrgentThreshold(void);
@@ -59,8 +59,8 @@ private:
     uint32_t urgentGcThreshold = 5;
     GcMode curGcMode;
     GcMode prevGcMode;
-
     BlockAllocationStatus* blockAllocStatus;
+    uint32_t arrayId = 0;
 };
 
 } // namespace pos

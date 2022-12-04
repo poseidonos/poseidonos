@@ -38,8 +38,9 @@
 
 namespace pos
 {
-GcCtx::GcCtx(BlockAllocationStatus* allocStatus)
-: blockAllocStatus(allocStatus)
+GcCtx::GcCtx(BlockAllocationStatus* allocStatus, uint32_t arrayId)
+: blockAllocStatus(allocStatus),
+  arrayId(arrayId)
 {
     curGcMode = MODE_NO_GC;
     prevGcMode = MODE_NO_GC;
@@ -61,12 +62,16 @@ void
 GcCtx::SetNormalGcThreshold(uint32_t inputThreshold)
 {
     normalGcThreshold = inputThreshold;
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "normal_threshold:{}, array_id:{}",
+        normalGcThreshold, arrayId);
 }
 
 void
 GcCtx::SetUrgentThreshold(uint32_t inputThreshold)
 {
     urgentGcThreshold = inputThreshold;
+    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "urgent_threshold:{}, array_id:{}",
+        urgentGcThreshold, arrayId);
 }
 
 GcMode
@@ -124,8 +129,8 @@ GcCtx::_PrintInfo(pos::GcMode newGcMode, uint32_t numFreeSegments)
     if (curGcMode != newGcMode)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE),
-            "Change GC STATE from GCState:{} to {}}, free_segment_count:{}",
-            (uint32_t)curGcMode, (uint32_t)newGcMode, numFreeSegments);
+            "Change GC STATE from GCState:{} to {}}",
+            (uint32_t)curGcMode, (uint32_t)newGcMode);
 
         // TODO (dh.ihm) want to print out this here...
         /*

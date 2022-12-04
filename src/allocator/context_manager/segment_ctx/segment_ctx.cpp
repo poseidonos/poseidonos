@@ -244,8 +244,8 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
         bool removed = segmentList[prevState]->RemoveFromList(segId);
 
         POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-            "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}",
-            segId, prevState, removed);
+            "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}, array_id:{}",
+            segId, prevState, removed, arrayId);
         _SegmentFreed(segId);
     }
 
@@ -433,7 +433,7 @@ SegmentCtx::AllocateFreeSegment(void)
         if (segId == UNMAP_SEGMENT)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_ALLOCATE_FAILURE_NO_FREE_SEGMENT),
-                "segment_id:{}, free_segment_count:{}", segId, GetNumOfFreeSegmentWoLock());
+                "segment_id:{}, free_segment_count:{}, array_id:{}", segId, GetNumOfFreeSegmentWoLock(), arrayId);
             break;
         }
         else
@@ -443,7 +443,7 @@ SegmentCtx::AllocateFreeSegment(void)
 
             int numFreeSegment = _OnNumFreeSegmentChanged();
             POS_TRACE_DEBUG(EID(ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS),
-                "segment_id:{}, free_segment_count:{}", segId, numFreeSegment);
+                "segment_id:{}, free_segment_count:{}, array_id:{}", segId, numFreeSegment, arrayId);
 
             return segId;
         }
@@ -533,8 +533,8 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
 
         _UpdateTelemetryOnVictimSegmentAllocation(victimSegment);
 
-        POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM), "victim_segment_id:{}, free_segment_count:{}",
-            victimSegment, GetNumOfFreeSegmentWoLock());
+        POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM), "victim_segment_id:{}, free_segment_count:{}, array_id:{}",
+            victimSegment, GetNumOfFreeSegmentWoLock(), arrayId);
     }
 
     return stateChanged;
@@ -576,7 +576,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-        "segment_id:{}, free_segment_count:{}", segmentId, numOfFreeSegments);
+        "segment_id:{}, free_segment_count:{}, array_id:{}", segmentId, numOfFreeSegments, arrayId);
 }
 
 int

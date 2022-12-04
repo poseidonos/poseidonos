@@ -171,7 +171,7 @@ Copier::_CompareThresholdState(void)
     SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
     GcCtx* gcCtx = iContextManager->GetGcCtx();
     GcMode gcMode = gcCtx->GetCurrentGcMode();
-    string arrayName = array->GetName();
+    uint32_t arrayId = array->GetIndex();
 
     _CleanUpVictimSegments();
 
@@ -186,8 +186,8 @@ Copier::_CompareThresholdState(void)
         if(victimCnt > gcBusyThreshold)
         {
             POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
-                "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_name:{}",
-                victimCnt, numFreeSegments, urgentThreshold, arrayName);
+                "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}",
+                victimCnt, numFreeSegments, urgentThreshold, arrayId);
             return;
         }
 
@@ -203,13 +203,13 @@ Copier::_CompareThresholdState(void)
             bool isUrgent = (numFreeSegments <= urgentThreshold);
             if (isUrgent == true)
             {
-                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_name:{}",
-                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayName);
+                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_id:{}",
+                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayId);
             }
             else
             {
-                POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_name:{}",
-                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayName);
+                POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_id:{}",
+                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayId);
             }
         }
     }

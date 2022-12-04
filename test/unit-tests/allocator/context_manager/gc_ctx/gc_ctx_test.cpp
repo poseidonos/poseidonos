@@ -30,7 +30,7 @@ TEST(GcCtx, UpdateCurrentGcMode_ByNumberOfFreeSegment)
 {
     // given
     NiceMock<MockBlockAllocationStatus> blockAllocStatus;
-    GcCtx* gcCtx = new GcCtx(&blockAllocStatus);
+    GcCtx* gcCtx = new GcCtx(&blockAllocStatus, 0);
 
     gcCtx->SetNormalGcThreshold(10);
     gcCtx->SetUrgentThreshold(5);
