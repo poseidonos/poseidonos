@@ -18,7 +18,7 @@ TEST(GcCtx, GetCurrentGcMode_TestModeNoGC)
     gcCtx.SetUrgentThreshold(5);
 
     // when 1
-    int numFreeSegments = 8;
+    uint32_t numFreeSegments = 8;
     GcMode gcMode = gcCtx.UpdateCurrentGcMode(numFreeSegments);
 
     // then 2
@@ -36,7 +36,7 @@ TEST(GcCtx, UpdateCurrentGcMode_ByNumberOfFreeSegment)
     gcCtx->SetUrgentThreshold(5);
 
     // when 1.
-    int numFreeSegments = 11;
+    uint32_t numFreeSegments = 11;
     GcMode ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
 
     // then 1.

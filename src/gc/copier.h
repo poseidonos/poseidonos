@@ -136,11 +136,9 @@ private:
     uint32_t userDataMaxStripes;
     uint32_t userDataMaxBlks;
     uint32_t blocksPerChunk;
-    StripeId currentStripeOffset;
     SegmentId victimId;
     SegmentId targetId;
     StripeId victimStripeId;
-    uint32_t victimIndex;
 
     CopierStateType copybackState;
     CopierMeta* meta;
@@ -149,8 +147,6 @@ private:
     IBlockAllocator* iBlockAllocator;
     IContextManager* iContextManager;
     GcStatus* gcStatus;
-    std::map<uint32_t, BlkInfo> validStripes;
-    bool loadedValidBlock;
 
     bool thresholdCheck = true;
     bool isStopped = false;

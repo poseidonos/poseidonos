@@ -41,32 +41,30 @@ namespace pos
 GcCtx::GcCtx(BlockAllocationStatus* allocStatus)
 : blockAllocStatus(allocStatus)
 {
-    normalGcThreshold = DEFAULT_GC_THRESHOLD;
-    urgentGcThreshold = DEFAULT_URGENT_THRESHOLD;
     curGcMode = MODE_NO_GC;
     prevGcMode = MODE_NO_GC;
 }
 
-int
+uint32_t
 GcCtx::GetNormalGcThreshold(void)
 {
     return normalGcThreshold;
 }
 
-int
+uint32_t
 GcCtx::GetUrgentThreshold(void)
 {
     return urgentGcThreshold;
 }
 
 void
-GcCtx::SetNormalGcThreshold(int inputThreshold)
+GcCtx::SetNormalGcThreshold(uint32_t inputThreshold)
 {
     normalGcThreshold = inputThreshold;
 }
 
 void
-GcCtx::SetUrgentThreshold(int inputThreshold)
+GcCtx::SetUrgentThreshold(uint32_t inputThreshold)
 {
     urgentGcThreshold = inputThreshold;
 }
@@ -78,7 +76,7 @@ GcCtx::GetCurrentGcMode(void)
 }
 
 GcMode
-GcCtx::UpdateCurrentGcMode(int numFreeSegments)
+GcCtx::UpdateCurrentGcMode(uint32_t numFreeSegments)
 {
     pos::GcMode newGcMode = curGcMode;
 
@@ -121,13 +119,13 @@ GcCtx::_UpdateGcMode(pos::GcMode newGcMode)
 }
 
 void
-GcCtx::_PrintInfo(pos::GcMode newGcMode, int numFreeSegments)
+GcCtx::_PrintInfo(pos::GcMode newGcMode, uint32_t numFreeSegments)
 {
     if (curGcMode != newGcMode)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE),
-            "Change GC STATE from GCState:{} to {}}, free segment count:{}",
-            (int)curGcMode, (int)newGcMode, numFreeSegments);
+            "Change GC STATE from GCState:{} to {}}, free_segment_count:{}",
+            (uint32_t)curGcMode, (uint32_t)newGcMode, numFreeSegments);
 
         // TODO (dh.ihm) want to print out this here...
         /*

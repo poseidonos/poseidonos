@@ -67,8 +67,7 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     IBlockAllocator* inputIBlockAllocator,
     IContextManager* inputIContextManager,
     CallbackSmartPtr inputStripeCopySubmissionPtr, CallbackSmartPtr inputReverseMapLoadCompletionPtr)
-: currentStripeOffset(0),
-  victimId(victimId),
+: victimId(victimId),
   targetId(targetId),
   victimStripeId(UNMAP_STRIPE),
   copybackState(COPIER_THRESHOLD_CHECK_STATE),
@@ -77,16 +76,12 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
   iBlockAllocator(inputIBlockAllocator),
   iContextManager(inputIContextManager),
   gcStatus(gcStatus),
-  loadedValidBlock(false),
   stripeCopySubmissionPtr(inputStripeCopySubmissionPtr),
   reverseMapLoadCompletionPtr(inputReverseMapLoadCompletionPtr)
 {
     userDataMaxStripes = udSize->stripesPerSegment;
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
-
-    victimIndex = 0;
-
     SetEventType(BackendEvent_GC);
 }
 
@@ -165,8 +160,6 @@ Copier::_Stop(void)
 void
 Copier::_InitVariables(void)
 {
-    currentStripeOffset = 0;
-    loadedValidBlock = false;
     gcStatus->SetCopyInfo(false /*started*/, victimId,
         0 /*invalid cnt*/, 0 /*copy cnt*/);
 }
@@ -177,8 +170,8 @@ Copier::_CompareThresholdState(void)
     uint64_t objAddr = reinterpret_cast<uint64_t>(this);
     SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
     GcCtx* gcCtx = iContextManager->GetGcCtx();
-
     GcMode gcMode = gcCtx->GetCurrentGcMode();
+    string arrayName = array->GetName();
 
     _CleanUpVictimSegments();
 
@@ -188,11 +181,13 @@ Copier::_CompareThresholdState(void)
         const uint32_t gcBusyThreshold = 20;
         uint32_t victimCnt = segmentCtx->GetVictimSegmentCount();
         uint32_t numFreeSegments = (uint32_t)segmentCtx->GetNumOfFreeSegment();
+        uint32_t urgentThreshold = gcCtx->GetUrgentThreshold();
+        uint32_t normalThreshold = gcCtx->GetUrgentThreshold();
         if(victimCnt > gcBusyThreshold)
         {
             POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
-                "victim_count:{}, free_segment_count:{}",
-                victimCnt, numFreeSegments);
+                "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_name:{}",
+                victimCnt, numFreeSegments, urgentThreshold, arrayName);
             return;
         }
 
@@ -205,16 +200,16 @@ Copier::_CompareThresholdState(void)
             _InitVariables();
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
-            bool isUrgent = (numFreeSegments <= (uint32_t)gcCtx->GetUrgentThreshold());
+            bool isUrgent = (numFreeSegments <= urgentThreshold);
             if (isUrgent == true)
             {
-                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
-                    victimId, numFreeSegments);
+                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_name:{}",
+                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayName);
             }
             else
             {
-                POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}",
-                    victimId, numFreeSegments);
+                POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_name:{}",
+                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayName);
             }
         }
     }
@@ -224,12 +219,8 @@ void
 Copier::_CopyPrepareState(void)
 {
     uint32_t victimSegmentIndex = meta->SetInUseBitmap();
-    victimIndex = victimSegmentIndex;
-
+    uint32_t victimIndex = victimSegmentIndex;
     StripeId baseStripe = victimId * userDataMaxStripes;
-
-    loadedValidBlock = false;
-    validStripes.clear();
 
     CallbackSmartPtr callee;
     if (nullptr == stripeCopySubmissionPtr)

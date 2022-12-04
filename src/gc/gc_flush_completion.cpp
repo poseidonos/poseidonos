@@ -106,7 +106,7 @@ GcFlushCompletion::_DoSpecificJob(void)
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried:{}",
+    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
         arrayName, lsid, tryCnt);
 
     airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);

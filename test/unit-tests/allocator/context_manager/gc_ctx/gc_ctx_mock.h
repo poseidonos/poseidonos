@@ -11,6 +11,6 @@ class MockGcCtx : public GcCtx
 public:
     using GcCtx::GcCtx;
     MOCK_METHOD(GcMode, GetCurrentGcMode, (), (override));
-    MOCK_METHOD(GcMode, UpdateCurrentGcMode, (int numFreeSegments), (override));
+    MOCK_METHOD(GcMode, UpdateCurrentGcMode, (uint32_t numFreeSegments), (override));
 };
 } // namespace pos
