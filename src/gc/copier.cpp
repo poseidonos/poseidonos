@@ -185,12 +185,21 @@ Copier::_CompareThresholdState(void)
         uint32_t normalThreshold = gcCtx->GetUrgentThreshold();
         if(victimCnt > gcBusyThreshold)
         {
-            POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
-                "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}",
-                victimCnt, numFreeSegments, urgentThreshold, arrayId);
+            gcBusyRetryCnt++;
+            if (gcBusyRetryCnt % 10000 == 0)
+            {
+                POS_TRACE_WARN(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
+                    "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}, gc_busy_retried:{}",
+                    victimCnt, numFreeSegments, urgentThreshold, arrayId, gcBusyRetryCnt);
+            }
+            else if (gcBusyRetryCnt % 100 == 0)
+            {
+                POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
+                    "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}, gc_busy_retried:{}",
+                    victimCnt, numFreeSegments, urgentThreshold, arrayId, gcBusyRetryCnt);
+            }
             return;
         }
-
         airlog("LAT_GetVictimSegment", "begin", 0, objAddr);
         victimId = iContextManager->AllocateGCVictimSegment();
         airlog("LAT_GetVictimSegment", "end", 0, objAddr);
@@ -213,6 +222,7 @@ Copier::_CompareThresholdState(void)
             }
         }
     }
+    gcBusyRetryCnt = 0;
 }
 
 void

@@ -152,6 +152,7 @@ private:
     bool isStopped = false;
     bool isPaused = false;
     bool readyToEnd = false;
+    uint32_t gcBusyRetryCnt = 0;
 
     CallbackSmartPtr stripeCopySubmissionPtr;
     CallbackSmartPtr reverseMapLoadCompletionPtr;
