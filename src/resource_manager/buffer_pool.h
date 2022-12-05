@@ -55,7 +55,7 @@ public:
             HugepageAllocatorSingleton::Instance());
     virtual ~BufferPool(void);
     virtual void* TryGetBuffer(void);
-    virtual bool TryGetBuffers(uint32_t count, std::vector<void*>* retBuffers);
+    virtual bool TryGetBuffers(uint32_t reqCnt, std::vector<void*>* retBuffers, uint32_t minAcqCnt);
     virtual void ReturnBuffer(void*);
     virtual void ReturnBuffers(std::vector<void*>* buffers);
     virtual bool IsAllocated(void) { return isAllocated; }
@@ -64,6 +64,8 @@ public:
 private:
     bool _Init(void);
     void _Clear(void);
+    void _TrySwapWhenConsumerPoolEmpty(void);
+    void _TrySwapWhenProducerPoolIsNotEmpty(void);
     void _Swap(void);
 
     const BufferInfo BUFFER_INFO;
@@ -79,7 +81,7 @@ private:
     std::mutex consumerLock;
     std::mutex producerLock;
     bool isAllocated = false;
-    size_t swapSize = 0;
+    size_t swapThreshold = 0;
     const static size_t SWAP_THRESHOLD_PERCENT = 25;
 };
 

@@ -89,6 +89,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
         flushed[volId] = true;
     }
     flushedStripeCnt = 0;
+    mapUpdatingCnt = 0;
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
     _SetBufferPool();
 }
@@ -241,6 +242,8 @@ void
 GcStripeManager::SetFinished(void)
 {
     flushedStripeCnt--;
+    POS_TRACE_TRACE(EID(GC_MAP_UPDATE_COMPLETION),
+        "flushing_and_updating_count_total:{}, array_id:{}", flushedStripeCnt, iArrayInfo->GetIndex());
 }
 
 void
@@ -300,6 +303,7 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
 void
 GcStripeManager::CheckTimeout(void)
 {
+    uint32_t arrayId = iArrayInfo->GetIndex();
     unique_lock<mutex> lock(timerMtx);
     for (auto t : timer)
     {
@@ -307,12 +311,12 @@ GcStripeManager::CheckTimeout(void)
         {
             uint32_t volId = t.first;
             POS_TRACE_WARN(EID(GC_FORCE_FLUSH_TIMER_TIMEOUT),
-                "vol_id:{}, interval:{}", volId, timeoutInterval);
+                "array_id:{}, vol_id:{}, interval:{}", arrayId, volId, timeoutInterval);
 
             if (ffLocker.TryForceFlushLock(volId) == false)
             {
                 POS_TRACE_WARN(EID(GC_FORCE_FLUSH_TRYLOCK_FAILED),
-                    "vol_id:{}", volId);
+                    "array_id:{}, vol_id:{}", arrayId, volId);
                 continue;
             }
 
@@ -334,7 +338,7 @@ GcStripeManager::CheckTimeout(void)
                             allocatedBlkInfoList, volId, dataBuffer, this, forceFlush);
                 EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
                 SetFlushed(volId, forceFlush);
-                POS_TRACE_WARN(EID(GC_STRIPE_FORCIBLY_FLUSHED), "vol_id:{}", volId);
+                POS_TRACE_WARN(EID(GC_STRIPE_FORCIBLY_FLUSHED), "array_id:{}, vol_id:{}", arrayId, volId);
             }
             ffLocker.UnlockForceFlushLock(volId);
             t.second->Reset();
@@ -352,6 +356,20 @@ void
 GcStripeManager::ReleaseFlushLock(uint32_t volId)
 {
     ffLocker.Unlock(volId);
+}
+
+void
+GcStripeManager::MapUpdateRequested(void)
+{
+    mapUpdatingCnt++;
+}
+
+void
+GcStripeManager::MapUpdateCompleted(void)
+{
+    mapUpdatingCnt--;
+    POS_TRACE_TRACE(EID(GC_MAP_UPDATE_COMPLETION),
+        "map_updating_count:{}, array_id:{}", mapUpdatingCnt, iArrayInfo->GetIndex());
 }
 
 uint32_t
@@ -387,7 +405,8 @@ GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
 {
     gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
     uint32_t bufCount = udSize->chunksPerStripe;
-    bool ret = gcWriteBufferPool->TryGetBuffers(bufCount, gcActiveWriteBuffers[volumeId]);
+    uint32_t minAcqCount = bufCount;
+    bool ret = gcWriteBufferPool->TryGetBuffers(bufCount, gcActiveWriteBuffers[volumeId], minAcqCount);
     if (ret == false)
     {
         bufAllocRetryCnt++;

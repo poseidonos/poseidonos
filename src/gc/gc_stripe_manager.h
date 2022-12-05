@@ -96,6 +96,8 @@ public:
     void CheckTimeout(void);
     virtual bool TryFlushLock(uint32_t volId);
     virtual void ReleaseFlushLock(uint32_t volId);
+    void MapUpdateRequested(void);
+    void MapUpdateCompleted(void);
 
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
@@ -127,6 +129,7 @@ private:
     std::vector<BlkInfo>* blkInfoList[GC_VOLUME_COUNT];
     const PartitionLogicalSize* udSize;
     std::atomic<uint32_t> flushedStripeCnt;
+    std::atomic<uint32_t> mapUpdatingCnt;
 
     VolumeEventPublisher* volumeEventPublisher;
     MemoryManager* memoryManager;

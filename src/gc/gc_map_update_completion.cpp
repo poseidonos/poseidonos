@@ -103,6 +103,7 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
     airlog("InternalIoPendingCnt", "user", volId, -1);
 
     gcStripeManager->SetFinished();
+    gcStripeManager->MapUpdateCompleted();
 
     POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_COMPLETION),
         "gc map update completion, arrayName:{}, stripeUserLsid:{}",

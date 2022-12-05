@@ -263,10 +263,11 @@ FlowControl::_RefillToken(FlowControlType type)
     uint32_t userToken;
     uint32_t gcToken;
 
+    uint32_t arrayId = arrayInfo->GetIndex();
     std::tie(userToken, gcToken) = _DistributeToken();
     POS_TRACE_INFO(EID(FLOW_CONTROL_TOKEN_DISTRIBUTED),
-        "userToken:{}, gcToken:{}, userBucket:{}, gcBucket:{}",
-        userToken, gcToken, bucket[FlowControlType::USER], bucket[FlowControlType::GC]);
+        "userToken:{}, gcToken:{}, userBucket:{}, gcBucket:{}, array_id:{}",
+        userToken, gcToken, bucket[FlowControlType::USER], bucket[FlowControlType::GC], arrayId);
     bucket[FlowControlType::USER].fetch_add(userToken);
     bucket[FlowControlType::GC].fetch_add(gcToken);
 
@@ -303,10 +304,11 @@ FlowControl::_TryForceResetToken(FlowControlType type)
     bucket[FlowControlType::GC] = 0;
 
     isForceReset = false;
+    uint32_t arrayId = arrayInfo->GetIndex();
     POS_TRACE_INFO(EID(FLOW_CONTROL_FORCERESET_DONE),
-        "userPrevBucket:{}, gcPrevBucket:{}, gcThreshold:{}, freeSegments:{}",
+        "userPrevBucket:{}, gcPrevBucket:{}, gc_normal_threshold:{}, free_segment_count:{}, array_id:{}",
         previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC],
-        gcThreshold, freeSegments);
+        gcThreshold, freeSegments, arrayId);
 
     return true;
 }

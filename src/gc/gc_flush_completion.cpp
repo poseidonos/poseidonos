@@ -127,6 +127,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     {
         event = inputEvent;
     }
+    gcStripeManager->MapUpdateRequested();
     stripe->Flush(event);
     return true;
 }

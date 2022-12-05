@@ -109,10 +109,11 @@ CopierMeta::~CopierMeta(void)
     }
 }
 
-void*
-CopierMeta::GetBuffer(StripeId stripeId)
+void
+CopierMeta::GetBuffers(uint32_t count, std::vector<void*>* retBuffers)
 {
-    return gcBufferPool->TryGetBuffer();
+    uint32_t minAcqCount = 1;
+    gcBufferPool->TryGetBuffers(count, retBuffers, minAcqCount);
 }
 
 void
