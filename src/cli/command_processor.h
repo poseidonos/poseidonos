@@ -141,6 +141,11 @@ using grpc_cli::ListVolumeRequest;
 using grpc_cli::ListVolumeResponse;
 using grpc_cli::QosCreateVolumePolicyRequest;
 using grpc_cli::QosCreateVolumePolicyResponse;
+using grpc_cli::QosResetVolumePolicyRequest;
+using grpc_cli::QosResetVolumePolicyResponse;
+using grpc_cli::QosVolumeNameParam;
+
+using google::protobuf::RepeatedPtrField;
 
 class CommandProcessor
 {
@@ -211,6 +216,7 @@ public:
 
     // QoS Commands
     grpc::Status ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolicyRequest* request, QosCreateVolumePolicyResponse* reply);
+    grpc::Status ExecuteQosResetVolumePolicyCommand(const QosResetVolumePolicyRequest* request, QosResetVolumePolicyResponse* reply);
 
 private:
     bool _isPosTerminating {false};
@@ -226,7 +232,8 @@ private:
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
     bool _IsValidIpAddress(const std::string &ipAddress);
     int _HandleInputVolumes(
-        const QosCreateVolumePolicyRequest* request,
+        const std::string arrayName,
+        const RepeatedPtrField<QosVolumeNameParam>& volumes,
         std::vector<std::string>& volumeNames,
         std::vector<std::pair<std::string, uint32_t>>& validVolumes);
 

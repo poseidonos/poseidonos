@@ -2047,15 +2047,14 @@ CommandProcessor::ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolic
         return grpc::Status::OK;
     }
 
-    int paramValidity = _HandleInputVolumes(request, volumeNames, validVolumes);
+    string arrayName = (request->param()).array();
+    int paramValidity = _HandleInputVolumes(arrayName, (request->param()).vol(), volumeNames, validVolumes);
     if (paramValidity != EID(SUCCESS))
     {
         _SetEventStatus(paramValidity, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-
-    string arrayName = (request->param()).array();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
@@ -2115,10 +2114,92 @@ CommandProcessor::ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolic
         return grpc::Status::OK;
     }
 
-    _SetEventStatus(SUCCESS, reply->mutable_result()->mutable_status());
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 
+}
+
+grpc::Status
+CommandProcessor::ExecuteQosResetVolumePolicyCommand(const QosResetVolumePolicyRequest* request, QosResetVolumePolicyResponse* reply)
+{
+    string command = request->command();
+
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    std::vector<string> volumeNames;
+    std::vector<std::pair<string, uint32_t>> validVolumes;
+    std::string errorMsg;
+
+    if (false == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        _SetEventStatus(EID(QOS_CLI_FE_QOS_DISABLED), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    string arrayName = (request->param()).array();
+    int paramValidity = _HandleInputVolumes(arrayName, (request->param()).vol(), volumeNames, validVolumes);
+    if (paramValidity != EID(SUCCESS))
+    {
+        _SetEventStatus(paramValidity, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        _SetEventStatus(EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    IArrayInfo* array = info->arrayInfo;
+    ArrayStateType arrayState = array->GetState();
+    if (arrayState == ArrayStateEnum::BROKEN)
+    {
+        _SetEventStatus(EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    qos_vol_policy newVolPolicy;
+    IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    for (auto vol = validVolumes.begin(); vol != validVolumes.end(); vol++)
+    {
+        std::pair<string, uint32_t> volume = (*vol);
+        newVolPolicy.minBwGuarantee = false;
+        newVolPolicy.minIopsGuarantee = false;
+        newVolPolicy.minBw = 0;
+        newVolPolicy.maxBw = 0;
+        newVolPolicy.minIops = 0;
+        newVolPolicy.maxIops = 0;
+        newVolPolicy.policyChange = true;
+        newVolPolicy.maxValueChanged = true;
+        int retVal = volMgr->UpdateQoSProperty(volume.first, newVolPolicy.maxIops, newVolPolicy.maxBw, newVolPolicy.minIops, newVolPolicy.minBw);
+        if (retVal != SUCCESS)
+        {
+            _SetEventStatus(EID(retVal), reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        int32_t arrayId = QosManagerSingleton::Instance()->GetArrayIdFromMap(arrayName);
+        if (arrayId != -1)
+        {
+            retVal = QosManagerSingleton::Instance()->UpdateVolumePolicy(volume.second, newVolPolicy, arrayId);
+        }
+        if (retVal != SUCCESS)
+        {
+            _SetEventStatus(EID(retVal), reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
 }
 
 std::string
@@ -2471,7 +2552,8 @@ CommandProcessor::_IsValidFile(const std::string& path)
 
 int
 CommandProcessor::_HandleInputVolumes(
-    const QosCreateVolumePolicyRequest *request,
+    const string arrayName,
+    const RepeatedPtrField<QosVolumeNameParam>& volumes,
     std::vector<string>& volumeNames,
     std::vector<std::pair<string, uint32_t>>& validVolumes)
 {
@@ -2479,15 +2561,14 @@ CommandProcessor::_HandleInputVolumes(
     volumeNames.clear();
     validVolumes.clear();
 
-    std::string arrayName = (request->param()).array();
 
     if (0 == arrayName.compare(""))
     {
         return EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
     }
 
-    for(int i = 0; i < (request->param()).vol().size(); i++) {
-        string volName = (request->param()).vol()[i].volumename();
+    for(int i = 0; i < volumes.size(); i++) {
+        string volName = volumes[i].volumename();
         volumeNames.push_back(volName);
     }
 
