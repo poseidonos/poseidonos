@@ -37,6 +37,7 @@
 #include <unordered_map>
 
 #include "posreplicator_config.h"
+#include "posreplicator_volumecopy_status.h"
 #include "proto/generated/cpp/pos_rpc.grpc.pb.h"
 #include "proto/generated/cpp/pos_rpc.pb.h"
 #include "spdk/pos.h"
@@ -52,7 +53,6 @@
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/volume/i_volume_info_manager.h"
 #include "src/volume/volume_base.h"
-#include "posreplicator_volumecopy_status.h"
 
 namespace pos
 {
@@ -62,7 +62,7 @@ class PosReplicatorManager
 {
 public:
     PosReplicatorManager(void);
-    PosReplicatorManager(AIO* aio); 
+    PosReplicatorManager(AIO* aio);
     ~PosReplicatorManager(void);
 
     void Init(GrpcPublisher* publisher, GrpcSubscriber* subscriber);

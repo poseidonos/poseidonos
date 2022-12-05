@@ -503,6 +503,7 @@ static const char* ReplicationControl_method_names[] = {
   "/pos_rpc.ReplicationControl/FinishVolumeSync",
   "/pos_rpc.ReplicationControl/SuspendWrite",
   "/pos_rpc.ReplicationControl/ResumeWrite",
+  "/pos_rpc.ReplicationControl/ChangeReplicationRole",
 };
 
 std::unique_ptr< ReplicationControl::Stub> ReplicationControl::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -516,6 +517,7 @@ ReplicationControl::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>&
   , rpcmethod_FinishVolumeSync_(ReplicationControl_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_SuspendWrite_(ReplicationControl_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ResumeWrite_(ReplicationControl_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ChangeReplicationRole_(ReplicationControl_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status ReplicationControl::Stub::StartVolumeSync(::grpc::ClientContext* context, const ::pos_rpc::StartVolumeSyncRequest& request, ::pos_rpc::StartVolumeSyncResponse* response) {
@@ -610,6 +612,29 @@ void ReplicationControl::Stub::experimental_async::ResumeWrite(::grpc::ClientCon
   return result;
 }
 
+::grpc::Status ReplicationControl::Stub::ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::pos_rpc::ChangeReplicationRoleResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ChangeReplicationRole_, context, request, response);
+}
+
+void ReplicationControl::Stub::experimental_async::ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ChangeReplicationRole_, context, request, response, std::move(f));
+}
+
+void ReplicationControl::Stub::experimental_async::ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ChangeReplicationRole_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>* ReplicationControl::Stub::PrepareAsyncChangeReplicationRoleRaw(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::pos_rpc::ChangeReplicationRoleResponse, ::pos_rpc::ChangeReplicationRoleRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ChangeReplicationRole_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>* ReplicationControl::Stub::AsyncChangeReplicationRoleRaw(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncChangeReplicationRoleRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ReplicationControl::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ReplicationControl_method_names[0],
@@ -651,6 +676,16 @@ ReplicationControl::Service::Service() {
              ::pos_rpc::ResumeWriteResponse* resp) {
                return service->ResumeWrite(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ReplicationControl_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ReplicationControl::Service, ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicationControl::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::pos_rpc::ChangeReplicationRoleRequest* req,
+             ::pos_rpc::ChangeReplicationRoleResponse* resp) {
+               return service->ChangeReplicationRole(ctx, req, resp);
+             }, this)));
 }
 
 ReplicationControl::Service::~Service() {
@@ -678,6 +713,13 @@ ReplicationControl::Service::~Service() {
 }
 
 ::grpc::Status ReplicationControl::Service::ResumeWrite(::grpc::ServerContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ReplicationControl::Service::ChangeReplicationRole(::grpc::ServerContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response) {
   (void) context;
   (void) request;
   (void) response;

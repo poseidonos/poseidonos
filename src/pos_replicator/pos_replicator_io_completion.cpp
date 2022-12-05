@@ -33,10 +33,10 @@
 #include "pos_replicator_io_completion.h"
 
 #include "posreplicator_manager.h"
-#include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
 #include "src/bio/volume_io.h"
+#include "src/include/pos_event_id.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {

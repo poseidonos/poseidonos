@@ -2251,6 +2251,13 @@ class ReplicationControl final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ResumeWriteResponse>> PrepareAsyncResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ResumeWriteResponse>>(PrepareAsyncResumeWriteRaw(context, request, cq));
     }
+    virtual ::grpc::Status ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::pos_rpc::ChangeReplicationRoleResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ChangeReplicationRoleResponse>> AsyncChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ChangeReplicationRoleResponse>>(AsyncChangeReplicationRoleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ChangeReplicationRoleResponse>> PrepareAsyncChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ChangeReplicationRoleResponse>>(PrepareAsyncChangeReplicationRoleRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
@@ -2278,6 +2285,12 @@ class ReplicationControl final {
       #else
       virtual void ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
+      virtual void ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
     typedef class experimental_async_interface async_interface;
@@ -2295,6 +2308,8 @@ class ReplicationControl final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::SuspendWriteResponse>* PrepareAsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ResumeWriteResponse>* AsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ResumeWriteResponse>* PrepareAsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ChangeReplicationRoleResponse>* AsyncChangeReplicationRoleRaw(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::pos_rpc::ChangeReplicationRoleResponse>* PrepareAsyncChangeReplicationRoleRaw(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -2327,6 +2342,13 @@ class ReplicationControl final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>> PrepareAsyncResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>>(PrepareAsyncResumeWriteRaw(context, request, cq));
     }
+    ::grpc::Status ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::pos_rpc::ChangeReplicationRoleResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>> AsyncChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>>(AsyncChangeReplicationRoleRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>> PrepareAsyncChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>>(PrepareAsyncChangeReplicationRoleRaw(context, request, cq));
+    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
@@ -2354,6 +2376,12 @@ class ReplicationControl final {
       #else
       void ResumeWrite(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
+      void ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void ChangeReplicationRole(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
      private:
       friend class Stub;
       explicit experimental_async(Stub* stub): stub_(stub) { }
@@ -2373,10 +2401,13 @@ class ReplicationControl final {
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::SuspendWriteResponse>* PrepareAsyncSuspendWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::SuspendWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* AsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::pos_rpc::ResumeWriteResponse>* PrepareAsyncResumeWriteRaw(::grpc::ClientContext* context, const ::pos_rpc::ResumeWriteRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>* AsyncChangeReplicationRoleRaw(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::pos_rpc::ChangeReplicationRoleResponse>* PrepareAsyncChangeReplicationRoleRaw(::grpc::ClientContext* context, const ::pos_rpc::ChangeReplicationRoleRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_StartVolumeSync_;
     const ::grpc::internal::RpcMethod rpcmethod_FinishVolumeSync_;
     const ::grpc::internal::RpcMethod rpcmethod_SuspendWrite_;
     const ::grpc::internal::RpcMethod rpcmethod_ResumeWrite_;
+    const ::grpc::internal::RpcMethod rpcmethod_ChangeReplicationRole_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -2388,6 +2419,7 @@ class ReplicationControl final {
     virtual ::grpc::Status FinishVolumeSync(::grpc::ServerContext* context, const ::pos_rpc::FinishVolumeSyncRequest* request, ::pos_rpc::FinishVolumeSyncResponse* response);
     virtual ::grpc::Status SuspendWrite(::grpc::ServerContext* context, const ::pos_rpc::SuspendWriteRequest* request, ::pos_rpc::SuspendWriteResponse* response);
     virtual ::grpc::Status ResumeWrite(::grpc::ServerContext* context, const ::pos_rpc::ResumeWriteRequest* request, ::pos_rpc::ResumeWriteResponse* response);
+    virtual ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_StartVolumeSync : public BaseClass {
@@ -2469,7 +2501,27 @@ class ReplicationControl final {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_StartVolumeSync<WithAsyncMethod_FinishVolumeSync<WithAsyncMethod_SuspendWrite<WithAsyncMethod_ResumeWrite<Service > > > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_ChangeReplicationRole : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ChangeReplicationRole() {
+      ::grpc::Service::MarkMethodAsync(4);
+    }
+    ~WithAsyncMethod_ChangeReplicationRole() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestChangeReplicationRole(::grpc::ServerContext* context, ::pos_rpc::ChangeReplicationRoleRequest* request, ::grpc::ServerAsyncResponseWriter< ::pos_rpc::ChangeReplicationRoleResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_StartVolumeSync<WithAsyncMethod_FinishVolumeSync<WithAsyncMethod_SuspendWrite<WithAsyncMethod_ResumeWrite<WithAsyncMethod_ChangeReplicationRole<Service > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_StartVolumeSync : public BaseClass {
    private:
@@ -2658,11 +2710,58 @@ class ReplicationControl final {
     #endif
       { return nullptr; }
   };
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_ChangeReplicationRole : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_ChangeReplicationRole() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::pos_rpc::ChangeReplicationRoleRequest* request, ::pos_rpc::ChangeReplicationRoleResponse* response) { return this->ChangeReplicationRole(context, request, response); }));}
+    void SetMessageAllocatorFor_ChangeReplicationRole(
+        ::grpc::experimental::MessageAllocator< ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_ChangeReplicationRole() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ChangeReplicationRole(
+      ::grpc::CallbackServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ChangeReplicationRole(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
   #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_StartVolumeSync<ExperimentalWithCallbackMethod_FinishVolumeSync<ExperimentalWithCallbackMethod_SuspendWrite<ExperimentalWithCallbackMethod_ResumeWrite<Service > > > > CallbackService;
+  typedef ExperimentalWithCallbackMethod_StartVolumeSync<ExperimentalWithCallbackMethod_FinishVolumeSync<ExperimentalWithCallbackMethod_SuspendWrite<ExperimentalWithCallbackMethod_ResumeWrite<ExperimentalWithCallbackMethod_ChangeReplicationRole<Service > > > > > CallbackService;
   #endif
 
-  typedef ExperimentalWithCallbackMethod_StartVolumeSync<ExperimentalWithCallbackMethod_FinishVolumeSync<ExperimentalWithCallbackMethod_SuspendWrite<ExperimentalWithCallbackMethod_ResumeWrite<Service > > > > ExperimentalCallbackService;
+  typedef ExperimentalWithCallbackMethod_StartVolumeSync<ExperimentalWithCallbackMethod_FinishVolumeSync<ExperimentalWithCallbackMethod_SuspendWrite<ExperimentalWithCallbackMethod_ResumeWrite<ExperimentalWithCallbackMethod_ChangeReplicationRole<Service > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_StartVolumeSync : public BaseClass {
    private:
@@ -2727,6 +2826,23 @@ class ReplicationControl final {
     }
     // disable synchronous version of this method
     ::grpc::Status ResumeWrite(::grpc::ServerContext* /*context*/, const ::pos_rpc::ResumeWriteRequest* /*request*/, ::pos_rpc::ResumeWriteResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ChangeReplicationRole : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ChangeReplicationRole() {
+      ::grpc::Service::MarkMethodGeneric(4);
+    }
+    ~WithGenericMethod_ChangeReplicationRole() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -2809,6 +2925,26 @@ class ReplicationControl final {
     }
     void RequestResumeWrite(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
       ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ChangeReplicationRole : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ChangeReplicationRole() {
+      ::grpc::Service::MarkMethodRaw(4);
+    }
+    ~WithRawMethod_ChangeReplicationRole() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestChangeReplicationRole(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -2964,6 +3100,44 @@ class ReplicationControl final {
       { return nullptr; }
   };
   template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_ChangeReplicationRole : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_ChangeReplicationRole() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ChangeReplicationRole(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_ChangeReplicationRole() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* ChangeReplicationRole(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* ChangeReplicationRole(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
   class WithStreamedUnaryMethod_StartVolumeSync : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -3071,9 +3245,36 @@ class ReplicationControl final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedResumeWrite(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::ResumeWriteRequest,::pos_rpc::ResumeWriteResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_StartVolumeSync<WithStreamedUnaryMethod_FinishVolumeSync<WithStreamedUnaryMethod_SuspendWrite<WithStreamedUnaryMethod_ResumeWrite<Service > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ChangeReplicationRole : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ChangeReplicationRole() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::pos_rpc::ChangeReplicationRoleRequest, ::pos_rpc::ChangeReplicationRoleResponse>* streamer) {
+                       return this->StreamedChangeReplicationRole(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ChangeReplicationRole() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ChangeReplicationRole(::grpc::ServerContext* /*context*/, const ::pos_rpc::ChangeReplicationRoleRequest* /*request*/, ::pos_rpc::ChangeReplicationRoleResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedChangeReplicationRole(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::pos_rpc::ChangeReplicationRoleRequest,::pos_rpc::ChangeReplicationRoleResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_StartVolumeSync<WithStreamedUnaryMethod_FinishVolumeSync<WithStreamedUnaryMethod_SuspendWrite<WithStreamedUnaryMethod_ResumeWrite<WithStreamedUnaryMethod_ChangeReplicationRole<Service > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_StartVolumeSync<WithStreamedUnaryMethod_FinishVolumeSync<WithStreamedUnaryMethod_SuspendWrite<WithStreamedUnaryMethod_ResumeWrite<Service > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_StartVolumeSync<WithStreamedUnaryMethod_FinishVolumeSync<WithStreamedUnaryMethod_SuspendWrite<WithStreamedUnaryMethod_ResumeWrite<WithStreamedUnaryMethod_ChangeReplicationRole<Service > > > > > StreamedService;
 };
 
 }  // namespace pos_rpc

@@ -57,6 +57,7 @@ public:
     ~MockReplicatorServer(void);
 
     void RunServer(std::string address);
+    void WaitForReceiveDone(int numSendCalls);
 
     virtual ::grpc::Status CompleteRead(
         ::grpc::ServerContext* context,
@@ -74,10 +75,10 @@ public:
         ::grpc::ServerContext* context,
         const ::replicator_rpc::PushDirtyLogRequest* request,
         ::replicator_rpc::PushDirtyLogResponse* response) override;
-    virtual ::grpc::Status TransferDirtyLog(
+    virtual ::grpc::Status TransferVolumeData(
         ::grpc::ServerContext* context,
-        const ::replicator_rpc::TransferDirtyLogRequest* request,
-        ::replicator_rpc::TransferDirtyLogResponse* response) override;
+        const ::replicator_rpc::TransferVolumeDataRequest* request,
+        ::replicator_rpc::TransferVolumeDataResponse* response) override;
     virtual ::grpc::Status TransferHostWrite(
         ::grpc::ServerContext* context,
         const ::replicator_rpc::TransferHostWriteRequest* request,
@@ -86,5 +87,7 @@ public:
 private:
     std::unique_ptr<::grpc::Server> server;
     std::string address;
+
+    int numRecievedCalls;
 };
 } // namespace pos

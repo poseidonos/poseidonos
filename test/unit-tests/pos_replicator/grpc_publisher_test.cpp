@@ -36,9 +36,9 @@
 
 #include <thread>
 
-#include "test/unit-tests/pos_replicator/mock_grpc/mock_replicator_server.h"
-#include "test/unit-tests/pos_replicator/mock_grpc/mock_replicator_client.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
+#include "test/unit-tests/pos_replicator/mock_grpc/mock_replicator_client.h"
+#include "test/unit-tests/pos_replicator/mock_grpc/mock_replicator_server.h"
 
 using ::testing::_;
 using testing::NiceMock;
@@ -54,12 +54,13 @@ ACTION_P(SetArg2ToStringAndReturn0, stringValue)
 
 class GrpcPublisherTestFixture : public ::testing::Test
 {
-const int CHUNK_SIZE = 512;
+    const int CHUNK_SIZE = 512;
+
 protected:
     void SetUp(void) override;
     void TearDown(void) override;
 
-    void* _GenerateDataBlock(int numChunks);
+    char* _GenerateDataBlock(int numChunks);
 
     GrpcPublisher* grpcPublisher;
     MockReplicatorServer* replicatorServer;
@@ -86,22 +87,16 @@ GrpcPublisherTestFixture::TearDown(void)
     delete replicatorServer;
 }
 
-void*
+char*
 GrpcPublisherTestFixture::_GenerateDataBlock(int numChunks)
 {
-    char * dataBuffer = new char[numChunks * CHUNK_SIZE];
-    char* nextChunkBuffer = dataBuffer;
-    for(int chunkIndex = 0; chunkIndex < numChunks; chunkIndex++)
+    char* dataBuffer = new char[numChunks * CHUNK_SIZE];
+    for (int offset = 0; offset < CHUNK_SIZE * numChunks; offset++)
     {
-        nextChunkBuffer = nextChunkBuffer + (CHUNK_SIZE * chunkIndex);
-        for (int offset = 0; offset < CHUNK_SIZE; offset++)
-        {
-            char c = 'A' + std::rand() % 26;
-            nextChunkBuffer[offset] = c;
-        }
-        nextChunkBuffer[0] = '!' + chunkIndex;
+        char c = 'A' + std::rand() % 26;
+        dataBuffer[offset] = c;
     }
-    return (void*)dataBuffer;
+    return dataBuffer;
 }
 
 TEST_F(GrpcPublisherTestFixture, DISABLED_GrpcPublisher_PushHostWrite)
@@ -138,12 +133,14 @@ TEST_F(GrpcPublisherTestFixture, DISABLED_GrpcPublisher_CompleteUserWrite)
 TEST_F(GrpcPublisherTestFixture, DISABLED_GrpcPublisher_CompleteWrite)
 {
     // Given
-    uint64_t lsn = 10;
-    string volumeName = "";
     string arrayName = "";
+    string volumeName = "";
+    uint64_t rba = 0;
+    uint64_t numBlocks = 8;
+    uint64_t lsn = 10;
 
     // When
-    int ret = grpcPublisher->CompleteWrite(lsn, volumeName, arrayName);
+    int ret = grpcPublisher->CompleteWrite(arrayName, volumeName, rba, numBlocks, lsn);
 
     // Then: Do Nothing
     EXPECT_EQ(EID(SUCCESS), ret);
@@ -174,7 +171,7 @@ TEST_F(GrpcPublisherTestFixture, GrpcPublisher_CompleteReadTestIfPublishDataSucc
     uint64_t rba = 0;
     uint64_t numChunks = 8;
     uint64_t lsn = 10;
-    void* buffer = _GenerateDataBlock(numChunks);
+    char* buffer = _GenerateDataBlock(numChunks);
 
     // When
     grpcPublisher->WaitClientConnected();
@@ -182,5 +179,7 @@ TEST_F(GrpcPublisherTestFixture, GrpcPublisher_CompleteReadTestIfPublishDataSucc
 
     // Then: Do Nothing
     EXPECT_EQ(EID(SUCCESS), ret);
+    replicatorServer->WaitForReceiveDone(1);
+    delete[] buffer;
 }
 } // namespace pos

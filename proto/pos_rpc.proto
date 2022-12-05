@@ -76,7 +76,7 @@ service PosIo {
 }
 
 message Chunk {
-    bytes content = 1;  // 4KB data
+    bytes content = 1;  // 512B data
 }
 
 message ReadBlocksRequest {
@@ -89,7 +89,6 @@ message ReadBlocksRequest {
 message ReadBlocksResponse {
     PosResult result = 1;
     optional string reason = 2;
-    repeated Chunk data = 3;
 }
 
 message WriteBlocksRequest {
@@ -172,6 +171,7 @@ service ReplicationControl {
     rpc FinishVolumeSync(FinishVolumeSyncRequest) returns (FinishVolumeSyncResponse) {}
     rpc SuspendWrite(SuspendWriteRequest) returns (SuspendWriteResponse) {}
     rpc ResumeWrite(ResumeWriteRequest) returns (ResumeWriteResponse) {}
+    rpc ChangeReplicationRole(ChangeReplicationRoleRequest) returns (ChangeReplicationRoleResponse) {}
 }
 
 message StartVolumeSyncRequest {
@@ -188,7 +188,6 @@ message StartVolumeSyncResponse {
 message FinishVolumeSyncRequest {
     string array_name = 1;
     string volume_name = 2;
-    bool is_primary = 3;
 }
 
 message FinishVolumeSyncResponse {
@@ -212,6 +211,17 @@ message ResumeWriteRequest {
 }
 
 message ResumeWriteResponse {
+    PosResult result = 1;
+    optional string reason = 2;
+}
+
+message ChangeReplicationRoleRequest {
+    string array_name = 1;
+    string volume_name = 2;
+    string role = 3;
+}
+
+message ChangeReplicationRoleResponse {
     PosResult result = 1;
     optional string reason = 2;
 }

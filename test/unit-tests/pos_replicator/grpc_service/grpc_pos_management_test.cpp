@@ -13,7 +13,6 @@ protected:
     GrpcPosManagement* grpcPosManagement;
 };
 
-
 void
 GrpcPosManagementTestFixture::SetUp(void)
 {

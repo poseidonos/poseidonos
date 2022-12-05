@@ -13,7 +13,6 @@ protected:
     GrpcReplicationController* grpcReplicationController;
 };
 
-
 void
 GrpcReplicationControllerTestFixture::SetUp(void)
 {

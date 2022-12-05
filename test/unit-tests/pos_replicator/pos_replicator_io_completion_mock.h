@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/pos_replicator/pos_replicator_io_completion.h"
 
 namespace pos

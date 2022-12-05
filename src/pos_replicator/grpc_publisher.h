@@ -52,7 +52,7 @@ public:
 
     int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buffer, uint64_t& lsn);
     int CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
-    int CompleteWrite(uint64_t lsn, string volumeName, string arrayName);
+    int CompleteWrite(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn);
     int CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer);
 
     void WaitClientConnected(void);

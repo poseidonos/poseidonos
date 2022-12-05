@@ -140,8 +140,7 @@ struct ReadBlocksRequestDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ReadBlocksRequestDefaultTypeInternal _ReadBlocksRequest_default_instance_;
 constexpr ReadBlocksResponse::ReadBlocksResponse(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : data_()
-  , reason_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  : reason_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , result_(0)
 {}
 struct ReadBlocksResponseDefaultTypeInternal {
@@ -359,8 +358,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT StartVolumeSyncResponseDefaultT
 constexpr FinishVolumeSyncRequest::FinishVolumeSyncRequest(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : array_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , volume_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , is_primary_(false){}
+  , volume_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
 struct FinishVolumeSyncRequestDefaultTypeInternal {
   constexpr FinishVolumeSyncRequestDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -438,8 +436,36 @@ struct ResumeWriteResponseDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ResumeWriteResponseDefaultTypeInternal _ResumeWriteResponse_default_instance_;
+constexpr ChangeReplicationRoleRequest::ChangeReplicationRoleRequest(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : array_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , volume_name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , role_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+struct ChangeReplicationRoleRequestDefaultTypeInternal {
+  constexpr ChangeReplicationRoleRequestDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ChangeReplicationRoleRequestDefaultTypeInternal() {}
+  union {
+    ChangeReplicationRoleRequest _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChangeReplicationRoleRequestDefaultTypeInternal _ChangeReplicationRoleRequest_default_instance_;
+constexpr ChangeReplicationRoleResponse::ChangeReplicationRoleResponse(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
+  : reason_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , result_(0)
+{}
+struct ChangeReplicationRoleResponseDefaultTypeInternal {
+  constexpr ChangeReplicationRoleResponseDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~ChangeReplicationRoleResponseDefaultTypeInternal() {}
+  union {
+    ChangeReplicationRoleResponse _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT ChangeReplicationRoleResponseDefaultTypeInternal _ChangeReplicationRoleResponse_default_instance_;
 }  // namespace pos_rpc
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_pos_5frpc_2eproto[30];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_pos_5frpc_2eproto[32];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_pos_5frpc_2eproto[3];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_pos_5frpc_2eproto = nullptr;
 
@@ -521,10 +547,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_pos_5frpc_2eproto::offsets[] P
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::pos_rpc::ReadBlocksResponse, result_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::ReadBlocksResponse, reason_),
-  PROTOBUF_FIELD_OFFSET(::pos_rpc::ReadBlocksResponse, data_),
   ~0u,
   0,
-  ~0u,
   ~0u,  // no _has_bits_
   PROTOBUF_FIELD_OFFSET(::pos_rpc::WriteBlocksRequest, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -659,7 +683,6 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_pos_5frpc_2eproto::offsets[] P
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::pos_rpc::FinishVolumeSyncRequest, array_name_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::FinishVolumeSyncRequest, volume_name_),
-  PROTOBUF_FIELD_OFFSET(::pos_rpc::FinishVolumeSyncRequest, is_primary_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::FinishVolumeSyncResponse, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::pos_rpc::FinishVolumeSyncResponse, _internal_metadata_),
   ~0u,  // no _extensions_
@@ -701,6 +724,23 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_pos_5frpc_2eproto::offsets[] P
   PROTOBUF_FIELD_OFFSET(::pos_rpc::ResumeWriteResponse, reason_),
   ~0u,
   0,
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleRequest, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleRequest, array_name_),
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleRequest, volume_name_),
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleRequest, role_),
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleResponse, _has_bits_),
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleResponse, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleResponse, result_),
+  PROTOBUF_FIELD_OFFSET(::pos_rpc::ChangeReplicationRoleResponse, reason_),
+  ~0u,
+  0,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::pos_rpc::HealthCheckRequest)},
@@ -712,27 +752,29 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 44, 52, sizeof(::pos_rpc::VolumeListResponse)},
   { 55, -1, sizeof(::pos_rpc::Chunk)},
   { 61, -1, sizeof(::pos_rpc::ReadBlocksRequest)},
-  { 70, 78, sizeof(::pos_rpc::ReadBlocksResponse)},
-  { 81, -1, sizeof(::pos_rpc::WriteBlocksRequest)},
-  { 92, 99, sizeof(::pos_rpc::WriteBlocksResponse)},
-  { 101, -1, sizeof(::pos_rpc::WriteBlocksSyncRequest)},
-  { 111, 118, sizeof(::pos_rpc::WriteBlocksSyncResponse)},
-  { 120, -1, sizeof(::pos_rpc::ReadBlocksSyncRequest)},
-  { 129, 137, sizeof(::pos_rpc::ReadBlocksSyncResponse)},
-  { 140, -1, sizeof(::pos_rpc::WriteHostBlocksRequest)},
-  { 148, 155, sizeof(::pos_rpc::WriteHostBlocksResponse)},
-  { 157, -1, sizeof(::pos_rpc::WriteHostBlocksSyncRequest)},
-  { 165, 172, sizeof(::pos_rpc::WriteHostBlocksSyncResponse)},
-  { 174, -1, sizeof(::pos_rpc::CompleteHostWriteRequest)},
-  { 182, 189, sizeof(::pos_rpc::CompleteHostWriteResponse)},
-  { 191, -1, sizeof(::pos_rpc::StartVolumeSyncRequest)},
-  { 199, 206, sizeof(::pos_rpc::StartVolumeSyncResponse)},
-  { 208, -1, sizeof(::pos_rpc::FinishVolumeSyncRequest)},
-  { 216, 223, sizeof(::pos_rpc::FinishVolumeSyncResponse)},
-  { 225, -1, sizeof(::pos_rpc::SuspendWriteRequest)},
-  { 232, 239, sizeof(::pos_rpc::SuspendWriteResponse)},
-  { 241, -1, sizeof(::pos_rpc::ResumeWriteRequest)},
-  { 248, 255, sizeof(::pos_rpc::ResumeWriteResponse)},
+  { 70, 77, sizeof(::pos_rpc::ReadBlocksResponse)},
+  { 79, -1, sizeof(::pos_rpc::WriteBlocksRequest)},
+  { 90, 97, sizeof(::pos_rpc::WriteBlocksResponse)},
+  { 99, -1, sizeof(::pos_rpc::WriteBlocksSyncRequest)},
+  { 109, 116, sizeof(::pos_rpc::WriteBlocksSyncResponse)},
+  { 118, -1, sizeof(::pos_rpc::ReadBlocksSyncRequest)},
+  { 127, 135, sizeof(::pos_rpc::ReadBlocksSyncResponse)},
+  { 138, -1, sizeof(::pos_rpc::WriteHostBlocksRequest)},
+  { 146, 153, sizeof(::pos_rpc::WriteHostBlocksResponse)},
+  { 155, -1, sizeof(::pos_rpc::WriteHostBlocksSyncRequest)},
+  { 163, 170, sizeof(::pos_rpc::WriteHostBlocksSyncResponse)},
+  { 172, -1, sizeof(::pos_rpc::CompleteHostWriteRequest)},
+  { 180, 187, sizeof(::pos_rpc::CompleteHostWriteResponse)},
+  { 189, -1, sizeof(::pos_rpc::StartVolumeSyncRequest)},
+  { 197, 204, sizeof(::pos_rpc::StartVolumeSyncResponse)},
+  { 206, -1, sizeof(::pos_rpc::FinishVolumeSyncRequest)},
+  { 213, 220, sizeof(::pos_rpc::FinishVolumeSyncResponse)},
+  { 222, -1, sizeof(::pos_rpc::SuspendWriteRequest)},
+  { 229, 236, sizeof(::pos_rpc::SuspendWriteResponse)},
+  { 238, -1, sizeof(::pos_rpc::ResumeWriteRequest)},
+  { 245, 252, sizeof(::pos_rpc::ResumeWriteResponse)},
+  { 254, -1, sizeof(::pos_rpc::ChangeReplicationRoleRequest)},
+  { 262, 269, sizeof(::pos_rpc::ChangeReplicationRoleResponse)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -766,6 +808,8 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_SuspendWriteResponse_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_ResumeWriteRequest_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_ResumeWriteResponse_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_ChangeReplicationRoleRequest_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_rpc::_ChangeReplicationRoleResponse_default_instance_),
 };
 
 const char descriptor_table_protodef_pos_5frpc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -789,94 +833,100 @@ const char descriptor_table_protodef_pos_5frpc_2eproto[] PROTOBUF_SECTION_VARIAB
   "pos_rpc.VolumeInfoB\t\n\007_reason\"\030\n\005Chunk\022\017"
   "\n\007content\030\001 \001(\014\"]\n\021ReadBlocksRequest\022\022\n\n"
   "array_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n"
-  "\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\"v\n\022ReadBl"
+  "\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\"X\n\022ReadBl"
   "ocksResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.P"
-  "osResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022\034\n\004data\030\003 "
-  "\003(\0132\016.pos_rpc.ChunkB\t\n\007_reason\"\211\001\n\022Write"
-  "BlocksRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013vol"
-  "ume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_block"
-  "s\030\004 \001(\004\022\013\n\003lsn\030\005 \001(\004\022\034\n\004data\030\006 \003(\0132\016.pos"
-  "_rpc.Chunk\"Y\n\023WriteBlocksResponse\022\"\n\006res"
-  "ult\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030"
-  "\002 \001(\tH\000\210\001\001B\t\n\007_reason\"\200\001\n\026WriteBlocksSyn"
-  "cRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_n"
-  "ame\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001"
-  "(\004\022\034\n\004data\030\005 \003(\0132\016.pos_rpc.Chunk\"]\n\027Writ"
-  "eBlocksSyncResponse\022\"\n\006result\030\001 \001(\0162\022.po"
-  "s_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007"
-  "_reason\"a\n\025ReadBlocksSyncRequest\022\022\n\narra"
-  "y_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba"
-  "\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\"z\n\026ReadBlocks"
-  "SyncResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.P"
-  "osResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022\034\n\004data\030\003 "
-  "\003(\0132\016.pos_rpc.ChunkB\t\n\007_reason\"N\n\026WriteH"
-  "ostBlocksRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013"
-  "volume_name\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004\"]\n\027WriteH"
-  "ostBlocksResponse\022\"\n\006result\030\001 \001(\0162\022.pos_"
-  "rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_r"
-  "eason\"R\n\032WriteHostBlocksSyncRequest\022\022\n\na"
-  "rray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003"
-  "lsn\030\003 \001(\004\"a\n\033WriteHostBlocksSyncResponse"
-  "\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006"
-  "reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"P\n\030Complete"
-  "HostWriteRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013"
-  "volume_name\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004\"_\n\031Comple"
-  "teHostWriteResponse\022\"\n\006result\030\001 \001(\0162\022.po"
-  "s_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007"
-  "_reason\"U\n\026StartVolumeSyncRequest\022\022\n\narr"
-  "ay_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\022\n\nis"
-  "_primary\030\003 \001(\010\"]\n\027StartVolumeSyncRespons"
-  "e\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n"
-  "\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"V\n\027FinishV"
-  "olumeSyncRequest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013"
-  "volume_name\030\002 \001(\t\022\022\n\nis_primary\030\003 \001(\010\"^\n"
-  "\030FinishVolumeSyncResponse\022\"\n\006result\030\001 \001("
-  "\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210"
-  "\001\001B\t\n\007_reason\">\n\023SuspendWriteRequest\022\022\n\n"
-  "array_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"Z\n"
-  "\024SuspendWriteResponse\022\"\n\006result\030\001 \001(\0162\022."
-  "pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t"
-  "\n\007_reason\"=\n\022ResumeWriteRequest\022\022\n\narray"
-  "_name\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"Y\n\023Resu"
-  "meWriteResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rp"
+  "osResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason"
+  "\"\211\001\n\022WriteBlocksRequest\022\022\n\narray_name\030\001 "
+  "\001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n"
+  "\nnum_blocks\030\004 \001(\004\022\013\n\003lsn\030\005 \001(\004\022\034\n\004data\030\006"
+  " \003(\0132\016.pos_rpc.Chunk\"Y\n\023WriteBlocksRespo"
+  "nse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosResult\022"
+  "\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"\200\001\n\026Writ"
+  "eBlocksSyncRequest\022\022\n\narray_name\030\001 \001(\t\022\023"
+  "\n\013volume_name\030\002 \001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_"
+  "blocks\030\004 \001(\004\022\034\n\004data\030\005 \003(\0132\016.pos_rpc.Chu"
+  "nk\"]\n\027WriteBlocksSyncResponse\022\"\n\006result\030"
+  "\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001("
+  "\tH\000\210\001\001B\t\n\007_reason\"a\n\025ReadBlocksSyncReque"
+  "st\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002 "
+  "\001(\t\022\013\n\003rba\030\003 \001(\004\022\022\n\nnum_blocks\030\004 \001(\004\"z\n\026"
+  "ReadBlocksSyncResponse\022\"\n\006result\030\001 \001(\0162\022"
+  ".pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001\022"
+  "\034\n\004data\030\003 \003(\0132\016.pos_rpc.ChunkB\t\n\007_reason"
+  "\"N\n\026WriteHostBlocksRequest\022\022\n\narray_name"
+  "\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004"
+  "\"]\n\027WriteHostBlocksResponse\022\"\n\006result\030\001 "
+  "\001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001(\tH"
+  "\000\210\001\001B\t\n\007_reason\"R\n\032WriteHostBlocksSyncRe"
+  "quest\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name"
+  "\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004\"a\n\033WriteHostBlocksSy"
+  "ncResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.Pos"
+  "Result\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"P"
+  "\n\030CompleteHostWriteRequest\022\022\n\narray_name"
+  "\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\013\n\003lsn\030\003 \001(\004"
+  "\"_\n\031CompleteHostWriteResponse\022\"\n\006result\030"
+  "\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030\002 \001("
+  "\tH\000\210\001\001B\t\n\007_reason\"U\n\026StartVolumeSyncRequ"
+  "est\022\022\n\narray_name\030\001 \001(\t\022\023\n\013volume_name\030\002"
+  " \001(\t\022\022\n\nis_primary\030\003 \001(\010\"]\n\027StartVolumeS"
+  "yncResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.Po"
+  "sResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\""
+  "B\n\027FinishVolumeSyncRequest\022\022\n\narray_name"
+  "\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"^\n\030FinishVol"
+  "umeSyncResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rp"
   "c.PosResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_rea"
-  "son*\"\n\tPosResult\022\013\n\007SUCCESS\020\000\022\010\n\004FAIL\020\0012"
-  "L\n\006Health\022B\n\005Check\022\033.pos_rpc.HealthCheck"
-  "Request\032\034.pos_rpc.HealthCheckResponse2\254\001"
-  "\n\rPosManagement\022L\n\020UpdateVoluemMeta\022 .po"
-  "s_rpc.UpdateVoluemMetaRequest\032\024.pos_rpc."
-  "PosResponse\"\000\022M\n\rGetVolumeList\022\035.pos_rpc"
-  ".GetVolumeListRequest\032\033.pos_rpc.VolumeLi"
-  "stResponse\"\0002\343\004\n\005PosIo\022G\n\nReadBlocks\022\032.p"
-  "os_rpc.ReadBlocksRequest\032\033.pos_rpc.ReadB"
-  "locksResponse\"\000\022J\n\013WriteBlocks\022\033.pos_rpc"
-  ".WriteBlocksRequest\032\034.pos_rpc.WriteBlock"
-  "sResponse\"\000\022V\n\017WriteHostBlocks\022\037.pos_rpc"
-  ".WriteHostBlocksRequest\032 .pos_rpc.WriteH"
-  "ostBlocksResponse\"\000\022S\n\016ReadBlocksSync\022\036."
-  "pos_rpc.ReadBlocksSyncRequest\032\037.pos_rpc."
-  "ReadBlocksSyncResponse\"\000\022V\n\017WriteBlocksS"
-  "ync\022\037.pos_rpc.WriteBlocksSyncRequest\032 .p"
-  "os_rpc.WriteBlocksSyncResponse\"\000\022b\n\023Writ"
-  "eHostBlocksSync\022#.pos_rpc.WriteHostBlock"
-  "sSyncRequest\032$.pos_rpc.WriteHostBlocksSy"
-  "ncResponse\"\000\022\\\n\021CompleteHostWrite\022!.pos_"
-  "rpc.CompleteHostWriteRequest\032\".pos_rpc.C"
-  "ompleteHostWriteResponse\"\0002\342\002\n\022Replicati"
-  "onControl\022V\n\017StartVolumeSync\022\037.pos_rpc.S"
-  "tartVolumeSyncRequest\032 .pos_rpc.StartVol"
-  "umeSyncResponse\"\000\022Y\n\020FinishVolumeSync\022 ."
-  "pos_rpc.FinishVolumeSyncRequest\032!.pos_rp"
-  "c.FinishVolumeSyncResponse\"\000\022M\n\014SuspendW"
-  "rite\022\034.pos_rpc.SuspendWriteRequest\032\035.pos"
-  "_rpc.SuspendWriteResponse\"\000\022J\n\013ResumeWri"
-  "te\022\033.pos_rpc.ResumeWriteRequest\032\034.pos_rp"
-  "c.ResumeWriteResponse\"\000b\006proto3"
+  "son\">\n\023SuspendWriteRequest\022\022\n\narray_name"
+  "\030\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\"Z\n\024SuspendWr"
+  "iteResponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.Po"
+  "sResult\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\""
+  "=\n\022ResumeWriteRequest\022\022\n\narray_name\030\001 \001("
+  "\t\022\023\n\013volume_name\030\002 \001(\t\"Y\n\023ResumeWriteRes"
+  "ponse\022\"\n\006result\030\001 \001(\0162\022.pos_rpc.PosResul"
+  "t\022\023\n\006reason\030\002 \001(\tH\000\210\001\001B\t\n\007_reason\"U\n\034Cha"
+  "ngeReplicationRoleRequest\022\022\n\narray_name\030"
+  "\001 \001(\t\022\023\n\013volume_name\030\002 \001(\t\022\014\n\004role\030\003 \001(\t"
+  "\"c\n\035ChangeReplicationRoleResponse\022\"\n\006res"
+  "ult\030\001 \001(\0162\022.pos_rpc.PosResult\022\023\n\006reason\030"
+  "\002 \001(\tH\000\210\001\001B\t\n\007_reason*\"\n\tPosResult\022\013\n\007SU"
+  "CCESS\020\000\022\010\n\004FAIL\020\0012L\n\006Health\022B\n\005Check\022\033.p"
+  "os_rpc.HealthCheckRequest\032\034.pos_rpc.Heal"
+  "thCheckResponse2\254\001\n\rPosManagement\022L\n\020Upd"
+  "ateVoluemMeta\022 .pos_rpc.UpdateVoluemMeta"
+  "Request\032\024.pos_rpc.PosResponse\"\000\022M\n\rGetVo"
+  "lumeList\022\035.pos_rpc.GetVolumeListRequest\032"
+  "\033.pos_rpc.VolumeListResponse\"\0002\343\004\n\005PosIo"
+  "\022G\n\nReadBlocks\022\032.pos_rpc.ReadBlocksReque"
+  "st\032\033.pos_rpc.ReadBlocksResponse\"\000\022J\n\013Wri"
+  "teBlocks\022\033.pos_rpc.WriteBlocksRequest\032\034."
+  "pos_rpc.WriteBlocksResponse\"\000\022V\n\017WriteHo"
+  "stBlocks\022\037.pos_rpc.WriteHostBlocksReques"
+  "t\032 .pos_rpc.WriteHostBlocksResponse\"\000\022S\n"
+  "\016ReadBlocksSync\022\036.pos_rpc.ReadBlocksSync"
+  "Request\032\037.pos_rpc.ReadBlocksSyncResponse"
+  "\"\000\022V\n\017WriteBlocksSync\022\037.pos_rpc.WriteBlo"
+  "cksSyncRequest\032 .pos_rpc.WriteBlocksSync"
+  "Response\"\000\022b\n\023WriteHostBlocksSync\022#.pos_"
+  "rpc.WriteHostBlocksSyncRequest\032$.pos_rpc"
+  ".WriteHostBlocksSyncResponse\"\000\022\\\n\021Comple"
+  "teHostWrite\022!.pos_rpc.CompleteHostWriteR"
+  "equest\032\".pos_rpc.CompleteHostWriteRespon"
+  "se\"\0002\314\003\n\022ReplicationControl\022V\n\017StartVolu"
+  "meSync\022\037.pos_rpc.StartVolumeSyncRequest\032"
+  " .pos_rpc.StartVolumeSyncResponse\"\000\022Y\n\020F"
+  "inishVolumeSync\022 .pos_rpc.FinishVolumeSy"
+  "ncRequest\032!.pos_rpc.FinishVolumeSyncResp"
+  "onse\"\000\022M\n\014SuspendWrite\022\034.pos_rpc.Suspend"
+  "WriteRequest\032\035.pos_rpc.SuspendWriteRespo"
+  "nse\"\000\022J\n\013ResumeWrite\022\033.pos_rpc.ResumeWri"
+  "teRequest\032\034.pos_rpc.ResumeWriteResponse\""
+  "\000\022h\n\025ChangeReplicationRole\022%.pos_rpc.Cha"
+  "ngeReplicationRoleRequest\032&.pos_rpc.Chan"
+  "geReplicationRoleResponse\"\000b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_pos_5frpc_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5frpc_2eproto = {
-  false, false, 4111, descriptor_table_protodef_pos_5frpc_2eproto, "pos_rpc.proto", 
-  &descriptor_table_pos_5frpc_2eproto_once, nullptr, 0, 30,
+  false, false, 4355, descriptor_table_protodef_pos_5frpc_2eproto, "pos_rpc.proto", 
+  &descriptor_table_pos_5frpc_2eproto_once, nullptr, 0, 32,
   schemas, file_default_instances, TableStruct_pos_5frpc_2eproto::offsets,
   file_level_metadata_pos_5frpc_2eproto, file_level_enum_descriptors_pos_5frpc_2eproto, file_level_service_descriptors_pos_5frpc_2eproto,
 };
@@ -3054,16 +3104,14 @@ class ReadBlocksResponse::_Internal {
 };
 
 ReadBlocksResponse::ReadBlocksResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena),
-  data_(arena) {
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
   SharedCtor();
   RegisterArenaDtor(arena);
   // @@protoc_insertion_point(arena_constructor:pos_rpc.ReadBlocksResponse)
 }
 ReadBlocksResponse::ReadBlocksResponse(const ReadBlocksResponse& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
-      _has_bits_(from._has_bits_),
-      data_(from.data_) {
+      _has_bits_(from._has_bits_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
   reason_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_reason()) {
@@ -3106,7 +3154,6 @@ void ReadBlocksResponse::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  data_.Clear();
   cached_has_bits = _has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     reason_.ClearNonDefaultToEmpty();
@@ -3139,18 +3186,6 @@ const char* ReadBlocksResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMES
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.ReadBlocksResponse.reason"));
           CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // repeated .pos_rpc.Chunk data = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
-          ptr -= 1;
-          do {
-            ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_data(), ptr);
-            CHK_(ptr);
-            if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
         } else goto handle_unusual;
         continue;
       default: {
@@ -3199,14 +3234,6 @@ failure:
         2, this->_internal_reason(), target);
   }
 
-  // repeated .pos_rpc.Chunk data = 3;
-  for (unsigned int i = 0,
-      n = static_cast<unsigned int>(this->_internal_data_size()); i < n; i++) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(3, this->_internal_data(i), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -3222,13 +3249,6 @@ size_t ReadBlocksResponse::ByteSizeLong() const {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
-
-  // repeated .pos_rpc.Chunk data = 3;
-  total_size += 1UL * this->_internal_data_size();
-  for (const auto& msg : this->data_) {
-    total_size +=
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
-  }
 
   // string reason = 2;
   cached_has_bits = _has_bits_[0];
@@ -3275,7 +3295,6 @@ void ReadBlocksResponse::MergeFrom(const ReadBlocksResponse& from) {
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  data_.MergeFrom(from.data_);
   if (from._internal_has_reason()) {
     _internal_set_reason(from._internal_reason());
   }
@@ -3306,7 +3325,6 @@ void ReadBlocksResponse::InternalSwap(ReadBlocksResponse* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
-  data_.InternalSwap(&other->data_);
   reason_.Swap(&other->reason_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   swap(result_, other->result_);
 }
@@ -7105,14 +7123,12 @@ FinishVolumeSyncRequest::FinishVolumeSyncRequest(const FinishVolumeSyncRequest& 
     volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_volume_name(), 
       GetArena());
   }
-  is_primary_ = from.is_primary_;
   // @@protoc_insertion_point(copy_constructor:pos_rpc.FinishVolumeSyncRequest)
 }
 
 void FinishVolumeSyncRequest::SharedCtor() {
 array_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 volume_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-is_primary_ = false;
 }
 
 FinishVolumeSyncRequest::~FinishVolumeSyncRequest() {
@@ -7145,7 +7161,6 @@ void FinishVolumeSyncRequest::Clear() {
 
   array_name_.ClearToEmpty();
   volume_name_.ClearToEmpty();
-  is_primary_ = false;
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -7171,13 +7186,6 @@ const char* FinishVolumeSyncRequest::_InternalParse(const char* ptr, ::PROTOBUF_
           auto str = _internal_mutable_volume_name();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.FinishVolumeSyncRequest.volume_name"));
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // bool is_primary = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 24)) {
-          is_primary_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -7229,12 +7237,6 @@ failure:
         2, this->_internal_volume_name(), target);
   }
 
-  // bool is_primary = 3;
-  if (this->is_primary() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(3, this->_internal_is_primary(), target);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
         _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
@@ -7263,11 +7265,6 @@ size_t FinishVolumeSyncRequest::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
         this->_internal_volume_name());
-  }
-
-  // bool is_primary = 3;
-  if (this->is_primary() != 0) {
-    total_size += 1 + 1;
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -7307,9 +7304,6 @@ void FinishVolumeSyncRequest::MergeFrom(const FinishVolumeSyncRequest& from) {
   if (from.volume_name().size() > 0) {
     _internal_set_volume_name(from._internal_volume_name());
   }
-  if (from.is_primary() != 0) {
-    _internal_set_is_primary(from._internal_is_primary());
-  }
 }
 
 void FinishVolumeSyncRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
@@ -7335,7 +7329,6 @@ void FinishVolumeSyncRequest::InternalSwap(FinishVolumeSyncRequest* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   array_name_.Swap(&other->array_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   volume_name_.Swap(&other->volume_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  swap(is_primary_, other->is_primary_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata FinishVolumeSyncRequest::GetMetadata() const {
@@ -8542,6 +8535,523 @@ void ResumeWriteResponse::InternalSwap(ResumeWriteResponse* other) {
 }
 
 
+// ===================================================================
+
+class ChangeReplicationRoleRequest::_Internal {
+ public:
+};
+
+ChangeReplicationRoleRequest::ChangeReplicationRoleRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:pos_rpc.ChangeReplicationRoleRequest)
+}
+ChangeReplicationRoleRequest::ChangeReplicationRoleRequest(const ChangeReplicationRoleRequest& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  array_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_array_name().empty()) {
+    array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_array_name(), 
+      GetArena());
+  }
+  volume_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_volume_name().empty()) {
+    volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_volume_name(), 
+      GetArena());
+  }
+  role_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_role().empty()) {
+    role_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_role(), 
+      GetArena());
+  }
+  // @@protoc_insertion_point(copy_constructor:pos_rpc.ChangeReplicationRoleRequest)
+}
+
+void ChangeReplicationRoleRequest::SharedCtor() {
+array_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+volume_name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+role_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+ChangeReplicationRoleRequest::~ChangeReplicationRoleRequest() {
+  // @@protoc_insertion_point(destructor:pos_rpc.ChangeReplicationRoleRequest)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ChangeReplicationRoleRequest::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  array_name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  volume_name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  role_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void ChangeReplicationRoleRequest::ArenaDtor(void* object) {
+  ChangeReplicationRoleRequest* _this = reinterpret_cast< ChangeReplicationRoleRequest* >(object);
+  (void)_this;
+}
+void ChangeReplicationRoleRequest::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ChangeReplicationRoleRequest::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ChangeReplicationRoleRequest::Clear() {
+// @@protoc_insertion_point(message_clear_start:pos_rpc.ChangeReplicationRoleRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  array_name_.ClearToEmpty();
+  volume_name_.ClearToEmpty();
+  role_.ClearToEmpty();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ChangeReplicationRoleRequest::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // string array_name = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 10)) {
+          auto str = _internal_mutable_array_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.ChangeReplicationRoleRequest.array_name"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string volume_name = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_volume_name();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.ChangeReplicationRoleRequest.volume_name"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // string role = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
+          auto str = _internal_mutable_role();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.ChangeReplicationRoleRequest.role"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ChangeReplicationRoleRequest::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:pos_rpc.ChangeReplicationRoleRequest)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // string array_name = 1;
+  if (this->array_name().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_array_name().data(), static_cast<int>(this->_internal_array_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "pos_rpc.ChangeReplicationRoleRequest.array_name");
+    target = stream->WriteStringMaybeAliased(
+        1, this->_internal_array_name(), target);
+  }
+
+  // string volume_name = 2;
+  if (this->volume_name().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_volume_name().data(), static_cast<int>(this->_internal_volume_name().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "pos_rpc.ChangeReplicationRoleRequest.volume_name");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_volume_name(), target);
+  }
+
+  // string role = 3;
+  if (this->role().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_role().data(), static_cast<int>(this->_internal_role().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "pos_rpc.ChangeReplicationRoleRequest.role");
+    target = stream->WriteStringMaybeAliased(
+        3, this->_internal_role(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:pos_rpc.ChangeReplicationRoleRequest)
+  return target;
+}
+
+size_t ChangeReplicationRoleRequest::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:pos_rpc.ChangeReplicationRoleRequest)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string array_name = 1;
+  if (this->array_name().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_array_name());
+  }
+
+  // string volume_name = 2;
+  if (this->volume_name().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_volume_name());
+  }
+
+  // string role = 3;
+  if (this->role().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_role());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ChangeReplicationRoleRequest::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:pos_rpc.ChangeReplicationRoleRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ChangeReplicationRoleRequest* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ChangeReplicationRoleRequest>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:pos_rpc.ChangeReplicationRoleRequest)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:pos_rpc.ChangeReplicationRoleRequest)
+    MergeFrom(*source);
+  }
+}
+
+void ChangeReplicationRoleRequest::MergeFrom(const ChangeReplicationRoleRequest& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:pos_rpc.ChangeReplicationRoleRequest)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from.array_name().size() > 0) {
+    _internal_set_array_name(from._internal_array_name());
+  }
+  if (from.volume_name().size() > 0) {
+    _internal_set_volume_name(from._internal_volume_name());
+  }
+  if (from.role().size() > 0) {
+    _internal_set_role(from._internal_role());
+  }
+}
+
+void ChangeReplicationRoleRequest::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:pos_rpc.ChangeReplicationRoleRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ChangeReplicationRoleRequest::CopyFrom(const ChangeReplicationRoleRequest& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:pos_rpc.ChangeReplicationRoleRequest)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ChangeReplicationRoleRequest::IsInitialized() const {
+  return true;
+}
+
+void ChangeReplicationRoleRequest::InternalSwap(ChangeReplicationRoleRequest* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  array_name_.Swap(&other->array_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  volume_name_.Swap(&other->volume_name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  role_.Swap(&other->role_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ChangeReplicationRoleRequest::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
+// ===================================================================
+
+class ChangeReplicationRoleResponse::_Internal {
+ public:
+  using HasBits = decltype(std::declval<ChangeReplicationRoleResponse>()._has_bits_);
+  static void set_has_reason(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
+};
+
+ChangeReplicationRoleResponse::ChangeReplicationRoleResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:pos_rpc.ChangeReplicationRoleResponse)
+}
+ChangeReplicationRoleResponse::ChangeReplicationRoleResponse(const ChangeReplicationRoleResponse& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message(),
+      _has_bits_(from._has_bits_) {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  reason_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_reason()) {
+    reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_reason(), 
+      GetArena());
+  }
+  result_ = from.result_;
+  // @@protoc_insertion_point(copy_constructor:pos_rpc.ChangeReplicationRoleResponse)
+}
+
+void ChangeReplicationRoleResponse::SharedCtor() {
+reason_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+result_ = 0;
+}
+
+ChangeReplicationRoleResponse::~ChangeReplicationRoleResponse() {
+  // @@protoc_insertion_point(destructor:pos_rpc.ChangeReplicationRoleResponse)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void ChangeReplicationRoleResponse::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+  reason_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+}
+
+void ChangeReplicationRoleResponse::ArenaDtor(void* object) {
+  ChangeReplicationRoleResponse* _this = reinterpret_cast< ChangeReplicationRoleResponse* >(object);
+  (void)_this;
+}
+void ChangeReplicationRoleResponse::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void ChangeReplicationRoleResponse::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void ChangeReplicationRoleResponse::Clear() {
+// @@protoc_insertion_point(message_clear_start:pos_rpc.ChangeReplicationRoleResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    reason_.ClearNonDefaultToEmpty();
+  }
+  result_ = 0;
+  _has_bits_.Clear();
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* ChangeReplicationRoleResponse::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  _Internal::HasBits has_bits{};
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+    switch (tag >> 3) {
+      // .pos_rpc.PosResult result = 1;
+      case 1:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
+          ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+          CHK_(ptr);
+          _internal_set_result(static_cast<::pos_rpc::PosResult>(val));
+        } else goto handle_unusual;
+        continue;
+      // string reason = 2;
+      case 2:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_reason();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "pos_rpc.ChangeReplicationRoleResponse.reason"));
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      default: {
+      handle_unusual:
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+      }
+    }  // switch
+  }  // while
+success:
+  _has_bits_.Or(has_bits);
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* ChangeReplicationRoleResponse::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:pos_rpc.ChangeReplicationRoleResponse)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  // .pos_rpc.PosResult result = 1;
+  if (this->result() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+      1, this->_internal_result(), target);
+  }
+
+  // string reason = 2;
+  if (_internal_has_reason()) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_reason().data(), static_cast<int>(this->_internal_reason().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "pos_rpc.ChangeReplicationRoleResponse.reason");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_reason(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:pos_rpc.ChangeReplicationRoleResponse)
+  return target;
+}
+
+size_t ChangeReplicationRoleResponse::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:pos_rpc.ChangeReplicationRoleResponse)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // string reason = 2;
+  cached_has_bits = _has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_reason());
+  }
+
+  // .pos_rpc.PosResult result = 1;
+  if (this->result() != 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_result());
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void ChangeReplicationRoleResponse::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:pos_rpc.ChangeReplicationRoleResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  const ChangeReplicationRoleResponse* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<ChangeReplicationRoleResponse>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:pos_rpc.ChangeReplicationRoleResponse)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:pos_rpc.ChangeReplicationRoleResponse)
+    MergeFrom(*source);
+  }
+}
+
+void ChangeReplicationRoleResponse::MergeFrom(const ChangeReplicationRoleResponse& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:pos_rpc.ChangeReplicationRoleResponse)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_has_reason()) {
+    _internal_set_reason(from._internal_reason());
+  }
+  if (from.result() != 0) {
+    _internal_set_result(from._internal_result());
+  }
+}
+
+void ChangeReplicationRoleResponse::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:pos_rpc.ChangeReplicationRoleResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void ChangeReplicationRoleResponse::CopyFrom(const ChangeReplicationRoleResponse& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:pos_rpc.ChangeReplicationRoleResponse)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool ChangeReplicationRoleResponse::IsInitialized() const {
+  return true;
+}
+
+void ChangeReplicationRoleResponse::InternalSwap(ChangeReplicationRoleResponse* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+  swap(_has_bits_[0], other->_has_bits_[0]);
+  reason_.Swap(&other->reason_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  swap(result_, other->result_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata ChangeReplicationRoleResponse::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace pos_rpc
 PROTOBUF_NAMESPACE_OPEN
@@ -8634,6 +9144,12 @@ template<> PROTOBUF_NOINLINE ::pos_rpc::ResumeWriteRequest* Arena::CreateMaybeMe
 }
 template<> PROTOBUF_NOINLINE ::pos_rpc::ResumeWriteResponse* Arena::CreateMaybeMessage< ::pos_rpc::ResumeWriteResponse >(Arena* arena) {
   return Arena::CreateMessageInternal< ::pos_rpc::ResumeWriteResponse >(arena);
+}
+template<> PROTOBUF_NOINLINE ::pos_rpc::ChangeReplicationRoleRequest* Arena::CreateMaybeMessage< ::pos_rpc::ChangeReplicationRoleRequest >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::pos_rpc::ChangeReplicationRoleRequest >(arena);
+}
+template<> PROTOBUF_NOINLINE ::pos_rpc::ChangeReplicationRoleResponse* Arena::CreateMaybeMessage< ::pos_rpc::ChangeReplicationRoleResponse >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::pos_rpc::ChangeReplicationRoleResponse >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

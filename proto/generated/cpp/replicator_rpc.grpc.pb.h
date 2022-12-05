@@ -28,8 +28,6 @@
 
 namespace replicator_rpc {
 
-// /////////////////////////////////////////////////////////////////////////////////
-//
 class ReplicatorIoService final {
  public:
   static constexpr char const* service_full_name() {
@@ -38,21 +36,6 @@ class ReplicatorIoService final {
   class StubInterface {
    public:
     virtual ~StubInterface() {}
-    // HA side server
-    virtual ::grpc::Status CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::replicator_rpc::CompleteReadResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>> AsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>>(AsyncCompleteReadRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>> PrepareAsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>>(PrepareAsyncCompleteReadRaw(context, request, cq));
-    }
-    virtual ::grpc::Status CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::replicator_rpc::CompleteWriteResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>> AsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>>(AsyncCompleteWriteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>> PrepareAsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>>(PrepareAsyncCompleteWriteRaw(context, request, cq));
-    }
     virtual ::grpc::Status PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::replicator_rpc::PushHostWriteResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushHostWriteResponse>> AsyncPushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushHostWriteResponse>>(AsyncPushHostWriteRaw(context, request, cq));
@@ -67,12 +50,12 @@ class ReplicatorIoService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushDirtyLogResponse>> PrepareAsyncPushDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushDirtyLogResponse>>(PrepareAsyncPushDirtyLogRaw(context, request, cq));
     }
-    virtual ::grpc::Status TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::replicator_rpc::TransferDirtyLogResponse* response) = 0;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferDirtyLogResponse>> AsyncTransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferDirtyLogResponse>>(AsyncTransferDirtyLogRaw(context, request, cq));
+    virtual ::grpc::Status TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::replicator_rpc::TransferVolumeDataResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferVolumeDataResponse>> AsyncTransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferVolumeDataResponse>>(AsyncTransferVolumeDataRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferDirtyLogResponse>> PrepareAsyncTransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferDirtyLogResponse>>(PrepareAsyncTransferDirtyLogRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferVolumeDataResponse>> PrepareAsyncTransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferVolumeDataResponse>>(PrepareAsyncTransferVolumeDataRaw(context, request, cq));
     }
     virtual ::grpc::Status TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::replicator_rpc::TransferHostWriteResponse* response) = 0;
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferHostWriteResponse>> AsyncTransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
@@ -81,22 +64,23 @@ class ReplicatorIoService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferHostWriteResponse>> PrepareAsyncTransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferHostWriteResponse>>(PrepareAsyncTransferHostWriteRaw(context, request, cq));
     }
+    virtual ::grpc::Status CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::replicator_rpc::CompleteReadResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>> AsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>>(AsyncCompleteReadRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>> PrepareAsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>>(PrepareAsyncCompleteReadRaw(context, request, cq));
+    }
+    virtual ::grpc::Status CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::replicator_rpc::CompleteWriteResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>> AsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>>(AsyncCompleteWriteRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>> PrepareAsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>>(PrepareAsyncCompleteWriteRaw(context, request, cq));
+    }
     class experimental_async_interface {
      public:
       virtual ~experimental_async_interface() {}
-      // HA side server
-      virtual void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
-      virtual void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, std::function<void(::grpc::Status)>) = 0;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
-      #else
-      virtual void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
-      #endif
       virtual void PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest* request, ::replicator_rpc::PushHostWriteResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest* request, ::replicator_rpc::PushHostWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
@@ -109,17 +93,29 @@ class ReplicatorIoService final {
       #else
       virtual void PushDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest* request, ::replicator_rpc::PushDirtyLogResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
-      virtual void TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      virtual void TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
-      virtual void TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      virtual void TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
       virtual void TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response, std::function<void(::grpc::Status)>) = 0;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       virtual void TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       #else
       virtual void TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+      virtual void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
       #endif
     };
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -130,36 +126,22 @@ class ReplicatorIoService final {
     #endif
     virtual class experimental_async_interface* experimental_async() { return nullptr; }
   private:
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>* AsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>* PrepareAsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>* AsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>* PrepareAsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushHostWriteResponse>* AsyncPushHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushHostWriteResponse>* PrepareAsyncPushHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushDirtyLogResponse>* AsyncPushDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::PushDirtyLogResponse>* PrepareAsyncPushDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferDirtyLogResponse>* AsyncTransferDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) = 0;
-    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferDirtyLogResponse>* PrepareAsyncTransferDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferVolumeDataResponse>* AsyncTransferVolumeDataRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferVolumeDataResponse>* PrepareAsyncTransferVolumeDataRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferHostWriteResponse>* AsyncTransferHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::TransferHostWriteResponse>* PrepareAsyncTransferHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>* AsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteReadResponse>* PrepareAsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>* AsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::CompleteWriteResponse>* PrepareAsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
     Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
-    ::grpc::Status CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::replicator_rpc::CompleteReadResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>> AsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>>(AsyncCompleteReadRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>> PrepareAsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>>(PrepareAsyncCompleteReadRaw(context, request, cq));
-    }
-    ::grpc::Status CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::replicator_rpc::CompleteWriteResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>> AsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>>(AsyncCompleteWriteRaw(context, request, cq));
-    }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>> PrepareAsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>>(PrepareAsyncCompleteWriteRaw(context, request, cq));
-    }
     ::grpc::Status PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::replicator_rpc::PushHostWriteResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushHostWriteResponse>> AsyncPushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushHostWriteResponse>>(AsyncPushHostWriteRaw(context, request, cq));
@@ -174,12 +156,12 @@ class ReplicatorIoService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushDirtyLogResponse>> PrepareAsyncPushDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushDirtyLogResponse>>(PrepareAsyncPushDirtyLogRaw(context, request, cq));
     }
-    ::grpc::Status TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::replicator_rpc::TransferDirtyLogResponse* response) override;
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>> AsyncTransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>>(AsyncTransferDirtyLogRaw(context, request, cq));
+    ::grpc::Status TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::replicator_rpc::TransferVolumeDataResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>> AsyncTransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>>(AsyncTransferVolumeDataRaw(context, request, cq));
     }
-    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>> PrepareAsyncTransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
-      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>>(PrepareAsyncTransferDirtyLogRaw(context, request, cq));
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>> PrepareAsyncTransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>>(PrepareAsyncTransferVolumeDataRaw(context, request, cq));
     }
     ::grpc::Status TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::replicator_rpc::TransferHostWriteResponse* response) override;
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferHostWriteResponse>> AsyncTransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
@@ -188,21 +170,23 @@ class ReplicatorIoService final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferHostWriteResponse>> PrepareAsyncTransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferHostWriteResponse>>(PrepareAsyncTransferHostWriteRaw(context, request, cq));
     }
+    ::grpc::Status CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::replicator_rpc::CompleteReadResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>> AsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>>(AsyncCompleteReadRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>> PrepareAsyncCompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>>(PrepareAsyncCompleteReadRaw(context, request, cq));
+    }
+    ::grpc::Status CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::replicator_rpc::CompleteWriteResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>> AsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>>(AsyncCompleteWriteRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>> PrepareAsyncCompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>>(PrepareAsyncCompleteWriteRaw(context, request, cq));
+    }
     class experimental_async final :
       public StubInterface::experimental_async_interface {
      public:
-      void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
-      void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, std::function<void(::grpc::Status)>) override;
-      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
-      #else
-      void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
-      #endif
       void PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest* request, ::replicator_rpc::PushHostWriteResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest* request, ::replicator_rpc::PushHostWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
@@ -215,17 +199,29 @@ class ReplicatorIoService final {
       #else
       void PushDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest* request, ::replicator_rpc::PushDirtyLogResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
-      void TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, std::function<void(::grpc::Status)>) override;
+      void TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      void TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
-      void TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      void TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
       void TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response, std::function<void(::grpc::Status)>) override;
       #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       void TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       #else
       void TransferHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+      void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
       #endif
      private:
       friend class Stub;
@@ -238,24 +234,24 @@ class ReplicatorIoService final {
    private:
     std::shared_ptr< ::grpc::ChannelInterface> channel_;
     class experimental_async async_stub_{this};
-    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* AsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* PrepareAsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* AsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* PrepareAsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushHostWriteResponse>* AsyncPushHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushHostWriteResponse>* PrepareAsyncPushHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushDirtyLogResponse>* AsyncPushDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::replicator_rpc::PushDirtyLogResponse>* PrepareAsyncPushDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::PushDirtyLogRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>* AsyncTransferDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) override;
-    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>* PrepareAsyncTransferDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>* AsyncTransferVolumeDataRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>* PrepareAsyncTransferVolumeDataRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferHostWriteResponse>* AsyncTransferHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferHostWriteResponse>* PrepareAsyncTransferHostWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferHostWriteRequest& request, ::grpc::CompletionQueue* cq) override;
-    const ::grpc::internal::RpcMethod rpcmethod_CompleteRead_;
-    const ::grpc::internal::RpcMethod rpcmethod_CompleteWrite_;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* AsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* PrepareAsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* AsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* PrepareAsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_PushHostWrite_;
     const ::grpc::internal::RpcMethod rpcmethod_PushDirtyLog_;
-    const ::grpc::internal::RpcMethod rpcmethod_TransferDirtyLog_;
+    const ::grpc::internal::RpcMethod rpcmethod_TransferVolumeData_;
     const ::grpc::internal::RpcMethod rpcmethod_TransferHostWrite_;
+    const ::grpc::internal::RpcMethod rpcmethod_CompleteRead_;
+    const ::grpc::internal::RpcMethod rpcmethod_CompleteWrite_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -263,53 +259,12 @@ class ReplicatorIoService final {
    public:
     Service();
     virtual ~Service();
-    // HA side server
-    virtual ::grpc::Status CompleteRead(::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response);
-    virtual ::grpc::Status CompleteWrite(::grpc::ServerContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response);
     virtual ::grpc::Status PushHostWrite(::grpc::ServerContext* context, const ::replicator_rpc::PushHostWriteRequest* request, ::replicator_rpc::PushHostWriteResponse* response);
     virtual ::grpc::Status PushDirtyLog(::grpc::ServerContext* context, const ::replicator_rpc::PushDirtyLogRequest* request, ::replicator_rpc::PushDirtyLogResponse* response);
-    virtual ::grpc::Status TransferDirtyLog(::grpc::ServerContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response);
+    virtual ::grpc::Status TransferVolumeData(::grpc::ServerContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response);
     virtual ::grpc::Status TransferHostWrite(::grpc::ServerContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response);
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_CompleteRead : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_CompleteRead() {
-      ::grpc::Service::MarkMethodAsync(0);
-    }
-    ~WithAsyncMethod_CompleteRead() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CompleteRead(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCompleteRead(::grpc::ServerContext* context, ::replicator_rpc::CompleteReadRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::CompleteReadResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
-    }
-  };
-  template <class BaseClass>
-  class WithAsyncMethod_CompleteWrite : public BaseClass {
-   private:
-    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
-   public:
-    WithAsyncMethod_CompleteWrite() {
-      ::grpc::Service::MarkMethodAsync(1);
-    }
-    ~WithAsyncMethod_CompleteWrite() override {
-      BaseClassMustBeDerivedFromService(this);
-    }
-    // disable synchronous version of this method
-    ::grpc::Status CompleteWrite(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/) override {
-      abort();
-      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCompleteWrite(::grpc::ServerContext* context, ::replicator_rpc::CompleteWriteRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::CompleteWriteResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
-    }
+    virtual ::grpc::Status CompleteRead(::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response);
+    virtual ::grpc::Status CompleteWrite(::grpc::ServerContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_PushHostWrite : public BaseClass {
@@ -317,7 +272,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_PushHostWrite() {
-      ::grpc::Service::MarkMethodAsync(2);
+      ::grpc::Service::MarkMethodAsync(0);
     }
     ~WithAsyncMethod_PushHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -328,7 +283,7 @@ class ReplicatorIoService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestPushHostWrite(::grpc::ServerContext* context, ::replicator_rpc::PushHostWriteRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::PushHostWriteResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -337,7 +292,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_PushDirtyLog() {
-      ::grpc::Service::MarkMethodAsync(3);
+      ::grpc::Service::MarkMethodAsync(1);
     }
     ~WithAsyncMethod_PushDirtyLog() override {
       BaseClassMustBeDerivedFromService(this);
@@ -348,27 +303,27 @@ class ReplicatorIoService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestPushDirtyLog(::grpc::ServerContext* context, ::replicator_rpc::PushDirtyLogRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::PushDirtyLogResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
-  class WithAsyncMethod_TransferDirtyLog : public BaseClass {
+  class WithAsyncMethod_TransferVolumeData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithAsyncMethod_TransferDirtyLog() {
-      ::grpc::Service::MarkMethodAsync(4);
+    WithAsyncMethod_TransferVolumeData() {
+      ::grpc::Service::MarkMethodAsync(2);
     }
-    ~WithAsyncMethod_TransferDirtyLog() override {
+    ~WithAsyncMethod_TransferVolumeData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status TransferDirtyLog(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/) override {
+    ::grpc::Status TransferVolumeData(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestTransferDirtyLog(::grpc::ServerContext* context, ::replicator_rpc::TransferDirtyLogRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::TransferDirtyLogResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    void RequestTransferVolumeData(::grpc::ServerContext* context, ::replicator_rpc::TransferVolumeDataRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::TransferVolumeDataResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -377,7 +332,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithAsyncMethod_TransferHostWrite() {
-      ::grpc::Service::MarkMethodAsync(5);
+      ::grpc::Service::MarkMethodAsync(3);
     }
     ~WithAsyncMethod_TransferHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -388,41 +343,18 @@ class ReplicatorIoService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestTransferHostWrite(::grpc::ServerContext* context, ::replicator_rpc::TransferHostWriteRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::TransferHostWriteResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_CompleteRead<WithAsyncMethod_CompleteWrite<WithAsyncMethod_PushHostWrite<WithAsyncMethod_PushDirtyLog<WithAsyncMethod_TransferDirtyLog<WithAsyncMethod_TransferHostWrite<Service > > > > > > AsyncService;
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CompleteRead : public BaseClass {
+  class WithAsyncMethod_CompleteRead : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_CompleteRead() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response) { return this->CompleteRead(context, request, response); }));}
-    void SetMessageAllocatorFor_CompleteRead(
-        ::grpc::experimental::MessageAllocator< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
+    WithAsyncMethod_CompleteRead() {
+      ::grpc::Service::MarkMethodAsync(4);
     }
-    ~ExperimentalWithCallbackMethod_CompleteRead() override {
+    ~WithAsyncMethod_CompleteRead() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -430,46 +362,19 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CompleteRead(
-      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CompleteRead(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestCompleteRead(::grpc::ServerContext* context, ::replicator_rpc::CompleteReadRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::CompleteReadResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_CompleteWrite : public BaseClass {
+  class WithAsyncMethod_CompleteWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_CompleteWrite() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response) { return this->CompleteWrite(context, request, response); }));}
-    void SetMessageAllocatorFor_CompleteWrite(
-        ::grpc::experimental::MessageAllocator< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>* allocator) {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
-    #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
-    #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>*>(handler)
-              ->SetMessageAllocator(allocator);
+    WithAsyncMethod_CompleteWrite() {
+      ::grpc::Service::MarkMethodAsync(5);
     }
-    ~ExperimentalWithCallbackMethod_CompleteWrite() override {
+    ~WithAsyncMethod_CompleteWrite() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -477,15 +382,11 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CompleteWrite(
-      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CompleteWrite(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestCompleteWrite(::grpc::ServerContext* context, ::replicator_rpc::CompleteWriteRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::CompleteWriteResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
   };
+  typedef WithAsyncMethod_PushHostWrite<WithAsyncMethod_PushDirtyLog<WithAsyncMethod_TransferVolumeData<WithAsyncMethod_TransferHostWrite<WithAsyncMethod_CompleteRead<WithAsyncMethod_CompleteWrite<Service > > > > > > AsyncService;
   template <class BaseClass>
   class ExperimentalWithCallbackMethod_PushHostWrite : public BaseClass {
    private:
@@ -497,7 +398,7 @@ class ReplicatorIoService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(2,
+        MarkMethodCallback(0,
           new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::PushHostWriteRequest, ::replicator_rpc::PushHostWriteResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -509,9 +410,9 @@ class ReplicatorIoService final {
     void SetMessageAllocatorFor_PushHostWrite(
         ::grpc::experimental::MessageAllocator< ::replicator_rpc::PushHostWriteRequest, ::replicator_rpc::PushHostWriteResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(2);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::PushHostWriteRequest, ::replicator_rpc::PushHostWriteResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -544,7 +445,7 @@ class ReplicatorIoService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(3,
+        MarkMethodCallback(1,
           new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::PushDirtyLogRequest, ::replicator_rpc::PushDirtyLogResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -556,9 +457,9 @@ class ReplicatorIoService final {
     void SetMessageAllocatorFor_PushDirtyLog(
         ::grpc::experimental::MessageAllocator< ::replicator_rpc::PushDirtyLogRequest, ::replicator_rpc::PushDirtyLogResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(1);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(1);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::PushDirtyLogRequest, ::replicator_rpc::PushDirtyLogResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -581,49 +482,49 @@ class ReplicatorIoService final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithCallbackMethod_TransferDirtyLog : public BaseClass {
+  class ExperimentalWithCallbackMethod_TransferVolumeData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithCallbackMethod_TransferDirtyLog() {
+    ExperimentalWithCallbackMethod_TransferVolumeData() {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::Service::
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(4,
-          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse>(
+        MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
                    ::grpc::CallbackServerContext*
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response) { return this->TransferDirtyLog(context, request, response); }));}
-    void SetMessageAllocatorFor_TransferDirtyLog(
-        ::grpc::experimental::MessageAllocator< ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse>* allocator) {
+                     context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response) { return this->TransferVolumeData(context, request, response); }));}
+    void SetMessageAllocatorFor_TransferVolumeData(
+        ::grpc::experimental::MessageAllocator< ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(2);
     #endif
-      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse>*>(handler)
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse>*>(handler)
               ->SetMessageAllocator(allocator);
     }
-    ~ExperimentalWithCallbackMethod_TransferDirtyLog() override {
+    ~ExperimentalWithCallbackMethod_TransferVolumeData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status TransferDirtyLog(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/) override {
+    ::grpc::Status TransferVolumeData(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* TransferDirtyLog(
-      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/)
+    virtual ::grpc::ServerUnaryReactor* TransferVolumeData(
+      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/)
     #else
-    virtual ::grpc::experimental::ServerUnaryReactor* TransferDirtyLog(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/)
+    virtual ::grpc::experimental::ServerUnaryReactor* TransferVolumeData(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/)
     #endif
       { return nullptr; }
   };
@@ -638,7 +539,7 @@ class ReplicatorIoService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodCallback(5,
+        MarkMethodCallback(3,
           new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::TransferHostWriteRequest, ::replicator_rpc::TransferHostWriteResponse>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -650,9 +551,9 @@ class ReplicatorIoService final {
     void SetMessageAllocatorFor_TransferHostWrite(
         ::grpc::experimental::MessageAllocator< ::replicator_rpc::TransferHostWriteRequest, ::replicator_rpc::TransferHostWriteResponse>* allocator) {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
     #else
-      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(3);
     #endif
       static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::TransferHostWriteRequest, ::replicator_rpc::TransferHostWriteResponse>*>(handler)
               ->SetMessageAllocator(allocator);
@@ -674,20 +575,37 @@ class ReplicatorIoService final {
     #endif
       { return nullptr; }
   };
-  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-  typedef ExperimentalWithCallbackMethod_CompleteRead<ExperimentalWithCallbackMethod_CompleteWrite<ExperimentalWithCallbackMethod_PushHostWrite<ExperimentalWithCallbackMethod_PushDirtyLog<ExperimentalWithCallbackMethod_TransferDirtyLog<ExperimentalWithCallbackMethod_TransferHostWrite<Service > > > > > > CallbackService;
-  #endif
-
-  typedef ExperimentalWithCallbackMethod_CompleteRead<ExperimentalWithCallbackMethod_CompleteWrite<ExperimentalWithCallbackMethod_PushHostWrite<ExperimentalWithCallbackMethod_PushDirtyLog<ExperimentalWithCallbackMethod_TransferDirtyLog<ExperimentalWithCallbackMethod_TransferHostWrite<Service > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
-  class WithGenericMethod_CompleteRead : public BaseClass {
+  class ExperimentalWithCallbackMethod_CompleteRead : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithGenericMethod_CompleteRead() {
-      ::grpc::Service::MarkMethodGeneric(0);
+    ExperimentalWithCallbackMethod_CompleteRead() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response) { return this->CompleteRead(context, request, response); }));}
+    void SetMessageAllocatorFor_CompleteRead(
+        ::grpc::experimental::MessageAllocator< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(4);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(4);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~WithGenericMethod_CompleteRead() override {
+    ~ExperimentalWithCallbackMethod_CompleteRead() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -695,16 +613,46 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* CompleteRead(
+      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* CompleteRead(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithGenericMethod_CompleteWrite : public BaseClass {
+  class ExperimentalWithCallbackMethod_CompleteWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithGenericMethod_CompleteWrite() {
-      ::grpc::Service::MarkMethodGeneric(1);
+    ExperimentalWithCallbackMethod_CompleteWrite() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response) { return this->CompleteWrite(context, request, response); }));}
+    void SetMessageAllocatorFor_CompleteWrite(
+        ::grpc::experimental::MessageAllocator< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(5);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(5);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
     }
-    ~WithGenericMethod_CompleteWrite() override {
+    ~ExperimentalWithCallbackMethod_CompleteWrite() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -712,14 +660,27 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* CompleteWrite(
+      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* CompleteWrite(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/)
+    #endif
+      { return nullptr; }
   };
+  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+  typedef ExperimentalWithCallbackMethod_PushHostWrite<ExperimentalWithCallbackMethod_PushDirtyLog<ExperimentalWithCallbackMethod_TransferVolumeData<ExperimentalWithCallbackMethod_TransferHostWrite<ExperimentalWithCallbackMethod_CompleteRead<ExperimentalWithCallbackMethod_CompleteWrite<Service > > > > > > CallbackService;
+  #endif
+
+  typedef ExperimentalWithCallbackMethod_PushHostWrite<ExperimentalWithCallbackMethod_PushDirtyLog<ExperimentalWithCallbackMethod_TransferVolumeData<ExperimentalWithCallbackMethod_TransferHostWrite<ExperimentalWithCallbackMethod_CompleteRead<ExperimentalWithCallbackMethod_CompleteWrite<Service > > > > > > ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_PushHostWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_PushHostWrite() {
-      ::grpc::Service::MarkMethodGeneric(2);
+      ::grpc::Service::MarkMethodGeneric(0);
     }
     ~WithGenericMethod_PushHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -736,7 +697,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_PushDirtyLog() {
-      ::grpc::Service::MarkMethodGeneric(3);
+      ::grpc::Service::MarkMethodGeneric(1);
     }
     ~WithGenericMethod_PushDirtyLog() override {
       BaseClassMustBeDerivedFromService(this);
@@ -748,18 +709,18 @@ class ReplicatorIoService final {
     }
   };
   template <class BaseClass>
-  class WithGenericMethod_TransferDirtyLog : public BaseClass {
+  class WithGenericMethod_TransferVolumeData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithGenericMethod_TransferDirtyLog() {
-      ::grpc::Service::MarkMethodGeneric(4);
+    WithGenericMethod_TransferVolumeData() {
+      ::grpc::Service::MarkMethodGeneric(2);
     }
-    ~WithGenericMethod_TransferDirtyLog() override {
+    ~WithGenericMethod_TransferVolumeData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status TransferDirtyLog(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/) override {
+    ::grpc::Status TransferVolumeData(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -770,7 +731,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithGenericMethod_TransferHostWrite() {
-      ::grpc::Service::MarkMethodGeneric(5);
+      ::grpc::Service::MarkMethodGeneric(3);
     }
     ~WithGenericMethod_TransferHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -782,14 +743,14 @@ class ReplicatorIoService final {
     }
   };
   template <class BaseClass>
-  class WithRawMethod_CompleteRead : public BaseClass {
+  class WithGenericMethod_CompleteRead : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawMethod_CompleteRead() {
-      ::grpc::Service::MarkMethodRaw(0);
+    WithGenericMethod_CompleteRead() {
+      ::grpc::Service::MarkMethodGeneric(4);
     }
-    ~WithRawMethod_CompleteRead() override {
+    ~WithGenericMethod_CompleteRead() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -797,28 +758,22 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestCompleteRead(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
-    }
   };
   template <class BaseClass>
-  class WithRawMethod_CompleteWrite : public BaseClass {
+  class WithGenericMethod_CompleteWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawMethod_CompleteWrite() {
-      ::grpc::Service::MarkMethodRaw(1);
+    WithGenericMethod_CompleteWrite() {
+      ::grpc::Service::MarkMethodGeneric(5);
     }
-    ~WithRawMethod_CompleteWrite() override {
+    ~WithGenericMethod_CompleteWrite() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
     ::grpc::Status CompleteWrite(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-    }
-    void RequestCompleteWrite(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -827,7 +782,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_PushHostWrite() {
-      ::grpc::Service::MarkMethodRaw(2);
+      ::grpc::Service::MarkMethodRaw(0);
     }
     ~WithRawMethod_PushHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -838,7 +793,7 @@ class ReplicatorIoService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestPushHostWrite(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -847,7 +802,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_PushDirtyLog() {
-      ::grpc::Service::MarkMethodRaw(3);
+      ::grpc::Service::MarkMethodRaw(1);
     }
     ~WithRawMethod_PushDirtyLog() override {
       BaseClassMustBeDerivedFromService(this);
@@ -858,27 +813,27 @@ class ReplicatorIoService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestPushDirtyLog(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
-  class WithRawMethod_TransferDirtyLog : public BaseClass {
+  class WithRawMethod_TransferVolumeData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithRawMethod_TransferDirtyLog() {
-      ::grpc::Service::MarkMethodRaw(4);
+    WithRawMethod_TransferVolumeData() {
+      ::grpc::Service::MarkMethodRaw(2);
     }
-    ~WithRawMethod_TransferDirtyLog() override {
+    ~WithRawMethod_TransferVolumeData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status TransferDirtyLog(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/) override {
+    ::grpc::Status TransferVolumeData(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    void RequestTransferDirtyLog(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    void RequestTransferVolumeData(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
@@ -887,7 +842,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithRawMethod_TransferHostWrite() {
-      ::grpc::Service::MarkMethodRaw(5);
+      ::grpc::Service::MarkMethodRaw(3);
     }
     ~WithRawMethod_TransferHostWrite() override {
       BaseClassMustBeDerivedFromService(this);
@@ -898,31 +853,18 @@ class ReplicatorIoService final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     void RequestTransferHostWrite(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
-      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CompleteRead : public BaseClass {
+  class WithRawMethod_CompleteRead : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_CompleteRead() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(0,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CompleteRead(context, request, response); }));
+    WithRawMethod_CompleteRead() {
+      ::grpc::Service::MarkMethodRaw(4);
     }
-    ~ExperimentalWithRawCallbackMethod_CompleteRead() override {
+    ~WithRawMethod_CompleteRead() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -930,37 +872,19 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CompleteRead(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CompleteRead(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestCompleteRead(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(4, context, request, response, new_call_cq, notification_cq, tag);
+    }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_CompleteWrite : public BaseClass {
+  class WithRawMethod_CompleteWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_CompleteWrite() {
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-      ::grpc::Service::
-    #else
-      ::grpc::Service::experimental().
-    #endif
-        MarkMethodRawCallback(1,
-          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
-            [this](
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-                   ::grpc::CallbackServerContext*
-    #else
-                   ::grpc::experimental::CallbackServerContext*
-    #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CompleteWrite(context, request, response); }));
+    WithRawMethod_CompleteWrite() {
+      ::grpc::Service::MarkMethodRaw(5);
     }
-    ~ExperimentalWithRawCallbackMethod_CompleteWrite() override {
+    ~WithRawMethod_CompleteWrite() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
@@ -968,14 +892,9 @@ class ReplicatorIoService final {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* CompleteWrite(
-      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #else
-    virtual ::grpc::experimental::ServerUnaryReactor* CompleteWrite(
-      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
-    #endif
-      { return nullptr; }
+    void RequestCompleteWrite(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(5, context, request, response, new_call_cq, notification_cq, tag);
+    }
   };
   template <class BaseClass>
   class ExperimentalWithRawCallbackMethod_PushHostWrite : public BaseClass {
@@ -988,7 +907,7 @@ class ReplicatorIoService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(2,
+        MarkMethodRawCallback(0,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1026,7 +945,7 @@ class ReplicatorIoService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(3,
+        MarkMethodRawCallback(1,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1054,17 +973,17 @@ class ReplicatorIoService final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class ExperimentalWithRawCallbackMethod_TransferDirtyLog : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_TransferVolumeData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    ExperimentalWithRawCallbackMethod_TransferDirtyLog() {
+    ExperimentalWithRawCallbackMethod_TransferVolumeData() {
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
       ::grpc::Service::
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(4,
+        MarkMethodRawCallback(2,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1072,21 +991,21 @@ class ReplicatorIoService final {
     #else
                    ::grpc::experimental::CallbackServerContext*
     #endif
-                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->TransferDirtyLog(context, request, response); }));
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->TransferVolumeData(context, request, response); }));
     }
-    ~ExperimentalWithRawCallbackMethod_TransferDirtyLog() override {
+    ~ExperimentalWithRawCallbackMethod_TransferVolumeData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable synchronous version of this method
-    ::grpc::Status TransferDirtyLog(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/) override {
+    ::grpc::Status TransferVolumeData(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
-    virtual ::grpc::ServerUnaryReactor* TransferDirtyLog(
+    virtual ::grpc::ServerUnaryReactor* TransferVolumeData(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
     #else
-    virtual ::grpc::experimental::ServerUnaryReactor* TransferDirtyLog(
+    virtual ::grpc::experimental::ServerUnaryReactor* TransferVolumeData(
       ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
     #endif
       { return nullptr; }
@@ -1102,7 +1021,7 @@ class ReplicatorIoService final {
     #else
       ::grpc::Service::experimental().
     #endif
-        MarkMethodRawCallback(5,
+        MarkMethodRawCallback(3,
           new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
             [this](
     #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
@@ -1130,58 +1049,80 @@ class ReplicatorIoService final {
       { return nullptr; }
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_CompleteRead : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_CompleteRead : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithStreamedUnaryMethod_CompleteRead() {
-      ::grpc::Service::MarkMethodStreamed(0,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>* streamer) {
-                       return this->StreamedCompleteRead(context,
-                         streamer);
-                  }));
+    ExperimentalWithRawCallbackMethod_CompleteRead() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(4,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CompleteRead(context, request, response); }));
     }
-    ~WithStreamedUnaryMethod_CompleteRead() override {
+    ~ExperimentalWithRawCallbackMethod_CompleteRead() override {
       BaseClassMustBeDerivedFromService(this);
     }
-    // disable regular version of this method
+    // disable synchronous version of this method
     ::grpc::Status CompleteRead(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedCompleteRead(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::CompleteReadRequest,::replicator_rpc::CompleteReadResponse>* server_unary_streamer) = 0;
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* CompleteRead(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* CompleteRead(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_CompleteWrite : public BaseClass {
+  class ExperimentalWithRawCallbackMethod_CompleteWrite : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithStreamedUnaryMethod_CompleteWrite() {
-      ::grpc::Service::MarkMethodStreamed(1,
-        new ::grpc::internal::StreamedUnaryHandler<
-          ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>(
-            [this](::grpc::ServerContext* context,
-                   ::grpc::ServerUnaryStreamer<
-                     ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>* streamer) {
-                       return this->StreamedCompleteWrite(context,
-                         streamer);
-                  }));
+    ExperimentalWithRawCallbackMethod_CompleteWrite() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(5,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CompleteWrite(context, request, response); }));
     }
-    ~WithStreamedUnaryMethod_CompleteWrite() override {
+    ~ExperimentalWithRawCallbackMethod_CompleteWrite() override {
       BaseClassMustBeDerivedFromService(this);
     }
-    // disable regular version of this method
+    // disable synchronous version of this method
     ::grpc::Status CompleteWrite(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
-    // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedCompleteWrite(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::CompleteWriteRequest,::replicator_rpc::CompleteWriteResponse>* server_unary_streamer) = 0;
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* CompleteWrite(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* CompleteWrite(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_PushHostWrite : public BaseClass {
@@ -1189,7 +1130,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_PushHostWrite() {
-      ::grpc::Service::MarkMethodStreamed(2,
+      ::grpc::Service::MarkMethodStreamed(0,
         new ::grpc::internal::StreamedUnaryHandler<
           ::replicator_rpc::PushHostWriteRequest, ::replicator_rpc::PushHostWriteResponse>(
             [this](::grpc::ServerContext* context,
@@ -1216,7 +1157,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_PushDirtyLog() {
-      ::grpc::Service::MarkMethodStreamed(3,
+      ::grpc::Service::MarkMethodStreamed(1,
         new ::grpc::internal::StreamedUnaryHandler<
           ::replicator_rpc::PushDirtyLogRequest, ::replicator_rpc::PushDirtyLogResponse>(
             [this](::grpc::ServerContext* context,
@@ -1238,31 +1179,31 @@ class ReplicatorIoService final {
     virtual ::grpc::Status StreamedPushDirtyLog(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::PushDirtyLogRequest,::replicator_rpc::PushDirtyLogResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
-  class WithStreamedUnaryMethod_TransferDirtyLog : public BaseClass {
+  class WithStreamedUnaryMethod_TransferVolumeData : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
-    WithStreamedUnaryMethod_TransferDirtyLog() {
-      ::grpc::Service::MarkMethodStreamed(4,
+    WithStreamedUnaryMethod_TransferVolumeData() {
+      ::grpc::Service::MarkMethodStreamed(2,
         new ::grpc::internal::StreamedUnaryHandler<
-          ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse>(
+          ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse>(
             [this](::grpc::ServerContext* context,
                    ::grpc::ServerUnaryStreamer<
-                     ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse>* streamer) {
-                       return this->StreamedTransferDirtyLog(context,
+                     ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse>* streamer) {
+                       return this->StreamedTransferVolumeData(context,
                          streamer);
                   }));
     }
-    ~WithStreamedUnaryMethod_TransferDirtyLog() override {
+    ~WithStreamedUnaryMethod_TransferVolumeData() override {
       BaseClassMustBeDerivedFromService(this);
     }
     // disable regular version of this method
-    ::grpc::Status TransferDirtyLog(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferDirtyLogRequest* /*request*/, ::replicator_rpc::TransferDirtyLogResponse* /*response*/) override {
+    ::grpc::Status TransferVolumeData(::grpc::ServerContext* /*context*/, const ::replicator_rpc::TransferVolumeDataRequest* /*request*/, ::replicator_rpc::TransferVolumeDataResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     // replace default version of method with streamed unary
-    virtual ::grpc::Status StreamedTransferDirtyLog(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::TransferDirtyLogRequest,::replicator_rpc::TransferDirtyLogResponse>* server_unary_streamer) = 0;
+    virtual ::grpc::Status StreamedTransferVolumeData(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::TransferVolumeDataRequest,::replicator_rpc::TransferVolumeDataResponse>* server_unary_streamer) = 0;
   };
   template <class BaseClass>
   class WithStreamedUnaryMethod_TransferHostWrite : public BaseClass {
@@ -1270,7 +1211,7 @@ class ReplicatorIoService final {
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
    public:
     WithStreamedUnaryMethod_TransferHostWrite() {
-      ::grpc::Service::MarkMethodStreamed(5,
+      ::grpc::Service::MarkMethodStreamed(3,
         new ::grpc::internal::StreamedUnaryHandler<
           ::replicator_rpc::TransferHostWriteRequest, ::replicator_rpc::TransferHostWriteResponse>(
             [this](::grpc::ServerContext* context,
@@ -1291,9 +1232,321 @@ class ReplicatorIoService final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedTransferHostWrite(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::TransferHostWriteRequest,::replicator_rpc::TransferHostWriteResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_CompleteRead<WithStreamedUnaryMethod_CompleteWrite<WithStreamedUnaryMethod_PushHostWrite<WithStreamedUnaryMethod_PushDirtyLog<WithStreamedUnaryMethod_TransferDirtyLog<WithStreamedUnaryMethod_TransferHostWrite<Service > > > > > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_CompleteRead : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_CompleteRead() {
+      ::grpc::Service::MarkMethodStreamed(4,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse>* streamer) {
+                       return this->StreamedCompleteRead(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_CompleteRead() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status CompleteRead(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteReadRequest* /*request*/, ::replicator_rpc::CompleteReadResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedCompleteRead(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::CompleteReadRequest,::replicator_rpc::CompleteReadResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_CompleteWrite : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_CompleteWrite() {
+      ::grpc::Service::MarkMethodStreamed(5,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse>* streamer) {
+                       return this->StreamedCompleteWrite(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_CompleteWrite() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status CompleteWrite(::grpc::ServerContext* /*context*/, const ::replicator_rpc::CompleteWriteRequest* /*request*/, ::replicator_rpc::CompleteWriteResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedCompleteWrite(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::CompleteWriteRequest,::replicator_rpc::CompleteWriteResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_PushHostWrite<WithStreamedUnaryMethod_PushDirtyLog<WithStreamedUnaryMethod_TransferVolumeData<WithStreamedUnaryMethod_TransferHostWrite<WithStreamedUnaryMethod_CompleteRead<WithStreamedUnaryMethod_CompleteWrite<Service > > > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_CompleteRead<WithStreamedUnaryMethod_CompleteWrite<WithStreamedUnaryMethod_PushHostWrite<WithStreamedUnaryMethod_PushDirtyLog<WithStreamedUnaryMethod_TransferDirtyLog<WithStreamedUnaryMethod_TransferHostWrite<Service > > > > > > StreamedService;
+  typedef WithStreamedUnaryMethod_PushHostWrite<WithStreamedUnaryMethod_PushDirtyLog<WithStreamedUnaryMethod_TransferVolumeData<WithStreamedUnaryMethod_TransferHostWrite<WithStreamedUnaryMethod_CompleteRead<WithStreamedUnaryMethod_CompleteWrite<Service > > > > > > StreamedService;
+};
+
+class Health final {
+ public:
+  static constexpr char const* service_full_name() {
+    return "replicator_rpc.Health";
+  }
+  class StubInterface {
+   public:
+    virtual ~StubInterface() {}
+    virtual ::grpc::Status Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::replicator_rpc::HealthCheckResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::HealthCheckResponse>> AsyncCheck(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::HealthCheckResponse>>(AsyncCheckRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::HealthCheckResponse>> PrepareAsyncCheck(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::HealthCheckResponse>>(PrepareAsyncCheckRaw(context, request, cq));
+    }
+    class experimental_async_interface {
+     public:
+      virtual ~experimental_async_interface() {}
+      virtual void Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, std::function<void(::grpc::Status)>) = 0;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      virtual void Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      #else
+      virtual void Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) = 0;
+      #endif
+    };
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    typedef class experimental_async_interface async_interface;
+    #endif
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    async_interface* async() { return experimental_async(); }
+    #endif
+    virtual class experimental_async_interface* experimental_async() { return nullptr; }
+  private:
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::HealthCheckResponse>* AsyncCheckRaw(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::replicator_rpc::HealthCheckResponse>* PrepareAsyncCheckRaw(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) = 0;
+  };
+  class Stub final : public StubInterface {
+   public:
+    Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
+    ::grpc::Status Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::replicator_rpc::HealthCheckResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>> AsyncCheck(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>>(AsyncCheckRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>> PrepareAsyncCheck(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>>(PrepareAsyncCheckRaw(context, request, cq));
+    }
+    class experimental_async final :
+      public StubInterface::experimental_async_interface {
+     public:
+      void Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, std::function<void(::grpc::Status)>) override;
+      #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      void Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      #else
+      void Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) override;
+      #endif
+     private:
+      friend class Stub;
+      explicit experimental_async(Stub* stub): stub_(stub) { }
+      Stub* stub() { return stub_; }
+      Stub* stub_;
+    };
+    class experimental_async_interface* experimental_async() override { return &async_stub_; }
+
+   private:
+    std::shared_ptr< ::grpc::ChannelInterface> channel_;
+    class experimental_async async_stub_{this};
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>* AsyncCheckRaw(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>* PrepareAsyncCheckRaw(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) override;
+    const ::grpc::internal::RpcMethod rpcmethod_Check_;
+  };
+  static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
+
+  class Service : public ::grpc::Service {
+   public:
+    Service();
+    virtual ~Service();
+    virtual ::grpc::Status Check(::grpc::ServerContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response);
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_Check : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_Check() {
+      ::grpc::Service::MarkMethodAsync(0);
+    }
+    ~WithAsyncMethod_Check() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Check(::grpc::ServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestCheck(::grpc::ServerContext* context, ::replicator_rpc::HealthCheckRequest* request, ::grpc::ServerAsyncResponseWriter< ::replicator_rpc::HealthCheckResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_Check<Service > AsyncService;
+  template <class BaseClass>
+  class ExperimentalWithCallbackMethod_Check : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithCallbackMethod_Check() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response) { return this->Check(context, request, response); }));}
+    void SetMessageAllocatorFor_Check(
+        ::grpc::experimental::MessageAllocator< ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse>* allocator) {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(0);
+    #else
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::experimental().GetHandler(0);
+    #endif
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~ExperimentalWithCallbackMethod_Check() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Check(::grpc::ServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* Check(
+      ::grpc::CallbackServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* Check(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+  typedef ExperimentalWithCallbackMethod_Check<Service > CallbackService;
+  #endif
+
+  typedef ExperimentalWithCallbackMethod_Check<Service > ExperimentalCallbackService;
+  template <class BaseClass>
+  class WithGenericMethod_Check : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_Check() {
+      ::grpc::Service::MarkMethodGeneric(0);
+    }
+    ~WithGenericMethod_Check() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Check(::grpc::ServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_Check : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_Check() {
+      ::grpc::Service::MarkMethodRaw(0);
+    }
+    ~WithRawMethod_Check() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Check(::grpc::ServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestCheck(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(0, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class ExperimentalWithRawCallbackMethod_Check : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    ExperimentalWithRawCallbackMethod_Check() {
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+      ::grpc::Service::
+    #else
+      ::grpc::Service::experimental().
+    #endif
+        MarkMethodRawCallback(0,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+                   ::grpc::CallbackServerContext*
+    #else
+                   ::grpc::experimental::CallbackServerContext*
+    #endif
+                     context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->Check(context, request, response); }));
+    }
+    ~ExperimentalWithRawCallbackMethod_Check() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status Check(::grpc::ServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    #ifdef GRPC_CALLBACK_API_NONEXPERIMENTAL
+    virtual ::grpc::ServerUnaryReactor* Check(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #else
+    virtual ::grpc::experimental::ServerUnaryReactor* Check(
+      ::grpc::experimental::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)
+    #endif
+      { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_Check : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_Check() {
+      ::grpc::Service::MarkMethodStreamed(0,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse>* streamer) {
+                       return this->StreamedCheck(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_Check() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status Check(::grpc::ServerContext* /*context*/, const ::replicator_rpc::HealthCheckRequest* /*request*/, ::replicator_rpc::HealthCheckResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedCheck(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::replicator_rpc::HealthCheckRequest,::replicator_rpc::HealthCheckResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_Check<Service > StreamedUnaryService;
+  typedef Service SplitStreamedService;
+  typedef WithStreamedUnaryMethod_Check<Service > StreamedService;
 };
 
 }  // namespace replicator_rpc

@@ -32,6 +32,8 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "mock_replicator_server.h"
+
 #include <grpc/grpc.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server.h>
@@ -41,15 +43,14 @@
 #include <string>
 #include <thread>
 
-#include "mock_replicator_server.h"
-
 namespace pos
 {
 MockReplicatorServer::MockReplicatorServer(void)
 : server(nullptr),
-  address("0.0.0.0:0")
+  address("0.0.0.0:0"),
+  numRecievedCalls(0)
 {
-}    
+}
 
 MockReplicatorServer::MockReplicatorServer(std::string _address)
 : MockReplicatorServer()
@@ -86,7 +87,7 @@ MockReplicatorServer::CompleteRead(
     {
         std::cout << request->data(index).content().c_str() << std::endl;
     }
-
+    numRecievedCalls++;
     return ::grpc::Status::OK;
 }
 
@@ -117,9 +118,9 @@ MockReplicatorServer::PushDirtyLog(
 }
 
 ::grpc::Status
-MockReplicatorServer::TransferDirtyLog(
-    ::grpc::ServerContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request,
-    ::replicator_rpc::TransferDirtyLogResponse* response)
+MockReplicatorServer::TransferVolumeData(
+    ::grpc::ServerContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request,
+    ::replicator_rpc::TransferVolumeDataResponse* response)
 {
     return ::grpc::Status::OK;
 }
@@ -132,4 +133,12 @@ MockReplicatorServer::TransferHostWrite(
     return ::grpc::Status::OK;
 }
 
+void
+MockReplicatorServer::WaitForReceiveDone(int numSendCalls)
+{
+    while (numRecievedCalls != numSendCalls)
+    {
+        usleep(1);
+    }
+}
 } // namespace pos

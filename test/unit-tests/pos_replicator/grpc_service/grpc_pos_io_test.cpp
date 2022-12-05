@@ -13,7 +13,6 @@ protected:
     GrpcPosIo* grpcPosIo;
 };
 
-
 void
 GrpcPosIoTestFixture::SetUp(void)
 {
@@ -25,7 +24,6 @@ GrpcPosIoTestFixture::TearDown(void)
 {
     delete grpcPosIo;
 }
-
 
 TEST(GrpcPosIoTestFixture, GrpcPosIo_)
 {
