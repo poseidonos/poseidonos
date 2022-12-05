@@ -268,19 +268,21 @@ DeviceManager::_InitScan()
 int
 DeviceManager::RemoveDevice(UblockSharedPtr dev)
 {
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
-    auto iter = find(devices.begin(), devices.end(), dev);
-    if (iter == devices.end())
+    DeviceType type = DeviceType::SSD;
     {
-        POS_TRACE_ERROR(EID(DEVICEMGR_REMOVE_DEV),
-            "device not found");
-        return static_cast<int>(EID(DEVICEMGR_REMOVE_DEV));
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        auto iter = find(devices.begin(), devices.end(), dev);
+        if (iter == devices.end())
+        {
+            POS_TRACE_ERROR(EID(DEVICEMGR_REMOVE_DEV),
+                "device not found");
+            return static_cast<int>(EID(DEVICEMGR_REMOVE_DEV));
+        }
+        type = (*iter)->GetType();
+        devices.erase(iter);
     }
-
-    DeviceType type = (*iter)->GetType();
     ioDispatcher->RemoveDeviceForReactor(dev);
     ioDispatcher->RemoveDeviceForIOWorker(dev);
-    devices.erase(iter);
 
     UnvmeSsdSharedPtr ssd = nullptr;
     if (type == DeviceType::SSD)
