@@ -42,7 +42,7 @@ namespace pos
 {
 ReplicatorVolumeSubscriber::ReplicatorVolumeSubscriber(IArrayInfo* info)
 : VolumeEvent("ReplicatorVolumeSubscriber", info->GetName(), info->GetIndex()),
-arrayInfo(info)
+  arrayInfo(info)
 {
     volumeManager = nullptr;
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "ReplicatorVolumeSubscriber has been constructed");
@@ -84,7 +84,6 @@ ReplicatorVolumeSubscriber::Shutdown(void)
 void
 ReplicatorVolumeSubscriber::Flush(void)
 {
-
 }
 
 int
@@ -132,7 +131,7 @@ ReplicatorVolumeSubscriber::VolumeDetached(vector<int> volList, VolumeArrayInfo*
 IVolumeEventManager*
 ReplicatorVolumeSubscriber::GetVolumeManager(void)
 {
-    return volumeManager;    
+    return volumeManager;
 }
 
 std::string
@@ -141,6 +140,4 @@ ReplicatorVolumeSubscriber::GetArrayName(void)
     return arrayInfo->GetName();
 }
 
-
 } // namespace pos
-

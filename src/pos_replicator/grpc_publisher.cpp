@@ -32,10 +32,10 @@
 
 #include "grpc_publisher.h"
 
+#include <time.h>
 #include <memory>
 #include <string>
 #include <thread>
-#include <time.h>
 
 #include "src/include/array_config.h"
 #include "src/include/grpc_server_socket_address.h"
@@ -164,15 +164,17 @@ GrpcPublisher::CompleteUserWrite(uint64_t lsn, string volumeName, string arrayNa
 }
 
 int
-GrpcPublisher::CompleteWrite(uint64_t lsn, string volumeName, string arrayName)
+GrpcPublisher::CompleteWrite(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn)
 {
     ::grpc::ClientContext cliContext;
     replicator_rpc::CompleteWriteRequest* request = new replicator_rpc::CompleteWriteRequest;
     replicator_rpc::CompleteWriteResponse response;
 
-    request->set_lsn(lsn);
     request->set_array_name(arrayName);
     request->set_volume_name(volumeName);
+    request->set_rba(rba);
+    request->set_num_blocks(numBlocks);
+    request->set_lsn(lsn);
 
     grpc::Status status = stub->CompleteWrite(&cliContext, *request, &response);
 
@@ -197,7 +199,6 @@ GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, u
     request->set_num_blocks(numBlocks);
 
     _InsertBlockToChunk(request, buffer, numBlocks);
-
 
     grpc::Status status;
     if (_WaitUntilReady() == true)

@@ -22,12 +22,12 @@
 namespace replicator_rpc {
 
 static const char* ReplicatorIoService_method_names[] = {
-  "/replicator_rpc.ReplicatorIoService/CompleteRead",
-  "/replicator_rpc.ReplicatorIoService/CompleteWrite",
   "/replicator_rpc.ReplicatorIoService/PushHostWrite",
   "/replicator_rpc.ReplicatorIoService/PushDirtyLog",
-  "/replicator_rpc.ReplicatorIoService/TransferDirtyLog",
+  "/replicator_rpc.ReplicatorIoService/TransferVolumeData",
   "/replicator_rpc.ReplicatorIoService/TransferHostWrite",
+  "/replicator_rpc.ReplicatorIoService/CompleteRead",
+  "/replicator_rpc.ReplicatorIoService/CompleteWrite",
 };
 
 std::unique_ptr< ReplicatorIoService::Stub> ReplicatorIoService::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -37,59 +37,13 @@ std::unique_ptr< ReplicatorIoService::Stub> ReplicatorIoService::NewStub(const s
 }
 
 ReplicatorIoService::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_CompleteRead_(ReplicatorIoService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_CompleteWrite_(ReplicatorIoService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_PushHostWrite_(ReplicatorIoService_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_PushDirtyLog_(ReplicatorIoService_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_TransferDirtyLog_(ReplicatorIoService_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_TransferHostWrite_(ReplicatorIoService_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  : channel_(channel), rpcmethod_PushHostWrite_(ReplicatorIoService_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_PushDirtyLog_(ReplicatorIoService_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_TransferVolumeData_(ReplicatorIoService_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_TransferHostWrite_(ReplicatorIoService_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CompleteRead_(ReplicatorIoService_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CompleteWrite_(ReplicatorIoService_method_names[5], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
-
-::grpc::Status ReplicatorIoService::Stub::CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::replicator_rpc::CompleteReadResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CompleteRead_, context, request, response);
-}
-
-void ReplicatorIoService::Stub::experimental_async::CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteRead_, context, request, response, std::move(f));
-}
-
-void ReplicatorIoService::Stub::experimental_async::CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteRead_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* ReplicatorIoService::Stub::PrepareAsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::CompleteReadResponse, ::replicator_rpc::CompleteReadRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CompleteRead_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* ReplicatorIoService::Stub::AsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncCompleteReadRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
-
-::grpc::Status ReplicatorIoService::Stub::CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::replicator_rpc::CompleteWriteResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CompleteWrite_, context, request, response);
-}
-
-void ReplicatorIoService::Stub::experimental_async::CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteWrite_, context, request, response, std::move(f));
-}
-
-void ReplicatorIoService::Stub::experimental_async::CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteWrite_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* ReplicatorIoService::Stub::PrepareAsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::CompleteWriteResponse, ::replicator_rpc::CompleteWriteRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CompleteWrite_, context, request);
-}
-
-::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* ReplicatorIoService::Stub::AsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncCompleteWriteRaw(context, request, cq);
-  result->StartCall();
-  return result;
-}
 
 ::grpc::Status ReplicatorIoService::Stub::PushHostWrite(::grpc::ClientContext* context, const ::replicator_rpc::PushHostWriteRequest& request, ::replicator_rpc::PushHostWriteResponse* response) {
   return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::PushHostWriteRequest, ::replicator_rpc::PushHostWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_PushHostWrite_, context, request, response);
@@ -137,25 +91,25 @@ void ReplicatorIoService::Stub::experimental_async::PushDirtyLog(::grpc::ClientC
   return result;
 }
 
-::grpc::Status ReplicatorIoService::Stub::TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::replicator_rpc::TransferDirtyLogResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_TransferDirtyLog_, context, request, response);
+::grpc::Status ReplicatorIoService::Stub::TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::replicator_rpc::TransferVolumeDataResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_TransferVolumeData_, context, request, response);
 }
 
-void ReplicatorIoService::Stub::experimental_async::TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_TransferDirtyLog_, context, request, response, std::move(f));
+void ReplicatorIoService::Stub::experimental_async::TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_TransferVolumeData_, context, request, response, std::move(f));
 }
 
-void ReplicatorIoService::Stub::experimental_async::TransferDirtyLog(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_TransferDirtyLog_, context, request, response, reactor);
+void ReplicatorIoService::Stub::experimental_async::TransferVolumeData(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_TransferVolumeData_, context, request, response, reactor);
 }
 
-::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>* ReplicatorIoService::Stub::PrepareAsyncTransferDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::TransferDirtyLogResponse, ::replicator_rpc::TransferDirtyLogRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_TransferDirtyLog_, context, request);
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>* ReplicatorIoService::Stub::PrepareAsyncTransferVolumeDataRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::TransferVolumeDataResponse, ::replicator_rpc::TransferVolumeDataRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_TransferVolumeData_, context, request);
 }
 
-::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferDirtyLogResponse>* ReplicatorIoService::Stub::AsyncTransferDirtyLogRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferDirtyLogRequest& request, ::grpc::CompletionQueue* cq) {
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::TransferVolumeDataResponse>* ReplicatorIoService::Stub::AsyncTransferVolumeDataRaw(::grpc::ClientContext* context, const ::replicator_rpc::TransferVolumeDataRequest& request, ::grpc::CompletionQueue* cq) {
   auto* result =
-    this->PrepareAsyncTransferDirtyLogRaw(context, request, cq);
+    this->PrepareAsyncTransferVolumeDataRaw(context, request, cq);
   result->StartCall();
   return result;
 }
@@ -183,29 +137,55 @@ void ReplicatorIoService::Stub::experimental_async::TransferHostWrite(::grpc::Cl
   return result;
 }
 
+::grpc::Status ReplicatorIoService::Stub::CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::replicator_rpc::CompleteReadResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CompleteRead_, context, request, response);
+}
+
+void ReplicatorIoService::Stub::experimental_async::CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteRead_, context, request, response, std::move(f));
+}
+
+void ReplicatorIoService::Stub::experimental_async::CompleteRead(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteRead_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* ReplicatorIoService::Stub::PrepareAsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::CompleteReadResponse, ::replicator_rpc::CompleteReadRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CompleteRead_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteReadResponse>* ReplicatorIoService::Stub::AsyncCompleteReadRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteReadRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCompleteReadRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status ReplicatorIoService::Stub::CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::replicator_rpc::CompleteWriteResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CompleteWrite_, context, request, response);
+}
+
+void ReplicatorIoService::Stub::experimental_async::CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteWrite_, context, request, response, std::move(f));
+}
+
+void ReplicatorIoService::Stub::experimental_async::CompleteWrite(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CompleteWrite_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* ReplicatorIoService::Stub::PrepareAsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::CompleteWriteResponse, ::replicator_rpc::CompleteWriteRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CompleteWrite_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::CompleteWriteResponse>* ReplicatorIoService::Stub::AsyncCompleteWriteRaw(::grpc::ClientContext* context, const ::replicator_rpc::CompleteWriteRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCompleteWriteRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 ReplicatorIoService::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       ReplicatorIoService_method_names[0],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](ReplicatorIoService::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::replicator_rpc::CompleteReadRequest* req,
-             ::replicator_rpc::CompleteReadResponse* resp) {
-               return service->CompleteRead(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      ReplicatorIoService_method_names[1],
-      ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](ReplicatorIoService::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::replicator_rpc::CompleteWriteRequest* req,
-             ::replicator_rpc::CompleteWriteResponse* resp) {
-               return service->CompleteWrite(ctx, req, resp);
-             }, this)));
-  AddMethod(new ::grpc::internal::RpcServiceMethod(
-      ReplicatorIoService_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::PushHostWriteRequest, ::replicator_rpc::PushHostWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](ReplicatorIoService::Service* service,
@@ -215,7 +195,7 @@ ReplicatorIoService::Service::Service() {
                return service->PushHostWrite(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      ReplicatorIoService_method_names[3],
+      ReplicatorIoService_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::PushDirtyLogRequest, ::replicator_rpc::PushDirtyLogResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](ReplicatorIoService::Service* service,
@@ -225,17 +205,17 @@ ReplicatorIoService::Service::Service() {
                return service->PushDirtyLog(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      ReplicatorIoService_method_names[4],
+      ReplicatorIoService_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::TransferDirtyLogRequest, ::replicator_rpc::TransferDirtyLogResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+      new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::TransferVolumeDataRequest, ::replicator_rpc::TransferVolumeDataResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](ReplicatorIoService::Service* service,
              ::grpc::ServerContext* ctx,
-             const ::replicator_rpc::TransferDirtyLogRequest* req,
-             ::replicator_rpc::TransferDirtyLogResponse* resp) {
-               return service->TransferDirtyLog(ctx, req, resp);
+             const ::replicator_rpc::TransferVolumeDataRequest* req,
+             ::replicator_rpc::TransferVolumeDataResponse* resp) {
+               return service->TransferVolumeData(ctx, req, resp);
              }, this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
-      ReplicatorIoService_method_names[5],
+      ReplicatorIoService_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
       new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::TransferHostWriteRequest, ::replicator_rpc::TransferHostWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
           [](ReplicatorIoService::Service* service,
@@ -244,23 +224,29 @@ ReplicatorIoService::Service::Service() {
              ::replicator_rpc::TransferHostWriteResponse* resp) {
                return service->TransferHostWrite(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ReplicatorIoService_method_names[4],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::CompleteReadRequest, ::replicator_rpc::CompleteReadResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicatorIoService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::replicator_rpc::CompleteReadRequest* req,
+             ::replicator_rpc::CompleteReadResponse* resp) {
+               return service->CompleteRead(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      ReplicatorIoService_method_names[5],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< ReplicatorIoService::Service, ::replicator_rpc::CompleteWriteRequest, ::replicator_rpc::CompleteWriteResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](ReplicatorIoService::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::replicator_rpc::CompleteWriteRequest* req,
+             ::replicator_rpc::CompleteWriteResponse* resp) {
+               return service->CompleteWrite(ctx, req, resp);
+             }, this)));
 }
 
 ReplicatorIoService::Service::~Service() {
-}
-
-::grpc::Status ReplicatorIoService::Service::CompleteRead(::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
-}
-
-::grpc::Status ReplicatorIoService::Service::CompleteWrite(::grpc::ServerContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response) {
-  (void) context;
-  (void) request;
-  (void) response;
-  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
 ::grpc::Status ReplicatorIoService::Service::PushHostWrite(::grpc::ServerContext* context, const ::replicator_rpc::PushHostWriteRequest* request, ::replicator_rpc::PushHostWriteResponse* response) {
@@ -277,7 +263,7 @@ ReplicatorIoService::Service::~Service() {
   return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
 }
 
-::grpc::Status ReplicatorIoService::Service::TransferDirtyLog(::grpc::ServerContext* context, const ::replicator_rpc::TransferDirtyLogRequest* request, ::replicator_rpc::TransferDirtyLogResponse* response) {
+::grpc::Status ReplicatorIoService::Service::TransferVolumeData(::grpc::ServerContext* context, const ::replicator_rpc::TransferVolumeDataRequest* request, ::replicator_rpc::TransferVolumeDataResponse* response) {
   (void) context;
   (void) request;
   (void) response;
@@ -285,6 +271,81 @@ ReplicatorIoService::Service::~Service() {
 }
 
 ::grpc::Status ReplicatorIoService::Service::TransferHostWrite(::grpc::ServerContext* context, const ::replicator_rpc::TransferHostWriteRequest* request, ::replicator_rpc::TransferHostWriteResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ReplicatorIoService::Service::CompleteRead(::grpc::ServerContext* context, const ::replicator_rpc::CompleteReadRequest* request, ::replicator_rpc::CompleteReadResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status ReplicatorIoService::Service::CompleteWrite(::grpc::ServerContext* context, const ::replicator_rpc::CompleteWriteRequest* request, ::replicator_rpc::CompleteWriteResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+
+static const char* Health_method_names[] = {
+  "/replicator_rpc.Health/Check",
+};
+
+std::unique_ptr< Health::Stub> Health::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
+  (void)options;
+  std::unique_ptr< Health::Stub> stub(new Health::Stub(channel, options));
+  return stub;
+}
+
+Health::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
+  : channel_(channel), rpcmethod_Check_(Health_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  {}
+
+::grpc::Status Health::Stub::Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::replicator_rpc::HealthCheckResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_Check_, context, request, response);
+}
+
+void Health::Stub::experimental_async::Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Check_, context, request, response, std::move(f));
+}
+
+void Health::Stub::experimental_async::Check(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_Check_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>* Health::Stub::PrepareAsyncCheckRaw(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::replicator_rpc::HealthCheckResponse, ::replicator_rpc::HealthCheckRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_Check_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::replicator_rpc::HealthCheckResponse>* Health::Stub::AsyncCheckRaw(::grpc::ClientContext* context, const ::replicator_rpc::HealthCheckRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCheckRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+Health::Service::Service() {
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      Health_method_names[0],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< Health::Service, ::replicator_rpc::HealthCheckRequest, ::replicator_rpc::HealthCheckResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](Health::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::replicator_rpc::HealthCheckRequest* req,
+             ::replicator_rpc::HealthCheckResponse* resp) {
+               return service->Check(ctx, req, resp);
+             }, this)));
+}
+
+Health::Service::~Service() {
+}
+
+::grpc::Status Health::Service::Check(::grpc::ServerContext* context, const ::replicator_rpc::HealthCheckRequest* request, ::replicator_rpc::HealthCheckResponse* response) {
   (void) context;
   (void) request;
   (void) response;

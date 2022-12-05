@@ -50,14 +50,14 @@ public:
     {
     }
 
-    virtual PosReplicatorStatus
+    virtual const PosReplicatorStatus
     Get(void)
     {
         return status;
     }
 
     virtual void
-    Set(PosReplicatorStatus to)
+    Set(const PosReplicatorStatus to)
     {
         status = to;
     }

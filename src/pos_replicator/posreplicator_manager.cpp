@@ -251,7 +251,7 @@ int
 PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList)
 {
     VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numChunks);
-    // TODO (cheolho.kang): Should add the error handling. if nullptr return 
+    // TODO (cheolho.kang): Should add the error handling. if nullptr return
 
     if (ioType == IO_TYPE::WRITE)
     {
@@ -311,8 +311,8 @@ PosReplicatorManager::HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
             return;
         }
     }
-
-    grpcPublisher->CompleteWrite(lsn, volumeName, arrayName);
+    uint64_t numBlocks = ChangeByteToSector(volumeIo->GetSize());
+    grpcPublisher->CompleteWrite(arrayName, volumeName, volumeIo->GetSectorRba(), numBlocks, lsn);
 }
 
 void

@@ -47,7 +47,7 @@ struct TableStruct_replicator_5frpc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[13]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[15]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -71,6 +71,12 @@ extern CompleteWriteRequestDefaultTypeInternal _CompleteWriteRequest_default_ins
 class CompleteWriteResponse;
 struct CompleteWriteResponseDefaultTypeInternal;
 extern CompleteWriteResponseDefaultTypeInternal _CompleteWriteResponse_default_instance_;
+class HealthCheckRequest;
+struct HealthCheckRequestDefaultTypeInternal;
+extern HealthCheckRequestDefaultTypeInternal _HealthCheckRequest_default_instance_;
+class HealthCheckResponse;
+struct HealthCheckResponseDefaultTypeInternal;
+extern HealthCheckResponseDefaultTypeInternal _HealthCheckResponse_default_instance_;
 class PushDirtyLogRequest;
 struct PushDirtyLogRequestDefaultTypeInternal;
 extern PushDirtyLogRequestDefaultTypeInternal _PushDirtyLogRequest_default_instance_;
@@ -83,18 +89,18 @@ extern PushHostWriteRequestDefaultTypeInternal _PushHostWriteRequest_default_ins
 class PushHostWriteResponse;
 struct PushHostWriteResponseDefaultTypeInternal;
 extern PushHostWriteResponseDefaultTypeInternal _PushHostWriteResponse_default_instance_;
-class TransferDirtyLogRequest;
-struct TransferDirtyLogRequestDefaultTypeInternal;
-extern TransferDirtyLogRequestDefaultTypeInternal _TransferDirtyLogRequest_default_instance_;
-class TransferDirtyLogResponse;
-struct TransferDirtyLogResponseDefaultTypeInternal;
-extern TransferDirtyLogResponseDefaultTypeInternal _TransferDirtyLogResponse_default_instance_;
 class TransferHostWriteRequest;
 struct TransferHostWriteRequestDefaultTypeInternal;
 extern TransferHostWriteRequestDefaultTypeInternal _TransferHostWriteRequest_default_instance_;
 class TransferHostWriteResponse;
 struct TransferHostWriteResponseDefaultTypeInternal;
 extern TransferHostWriteResponseDefaultTypeInternal _TransferHostWriteResponse_default_instance_;
+class TransferVolumeDataRequest;
+struct TransferVolumeDataRequestDefaultTypeInternal;
+extern TransferVolumeDataRequestDefaultTypeInternal _TransferVolumeDataRequest_default_instance_;
+class TransferVolumeDataResponse;
+struct TransferVolumeDataResponseDefaultTypeInternal;
+extern TransferVolumeDataResponseDefaultTypeInternal _TransferVolumeDataResponse_default_instance_;
 }  // namespace replicator_rpc
 PROTOBUF_NAMESPACE_OPEN
 template<> ::replicator_rpc::Chunk* Arena::CreateMaybeMessage<::replicator_rpc::Chunk>(Arena*);
@@ -102,43 +108,663 @@ template<> ::replicator_rpc::CompleteReadRequest* Arena::CreateMaybeMessage<::re
 template<> ::replicator_rpc::CompleteReadResponse* Arena::CreateMaybeMessage<::replicator_rpc::CompleteReadResponse>(Arena*);
 template<> ::replicator_rpc::CompleteWriteRequest* Arena::CreateMaybeMessage<::replicator_rpc::CompleteWriteRequest>(Arena*);
 template<> ::replicator_rpc::CompleteWriteResponse* Arena::CreateMaybeMessage<::replicator_rpc::CompleteWriteResponse>(Arena*);
+template<> ::replicator_rpc::HealthCheckRequest* Arena::CreateMaybeMessage<::replicator_rpc::HealthCheckRequest>(Arena*);
+template<> ::replicator_rpc::HealthCheckResponse* Arena::CreateMaybeMessage<::replicator_rpc::HealthCheckResponse>(Arena*);
 template<> ::replicator_rpc::PushDirtyLogRequest* Arena::CreateMaybeMessage<::replicator_rpc::PushDirtyLogRequest>(Arena*);
 template<> ::replicator_rpc::PushDirtyLogResponse* Arena::CreateMaybeMessage<::replicator_rpc::PushDirtyLogResponse>(Arena*);
 template<> ::replicator_rpc::PushHostWriteRequest* Arena::CreateMaybeMessage<::replicator_rpc::PushHostWriteRequest>(Arena*);
 template<> ::replicator_rpc::PushHostWriteResponse* Arena::CreateMaybeMessage<::replicator_rpc::PushHostWriteResponse>(Arena*);
-template<> ::replicator_rpc::TransferDirtyLogRequest* Arena::CreateMaybeMessage<::replicator_rpc::TransferDirtyLogRequest>(Arena*);
-template<> ::replicator_rpc::TransferDirtyLogResponse* Arena::CreateMaybeMessage<::replicator_rpc::TransferDirtyLogResponse>(Arena*);
 template<> ::replicator_rpc::TransferHostWriteRequest* Arena::CreateMaybeMessage<::replicator_rpc::TransferHostWriteRequest>(Arena*);
 template<> ::replicator_rpc::TransferHostWriteResponse* Arena::CreateMaybeMessage<::replicator_rpc::TransferHostWriteResponse>(Arena*);
+template<> ::replicator_rpc::TransferVolumeDataRequest* Arena::CreateMaybeMessage<::replicator_rpc::TransferVolumeDataRequest>(Arena*);
+template<> ::replicator_rpc::TransferVolumeDataResponse* Arena::CreateMaybeMessage<::replicator_rpc::TransferVolumeDataResponse>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace replicator_rpc {
 
-enum PosResult : int {
-  SUCCESS = 0,
-  FAIL = 1,
-  PosResult_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
-  PosResult_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+enum HealthCheckResponse_ServingStatus : int {
+  HealthCheckResponse_ServingStatus_UNKNOWN = 0,
+  HealthCheckResponse_ServingStatus_SERVING = 1,
+  HealthCheckResponse_ServingStatus_NOT_SERVING = 2,
+  HealthCheckResponse_ServingStatus_HealthCheckResponse_ServingStatus_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  HealthCheckResponse_ServingStatus_HealthCheckResponse_ServingStatus_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
-bool PosResult_IsValid(int value);
-constexpr PosResult PosResult_MIN = SUCCESS;
-constexpr PosResult PosResult_MAX = FAIL;
-constexpr int PosResult_ARRAYSIZE = PosResult_MAX + 1;
+bool HealthCheckResponse_ServingStatus_IsValid(int value);
+constexpr HealthCheckResponse_ServingStatus HealthCheckResponse_ServingStatus_ServingStatus_MIN = HealthCheckResponse_ServingStatus_UNKNOWN;
+constexpr HealthCheckResponse_ServingStatus HealthCheckResponse_ServingStatus_ServingStatus_MAX = HealthCheckResponse_ServingStatus_NOT_SERVING;
+constexpr int HealthCheckResponse_ServingStatus_ServingStatus_ARRAYSIZE = HealthCheckResponse_ServingStatus_ServingStatus_MAX + 1;
 
-const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* PosResult_descriptor();
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* HealthCheckResponse_ServingStatus_descriptor();
 template<typename T>
-inline const std::string& PosResult_Name(T enum_t_value) {
-  static_assert(::std::is_same<T, PosResult>::value ||
+inline const std::string& HealthCheckResponse_ServingStatus_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, HealthCheckResponse_ServingStatus>::value ||
     ::std::is_integral<T>::value,
-    "Incorrect type passed to function PosResult_Name.");
+    "Incorrect type passed to function HealthCheckResponse_ServingStatus_Name.");
   return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
-    PosResult_descriptor(), enum_t_value);
+    HealthCheckResponse_ServingStatus_descriptor(), enum_t_value);
 }
-inline bool PosResult_Parse(
-    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, PosResult* value) {
-  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<PosResult>(
-    PosResult_descriptor(), name, value);
+inline bool HealthCheckResponse_ServingStatus_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, HealthCheckResponse_ServingStatus* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<HealthCheckResponse_ServingStatus>(
+    HealthCheckResponse_ServingStatus_descriptor(), name, value);
 }
 // ===================================================================
+
+class TransferHostWriteRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferHostWriteRequest) */ {
+ public:
+  inline TransferHostWriteRequest() : TransferHostWriteRequest(nullptr) {}
+  virtual ~TransferHostWriteRequest();
+  explicit constexpr TransferHostWriteRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TransferHostWriteRequest(const TransferHostWriteRequest& from);
+  TransferHostWriteRequest(TransferHostWriteRequest&& from) noexcept
+    : TransferHostWriteRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline TransferHostWriteRequest& operator=(const TransferHostWriteRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TransferHostWriteRequest& operator=(TransferHostWriteRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const TransferHostWriteRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TransferHostWriteRequest* internal_default_instance() {
+    return reinterpret_cast<const TransferHostWriteRequest*>(
+               &_TransferHostWriteRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    0;
+
+  friend void swap(TransferHostWriteRequest& a, TransferHostWriteRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TransferHostWriteRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TransferHostWriteRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline TransferHostWriteRequest* New() const final {
+    return CreateMaybeMessage<TransferHostWriteRequest>(nullptr);
+  }
+
+  TransferHostWriteRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<TransferHostWriteRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const TransferHostWriteRequest& from);
+  void MergeFrom(const TransferHostWriteRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TransferHostWriteRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.TransferHostWriteRequest";
+  }
+  protected:
+  explicit TransferHostWriteRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 7,
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+    kLsnFieldNumber = 6,
+    kRidFieldNumber = 5,
+  };
+  // repeated .replicator_rpc.Chunk data = 7;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::replicator_rpc::Chunk* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
+      mutable_data();
+  private:
+  const ::replicator_rpc::Chunk& _internal_data(int index) const;
+  ::replicator_rpc::Chunk* _internal_add_data();
+  public:
+  const ::replicator_rpc::Chunk& data(int index) const;
+  ::replicator_rpc::Chunk* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
+      data() const;
+
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 lsn = 6;
+  void clear_lsn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
+  void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_lsn() const;
+  void _internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 rid = 5;
+  void clear_rid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 rid() const;
+  void set_rid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_rid() const;
+  void _internal_set_rid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferHostWriteRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 rid_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class TransferHostWriteResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferHostWriteResponse) */ {
+ public:
+  inline TransferHostWriteResponse() : TransferHostWriteResponse(nullptr) {}
+  virtual ~TransferHostWriteResponse();
+  explicit constexpr TransferHostWriteResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TransferHostWriteResponse(const TransferHostWriteResponse& from);
+  TransferHostWriteResponse(TransferHostWriteResponse&& from) noexcept
+    : TransferHostWriteResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline TransferHostWriteResponse& operator=(const TransferHostWriteResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TransferHostWriteResponse& operator=(TransferHostWriteResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const TransferHostWriteResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TransferHostWriteResponse* internal_default_instance() {
+    return reinterpret_cast<const TransferHostWriteResponse*>(
+               &_TransferHostWriteResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    1;
+
+  friend void swap(TransferHostWriteResponse& a, TransferHostWriteResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TransferHostWriteResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TransferHostWriteResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline TransferHostWriteResponse* New() const final {
+    return CreateMaybeMessage<TransferHostWriteResponse>(nullptr);
+  }
+
+  TransferHostWriteResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<TransferHostWriteResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const TransferHostWriteResponse& from);
+  void MergeFrom(const TransferHostWriteResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TransferHostWriteResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.TransferHostWriteResponse";
+  }
+  protected:
+  explicit TransferHostWriteResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 2,
+    kSuccessfulFieldNumber = 1,
+  };
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // bool successful = 1;
+  void clear_successful();
+  bool successful() const;
+  void set_successful(bool value);
+  private:
+  bool _internal_successful() const;
+  void _internal_set_successful(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferHostWriteResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  bool successful_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class TransferVolumeDataRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferVolumeDataRequest) */ {
+ public:
+  inline TransferVolumeDataRequest() : TransferVolumeDataRequest(nullptr) {}
+  virtual ~TransferVolumeDataRequest();
+  explicit constexpr TransferVolumeDataRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TransferVolumeDataRequest(const TransferVolumeDataRequest& from);
+  TransferVolumeDataRequest(TransferVolumeDataRequest&& from) noexcept
+    : TransferVolumeDataRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline TransferVolumeDataRequest& operator=(const TransferVolumeDataRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TransferVolumeDataRequest& operator=(TransferVolumeDataRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const TransferVolumeDataRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TransferVolumeDataRequest* internal_default_instance() {
+    return reinterpret_cast<const TransferVolumeDataRequest*>(
+               &_TransferVolumeDataRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(TransferVolumeDataRequest& a, TransferVolumeDataRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TransferVolumeDataRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TransferVolumeDataRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline TransferVolumeDataRequest* New() const final {
+    return CreateMaybeMessage<TransferVolumeDataRequest>(nullptr);
+  }
+
+  TransferVolumeDataRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<TransferVolumeDataRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const TransferVolumeDataRequest& from);
+  void MergeFrom(const TransferVolumeDataRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TransferVolumeDataRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.TransferVolumeDataRequest";
+  }
+  protected:
+  explicit TransferVolumeDataRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 7,
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+    kLsnFieldNumber = 6,
+    kIsDirtyLogFieldNumber = 5,
+  };
+  // repeated .replicator_rpc.Chunk data = 7;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::replicator_rpc::Chunk* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
+      mutable_data();
+  private:
+  const ::replicator_rpc::Chunk& _internal_data(int index) const;
+  ::replicator_rpc::Chunk* _internal_add_data();
+  public:
+  const ::replicator_rpc::Chunk& data(int index) const;
+  ::replicator_rpc::Chunk* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
+      data() const;
+
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 lsn = 6;
+  bool has_lsn() const;
+  private:
+  bool _internal_has_lsn() const;
+  public:
+  void clear_lsn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
+  void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_lsn() const;
+  void _internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // bool is_dirty_log = 5;
+  void clear_is_dirty_log();
+  bool is_dirty_log() const;
+  void set_is_dirty_log(bool value);
+  private:
+  bool _internal_is_dirty_log() const;
+  void _internal_set_is_dirty_log(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferVolumeDataRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
+  bool is_dirty_log_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
 
 class Chunk PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.Chunk) */ {
@@ -183,7 +809,7 @@ class Chunk PROTOBUF_FINAL :
                &_Chunk_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    0;
+    3;
 
   friend void swap(Chunk& a, Chunk& b) {
     a.Swap(&b);
@@ -284,6 +910,885 @@ class Chunk PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class TransferVolumeDataResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferVolumeDataResponse) */ {
+ public:
+  inline TransferVolumeDataResponse() : TransferVolumeDataResponse(nullptr) {}
+  virtual ~TransferVolumeDataResponse();
+  explicit constexpr TransferVolumeDataResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  TransferVolumeDataResponse(const TransferVolumeDataResponse& from);
+  TransferVolumeDataResponse(TransferVolumeDataResponse&& from) noexcept
+    : TransferVolumeDataResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline TransferVolumeDataResponse& operator=(const TransferVolumeDataResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline TransferVolumeDataResponse& operator=(TransferVolumeDataResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const TransferVolumeDataResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const TransferVolumeDataResponse* internal_default_instance() {
+    return reinterpret_cast<const TransferVolumeDataResponse*>(
+               &_TransferVolumeDataResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(TransferVolumeDataResponse& a, TransferVolumeDataResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(TransferVolumeDataResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(TransferVolumeDataResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline TransferVolumeDataResponse* New() const final {
+    return CreateMaybeMessage<TransferVolumeDataResponse>(nullptr);
+  }
+
+  TransferVolumeDataResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<TransferVolumeDataResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const TransferVolumeDataResponse& from);
+  void MergeFrom(const TransferVolumeDataResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(TransferVolumeDataResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.TransferVolumeDataResponse";
+  }
+  protected:
+  explicit TransferVolumeDataResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 2,
+    kSuccessfulFieldNumber = 1,
+  };
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // bool successful = 1;
+  void clear_successful();
+  bool successful() const;
+  void set_successful(bool value);
+  private:
+  bool _internal_successful() const;
+  void _internal_set_successful(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferVolumeDataResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  bool successful_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class PushHostWriteRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushHostWriteRequest) */ {
+ public:
+  inline PushHostWriteRequest() : PushHostWriteRequest(nullptr) {}
+  virtual ~PushHostWriteRequest();
+  explicit constexpr PushHostWriteRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PushHostWriteRequest(const PushHostWriteRequest& from);
+  PushHostWriteRequest(PushHostWriteRequest&& from) noexcept
+    : PushHostWriteRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline PushHostWriteRequest& operator=(const PushHostWriteRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PushHostWriteRequest& operator=(PushHostWriteRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const PushHostWriteRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PushHostWriteRequest* internal_default_instance() {
+    return reinterpret_cast<const PushHostWriteRequest*>(
+               &_PushHostWriteRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(PushHostWriteRequest& a, PushHostWriteRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PushHostWriteRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PushHostWriteRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline PushHostWriteRequest* New() const final {
+    return CreateMaybeMessage<PushHostWriteRequest>(nullptr);
+  }
+
+  PushHostWriteRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<PushHostWriteRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const PushHostWriteRequest& from);
+  void MergeFrom(const PushHostWriteRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PushHostWriteRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.PushHostWriteRequest";
+  }
+  protected:
+  explicit PushHostWriteRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kDataFieldNumber = 5,
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+  };
+  // repeated .replicator_rpc.Chunk data = 5;
+  int data_size() const;
+  private:
+  int _internal_data_size() const;
+  public:
+  void clear_data();
+  ::replicator_rpc::Chunk* mutable_data(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
+      mutable_data();
+  private:
+  const ::replicator_rpc::Chunk& _internal_data(int index) const;
+  ::replicator_rpc::Chunk* _internal_add_data();
+  public:
+  const ::replicator_rpc::Chunk& data(int index) const;
+  ::replicator_rpc::Chunk* add_data();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
+      data() const;
+
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint32 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.PushHostWriteRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk > data_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 num_blocks_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class PushHostWriteResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushHostWriteResponse) */ {
+ public:
+  inline PushHostWriteResponse() : PushHostWriteResponse(nullptr) {}
+  virtual ~PushHostWriteResponse();
+  explicit constexpr PushHostWriteResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PushHostWriteResponse(const PushHostWriteResponse& from);
+  PushHostWriteResponse(PushHostWriteResponse&& from) noexcept
+    : PushHostWriteResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline PushHostWriteResponse& operator=(const PushHostWriteResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PushHostWriteResponse& operator=(PushHostWriteResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const PushHostWriteResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PushHostWriteResponse* internal_default_instance() {
+    return reinterpret_cast<const PushHostWriteResponse*>(
+               &_PushHostWriteResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(PushHostWriteResponse& a, PushHostWriteResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PushHostWriteResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PushHostWriteResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline PushHostWriteResponse* New() const final {
+    return CreateMaybeMessage<PushHostWriteResponse>(nullptr);
+  }
+
+  PushHostWriteResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<PushHostWriteResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const PushHostWriteResponse& from);
+  void MergeFrom(const PushHostWriteResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PushHostWriteResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.PushHostWriteResponse";
+  }
+  protected:
+  explicit PushHostWriteResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 3,
+    kLsnFieldNumber = 2,
+    kSuccessfulFieldNumber = 1,
+  };
+  // string reason = 3;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // uint64 lsn = 2;
+  void clear_lsn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
+  void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_lsn() const;
+  void _internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // bool successful = 1;
+  void clear_successful();
+  bool successful() const;
+  void set_successful(bool value);
+  private:
+  bool _internal_successful() const;
+  void _internal_set_successful(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.PushHostWriteResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
+  bool successful_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class PushDirtyLogRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushDirtyLogRequest) */ {
+ public:
+  inline PushDirtyLogRequest() : PushDirtyLogRequest(nullptr) {}
+  virtual ~PushDirtyLogRequest();
+  explicit constexpr PushDirtyLogRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PushDirtyLogRequest(const PushDirtyLogRequest& from);
+  PushDirtyLogRequest(PushDirtyLogRequest&& from) noexcept
+    : PushDirtyLogRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline PushDirtyLogRequest& operator=(const PushDirtyLogRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PushDirtyLogRequest& operator=(PushDirtyLogRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const PushDirtyLogRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PushDirtyLogRequest* internal_default_instance() {
+    return reinterpret_cast<const PushDirtyLogRequest*>(
+               &_PushDirtyLogRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(PushDirtyLogRequest& a, PushDirtyLogRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PushDirtyLogRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PushDirtyLogRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline PushDirtyLogRequest* New() const final {
+    return CreateMaybeMessage<PushDirtyLogRequest>(nullptr);
+  }
+
+  PushDirtyLogRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<PushDirtyLogRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const PushDirtyLogRequest& from);
+  void MergeFrom(const PushDirtyLogRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PushDirtyLogRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.PushDirtyLogRequest";
+  }
+  protected:
+  explicit PushDirtyLogRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+  };
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint32 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.PushDirtyLogRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 num_blocks_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class PushDirtyLogResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushDirtyLogResponse) */ {
+ public:
+  inline PushDirtyLogResponse() : PushDirtyLogResponse(nullptr) {}
+  virtual ~PushDirtyLogResponse();
+  explicit constexpr PushDirtyLogResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  PushDirtyLogResponse(const PushDirtyLogResponse& from);
+  PushDirtyLogResponse(PushDirtyLogResponse&& from) noexcept
+    : PushDirtyLogResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline PushDirtyLogResponse& operator=(const PushDirtyLogResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline PushDirtyLogResponse& operator=(PushDirtyLogResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const PushDirtyLogResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const PushDirtyLogResponse* internal_default_instance() {
+    return reinterpret_cast<const PushDirtyLogResponse*>(
+               &_PushDirtyLogResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(PushDirtyLogResponse& a, PushDirtyLogResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(PushDirtyLogResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(PushDirtyLogResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline PushDirtyLogResponse* New() const final {
+    return CreateMaybeMessage<PushDirtyLogResponse>(nullptr);
+  }
+
+  PushDirtyLogResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<PushDirtyLogResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const PushDirtyLogResponse& from);
+  void MergeFrom(const PushDirtyLogResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(PushDirtyLogResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "replicator_rpc.PushDirtyLogResponse";
+  }
+  protected:
+  explicit PushDirtyLogResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 2,
+    kSuccessfulFieldNumber = 1,
+  };
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // bool successful = 1;
+  void clear_successful();
+  bool successful() const;
+  void set_successful(bool value);
+  private:
+  bool _internal_successful() const;
+  void _internal_set_successful(bool value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:replicator_rpc.PushDirtyLogResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  bool successful_;
+  friend struct ::TableStruct_replicator_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CompleteReadRequest PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.CompleteReadRequest) */ {
  public:
@@ -327,7 +1832,7 @@ class CompleteReadRequest PROTOBUF_FINAL :
                &_CompleteReadRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    1;
+    9;
 
   friend void swap(CompleteReadRequest& a, CompleteReadRequest& b) {
     a.Swap(&b);
@@ -531,7 +2036,7 @@ class CompleteReadResponse PROTOBUF_FINAL :
                &_CompleteReadResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    2;
+    10;
 
   friend void swap(CompleteReadResponse& a, CompleteReadResponse& b) {
     a.Swap(&b);
@@ -602,7 +2107,7 @@ class CompleteReadResponse PROTOBUF_FINAL :
 
   enum : int {
     kReasonFieldNumber = 2,
-    kResultFieldNumber = 1,
+    kSuccessfulFieldNumber = 1,
   };
   // string reason = 2;
   bool has_reason() const;
@@ -624,13 +2129,13 @@ class CompleteReadResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // .replicator_rpc.PosResult result = 1;
-  void clear_result();
-  ::replicator_rpc::PosResult result() const;
-  void set_result(::replicator_rpc::PosResult value);
+  // bool successful = 1;
+  void clear_successful();
+  bool successful() const;
+  void set_successful(bool value);
   private:
-  ::replicator_rpc::PosResult _internal_result() const;
-  void _internal_set_result(::replicator_rpc::PosResult value);
+  bool _internal_successful() const;
+  void _internal_set_successful(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:replicator_rpc.CompleteReadResponse)
@@ -643,7 +2148,7 @@ class CompleteReadResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
-  int result_;
+  bool successful_;
   friend struct ::TableStruct_replicator_5frpc_2eproto;
 };
 // -------------------------------------------------------------------
@@ -691,7 +2196,7 @@ class CompleteWriteRequest PROTOBUF_FINAL :
                &_CompleteWriteRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    3;
+    11;
 
   friend void swap(CompleteWriteRequest& a, CompleteWriteRequest& b) {
     a.Swap(&b);
@@ -763,7 +2268,9 @@ class CompleteWriteRequest PROTOBUF_FINAL :
   enum : int {
     kArrayNameFieldNumber = 1,
     kVolumeNameFieldNumber = 2,
-    kLsnFieldNumber = 3,
+    kRbaFieldNumber = 3,
+    kNumBlocksFieldNumber = 4,
+    kLsnFieldNumber = 5,
   };
   // string array_name = 1;
   void clear_array_name();
@@ -797,7 +2304,29 @@ class CompleteWriteRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_volume_name();
   public:
 
-  // uint64 lsn = 3;
+  // uint64 rba = 3;
+  void clear_rba();
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
+  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
+  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 num_blocks = 4;
+  void clear_num_blocks();
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
+  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
+  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 lsn = 5;
+  bool has_lsn() const;
+  private:
+  bool _internal_has_lsn() const;
+  public:
   void clear_lsn();
   ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
   void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
@@ -813,10 +2342,13 @@ class CompleteWriteRequest PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
   ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_replicator_5frpc_2eproto;
 };
 // -------------------------------------------------------------------
@@ -864,7 +2396,7 @@ class CompleteWriteResponse PROTOBUF_FINAL :
                &_CompleteWriteResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    4;
+    12;
 
   friend void swap(CompleteWriteResponse& a, CompleteWriteResponse& b) {
     a.Swap(&b);
@@ -935,7 +2467,7 @@ class CompleteWriteResponse PROTOBUF_FINAL :
 
   enum : int {
     kReasonFieldNumber = 2,
-    kResultFieldNumber = 1,
+    kSuccessfulFieldNumber = 1,
   };
   // string reason = 2;
   bool has_reason() const;
@@ -957,13 +2489,13 @@ class CompleteWriteResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // .replicator_rpc.PosResult result = 1;
-  void clear_result();
-  ::replicator_rpc::PosResult result() const;
-  void set_result(::replicator_rpc::PosResult value);
+  // bool successful = 1;
+  void clear_successful();
+  bool successful() const;
+  void set_successful(bool value);
   private:
-  ::replicator_rpc::PosResult _internal_result() const;
-  void _internal_set_result(::replicator_rpc::PosResult value);
+  bool _internal_successful() const;
+  void _internal_set_successful(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:replicator_rpc.CompleteWriteResponse)
@@ -976,748 +2508,29 @@ class CompleteWriteResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
-  int result_;
-  friend struct ::TableStruct_replicator_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class PushHostWriteRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushHostWriteRequest) */ {
- public:
-  inline PushHostWriteRequest() : PushHostWriteRequest(nullptr) {}
-  virtual ~PushHostWriteRequest();
-  explicit constexpr PushHostWriteRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  PushHostWriteRequest(const PushHostWriteRequest& from);
-  PushHostWriteRequest(PushHostWriteRequest&& from) noexcept
-    : PushHostWriteRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline PushHostWriteRequest& operator=(const PushHostWriteRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline PushHostWriteRequest& operator=(PushHostWriteRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const PushHostWriteRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const PushHostWriteRequest* internal_default_instance() {
-    return reinterpret_cast<const PushHostWriteRequest*>(
-               &_PushHostWriteRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    5;
-
-  friend void swap(PushHostWriteRequest& a, PushHostWriteRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(PushHostWriteRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(PushHostWriteRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline PushHostWriteRequest* New() const final {
-    return CreateMaybeMessage<PushHostWriteRequest>(nullptr);
-  }
-
-  PushHostWriteRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<PushHostWriteRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const PushHostWriteRequest& from);
-  void MergeFrom(const PushHostWriteRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(PushHostWriteRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.PushHostWriteRequest";
-  }
-  protected:
-  explicit PushHostWriteRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kDataFieldNumber = 5,
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-    kRbaFieldNumber = 3,
-    kNumBlocksFieldNumber = 4,
-  };
-  // repeated .replicator_rpc.Chunk data = 5;
-  int data_size() const;
-  private:
-  int _internal_data_size() const;
-  public:
-  void clear_data();
-  ::replicator_rpc::Chunk* mutable_data(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
-      mutable_data();
-  private:
-  const ::replicator_rpc::Chunk& _internal_data(int index) const;
-  ::replicator_rpc::Chunk* _internal_add_data();
-  public:
-  const ::replicator_rpc::Chunk& data(int index) const;
-  ::replicator_rpc::Chunk* add_data();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
-      data() const;
-
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // uint64 rba = 3;
-  void clear_rba();
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
-  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
-  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 num_blocks = 4;
-  void clear_num_blocks();
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
-  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
-  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.PushHostWriteRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk > data_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_replicator_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class PushHostWriteResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushHostWriteResponse) */ {
- public:
-  inline PushHostWriteResponse() : PushHostWriteResponse(nullptr) {}
-  virtual ~PushHostWriteResponse();
-  explicit constexpr PushHostWriteResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  PushHostWriteResponse(const PushHostWriteResponse& from);
-  PushHostWriteResponse(PushHostWriteResponse&& from) noexcept
-    : PushHostWriteResponse() {
-    *this = ::std::move(from);
-  }
-
-  inline PushHostWriteResponse& operator=(const PushHostWriteResponse& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline PushHostWriteResponse& operator=(PushHostWriteResponse&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const PushHostWriteResponse& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const PushHostWriteResponse* internal_default_instance() {
-    return reinterpret_cast<const PushHostWriteResponse*>(
-               &_PushHostWriteResponse_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    6;
-
-  friend void swap(PushHostWriteResponse& a, PushHostWriteResponse& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(PushHostWriteResponse* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(PushHostWriteResponse* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline PushHostWriteResponse* New() const final {
-    return CreateMaybeMessage<PushHostWriteResponse>(nullptr);
-  }
-
-  PushHostWriteResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<PushHostWriteResponse>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const PushHostWriteResponse& from);
-  void MergeFrom(const PushHostWriteResponse& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(PushHostWriteResponse* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.PushHostWriteResponse";
-  }
-  protected:
-  explicit PushHostWriteResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kReasonFieldNumber = 2,
-    kLsnFieldNumber = 3,
-    kResultFieldNumber = 1,
-  };
-  // string reason = 2;
-  bool has_reason() const;
-  private:
-  bool _internal_has_reason() const;
-  public:
-  void clear_reason();
-  const std::string& reason() const;
-  void set_reason(const std::string& value);
-  void set_reason(std::string&& value);
-  void set_reason(const char* value);
-  void set_reason(const char* value, size_t size);
-  std::string* mutable_reason();
-  std::string* release_reason();
-  void set_allocated_reason(std::string* reason);
-  private:
-  const std::string& _internal_reason() const;
-  void _internal_set_reason(const std::string& value);
-  std::string* _internal_mutable_reason();
-  public:
-
-  // uint64 lsn = 3;
-  void clear_lsn();
-  ::PROTOBUF_NAMESPACE_ID::uint64 lsn() const;
-  void set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_lsn() const;
-  void _internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // .replicator_rpc.PosResult result = 1;
-  void clear_result();
-  ::replicator_rpc::PosResult result() const;
-  void set_result(::replicator_rpc::PosResult value);
-  private:
-  ::replicator_rpc::PosResult _internal_result() const;
-  void _internal_set_result(::replicator_rpc::PosResult value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.PushHostWriteResponse)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 lsn_;
-  int result_;
-  friend struct ::TableStruct_replicator_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class PushDirtyLogRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushDirtyLogRequest) */ {
- public:
-  inline PushDirtyLogRequest() : PushDirtyLogRequest(nullptr) {}
-  virtual ~PushDirtyLogRequest();
-  explicit constexpr PushDirtyLogRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  PushDirtyLogRequest(const PushDirtyLogRequest& from);
-  PushDirtyLogRequest(PushDirtyLogRequest&& from) noexcept
-    : PushDirtyLogRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline PushDirtyLogRequest& operator=(const PushDirtyLogRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline PushDirtyLogRequest& operator=(PushDirtyLogRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const PushDirtyLogRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const PushDirtyLogRequest* internal_default_instance() {
-    return reinterpret_cast<const PushDirtyLogRequest*>(
-               &_PushDirtyLogRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    7;
-
-  friend void swap(PushDirtyLogRequest& a, PushDirtyLogRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(PushDirtyLogRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(PushDirtyLogRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline PushDirtyLogRequest* New() const final {
-    return CreateMaybeMessage<PushDirtyLogRequest>(nullptr);
-  }
-
-  PushDirtyLogRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<PushDirtyLogRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const PushDirtyLogRequest& from);
-  void MergeFrom(const PushDirtyLogRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(PushDirtyLogRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.PushDirtyLogRequest";
-  }
-  protected:
-  explicit PushDirtyLogRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-    kRbaFieldNumber = 3,
-    kNumBlocksFieldNumber = 4,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // uint64 rba = 3;
-  void clear_rba();
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
-  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
-  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 num_blocks = 4;
-  void clear_num_blocks();
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
-  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
-  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.PushDirtyLogRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_replicator_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class PushDirtyLogResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.PushDirtyLogResponse) */ {
- public:
-  inline PushDirtyLogResponse() : PushDirtyLogResponse(nullptr) {}
-  virtual ~PushDirtyLogResponse();
-  explicit constexpr PushDirtyLogResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  PushDirtyLogResponse(const PushDirtyLogResponse& from);
-  PushDirtyLogResponse(PushDirtyLogResponse&& from) noexcept
-    : PushDirtyLogResponse() {
-    *this = ::std::move(from);
-  }
-
-  inline PushDirtyLogResponse& operator=(const PushDirtyLogResponse& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline PushDirtyLogResponse& operator=(PushDirtyLogResponse&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const PushDirtyLogResponse& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const PushDirtyLogResponse* internal_default_instance() {
-    return reinterpret_cast<const PushDirtyLogResponse*>(
-               &_PushDirtyLogResponse_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    8;
-
-  friend void swap(PushDirtyLogResponse& a, PushDirtyLogResponse& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(PushDirtyLogResponse* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(PushDirtyLogResponse* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline PushDirtyLogResponse* New() const final {
-    return CreateMaybeMessage<PushDirtyLogResponse>(nullptr);
-  }
-
-  PushDirtyLogResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<PushDirtyLogResponse>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const PushDirtyLogResponse& from);
-  void MergeFrom(const PushDirtyLogResponse& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(PushDirtyLogResponse* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.PushDirtyLogResponse";
-  }
-  protected:
-  explicit PushDirtyLogResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kReasonFieldNumber = 2,
-    kSuccessfulFieldNumber = 1,
-  };
-  // string reason = 2;
-  bool has_reason() const;
-  private:
-  bool _internal_has_reason() const;
-  public:
-  void clear_reason();
-  const std::string& reason() const;
-  void set_reason(const std::string& value);
-  void set_reason(std::string&& value);
-  void set_reason(const char* value);
-  void set_reason(const char* value, size_t size);
-  std::string* mutable_reason();
-  std::string* release_reason();
-  void set_allocated_reason(std::string* reason);
-  private:
-  const std::string& _internal_reason() const;
-  void _internal_set_reason(const std::string& value);
-  std::string* _internal_mutable_reason();
-  public:
-
-  // bool successful = 1;
-  void clear_successful();
-  bool successful() const;
-  void set_successful(bool value);
-  private:
-  bool _internal_successful() const;
-  void _internal_set_successful(bool value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.PushDirtyLogResponse)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
   bool successful_;
   friend struct ::TableStruct_replicator_5frpc_2eproto;
 };
 // -------------------------------------------------------------------
 
-class TransferDirtyLogRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferDirtyLogRequest) */ {
+class HealthCheckRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.HealthCheckRequest) */ {
  public:
-  inline TransferDirtyLogRequest() : TransferDirtyLogRequest(nullptr) {}
-  virtual ~TransferDirtyLogRequest();
-  explicit constexpr TransferDirtyLogRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline HealthCheckRequest() : HealthCheckRequest(nullptr) {}
+  virtual ~HealthCheckRequest();
+  explicit constexpr HealthCheckRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  TransferDirtyLogRequest(const TransferDirtyLogRequest& from);
-  TransferDirtyLogRequest(TransferDirtyLogRequest&& from) noexcept
-    : TransferDirtyLogRequest() {
+  HealthCheckRequest(const HealthCheckRequest& from);
+  HealthCheckRequest(HealthCheckRequest&& from) noexcept
+    : HealthCheckRequest() {
     *this = ::std::move(from);
   }
 
-  inline TransferDirtyLogRequest& operator=(const TransferDirtyLogRequest& from) {
+  inline HealthCheckRequest& operator=(const HealthCheckRequest& from) {
     CopyFrom(from);
     return *this;
   }
-  inline TransferDirtyLogRequest& operator=(TransferDirtyLogRequest&& from) noexcept {
+  inline HealthCheckRequest& operator=(HealthCheckRequest&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1735,20 +2548,20 @@ class TransferDirtyLogRequest PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const TransferDirtyLogRequest& default_instance() {
+  static const HealthCheckRequest& default_instance() {
     return *internal_default_instance();
   }
-  static inline const TransferDirtyLogRequest* internal_default_instance() {
-    return reinterpret_cast<const TransferDirtyLogRequest*>(
-               &_TransferDirtyLogRequest_default_instance_);
+  static inline const HealthCheckRequest* internal_default_instance() {
+    return reinterpret_cast<const HealthCheckRequest*>(
+               &_HealthCheckRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    9;
+    13;
 
-  friend void swap(TransferDirtyLogRequest& a, TransferDirtyLogRequest& b) {
+  friend void swap(HealthCheckRequest& a, HealthCheckRequest& b) {
     a.Swap(&b);
   }
-  inline void Swap(TransferDirtyLogRequest* other) {
+  inline void Swap(HealthCheckRequest* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1756,7 +2569,7 @@ class TransferDirtyLogRequest PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(TransferDirtyLogRequest* other) {
+  void UnsafeArenaSwap(HealthCheckRequest* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1764,17 +2577,17 @@ class TransferDirtyLogRequest PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline TransferDirtyLogRequest* New() const final {
-    return CreateMaybeMessage<TransferDirtyLogRequest>(nullptr);
+  inline HealthCheckRequest* New() const final {
+    return CreateMaybeMessage<HealthCheckRequest>(nullptr);
   }
 
-  TransferDirtyLogRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<TransferDirtyLogRequest>(arena);
+  HealthCheckRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<HealthCheckRequest>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const TransferDirtyLogRequest& from);
-  void MergeFrom(const TransferDirtyLogRequest& from);
+  void CopyFrom(const HealthCheckRequest& from);
+  void MergeFrom(const HealthCheckRequest& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1788,13 +2601,13 @@ class TransferDirtyLogRequest PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(TransferDirtyLogRequest* other);
+  void InternalSwap(HealthCheckRequest* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.TransferDirtyLogRequest";
+    return "replicator_rpc.HealthCheckRequest";
   }
   protected:
-  explicit TransferDirtyLogRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit HealthCheckRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1812,96 +2625,36 @@ class TransferDirtyLogRequest PROTOBUF_FINAL :
 
   // accessors -------------------------------------------------------
 
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-    kRbaFieldNumber = 3,
-    kNumBlocksFieldNumber = 4,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // uint64 rba = 3;
-  void clear_rba();
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
-  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
-  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 num_blocks = 4;
-  void clear_num_blocks();
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
-  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
-  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferDirtyLogRequest)
+  // @@protoc_insertion_point(class_scope:replicator_rpc.HealthCheckRequest)
  private:
   class _Internal;
 
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_replicator_5frpc_2eproto;
 };
 // -------------------------------------------------------------------
 
-class TransferDirtyLogResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferDirtyLogResponse) */ {
+class HealthCheckResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.HealthCheckResponse) */ {
  public:
-  inline TransferDirtyLogResponse() : TransferDirtyLogResponse(nullptr) {}
-  virtual ~TransferDirtyLogResponse();
-  explicit constexpr TransferDirtyLogResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+  inline HealthCheckResponse() : HealthCheckResponse(nullptr) {}
+  virtual ~HealthCheckResponse();
+  explicit constexpr HealthCheckResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
 
-  TransferDirtyLogResponse(const TransferDirtyLogResponse& from);
-  TransferDirtyLogResponse(TransferDirtyLogResponse&& from) noexcept
-    : TransferDirtyLogResponse() {
+  HealthCheckResponse(const HealthCheckResponse& from);
+  HealthCheckResponse(HealthCheckResponse&& from) noexcept
+    : HealthCheckResponse() {
     *this = ::std::move(from);
   }
 
-  inline TransferDirtyLogResponse& operator=(const TransferDirtyLogResponse& from) {
+  inline HealthCheckResponse& operator=(const HealthCheckResponse& from) {
     CopyFrom(from);
     return *this;
   }
-  inline TransferDirtyLogResponse& operator=(TransferDirtyLogResponse&& from) noexcept {
+  inline HealthCheckResponse& operator=(HealthCheckResponse&& from) noexcept {
     if (GetArena() == from.GetArena()) {
       if (this != &from) InternalSwap(&from);
     } else {
@@ -1919,20 +2672,20 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
   static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
     return GetMetadataStatic().reflection;
   }
-  static const TransferDirtyLogResponse& default_instance() {
+  static const HealthCheckResponse& default_instance() {
     return *internal_default_instance();
   }
-  static inline const TransferDirtyLogResponse* internal_default_instance() {
-    return reinterpret_cast<const TransferDirtyLogResponse*>(
-               &_TransferDirtyLogResponse_default_instance_);
+  static inline const HealthCheckResponse* internal_default_instance() {
+    return reinterpret_cast<const HealthCheckResponse*>(
+               &_HealthCheckResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    10;
+    14;
 
-  friend void swap(TransferDirtyLogResponse& a, TransferDirtyLogResponse& b) {
+  friend void swap(HealthCheckResponse& a, HealthCheckResponse& b) {
     a.Swap(&b);
   }
-  inline void Swap(TransferDirtyLogResponse* other) {
+  inline void Swap(HealthCheckResponse* other) {
     if (other == this) return;
     if (GetArena() == other->GetArena()) {
       InternalSwap(other);
@@ -1940,7 +2693,7 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
       ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(TransferDirtyLogResponse* other) {
+  void UnsafeArenaSwap(HealthCheckResponse* other) {
     if (other == this) return;
     GOOGLE_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -1948,17 +2701,17 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
 
   // implements Message ----------------------------------------------
 
-  inline TransferDirtyLogResponse* New() const final {
-    return CreateMaybeMessage<TransferDirtyLogResponse>(nullptr);
+  inline HealthCheckResponse* New() const final {
+    return CreateMaybeMessage<HealthCheckResponse>(nullptr);
   }
 
-  TransferDirtyLogResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<TransferDirtyLogResponse>(arena);
+  HealthCheckResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<HealthCheckResponse>(arena);
   }
   void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
   void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const TransferDirtyLogResponse& from);
-  void MergeFrom(const TransferDirtyLogResponse& from);
+  void CopyFrom(const HealthCheckResponse& from);
+  void MergeFrom(const HealthCheckResponse& from);
   PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
   bool IsInitialized() const final;
 
@@ -1972,13 +2725,13 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
   inline void SharedCtor();
   inline void SharedDtor();
   void SetCachedSize(int size) const final;
-  void InternalSwap(TransferDirtyLogResponse* other);
+  void InternalSwap(HealthCheckResponse* other);
   friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
   static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.TransferDirtyLogResponse";
+    return "replicator_rpc.HealthCheckResponse";
   }
   protected:
-  explicit TransferDirtyLogResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  explicit HealthCheckResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
   private:
   static void ArenaDtor(void* object);
   inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
@@ -1994,11 +2747,43 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+  typedef HealthCheckResponse_ServingStatus ServingStatus;
+  static constexpr ServingStatus UNKNOWN =
+    HealthCheckResponse_ServingStatus_UNKNOWN;
+  static constexpr ServingStatus SERVING =
+    HealthCheckResponse_ServingStatus_SERVING;
+  static constexpr ServingStatus NOT_SERVING =
+    HealthCheckResponse_ServingStatus_NOT_SERVING;
+  static inline bool ServingStatus_IsValid(int value) {
+    return HealthCheckResponse_ServingStatus_IsValid(value);
+  }
+  static constexpr ServingStatus ServingStatus_MIN =
+    HealthCheckResponse_ServingStatus_ServingStatus_MIN;
+  static constexpr ServingStatus ServingStatus_MAX =
+    HealthCheckResponse_ServingStatus_ServingStatus_MAX;
+  static constexpr int ServingStatus_ARRAYSIZE =
+    HealthCheckResponse_ServingStatus_ServingStatus_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  ServingStatus_descriptor() {
+    return HealthCheckResponse_ServingStatus_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& ServingStatus_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, ServingStatus>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function ServingStatus_Name.");
+    return HealthCheckResponse_ServingStatus_Name(enum_t_value);
+  }
+  static inline bool ServingStatus_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
+      ServingStatus* value) {
+    return HealthCheckResponse_ServingStatus_Parse(name, value);
+  }
+
   // accessors -------------------------------------------------------
 
   enum : int {
     kReasonFieldNumber = 2,
-    kSuccessfulFieldNumber = 1,
+    kStatusFieldNumber = 1,
   };
   // string reason = 2;
   bool has_reason() const;
@@ -2020,16 +2805,16 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
   std::string* _internal_mutable_reason();
   public:
 
-  // bool successful = 1;
-  void clear_successful();
-  bool successful() const;
-  void set_successful(bool value);
+  // .replicator_rpc.HealthCheckResponse.ServingStatus status = 1;
+  void clear_status();
+  ::replicator_rpc::HealthCheckResponse_ServingStatus status() const;
+  void set_status(::replicator_rpc::HealthCheckResponse_ServingStatus value);
   private:
-  bool _internal_successful() const;
-  void _internal_set_successful(bool value);
+  ::replicator_rpc::HealthCheckResponse_ServingStatus _internal_status() const;
+  void _internal_set_status(::replicator_rpc::HealthCheckResponse_ServingStatus value);
   public:
 
-  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferDirtyLogResponse)
+  // @@protoc_insertion_point(class_scope:replicator_rpc.HealthCheckResponse)
  private:
   class _Internal;
 
@@ -2039,351 +2824,7 @@ class TransferDirtyLogResponse PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
-  bool successful_;
-  friend struct ::TableStruct_replicator_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class TransferHostWriteRequest PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferHostWriteRequest) */ {
- public:
-  inline TransferHostWriteRequest() : TransferHostWriteRequest(nullptr) {}
-  virtual ~TransferHostWriteRequest();
-  explicit constexpr TransferHostWriteRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  TransferHostWriteRequest(const TransferHostWriteRequest& from);
-  TransferHostWriteRequest(TransferHostWriteRequest&& from) noexcept
-    : TransferHostWriteRequest() {
-    *this = ::std::move(from);
-  }
-
-  inline TransferHostWriteRequest& operator=(const TransferHostWriteRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline TransferHostWriteRequest& operator=(TransferHostWriteRequest&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const TransferHostWriteRequest& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const TransferHostWriteRequest* internal_default_instance() {
-    return reinterpret_cast<const TransferHostWriteRequest*>(
-               &_TransferHostWriteRequest_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    11;
-
-  friend void swap(TransferHostWriteRequest& a, TransferHostWriteRequest& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(TransferHostWriteRequest* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(TransferHostWriteRequest* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline TransferHostWriteRequest* New() const final {
-    return CreateMaybeMessage<TransferHostWriteRequest>(nullptr);
-  }
-
-  TransferHostWriteRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<TransferHostWriteRequest>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const TransferHostWriteRequest& from);
-  void MergeFrom(const TransferHostWriteRequest& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(TransferHostWriteRequest* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.TransferHostWriteRequest";
-  }
-  protected:
-  explicit TransferHostWriteRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kArrayNameFieldNumber = 1,
-    kVolumeNameFieldNumber = 2,
-    kRbaFieldNumber = 3,
-    kNumBlocksFieldNumber = 4,
-  };
-  // string array_name = 1;
-  void clear_array_name();
-  const std::string& array_name() const;
-  void set_array_name(const std::string& value);
-  void set_array_name(std::string&& value);
-  void set_array_name(const char* value);
-  void set_array_name(const char* value, size_t size);
-  std::string* mutable_array_name();
-  std::string* release_array_name();
-  void set_allocated_array_name(std::string* array_name);
-  private:
-  const std::string& _internal_array_name() const;
-  void _internal_set_array_name(const std::string& value);
-  std::string* _internal_mutable_array_name();
-  public:
-
-  // string volume_name = 2;
-  void clear_volume_name();
-  const std::string& volume_name() const;
-  void set_volume_name(const std::string& value);
-  void set_volume_name(std::string&& value);
-  void set_volume_name(const char* value);
-  void set_volume_name(const char* value, size_t size);
-  std::string* mutable_volume_name();
-  std::string* release_volume_name();
-  void set_allocated_volume_name(std::string* volume_name);
-  private:
-  const std::string& _internal_volume_name() const;
-  void _internal_set_volume_name(const std::string& value);
-  std::string* _internal_mutable_volume_name();
-  public:
-
-  // uint64 rba = 3;
-  void clear_rba();
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba() const;
-  void set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_rba() const;
-  void _internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // uint64 num_blocks = 4;
-  void clear_num_blocks();
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks() const;
-  void set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  private:
-  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_num_blocks() const;
-  void _internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferHostWriteRequest)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 rba_;
-  ::PROTOBUF_NAMESPACE_ID::uint64 num_blocks_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  friend struct ::TableStruct_replicator_5frpc_2eproto;
-};
-// -------------------------------------------------------------------
-
-class TransferHostWriteResponse PROTOBUF_FINAL :
-    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:replicator_rpc.TransferHostWriteResponse) */ {
- public:
-  inline TransferHostWriteResponse() : TransferHostWriteResponse(nullptr) {}
-  virtual ~TransferHostWriteResponse();
-  explicit constexpr TransferHostWriteResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
-
-  TransferHostWriteResponse(const TransferHostWriteResponse& from);
-  TransferHostWriteResponse(TransferHostWriteResponse&& from) noexcept
-    : TransferHostWriteResponse() {
-    *this = ::std::move(from);
-  }
-
-  inline TransferHostWriteResponse& operator=(const TransferHostWriteResponse& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline TransferHostWriteResponse& operator=(TransferHostWriteResponse&& from) noexcept {
-    if (GetArena() == from.GetArena()) {
-      if (this != &from) InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
-    return GetMetadataStatic().descriptor;
-  }
-  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
-    return GetMetadataStatic().reflection;
-  }
-  static const TransferHostWriteResponse& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const TransferHostWriteResponse* internal_default_instance() {
-    return reinterpret_cast<const TransferHostWriteResponse*>(
-               &_TransferHostWriteResponse_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages =
-    12;
-
-  friend void swap(TransferHostWriteResponse& a, TransferHostWriteResponse& b) {
-    a.Swap(&b);
-  }
-  inline void Swap(TransferHostWriteResponse* other) {
-    if (other == this) return;
-    if (GetArena() == other->GetArena()) {
-      InternalSwap(other);
-    } else {
-      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(TransferHostWriteResponse* other) {
-    if (other == this) return;
-    GOOGLE_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  inline TransferHostWriteResponse* New() const final {
-    return CreateMaybeMessage<TransferHostWriteResponse>(nullptr);
-  }
-
-  TransferHostWriteResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
-    return CreateMaybeMessage<TransferHostWriteResponse>(arena);
-  }
-  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
-  void CopyFrom(const TransferHostWriteResponse& from);
-  void MergeFrom(const TransferHostWriteResponse& from);
-  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
-  bool IsInitialized() const final;
-
-  size_t ByteSizeLong() const final;
-  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
-  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
-      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const final { return _cached_size_.Get(); }
-
-  private:
-  inline void SharedCtor();
-  inline void SharedDtor();
-  void SetCachedSize(int size) const final;
-  void InternalSwap(TransferHostWriteResponse* other);
-  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
-  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
-    return "replicator_rpc.TransferHostWriteResponse";
-  }
-  protected:
-  explicit TransferHostWriteResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  private:
-  static void ArenaDtor(void* object);
-  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
-  public:
-
-  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
-  private:
-  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
-    return ::descriptor_table_replicator_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
-  }
-
-  public:
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  enum : int {
-    kReasonFieldNumber = 2,
-    kSuccessfulFieldNumber = 1,
-  };
-  // string reason = 2;
-  bool has_reason() const;
-  private:
-  bool _internal_has_reason() const;
-  public:
-  void clear_reason();
-  const std::string& reason() const;
-  void set_reason(const std::string& value);
-  void set_reason(std::string&& value);
-  void set_reason(const char* value);
-  void set_reason(const char* value, size_t size);
-  std::string* mutable_reason();
-  std::string* release_reason();
-  void set_allocated_reason(std::string* reason);
-  private:
-  const std::string& _internal_reason() const;
-  void _internal_set_reason(const std::string& value);
-  std::string* _internal_mutable_reason();
-  public:
-
-  // bool successful = 1;
-  void clear_successful();
-  bool successful() const;
-  void set_successful(bool value);
-  private:
-  bool _internal_successful() const;
-  void _internal_set_successful(bool value);
-  public:
-
-  // @@protoc_insertion_point(class_scope:replicator_rpc.TransferHostWriteResponse)
- private:
-  class _Internal;
-
-  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
-  typedef void InternalArenaConstructable_;
-  typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
-  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
-  bool successful_;
+  int status_;
   friend struct ::TableStruct_replicator_5frpc_2eproto;
 };
 // ===================================================================
@@ -2395,6 +2836,601 @@ class TransferHostWriteResponse PROTOBUF_FINAL :
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif  // __GNUC__
+// TransferHostWriteRequest
+
+// string array_name = 1;
+inline void TransferHostWriteRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& TransferHostWriteRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.array_name)
+  return _internal_array_name();
+}
+inline void TransferHostWriteRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.array_name)
+}
+inline std::string* TransferHostWriteRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& TransferHostWriteRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void TransferHostWriteRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TransferHostWriteRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferHostWriteRequest.array_name)
+}
+inline void TransferHostWriteRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferHostWriteRequest.array_name)
+}
+inline void TransferHostWriteRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferHostWriteRequest.array_name)
+}
+inline std::string* TransferHostWriteRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TransferHostWriteRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.TransferHostWriteRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TransferHostWriteRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferHostWriteRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void TransferHostWriteRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& TransferHostWriteRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void TransferHostWriteRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.volume_name)
+}
+inline std::string* TransferHostWriteRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& TransferHostWriteRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void TransferHostWriteRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TransferHostWriteRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferHostWriteRequest.volume_name)
+}
+inline void TransferHostWriteRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferHostWriteRequest.volume_name)
+}
+inline void TransferHostWriteRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferHostWriteRequest.volume_name)
+}
+inline std::string* TransferHostWriteRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TransferHostWriteRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.TransferHostWriteRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TransferHostWriteRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferHostWriteRequest.volume_name)
+}
+
+// uint64 rba = 3;
+inline void TransferHostWriteRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::rba() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.rba)
+  return _internal_rba();
+}
+inline void TransferHostWriteRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void TransferHostWriteRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.rba)
+}
+
+// uint64 num_blocks = 4;
+inline void TransferHostWriteRequest::clear_num_blocks() {
+  num_blocks_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void TransferHostWriteRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  num_blocks_ = value;
+}
+inline void TransferHostWriteRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.num_blocks)
+}
+
+// uint32 rid = 5;
+inline void TransferHostWriteRequest::clear_rid() {
+  rid_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 TransferHostWriteRequest::_internal_rid() const {
+  return rid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 TransferHostWriteRequest::rid() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.rid)
+  return _internal_rid();
+}
+inline void TransferHostWriteRequest::_internal_set_rid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  rid_ = value;
+}
+inline void TransferHostWriteRequest::set_rid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.rid)
+}
+
+// uint64 lsn = 6;
+inline void TransferHostWriteRequest::clear_lsn() {
+  lsn_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::_internal_lsn() const {
+  return lsn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::lsn() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.lsn)
+  return _internal_lsn();
+}
+inline void TransferHostWriteRequest::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  lsn_ = value;
+}
+inline void TransferHostWriteRequest::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_lsn(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.lsn)
+}
+
+// repeated .replicator_rpc.Chunk data = 7;
+inline int TransferHostWriteRequest::_internal_data_size() const {
+  return data_.size();
+}
+inline int TransferHostWriteRequest::data_size() const {
+  return _internal_data_size();
+}
+inline void TransferHostWriteRequest::clear_data() {
+  data_.Clear();
+}
+inline ::replicator_rpc::Chunk* TransferHostWriteRequest::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteRequest.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
+TransferHostWriteRequest::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:replicator_rpc.TransferHostWriteRequest.data)
+  return &data_;
+}
+inline const ::replicator_rpc::Chunk& TransferHostWriteRequest::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::replicator_rpc::Chunk& TransferHostWriteRequest::data(int index) const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.data)
+  return _internal_data(index);
+}
+inline ::replicator_rpc::Chunk* TransferHostWriteRequest::_internal_add_data() {
+  return data_.Add();
+}
+inline ::replicator_rpc::Chunk* TransferHostWriteRequest::add_data() {
+  // @@protoc_insertion_point(field_add:replicator_rpc.TransferHostWriteRequest.data)
+  return _internal_add_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
+TransferHostWriteRequest::data() const {
+  // @@protoc_insertion_point(field_list:replicator_rpc.TransferHostWriteRequest.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
+// TransferHostWriteResponse
+
+// bool successful = 1;
+inline void TransferHostWriteResponse::clear_successful() {
+  successful_ = false;
+}
+inline bool TransferHostWriteResponse::_internal_successful() const {
+  return successful_;
+}
+inline bool TransferHostWriteResponse::successful() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteResponse.successful)
+  return _internal_successful();
+}
+inline void TransferHostWriteResponse::_internal_set_successful(bool value) {
+  
+  successful_ = value;
+}
+inline void TransferHostWriteResponse::set_successful(bool value) {
+  _internal_set_successful(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteResponse.successful)
+}
+
+// string reason = 2;
+inline bool TransferHostWriteResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TransferHostWriteResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void TransferHostWriteResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& TransferHostWriteResponse::reason() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteResponse.reason)
+  return _internal_reason();
+}
+inline void TransferHostWriteResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteResponse.reason)
+}
+inline std::string* TransferHostWriteResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& TransferHostWriteResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void TransferHostWriteResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TransferHostWriteResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferHostWriteResponse.reason)
+}
+inline void TransferHostWriteResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferHostWriteResponse.reason)
+}
+inline void TransferHostWriteResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferHostWriteResponse.reason)
+}
+inline std::string* TransferHostWriteResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TransferHostWriteResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.TransferHostWriteResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TransferHostWriteResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferHostWriteResponse.reason)
+}
+
+// -------------------------------------------------------------------
+
+// TransferVolumeDataRequest
+
+// string array_name = 1;
+inline void TransferVolumeDataRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& TransferVolumeDataRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.array_name)
+  return _internal_array_name();
+}
+inline void TransferVolumeDataRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataRequest.array_name)
+}
+inline std::string* TransferVolumeDataRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferVolumeDataRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& TransferVolumeDataRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void TransferVolumeDataRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TransferVolumeDataRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferVolumeDataRequest.array_name)
+}
+inline void TransferVolumeDataRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferVolumeDataRequest.array_name)
+}
+inline void TransferVolumeDataRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferVolumeDataRequest.array_name)
+}
+inline std::string* TransferVolumeDataRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TransferVolumeDataRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.TransferVolumeDataRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TransferVolumeDataRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferVolumeDataRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void TransferVolumeDataRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& TransferVolumeDataRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void TransferVolumeDataRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataRequest.volume_name)
+}
+inline std::string* TransferVolumeDataRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferVolumeDataRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& TransferVolumeDataRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void TransferVolumeDataRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TransferVolumeDataRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferVolumeDataRequest.volume_name)
+}
+inline void TransferVolumeDataRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferVolumeDataRequest.volume_name)
+}
+inline void TransferVolumeDataRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferVolumeDataRequest.volume_name)
+}
+inline std::string* TransferVolumeDataRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TransferVolumeDataRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.TransferVolumeDataRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TransferVolumeDataRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferVolumeDataRequest.volume_name)
+}
+
+// uint64 rba = 3;
+inline void TransferVolumeDataRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferVolumeDataRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferVolumeDataRequest::rba() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.rba)
+  return _internal_rba();
+}
+inline void TransferVolumeDataRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void TransferVolumeDataRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataRequest.rba)
+}
+
+// uint64 num_blocks = 4;
+inline void TransferVolumeDataRequest::clear_num_blocks() {
+  num_blocks_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferVolumeDataRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferVolumeDataRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void TransferVolumeDataRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  num_blocks_ = value;
+}
+inline void TransferVolumeDataRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataRequest.num_blocks)
+}
+
+// bool is_dirty_log = 5;
+inline void TransferVolumeDataRequest::clear_is_dirty_log() {
+  is_dirty_log_ = false;
+}
+inline bool TransferVolumeDataRequest::_internal_is_dirty_log() const {
+  return is_dirty_log_;
+}
+inline bool TransferVolumeDataRequest::is_dirty_log() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.is_dirty_log)
+  return _internal_is_dirty_log();
+}
+inline void TransferVolumeDataRequest::_internal_set_is_dirty_log(bool value) {
+  
+  is_dirty_log_ = value;
+}
+inline void TransferVolumeDataRequest::set_is_dirty_log(bool value) {
+  _internal_set_is_dirty_log(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataRequest.is_dirty_log)
+}
+
+// uint64 lsn = 6;
+inline bool TransferVolumeDataRequest::_internal_has_lsn() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TransferVolumeDataRequest::has_lsn() const {
+  return _internal_has_lsn();
+}
+inline void TransferVolumeDataRequest::clear_lsn() {
+  lsn_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferVolumeDataRequest::_internal_lsn() const {
+  return lsn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferVolumeDataRequest::lsn() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.lsn)
+  return _internal_lsn();
+}
+inline void TransferVolumeDataRequest::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _has_bits_[0] |= 0x00000001u;
+  lsn_ = value;
+}
+inline void TransferVolumeDataRequest::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_lsn(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataRequest.lsn)
+}
+
+// repeated .replicator_rpc.Chunk data = 7;
+inline int TransferVolumeDataRequest::_internal_data_size() const {
+  return data_.size();
+}
+inline int TransferVolumeDataRequest::data_size() const {
+  return _internal_data_size();
+}
+inline void TransferVolumeDataRequest::clear_data() {
+  data_.Clear();
+}
+inline ::replicator_rpc::Chunk* TransferVolumeDataRequest::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferVolumeDataRequest.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
+TransferVolumeDataRequest::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:replicator_rpc.TransferVolumeDataRequest.data)
+  return &data_;
+}
+inline const ::replicator_rpc::Chunk& TransferVolumeDataRequest::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::replicator_rpc::Chunk& TransferVolumeDataRequest::data(int index) const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataRequest.data)
+  return _internal_data(index);
+}
+inline ::replicator_rpc::Chunk* TransferVolumeDataRequest::_internal_add_data() {
+  return data_.Add();
+}
+inline ::replicator_rpc::Chunk* TransferVolumeDataRequest::add_data() {
+  // @@protoc_insertion_point(field_add:replicator_rpc.TransferVolumeDataRequest.data)
+  return _internal_add_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
+TransferVolumeDataRequest::data() const {
+  // @@protoc_insertion_point(field_list:replicator_rpc.TransferVolumeDataRequest.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
 // Chunk
 
 // bytes content = 1;
@@ -2456,6 +3492,688 @@ inline void Chunk::set_allocated_content(std::string* content) {
   content_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), content,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:replicator_rpc.Chunk.content)
+}
+
+// -------------------------------------------------------------------
+
+// TransferVolumeDataResponse
+
+// bool successful = 1;
+inline void TransferVolumeDataResponse::clear_successful() {
+  successful_ = false;
+}
+inline bool TransferVolumeDataResponse::_internal_successful() const {
+  return successful_;
+}
+inline bool TransferVolumeDataResponse::successful() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataResponse.successful)
+  return _internal_successful();
+}
+inline void TransferVolumeDataResponse::_internal_set_successful(bool value) {
+  
+  successful_ = value;
+}
+inline void TransferVolumeDataResponse::set_successful(bool value) {
+  _internal_set_successful(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataResponse.successful)
+}
+
+// string reason = 2;
+inline bool TransferVolumeDataResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool TransferVolumeDataResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void TransferVolumeDataResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& TransferVolumeDataResponse::reason() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.TransferVolumeDataResponse.reason)
+  return _internal_reason();
+}
+inline void TransferVolumeDataResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.TransferVolumeDataResponse.reason)
+}
+inline std::string* TransferVolumeDataResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferVolumeDataResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& TransferVolumeDataResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void TransferVolumeDataResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void TransferVolumeDataResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferVolumeDataResponse.reason)
+}
+inline void TransferVolumeDataResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferVolumeDataResponse.reason)
+}
+inline void TransferVolumeDataResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferVolumeDataResponse.reason)
+}
+inline std::string* TransferVolumeDataResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* TransferVolumeDataResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.TransferVolumeDataResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void TransferVolumeDataResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferVolumeDataResponse.reason)
+}
+
+// -------------------------------------------------------------------
+
+// PushHostWriteRequest
+
+// string array_name = 1;
+inline void PushHostWriteRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& PushHostWriteRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.array_name)
+  return _internal_array_name();
+}
+inline void PushHostWriteRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.array_name)
+}
+inline std::string* PushHostWriteRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& PushHostWriteRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void PushHostWriteRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void PushHostWriteRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushHostWriteRequest.array_name)
+}
+inline void PushHostWriteRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushHostWriteRequest.array_name)
+}
+inline void PushHostWriteRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushHostWriteRequest.array_name)
+}
+inline std::string* PushHostWriteRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* PushHostWriteRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.PushHostWriteRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PushHostWriteRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushHostWriteRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void PushHostWriteRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& PushHostWriteRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void PushHostWriteRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.volume_name)
+}
+inline std::string* PushHostWriteRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& PushHostWriteRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void PushHostWriteRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void PushHostWriteRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushHostWriteRequest.volume_name)
+}
+inline void PushHostWriteRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushHostWriteRequest.volume_name)
+}
+inline void PushHostWriteRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushHostWriteRequest.volume_name)
+}
+inline std::string* PushHostWriteRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* PushHostWriteRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.PushHostWriteRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PushHostWriteRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushHostWriteRequest.volume_name)
+}
+
+// uint64 rba = 3;
+inline void PushHostWriteRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteRequest::rba() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.rba)
+  return _internal_rba();
+}
+inline void PushHostWriteRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void PushHostWriteRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.rba)
+}
+
+// uint32 num_blocks = 4;
+inline void PushHostWriteRequest::clear_num_blocks() {
+  num_blocks_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PushHostWriteRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PushHostWriteRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void PushHostWriteRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  num_blocks_ = value;
+}
+inline void PushHostWriteRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.num_blocks)
+}
+
+// repeated .replicator_rpc.Chunk data = 5;
+inline int PushHostWriteRequest::_internal_data_size() const {
+  return data_.size();
+}
+inline int PushHostWriteRequest::data_size() const {
+  return _internal_data_size();
+}
+inline void PushHostWriteRequest::clear_data() {
+  data_.Clear();
+}
+inline ::replicator_rpc::Chunk* PushHostWriteRequest::mutable_data(int index) {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteRequest.data)
+  return data_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
+PushHostWriteRequest::mutable_data() {
+  // @@protoc_insertion_point(field_mutable_list:replicator_rpc.PushHostWriteRequest.data)
+  return &data_;
+}
+inline const ::replicator_rpc::Chunk& PushHostWriteRequest::_internal_data(int index) const {
+  return data_.Get(index);
+}
+inline const ::replicator_rpc::Chunk& PushHostWriteRequest::data(int index) const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.data)
+  return _internal_data(index);
+}
+inline ::replicator_rpc::Chunk* PushHostWriteRequest::_internal_add_data() {
+  return data_.Add();
+}
+inline ::replicator_rpc::Chunk* PushHostWriteRequest::add_data() {
+  // @@protoc_insertion_point(field_add:replicator_rpc.PushHostWriteRequest.data)
+  return _internal_add_data();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
+PushHostWriteRequest::data() const {
+  // @@protoc_insertion_point(field_list:replicator_rpc.PushHostWriteRequest.data)
+  return data_;
+}
+
+// -------------------------------------------------------------------
+
+// PushHostWriteResponse
+
+// bool successful = 1;
+inline void PushHostWriteResponse::clear_successful() {
+  successful_ = false;
+}
+inline bool PushHostWriteResponse::_internal_successful() const {
+  return successful_;
+}
+inline bool PushHostWriteResponse::successful() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteResponse.successful)
+  return _internal_successful();
+}
+inline void PushHostWriteResponse::_internal_set_successful(bool value) {
+  
+  successful_ = value;
+}
+inline void PushHostWriteResponse::set_successful(bool value) {
+  _internal_set_successful(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteResponse.successful)
+}
+
+// uint64 lsn = 2;
+inline void PushHostWriteResponse::clear_lsn() {
+  lsn_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteResponse::_internal_lsn() const {
+  return lsn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteResponse::lsn() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteResponse.lsn)
+  return _internal_lsn();
+}
+inline void PushHostWriteResponse::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  lsn_ = value;
+}
+inline void PushHostWriteResponse::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_lsn(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteResponse.lsn)
+}
+
+// string reason = 3;
+inline bool PushHostWriteResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool PushHostWriteResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void PushHostWriteResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& PushHostWriteResponse::reason() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteResponse.reason)
+  return _internal_reason();
+}
+inline void PushHostWriteResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteResponse.reason)
+}
+inline std::string* PushHostWriteResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& PushHostWriteResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void PushHostWriteResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void PushHostWriteResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushHostWriteResponse.reason)
+}
+inline void PushHostWriteResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushHostWriteResponse.reason)
+}
+inline void PushHostWriteResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushHostWriteResponse.reason)
+}
+inline std::string* PushHostWriteResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* PushHostWriteResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.PushHostWriteResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PushHostWriteResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushHostWriteResponse.reason)
+}
+
+// -------------------------------------------------------------------
+
+// PushDirtyLogRequest
+
+// string array_name = 1;
+inline void PushDirtyLogRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& PushDirtyLogRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.array_name)
+  return _internal_array_name();
+}
+inline void PushDirtyLogRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.array_name)
+}
+inline std::string* PushDirtyLogRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushDirtyLogRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& PushDirtyLogRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void PushDirtyLogRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void PushDirtyLogRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushDirtyLogRequest.array_name)
+}
+inline void PushDirtyLogRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushDirtyLogRequest.array_name)
+}
+inline void PushDirtyLogRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushDirtyLogRequest.array_name)
+}
+inline std::string* PushDirtyLogRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* PushDirtyLogRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.PushDirtyLogRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PushDirtyLogRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushDirtyLogRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void PushDirtyLogRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& PushDirtyLogRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void PushDirtyLogRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.volume_name)
+}
+inline std::string* PushDirtyLogRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushDirtyLogRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& PushDirtyLogRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void PushDirtyLogRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void PushDirtyLogRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushDirtyLogRequest.volume_name)
+}
+inline void PushDirtyLogRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushDirtyLogRequest.volume_name)
+}
+inline void PushDirtyLogRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushDirtyLogRequest.volume_name)
+}
+inline std::string* PushDirtyLogRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* PushDirtyLogRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.PushDirtyLogRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PushDirtyLogRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushDirtyLogRequest.volume_name)
+}
+
+// uint64 rba = 3;
+inline void PushDirtyLogRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PushDirtyLogRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 PushDirtyLogRequest::rba() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.rba)
+  return _internal_rba();
+}
+inline void PushDirtyLogRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void PushDirtyLogRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.rba)
+}
+
+// uint32 num_blocks = 4;
+inline void PushDirtyLogRequest::clear_num_blocks() {
+  num_blocks_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PushDirtyLogRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 PushDirtyLogRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void PushDirtyLogRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  num_blocks_ = value;
+}
+inline void PushDirtyLogRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.num_blocks)
+}
+
+// -------------------------------------------------------------------
+
+// PushDirtyLogResponse
+
+// bool successful = 1;
+inline void PushDirtyLogResponse::clear_successful() {
+  successful_ = false;
+}
+inline bool PushDirtyLogResponse::_internal_successful() const {
+  return successful_;
+}
+inline bool PushDirtyLogResponse::successful() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogResponse.successful)
+  return _internal_successful();
+}
+inline void PushDirtyLogResponse::_internal_set_successful(bool value) {
+  
+  successful_ = value;
+}
+inline void PushDirtyLogResponse::set_successful(bool value) {
+  _internal_set_successful(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogResponse.successful)
+}
+
+// string reason = 2;
+inline bool PushDirtyLogResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool PushDirtyLogResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void PushDirtyLogResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& PushDirtyLogResponse::reason() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogResponse.reason)
+  return _internal_reason();
+}
+inline void PushDirtyLogResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogResponse.reason)
+}
+inline std::string* PushDirtyLogResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushDirtyLogResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& PushDirtyLogResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void PushDirtyLogResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void PushDirtyLogResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushDirtyLogResponse.reason)
+}
+inline void PushDirtyLogResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushDirtyLogResponse.reason)
+}
+inline void PushDirtyLogResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushDirtyLogResponse.reason)
+}
+inline std::string* PushDirtyLogResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* PushDirtyLogResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.PushDirtyLogResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void PushDirtyLogResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushDirtyLogResponse.reason)
 }
 
 // -------------------------------------------------------------------
@@ -2667,24 +4385,24 @@ CompleteReadRequest::data() const {
 
 // CompleteReadResponse
 
-// .replicator_rpc.PosResult result = 1;
-inline void CompleteReadResponse::clear_result() {
-  result_ = 0;
+// bool successful = 1;
+inline void CompleteReadResponse::clear_successful() {
+  successful_ = false;
 }
-inline ::replicator_rpc::PosResult CompleteReadResponse::_internal_result() const {
-  return static_cast< ::replicator_rpc::PosResult >(result_);
+inline bool CompleteReadResponse::_internal_successful() const {
+  return successful_;
 }
-inline ::replicator_rpc::PosResult CompleteReadResponse::result() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteReadResponse.result)
-  return _internal_result();
+inline bool CompleteReadResponse::successful() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteReadResponse.successful)
+  return _internal_successful();
 }
-inline void CompleteReadResponse::_internal_set_result(::replicator_rpc::PosResult value) {
+inline void CompleteReadResponse::_internal_set_successful(bool value) {
   
-  result_ = value;
+  successful_ = value;
 }
-inline void CompleteReadResponse::set_result(::replicator_rpc::PosResult value) {
-  _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteReadResponse.result)
+inline void CompleteReadResponse::set_successful(bool value) {
+  _internal_set_successful(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteReadResponse.successful)
 }
 
 // string reason = 2;
@@ -2886,9 +4604,57 @@ inline void CompleteWriteRequest::set_allocated_volume_name(std::string* volume_
   // @@protoc_insertion_point(field_set_allocated:replicator_rpc.CompleteWriteRequest.volume_name)
 }
 
-// uint64 lsn = 3;
+// uint64 rba = 3;
+inline void CompleteWriteRequest::clear_rba() {
+  rba_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteWriteRequest::_internal_rba() const {
+  return rba_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteWriteRequest::rba() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteWriteRequest.rba)
+  return _internal_rba();
+}
+inline void CompleteWriteRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  rba_ = value;
+}
+inline void CompleteWriteRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_rba(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteWriteRequest.rba)
+}
+
+// uint64 num_blocks = 4;
+inline void CompleteWriteRequest::clear_num_blocks() {
+  num_blocks_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteWriteRequest::_internal_num_blocks() const {
+  return num_blocks_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteWriteRequest::num_blocks() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteWriteRequest.num_blocks)
+  return _internal_num_blocks();
+}
+inline void CompleteWriteRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  num_blocks_ = value;
+}
+inline void CompleteWriteRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_num_blocks(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteWriteRequest.num_blocks)
+}
+
+// uint64 lsn = 5;
+inline bool CompleteWriteRequest::_internal_has_lsn() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool CompleteWriteRequest::has_lsn() const {
+  return _internal_has_lsn();
+}
 inline void CompleteWriteRequest::clear_lsn() {
   lsn_ = PROTOBUF_ULONGLONG(0);
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteWriteRequest::_internal_lsn() const {
   return lsn_;
@@ -2898,7 +4664,7 @@ inline ::PROTOBUF_NAMESPACE_ID::uint64 CompleteWriteRequest::lsn() const {
   return _internal_lsn();
 }
 inline void CompleteWriteRequest::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
+  _has_bits_[0] |= 0x00000001u;
   lsn_ = value;
 }
 inline void CompleteWriteRequest::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
@@ -2910,24 +4676,24 @@ inline void CompleteWriteRequest::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value)
 
 // CompleteWriteResponse
 
-// .replicator_rpc.PosResult result = 1;
-inline void CompleteWriteResponse::clear_result() {
-  result_ = 0;
+// bool successful = 1;
+inline void CompleteWriteResponse::clear_successful() {
+  successful_ = false;
 }
-inline ::replicator_rpc::PosResult CompleteWriteResponse::_internal_result() const {
-  return static_cast< ::replicator_rpc::PosResult >(result_);
+inline bool CompleteWriteResponse::_internal_successful() const {
+  return successful_;
 }
-inline ::replicator_rpc::PosResult CompleteWriteResponse::result() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteWriteResponse.result)
-  return _internal_result();
+inline bool CompleteWriteResponse::successful() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.CompleteWriteResponse.successful)
+  return _internal_successful();
 }
-inline void CompleteWriteResponse::_internal_set_result(::replicator_rpc::PosResult value) {
+inline void CompleteWriteResponse::_internal_set_successful(bool value) {
   
-  result_ = value;
+  successful_ = value;
 }
-inline void CompleteWriteResponse::set_result(::replicator_rpc::PosResult value) {
-  _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteWriteResponse.result)
+inline void CompleteWriteResponse::set_successful(bool value) {
+  _internal_set_successful(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.CompleteWriteResponse.successful)
 }
 
 // string reason = 2;
@@ -3005,296 +4771,95 @@ inline void CompleteWriteResponse::set_allocated_reason(std::string* reason) {
 
 // -------------------------------------------------------------------
 
-// PushHostWriteRequest
-
-// string array_name = 1;
-inline void PushHostWriteRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& PushHostWriteRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.array_name)
-  return _internal_array_name();
-}
-inline void PushHostWriteRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.array_name)
-}
-inline std::string* PushHostWriteRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& PushHostWriteRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void PushHostWriteRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void PushHostWriteRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushHostWriteRequest.array_name)
-}
-inline void PushHostWriteRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushHostWriteRequest.array_name)
-}
-inline void PushHostWriteRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushHostWriteRequest.array_name)
-}
-inline std::string* PushHostWriteRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* PushHostWriteRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.PushHostWriteRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PushHostWriteRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushHostWriteRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void PushHostWriteRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& PushHostWriteRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void PushHostWriteRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.volume_name)
-}
-inline std::string* PushHostWriteRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& PushHostWriteRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void PushHostWriteRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void PushHostWriteRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushHostWriteRequest.volume_name)
-}
-inline void PushHostWriteRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushHostWriteRequest.volume_name)
-}
-inline void PushHostWriteRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushHostWriteRequest.volume_name)
-}
-inline std::string* PushHostWriteRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* PushHostWriteRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.PushHostWriteRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PushHostWriteRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushHostWriteRequest.volume_name)
-}
-
-// uint64 rba = 3;
-inline void PushHostWriteRequest::clear_rba() {
-  rba_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteRequest::_internal_rba() const {
-  return rba_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteRequest::rba() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.rba)
-  return _internal_rba();
-}
-inline void PushHostWriteRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  rba_ = value;
-}
-inline void PushHostWriteRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_rba(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.rba)
-}
-
-// uint64 num_blocks = 4;
-inline void PushHostWriteRequest::clear_num_blocks() {
-  num_blocks_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteRequest::_internal_num_blocks() const {
-  return num_blocks_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteRequest::num_blocks() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.num_blocks)
-  return _internal_num_blocks();
-}
-inline void PushHostWriteRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  num_blocks_ = value;
-}
-inline void PushHostWriteRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_num_blocks(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteRequest.num_blocks)
-}
-
-// repeated .replicator_rpc.Chunk data = 5;
-inline int PushHostWriteRequest::_internal_data_size() const {
-  return data_.size();
-}
-inline int PushHostWriteRequest::data_size() const {
-  return _internal_data_size();
-}
-inline void PushHostWriteRequest::clear_data() {
-  data_.Clear();
-}
-inline ::replicator_rpc::Chunk* PushHostWriteRequest::mutable_data(int index) {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteRequest.data)
-  return data_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >*
-PushHostWriteRequest::mutable_data() {
-  // @@protoc_insertion_point(field_mutable_list:replicator_rpc.PushHostWriteRequest.data)
-  return &data_;
-}
-inline const ::replicator_rpc::Chunk& PushHostWriteRequest::_internal_data(int index) const {
-  return data_.Get(index);
-}
-inline const ::replicator_rpc::Chunk& PushHostWriteRequest::data(int index) const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteRequest.data)
-  return _internal_data(index);
-}
-inline ::replicator_rpc::Chunk* PushHostWriteRequest::_internal_add_data() {
-  return data_.Add();
-}
-inline ::replicator_rpc::Chunk* PushHostWriteRequest::add_data() {
-  // @@protoc_insertion_point(field_add:replicator_rpc.PushHostWriteRequest.data)
-  return _internal_add_data();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::replicator_rpc::Chunk >&
-PushHostWriteRequest::data() const {
-  // @@protoc_insertion_point(field_list:replicator_rpc.PushHostWriteRequest.data)
-  return data_;
-}
+// HealthCheckRequest
 
 // -------------------------------------------------------------------
 
-// PushHostWriteResponse
+// HealthCheckResponse
 
-// .replicator_rpc.PosResult result = 1;
-inline void PushHostWriteResponse::clear_result() {
-  result_ = 0;
+// .replicator_rpc.HealthCheckResponse.ServingStatus status = 1;
+inline void HealthCheckResponse::clear_status() {
+  status_ = 0;
 }
-inline ::replicator_rpc::PosResult PushHostWriteResponse::_internal_result() const {
-  return static_cast< ::replicator_rpc::PosResult >(result_);
+inline ::replicator_rpc::HealthCheckResponse_ServingStatus HealthCheckResponse::_internal_status() const {
+  return static_cast< ::replicator_rpc::HealthCheckResponse_ServingStatus >(status_);
 }
-inline ::replicator_rpc::PosResult PushHostWriteResponse::result() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteResponse.result)
-  return _internal_result();
+inline ::replicator_rpc::HealthCheckResponse_ServingStatus HealthCheckResponse::status() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.HealthCheckResponse.status)
+  return _internal_status();
 }
-inline void PushHostWriteResponse::_internal_set_result(::replicator_rpc::PosResult value) {
+inline void HealthCheckResponse::_internal_set_status(::replicator_rpc::HealthCheckResponse_ServingStatus value) {
   
-  result_ = value;
+  status_ = value;
 }
-inline void PushHostWriteResponse::set_result(::replicator_rpc::PosResult value) {
-  _internal_set_result(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteResponse.result)
+inline void HealthCheckResponse::set_status(::replicator_rpc::HealthCheckResponse_ServingStatus value) {
+  _internal_set_status(value);
+  // @@protoc_insertion_point(field_set:replicator_rpc.HealthCheckResponse.status)
 }
 
 // string reason = 2;
-inline bool PushHostWriteResponse::_internal_has_reason() const {
+inline bool HealthCheckResponse::_internal_has_reason() const {
   bool value = (_has_bits_[0] & 0x00000001u) != 0;
   return value;
 }
-inline bool PushHostWriteResponse::has_reason() const {
+inline bool HealthCheckResponse::has_reason() const {
   return _internal_has_reason();
 }
-inline void PushHostWriteResponse::clear_reason() {
+inline void HealthCheckResponse::clear_reason() {
   reason_.ClearToEmpty();
   _has_bits_[0] &= ~0x00000001u;
 }
-inline const std::string& PushHostWriteResponse::reason() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteResponse.reason)
+inline const std::string& HealthCheckResponse::reason() const {
+  // @@protoc_insertion_point(field_get:replicator_rpc.HealthCheckResponse.reason)
   return _internal_reason();
 }
-inline void PushHostWriteResponse::set_reason(const std::string& value) {
+inline void HealthCheckResponse::set_reason(const std::string& value) {
   _internal_set_reason(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteResponse.reason)
+  // @@protoc_insertion_point(field_set:replicator_rpc.HealthCheckResponse.reason)
 }
-inline std::string* PushHostWriteResponse::mutable_reason() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushHostWriteResponse.reason)
+inline std::string* HealthCheckResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:replicator_rpc.HealthCheckResponse.reason)
   return _internal_mutable_reason();
 }
-inline const std::string& PushHostWriteResponse::_internal_reason() const {
+inline const std::string& HealthCheckResponse::_internal_reason() const {
   return reason_.Get();
 }
-inline void PushHostWriteResponse::_internal_set_reason(const std::string& value) {
+inline void HealthCheckResponse::_internal_set_reason(const std::string& value) {
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
-inline void PushHostWriteResponse::set_reason(std::string&& value) {
+inline void HealthCheckResponse::set_reason(std::string&& value) {
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushHostWriteResponse.reason)
+  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.HealthCheckResponse.reason)
 }
-inline void PushHostWriteResponse::set_reason(const char* value) {
+inline void HealthCheckResponse::set_reason(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushHostWriteResponse.reason)
+  // @@protoc_insertion_point(field_set_char:replicator_rpc.HealthCheckResponse.reason)
 }
-inline void PushHostWriteResponse::set_reason(const char* value,
+inline void HealthCheckResponse::set_reason(const char* value,
     size_t size) {
   _has_bits_[0] |= 0x00000001u;
   reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushHostWriteResponse.reason)
+  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.HealthCheckResponse.reason)
 }
-inline std::string* PushHostWriteResponse::_internal_mutable_reason() {
+inline std::string* HealthCheckResponse::_internal_mutable_reason() {
   _has_bits_[0] |= 0x00000001u;
   return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
-inline std::string* PushHostWriteResponse::release_reason() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.PushHostWriteResponse.reason)
+inline std::string* HealthCheckResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:replicator_rpc.HealthCheckResponse.reason)
   if (!_internal_has_reason()) {
     return nullptr;
   }
   _has_bits_[0] &= ~0x00000001u;
   return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
-inline void PushHostWriteResponse::set_allocated_reason(std::string* reason) {
+inline void HealthCheckResponse::set_allocated_reason(std::string* reason) {
   if (reason != nullptr) {
     _has_bits_[0] |= 0x00000001u;
   } else {
@@ -3302,821 +4867,16 @@ inline void PushHostWriteResponse::set_allocated_reason(std::string* reason) {
   }
   reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
       GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushHostWriteResponse.reason)
-}
-
-// uint64 lsn = 3;
-inline void PushHostWriteResponse::clear_lsn() {
-  lsn_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteResponse::_internal_lsn() const {
-  return lsn_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushHostWriteResponse::lsn() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushHostWriteResponse.lsn)
-  return _internal_lsn();
-}
-inline void PushHostWriteResponse::_internal_set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  lsn_ = value;
-}
-inline void PushHostWriteResponse::set_lsn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_lsn(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushHostWriteResponse.lsn)
-}
-
-// -------------------------------------------------------------------
-
-// PushDirtyLogRequest
-
-// string array_name = 1;
-inline void PushDirtyLogRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& PushDirtyLogRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.array_name)
-  return _internal_array_name();
-}
-inline void PushDirtyLogRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.array_name)
-}
-inline std::string* PushDirtyLogRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushDirtyLogRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& PushDirtyLogRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void PushDirtyLogRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void PushDirtyLogRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushDirtyLogRequest.array_name)
-}
-inline void PushDirtyLogRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushDirtyLogRequest.array_name)
-}
-inline void PushDirtyLogRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushDirtyLogRequest.array_name)
-}
-inline std::string* PushDirtyLogRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* PushDirtyLogRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.PushDirtyLogRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PushDirtyLogRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushDirtyLogRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void PushDirtyLogRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& PushDirtyLogRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void PushDirtyLogRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.volume_name)
-}
-inline std::string* PushDirtyLogRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushDirtyLogRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& PushDirtyLogRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void PushDirtyLogRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void PushDirtyLogRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushDirtyLogRequest.volume_name)
-}
-inline void PushDirtyLogRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushDirtyLogRequest.volume_name)
-}
-inline void PushDirtyLogRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushDirtyLogRequest.volume_name)
-}
-inline std::string* PushDirtyLogRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* PushDirtyLogRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.PushDirtyLogRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PushDirtyLogRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushDirtyLogRequest.volume_name)
-}
-
-// uint64 rba = 3;
-inline void PushDirtyLogRequest::clear_rba() {
-  rba_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushDirtyLogRequest::_internal_rba() const {
-  return rba_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushDirtyLogRequest::rba() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.rba)
-  return _internal_rba();
-}
-inline void PushDirtyLogRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  rba_ = value;
-}
-inline void PushDirtyLogRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_rba(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.rba)
-}
-
-// uint64 num_blocks = 4;
-inline void PushDirtyLogRequest::clear_num_blocks() {
-  num_blocks_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushDirtyLogRequest::_internal_num_blocks() const {
-  return num_blocks_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 PushDirtyLogRequest::num_blocks() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogRequest.num_blocks)
-  return _internal_num_blocks();
-}
-inline void PushDirtyLogRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  num_blocks_ = value;
-}
-inline void PushDirtyLogRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_num_blocks(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogRequest.num_blocks)
-}
-
-// -------------------------------------------------------------------
-
-// PushDirtyLogResponse
-
-// bool successful = 1;
-inline void PushDirtyLogResponse::clear_successful() {
-  successful_ = false;
-}
-inline bool PushDirtyLogResponse::_internal_successful() const {
-  return successful_;
-}
-inline bool PushDirtyLogResponse::successful() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogResponse.successful)
-  return _internal_successful();
-}
-inline void PushDirtyLogResponse::_internal_set_successful(bool value) {
-  
-  successful_ = value;
-}
-inline void PushDirtyLogResponse::set_successful(bool value) {
-  _internal_set_successful(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogResponse.successful)
-}
-
-// string reason = 2;
-inline bool PushDirtyLogResponse::_internal_has_reason() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool PushDirtyLogResponse::has_reason() const {
-  return _internal_has_reason();
-}
-inline void PushDirtyLogResponse::clear_reason() {
-  reason_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& PushDirtyLogResponse::reason() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.PushDirtyLogResponse.reason)
-  return _internal_reason();
-}
-inline void PushDirtyLogResponse::set_reason(const std::string& value) {
-  _internal_set_reason(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.PushDirtyLogResponse.reason)
-}
-inline std::string* PushDirtyLogResponse::mutable_reason() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.PushDirtyLogResponse.reason)
-  return _internal_mutable_reason();
-}
-inline const std::string& PushDirtyLogResponse::_internal_reason() const {
-  return reason_.Get();
-}
-inline void PushDirtyLogResponse::_internal_set_reason(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void PushDirtyLogResponse::set_reason(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.PushDirtyLogResponse.reason)
-}
-inline void PushDirtyLogResponse::set_reason(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.PushDirtyLogResponse.reason)
-}
-inline void PushDirtyLogResponse::set_reason(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.PushDirtyLogResponse.reason)
-}
-inline std::string* PushDirtyLogResponse::_internal_mutable_reason() {
-  _has_bits_[0] |= 0x00000001u;
-  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* PushDirtyLogResponse::release_reason() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.PushDirtyLogResponse.reason)
-  if (!_internal_has_reason()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void PushDirtyLogResponse::set_allocated_reason(std::string* reason) {
-  if (reason != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.PushDirtyLogResponse.reason)
-}
-
-// -------------------------------------------------------------------
-
-// TransferDirtyLogRequest
-
-// string array_name = 1;
-inline void TransferDirtyLogRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& TransferDirtyLogRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferDirtyLogRequest.array_name)
-  return _internal_array_name();
-}
-inline void TransferDirtyLogRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferDirtyLogRequest.array_name)
-}
-inline std::string* TransferDirtyLogRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferDirtyLogRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& TransferDirtyLogRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void TransferDirtyLogRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TransferDirtyLogRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferDirtyLogRequest.array_name)
-}
-inline void TransferDirtyLogRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferDirtyLogRequest.array_name)
-}
-inline void TransferDirtyLogRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferDirtyLogRequest.array_name)
-}
-inline std::string* TransferDirtyLogRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TransferDirtyLogRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.TransferDirtyLogRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransferDirtyLogRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferDirtyLogRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void TransferDirtyLogRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& TransferDirtyLogRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferDirtyLogRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void TransferDirtyLogRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferDirtyLogRequest.volume_name)
-}
-inline std::string* TransferDirtyLogRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferDirtyLogRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& TransferDirtyLogRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void TransferDirtyLogRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TransferDirtyLogRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferDirtyLogRequest.volume_name)
-}
-inline void TransferDirtyLogRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferDirtyLogRequest.volume_name)
-}
-inline void TransferDirtyLogRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferDirtyLogRequest.volume_name)
-}
-inline std::string* TransferDirtyLogRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TransferDirtyLogRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.TransferDirtyLogRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransferDirtyLogRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferDirtyLogRequest.volume_name)
-}
-
-// uint64 rba = 3;
-inline void TransferDirtyLogRequest::clear_rba() {
-  rba_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferDirtyLogRequest::_internal_rba() const {
-  return rba_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferDirtyLogRequest::rba() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferDirtyLogRequest.rba)
-  return _internal_rba();
-}
-inline void TransferDirtyLogRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  rba_ = value;
-}
-inline void TransferDirtyLogRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_rba(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferDirtyLogRequest.rba)
-}
-
-// uint64 num_blocks = 4;
-inline void TransferDirtyLogRequest::clear_num_blocks() {
-  num_blocks_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferDirtyLogRequest::_internal_num_blocks() const {
-  return num_blocks_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferDirtyLogRequest::num_blocks() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferDirtyLogRequest.num_blocks)
-  return _internal_num_blocks();
-}
-inline void TransferDirtyLogRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  num_blocks_ = value;
-}
-inline void TransferDirtyLogRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_num_blocks(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferDirtyLogRequest.num_blocks)
-}
-
-// -------------------------------------------------------------------
-
-// TransferDirtyLogResponse
-
-// bool successful = 1;
-inline void TransferDirtyLogResponse::clear_successful() {
-  successful_ = false;
-}
-inline bool TransferDirtyLogResponse::_internal_successful() const {
-  return successful_;
-}
-inline bool TransferDirtyLogResponse::successful() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferDirtyLogResponse.successful)
-  return _internal_successful();
-}
-inline void TransferDirtyLogResponse::_internal_set_successful(bool value) {
-  
-  successful_ = value;
-}
-inline void TransferDirtyLogResponse::set_successful(bool value) {
-  _internal_set_successful(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferDirtyLogResponse.successful)
-}
-
-// string reason = 2;
-inline bool TransferDirtyLogResponse::_internal_has_reason() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool TransferDirtyLogResponse::has_reason() const {
-  return _internal_has_reason();
-}
-inline void TransferDirtyLogResponse::clear_reason() {
-  reason_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& TransferDirtyLogResponse::reason() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferDirtyLogResponse.reason)
-  return _internal_reason();
-}
-inline void TransferDirtyLogResponse::set_reason(const std::string& value) {
-  _internal_set_reason(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferDirtyLogResponse.reason)
-}
-inline std::string* TransferDirtyLogResponse::mutable_reason() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferDirtyLogResponse.reason)
-  return _internal_mutable_reason();
-}
-inline const std::string& TransferDirtyLogResponse::_internal_reason() const {
-  return reason_.Get();
-}
-inline void TransferDirtyLogResponse::_internal_set_reason(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TransferDirtyLogResponse::set_reason(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferDirtyLogResponse.reason)
-}
-inline void TransferDirtyLogResponse::set_reason(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferDirtyLogResponse.reason)
-}
-inline void TransferDirtyLogResponse::set_reason(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferDirtyLogResponse.reason)
-}
-inline std::string* TransferDirtyLogResponse::_internal_mutable_reason() {
-  _has_bits_[0] |= 0x00000001u;
-  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TransferDirtyLogResponse::release_reason() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.TransferDirtyLogResponse.reason)
-  if (!_internal_has_reason()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransferDirtyLogResponse::set_allocated_reason(std::string* reason) {
-  if (reason != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferDirtyLogResponse.reason)
-}
-
-// -------------------------------------------------------------------
-
-// TransferHostWriteRequest
-
-// string array_name = 1;
-inline void TransferHostWriteRequest::clear_array_name() {
-  array_name_.ClearToEmpty();
-}
-inline const std::string& TransferHostWriteRequest::array_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.array_name)
-  return _internal_array_name();
-}
-inline void TransferHostWriteRequest::set_array_name(const std::string& value) {
-  _internal_set_array_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.array_name)
-}
-inline std::string* TransferHostWriteRequest::mutable_array_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteRequest.array_name)
-  return _internal_mutable_array_name();
-}
-inline const std::string& TransferHostWriteRequest::_internal_array_name() const {
-  return array_name_.Get();
-}
-inline void TransferHostWriteRequest::_internal_set_array_name(const std::string& value) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TransferHostWriteRequest::set_array_name(std::string&& value) {
-  
-  array_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferHostWriteRequest.array_name)
-}
-inline void TransferHostWriteRequest::set_array_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferHostWriteRequest.array_name)
-}
-inline void TransferHostWriteRequest::set_array_name(const char* value,
-    size_t size) {
-  
-  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferHostWriteRequest.array_name)
-}
-inline std::string* TransferHostWriteRequest::_internal_mutable_array_name() {
-  
-  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TransferHostWriteRequest::release_array_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.TransferHostWriteRequest.array_name)
-  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransferHostWriteRequest::set_allocated_array_name(std::string* array_name) {
-  if (array_name != nullptr) {
-    
-  } else {
-    
-  }
-  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferHostWriteRequest.array_name)
-}
-
-// string volume_name = 2;
-inline void TransferHostWriteRequest::clear_volume_name() {
-  volume_name_.ClearToEmpty();
-}
-inline const std::string& TransferHostWriteRequest::volume_name() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.volume_name)
-  return _internal_volume_name();
-}
-inline void TransferHostWriteRequest::set_volume_name(const std::string& value) {
-  _internal_set_volume_name(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.volume_name)
-}
-inline std::string* TransferHostWriteRequest::mutable_volume_name() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteRequest.volume_name)
-  return _internal_mutable_volume_name();
-}
-inline const std::string& TransferHostWriteRequest::_internal_volume_name() const {
-  return volume_name_.Get();
-}
-inline void TransferHostWriteRequest::_internal_set_volume_name(const std::string& value) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TransferHostWriteRequest::set_volume_name(std::string&& value) {
-  
-  volume_name_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferHostWriteRequest.volume_name)
-}
-inline void TransferHostWriteRequest::set_volume_name(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferHostWriteRequest.volume_name)
-}
-inline void TransferHostWriteRequest::set_volume_name(const char* value,
-    size_t size) {
-  
-  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferHostWriteRequest.volume_name)
-}
-inline std::string* TransferHostWriteRequest::_internal_mutable_volume_name() {
-  
-  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TransferHostWriteRequest::release_volume_name() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.TransferHostWriteRequest.volume_name)
-  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransferHostWriteRequest::set_allocated_volume_name(std::string* volume_name) {
-  if (volume_name != nullptr) {
-    
-  } else {
-    
-  }
-  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferHostWriteRequest.volume_name)
-}
-
-// uint64 rba = 3;
-inline void TransferHostWriteRequest::clear_rba() {
-  rba_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::_internal_rba() const {
-  return rba_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::rba() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.rba)
-  return _internal_rba();
-}
-inline void TransferHostWriteRequest::_internal_set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  rba_ = value;
-}
-inline void TransferHostWriteRequest::set_rba(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_rba(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.rba)
-}
-
-// uint64 num_blocks = 4;
-inline void TransferHostWriteRequest::clear_num_blocks() {
-  num_blocks_ = PROTOBUF_ULONGLONG(0);
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::_internal_num_blocks() const {
-  return num_blocks_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::uint64 TransferHostWriteRequest::num_blocks() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteRequest.num_blocks)
-  return _internal_num_blocks();
-}
-inline void TransferHostWriteRequest::_internal_set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  
-  num_blocks_ = value;
-}
-inline void TransferHostWriteRequest::set_num_blocks(::PROTOBUF_NAMESPACE_ID::uint64 value) {
-  _internal_set_num_blocks(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteRequest.num_blocks)
-}
-
-// -------------------------------------------------------------------
-
-// TransferHostWriteResponse
-
-// bool successful = 1;
-inline void TransferHostWriteResponse::clear_successful() {
-  successful_ = false;
-}
-inline bool TransferHostWriteResponse::_internal_successful() const {
-  return successful_;
-}
-inline bool TransferHostWriteResponse::successful() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteResponse.successful)
-  return _internal_successful();
-}
-inline void TransferHostWriteResponse::_internal_set_successful(bool value) {
-  
-  successful_ = value;
-}
-inline void TransferHostWriteResponse::set_successful(bool value) {
-  _internal_set_successful(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteResponse.successful)
-}
-
-// string reason = 2;
-inline bool TransferHostWriteResponse::_internal_has_reason() const {
-  bool value = (_has_bits_[0] & 0x00000001u) != 0;
-  return value;
-}
-inline bool TransferHostWriteResponse::has_reason() const {
-  return _internal_has_reason();
-}
-inline void TransferHostWriteResponse::clear_reason() {
-  reason_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline const std::string& TransferHostWriteResponse::reason() const {
-  // @@protoc_insertion_point(field_get:replicator_rpc.TransferHostWriteResponse.reason)
-  return _internal_reason();
-}
-inline void TransferHostWriteResponse::set_reason(const std::string& value) {
-  _internal_set_reason(value);
-  // @@protoc_insertion_point(field_set:replicator_rpc.TransferHostWriteResponse.reason)
-}
-inline std::string* TransferHostWriteResponse::mutable_reason() {
-  // @@protoc_insertion_point(field_mutable:replicator_rpc.TransferHostWriteResponse.reason)
-  return _internal_mutable_reason();
-}
-inline const std::string& TransferHostWriteResponse::_internal_reason() const {
-  return reason_.Get();
-}
-inline void TransferHostWriteResponse::_internal_set_reason(const std::string& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void TransferHostWriteResponse::set_reason(std::string&& value) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:replicator_rpc.TransferHostWriteResponse.reason)
-}
-inline void TransferHostWriteResponse::set_reason(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:replicator_rpc.TransferHostWriteResponse.reason)
-}
-inline void TransferHostWriteResponse::set_reason(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000001u;
-  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:replicator_rpc.TransferHostWriteResponse.reason)
-}
-inline std::string* TransferHostWriteResponse::_internal_mutable_reason() {
-  _has_bits_[0] |= 0x00000001u;
-  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* TransferHostWriteResponse::release_reason() {
-  // @@protoc_insertion_point(field_release:replicator_rpc.TransferHostWriteResponse.reason)
-  if (!_internal_has_reason()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000001u;
-  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void TransferHostWriteResponse::set_allocated_reason(std::string* reason) {
-  if (reason != nullptr) {
-    _has_bits_[0] |= 0x00000001u;
-  } else {
-    _has_bits_[0] &= ~0x00000001u;
-  }
-  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.TransferHostWriteResponse.reason)
+  // @@protoc_insertion_point(field_set_allocated:replicator_rpc.HealthCheckResponse.reason)
 }
 
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -4148,10 +4908,10 @@ inline void TransferHostWriteResponse::set_allocated_reason(std::string* reason)
 
 PROTOBUF_NAMESPACE_OPEN
 
-template <> struct is_proto_enum< ::replicator_rpc::PosResult> : ::std::true_type {};
+template <> struct is_proto_enum< ::replicator_rpc::HealthCheckResponse_ServingStatus> : ::std::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::replicator_rpc::PosResult>() {
-  return ::replicator_rpc::PosResult_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::replicator_rpc::HealthCheckResponse_ServingStatus>() {
+  return ::replicator_rpc::HealthCheckResponse_ServingStatus_descriptor();
 }
 
 PROTOBUF_NAMESPACE_CLOSE

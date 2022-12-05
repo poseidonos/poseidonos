@@ -69,6 +69,8 @@ GrpcReplicationController::SuspendWrite(
     const pos_rpc::SuspendWriteRequest* request,
     pos_rpc::SuspendWriteResponse* response)
 {
+    // TODO (cheolho.kang): Implement later
+    // Should suepend new io from initator
     POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get SuspendWrite from grpc client");
     response->set_result(pos_rpc::PosResult::SUCCESS);
 

@@ -38,15 +38,15 @@
 #include <string>
 #include <thread>
 
-#include "spdk/pos.h"
-#include "src/include/pos_event_id.h"
 #include "mock_grpc/mock_replicator_client.h"
 #include "mock_grpc/mock_replicator_server.h"
+#include "spdk/pos.h"
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
+#include "test/unit-tests/io/frontend_io/aio_mock.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/pos_replicator/grpc_publisher_mock.h"
 #include "test/unit-tests/pos_replicator/grpc_subscriber_mock.h"
-#include "test/unit-tests/io/frontend_io/aio_mock.h"
 
 using namespace ::testing;
 using ::testing::_;

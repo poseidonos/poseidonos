@@ -47,7 +47,7 @@ struct TableStruct_pos_5frpc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[30]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[32]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -56,6 +56,12 @@ struct TableStruct_pos_5frpc_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5frpc_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_pos_5frpc_2eproto_metadata_getter(int index);
 namespace pos_rpc {
+class ChangeReplicationRoleRequest;
+struct ChangeReplicationRoleRequestDefaultTypeInternal;
+extern ChangeReplicationRoleRequestDefaultTypeInternal _ChangeReplicationRoleRequest_default_instance_;
+class ChangeReplicationRoleResponse;
+struct ChangeReplicationRoleResponseDefaultTypeInternal;
+extern ChangeReplicationRoleResponseDefaultTypeInternal _ChangeReplicationRoleResponse_default_instance_;
 class Chunk;
 struct ChunkDefaultTypeInternal;
 extern ChunkDefaultTypeInternal _Chunk_default_instance_;
@@ -148,6 +154,8 @@ struct WriteHostBlocksSyncResponseDefaultTypeInternal;
 extern WriteHostBlocksSyncResponseDefaultTypeInternal _WriteHostBlocksSyncResponse_default_instance_;
 }  // namespace pos_rpc
 PROTOBUF_NAMESPACE_OPEN
+template<> ::pos_rpc::ChangeReplicationRoleRequest* Arena::CreateMaybeMessage<::pos_rpc::ChangeReplicationRoleRequest>(Arena*);
+template<> ::pos_rpc::ChangeReplicationRoleResponse* Arena::CreateMaybeMessage<::pos_rpc::ChangeReplicationRoleResponse>(Arena*);
 template<> ::pos_rpc::Chunk* Arena::CreateMaybeMessage<::pos_rpc::Chunk>(Arena*);
 template<> ::pos_rpc::CompleteHostWriteRequest* Arena::CreateMaybeMessage<::pos_rpc::CompleteHostWriteRequest>(Arena*);
 template<> ::pos_rpc::CompleteHostWriteResponse* Arena::CreateMaybeMessage<::pos_rpc::CompleteHostWriteResponse>(Arena*);
@@ -1854,28 +1862,9 @@ class ReadBlocksResponse PROTOBUF_FINAL :
   // accessors -------------------------------------------------------
 
   enum : int {
-    kDataFieldNumber = 3,
     kReasonFieldNumber = 2,
     kResultFieldNumber = 1,
   };
-  // repeated .pos_rpc.Chunk data = 3;
-  int data_size() const;
-  private:
-  int _internal_data_size() const;
-  public:
-  void clear_data();
-  ::pos_rpc::Chunk* mutable_data(int index);
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >*
-      mutable_data();
-  private:
-  const ::pos_rpc::Chunk& _internal_data(int index) const;
-  ::pos_rpc::Chunk* _internal_add_data();
-  public:
-  const ::pos_rpc::Chunk& data(int index) const;
-  ::pos_rpc::Chunk* add_data();
-  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >&
-      data() const;
-
   // string reason = 2;
   bool has_reason() const;
   private:
@@ -1914,7 +1903,6 @@ class ReadBlocksResponse PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
-  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk > data_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
   int result_;
   friend struct ::TableStruct_pos_5frpc_2eproto;
@@ -4471,7 +4459,6 @@ class FinishVolumeSyncRequest PROTOBUF_FINAL :
   enum : int {
     kArrayNameFieldNumber = 1,
     kVolumeNameFieldNumber = 2,
-    kIsPrimaryFieldNumber = 3,
   };
   // string array_name = 1;
   void clear_array_name();
@@ -4505,15 +4492,6 @@ class FinishVolumeSyncRequest PROTOBUF_FINAL :
   std::string* _internal_mutable_volume_name();
   public:
 
-  // bool is_primary = 3;
-  void clear_is_primary();
-  bool is_primary() const;
-  void set_is_primary(bool value);
-  private:
-  bool _internal_is_primary() const;
-  void _internal_set_is_primary(bool value);
-  public:
-
   // @@protoc_insertion_point(class_scope:pos_rpc.FinishVolumeSyncRequest)
  private:
   class _Internal;
@@ -4523,7 +4501,6 @@ class FinishVolumeSyncRequest PROTOBUF_FINAL :
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
-  bool is_primary_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_pos_5frpc_2eproto;
 };
@@ -5319,6 +5296,346 @@ class ResumeWriteResponse PROTOBUF_FINAL :
   public:
 
   // @@protoc_insertion_point(class_scope:pos_rpc.ResumeWriteResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr reason_;
+  int result_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ChangeReplicationRoleRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.ChangeReplicationRoleRequest) */ {
+ public:
+  inline ChangeReplicationRoleRequest() : ChangeReplicationRoleRequest(nullptr) {}
+  virtual ~ChangeReplicationRoleRequest();
+  explicit constexpr ChangeReplicationRoleRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ChangeReplicationRoleRequest(const ChangeReplicationRoleRequest& from);
+  ChangeReplicationRoleRequest(ChangeReplicationRoleRequest&& from) noexcept
+    : ChangeReplicationRoleRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline ChangeReplicationRoleRequest& operator=(const ChangeReplicationRoleRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ChangeReplicationRoleRequest& operator=(ChangeReplicationRoleRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ChangeReplicationRoleRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ChangeReplicationRoleRequest* internal_default_instance() {
+    return reinterpret_cast<const ChangeReplicationRoleRequest*>(
+               &_ChangeReplicationRoleRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    30;
+
+  friend void swap(ChangeReplicationRoleRequest& a, ChangeReplicationRoleRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ChangeReplicationRoleRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ChangeReplicationRoleRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ChangeReplicationRoleRequest* New() const final {
+    return CreateMaybeMessage<ChangeReplicationRoleRequest>(nullptr);
+  }
+
+  ChangeReplicationRoleRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ChangeReplicationRoleRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ChangeReplicationRoleRequest& from);
+  void MergeFrom(const ChangeReplicationRoleRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ChangeReplicationRoleRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.ChangeReplicationRoleRequest";
+  }
+  protected:
+  explicit ChangeReplicationRoleRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kArrayNameFieldNumber = 1,
+    kVolumeNameFieldNumber = 2,
+    kRoleFieldNumber = 3,
+  };
+  // string array_name = 1;
+  void clear_array_name();
+  const std::string& array_name() const;
+  void set_array_name(const std::string& value);
+  void set_array_name(std::string&& value);
+  void set_array_name(const char* value);
+  void set_array_name(const char* value, size_t size);
+  std::string* mutable_array_name();
+  std::string* release_array_name();
+  void set_allocated_array_name(std::string* array_name);
+  private:
+  const std::string& _internal_array_name() const;
+  void _internal_set_array_name(const std::string& value);
+  std::string* _internal_mutable_array_name();
+  public:
+
+  // string volume_name = 2;
+  void clear_volume_name();
+  const std::string& volume_name() const;
+  void set_volume_name(const std::string& value);
+  void set_volume_name(std::string&& value);
+  void set_volume_name(const char* value);
+  void set_volume_name(const char* value, size_t size);
+  std::string* mutable_volume_name();
+  std::string* release_volume_name();
+  void set_allocated_volume_name(std::string* volume_name);
+  private:
+  const std::string& _internal_volume_name() const;
+  void _internal_set_volume_name(const std::string& value);
+  std::string* _internal_mutable_volume_name();
+  public:
+
+  // string role = 3;
+  void clear_role();
+  const std::string& role() const;
+  void set_role(const std::string& value);
+  void set_role(std::string&& value);
+  void set_role(const char* value);
+  void set_role(const char* value, size_t size);
+  std::string* mutable_role();
+  std::string* release_role();
+  void set_allocated_role(std::string* role);
+  private:
+  const std::string& _internal_role() const;
+  void _internal_set_role(const std::string& value);
+  std::string* _internal_mutable_role();
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.ChangeReplicationRoleRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr volume_name_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr role_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5frpc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ChangeReplicationRoleResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_rpc.ChangeReplicationRoleResponse) */ {
+ public:
+  inline ChangeReplicationRoleResponse() : ChangeReplicationRoleResponse(nullptr) {}
+  virtual ~ChangeReplicationRoleResponse();
+  explicit constexpr ChangeReplicationRoleResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ChangeReplicationRoleResponse(const ChangeReplicationRoleResponse& from);
+  ChangeReplicationRoleResponse(ChangeReplicationRoleResponse&& from) noexcept
+    : ChangeReplicationRoleResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline ChangeReplicationRoleResponse& operator=(const ChangeReplicationRoleResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ChangeReplicationRoleResponse& operator=(ChangeReplicationRoleResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ChangeReplicationRoleResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ChangeReplicationRoleResponse* internal_default_instance() {
+    return reinterpret_cast<const ChangeReplicationRoleResponse*>(
+               &_ChangeReplicationRoleResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    31;
+
+  friend void swap(ChangeReplicationRoleResponse& a, ChangeReplicationRoleResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ChangeReplicationRoleResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ChangeReplicationRoleResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ChangeReplicationRoleResponse* New() const final {
+    return CreateMaybeMessage<ChangeReplicationRoleResponse>(nullptr);
+  }
+
+  ChangeReplicationRoleResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ChangeReplicationRoleResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ChangeReplicationRoleResponse& from);
+  void MergeFrom(const ChangeReplicationRoleResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ChangeReplicationRoleResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_rpc.ChangeReplicationRoleResponse";
+  }
+  protected:
+  explicit ChangeReplicationRoleResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5frpc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kReasonFieldNumber = 2,
+    kResultFieldNumber = 1,
+  };
+  // string reason = 2;
+  bool has_reason() const;
+  private:
+  bool _internal_has_reason() const;
+  public:
+  void clear_reason();
+  const std::string& reason() const;
+  void set_reason(const std::string& value);
+  void set_reason(std::string&& value);
+  void set_reason(const char* value);
+  void set_reason(const char* value, size_t size);
+  std::string* mutable_reason();
+  std::string* release_reason();
+  void set_allocated_reason(std::string* reason);
+  private:
+  const std::string& _internal_reason() const;
+  void _internal_set_reason(const std::string& value);
+  std::string* _internal_mutable_reason();
+  public:
+
+  // .pos_rpc.PosResult result = 1;
+  void clear_result();
+  ::pos_rpc::PosResult result() const;
+  void set_result(::pos_rpc::PosResult value);
+  private:
+  ::pos_rpc::PosResult _internal_result() const;
+  void _internal_set_result(::pos_rpc::PosResult value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_rpc.ChangeReplicationRoleResponse)
  private:
   class _Internal;
 
@@ -6253,45 +6570,6 @@ inline void ReadBlocksResponse::set_allocated_reason(std::string* reason) {
   reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.ReadBlocksResponse.reason)
-}
-
-// repeated .pos_rpc.Chunk data = 3;
-inline int ReadBlocksResponse::_internal_data_size() const {
-  return data_.size();
-}
-inline int ReadBlocksResponse::data_size() const {
-  return _internal_data_size();
-}
-inline void ReadBlocksResponse::clear_data() {
-  data_.Clear();
-}
-inline ::pos_rpc::Chunk* ReadBlocksResponse::mutable_data(int index) {
-  // @@protoc_insertion_point(field_mutable:pos_rpc.ReadBlocksResponse.data)
-  return data_.Mutable(index);
-}
-inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >*
-ReadBlocksResponse::mutable_data() {
-  // @@protoc_insertion_point(field_mutable_list:pos_rpc.ReadBlocksResponse.data)
-  return &data_;
-}
-inline const ::pos_rpc::Chunk& ReadBlocksResponse::_internal_data(int index) const {
-  return data_.Get(index);
-}
-inline const ::pos_rpc::Chunk& ReadBlocksResponse::data(int index) const {
-  // @@protoc_insertion_point(field_get:pos_rpc.ReadBlocksResponse.data)
-  return _internal_data(index);
-}
-inline ::pos_rpc::Chunk* ReadBlocksResponse::_internal_add_data() {
-  return data_.Add();
-}
-inline ::pos_rpc::Chunk* ReadBlocksResponse::add_data() {
-  // @@protoc_insertion_point(field_add:pos_rpc.ReadBlocksResponse.data)
-  return _internal_add_data();
-}
-inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_rpc::Chunk >&
-ReadBlocksResponse::data() const {
-  // @@protoc_insertion_point(field_list:pos_rpc.ReadBlocksResponse.data)
-  return data_;
 }
 
 // -------------------------------------------------------------------
@@ -8318,26 +8596,6 @@ inline void FinishVolumeSyncRequest::set_allocated_volume_name(std::string* volu
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.FinishVolumeSyncRequest.volume_name)
 }
 
-// bool is_primary = 3;
-inline void FinishVolumeSyncRequest::clear_is_primary() {
-  is_primary_ = false;
-}
-inline bool FinishVolumeSyncRequest::_internal_is_primary() const {
-  return is_primary_;
-}
-inline bool FinishVolumeSyncRequest::is_primary() const {
-  // @@protoc_insertion_point(field_get:pos_rpc.FinishVolumeSyncRequest.is_primary)
-  return _internal_is_primary();
-}
-inline void FinishVolumeSyncRequest::_internal_set_is_primary(bool value) {
-  
-  is_primary_ = value;
-}
-inline void FinishVolumeSyncRequest::set_is_primary(bool value) {
-  _internal_set_is_primary(value);
-  // @@protoc_insertion_point(field_set:pos_rpc.FinishVolumeSyncRequest.is_primary)
-}
-
 // -------------------------------------------------------------------
 
 // FinishVolumeSyncResponse
@@ -8881,9 +9139,297 @@ inline void ResumeWriteResponse::set_allocated_reason(std::string* reason) {
   // @@protoc_insertion_point(field_set_allocated:pos_rpc.ResumeWriteResponse.reason)
 }
 
+// -------------------------------------------------------------------
+
+// ChangeReplicationRoleRequest
+
+// string array_name = 1;
+inline void ChangeReplicationRoleRequest::clear_array_name() {
+  array_name_.ClearToEmpty();
+}
+inline const std::string& ChangeReplicationRoleRequest::array_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ChangeReplicationRoleRequest.array_name)
+  return _internal_array_name();
+}
+inline void ChangeReplicationRoleRequest::set_array_name(const std::string& value) {
+  _internal_set_array_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ChangeReplicationRoleRequest.array_name)
+}
+inline std::string* ChangeReplicationRoleRequest::mutable_array_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ChangeReplicationRoleRequest.array_name)
+  return _internal_mutable_array_name();
+}
+inline const std::string& ChangeReplicationRoleRequest::_internal_array_name() const {
+  return array_name_.Get();
+}
+inline void ChangeReplicationRoleRequest::_internal_set_array_name(const std::string& value) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ChangeReplicationRoleRequest::set_array_name(std::string&& value) {
+  
+  array_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ChangeReplicationRoleRequest.array_name)
+}
+inline void ChangeReplicationRoleRequest::set_array_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ChangeReplicationRoleRequest.array_name)
+}
+inline void ChangeReplicationRoleRequest::set_array_name(const char* value,
+    size_t size) {
+  
+  array_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ChangeReplicationRoleRequest.array_name)
+}
+inline std::string* ChangeReplicationRoleRequest::_internal_mutable_array_name() {
+  
+  return array_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ChangeReplicationRoleRequest::release_array_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ChangeReplicationRoleRequest.array_name)
+  return array_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ChangeReplicationRoleRequest::set_allocated_array_name(std::string* array_name) {
+  if (array_name != nullptr) {
+    
+  } else {
+    
+  }
+  array_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ChangeReplicationRoleRequest.array_name)
+}
+
+// string volume_name = 2;
+inline void ChangeReplicationRoleRequest::clear_volume_name() {
+  volume_name_.ClearToEmpty();
+}
+inline const std::string& ChangeReplicationRoleRequest::volume_name() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+  return _internal_volume_name();
+}
+inline void ChangeReplicationRoleRequest::set_volume_name(const std::string& value) {
+  _internal_set_volume_name(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+}
+inline std::string* ChangeReplicationRoleRequest::mutable_volume_name() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+  return _internal_mutable_volume_name();
+}
+inline const std::string& ChangeReplicationRoleRequest::_internal_volume_name() const {
+  return volume_name_.Get();
+}
+inline void ChangeReplicationRoleRequest::_internal_set_volume_name(const std::string& value) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ChangeReplicationRoleRequest::set_volume_name(std::string&& value) {
+  
+  volume_name_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+}
+inline void ChangeReplicationRoleRequest::set_volume_name(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+}
+inline void ChangeReplicationRoleRequest::set_volume_name(const char* value,
+    size_t size) {
+  
+  volume_name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+}
+inline std::string* ChangeReplicationRoleRequest::_internal_mutable_volume_name() {
+  
+  return volume_name_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ChangeReplicationRoleRequest::release_volume_name() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+  return volume_name_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ChangeReplicationRoleRequest::set_allocated_volume_name(std::string* volume_name) {
+  if (volume_name != nullptr) {
+    
+  } else {
+    
+  }
+  volume_name_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), volume_name,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ChangeReplicationRoleRequest.volume_name)
+}
+
+// string role = 3;
+inline void ChangeReplicationRoleRequest::clear_role() {
+  role_.ClearToEmpty();
+}
+inline const std::string& ChangeReplicationRoleRequest::role() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ChangeReplicationRoleRequest.role)
+  return _internal_role();
+}
+inline void ChangeReplicationRoleRequest::set_role(const std::string& value) {
+  _internal_set_role(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ChangeReplicationRoleRequest.role)
+}
+inline std::string* ChangeReplicationRoleRequest::mutable_role() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ChangeReplicationRoleRequest.role)
+  return _internal_mutable_role();
+}
+inline const std::string& ChangeReplicationRoleRequest::_internal_role() const {
+  return role_.Get();
+}
+inline void ChangeReplicationRoleRequest::_internal_set_role(const std::string& value) {
+  
+  role_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ChangeReplicationRoleRequest::set_role(std::string&& value) {
+  
+  role_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ChangeReplicationRoleRequest.role)
+}
+inline void ChangeReplicationRoleRequest::set_role(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  role_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ChangeReplicationRoleRequest.role)
+}
+inline void ChangeReplicationRoleRequest::set_role(const char* value,
+    size_t size) {
+  
+  role_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ChangeReplicationRoleRequest.role)
+}
+inline std::string* ChangeReplicationRoleRequest::_internal_mutable_role() {
+  
+  return role_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ChangeReplicationRoleRequest::release_role() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ChangeReplicationRoleRequest.role)
+  return role_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ChangeReplicationRoleRequest::set_allocated_role(std::string* role) {
+  if (role != nullptr) {
+    
+  } else {
+    
+  }
+  role_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), role,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ChangeReplicationRoleRequest.role)
+}
+
+// -------------------------------------------------------------------
+
+// ChangeReplicationRoleResponse
+
+// .pos_rpc.PosResult result = 1;
+inline void ChangeReplicationRoleResponse::clear_result() {
+  result_ = 0;
+}
+inline ::pos_rpc::PosResult ChangeReplicationRoleResponse::_internal_result() const {
+  return static_cast< ::pos_rpc::PosResult >(result_);
+}
+inline ::pos_rpc::PosResult ChangeReplicationRoleResponse::result() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ChangeReplicationRoleResponse.result)
+  return _internal_result();
+}
+inline void ChangeReplicationRoleResponse::_internal_set_result(::pos_rpc::PosResult value) {
+  
+  result_ = value;
+}
+inline void ChangeReplicationRoleResponse::set_result(::pos_rpc::PosResult value) {
+  _internal_set_result(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ChangeReplicationRoleResponse.result)
+}
+
+// string reason = 2;
+inline bool ChangeReplicationRoleResponse::_internal_has_reason() const {
+  bool value = (_has_bits_[0] & 0x00000001u) != 0;
+  return value;
+}
+inline bool ChangeReplicationRoleResponse::has_reason() const {
+  return _internal_has_reason();
+}
+inline void ChangeReplicationRoleResponse::clear_reason() {
+  reason_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& ChangeReplicationRoleResponse::reason() const {
+  // @@protoc_insertion_point(field_get:pos_rpc.ChangeReplicationRoleResponse.reason)
+  return _internal_reason();
+}
+inline void ChangeReplicationRoleResponse::set_reason(const std::string& value) {
+  _internal_set_reason(value);
+  // @@protoc_insertion_point(field_set:pos_rpc.ChangeReplicationRoleResponse.reason)
+}
+inline std::string* ChangeReplicationRoleResponse::mutable_reason() {
+  // @@protoc_insertion_point(field_mutable:pos_rpc.ChangeReplicationRoleResponse.reason)
+  return _internal_mutable_reason();
+}
+inline const std::string& ChangeReplicationRoleResponse::_internal_reason() const {
+  return reason_.Get();
+}
+inline void ChangeReplicationRoleResponse::_internal_set_reason(const std::string& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ChangeReplicationRoleResponse::set_reason(std::string&& value) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_rpc.ChangeReplicationRoleResponse.reason)
+}
+inline void ChangeReplicationRoleResponse::set_reason(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_rpc.ChangeReplicationRoleResponse.reason)
+}
+inline void ChangeReplicationRoleResponse::set_reason(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000001u;
+  reason_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_rpc.ChangeReplicationRoleResponse.reason)
+}
+inline std::string* ChangeReplicationRoleResponse::_internal_mutable_reason() {
+  _has_bits_[0] |= 0x00000001u;
+  return reason_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ChangeReplicationRoleResponse::release_reason() {
+  // @@protoc_insertion_point(field_release:pos_rpc.ChangeReplicationRoleResponse.reason)
+  if (!_internal_has_reason()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000001u;
+  return reason_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ChangeReplicationRoleResponse::set_allocated_reason(std::string* reason) {
+  if (reason != nullptr) {
+    _has_bits_[0] |= 0x00000001u;
+  } else {
+    _has_bits_[0] &= ~0x00000001u;
+  }
+  reason_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), reason,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_rpc.ChangeReplicationRoleResponse.reason)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -57,7 +57,7 @@ public:
         ::grpc::ServerContext* context,
         const pos_rpc::FinishVolumeSyncRequest* request,
         pos_rpc::FinishVolumeSyncResponse* response) override;
-    
+
     virtual ::grpc::Status SuspendWrite(
         ::grpc::ServerContext* context,
         const pos_rpc::SuspendWriteRequest* request,
@@ -67,6 +67,5 @@ public:
         ::grpc::ServerContext* context,
         const pos_rpc::ResumeWriteRequest* request,
         pos_rpc::ResumeWriteResponse* response) override;
-    
 };
 } // namespace pos
