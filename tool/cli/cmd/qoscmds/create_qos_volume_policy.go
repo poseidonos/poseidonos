@@ -1,16 +1,16 @@
 package qoscmds
 
 import (
-	"encoding/json"
-	"pnconnector/src/log"
+	"fmt"
 	"strings"
 
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
+	"cli/cmd/grpcmgr"
 
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var VolumePolicyCmd = &cobra.Command{
@@ -32,47 +32,60 @@ NOTE:
 	the throttling will be take effect only for the first mounted volume in the subsystem.
           `,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "CREATEQOSVOLUMEPOLICY"
 
 		req := formVolumePolicyReq(command)
-		reqJson, err := json.Marshal(req)
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
 		if err != nil {
-			log.Error("error:", err)
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
 		}
-
 		displaymgr.PrintRequest(string(reqJson))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		res, gRpcErr := grpcmgr.SendQosCreateVolumePolicy(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
+
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
+		}
+
+		return nil
 	},
 }
 
-func formVolumePolicyReq(command string) messages.Request {
+func formVolumePolicyReq(command string) *pb.QosCreateVolumePolicyRequest {
 
 	volumeNameListSlice := strings.Split(volumePolicy_volumeNameList, ",")
-	var volumeNames []messages.VolumeNameList
+	var volumeNames []*pb.QosCreateVolumePolicyRequest_Param_Volume
 	for _, str := range volumeNameListSlice {
-		var volumeNameList messages.VolumeNameList // Single device name that is splitted
-		volumeNameList.VOLUMENAME = str
-		volumeNames = append(volumeNames, volumeNameList)
+		volumeName := &pb.QosCreateVolumePolicyRequest_Param_Volume{
+			VolumeName: str,
+		}
+		volumeNames = append(volumeNames, volumeName)
 	}
-	param := messages.VolumePolicyParam{
-		VOLUMENAME:   volumeNames,
-		MINIOPS:      volumePolicy_minIOPS,
-		MAXIOPS:      volumePolicy_maxIOPS,
-		MINBANDWIDTH: volumePolicy_minBandwidth,
-		MAXBANDWIDTH: volumePolicy_maxBandwidth,
-		ARRAYNAME:    volumePolicy_arrayName,
-	}
-
 	uuid := globals.GenerateUUID()
-
-	req := messages.BuildReqWithParam(command, uuid, param)
+	param := &pb.QosCreateVolumePolicyRequest_Param{
+		Array:   volumePolicy_arrayName,
+		Vol:     volumeNames,
+		Miniops: int64(volumePolicy_minIOPS),
+		Maxiops: int64(volumePolicy_maxIOPS),
+		Minbw:   int64(volumePolicy_minBandwidth),
+		Maxbw:   int64(volumePolicy_maxBandwidth),
+	}
+	req := &pb.QosCreateVolumePolicyRequest{
+		Command:   command,
+		Rid:       uuid,
+		Requestor: "cli",
+		Param:     param,
+	}
 
 	return req
 }

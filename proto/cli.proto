@@ -224,6 +224,12 @@ service PosCli {
     	};
 	}
 
+	rpc QosCreateVolumePolicy (QosCreateVolumePolicyRequest) returns (QosCreateVolumePolicyResponse) {
+		option (google.api.http) = {
+			post: "/v1/createqospolicy"
+		};
+	}
+
 	rpc DeleteVolume (DeleteVolumeRequest) returns (DeleteVolumeResponse) {
 		option (google.api.http) = {
       		post: "/v1/deletevolume"
@@ -1415,3 +1421,30 @@ message ListVolumeResponse {
     PosInfo info = 4;
 }
 
+message QosCreateVolumePolicyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string array = 1;
+		message Volume {
+			string volumeName = 1;
+		}
+		repeated Volume vol = 2;
+		int64 minbw = 3;
+		int64 miniops = 4;
+		int64 maxbw = 5;
+		int64 maxiops = 6;
+	}
+	Param param = 4;
+}
+
+message QosCreateVolumePolicyResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
