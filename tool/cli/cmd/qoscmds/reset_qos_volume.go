@@ -1,16 +1,16 @@
 package qoscmds
 
 import (
-	"encoding/json"
-	"pnconnector/src/log"
-	"strings"
+    "fmt"
+    "strings"
 
-	"cli/cmd/displaymgr"
-	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
+    pb "cli/api"
+    "cli/cmd/displaymgr"
+    "cli/cmd/globals"
+    "cli/cmd/grpcmgr"
 
-	"github.com/spf13/cobra"
+    "github.com/spf13/cobra"
+    "google.golang.org/protobuf/encoding/protojson"
 )
 
 var VolumeResetCmd = &cobra.Command{
@@ -25,47 +25,58 @@ Syntax:
 Example: 
 	poseidonos-cli qos reset --volume-name Volume0 --array-name Array0
           `,
+    RunE: func(cmd *cobra.Command, args []string) error {
 
-	Run: func(cmd *cobra.Command, args []string) {
+        var command = "RESETQOSVOLUMEPOLICY"
 
-		var command = "RESETQOSVOLUMEPOLICY"
+        req := formResetVolumePolicyReq(command)
+        reqJson, err := protojson.MarshalOptions{
+            EmitUnpopulated: true,
+        }.Marshal(req)
+        if err != nil {
+            fmt.Printf("failed to marshal the protobuf request: %v", err)
+            return err
+        }
+        displaymgr.PrintRequest(string(reqJson))
+        res, gRpcErr := grpcmgr.SendQosResetVolumePolicy(req)
+        if gRpcErr != nil {
+            globals.PrintErrMsg(gRpcErr)
+            return gRpcErr
+        }
 
-		req := formVolumeResetReq(command)
-		reqJson, err := json.Marshal(req)
-		if err != nil {
-			log.Error("error:", err)
-		}
+        printErr := displaymgr.PrintProtoResponse(command, res)
+        if printErr != nil {
+            fmt.Printf("failed to print the response: %v", printErr)
+            return printErr
+        }
 
-		displaymgr.PrintRequest(string(reqJson))
-
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
-		}
-	},
+        return nil
+    },
 }
 
-func formVolumeResetReq(command string) messages.Request {
+func formResetVolumePolicyReq(command string) *pb.QosResetVolumePolicyRequest {
 
-	volumeNameListSlice := strings.Split(volumeReset_volumeNameList, ",")
-	var volumeNames []messages.VolumeNameList
-	for _, str := range volumeNameListSlice {
-		var volumeNameList messages.VolumeNameList // Single device name that is splitted
-		volumeNameList.VOLUMENAME = str
-		volumeNames = append(volumeNames, volumeNameList)
-	}
+    volumeNameListSlice := strings.Split(volumePolicy_volumeNameList, ",")
+    var volumeNames []*pb.QosVolumeNameParam
+    for _, str := range volumeNameListSlice {
+        volumeName := &pb.QosVolumeNameParam{
+            VolumeName: str,
+        }
+        volumeNames = append(volumeNames, volumeName)
+    }
+    uuid := globals.GenerateUUID()
+    param := &pb.QosResetVolumePolicyRequest_Param{
+        Array:   volumePolicy_arrayName,
+        Vol:     volumeNames,
+    }
+    req := &pb.QosResetVolumePolicyRequest{
+        Command:   command,
+        Rid:       uuid,
+        Requestor: "cli",
+        Param:     param,
+    }
 
-	param := messages.VolumePolicyParam{
-		VOLUMENAME: volumeNames,
-		ARRAYNAME:  volumeReset_arrayName,
-	}
-
-	uuid := globals.GenerateUUID()
-
-	req := messages.BuildReqWithParam(command, uuid, param)
-
-	return req
+    return req
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

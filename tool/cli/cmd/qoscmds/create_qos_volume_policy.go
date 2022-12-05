@@ -64,9 +64,9 @@ NOTE:
 func formVolumePolicyReq(command string) *pb.QosCreateVolumePolicyRequest {
 
 	volumeNameListSlice := strings.Split(volumePolicy_volumeNameList, ",")
-	var volumeNames []*pb.QosCreateVolumePolicyRequest_Param_Volume
+	var volumeNames []*pb.QosVolumeNameParam
 	for _, str := range volumeNameListSlice {
-		volumeName := &pb.QosCreateVolumePolicyRequest_Param_Volume{
+		volumeName := &pb.QosVolumeNameParam{
 			VolumeName: str,
 		}
 		volumeNames = append(volumeNames, volumeName)
