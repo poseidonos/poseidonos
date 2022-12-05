@@ -84,11 +84,11 @@ class AIO
 {
 public:
     AIO(void);
-    void SubmitAsyncIO(VolumeIoSmartPtr volIo);
+    virtual void SubmitAsyncIO(VolumeIoSmartPtr volIo);
     void SubmitFlush(pos_io& posIo);
     void CompleteIOs(void);
     VolumeIoSmartPtr CreateVolumeIo(pos_io& posIo);
-    VolumeIoSmartPtr CreatePosReplicatorVolumeIo(pos_io& posIo, uint64_t lsn);
+    virtual VolumeIoSmartPtr CreatePosReplicatorVolumeIo(pos_io& posIo, uint64_t lsn);
     void SubmitAsyncAdmin(pos_io& posIo, IArrayInfo* arrayInfo = nullptr);
 
 private:

@@ -74,6 +74,7 @@
                 "LOG": "pos.log",
                 "TELEMETRY": false,
                 "LOGGER_LEVEL": "debug",
+                "WAIT_AFTER_EXE": 10,
                 "TRANSPORT": {
                     "TYPE": "tcp",
                     "NUM_SHARED_BUFFER": 4096

@@ -58,6 +58,7 @@ public:
 private:
     void _ConnectGrpcServer(std::string targetAddress);
     bool _WaitUntilReady(void);
+    void _InsertBlockToChunk(replicator_rpc::CompleteReadRequest* request, void* data, uint64_t numBlocks);
 
     ConfigManager* configManager;
     std::shared_ptr<grpc::Channel> channel;

@@ -57,7 +57,6 @@ protected:
     void SetUp(void) override;
     void TearDown(void) override;
 
-    MockReplicatorServer* haServer;
     GrpcPublisher* posClient;
     NiceMock<MockConfigManager>* configManager;
 };
@@ -67,12 +66,6 @@ GrpcPublisherTestFixture::SetUp(void)
 {
     configManager = new NiceMock<MockConfigManager>;
     ON_CALL(*configManager, GetValue("replicator", "ha_publisher_address", _, _)).WillByDefault(SetArg2ToStringAndReturn0("0.0.0.0:50003"));
-    
-    // new Server : HA side
-    haServer = new MockReplicatorServer();
-    string serverAddress(GRPC_HA_PUB_SERVER_SOCKET_ADDRESS);
-    new std::thread(&MockReplicatorServer::RunServer, haServer, serverAddress);
-    sleep(1);
 
     posClient = new GrpcPublisher(nullptr, configManager);
 }
@@ -81,9 +74,6 @@ void
 GrpcPublisherTestFixture::TearDown(void)
 {
     delete configManager;
-    delete haServer;
-    sleep(1);
-
     delete posClient;
 }
 
