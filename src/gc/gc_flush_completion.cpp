@@ -106,8 +106,16 @@ GcFlushCompletion::_DoSpecificJob(void)
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried:{}",
-        arrayName, lsid, tryCnt);
+    if (tryCnt >= GC_RBA_TRYLOCK_RETRY_THRESHOLD)
+    {
+        POS_TRACE_TRACE(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
+            arrayName, lsid, tryCnt);
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
+            arrayName, lsid, tryCnt);
+    }
 
     airlog("PERF_GcFlush", "write", 0, totalBlksPerUserStripe * BLOCK_SIZE);
     EventSmartPtr event;
@@ -163,15 +171,17 @@ GcFlushCompletion::Init(void)
 bool
 GcFlushCompletion::_IsValidRba(BlkAddr rba, uint32_t offset)
 {
-    int shouldRetry = OK_READY;
-    VirtualBlkAddr currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
-    if (NEED_RETRY != shouldRetry)
-    {
-        VirtualBlkAddr oldVsa = stripe->GetVictimVsa(offset);
-        bool isValid = currentVsa == oldVsa;
-        return isValid;
-    }
     return true;
+    // todo comment out due to performance issue
+    // int shouldRetry = OK_READY;
+    // VirtualBlkAddr currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
+    // if (NEED_RETRY != shouldRetry)
+    // {
+    //     VirtualBlkAddr oldVsa = stripe->GetVictimVsa(offset);
+    //     bool isValid = currentVsa == oldVsa;
+    //     return isValid;
+    // }
+    // return true;
 }
 
 bool
@@ -185,7 +195,7 @@ GcFlushCompletion::AcquireOwnership(void)
         if (needLogging == true)
         {
             RBAOwnerType owner = rbaStateManager->GetOwner(volId, *currPos);
-            bool needWarnLogging = tryCnt % 50000 == 0;
+            bool needWarnLogging = tryCnt % GC_RBA_TRYLOCK_RETRY_THRESHOLD == 0;
             if (needWarnLogging)
             {
                 POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),

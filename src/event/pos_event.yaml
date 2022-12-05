@@ -4203,10 +4203,17 @@ Root:
     Cause:
     Solution:
   -
-    Id: 3406
-    Name: GC_IS_BUSY_IN_VICTIM_SELECTION
+    Id: 3405
+    Name: GC_CONGESTED_VICTIM_SELECTION
     Severity:
-    Message: GC is busy, so victim selection has been postponed.
+    Message: GC is congested, so victim selection should be retried.
+    Cause:
+    Solution:
+  -
+    Id: 3406
+    Name: GC_RETRY_VICTIM_SELECTION
+    Severity:
+    Message: GC is busy, so victim selection should be retried.
     Cause:
     Solution:
   -

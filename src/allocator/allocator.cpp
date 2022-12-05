@@ -278,14 +278,12 @@ Allocator::PrepareRebuild(void)
 void
 Allocator::SetNormalGcThreshold(uint32_t inputThreshold)
 {
-    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "normal threshold:{}", inputThreshold);
     contextManager->GetGcCtx()->SetNormalGcThreshold(inputThreshold);
 }
 
 void
 Allocator::SetUrgentThreshold(uint32_t inputThreshold)
 {
-    POS_TRACE_TRACE(EID(GC_THRESHOLD_IS_SET), "urgent threshold:{}", inputThreshold);
     contextManager->GetGcCtx()->SetUrgentThreshold(inputThreshold);
 }
 

@@ -84,6 +84,7 @@ private:
     uint32_t ownershipProgress = 0;
     uint32_t volId = 0;
     uint32_t tryCnt = 0;
+    const uint32_t GC_RBA_TRYLOCK_RETRY_THRESHOLD = 50000;
     bool isInit = false;
     StripeId lsid = 0;
     uint32_t totalBlksPerUserStripe = 0;
