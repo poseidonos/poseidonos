@@ -171,15 +171,17 @@ GcFlushCompletion::Init(void)
 bool
 GcFlushCompletion::_IsValidRba(BlkAddr rba, uint32_t offset)
 {
-    int shouldRetry = OK_READY;
-    VirtualBlkAddr currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
-    if (NEED_RETRY != shouldRetry)
-    {
-        VirtualBlkAddr oldVsa = stripe->GetVictimVsa(offset);
-        bool isValid = currentVsa == oldVsa;
-        return isValid;
-    }
     return true;
+    // todo comment out due to performance issue
+    // int shouldRetry = OK_READY;
+    // VirtualBlkAddr currentVsa = iVSAMap->GetVSAInternal(volId, rba, shouldRetry);
+    // if (NEED_RETRY != shouldRetry)
+    // {
+    //     VirtualBlkAddr oldVsa = stripe->GetVictimVsa(offset);
+    //     bool isValid = currentVsa == oldVsa;
+    //     return isValid;
+    // }
+    // return true;
 }
 
 bool
