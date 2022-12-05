@@ -138,6 +138,10 @@ WriteSubmission::Execute(void)
         {
             rbaStateManager->BulkReleaseOwnership(volumeId, startRba,
                 blockCount);
+            if (0 < token)
+            {
+                flowControl->ReturnToken(FlowControlType::USER, token);
+            }
         }
         else
         {

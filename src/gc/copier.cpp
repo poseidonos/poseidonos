@@ -182,19 +182,19 @@ Copier::_CompareThresholdState(void)
         uint32_t victimCnt = segmentCtx->GetVictimSegmentCount();
         uint32_t numFreeSegments = (uint32_t)segmentCtx->GetNumOfFreeSegment();
         uint32_t urgentThreshold = gcCtx->GetUrgentThreshold();
-        uint32_t normalThreshold = gcCtx->GetUrgentThreshold();
+        uint32_t normalThreshold = gcCtx->GetNormalGcThreshold();
         if(victimCnt > gcBusyThreshold)
         {
             gcBusyRetryCnt++;
             if (gcBusyRetryCnt % 10000 == 0)
             {
-                POS_TRACE_WARN(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
+                POS_TRACE_WARN(EID(GC_CONGESTED_VICTIM_SELECTION),
                     "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}, gc_busy_retried:{}",
                     victimCnt, numFreeSegments, urgentThreshold, arrayId, gcBusyRetryCnt);
             }
             else if (gcBusyRetryCnt % 100 == 0)
             {
-                POS_TRACE_DEBUG(EID(GC_IS_BUSY_IN_VICTIM_SELECTION),
+                POS_TRACE_DEBUG(EID(GC_RETRY_VICTIM_SELECTION),
                     "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}, gc_busy_retried:{}",
                     victimCnt, numFreeSegments, urgentThreshold, arrayId, gcBusyRetryCnt);
             }
