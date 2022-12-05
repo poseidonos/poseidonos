@@ -106,7 +106,7 @@ GcFlushCompletion::_DoSpecificJob(void)
         return false;
     }
 
-    if (tryCnt >= RETRY_WARN_FREQUENCY)
+    if (tryCnt >= GC_RBA_TRYLOCK_RETRY_THRESHOLD)
     {
         POS_TRACE_TRACE(EID(GC_RBA_OWNERSHIP_ACQUIRED), "array_name:{}, stripe_id:{}, tried_total:{}",
             arrayName, lsid, tryCnt);
@@ -195,7 +195,7 @@ GcFlushCompletion::AcquireOwnership(void)
         if (needLogging == true)
         {
             RBAOwnerType owner = rbaStateManager->GetOwner(volId, *currPos);
-            bool needWarnLogging = tryCnt % RETRY_WARN_FREQUENCY == 0;
+            bool needWarnLogging = tryCnt % GC_RBA_TRYLOCK_RETRY_THRESHOLD == 0;
             if (needWarnLogging)
             {
                 POS_TRACE_WARN(EID(GC_RBA_OWNERSHIP_ACQUISITION_FAILED),
