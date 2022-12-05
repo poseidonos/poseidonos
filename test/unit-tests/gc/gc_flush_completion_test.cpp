@@ -130,9 +130,9 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testIfgcFlushCompletionWhenAcquireR
     {
         std::pair<uint32_t, uint32_t> revMapEntry = {index, testVolumeId};
         EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
-        VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
-        EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, index, _)).WillOnce(Return(vsa));
-        EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
+        // VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
+        // EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, index, _)).WillOnce(Return(vsa));
+        // EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
     }
     gcFlushCompletion->Init();
     list<RbaAndSize>* rbaList = gcFlushCompletion->GetRbaList();
@@ -160,9 +160,9 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testgcFlushExecuteWhenAcquireOwners
     {
         std::pair<uint32_t, uint32_t> revMapEntry = {index, testVolumeId};
         EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
-        VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
-        EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, index, _)).WillOnce(Return(vsa));
-        EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
+        // VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
+        // EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, index, _)).WillOnce(Return(vsa));
+        // EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
     }
     gcFlushCompletion->Init();
     list<RbaAndSize>* rbaList = gcFlushCompletion->GetRbaList();
@@ -190,9 +190,9 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testRbaListShouldBeUniqueAndBeSorte
         uint32_t rba = (4 - (index % 4)) * 100; // 400, 300, 200, or 100, Because it is a total of 16 cycles, it overlaps four times.
         std::pair<uint32_t, uint32_t> revMapEntry = {rba, testVolumeId};
         EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
-        VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
-        EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, rba, _)).WillRepeatedly(Return(vsa));
-        EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
+        // VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
+        // EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, rba, _)).WillRepeatedly(Return(vsa));
+        // EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
     }
     gcFlushCompletion->Init();
     list<RbaAndSize>* rbaList = gcFlushCompletion->GetRbaList();
