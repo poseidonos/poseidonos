@@ -26,6 +26,10 @@ public:
     MOCK_METHOD(std::vector<BlkInfo>*, GetBlkInfoList, (uint32_t volumeId), (override));
     MOCK_METHOD(void, SetFlushed, (uint32_t volumeId, bool force), (override));
     MOCK_METHOD(bool, IsAllFinished, (), (override));
+    MOCK_METHOD(bool, FlushSubmitted, (), (override));
+    MOCK_METHOD(bool, FlushCompleted, (), (override));
+    MOCK_METHOD(bool, UpdateMapRequested, (), (override));
+    MOCK_METHOD(bool, UpdateMapCompleted, (), (override));
 };
 
 } // namespace pos

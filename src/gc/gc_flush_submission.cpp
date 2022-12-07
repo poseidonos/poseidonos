@@ -193,14 +193,20 @@ GcFlushSubmission::Execute(void)
         iArrayInfo->GetIndex(),
         false);
 
+    bool result = (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
+    if (result == true)
+    {
+        gcStripeManager->FlushSubmitted();
+    }
+
     POS_TRACE_DEBUG(EID(GC_STRIPE_FLUSH_SUBMISSION),
         "arrayName:{}, validCnt:{}, stripeUserLsid:{}, result:{}",
         arrayName,
         validCnt,
         logicalStripeId,
-        (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned));
+        result);
 
-    return (IOSubmitHandlerStatus::SUCCESS == errorReturned || IOSubmitHandlerStatus::FAIL_IN_SYSTEM_STOP == errorReturned);
+    return result;
 }
 
 Stripe*

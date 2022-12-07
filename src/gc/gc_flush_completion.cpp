@@ -98,6 +98,7 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     if (isInit == false)
     {
+        gcStripeManager->FlushCompleted();
         Init();
     }
 
@@ -127,7 +128,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     {
         event = inputEvent;
     }
-    gcStripeManager->MapUpdateRequested();
+    gcStripeManager->UpdateMapRequested();
     stripe->Flush(event);
     return true;
 }

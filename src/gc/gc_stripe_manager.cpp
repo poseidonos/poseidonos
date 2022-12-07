@@ -88,14 +88,24 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
         gcActiveWriteBuffers[volId] = nullptr;
         flushed[volId] = true;
     }
-    flushedStripeCnt = 0;
+
+    totalProcessingCnt = 0;
+    flushingCnt = 0;
     mapUpdatingCnt = 0;
+
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
     _SetBufferPool();
+    if (publisher == nullptr)
+    {
+        publisher = new TelemetryPublisher("SpaceInfo");
+        publisher->AddDefaultLabel("array_id", to_string(arrayId));
+        TelemetryClientSingleton::Instance()->RegisterPublisher(publisher);
+    }
 }
 
 GcStripeManager::~GcStripeManager(void)
 {
+    TelemetryClientSingleton::Instance()->DeregisterPublisher(publisher->GetName());
     for (auto t : timer)
     {
         delete t.second;
@@ -241,9 +251,8 @@ GcStripeManager::_ReturnBuffer(GcWriteBuffer* buffer)
 void
 GcStripeManager::SetFinished(void)
 {
-    flushedStripeCnt--;
-    POS_TRACE_TRACE(EID(GC_MAP_UPDATE_COMPLETION),
-        "flushing_and_updating_count_total:{}, array_id:{}", flushedStripeCnt, iArrayInfo->GetIndex());
+    uint32_t count = --totalProcessingCnt;
+    _PublishTotalProcessingCount(count);
 }
 
 void
@@ -256,7 +265,7 @@ GcStripeManager::ReturnBuffer(GcWriteBuffer* buffer)
 bool
 GcStripeManager::IsAllFinished(void)
 {
-    return (flushedStripeCnt == 0);
+    return (totalProcessingCnt == 0);
 }
 
 std::vector<BlkInfo>*
@@ -296,8 +305,9 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
     assert(flushed[volumeId] == false);
     blkInfoList[volumeId] = nullptr;
     gcActiveWriteBuffers[volumeId] = nullptr;
-    flushedStripeCnt++;
     flushed[volumeId] = true;
+    uint32_t count = ++totalProcessingCnt;
+    _PublishTotalProcessingCount(count);
 }
 
 void
@@ -359,17 +369,31 @@ GcStripeManager::ReleaseFlushLock(uint32_t volId)
 }
 
 void
-GcStripeManager::MapUpdateRequested(void)
+GcStripeManager::FlushSubmitted(void)
 {
-    mapUpdatingCnt++;
+    uint32_t count = ++flushingCnt;
+    _PublishFlushingCount(count);
 }
 
 void
-GcStripeManager::MapUpdateCompleted(void)
+GcStripeManager::FlushCompleted(void)
 {
-    mapUpdatingCnt--;
-    POS_TRACE_TRACE(EID(GC_MAP_UPDATE_COMPLETION),
-        "map_updating_count:{}, array_id:{}", mapUpdatingCnt, iArrayInfo->GetIndex());
+    uint32_t count = --flushingCnt;
+    _PublishFlushingCount(count);
+}
+
+void
+GcStripeManager::UpdateMapRequested(void)
+{
+    uint32_t count = ++mapUpdatingCnt;
+    _PublishUpdatingCount(count);
+}
+
+void
+GcStripeManager::UpdateMapCompleted(void)
+{
+    uint32_t count = --mapUpdatingCnt;
+    _PublishUpdatingCount(count);
 }
 
 uint32_t
@@ -510,5 +534,32 @@ void
 GcStripeManager::_ResetFlushLock(uint32_t volId)
 {
     ffLocker.Reset(volId);
+}
+
+void
+GcStripeManager::_PublishTotalProcessingCount(uint32_t count)
+{
+    POSMetric metric(TEL90000_GC_TOTAL_PROCESSING_COUNT, POSMetricTypes::MT_GAUGE);
+    metric.SetGaugeValue(count);
+    metric.AddLabel("array_id", to_string(arrayId));
+    publisher->PublishMetric(metric);
+}
+
+void
+GcStripeManager::_PublishFlushingCount(uint32_t count)
+{
+    POSMetric metric(TEL90001_GC_FLUSHING_COUNT, POSMetricTypes::MT_GAUGE);
+    metric.SetGaugeValue(count);
+    metric.AddLabel("array_id", to_string(arrayId));
+    publisher->PublishMetric(metric);
+}
+
+void
+GcStripeManager::_PublishUpdatingCount(uint32_t count)
+{
+    POSMetric metric(TEL90002_GC_UPDATING_COUNT, POSMetricTypes::MT_GAUGE);
+    metric.SetGaugeValue(count);
+    metric.AddLabel("array_id", to_string(arrayId));
+    publisher->PublishMetric(metric);
 }
 } // namespace pos

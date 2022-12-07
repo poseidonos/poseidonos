@@ -40,6 +40,7 @@
 #include "src/sys_event/volume_event.h"
 #include "src/resource_manager/memory_manager.h"
 #include "src/lib/system_timeout_checker.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #include <string>
 #include <utility>
@@ -96,8 +97,10 @@ public:
     void CheckTimeout(void);
     virtual bool TryFlushLock(uint32_t volId);
     virtual void ReleaseFlushLock(uint32_t volId);
-    void MapUpdateRequested(void);
-    void MapUpdateCompleted(void);
+    virtual void FlushSubmitted(void);
+    virtual void FlushCompleted(void);
+    virtual void UpdateMapRequested(void);
+    virtual void UpdateMapCompleted(void);
 
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
@@ -115,6 +118,9 @@ private:
     void _SetForceFlushInterval(void);
     void _StartTimer(uint32_t volumeId);
     void _ResetFlushLock(uint32_t volId);
+    void _PublishTotalProcessingCount(uint32_t count);
+    void _PublishFlushingCount(uint32_t count);
+    void _PublishUpdatingCount(uint32_t count);
 
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
@@ -128,7 +134,8 @@ private:
     std::mutex gcWriteBufferLock[GC_VOLUME_COUNT];
     std::vector<BlkInfo>* blkInfoList[GC_VOLUME_COUNT];
     const PartitionLogicalSize* udSize;
-    std::atomic<uint32_t> flushedStripeCnt;
+    std::atomic<uint32_t> totalProcessingCnt;
+    std::atomic<uint32_t> flushingCnt;
     std::atomic<uint32_t> mapUpdatingCnt;
 
     VolumeEventPublisher* volumeEventPublisher;
@@ -138,6 +145,8 @@ private:
     mutex timerMtx;
     ForceFlushLocker ffLocker;
     uint32_t bufAllocRetryCnt = 0;
+    void _RegisterTelemetry(uint32_t arrayId);
+    TelemetryPublisher* publisher = nullptr;
 };
 
 } // namespace pos
