@@ -51,9 +51,10 @@ public:
     ~GrpcPublisher(void);
 
     int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buffer, uint64_t& lsn);
-    int CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName);
-    int CompleteWrite(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn);
-    int CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer);
+    int PushDirtyLog(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks);
+    int CompleteUserWrite(uint64_t lsn, std::string volumeName, string arrayName);
+    int CompleteWrite(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn);
+    int CompleteRead(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer);
 
     void WaitClientConnected(void);
 
