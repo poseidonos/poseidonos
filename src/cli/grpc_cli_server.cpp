@@ -743,13 +743,48 @@ class PosCliServiceImpl final : public PosCli::Service {
     return status;
   }
 
-  grpc::Status
-  QosCreateVolumePolicy(ServerContext* context, const QosCreateVolumePolicyRequest* request,
-                  QosCreateVolumePolicyResponse* reply) override
+  grpc::Status QosCreateVolumePolicy(ServerContext* context, const QosCreateVolumePolicyRequest* request, QosCreateVolumePolicyResponse* reply) override
   {
     _LogCliRequest(request);
 
     grpc::Status status = pc->ExecuteQosCreateVolumePolicyCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status VolumeInfo(ServerContext* context, const VolumeInfoRequest* request, VolumeInfoResponse* reply) override
+  {
+    _LogCliRequest(request);
+    grpc::Status status = pc->ExecuteVolumeInfoCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+  grpc::Status VolumeRename(ServerContext* context, const VolumeRenameRequest* request, VolumeRenameResponse* reply) override
+  {
+    _LogCliRequest(request);
+    grpc::Status status = pc->ExecuteVolumeRenameCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+  grpc::Status ListQOSPolicy(ServerContext* context, const ListQOSPolicyRequest* request, ListQOSPolicyResponse* reply) override
+  {
+    _LogCliRequest(request);
+    grpc::Status status = pc->ExecuteListQOSPolicyCommand(request, reply);
     if (context->IsCancelled()) {
       _LogGrpcTimeout(request, reply);
       return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);

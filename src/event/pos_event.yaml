@@ -1235,7 +1235,13 @@ Root:
     Description: Failed to retrieve volume list.
     Cause: Try again after creating an array and volume.
     Solution:
-
+  -
+    Id: 1879
+    Name: VOLUME_INFO_ARRAY_NAME_DOES_NOT_EXIST
+    Severity:
+    Description: Failed to retrieve volume info.
+    Cause: The volume of the requested name or ID could not be found
+    Solution: Please check volume name or ID and try again
   -
     Id: 2200
     Name: CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST
@@ -5546,7 +5552,20 @@ Root:
     Description:
     Cause:
     Solution:
-
+  -
+    Id: 4613
+    Name: QOS_INVALID_VOLUME_NAME
+    Severity:
+    Description: Failed to find a volume with the given name
+    Cause: Wrong Volume Name parameter provided
+    Solution: Provide valid existing volume names
+  -
+    Id: 4614
+    Name: QOS_INVALID_ARRAY_NAME
+    Severity:
+    Description: Failed to find a array with the given name
+    Cause: Wrong Array Name parameter provided
+    Solution: Provide valid existing array name
 
   # IOPath nvmf: 5000 - 5099
   -

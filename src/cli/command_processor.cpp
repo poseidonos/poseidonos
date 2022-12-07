@@ -1953,6 +1953,205 @@ grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest*
 
 }
 
+grpc::Status CommandProcessor::ExecuteVolumeInfoCommand(const VolumeInfoRequest* request, VolumeInfoResponse* reply)
+{
+    string volumeName = "";
+    string arrayName = "";
+    arrayName = (request->param()).array();
+    volumeName = (request->param()).volume();
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int event = EID(VOLUME_INFO_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(event, "array_name:{}", arrayName);
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    if (volMgr == nullptr)
+    {
+        int event = EID(VOL_NOT_FOUND);
+        POS_TRACE_WARN(event,"Failed to get an IVolumeInfoManager instance. array name: " + arrayName +" volume name: "+ volumeName);
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    VolumeBase* vol = volMgr->GetVolume(volMgr->GetVolumeID(volumeName));
+
+    if (vol == nullptr)
+    {
+        int event = EID(VOL_NOT_FOUND);
+        POS_TRACE_WARN(event,"No such volume exists in array. array name: " + arrayName);
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    grpc_cli::Volume* volume = reply->mutable_result()->mutable_data();
+    volume->set_name(vol->GetVolumeName());
+    volume->set_uuid(vol->GetUuid());
+    volume->set_total(vol->GetTotalSize());
+    VolumeMountStatus VolumeMountStatus = vol->GetVolumeMountStatus();
+
+    if (Mounted == VolumeMountStatus)
+    {
+        volume->set_remain(vol->RemainingSize());
+    }
+    volume->set_status(volMgr->GetStatusStr(VolumeMountStatus));
+    volume->set_maxiops(vol->GetMaxIOPS());
+    volume->set_maxbw(vol->GetMaxBW());
+    volume->set_minbw(vol->GetMinBW());
+    volume->set_miniops(vol->GetMinIOPS());
+    volume->set_subnqn(vol->GetSubnqn());
+    volume->set_arrayname(vol->GetArrayName());
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+
+}
+
+grpc::Status CommandProcessor::ExecuteVolumeRenameCommand(const VolumeRenameRequest* request, VolumeRenameResponse* reply)
+{
+    string volumeOldName = "";
+    string volumeNewName = "";
+    string arrayName = "";
+    arrayName = (request->param()).array();
+    volumeOldName = (request->param()).name();
+    volumeNewName = (request->param()).newname(); 
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int event = EID(RENAME_VOL_ARRAY_NAME_DOES_NOT_EXIST);
+        POS_TRACE_WARN(event, "array_name:{}", arrayName);
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    if (info->arrayInfo->GetState() < ArrayStateEnum::NORMAL)
+    {
+        int eventId = EID(RENAME_VOL_CAN_ONLY_BE_WHILE_ONLINE);
+        POS_TRACE_WARN(eventId, "array_name:{}, array_state:{}", arrayName, info->arrayInfo->GetState().ToString());
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    IVolumeEventManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    int ret = EID(RENAME_VOL_INTERNAL_ERROR);
+    if (volMgr != nullptr)
+    {
+        ret = volMgr->Rename(volumeOldName, volumeNewName);
+        if (ret == SUCCESS)
+        {
+            _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        else
+        {
+            _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+    else
+    {
+        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+}
+
+grpc::Status CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRequest* request, ListQOSPolicyResponse* reply)
+    {
+    std::vector<string> volumeNames;
+    std::vector<uint32_t> volumeIds;
+    string errorMsg;
+    int validVol = -1;
+    string volName;
+    qos_backend_policy backendPolicy;
+    qos_vol_policy volPolicy;
+    string arrayName = (request->param()).array();
+    int eventId;
+    if (0 == arrayName.compare(""))
+    {
+        eventId = EID(QOS_INVALID_ARRAY_NAME);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        eventId = EID(QOS_ARRAY_DOES_NOT_EXIST);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    IArrayInfo* arrayInfo = info->arrayInfo;
+    ArrayStateType arrayState = arrayInfo->GetState();
+    if (arrayState == ArrayStateEnum::BROKEN)
+    {
+        eventId = EID(CLI_COMMAND_FAILURE_ARRAY_BROKEN);
+        POS_TRACE_WARN(eventId, "array_name:{}", arrayName);
+        _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    backendPolicy = QosManagerSingleton::Instance()->GetBackendPolicy(BackendEvent_UserdataRebuild);
+    string impact = _GetRebuildImpactString(backendPolicy.priorityImpact);
+    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+    if (volMgr == nullptr)
+    {
+        int event = EID(VOL_NOT_FOUND);
+        POS_TRACE_WARN(event,"Failed to get an IVolumeInfoManager instance. array name: " + arrayName);
+        _SetEventStatus(event, reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+    grpc_cli::QOSResult* qosResult = reply->mutable_result()->mutable_data()->add_qosresult();
+    grpc_cli::QOSResult_RebuildPolicy* rebuildpolicy = qosResult->add_rebuildpolicy();
+	grpc_cli::QOSResult_Arrays* arrays = qosResult->add_arrayname();
+    arrays->set_arrayname(arrayName);
+    rebuildpolicy->set_rebuild(impact);
+    for (int i = 0; i < request->param().vol().size(); i++)
+    {
+        string volName = (request->param()).vol()[i].volumename();
+        validVol = volMgr->CheckVolumeValidity(volName);
+        if (EID(SUCCESS) != validVol)
+        {
+            int event = EID(QOS_CLI_WRONG_MISSING_PARAMETER);
+            POS_TRACE_WARN(event,"Invalid Volume Name " + volName);
+            _SetEventStatus(event, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+        int volId = volMgr->GetVolumeID(volName);
+		grpc_cli::QOSResult_VolumePolicies* volumepolicies = qosResult->add_volumepolicies();
+        volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId, arrayName);
+        volMgr->GetVolumeName(volId, volName);
+        volumepolicies->set_name(volName);
+        volumepolicies->set_id(volId);
+        volumepolicies->set_maxbw(to_string(volPolicy.maxBw));
+        volumepolicies->set_maxiops(to_string(volPolicy.maxIops));
+        volumepolicies->set_miniops(to_string(volPolicy.minIops));
+        volumepolicies->set_minbw(to_string(volPolicy.minBw));
+        if (true == volPolicy.minBwGuarantee) 
+            volumepolicies->set_min_bw_guarantee("Yes");
+        else
+            volumepolicies->set_min_bw_guarantee("No");
+        if (true == volPolicy.minIopsGuarantee)
+            volumepolicies->set_min_iops_guarantee("Yes");
+        else
+            volumepolicies->set_min_iops_guarantee("No");
+
+    }
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
 grpc::Status
 CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply)
 {
