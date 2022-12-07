@@ -31,11 +31,21 @@
  */
 #include "posreplicator_manager.h"
 
-#include "pos_replicator_io_completion.h"
+#include "spdk/pos.h"
+#include "src/event_scheduler/callback.h"
 #include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/aio.h"
+#include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/logger/logger.h"
-
+#include "src/master_context/config_manager.h"
+#include "src/pos_replicator/grpc_publisher.h"
+#include "src/pos_replicator/grpc_subscriber.h"
+#include "src/pos_replicator/pos_replicator_io_completion.h"
+#include "src/pos_replicator/replicator_volume_subscriber.h"
+#include "src/sys_event/volume_event.h"
+#include "src/sys_event/volume_event_publisher.h"
+#include "src/volume/i_volume_info_manager.h"
+#include "src/volume/volume_base.h"
 namespace pos
 {
 PosReplicatorManager::PosReplicatorManager(void)
@@ -46,7 +56,7 @@ PosReplicatorManager::PosReplicatorManager(void)
 PosReplicatorManager::PosReplicatorManager(AIO* aio)
 : aio(aio),
   volumeSubscriberCnt(0),
-  status(VOLUMECOPY_None)
+  isEnabled(false)
 {
     for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
     {
@@ -63,19 +73,27 @@ PosReplicatorManager::~PosReplicatorManager(void)
 }
 
 void
-PosReplicatorManager::Init(GrpcPublisher* publisher, GrpcSubscriber* subscriber)
+PosReplicatorManager::Init(GrpcPublisher* publisher, GrpcSubscriber* subscriber, ConfigManager* configManager)
 {
-    // grpc server or client start
-    grpcPublisher = publisher;
-    grpcSubscriber = subscriber;
-
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been initialized");
+    int ret = configManager->GetValue("replicator", "enable", &isEnabled, CONFIG_TYPE_BOOL);
+    if (ret == EID(SUCCESS))
+    {
+        replicatorStatus.Set(ReplicatorStatus::VOLUMECOPY_None);
+        grpcPublisher = publisher;
+        grpcSubscriber = subscriber;
+        isEnabled = true;
+        POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been initialized");
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(HA_DEBUG_MSG), "POS Replicator is disabled. Skip initializing ReplicatorManager");
+    }
 }
 
 void
 PosReplicatorManager::Dispose(void)
 {
-    // stop grpc server or client
+    // stop replicator grpc server and client
     if (grpcPublisher != nullptr)
     {
         delete grpcPublisher;
@@ -175,13 +193,13 @@ PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
     std::string volumeName;
     int ret;
 
-    ret = ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
+    ret = _ConvertVolumeIdtoVolumeName(io.volume_id, io.array_id, volumeName);
     if (ret != EID(SUCCESS))
     {
         POS_TRACE_WARN(ret, "Invalid Input. Volume_ID: {}", io.volume_id);
         return ret;
     }
-    ret = ConvertArrayIdtoArrayName(io.array_id, arrayName);
+    ret = _ConvertArrayIdtoArrayName(io.array_id, arrayName);
     if (ret != EID(SUCCESS))
     {
         POS_TRACE_WARN(ret, "Invalid Input. Array_ID: {}", io.array_id);
@@ -299,10 +317,10 @@ PosReplicatorManager::HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
     // TODO (cheolho.kang): Need to combine HAWriteCompletion() and HAReadCompletion()
     std::string volumeName;
     std::string arrayName;
-    int ret = ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
+    int ret = _ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
     if (ret == EID(SUCCESS))
     {
-        ret = ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
+        ret = _ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
         if (ret != EID(SUCCESS))
         {
             // TODO (cheolho.kang): Need to handle the error case
@@ -320,10 +338,10 @@ PosReplicatorManager::HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
 {
     std::string volumeName;
     std::string arrayName;
-    int ret = ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
+    int ret = _ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
     if (ret == EID(SUCCESS))
     {
-        ret = ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
+        ret = _ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
         if (ret != EID(SUCCESS))
         {
             POS_TRACE_WARN(ret, "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
@@ -337,7 +355,7 @@ PosReplicatorManager::HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
 }
 
 int
-PosReplicatorManager::ConvertArrayIdtoArrayName(int arrayId, std::string& arrayName)
+PosReplicatorManager::_ConvertArrayIdtoArrayName(int arrayId, std::string& arrayName)
 {
     int ret = EID(HA_INVALID_INPUT_ARGUMENT);
 
@@ -356,7 +374,7 @@ PosReplicatorManager::ConvertArrayIdtoArrayName(int arrayId, std::string& arrayN
 }
 
 int
-PosReplicatorManager::ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std::string& volumeName)
+PosReplicatorManager::_ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std::string& volumeName)
 {
     // Volume Idx <-> Volume Name
     IVolumeInfoManager* volMgr =
@@ -375,7 +393,7 @@ PosReplicatorManager::ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std
 }
 
 int
-PosReplicatorManager::ConvertArrayNametoArrayId(std::string arrayName)
+PosReplicatorManager::_ConvertArrayNametoArrayId(std::string arrayName)
 {
     int ret = HA_INVALID_ARRAY_IDX;
 
@@ -392,7 +410,7 @@ PosReplicatorManager::ConvertArrayNametoArrayId(std::string arrayName)
 }
 
 int
-PosReplicatorManager::ConvertVolumeNametoVolumeId(std::string volumeName, int arrayId)
+PosReplicatorManager::_ConvertVolumeNametoVolumeId(std::string volumeName, int arrayId)
 {
     IVolumeInfoManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
@@ -434,8 +452,8 @@ PosReplicatorManager::_RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSm
 int
 PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int>& arraySet, std::pair<std::string, int>& volumeSet)
 {
-    arraySet.second = ConvertArrayNametoArrayId(arraySet.first);
-    volumeSet.second = ConvertVolumeNametoVolumeId(volumeSet.first, arraySet.second);
+    arraySet.second = _ConvertArrayNametoArrayId(arraySet.first);
+    volumeSet.second = _ConvertVolumeNametoVolumeId(volumeSet.first, arraySet.second);
 
     int ret = EID(SUCCESS);
 
@@ -454,6 +472,34 @@ PosReplicatorManager::ConvertNametoIdx(std::pair<std::string, int>& arraySet, st
     return ret;
 }
 
+int
+PosReplicatorManager::HandleHostWrite(VolumeIoSmartPtr volumeIo)
+{
+    int result = EID(SUCCESS);
+    if (isEnabled)
+    {
+        // Check VolumeSyncStatus
+        // if status is ISS2 request PushDirtyLog
+        if (replicatorStatus.Get() == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy)
+        {
+            std::string arrayName;
+            std::string volumeName;
+            uint64_t rba;
+            uint64_t numBlocks;
+
+            _ConvertArrayIdtoArrayName(volumeIo->GetArrayId(), arrayName);
+            _ConvertVolumeIdtoVolumeName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
+            rba = volumeIo->GetSectorRba();
+            numBlocks = ChangeByteToSector(volumeIo->GetSize());
+
+            result = grpcPublisher->PushDirtyLog(arrayName, volumeName, rba, numBlocks);
+        }
+        // if status is Normal (Live Replication)
+        // Push it to pending list
+    }
+    return result;
+}
+
 void
 PosReplicatorManager::_InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numChunks)
 {
@@ -464,4 +510,11 @@ PosReplicatorManager::_InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared
         memcpy((void*)bufferPtr, (void*)(targetPtr), ArrayConfig::SECTOR_SIZE_BYTE);
     }
 }
+
+bool
+PosReplicatorManager::IsEnabled(void)
+{
+    return isEnabled;
+}
+
 } // namespace pos

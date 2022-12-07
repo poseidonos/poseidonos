@@ -146,17 +146,9 @@ Poseidonos::_InitReplicatorManager(void)
 {
     ConfigManager* configManager = ConfigManagerSingleton::Instance();
     std::string module("replicator");
-    bool isEnabled = false;
-    int ret = configManager->GetValue(module, "enable", &isEnabled, CONFIG_TYPE_BOOL);
-    if (ret == EID(SUCCESS) && isEnabled == true)
-    {
-        PosReplicatorManager* posReplicatorManager = PosReplicatorManagerSingleton::Instance();
-        posReplicatorManager->Init(new GrpcPublisher(nullptr, ConfigManagerSingleton::Instance()), new GrpcSubscriber(ConfigManagerSingleton::Instance()));
-    }
-    else
-    {
-        POS_TRACE_WARN(EID(HA_DEBUG_MSG), "POS Replicator is disabled. Skip initializing ReplicatorManager");
-    }
+    PosReplicatorManager* posReplicatorManager = PosReplicatorManagerSingleton::Instance();
+    posReplicatorManager->Init(new GrpcPublisher(nullptr, configManager), new GrpcSubscriber(configManager), configManager);
+    POS_TRACE_WARN(EID(HA_DEBUG_MSG), "POS Replicator is disabled. Skip initializing ReplicatorManager");
 }
 #endif
 

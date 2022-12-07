@@ -143,6 +143,28 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
 }
 
 int
+GrpcPublisher::PushDirtyLog(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks)
+{
+    ::grpc::ClientContext cliContext;
+    // TODO (cheolho.kang): Make sure 'request' doesn't need to be delete later
+    replicator_rpc::PushDirtyLogRequest* request = new replicator_rpc::PushDirtyLogRequest;
+    replicator_rpc::PushDirtyLogResponse response;
+
+    request->set_array_name(arrayName);
+    request->set_volume_name(volumeName);
+    request->set_rba(rba);
+    request->set_num_blocks(numBlocks);
+
+    grpc::Status status = stub->PushDirtyLog(&cliContext, *request, &response);
+    if (status.ok() == false)
+    {
+        return EID(HA_COMPLETION_FAIL);
+    }
+
+    return EID(SUCCESS);
+}
+
+int
 GrpcPublisher::CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName)
 {
     ::grpc::ClientContext cliContext;

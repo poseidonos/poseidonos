@@ -46,9 +46,11 @@
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_manager.h"
+
 using namespace pos;
 using namespace std;
 
@@ -142,6 +144,14 @@ UNVMfSubmitHandler(struct pos_io* io)
 
         airlog("UserWritePendingCnt", "user", io->volume_id, 1);
         airlog("UserReadPendingCnt", "user", io->volume_id, 1);
+
+#ifdef IBOF_CONFIG_REPLICATOR
+        PosReplicatorManager* replicatorManager = PosReplicatorManagerSingleton::Instance();
+        if (replicatorManager->IsEnabled())
+        {
+            replicatorManager->HandleHostWrite(volumeIo);
+        }
+#endif
 
         if (true == qosManager->IsFeQosEnabled())
         {
