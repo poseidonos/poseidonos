@@ -67,7 +67,7 @@ public:
     virtual void AddLogToWaitingList(LogWriteContext* context);
     void LogWriteDone(AsyncMetaFileIoCtx* ctx);
 
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
 private:

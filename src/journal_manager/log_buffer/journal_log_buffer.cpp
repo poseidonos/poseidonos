@@ -267,7 +267,7 @@ JournalLogBuffer::WriteLog(LogWriteContext* context, uint64_t offset, MetaFileIo
             "Failed to write journal log");
         POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED), ioContext->ToString());
 
-        delete ioContext; // TODO is it okay to remove logWriteContext here??
+        delete ioContext;
         ret = -1 * EID(JOURNAL_LOG_WRITE_FAILED);
     }
 

@@ -161,10 +161,11 @@ void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
     LogWriteIoContext* ioContext = dynamic_cast<LogWriteIoContext*>(ctx);
-    LogWriteContext* logWriteContext = ioContext->GetLogWriteContext();
 
     if (ioContext != nullptr)
     {
+        LogWriteContext* logWriteContext = ioContext->GetLogWriteContext();
+
         (*numIosCompleted)[ioContext->GetLogGroupId()]++;
 
         ioContext->stopwatch.StoreTimestamp(LogStage::Complete);
@@ -198,6 +199,11 @@ LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
         }
 
         delete ioContext;
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_CRITICAL_ERROR),
+            "Cannot complete log write request, {}", ctx->ToString());
     }
     _StartWaitingIos();
 }
@@ -240,7 +246,7 @@ LogWriteHandler::_StartWaitingIos(void)
 }
 
 void
-LogWriteHandler::LogFilled(int logGroupId, MapList& dirty)
+LogWriteHandler::LogFilled(int logGroupId, const MapList& dirty)
 {
     // Nothing to do
 }

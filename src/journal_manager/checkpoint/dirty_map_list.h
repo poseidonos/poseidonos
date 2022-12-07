@@ -48,7 +48,7 @@ public:
     {
     }
 
-    virtual void Add(MapList& dirty);
+    virtual void Add(const MapList& dirty);
     virtual MapList GetList(void);
     virtual MapList PopDirtyList(void);
     virtual void Reset(void);

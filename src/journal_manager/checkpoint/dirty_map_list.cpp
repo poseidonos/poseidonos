@@ -42,7 +42,7 @@ DirtyMapList::DirtyMapList(void)
 }
 
 void
-DirtyMapList::Add(MapList& dirty)
+DirtyMapList::Add(const MapList& dirty)
 {
     // TODO(cheolho.kang): Remove lock using bitmap
     std::unique_lock<std::mutex> lock(dirtyListLock);

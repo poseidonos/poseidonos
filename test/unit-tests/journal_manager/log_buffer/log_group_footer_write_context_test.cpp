@@ -32,6 +32,7 @@ TEST(LogGroupFooterWriteContext, SetIoRequest_testIfContextUpdatedCorrectly)
     // Then
     EXPECT_EQ(context.GetLength(), sizeof(LogGroupFooter));
     EXPECT_EQ(context.GetFileOffset(), offset);
+    EXPECT_EQ(*(LogGroupFooter*)context.GetBuffer(), footer);
     EXPECT_EQ(std::memcmp((void*)context.GetBuffer(), (void*)(&footer), sizeof(LogGroupFooter)), 0);
 }
 

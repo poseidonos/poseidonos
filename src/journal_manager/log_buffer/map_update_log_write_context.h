@@ -56,7 +56,7 @@ public:
         LogBufferWriteDoneNotifier* notifier, CallbackSequenceController* sequencer);
     virtual ~MapUpdateLogWriteContext(void) = default;
 
-    MapList& GetDirtyList(void);
+    const MapList& GetDirtyList(void);
     virtual void IoDone(void) override;
 
     // For UT
