@@ -42,3 +42,4 @@ metrics_to_publish:
   gc_stripe_count_flush_completed:
   gc_stripe_count_map_update_requested:
   gc_stripe_count_map_update_completed:
+  gc_stripe_count_force_flush_requested:

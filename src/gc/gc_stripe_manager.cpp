@@ -95,6 +95,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
     gcStripeCntFlushCompleted = 0;
     gcStripeCntMapUpdateRequested = 0;
     gcStripeCntMapUpdateCompleted = 0;
+    gcStripeCntForceFlushRequested = 0;
 
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
     _SetBufferPool();
@@ -293,6 +294,12 @@ GcStripeManager::SetFinished(void)
         metric.AddLabel("array_id", to_string(arrayId));
         v->push_back(metric);
     }
+    {
+        POSMetric metric(TEL90006_GC_STRIPE_COUNT_FORCE_FLUSH_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntForceFlushRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
     publisher->PublishMetricList(v);
 }
 
@@ -348,6 +355,10 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
     gcActiveWriteBuffers[volumeId] = nullptr;
     flushed[volumeId] = true;
     ++gcStripeCntRequested;
+    if (force == true)
+    {
+        ++gcStripeCntForceFlushRequested;
+    }
 }
 
 void

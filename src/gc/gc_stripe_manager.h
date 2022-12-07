@@ -138,6 +138,7 @@ private:
     std::atomic<uint64_t> gcStripeCntFlushCompleted;
     std::atomic<uint64_t> gcStripeCntMapUpdateRequested;
     std::atomic<uint64_t> gcStripeCntMapUpdateCompleted;
+    std::atomic<uint64_t> gcStripeCntForceFlushRequested;
 
     VolumeEventPublisher* volumeEventPublisher;
     MemoryManager* memoryManager;
