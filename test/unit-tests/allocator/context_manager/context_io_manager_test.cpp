@@ -63,8 +63,16 @@ TEST(ContextIoManager, Init_testFileCreate)
     ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
+    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITH_CREATION)));
+    EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
 
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
+    EXPECT_CALL(*allocatorCtxIo, Init);
+    EXPECT_CALL(*allocatorCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITH_CREATION)));
+    EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
+
+    EXPECT_CALL(*rebuildCtxIo, Init);
+    EXPECT_CALL(*rebuildCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITH_CREATION)));
+    EXPECT_CALL(*rebuildCtxIo, Flush).WillOnce(Return(0));
 
     ioManager.Init();
 }
@@ -82,7 +90,13 @@ TEST(ContextIoManager, Init_testFileLoad)
     ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
-    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(1));
+    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITHOUT_CREATION)));
+
+    EXPECT_CALL(*allocatorCtxIo, Init);
+    EXPECT_CALL(*allocatorCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITHOUT_CREATION)));
+
+    EXPECT_CALL(*rebuildCtxIo, Init);
+    EXPECT_CALL(*rebuildCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITHOUT_CREATION)));
 
     ioManager.Init();
 }
@@ -100,7 +114,8 @@ TEST(ContextIoManager, Init_testFileFlushFail)
     ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
-    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(0));
+    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(EID(SUCCEED_TO_OPEN_WITH_CREATION)));
+    EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(EID(MFS_INVALID_PARAMETER) * -1));
 
     ioManager.Init();
 }
@@ -118,7 +133,7 @@ TEST(ContextIoManager, Init_testFileLoadFail)
     ContextIoManager ioManager(&info, &tp, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Init);
-    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(-1));
+    EXPECT_CALL(*segmentCtxIo, LoadContext).WillOnce(Return(EID(MFS_INVALID_PARAMETER) * -1));
 
     ioManager.Init();
 }
@@ -171,8 +186,6 @@ TEST(ContextIoManager, FlushContexts_IfSyncSuccessAllFile)
     EXPECT_CALL(*segmentCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
     EXPECT_CALL(*allocatorCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
 
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
-
     // when
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
     int ret = ioManager.FlushContexts(flushCallback, true);
@@ -196,8 +209,6 @@ TEST(ContextIoManager, FlushContexts_IfSyncFailFirstFile)
     ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(-1));
-
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
 
     // when
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
@@ -246,8 +257,6 @@ TEST(ContextIoManager, FlushContexts_IfAsyncAlreadyFlushing)
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
 
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
-
     // when 1
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
     int ret = ioManager.FlushContexts(flushCallback, false);
@@ -276,8 +285,6 @@ TEST(ContextIoManager, FlushContexts_IfAsyncSuccessAllFile)
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
 
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
-
     // when
     int ret = ioManager.FlushContexts(nullptr, false);
 
@@ -299,8 +306,6 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailFirstFile)
     ContextIoManager ioManager(&info, &tp, nullptr, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(-1));
-
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
 
     // when
     int ret = ioManager.FlushContexts(nullptr, false);
@@ -325,8 +330,6 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailSecondFile)
 
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(0));
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(-1));
-
-    EXPECT_CALL(info, IsUT).WillRepeatedly(Return(true));
 
     // when
     int ret = ioManager.FlushContexts(nullptr, false);
