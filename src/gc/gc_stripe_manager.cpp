@@ -97,7 +97,7 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
     _SetBufferPool();
     if (publisher == nullptr)
     {
-        publisher = new TelemetryPublisher("SpaceInfo");
+        publisher = new TelemetryPublisher("GCStripeManager");
         publisher->AddDefaultLabel("array_id", to_string(arrayId));
         TelemetryClientSingleton::Instance()->RegisterPublisher(publisher);
     }

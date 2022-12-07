@@ -160,6 +160,10 @@ GcFlushCompletion::Init(void)
             }
         }
     }
+    {
+        BlkAddr rba;
+        std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
+    }
     sectorRbaList.sort();
     currPos = sectorRbaList.begin();
     lsid = stripe->GetUserLsid();
