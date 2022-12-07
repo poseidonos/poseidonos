@@ -2421,10 +2421,10 @@ CommandProcessor::_GetRebuildImpactString(uint8_t impact)
 }
 
 void
-CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status* status)
+CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status* status, std::string message /*=""*/)
 {
     std::string eventName = "";
-    std::string message = "";
+    std::string description = "";
     std::string cause = "";
     std::string solution = "";
 
@@ -2433,16 +2433,21 @@ CommandProcessor::_SetEventStatus(int eventId, grpc_cli::Status* status)
     if (it != event_info->end())
     {
         eventName = it->second.GetEventName();
-        message = it->second.GetDescription();
+        description = it->second.GetDescription();
         cause = it->second.GetCause();
         solution = it->second.GetSolution();
     }
 
     status->set_code(eventId);
     status->set_event_name(eventName);
-    status->set_description(message);
+    status->set_description(description);
     status->set_cause(cause);
     status->set_solution(solution);
+
+    if (message != "")
+    {
+        status->set_message(message);
+    }
 }
 
 void

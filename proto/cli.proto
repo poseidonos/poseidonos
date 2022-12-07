@@ -292,6 +292,7 @@ message Status {
 	optional string description = 3;
 	optional string cause = 4;
 	optional string solution = 5;
+	optional string message = 6; 
 }
 
 

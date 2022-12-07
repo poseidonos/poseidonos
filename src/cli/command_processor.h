@@ -233,7 +233,7 @@ private:
     bool _isPosTerminating {false};
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
-    void _SetEventStatus(int eventId, grpc_cli::Status *status);
+    void _SetEventStatus(int eventId, grpc_cli::Status *status, std::string message = "");
     void _SetPosInfo(grpc_cli::PosInfo *posInfo);
     std::string _GetRebuildImpactString(uint8_t impact);
     pos::BackendEvent _GetEventId(std::string eventName);

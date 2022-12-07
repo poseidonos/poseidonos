@@ -32,8 +32,8 @@
 
 #include "src/cli/create_array_command.h"
 
-#include "src/cli/cli_event_code.h"
 #include "src/array_mgmt/array_manager.h"
+#include "src/cli/cli_event_code.h"
 
 namespace pos_cli
 {
@@ -48,7 +48,8 @@ CreateArrayCommand::~CreateArrayCommand(void)
 }
 // LCOV_EXCL_STOP
 
-string CreateArrayCommand::Execute(json& doc, string rid)
+string
+CreateArrayCommand::Execute(json& doc, string rid)
 {
     int ret = 0;
     JsonFormat jFormat;
