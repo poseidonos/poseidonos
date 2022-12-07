@@ -66,8 +66,8 @@ LogWriteIoContext::GetLogGroupId(void)
 void
 LogWriteIoContext::IoDone(void)
 {
-    MapList emptyDirtyList;
-    logFilledNotifier->NotifyLogFilled(logWriteContext->GetLogGroupId(), emptyDirtyList);
+    auto dirty = logWriteContext->GetDirtyMapList();
+    logFilledNotifier->NotifyLogFilled(logWriteContext->GetLogGroupId(), dirty);
 
     LogBufferIoContext::IoDone();
 }
