@@ -1024,6 +1024,7 @@ class Status PROTOBUF_FINAL :
     kDescriptionFieldNumber = 3,
     kCauseFieldNumber = 4,
     kSolutionFieldNumber = 5,
+    kMessageFieldNumber = 6,
     kCodeFieldNumber = 1,
   };
   // string event_name = 2;
@@ -1106,6 +1107,26 @@ class Status PROTOBUF_FINAL :
   std::string* _internal_mutable_solution();
   public:
 
+  // string message = 6;
+  bool has_message() const;
+  private:
+  bool _internal_has_message() const;
+  public:
+  void clear_message();
+  const std::string& message() const;
+  void set_message(const std::string& value);
+  void set_message(std::string&& value);
+  void set_message(const char* value);
+  void set_message(const char* value, size_t size);
+  std::string* mutable_message();
+  std::string* release_message();
+  void set_allocated_message(std::string* message);
+  private:
+  const std::string& _internal_message() const;
+  void _internal_set_message(const std::string& value);
+  std::string* _internal_mutable_message();
+  public:
+
   // int32 code = 1;
   bool has_code() const;
   private:
@@ -1132,6 +1153,7 @@ class Status PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr description_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr cause_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr solution_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_;
   ::PROTOBUF_NAMESPACE_ID::int32 code_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -39989,7 +40011,7 @@ class QosResetVolumePolicyResponse PROTOBUF_FINAL :
 
 // int32 code = 1;
 inline bool Status::_internal_has_code() const {
-  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
   return value;
 }
 inline bool Status::has_code() const {
@@ -39997,7 +40019,7 @@ inline bool Status::has_code() const {
 }
 inline void Status::clear_code() {
   code_ = 0;
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline ::PROTOBUF_NAMESPACE_ID::int32 Status::_internal_code() const {
   return code_;
@@ -40007,7 +40029,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 Status::code() const {
   return _internal_code();
 }
 inline void Status::_internal_set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000020u;
   code_ = value;
 }
 inline void Status::set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -40305,6 +40327,79 @@ inline void Status::set_allocated_solution(std::string* solution) {
   solution_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), solution,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.Status.solution)
+}
+
+// string message = 6;
+inline bool Status::_internal_has_message() const {
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
+  return value;
+}
+inline bool Status::has_message() const {
+  return _internal_has_message();
+}
+inline void Status::clear_message() {
+  message_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline const std::string& Status::message() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Status.message)
+  return _internal_message();
+}
+inline void Status::set_message(const std::string& value) {
+  _internal_set_message(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Status.message)
+}
+inline std::string* Status::mutable_message() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Status.message)
+  return _internal_mutable_message();
+}
+inline const std::string& Status::_internal_message() const {
+  return message_.Get();
+}
+inline void Status::_internal_set_message(const std::string& value) {
+  _has_bits_[0] |= 0x00000010u;
+  message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Status::set_message(std::string&& value) {
+  _has_bits_[0] |= 0x00000010u;
+  message_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Status.message)
+}
+inline void Status::set_message(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000010u;
+  message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Status.message)
+}
+inline void Status::set_message(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000010u;
+  message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Status.message)
+}
+inline std::string* Status::_internal_mutable_message() {
+  _has_bits_[0] |= 0x00000010u;
+  return message_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Status::release_message() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Status.message)
+  if (!_internal_has_message()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000010u;
+  return message_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Status::set_allocated_message(std::string* message) {
+  if (message != nullptr) {
+    _has_bits_[0] |= 0x00000010u;
+  } else {
+    _has_bits_[0] &= ~0x00000010u;
+  }
+  message_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), message,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Status.message)
 }
 
 // -------------------------------------------------------------------
