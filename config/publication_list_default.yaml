@@ -36,6 +36,9 @@ metrics_to_publish:
   write_avg_lat_volume:
   write_iops_volume:
   write_bps_volume:
-  gc_total_processing_count:
-  gc_flushing_count:
-  gc_updating_count:
+  gc_stripe_count_requested:
+  gc_stripe_count_completed:
+  gc_stripe_count_flush_requested:
+  gc_stripe_count_flush_completed:
+  gc_stripe_count_map_update_requested:
+  gc_stripe_count_map_update_completed:

@@ -89,9 +89,12 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
         flushed[volId] = true;
     }
 
-    totalProcessingCnt = 0;
-    flushingCnt = 0;
-    mapUpdatingCnt = 0;
+    gcStripeCntRequested = 0;
+    gcStripeCntCompleted = 0;
+    gcStripeCntFlushRequested = 0;
+    gcStripeCntFlushCompleted = 0;
+    gcStripeCntMapUpdateRequested = 0;
+    gcStripeCntMapUpdateCompleted = 0;
 
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
     _SetBufferPool();
@@ -251,8 +254,46 @@ GcStripeManager::_ReturnBuffer(GcWriteBuffer* buffer)
 void
 GcStripeManager::SetFinished(void)
 {
-    uint32_t count = --totalProcessingCnt;
-    _PublishTotalProcessingCount(count);
+    ++gcStripeCntCompleted;
+
+    POSMetricVector* v = new POSMetricVector();
+    {
+        POSMetric metric(TEL90000_GC_STRIPE_COUNT_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90001_GC_STRIPE_COUNT_COMPLETED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntCompleted);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90002_GC_STRIPE_COUNT_FLUSH_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntFlushRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90003_GC_STRIPE_COUNT_FLUSH_COMPLETED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntFlushCompleted);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90004_GC_STRIPE_COUNT_MAP_UPDATE_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntMapUpdateRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90005_GC_STRIPE_COUNT_MAP_UPDATE_COMPLETED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntMapUpdateCompleted);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    publisher->PublishMetricList(v);
 }
 
 void
@@ -265,7 +306,7 @@ GcStripeManager::ReturnBuffer(GcWriteBuffer* buffer)
 bool
 GcStripeManager::IsAllFinished(void)
 {
-    return (totalProcessingCnt == 0);
+    return (gcStripeCntRequested - gcStripeCntCompleted == 0);
 }
 
 std::vector<BlkInfo>*
@@ -306,8 +347,7 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
     blkInfoList[volumeId] = nullptr;
     gcActiveWriteBuffers[volumeId] = nullptr;
     flushed[volumeId] = true;
-    uint32_t count = ++totalProcessingCnt;
-    _PublishTotalProcessingCount(count);
+    ++gcStripeCntRequested;
 }
 
 void
@@ -371,29 +411,25 @@ GcStripeManager::ReleaseFlushLock(uint32_t volId)
 void
 GcStripeManager::FlushSubmitted(void)
 {
-    uint32_t count = ++flushingCnt;
-    _PublishFlushingCount(count);
+    ++gcStripeCntFlushRequested;
 }
 
 void
 GcStripeManager::FlushCompleted(void)
 {
-    uint32_t count = --flushingCnt;
-    _PublishFlushingCount(count);
+    ++gcStripeCntFlushCompleted;
 }
 
 void
 GcStripeManager::UpdateMapRequested(void)
 {
-    uint32_t count = ++mapUpdatingCnt;
-    _PublishUpdatingCount(count);
+    ++gcStripeCntMapUpdateRequested;
 }
 
 void
 GcStripeManager::UpdateMapCompleted(void)
 {
-    uint32_t count = --mapUpdatingCnt;
-    _PublishUpdatingCount(count);
+    ++gcStripeCntMapUpdateCompleted;
 }
 
 uint32_t
@@ -534,32 +570,5 @@ void
 GcStripeManager::_ResetFlushLock(uint32_t volId)
 {
     ffLocker.Reset(volId);
-}
-
-void
-GcStripeManager::_PublishTotalProcessingCount(uint32_t count)
-{
-    POSMetric metric(TEL90000_GC_TOTAL_PROCESSING_COUNT, POSMetricTypes::MT_GAUGE);
-    metric.SetGaugeValue(count);
-    metric.AddLabel("array_id", to_string(arrayId));
-    publisher->PublishMetric(metric);
-}
-
-void
-GcStripeManager::_PublishFlushingCount(uint32_t count)
-{
-    POSMetric metric(TEL90001_GC_FLUSHING_COUNT, POSMetricTypes::MT_GAUGE);
-    metric.SetGaugeValue(count);
-    metric.AddLabel("array_id", to_string(arrayId));
-    publisher->PublishMetric(metric);
-}
-
-void
-GcStripeManager::_PublishUpdatingCount(uint32_t count)
-{
-    POSMetric metric(TEL90002_GC_UPDATING_COUNT, POSMetricTypes::MT_GAUGE);
-    metric.SetGaugeValue(count);
-    metric.AddLabel("array_id", to_string(arrayId));
-    publisher->PublishMetric(metric);
 }
 } // namespace pos

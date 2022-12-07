@@ -118,9 +118,6 @@ private:
     void _SetForceFlushInterval(void);
     void _StartTimer(uint32_t volumeId);
     void _ResetFlushLock(uint32_t volId);
-    void _PublishTotalProcessingCount(uint32_t count);
-    void _PublishFlushingCount(uint32_t count);
-    void _PublishUpdatingCount(uint32_t count);
 
     std::vector<Stripe*> gcStripeArray;
     IArrayInfo* iArrayInfo;
@@ -134,9 +131,13 @@ private:
     std::mutex gcWriteBufferLock[GC_VOLUME_COUNT];
     std::vector<BlkInfo>* blkInfoList[GC_VOLUME_COUNT];
     const PartitionLogicalSize* udSize;
-    std::atomic<uint32_t> totalProcessingCnt;
-    std::atomic<uint32_t> flushingCnt;
-    std::atomic<uint32_t> mapUpdatingCnt;
+
+    std::atomic<uint64_t> gcStripeCntRequested;
+    std::atomic<uint64_t> gcStripeCntCompleted;
+    std::atomic<uint64_t> gcStripeCntFlushRequested;
+    std::atomic<uint64_t> gcStripeCntFlushCompleted;
+    std::atomic<uint64_t> gcStripeCntMapUpdateRequested;
+    std::atomic<uint64_t> gcStripeCntMapUpdateCompleted;
 
     VolumeEventPublisher* volumeEventPublisher;
     MemoryManager* memoryManager;
