@@ -36,8 +36,8 @@ Example2 (displaying a detailed information of a volume):
 		)
 
 		if list_volume_volumeName != "" {
-			//command = "VOLUMEINFO"
-			//err = executeVolumeInfoCmd(command)
+			command = "VOLUMEINFO"
+			err = executeVolumeInfoCmd(command)
 		} else {
 			command = "LISTVOLUME"
 			err = executeListVolumeCmd(command)
@@ -45,6 +45,37 @@ Example2 (displaying a detailed information of a volume):
 
 		return err
 	},
+}
+func executeVolumeInfoCmd(command string) error {
+    req, buildErr := buildVolumeInfoReq(command)
+    if buildErr != nil {
+        fmt.Printf("failed to build request: %v", buildErr)
+        return buildErr
+    }
+
+    reqJson, err := protojson.MarshalOptions{
+        EmitUnpopulated: true,
+    }.Marshal(req)
+    if err != nil {
+        fmt.Printf("failed to marshal the protobuf request: %v", err)
+        return err
+    }
+    displaymgr.PrintRequest(string(reqJson))
+    fmt.Println("req",req)
+    res, gRpcErr := grpcmgr.SendVolumeInfo(req)
+    fmt.Println("res",res)
+    if gRpcErr != nil {
+        globals.PrintErrMsg(gRpcErr)
+        return gRpcErr
+    }
+
+    printErr := displaymgr.PrintProtoResponse(command, res)
+    if printErr != nil {
+        fmt.Printf("failed to print the response: %v", printErr)
+        return printErr
+    }
+
+    return nil
 }
 
 func executeListVolumeCmd(command string) error {
@@ -82,9 +113,16 @@ func buildListVolumeReq(command string) (*pb.ListVolumeRequest, error) {
 	uuid := globals.GenerateUUID()
 	param := &pb.ListVolumeRequest_Param{Array: list_volume_arrayName}
 	req := &pb.ListVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
 	return req, nil
 }
+
+func buildVolumeInfoReq(command string) (*pb.VolumeInfoRequest, error) {
+    uuid := globals.GenerateUUID()
+    param := &pb.VolumeInfoRequest_Param{Array: list_volume_arrayName, Volume:list_volume_volumeName}
+    req := &pb.VolumeInfoRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
+    return req, nil
+}
+
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,

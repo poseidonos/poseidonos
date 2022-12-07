@@ -144,7 +144,12 @@ using grpc_cli::QosCreateVolumePolicyResponse;
 using grpc_cli::QosResetVolumePolicyRequest;
 using grpc_cli::QosResetVolumePolicyResponse;
 using grpc_cli::QosVolumeNameParam;
-
+using grpc_cli::VolumeInfoRequest;
+using grpc_cli::VolumeInfoResponse;
+using grpc_cli::VolumeRenameRequest;
+using grpc_cli::VolumeRenameResponse;
+using grpc_cli::ListQOSPolicyRequest;
+using grpc_cli::ListQOSPolicyResponse;
 using google::protobuf::RepeatedPtrField;
 
 class CommandProcessor
@@ -153,6 +158,7 @@ public:
     CommandProcessor(void);
     ~CommandProcessor(void);
     void FillHeader(const SystemInfoRequest* request, SystemInfoResponse* reply);
+
 
     // System Commands
     grpc::Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
@@ -213,6 +219,11 @@ public:
     grpc::Status ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* request, UnmountVolumeResponse* reply);
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
     grpc::Status ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply);
+    grpc::Status ExecuteVolumeInfoCommand(const VolumeInfoRequest* request, VolumeInfoResponse* reply);
+    grpc::Status ExecuteVolumeRenameCommand(const VolumeRenameRequest* request, VolumeRenameResponse* reply);
+
+    //QOS Commands
+    grpc::Status ExecuteListQOSPolicyCommand(const ListQOSPolicyRequest* request, ListQOSPolicyResponse* reply);
 
     // QoS Commands
     grpc::Status ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolicyRequest* request, QosCreateVolumePolicyResponse* reply);
