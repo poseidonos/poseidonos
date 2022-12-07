@@ -138,6 +138,14 @@ static const std::string TEL70011_WRITE_BPS_NETWORK = "write_bps_network";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
 
+static const std::string TEL90000_GC_STRIPE_COUNT_REQUESTED = "gc_stripe_count_requested";
+static const std::string TEL90001_GC_STRIPE_COUNT_COMPLETED = "gc_stripe_count_completed";
+static const std::string TEL90002_GC_STRIPE_COUNT_FLUSH_REQUESTED  = "gc_stripe_count_flush_requested";
+static const std::string TEL90003_GC_STRIPE_COUNT_FLUSH_COMPLETED  = "gc_stripe_count_flush_completed";
+static const std::string TEL90004_GC_STRIPE_COUNT_MAP_UPDATE_REQUESTED  = "gc_stripe_count_map_update_requested";
+static const std::string TEL90005_GC_STRIPE_COUNT_MAP_UPDATE_COMPLETED  = "gc_stripe_count_map_update_completed";
+static const std::string TEL90006_GC_STRIPE_COUNT_FORCE_FLUSH_REQUESTED  = "gc_stripe_count_force_flush_requested";
+
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 
 static const std::string TEL110000_MEDIA_ERROR_COUNT_LOWER = "soft_media_error_lower";

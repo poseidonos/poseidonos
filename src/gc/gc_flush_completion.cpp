@@ -98,6 +98,7 @@ GcFlushCompletion::_DoSpecificJob(void)
 
     if (isInit == false)
     {
+        gcStripeManager->FlushCompleted();
         Init();
     }
 
@@ -127,6 +128,7 @@ GcFlushCompletion::_DoSpecificJob(void)
     {
         event = inputEvent;
     }
+    gcStripeManager->UpdateMapRequested();
     stripe->Flush(event);
     return true;
 }
@@ -157,6 +159,10 @@ GcFlushCompletion::Init(void)
                 invalidRbaCnt++;
             }
         }
+    }
+    {
+        BlkAddr rba;
+        std::tie(rba, volId) = stripe->GetReverseMapEntry(0);
     }
     sectorRbaList.sort();
     currPos = sectorRbaList.begin();

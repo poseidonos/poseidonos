@@ -102,6 +102,7 @@ GcMapUpdateCompletion::_DoSpecificJob(void)
     volumeManager->DecreasePendingIOCount(volId, VolumeIoType::InternalIo);
     airlog("InternalIoPendingCnt", "user", volId, -1);
 
+    gcStripeManager->UpdateMapCompleted();
     gcStripeManager->SetFinished();
 
     POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_COMPLETION),

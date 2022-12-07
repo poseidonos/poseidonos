@@ -78,18 +78,10 @@ BufferPool::TryGetBuffer(void)
         return nullptr;
     }
     unique_lock<mutex> lock(consumerLock);
+    _TrySwapWhenConsumerPoolEmpty();
     if (consumerPool->empty())
     {
-        if (producerPool->size() > swapSize)
-        {
-            producerLock.lock();
-            _Swap();
-            producerLock.unlock();
-        }
-        else
-        {
-            return nullptr;
-        }
+        return nullptr;
     }
     void* buffer = nullptr;
     buffer = consumerPool->front();
@@ -98,7 +90,7 @@ BufferPool::TryGetBuffer(void)
 }
 
 bool
-BufferPool::TryGetBuffers(uint32_t count, std::vector<void*>* retBuffers)
+BufferPool::TryGetBuffers(uint32_t reqCnt, std::vector<void*>* retBuffers, uint32_t minAcqCnt)
 {
     if (isAllocated == false)
     {
@@ -107,26 +99,31 @@ BufferPool::TryGetBuffers(uint32_t count, std::vector<void*>* retBuffers)
         return false;
     }
     unique_lock<mutex> lock(consumerLock);
-    if (count > consumerPool->size())
+    if (consumerPool->size() + producerPool->size() < minAcqCnt)
     {
-        if (producerPool->size() >= count)
-        {
-            producerLock.lock();
-            _Swap();
-            producerLock.unlock();
-        }
-        else
-        {
-            return false;
-        }
+        return false;
     }
-    assert(count <= consumerPool->size());
-    for (uint32_t i = 0; i < count; i++)
+
+    while (consumerPool->size() > 0 && reqCnt > 0)
     {
         void* buffer = consumerPool->front();
         consumerPool->pop_front();
         retBuffers->push_back(buffer);
+        reqCnt--;
     }
+
+    if (reqCnt > 0)
+    {
+        _TrySwapWhenProducerPoolIsNotEmpty();
+        while (consumerPool->size() > 0 && reqCnt > 0)
+        {
+            void* buffer = consumerPool->front();
+            consumerPool->pop_front();
+            retBuffers->push_back(buffer);
+            reqCnt--;
+        }
+    }
+
     return true;
 }
 
@@ -200,11 +197,12 @@ BufferPool::_Init(void)
         buffer += BUFFER_INFO.size;
         remainBufferCount--;
     }
-    swapSize = (size_t)((bufferList1.size() * SWAP_THRESHOLD_PERCENT) / 100);
+    // Set the swap size to prevent frequent swaps
+    swapThreshold = (size_t)((bufferList1.size() * SWAP_THRESHOLD_PERCENT) / 100);
     consumerPool = &bufferList1;
     producerPool = &bufferList2;
     POS_TRACE_INFO(EID(RESOURCE_MANAGER_DEBUG_MSG),
-        "BufferPool initialized, size:{}, swapSize:{}, owner:{}", bufferList1.size(), swapSize, BUFFER_INFO.owner);
+        "BufferPool initialized, size:{}, swap_threshold:{}, owner:{}", bufferList1.size(), swapThreshold, BUFFER_INFO.owner);
     return true;
 }
 
@@ -230,9 +228,35 @@ BufferPool::_Clear()
 }
 
 void
+BufferPool::_TrySwapWhenConsumerPoolEmpty(void)
+{
+    // This method should be executed with the lock of consumer.
+    if (consumerPool->empty())
+    {
+        if (producerPool->size() > swapThreshold)
+        {
+            producerLock.lock();
+            _Swap();
+            producerLock.unlock();
+        }
+    }
+}
+
+void
+BufferPool::_TrySwapWhenProducerPoolIsNotEmpty(void)
+{
+    if (producerPool->size() > 0)
+    {
+        producerLock.lock();
+        _Swap();
+        producerLock.unlock();
+    }
+}
+
+void
 BufferPool::_Swap(void)
 {
-    // This method must be performed in a thread-safe state.
+    // This method should be executed with the lock of both consumer and producer acquired.
     std::list<void*>* temp;
     temp = consumerPool;
     consumerPool = producerPool;

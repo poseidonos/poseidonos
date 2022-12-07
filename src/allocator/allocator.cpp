@@ -528,27 +528,31 @@ Allocator::_SetGCThreshold(void)
             "retNormalRatio:{}, retNormalLb:{}, retUrgentRatio:{}, retUrgentLb:{}",
             retNormalRatio, retNormalLb, retUrgentRatio, retUrgentLb);
     }
-    POS_TRACE_INFO(EID(GC_THREHOLD_SETTING_PRINT), "normal_gc_ratio:{}, urgent_gc_ratio:{}, normal_gc_lb:{}, urgent_gc_lb:{}",
-        normal_gc_ratio, urgent_gc_ratio, normal_gc_lb, urgent_gc_lb);
-
     const PartitionLogicalSize* dataPartitionSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    uint32_t baseCapacity = 0;
+    bool lbBounded = false;
     if (dataPartitionSize != nullptr)
     {
-        uint32_t normalGcThreshold = (uint32_t)(dataPartitionSize->totalSegments * normal_gc_ratio / 100);
+        baseCapacity = dataPartitionSize->totalSegments;
+        normalGcThreshold = (uint32_t)(baseCapacity * normal_gc_ratio / 100);
         if (normalGcThreshold < normal_gc_lb)
         {
             normalGcThreshold = normal_gc_lb;
+            lbBounded = true;
         }
-        uint32_t urgentGcThreshold = (uint32_t)(normalGcThreshold * urgent_gc_ratio / 100);
+        urgentGcThreshold = (uint32_t)(normalGcThreshold * urgent_gc_ratio / 100);
         if (urgentGcThreshold < urgent_gc_lb)
         {
             urgentGcThreshold = urgent_gc_lb;
+            lbBounded = true;
         }
     }
     else
     {
         POS_TRACE_ERROR(EID(GC_THRESHOLD_SETTING_ERROR_INVALID_ARRAY_SIZE), "");
     }
+    POS_TRACE_INFO(EID(GC_THREHOLD_SETTING_PRINT), "normal_gc_ratio:{}, urgent_gc_ratio:{}, normal_gc_lb:{}, urgent_gc_lb:{}, base_capa:{}, normal_threshold:{}, urgent_threshold:{}, is_lower_bounded:{}",
+        normal_gc_ratio, urgent_gc_ratio, normal_gc_lb, urgent_gc_lb, baseCapacity, normalGcThreshold, urgentGcThreshold, lbBounded);
     SetNormalGcThreshold(normalGcThreshold);
     SetUrgentThreshold(urgentGcThreshold);
 }

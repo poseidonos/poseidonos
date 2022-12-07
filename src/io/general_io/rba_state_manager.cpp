@@ -171,6 +171,7 @@ RBAStateManager::_AcquireOwnership(uint32_t volumeID, BlkAddr startRba,
 {
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
+        POS_TRACE_ERROR(EID(RBAMGR_WRONG_VOLUME_ID), "vol_id:{}", volumeID);
         std::pair<POS_EVENT_ID, EventLevel> eventIdWithLevel(
             EID(RBAMGR_WRONG_VOLUME_ID), EventLevel::ERROR);
         throw eventIdWithLevel;
