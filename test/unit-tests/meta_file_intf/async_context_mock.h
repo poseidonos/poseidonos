@@ -12,7 +12,7 @@ public:
     using AsyncMetaFileIoCtx::AsyncMetaFileIoCtx;
     MOCK_METHOD(void, HandleIoComplete, (void* data), (override));
     MOCK_METHOD(char*, GetBuffer, (), (override));
-    MOCK_METHOD(MetaFileIoCbPtr, GetCallback, (), (override));
+    MOCK_METHOD(FnCompleteMetaFileIo, GetCallback, (), (override));
     MOCK_METHOD(int, GetError, (), (const, override));
     MOCK_METHOD(uint64_t, GetLength, (), (const, override));
     MOCK_METHOD(MetaFsIoOpcode, GetOpcode, (), (const, override));
@@ -21,8 +21,8 @@ public:
     MOCK_METHOD(std::string, ToString, (), (const, override));
     MOCK_METHOD(bool, IsReadyToUse, (), (const, override));
     MOCK_METHOD(void, SetIoInfo, (MetaFsIoOpcode opcode, uint64_t fileOffset, uint64_t length, char* buffer), (override));
-    MOCK_METHOD(void, SetFileInfo, (int fd, MetaFileIoDoneCheckFunc ioDoneCheckCallback), (override));
-    MOCK_METHOD(void, SetCallback, (MetaFileIoCbPtr callback), (override));
+    MOCK_METHOD(void, SetFileInfo, (int fd, FnCheckMetaFileIoDone ioDoneCheckCallback), (override));
+    MOCK_METHOD(void, SetCallback, (FnCompleteMetaFileIo callback), (override));
 };
 
 } // namespace pos

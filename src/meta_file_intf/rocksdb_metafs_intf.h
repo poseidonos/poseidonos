@@ -66,7 +66,7 @@ public:
     virtual uint64_t GetFileSize(void) override;
 
     virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) override;
-    virtual MetaFileIoDoneCheckFunc GetIoDoneCheckFunc(void) override;
+    virtual FnCheckMetaFileIoDone GetIoDoneCheckFunc(void) override;
     virtual int CheckIoDoneStatus(void* data) override;
     virtual int ReleaseAsyncIoContext(void* data);
 

@@ -56,7 +56,7 @@ public:
     virtual void Dispose(void);
 
     virtual int LoadContext(void);
-    virtual int Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf = nullptr);
+    virtual int Flush(FnAllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf = nullptr);
 
     virtual uint64_t GetStoredVersion(void);
     virtual char* GetSectionAddr(int section);

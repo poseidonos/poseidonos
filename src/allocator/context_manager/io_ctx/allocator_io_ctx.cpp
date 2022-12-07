@@ -34,12 +34,12 @@
 
 namespace pos
 {
-AllocatorIoCtx::AllocatorIoCtx(AllocatorCtxIoCompletion callback)
+AllocatorIoCtx::AllocatorIoCtx(FnAllocatorCtxIoCompletion callback)
 : clientCallback(callback)
 {
 }
 
-AllocatorCtxIoCompletion 
+FnAllocatorCtxIoCompletion 
 AllocatorIoCtx::GetAllocatorClientCallback(void)
 {
     return clientCallback;

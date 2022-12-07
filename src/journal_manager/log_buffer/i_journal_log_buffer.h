@@ -61,7 +61,7 @@ public:
     virtual int Create(uint64_t logBufferSize) = 0;
     virtual int Open(uint64_t& logBufferSize) = 0;
 
-    virtual int WriteLog(LogWriteContext* context, uint64_t offset, MetaFileIoCbPtr func) = 0;
+    virtual int WriteLog(LogWriteContext* context, uint64_t offset, FnCompleteMetaFileIo func) = 0;
     virtual int ReadLogBuffer(int groupId, void* buffer) = 0;
 
     virtual int SyncResetAll(void) = 0;

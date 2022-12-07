@@ -43,7 +43,7 @@ namespace pos
 class EventMpageAsyncIo : public Event
 {
 public:
-    EventMpageAsyncIo(MapHeader* mapHeader, Map* map, MetaFileIntf* file, MetaFileIoCbPtr asyncIoReqCB);
+    EventMpageAsyncIo(MapHeader* mapHeader, Map* map, MetaFileIntf* file, FnCompleteMetaFileIo asyncIoReqCB);
     virtual ~EventMpageAsyncIo(void);
     bool Execute(void) override;
 
@@ -51,7 +51,7 @@ private:
     MapHeader* mapHeader;
     Map* map;
     MetaFileIntf* file;
-    MetaFileIoCbPtr asyncIoReqCB;
+    FnCompleteMetaFileIo asyncIoReqCB;
     int startMpage;
 };
 

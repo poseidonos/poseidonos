@@ -37,18 +37,18 @@
 namespace pos
 {
 
-using AllocatorCtxIoCompletion = std::function<void(void)>;
+using FnAllocatorCtxIoCompletion = std::function<void(void)>;
 
 class AllocatorIoCtx : public AsyncMetaFileIoCtx
 {
 public:
-    AllocatorIoCtx(AllocatorCtxIoCompletion callback);
+    AllocatorIoCtx(FnAllocatorCtxIoCompletion callback);
     virtual ~AllocatorIoCtx(void) = default;
 
-    virtual AllocatorCtxIoCompletion GetAllocatorClientCallback(void);
+    virtual FnAllocatorCtxIoCompletion GetAllocatorClientCallback(void);
 
 private:
-    AllocatorCtxIoCompletion clientCallback;
+    FnAllocatorCtxIoCompletion clientCallback;
 };
 
 } // namespace pos

@@ -37,7 +37,7 @@
 namespace pos
 {
 EventMpageAsyncIo::EventMpageAsyncIo(MapHeader* mapHeader_, Map* map_,
-    MetaFileIntf* file_, MetaFileIoCbPtr asyncIoReqCB_)
+    MetaFileIntf* file_, FnCompleteMetaFileIo asyncIoReqCB_)
 {
     mapHeader = mapHeader_;
     map = map_;

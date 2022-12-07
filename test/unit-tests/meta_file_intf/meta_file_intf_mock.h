@@ -15,7 +15,7 @@ public:
     MOCK_METHOD(int, Delete, (), (override));
     MOCK_METHOD(uint64_t, GetFileSize, (), (override));
     MOCK_METHOD(int, AsyncIO, (AsyncMetaFileIoCtx* ctx), (override));
-    MOCK_METHOD(MetaFileIoDoneCheckFunc, GetIoDoneCheckFunc, (), (override));
+    MOCK_METHOD(FnCheckMetaFileIoDone, GetIoDoneCheckFunc, (), (override));
     MOCK_METHOD(int, CheckIoDoneStatus, (void* data), (override));
     MOCK_METHOD(int, Open, (), (override));
     MOCK_METHOD(int, Close, (), (override));

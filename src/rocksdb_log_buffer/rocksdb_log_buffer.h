@@ -56,7 +56,7 @@ public:
     virtual int Close(void);
 
     virtual int ReadLogBuffer(int groupId, void* buffer) override;
-    virtual int WriteLog(LogWriteContext* context, uint64_t offset, MetaFileIoCbPtr func) override;
+    virtual int WriteLog(LogWriteContext* context, uint64_t offset, FnCompleteMetaFileIo func) override;
 
     virtual int SyncResetAll(void) override;
     virtual int AsyncReset(int id, EventSmartPtr callbackEvent) override;

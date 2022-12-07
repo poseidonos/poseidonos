@@ -149,7 +149,7 @@ RocksDBMetaFsIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     return EID(SUCCESS);
 }
 
-MetaFileIoDoneCheckFunc
+FnCheckMetaFileIoDone
 RocksDBMetaFsIntf::GetIoDoneCheckFunc(void)
 {
     return std::bind(&RocksDBMetaFsIntf::CheckIoDoneStatus, this, std::placeholders::_1);

@@ -369,7 +369,7 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
     allocCtxHeader->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
     allocCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, 0, (char*)allocCtxHeader);
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             std::thread allocCtxFlushCallback([&]
             {
@@ -389,7 +389,7 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
     segCtxHeader->sig = SegmentCtx::SIG_SEGMENT_CTX;
     segCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)segCtxHeader);
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             std::thread segCtxFlushCallback([&]
             {
@@ -415,7 +415,7 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
     rebuildCtxHeader->sig = RebuildCtx::SIG_REBUILD_CTX;
     rebuildCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)rebuildCtxHeader);
     EXPECT_CALL(*rebuildCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             callback();
 

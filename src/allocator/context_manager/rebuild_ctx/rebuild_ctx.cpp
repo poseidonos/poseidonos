@@ -225,7 +225,7 @@ RebuildCtx::GetNumSections(void)
 int
 RebuildCtx::_FlushContext(void)
 {
-    AllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
+    FnAllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
     int ret = fileIo->Flush(completion, INVALID_SECTION_ID);
 
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),
