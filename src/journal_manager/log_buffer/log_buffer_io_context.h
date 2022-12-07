@@ -67,8 +67,6 @@ public:
 protected:
     int logGroupId;
     EventSmartPtr clientCallback;
-
-    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
 };
 
 } // namespace pos

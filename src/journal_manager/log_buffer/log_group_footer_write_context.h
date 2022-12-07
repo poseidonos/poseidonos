@@ -49,10 +49,10 @@ public:
 
     bool operator==(const LogGroupFooterWriteContext& input) const
     {
-        return (this->logGroupId == input.logGroupId && *(this->data) == *(input.data)); // Modify this depending on the equality criteria
+        return (this->logGroupId == input.logGroupId && (this->data) == (input.data)); // Modify this depending on the equality criteria
     }
 
 private:
-    LogGroupFooter* data;
+    LogGroupFooter data;
 };
 } // namespace pos

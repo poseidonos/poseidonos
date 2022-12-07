@@ -11,7 +11,7 @@ class MockLogWriteContext : public LogWriteContext
 public:
     using LogWriteContext::LogWriteContext;
     MOCK_METHOD(void, SetLogAllocated, (int logGroupId, uint64_t sequenceNumber), (override));
-    MOCK_METHOD(MapList&, GetDirtyMapList, (), (override));
+    MOCK_METHOD(const MapList&, GetDirtyMapList, (), (override));
     MOCK_METHOD(int, GetLogGroupId, (), (override));
     MOCK_METHOD(uint64_t, GetLogSize, (), (override));
     MOCK_METHOD(char*, GetBuffer, (), (override));

@@ -45,7 +45,7 @@ MapUpdateLogWriteContext::MapUpdateLogWriteContext(LogWriteContext* context,
 {
 }
 
-MapList&
+const MapList&
 MapUpdateLogWriteContext::GetDirtyList(void)
 {
     return logWriteContext->GetDirtyMapList();

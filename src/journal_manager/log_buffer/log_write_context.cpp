@@ -39,7 +39,7 @@ namespace pos
 {
 LogWriteContext::LogWriteContext(void)
 : log(nullptr),
-  logGroupId(-1),
+  logGroupId(INVALID_GROUP_ID),
   callback(nullptr)
 {
 }
@@ -84,7 +84,7 @@ LogWriteContext::SetLogAllocated(int id, uint64_t seqNum)
     }
 }
 
-MapList&
+const MapList&
 LogWriteContext::GetDirtyMapList(void)
 {
     return dirtyMap;

@@ -44,7 +44,7 @@ class MockDirtyPageList : public DirtyMapList
 {
 public:
     using DirtyMapList::DirtyMapList;
-    MOCK_METHOD(void, Add, (MapList & dirty), (override));
+    MOCK_METHOD(void, Add, (const MapList& dirty), (override));
     MOCK_METHOD(MapList, GetList, (), (override));
     MOCK_METHOD(MapList, PopDirtyList, (), (override));
     MOCK_METHOD(void, Reset, (), (override));

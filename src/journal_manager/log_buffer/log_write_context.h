@@ -50,7 +50,7 @@ public:
 
     virtual void SetLogAllocated(int logGroupId, uint64_t sequenceNumber);
 
-    virtual MapList& GetDirtyMapList(void);
+    virtual const MapList& GetDirtyMapList(void);
     virtual int GetLogGroupId(void);
 
     virtual uint64_t GetLogSize(void);
@@ -65,6 +65,8 @@ private:
 
     int logGroupId;
     EventSmartPtr callback;
+
+    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
 };
 
 } // namespace pos

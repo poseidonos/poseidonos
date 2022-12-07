@@ -72,7 +72,7 @@ public:
     virtual void SetFileInfo(int fd, MetaFileIoDoneCheckFunc ioDoneCheckCallback);
     virtual void SetCallback(MetaFileIoCbPtr callback);
 
-    int error; // TODO remove this
+    int error;
 
 private:
     MetaFsIoOpcode opcode;

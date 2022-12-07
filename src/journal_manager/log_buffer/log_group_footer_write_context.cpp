@@ -38,15 +38,13 @@ LogGroupFooterWriteContext::LogGroupFooterWriteContext(int id,
     EventSmartPtr callback, LogGroupFooter footer, uint64_t offset)
 : LogBufferIoContext(id, callback)
 {
-    data = new LogGroupFooter();
-    *data = footer;
+    data = footer;
 
-    SetIoInfo(MetaFsIoOpcode::Write, offset, sizeof(*data), (char*)data);
+    SetIoInfo(MetaFsIoOpcode::Write, offset, sizeof(data), (char*)&data);
 }
 
 LogGroupFooterWriteContext::~LogGroupFooterWriteContext(void)
 {
-    delete data;
 }
 
 } // namespace pos
