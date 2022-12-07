@@ -82,7 +82,7 @@ ContextIoManager::Init(void)
         ret = fileIo[owner]->LoadContext();
         if (ret == EID(SUCCEED_TO_OPEN_WITH_CREATION)) // new file created
         {
-            AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
+            FnAllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
             uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
             ret = fileIo[owner]->Flush(completion, dstSectionId);
             if (ret == EID(SUCCESS))
@@ -140,7 +140,7 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externa
 
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
-        AllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
+        FnAllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
 
         uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
         ret = fileIo[owner]->Flush(completion, dstSectionId, externalBuf);

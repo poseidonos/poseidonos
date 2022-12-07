@@ -248,7 +248,7 @@ RocksDBLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 }
 
 int
-RocksDBLogBuffer::WriteLog(LogWriteContext* context, uint64_t fileOffset, MetaFileIoCbPtr func)
+RocksDBLogBuffer::WriteLog(LogWriteContext* context, uint64_t fileOffset, FnCompleteMetaFileIo func)
 {
     // TODO do not use log write io context (it's needed for now because of callback func)
     LogWriteIoContext* ioContext = ioContextFactory->CreateMapUpdateLogWriteIoContext(context);

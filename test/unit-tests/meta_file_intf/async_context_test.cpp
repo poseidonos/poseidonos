@@ -97,9 +97,9 @@ TEST(AsyncMetaFileIoCtx, ToString_testIfTheMethodReturnsInternalFieldAsStringCor
     const uint64_t expectedFileOffset = 11;
     const uint64_t expectedLength = 10;
     char expectedBuffer = 'A';
-    const MetaFileIoCbPtr expectedMetaIoCb = TestFunction;
+    const FnCompleteMetaFileIo expectedMetaIoCb = TestFunction;
     const int expectedError = 3;
-    const MetaFileIoDoneCheckFunc expectedFileIoCb = [](void* data){ return 0; };
+    const FnCheckMetaFileIoDone expectedFileIoCb = [](void* data){ return 0; };
     const uint32_t expectedVsid = 2;
 
     AsyncMetaFileIoCtx ctx;

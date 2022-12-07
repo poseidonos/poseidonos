@@ -248,7 +248,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 }
 
 int
-JournalLogBuffer::WriteLog(LogWriteContext* context, uint64_t offset, MetaFileIoCbPtr func)
+JournalLogBuffer::WriteLog(LogWriteContext* context, uint64_t offset, FnCompleteMetaFileIo func)
 {
     LogWriteIoContext* ioContext =
         ioContextFactory->CreateMapUpdateLogWriteIoContext(context);

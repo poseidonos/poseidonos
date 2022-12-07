@@ -67,7 +67,7 @@ AsyncMetaFileIoCtx::GetBuffer(void)
     return buffer;
 }
 
-MetaFileIoCbPtr
+FnCompleteMetaFileIo
 AsyncMetaFileIoCtx::GetCallback(void)
 {
     return callback;
@@ -120,7 +120,7 @@ AsyncMetaFileIoCtx::ToString(void) const
 }
 
 void
-AsyncMetaFileIoCtx::SetFileInfo(int fd_, MetaFileIoDoneCheckFunc ioDoneCallback_)
+AsyncMetaFileIoCtx::SetFileInfo(int fd_, FnCheckMetaFileIoDone ioDoneCallback_)
 {
     this->fd = fd_;
     this->ioDoneCheckFunc = ioDoneCallback_;
@@ -141,7 +141,7 @@ AsyncMetaFileIoCtx::SetIoInfo(MetaFsIoOpcode opcode_, uint64_t fileOffset_,
 }
 
 void
-AsyncMetaFileIoCtx::SetCallback(MetaFileIoCbPtr callback_)
+AsyncMetaFileIoCtx::SetCallback(FnCompleteMetaFileIo callback_)
 {
     this->callback = callback_;
 

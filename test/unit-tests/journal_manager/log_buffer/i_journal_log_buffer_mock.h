@@ -15,7 +15,7 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, Create, (uint64_t logBufferSize), (override));
     MOCK_METHOD(int, Open, (uint64_t& logBufferSize), (override));
-    MOCK_METHOD(int, WriteLog, (LogWriteContext * context, uint64_t offset, MetaFileIoCbPtr func), (override));
+    MOCK_METHOD(int, WriteLog, (LogWriteContext * context, uint64_t offset, FnCompleteMetaFileIo func), (override));
     MOCK_METHOD(int, ReadLogBuffer, (int groupId, void* buffer), (override));
     MOCK_METHOD(int, SyncResetAll, (), (override));
     MOCK_METHOD(int, AsyncReset, (int id, EventSmartPtr callbackEvent), (override));
