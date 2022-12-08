@@ -70,11 +70,11 @@ UNVMfCompleteHandler(void)
             }
         }
     }
-    catch (...)
+    catch (int eID)
     {
         POS_EVENT_ID eventId = EID(SCHEDAPI_COMPLETION_POLLING_FAIL);
         POS_TRACE_ERROR(static_cast<int>(eventId),
-            "Fail to poll ibof completion");
+            "Fail to poll ibof completion EID : {}", eID);
     }
 }
 
