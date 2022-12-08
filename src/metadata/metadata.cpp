@@ -154,7 +154,8 @@ Metadata::Init(void)
     result = mapper->Init();
     if (result != 0)
     {
-        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Mapper, array {}", arrayName);
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Mapper, array {} error {}",
+            arrayName, result);
         return result;
     }
 
@@ -162,7 +163,8 @@ Metadata::Init(void)
     result = allocator->Init();
     if (result != 0)
     {
-        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Allocator, array {}", arrayName);
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Allocator, array {}, error {}",
+            arrayName, result);
         return result;
     }
 
