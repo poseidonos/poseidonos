@@ -84,6 +84,8 @@ Allocator::~Allocator(void)
 int
 Allocator::Init(void)
 {
+    int ret = EID(SUCCESS);
+
     if (isInitialized == false)
     {
         if (tp != nullptr)
@@ -91,7 +93,14 @@ Allocator::Init(void)
             TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
         }
         addrInfo->Init(iArrayInfo);
-        contextManager->Init();
+        ret = contextManager->Init();
+        if (ret != EID(SUCCESS))
+        {
+            POS_TRACE_ERROR(EID(CONTEXT_MANAGER_FAILED_TO_INIT),
+                "Context Manager of array {} has been failed to initialize, error {}",
+                iArrayInfo->GetName(), ret);
+            return ret;
+        }
         blockManager->Init(stripeManager);
         wbStripeManager->Init();
         stripeManager->Init(wbStripeManager);
@@ -109,7 +118,8 @@ Allocator::Init(void)
             Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
             iArrayInfo->GetName());
     }
-    return 0;
+
+    return ret;
 }
 
 void

@@ -71,7 +71,7 @@ public:
         ContextIoManager* ioManager, ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_);
     virtual ~ContextManager(void);
-    virtual void Init(void);
+    virtual int Init(void);
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync, int logGroupId = ALL_LOG_GROUP);

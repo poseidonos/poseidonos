@@ -261,15 +261,15 @@ TEST(MetaFsIoRequest, GetLogString_testIfTheStringIsCorrect)
 {
     MetaFsIoRequest req;
     std::string log;
-    log.append("reqType: " + (int)req.reqType);
-    log.append(", ioMode: " + (int)req.ioMode);
-    log.append(", tagId: " + req.tagId);
+    log.append("reqType: " + std::to_string((int)req.reqType));
+    log.append(", ioMode: " + std::to_string((int)req.ioMode));
+    log.append(", tagId: " + std::to_string(req.tagId));
     log.append(", fd: " + std::to_string(req.fd));
-    log.append(", targetMediaType: " + (int)req.targetMediaType);
+    log.append(", targetMediaType: " + std::to_string((int)req.targetMediaType));
     log.append(", arrayId: " + std::to_string(req.arrayId));
     log.append(", byteOffsetInFile: " + std::to_string(req.byteOffsetInFile));
     log.append(", byteSize: " + std::to_string(req.byteSize));
-    log.append(", priority: " + (int)req.priority);
+    log.append(", priority: " + std::to_string((int)req.priority));
     std::string result = req.GetLogString();
     EXPECT_EQ(result, log);
 }
