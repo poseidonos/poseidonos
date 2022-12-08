@@ -180,9 +180,9 @@ StripeBasedRaceRebuild::_RecoverCompleted(uint32_t targetId, int result)
 
     if (result != 0)
     {
-        ctx->SetResult(RebuildState::FAIL);
-        POS_TRACE_WARN(result,
+        POS_TRACE_ERROR(EID(REBUILD_CANCELLED_RESTORATION_FAILURE),
             "stripeId:{}, result:{}", targetId, result);
+        ctx->SetResult(RebuildState::FAIL);
     }
 
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;

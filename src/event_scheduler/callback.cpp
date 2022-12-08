@@ -105,11 +105,6 @@ Callback::~Callback(void)
     airlog("Callback_Destructor", "internal", type, 1);
     if (unlikely(executed == false))
     {
-        POS_EVENT_ID eventId = EID(CALLBACK_DESTROY_WITHOUT_EXECUTED);
-        POS_TRACE_WARN(
-            eventId,
-            "Callback destroy without executed : {}",
-            static_cast<uint32_t>(type));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
         dumpCallbackError.AddDump(buffer, 0);
     }
@@ -287,7 +282,7 @@ Callback::_RecordCallerCompletionAndCheckOkToCall(uint32_t transferredErrorCount
     {
         POS_EVENT_ID eventId = EID(CALLBACK_INVALID_COUNT);
         POS_TRACE_ERROR(static_cast<uint32_t>(eventId),
-            "CompletionCount exceeds WaitingCount");
+            "CompletionCount exceeds WaitingCount, event_type: {}, buffer_addr: {},  increasedCompletionCount: {}, localWaitingCount: {}", type, (void*)this, increasedCompletionCount, localWaitingCount);
     }
 
     return isOkToBeCalled;

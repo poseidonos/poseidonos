@@ -2080,6 +2080,8 @@ setup_test_environment;
 run_min_volume_test_cases;
 
 #Run all Qos Minimum Volume Cases(Multi Array)
+if [ ${PM_MACHINE} -eq 1 ]; then
 run_min_volume_multi_array_cases;
+fi
 
 exit 0

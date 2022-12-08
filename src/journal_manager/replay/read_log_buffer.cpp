@@ -112,6 +112,7 @@ ReadLogBuffer::Start(void)
 
     if (result == 0)
     {
+        parser->PrintFoundLogTypes();
         if (logList.IsEmpty() == true)
         {
             int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STOPPED));
@@ -123,7 +124,6 @@ ReadLogBuffer::Start(void)
             result = eventId;
         }
     }
-
     return result;
 }
 

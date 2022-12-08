@@ -40,6 +40,7 @@
 #include "src/sys_event/volume_event.h"
 #include "src/resource_manager/memory_manager.h"
 #include "src/lib/system_timeout_checker.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
 
 #include <string>
 #include <utility>
@@ -96,6 +97,10 @@ public:
     void CheckTimeout(void);
     virtual bool TryFlushLock(uint32_t volId);
     virtual void ReleaseFlushLock(uint32_t volId);
+    virtual void FlushSubmitted(void);
+    virtual void FlushCompleted(void);
+    virtual void UpdateMapRequested(void);
+    virtual void UpdateMapCompleted(void);
 
     static const uint32_t GC_VOLUME_COUNT = MAX_VOLUME_COUNT;
 
@@ -125,7 +130,14 @@ private:
     std::mutex gcWriteBufferLock[GC_VOLUME_COUNT];
     std::vector<BlkInfo>* blkInfoList[GC_VOLUME_COUNT];
     const PartitionLogicalSize* udSize;
-    std::atomic<uint32_t> flushedStripeCnt;
+
+    std::atomic<uint64_t> gcStripeCntRequested;
+    std::atomic<uint64_t> gcStripeCntCompleted;
+    std::atomic<uint64_t> gcStripeCntFlushRequested;
+    std::atomic<uint64_t> gcStripeCntFlushCompleted;
+    std::atomic<uint64_t> gcStripeCntMapUpdateRequested;
+    std::atomic<uint64_t> gcStripeCntMapUpdateCompleted;
+    std::atomic<uint64_t> gcStripeCntForceFlushRequested;
 
     VolumeEventPublisher* volumeEventPublisher;
     MemoryManager* memoryManager;
@@ -133,6 +145,9 @@ private:
     uint64_t timeoutInterval = 10;
     mutex timerMtx;
     ForceFlushLocker ffLocker;
+    uint32_t bufAllocRetryCnt = 0;
+    void _RegisterTelemetry(uint32_t arrayId);
+    TelemetryPublisher* publisher = nullptr;
 };
 
 } // namespace pos

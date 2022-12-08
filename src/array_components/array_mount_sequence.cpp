@@ -215,7 +215,7 @@ ArrayMountSequence::Shutdown(void)
 {
     POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down {} ...", arrayName);
     POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - wait for rebuilding");
-    rebuilder->StopRebuild(arrayName);
+    rebuilder->StopRebuild(arrayName, EID(REBUILD_STOPPED_ARRAY_BROKEN));
     rebuilder->WaitRebuildDone(arrayName);
     POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - rebuild done");
     volMgr->DetachVolumes();

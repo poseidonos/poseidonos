@@ -361,7 +361,7 @@ CommandProcessor::ExecuteStopRebuildingCommand(const StopRebuildingRequest* requ
 
     string arrayName = (request->param()).name();
     IArrayRebuilder* rebuilder = ArrayManagerSingleton::Instance()->arrayRebuilder;
-    rebuilder->StopRebuild(arrayName);
+    rebuilder->StopRebuild(arrayName, EID(REBUILD_STOPPED_USER_REQUEST));
     rebuilder->WaitRebuildDone(arrayName);
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());

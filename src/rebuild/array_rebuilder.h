@@ -57,7 +57,7 @@ public:
         RebuildComplete cb, list<RebuildTarget*>& tgt) override;
     void QuickRebuild(string array, uint32_t arrayId, QuickRebuildPair rebuildPair,
         RebuildComplete cb, list<RebuildTarget*>& tgt) override;
-    void StopRebuild(string arrayname) override;
+    void StopRebuild(string arrayname, int reason = EID(REBUILD_JOB_STOP)) override;
     void RebuildDone(RebuildResult result) override;
     void WaitRebuildDone(string arrayname) override;
     bool IsRebuilding(string arrayname) override;

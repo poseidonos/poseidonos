@@ -145,7 +145,7 @@ Metadata::~Metadata(void)
 int
 Metadata::Init(void)
 {
-    int eventId = static_cast<int>(EID(MOUNT_ARRAY_DEBUG_MSG));
+    int eventId = EID(MOUNT_ARRAY_DEBUG_MSG);
     int result = 0;
 
     std::string arrayName = arrayInfo->GetName();
@@ -203,7 +203,7 @@ Metadata::Init(void)
 void
 Metadata::Dispose(void)
 {
-    int eventId = static_cast<int>(EID(UNMOUNT_ARRAY_DEBUG_MSG));
+    int eventId = EID(UNMOUNT_ARRAY_DEBUG_MSG);
     std::string arrayName = arrayInfo->GetName();
 
     POS_TRACE_INFO(eventId, "Start disposing allocator of array {}", arrayName);
@@ -221,7 +221,7 @@ Metadata::Dispose(void)
 void
 Metadata::Shutdown(void)
 {
-    int eventId = static_cast<int>(EID(UNMOUNT_ARRAY_DEBUG_MSG));
+    int eventId = EID(UNMOUNT_ARRAY_DEBUG_MSG);
     std::string arrayName = arrayInfo->GetName();
 
     POS_TRACE_INFO(eventId, "Start shutdown allocator of array {}", arrayName);
@@ -252,7 +252,7 @@ Metadata::NeedRebuildAgain(void)
     }
     else
     {
-        int eventId = static_cast<int>(EID(UNKNOWN_ALLOCATOR_ERROR));
+        int eventId = EID(UNKNOWN_ALLOCATOR_ERROR);
         POS_TRACE_ERROR(eventId, "Can't find context manager to check if rebuild is needed");
         return false;
     }
@@ -274,7 +274,7 @@ Metadata::StopRebuilding(void)
     }
     else
     {
-        int eventId = static_cast<int>(EID(UNKNOWN_ALLOCATOR_ERROR));
+        int eventId = EID(UNKNOWN_ALLOCATOR_ERROR);
         POS_TRACE_ERROR(eventId, "Can't find context manager to check if rebuild is needed");
     }
 }

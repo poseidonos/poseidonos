@@ -112,6 +112,25 @@ DeviceManager::_InitMonitor()
     monitors.push_back(UnvmeDrvSingleton::Instance()->GetDaemon());
 }
 
+vector<UblockSharedPtr>
+DeviceManager::_GetDeviceListLocal(void)
+{
+    vector<UblockSharedPtr> devicesLocal;
+    devicesLocal.clear();
+    // Local Copy of device managers increase ublock's reference count.
+    // Even if a single device is removed from device list, it still must be maintained in memory.
+    // If func uses device lock, this implementation will avoid dead lock condition.
+    {
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        for (auto it = devices.begin(); it != devices.end(); it++)
+        {
+            devicesLocal.push_back(*it);
+        }
+    }
+    return devicesLocal;
+}
+
+
 void
 DeviceManager::Initialize(IIODispatcher* ioDispatcherInterface)
 {
@@ -159,15 +178,18 @@ DeviceManager::SetDeviceEventCallback(IDeviceEvent* event)
 void
 DeviceManager::_ClearDevices()
 {
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
-    for (UblockSharedPtr dev : devices)
+    vector<UblockSharedPtr> devicesLocal = _GetDeviceListLocal();
+    for (UblockSharedPtr dev : devicesLocal)
     {
         ioDispatcher->RemoveDeviceForReactor(dev);
         ioDispatcher->RemoveDeviceForIOWorker(dev);
         dev.reset();
     }
     POS_TRACE_INFO(EID(DEVICEMGR_CLEAR_DEVICE), "devices has been cleared sucessfully");
-    devices.clear();
+    {
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        devices.clear();
+    }
 }
 
 void
@@ -228,7 +250,6 @@ DeviceManager::_CheckDuplication(UblockSharedPtr dev)
 void
 DeviceManager::ScanDevs(void)
 {
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
     if (devices.size() == 0)
     {
         _PrepareIOWorker();
@@ -257,30 +278,36 @@ DeviceManager::_InitScan()
         {
             if (_CheckDuplication(_devs[j]) == true)
             {
+                std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
                 devices.push_back(_devs[j]);
             }
         }
     }
-    POS_TRACE_INFO(EID(DEVICEMGR_INIT_SCAN),
-        "InitScan done, dev cnt: {}", devices.size());
+    {
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        POS_TRACE_INFO(EID(DEVICEMGR_INIT_SCAN),
+            "InitScan done, dev cnt: {}", devices.size());
+    }
 }
 
 int
 DeviceManager::RemoveDevice(UblockSharedPtr dev)
 {
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
-    auto iter = find(devices.begin(), devices.end(), dev);
-    if (iter == devices.end())
+    DeviceType type = DeviceType::SSD;
     {
-        POS_TRACE_ERROR(EID(DEVICEMGR_REMOVE_DEV),
-            "device not found");
-        return static_cast<int>(EID(DEVICEMGR_REMOVE_DEV));
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        auto iter = find(devices.begin(), devices.end(), dev);
+        if (iter == devices.end())
+        {
+            POS_TRACE_ERROR(EID(DEVICEMGR_REMOVE_DEV),
+                "device not found");
+            return static_cast<int>(EID(DEVICEMGR_REMOVE_DEV));
+        }
+        type = (*iter)->GetType();
+        devices.erase(iter);
     }
-
-    DeviceType type = (*iter)->GetType();
     ioDispatcher->RemoveDeviceForReactor(dev);
     ioDispatcher->RemoveDeviceForIOWorker(dev);
-    devices.erase(iter);
 
     UnvmeSsdSharedPtr ssd = nullptr;
     if (type == DeviceType::SSD)
@@ -318,6 +345,7 @@ DeviceManager::_Rescan()
     if (i >= drivers.size())
     {
         // NO URAM_DRV
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
         POS_TRACE_INFO(EID(DEVICEMGR_RESCAN),
             "ReScan done, dev cnt: {}", devices.size());
         return;
@@ -329,7 +357,10 @@ DeviceManager::_Rescan()
     drivers[i]->ScanDevs(&_devs);
 
     std::vector<UblockSharedPtr>::iterator it;
-    for (it = devices.begin(); it != devices.end(); it++)
+
+    vector<UblockSharedPtr> devicesLocal = _GetDeviceListLocal();
+ 
+    for (it = devicesLocal.begin(); it != devicesLocal.end(); it++)
     {
         if ((*it)->GetType() != DeviceType::NVRAM)
         {
@@ -355,7 +386,10 @@ DeviceManager::_Rescan()
     {
         if (_CheckDuplication(_devs[j]) == true)
         {
-            devices.push_back(_devs[j]);
+            {
+                std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+                devices.push_back(_devs[j]);
+            }
             _PrepareDevice(_devs[j]);
         }
         else
@@ -371,12 +405,14 @@ DeviceManager::_Rescan()
 UblockSharedPtr
 DeviceManager::GetDev(DeviceIdentifier& devID)
 {
-    auto it = find_if(devices.begin(), devices.end(), devID.GetPredicate());
-    if (it != devices.end())
     {
-        return (*it);
+        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+        auto it = find_if(devices.begin(), devices.end(), devID.GetPredicate());
+        if (it != devices.end())
+        {
+            return (*it);
+        }
     }
-
     POS_TRACE_DEBUG(EID(DEVICEMGR_DEVICE_NOT_FOUND),
         "dev_id:{}", devID.val);
     return nullptr;
@@ -404,8 +440,10 @@ DeviceManager::ListDevs()
 struct spdk_nvme_ctrlr*
 DeviceManager::GetNvmeCtrlr(std::string& deviceName)
 {
-    std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
-    for (UblockSharedPtr dev : devices)
+    std::vector<UblockSharedPtr>::iterator it;
+
+    vector<UblockSharedPtr> devicesLocal = _GetDeviceListLocal();
+    for (UblockSharedPtr dev : devicesLocal)
     {
         DeviceType deviceType = dev->GetType();
         if (DeviceType::SSD == deviceType &&
@@ -424,11 +462,13 @@ DeviceManager::AttachDevice(UblockSharedPtr dev)
 {
     bool isNew = false;
     {
-        std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
         if (_CheckDuplication(dev) == true)
         {
             _PrepareDevice(dev);
-            devices.push_back(dev);
+            {
+                std::lock_guard<std::recursive_mutex> guard(deviceManagerMutex);
+                devices.push_back(dev);
+            }
             isNew = true;
         }
     }
@@ -509,7 +549,10 @@ DeviceManager::_PrepareIOWorker(void)
 void
 DeviceManager::_PrepareDevices(void)
 {
-    for (auto& iter : devices)
+    std::vector<UblockSharedPtr>::iterator it;
+
+    vector<UblockSharedPtr> devicesLocal = _GetDeviceListLocal();
+    for (auto& iter : devicesLocal)
     {
         _PrepareDevice(iter);
     }

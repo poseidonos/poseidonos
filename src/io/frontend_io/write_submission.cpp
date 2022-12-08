@@ -112,6 +112,10 @@ WriteSubmission::Execute(void)
 {
     try
     {
+        if (iBlockAllocator->IsProhibitedUserBlkAlloc() == true)
+        {
+            return false;
+        }
         int token = flowControl->GetToken(FlowControlType::USER, blockCount);
         if (0 >= token)
         {
@@ -134,6 +138,10 @@ WriteSubmission::Execute(void)
         {
             rbaStateManager->BulkReleaseOwnership(volumeId, startRba,
                 blockCount);
+            if (0 < token)
+            {
+                flowControl->ReturnToken(FlowControlType::USER, token);
+            }
         }
         else
         {

@@ -12,13 +12,13 @@ TEST(GcCtx, GetCurrentGcMode_TestModeNoGC)
 {
     // given
     NiceMock<MockBlockAllocationStatus> allocStatus;
-    GcCtx gcCtx(&allocStatus);
+    GcCtx gcCtx(&allocStatus, 0);
 
     gcCtx.SetNormalGcThreshold(10);
     gcCtx.SetUrgentThreshold(5);
 
     // when 1
-    int numFreeSegments = 8;
+    uint32_t numFreeSegments = 8;
     GcMode gcMode = gcCtx.UpdateCurrentGcMode(numFreeSegments);
 
     // then 2
@@ -30,13 +30,13 @@ TEST(GcCtx, UpdateCurrentGcMode_ByNumberOfFreeSegment)
 {
     // given
     NiceMock<MockBlockAllocationStatus> blockAllocStatus;
-    GcCtx* gcCtx = new GcCtx(&blockAllocStatus);
+    GcCtx* gcCtx = new GcCtx(&blockAllocStatus, 0);
 
     gcCtx->SetNormalGcThreshold(10);
     gcCtx->SetUrgentThreshold(5);
 
     // when 1.
-    int numFreeSegments = 11;
+    uint32_t numFreeSegments = 11;
     GcMode ret = gcCtx->UpdateCurrentGcMode(numFreeSegments);
 
     // then 1.

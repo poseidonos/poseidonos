@@ -50,6 +50,7 @@ Mpio::Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCr
   errorStopState(false),
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
+  mergedRequestList(nullptr),
   fileType(MetaFileType::General),
   partialMpioDoneNotifier(nullptr),
   mpioDoneCallback(callback),
@@ -77,6 +78,8 @@ Mpio::Reset(void)
     // clear error info
     error = 0;
     errorStopState = false;
+
+    mergedRequestList = nullptr;
 
     ResetTimestamp();
 
@@ -358,5 +361,21 @@ void
 Mpio::_HandleAsyncMemOpDone(void* obj)
 {
     reinterpret_cast<Mpio*>(obj)->_HandlePartialDone();
+}
+
+void
+Mpio::_CopyDataFromMergedRequestListAndRemoveTheListConditionally(void)
+{
+    if (mergedRequestList)
+    {
+        // copy data for merged requests
+        for (auto& request : *mergedRequestList)
+        {
+            FileBufType targetBuf = (uint8_t*)(GetMDPageDataBuf()) + (request->byteOffsetInFile % MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
+            FileBufType originBuf = request->buf;
+            memcpy(targetBuf, originBuf, request->byteSize);
+        }
+    }
+    mergedRequestList = nullptr;
 }
 } // namespace pos

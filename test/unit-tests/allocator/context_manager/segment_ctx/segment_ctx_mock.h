@@ -45,6 +45,7 @@ public:
     MOCK_METHOD(int, MakeRebuildTarget, (), (override));
     MOCK_METHOD(std::set<SegmentId>, GetNvramSegmentList, (), (override));
     MOCK_METHOD(std::set<SegmentId>, GetVictimSegmentList, (), (override));
+    MOCK_METHOD(uint32_t, GetVictimSegmentCount, (), (override));
     MOCK_METHOD(int, StopRebuilding, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildTargetSegmentCount, (), (override));
     MOCK_METHOD(std::set<SegmentId>, GetRebuildSegmentList, (), (override));

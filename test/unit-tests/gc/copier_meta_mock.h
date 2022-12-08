@@ -10,7 +10,7 @@ class MockCopierMeta : public CopierMeta
 {
 public:
     using CopierMeta::CopierMeta;
-    MOCK_METHOD(void*, GetBuffer, (StripeId stripeId), (override));
+    MOCK_METHOD(void, GetBuffers, (uint32_t count, std::vector<void*>* retBuffers), (override));
     MOCK_METHOD(void, ReturnBuffer, (StripeId stripeId, void* buffer), (override));
     MOCK_METHOD(void, SetStartCopyStripes, (), (override));
     MOCK_METHOD(void, SetStartCopyBlks, (uint32_t blocks), (override));

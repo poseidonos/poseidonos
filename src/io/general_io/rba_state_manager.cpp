@@ -118,41 +118,45 @@ RBAStateManager::BulkReleaseOwnership(uint32_t volumeID,
     _ReleaseOwnership(volumeID, startRba, count);
 }
 
-bool
-RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& sectorRbaList)
+RBAOwnerType
+RBAStateManager::GetOwner(uint32_t volumeID, RbaAndSize rbaAndSize)
 {
-    VolumeIo::RbaList uniqueList = sectorRbaList;
-    uniqueList.sort();
-    uniqueList.unique();
-    for (auto& rbaAndSize : uniqueList)
+    BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba), rbaAndSize.size);
+    BlkAddr rba = blockAlignment.GetHeadBlock();
+    RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
+    return targetVolume.GetOwner(rba);
+}
+
+VolumeIo::RbaList::iterator
+RBAStateManager::AcquireOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& uniqueRbaList, VolumeIo::RbaList::iterator startIter,
+        uint32_t& acquiredCnt)
+{
+    auto it = startIter;
+    for ( ; it != uniqueRbaList.end(); ++it)
     {
+        RbaAndSize rbaAndSize = *it;
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);
-        bool success = _AcquireOwnership(volumeId,
-                blockAlignment.GetHeadBlock(), blockAlignment.GetBlockCount());
-        if (success == false)
+        bool success = _AcquireOwnership(volumeId, blockAlignment.GetHeadBlock(),
+            blockAlignment.GetBlockCount(), RBAOwnerType::GC);
+        if (success == true)
         {
-            auto iterator =
-                std::find(uniqueList.cbegin(), uniqueList.cend(), rbaAndSize);
-            VolumeIo::RbaList rbaList;
-            rbaList.insert(rbaList.begin(), uniqueList.cbegin(), iterator);
-            ReleaseOwnershipRbaList(volumeId, rbaList);
-
-            return false;
+            acquiredCnt++;
+        }
+        else
+        {
+            break;
         }
     }
-    return true;
+    return it;
 }
 
 void
 RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& sectorRbaList)
+        const VolumeIo::RbaList& uniqueRbaList)
 {
-    VolumeIo::RbaList uniqueList = sectorRbaList;
-    uniqueList.sort();
-    uniqueList.unique();
-    for (auto& rbaAndSize : uniqueList)
+    for (auto& rbaAndSize : uniqueRbaList)
     {
         BlockAlignment blockAlignment(ChangeSectorToByte(rbaAndSize.sectorRba),
                 rbaAndSize.size);
@@ -163,19 +167,18 @@ RBAStateManager::ReleaseOwnershipRbaList(uint32_t volumeId,
 
 bool
 RBAStateManager::_AcquireOwnership(uint32_t volumeID, BlkAddr startRba,
-        uint32_t count)
+        uint32_t count, RBAOwnerType owner)
 {
     if (unlikely(volumeID >= MAX_VOLUME_COUNT))
     {
+        POS_TRACE_ERROR(EID(RBAMGR_WRONG_VOLUME_ID), "vol_id:{}", volumeID);
         std::pair<POS_EVENT_ID, EventLevel> eventIdWithLevel(
             EID(RBAMGR_WRONG_VOLUME_ID), EventLevel::ERROR);
         throw eventIdWithLevel;
     }
 
-
     RBAStatesInVolume& targetVolume = rbaStatesInArray[volumeID];
-    bool acquired = targetVolume.AcquireOwnership(startRba, count);
-
+    bool acquired = targetVolume.AcquireOwnership(startRba, count, owner);
     return acquired;
 }
 
@@ -199,10 +202,13 @@ RBAStateManager::RBAState::RBAState(void)
 }
 
 bool
-RBAStateManager::RBAState::AcquireOwnership(void)
+RBAStateManager::RBAState::AcquireOwnership(RBAOwnerType owner)
 {
     bool acquired = (ownered.test_and_set(memory_order_relaxed) == false);
-
+    if (acquired == true)
+    {
+        this->owner = owner;
+    }
     return acquired;
 }
 
@@ -210,6 +216,7 @@ void
 RBAStateManager::RBAState::ReleaseOwnership(void)
 {
     ownered.clear(memory_order_relaxed);
+    this->owner = RBAOwnerType::NoOwner;
 }
 
 RBAStateManager::RBAStatesInVolume::RBAStatesInVolume(void)
@@ -219,7 +226,7 @@ RBAStateManager::RBAStatesInVolume::RBAStatesInVolume(void)
 }
 
 bool
-RBAStateManager::RBAStatesInVolume::AcquireOwnership(BlkAddr startRba, uint32_t cnt)
+RBAStateManager::RBAStatesInVolume::AcquireOwnership(BlkAddr startRba, uint32_t cnt, RBAOwnerType owner)
 {
     BlkAddr endRba = startRba + cnt - 1;
     if (likely(_IsAccessibleRba(endRba)))
@@ -227,7 +234,7 @@ RBAStateManager::RBAStatesInVolume::AcquireOwnership(BlkAddr startRba, uint32_t 
         BlkAddr targetRba = startRba;
         for (; targetRba <= endRba; targetRba++)
         {
-            bool targetAcquired = rbaStates[targetRba].AcquireOwnership();
+            bool targetAcquired = rbaStates[targetRba].AcquireOwnership(owner);
             if (targetAcquired == false)
             {
                 uint32_t acquiredCount = targetRba - startRba;
@@ -235,7 +242,6 @@ RBAStateManager::RBAStatesInVolume::AcquireOwnership(BlkAddr startRba, uint32_t 
                 return false;
             }
         }
-
         return true;
     }
     return false;
@@ -272,6 +278,16 @@ RBAStateManager::RBAStatesInVolume::SetSize(uint64_t newSize)
         size = newSize;
         return;
     }
+}
+
+RBAOwnerType
+RBAStateManager::RBAStatesInVolume::GetOwner(BlkAddr rba)
+{
+    if (likely(_IsAccessibleRba(rba)))
+    {
+        return rbaStates[rba].GetOwner();
+    }
+    return RBAOwnerType::NoOwner;
 }
 
 bool

@@ -60,7 +60,8 @@ class GcMapUpdateRequest : public Event
 public:
     GcMapUpdateRequest(void) = default;
 
-    explicit GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName, GcStripeManager* gcStripeManager);
+    explicit GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName,
+        GcStripeManager* gcStripeManager, std::list<RbaAndSize> rbaList);
     GcMapUpdateRequest(StripeSmartPtr stripe,
         CallbackSmartPtr completionEvent,
         IVSAMap* inputIVSAMap,

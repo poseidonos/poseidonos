@@ -81,7 +81,7 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     allocatorCtx = new AllocatorCtx(tp, info);
     rebuildCtx = new RebuildCtx(tp, info);
     blockAllocStatus = new BlockAllocationStatus();
-    gcCtx = new GcCtx(blockAllocStatus);
+    gcCtx = new GcCtx(blockAllocStatus, arrayId);
     segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx, arrayId);
 
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);

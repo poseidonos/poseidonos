@@ -51,6 +51,13 @@ namespace pos
 class RBAStateService;
 class VolumeEventPublisher;
 
+enum class RBAOwnerType
+{
+    NoOwner,
+    HOST,
+    GC
+};
+
 class RBAStateManager : public VolumeEvent, public IMountSequence
 {
 public:
@@ -64,17 +71,18 @@ public:
 
     virtual void CreateRBAState(uint32_t volumeID, uint64_t totalRBACount);
     virtual void DeleteRBAState(uint32_t volumeID);
-    virtual bool AcquireOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& sectorRbaList);
+    virtual VolumeIo::RbaList::iterator AcquireOwnershipRbaList(uint32_t volumeId,
+        const VolumeIo::RbaList& uniqueRbaList, VolumeIo::RbaList::iterator startIter,
+        uint32_t& acquiredCnt);
     virtual void ReleaseOwnershipRbaList(uint32_t volumeId,
-        const VolumeIo::RbaList& sectorRbaList);
+        const VolumeIo::RbaList& uniqueRbaList);
     virtual bool BulkAcquireOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
     virtual void BulkReleaseOwnership(uint32_t volumeID,
         BlkAddr startRba,
         uint32_t count);
-
+    virtual RBAOwnerType GetOwner(uint32_t volumeID, RbaAndSize rbaAndSize);
     int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
     int VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo) override;
     int VolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
@@ -88,19 +96,22 @@ private:
     {
     public:
         RBAState(void);
-        bool AcquireOwnership(void);
+        bool AcquireOwnership(RBAOwnerType owner);
         void ReleaseOwnership(void);
+        RBAOwnerType GetOwner(void) { return owner; }
 
     private:
         std::atomic_flag ownered;
+        RBAOwnerType owner = RBAOwnerType::NoOwner;
     };
 
     class RBAStatesInVolume
     {
     public:
         RBAStatesInVolume(void);
-        bool AcquireOwnership(BlkAddr startRba, uint32_t cnt);
+        bool AcquireOwnership(BlkAddr startRba, uint32_t cnt, RBAOwnerType owner);
         void ReleaseOwnership(BlkAddr startRba, uint32_t cnt);
+        RBAOwnerType GetOwner(BlkAddr rba);
         void SetSize(uint64_t newSize);
 
     private:
@@ -112,7 +123,7 @@ private:
 
     RBAStatesInArray rbaStatesInArray;
 
-    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
+    bool _AcquireOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count, RBAOwnerType owner = RBAOwnerType::HOST);
     void _ReleaseOwnership(uint32_t volumeID, BlkAddr startRba, uint32_t count);
 };
 

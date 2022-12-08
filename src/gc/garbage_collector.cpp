@@ -148,15 +148,9 @@ GarbageCollector::IsEnabled(void)
 
     if (false == isEnabled)
     {
-        POS_TRACE_INFO(EID(GC_CANNOT_START), "cannot start gc");
-        return EID(GC_CANNOT_START);
+        POS_TRACE_INFO(EID(GC_CANNOT_BE_STARTED), "curr_state:{}", currState);
+        return EID(GC_CANNOT_BE_STARTED);
     }
-
-    if (true == isRunning)
-    {
-        POS_TRACE_INFO(EID(GC_STARTED), "gc already running");
-    }
-
     return returnVal;
 }
 
@@ -167,16 +161,16 @@ GarbageCollector::Start(void)
 
     if (false == isRunning)
     {
-        POS_TRACE_INFO(EID(GC_STARTED), "gc started");
         returnVal = _DoGC();
         if (likely(returnVal == EID(SUCCESS)))
         {
             isRunning = true;
+            POS_TRACE_INFO(EID(GC_STARTED), "GC started");
         }
     }
     else
     {
-        POS_TRACE_INFO(EID(GC_STARTED), "gc already running");
+        POS_TRACE_INFO(EID(GC_ALREADY_STARTED), "");
         returnVal = EID(SUCCESS);
     }
 
@@ -217,8 +211,6 @@ GarbageCollector::End(void)
 int
 GarbageCollector::_DoGC(void)
 {
-    POS_TRACE_INFO(EID(GC_STARTED), "GC started");
-
     CopierSmartPtr event;
     event = copierFactory(&gcStatus, arrayInfo, inputEvent);
 

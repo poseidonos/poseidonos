@@ -61,7 +61,7 @@ public:
 
     virtual ~CopierMeta(void);
 
-    virtual void* GetBuffer(StripeId stripeId);
+    virtual void GetBuffers(uint32_t count, std::vector<void*>* retBuffers);
     virtual void ReturnBuffer(StripeId stripeId, void* buffer);
 
     virtual void SetStartCopyStripes(void);

@@ -62,6 +62,7 @@ public:
     virtual StripeSmartPtr AllocateGcDestStripe(uint32_t volumeId);
     virtual void ProhibitUserBlkAlloc(void) override;
     virtual void PermitUserBlkAlloc(void) override;
+    virtual bool IsProhibitedUserBlkAlloc(void) override;
 
     virtual bool BlockAllocating(uint32_t volumeId) override;
     virtual void UnblockAllocating(uint32_t volumeId) override;
