@@ -30,7 +30,7 @@ DOCDIR = $(TOP)/doc
 #################################################
 # nvme driver : unvme, libaio
 
-POS_VERSION = v0.12.0-rc4
+POS_VERSION = v0.12.0-rc6
 
 DEFINE += -DPOS_VERSION=\"$(POS_VERSION)\"
 DEFINE += -DUNVME_BUILD

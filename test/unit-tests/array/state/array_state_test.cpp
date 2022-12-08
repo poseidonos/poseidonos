@@ -415,7 +415,7 @@ TEST(ArrayState, IsRebuildable_testIfDegradedStateIsRebuildable)
     }
 }
 
-TEST(ArrayState, IsRecoverable_testIfOnlyTwoStatesAreRecoverable)
+TEST(ArrayState, IsRecoverable_testIfOnlyThreeStatesAreRecoverable)
 {
     // Given
     NiceMock<MockIStateControl> mockIStateControl;
@@ -430,7 +430,8 @@ TEST(ArrayState, IsRecoverable_testIfOnlyTwoStatesAreRecoverable)
         bool actual = arrayState.IsRecoverable();
 
         // Then
-        if (ArrayStateEnum::EXIST_DEGRADED == arrayStateEnum || ArrayStateEnum::DEGRADED == arrayStateEnum)
+        if (ArrayStateEnum::EXIST_DEGRADED == arrayStateEnum || ArrayStateEnum::DEGRADED == arrayStateEnum ||
+            ArrayStateEnum::REBUILD == arrayStateEnum)
         {
             ASSERT_TRUE(actual);
         }

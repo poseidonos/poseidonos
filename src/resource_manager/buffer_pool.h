@@ -34,6 +34,7 @@
 #define BUFFER_POOL_H_
 
 #include <list>
+#include <vector>
 #include <mutex>
 #include <string>
 
@@ -53,26 +54,35 @@ public:
         HugepageAllocator* hugepageAllocator =
             HugepageAllocatorSingleton::Instance());
     virtual ~BufferPool(void);
-
     virtual void* TryGetBuffer(void);
+    virtual bool TryGetBuffers(uint32_t reqCnt, std::vector<void*>* retBuffers, uint32_t minAcqCnt);
     virtual void ReturnBuffer(void*);
-    virtual bool IsFull(void) { return freeBufferSize == initSize; }
+    virtual void ReturnBuffers(std::vector<void*>* buffers);
     virtual bool IsAllocated(void) { return isAllocated; }
     std::string GetOwner(void) { return BUFFER_INFO.owner; }
+
 private:
-    bool _Alloc(void);
+    bool _Init(void);
     void _Clear(void);
+    void _TrySwapWhenConsumerPoolEmpty(void);
+    void _TrySwapWhenProducerPoolIsNotEmpty(void);
+    void _Swap(void);
 
     const BufferInfo BUFFER_INFO;
     const uint32_t SOCKET;
 
-    std::mutex freeBufferLock;
-    std::list<void*> freeBuffers;
+    HugepageAllocator* hugepageAllocator = nullptr;
     std::list<void*> allocatedHugepages;
-    uint32_t freeBufferSize = 0;
-    uint32_t initSize = 0;
+    std::list<void*>* consumerPool = nullptr;
+    std::list<void*>* producerPool = nullptr;
+    std::list<void*> bufferList1;
+    std::list<void*> bufferList2;
+
+    std::mutex consumerLock;
+    std::mutex producerLock;
     bool isAllocated = false;
-    HugepageAllocator* hugepageAllocator;
+    size_t swapThreshold = 0;
+    const static size_t SWAP_THRESHOLD_PERCENT = 25;
 };
 
 } // namespace pos

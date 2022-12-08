@@ -85,9 +85,9 @@ FlushCompletion::_DoSpecificJob(void)
     if (likely(true == userArea))
     {
         StripeId nvmStripeId = stripe->GetWbLsid();
-        StripePutEvent event(stripe, nvmStripeId, arrayId);
+	    EventSmartPtr event(new StripePutEvent(stripe, nvmStripeId, arrayId));
 
-        bool done = event.Execute();
+        bool done = event->Execute();
         FlushCountSingleton::Instance()->pendingFlush--;
         airlog("Pending_Flush", "internal", arrayId, -1);
         if (false == done)

@@ -90,7 +90,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
 
             if (result < 0 || ubio->GetError() != IOErrorType::SUCCESS)
             {
-                POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG_MSG),
+                POS_TRACE_WARN(EID(FORMAT_PARTITION_TRIM_FAILED),
                     "Trim Failed on {}, res:{}, error:{}",
                     devs[i]->GetUblock()->GetName(), result, ubio->GetError());
                 trimResult = 1;
@@ -121,7 +121,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
     }
     else
     {
-        POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG_MSG), "Trim Failed on some devices");
+        POS_TRACE_WARN(EID(FORMAT_PARTITION_TRIM_FAILED), "Trim Failed on some devices");
         // To Do : Write All Zeroes
         return trimResult;
     }
@@ -150,7 +150,7 @@ PartitionFormatter::_CheckTrimValue(uint64_t startLba, uint32_t arrayId,
 
         if (result != 0)
         {
-            POS_TRACE_ERROR(EID(FORMAT_PARTITION_DEBUG_MSG),
+            POS_TRACE_ERROR(EID(FORMAT_PARTITION_TRIM_FAILED),
                 "Trim Value is not Zero on {}", devs[i]->GetUblock()->GetName());
             nonZeroResult = 1;
         }

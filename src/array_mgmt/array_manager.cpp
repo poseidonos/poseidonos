@@ -326,6 +326,7 @@ ArrayManager::GetInfo(uint32_t arrayIdx)
 int
 ArrayManager::PrepareRebuild(string name, bool& resume)
 {
+    POS_TRACE_INFO(EID(REBUILD_JOB_PREPARING), "");
     pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array == nullptr)
@@ -342,6 +343,7 @@ ArrayManager::PrepareRebuild(string name, bool& resume)
 void
 ArrayManager::RebuildDone(string name)
 {
+    POS_TRACE_INFO(EID(REBUILD_JOB_COMPLETED), "array_name:{}", name);
     pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
@@ -387,6 +389,7 @@ ArrayManager::Load(list<string>& failedArrayList)
 int
 ArrayManager::_Load(string name)
 {
+    POS_TRACE_INFO(EID(LOAD_MBR_TRYING), "array_name:{}", name);
     pthread_rwlock_wrlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
     if (array != nullptr)
@@ -400,10 +403,12 @@ ArrayManager::_Load(string name)
     int ret = array->Load();
     if (ret == EID(SUCCESS))
     {
+        POS_TRACE_INFO(EID(LOAD_MBR_COMPLETED), "array_name:{}", name);
         arrayList.emplace(name, array);
     }
     else
     {
+        POS_TRACE_WARN(EID(LOAD_MBR_FAILED), "array_name:{}", name);
         delete array;
     }
 
@@ -414,6 +419,7 @@ ArrayManager::_Load(string name)
 int
 ArrayManager::ResetMbr(void)
 {
+    POS_TRACE_INFO(EID(RESET_MBR_TRYING), "");
     pthread_rwlock_wrlock(&arrayListLock);
     int result = 0;
     for (auto iter = arrayList.begin(); iter != arrayList.end();)
@@ -436,6 +442,14 @@ ArrayManager::ResetMbr(void)
 
     pthread_rwlock_unlock(&arrayListLock);
     result = abrManager->ResetMbr();
+    if (result == 0)
+    {
+        POS_TRACE_INFO(EID(RESET_MBR_COMPLETED), "");
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(RESET_MBR_FAILED), "");
+    }
     return result;
 }
 

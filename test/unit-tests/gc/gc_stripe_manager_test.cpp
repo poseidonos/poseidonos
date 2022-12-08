@@ -92,14 +92,14 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testAllocateGcWriteBufferBlksW
     GcAllocateBlks testGcAllocateBlks;
 
     // given not enough gc write buffer
-    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillOnce(Return((void*)0x20000000)).WillOnce(Return(nullptr));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffers).WillOnce(Return(false));
     // when allocate write buffer blks
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     // then return allocate 0 blk
     EXPECT_TRUE(testGcAllocateBlks.numBlks == 0);
 
     // given enough gc write buffer
-    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffers).WillOnce(Return(true));
     // when allocate write buffer blks
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     // then return request blks cnt
@@ -114,7 +114,7 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testAllocateGcWriteBufferBlksB
     GcAllocateBlks testGcAllocateBlks;
 
     // given enough write buffer and request to allocate blks per stripe
-    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffers).WillRepeatedly(Return(true));
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks/2);
     EXPECT_TRUE(testGcAllocateBlks.numBlks == numBlks / 2);
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
@@ -134,17 +134,13 @@ TEST_F(GcStripeManagerTestFixture, AllocateBlocks_testIf)
     GcAllocateBlks testGcAllocateBlks;
 
     // given write buffer and allocate write buffer blks
-    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffers).WillRepeatedly(Return(true));
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     EXPECT_TRUE(testGcAllocateBlks.numBlks == numBlks);
     // when get write buffer
     // then return GcWriteBuffer
     GcWriteBuffer* writeBuffer = gcStripeManager->GetWriteBuffer(volId);
-    for (auto buffer : *writeBuffer)
-    {
-        EXPECT_TRUE(buffer == (void*)0x20000000);
-    }
-
+    
     // when set blk info
     for (uint32_t offset = 0; offset < numBlks; offset++)
     {
@@ -187,16 +183,12 @@ TEST_F(GcStripeManagerTestFixture, VolumeEvent_testVolumeDeleteWhenSetBlkInfo)
     GcAllocateBlks expectGcAllocateBlks = {.startOffset = 0, .numBlks = numBlks};
     GcAllocateBlks testGcAllocateBlks;
 
-    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffer).WillRepeatedly(Return((void*)0x20000000));
+    EXPECT_CALL(*gcWriteBufferPool, TryGetBuffers).WillRepeatedly(Return(true));
 
     testGcAllocateBlks = gcStripeManager->AllocateWriteBufferBlks(volId, numBlks);
     // when get write buffer
     // then return GcWriteBuffer
     GcWriteBuffer* writeBuffer = gcStripeManager->GetWriteBuffer(volId);
-    for (auto buffer : *writeBuffer)
-    {
-        EXPECT_TRUE(buffer == (void*)0x20000000);
-    }
     EXPECT_TRUE(testGcAllocateBlks.numBlks == numBlks);
     // when set blk info
     for (uint32_t offset = 0; offset < numBlks; offset++)

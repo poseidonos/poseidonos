@@ -1070,7 +1070,7 @@ index fdf512f69..faa3d8704 100644
  C_SRCS-$(CONFIG_RDMA) += rdma.c
  LIBNAME = nvmf
 diff --git lib/nvmf/ctrlr.c lib/nvmf/ctrlr.c
-index 2f23b2f78..9ab349fb7 100644
+index 2f23b2f78..bad1f949b 100644
 --- lib/nvmf/ctrlr.c
 +++ lib/nvmf/ctrlr.c
 @@ -42,6 +42,7 @@
@@ -1156,7 +1156,7 @@ index 2f23b2f78..9ab349fb7 100644
  	}
  
 +	/* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
-+	if (!spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
++	if (ctrlr->admin_qpair == NULL || !spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
 +		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
 +		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
 +		spdk_nvmf_request_complete(req);

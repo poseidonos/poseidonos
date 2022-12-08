@@ -57,9 +57,10 @@
 
 namespace pos
 {
-GcMapUpdateRequest::GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName, GcStripeManager* gcStripeManager)
+GcMapUpdateRequest::GcMapUpdateRequest(StripeSmartPtr stripe, std::string arrayName,
+    GcStripeManager* gcStripeManager, std::list<RbaAndSize> rbaList)
 : GcMapUpdateRequest(stripe,
-      std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName), EventSchedulerSingleton::Instance(), gcStripeManager),
+      std::make_shared<GcMapUpdateCompletion>(stripe, arrayName, MapperServiceSingleton::Instance()->GetIStripeMap(arrayName), EventSchedulerSingleton::Instance(), gcStripeManager, rbaList),
       MapperServiceSingleton::Instance()->GetIVSAMap(arrayName),
       ArrayMgr()->GetInfo(arrayName)->arrayInfo,
       MetaServiceSingleton::Instance()->GetMetaUpdater(arrayName))
@@ -151,14 +152,13 @@ GcMapUpdateRequest::_UpdateMeta(void)
     if (unlikely(0 != result))
     {
         POS_EVENT_ID eventId = EID(GC_MAP_UPDATE_FAILED);
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            "gc map update failed, arrayName:{}, stripeUserLsid:{}",
+        POS_TRACE_ERROR(static_cast<int>(eventId), "array_name:{}, stripe_id:{}",
             iArrayInfo->GetName(), mapUpdates.userLsid);
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_REQUEST),
-        "gc map update request, arrayName:{}, stripeUserLsid:{}",
+    POS_TRACE_DEBUG(EID(GC_MAP_UPDATE_SUCCESS),
+        "array_name:{}, stripe_id:{}",
         iArrayInfo->GetName(), mapUpdates.userLsid);
     return true;
 }

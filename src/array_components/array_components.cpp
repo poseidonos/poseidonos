@@ -260,6 +260,7 @@ ArrayComponents::PrepareRebuild(bool& resume)
                 ret = meta->PrepareRebuild();
             }
             gc->Resume();
+            POS_TRACE_INFO(EID(REBUILD_JOB_PREPARING), "result:{}", ret);
             return ret;
         }
     }

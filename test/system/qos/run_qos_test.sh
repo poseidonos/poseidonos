@@ -1396,8 +1396,10 @@ setup_test_environment;
 # Run all the QoS Test Cases
 run_qos_test_cases;
 
+if [[ $TYPE == "PM" ]]; then
 #run_test_on_multi_array and multi_volume_on_1 subsystem
 run_multi_array_test;
+fi
 
 # Minimum Volume Test
 run_minimum_policy_test;

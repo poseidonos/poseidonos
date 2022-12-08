@@ -503,7 +503,7 @@ Nvme::InitController(void)
         return nullptr;
     }
 
-    POS_TRACE_WARN(EID(UNVME_INIT_CONTROLLER), "Initialization complete.");
+    POS_TRACE_INFO(EID(UNVME_INIT_CONTROLLER), "Initialization complete.");
 
     return &namespaces;
 }
@@ -515,15 +515,13 @@ Nvme::ControllerTimeoutCallback(void* cbArg, struct spdk_nvme_ctrlr* ctrlr,
     const struct spdk_nvme_ctrlr_data* ctrlData =
         spdk_nvme_ctrlr_get_data(ctrlr);
 
-    POS_EVENT_ID eventId = EID(UNVME_COMPLETION_TIMEOUT);
-    POS_TRACE_WARN(static_cast<int>(eventId),
+    POS_TRACE_WARN(EID(UNVME_COMPLETION_TIMEOUT),
         "uNVMe completion checking timed out: SN: {}", ctrlData->sn);
 
     union spdk_nvme_csts_register csts = spdk_nvme_ctrlr_get_regs_csts(ctrlr);
     if (csts.bits.cfs)
     {
-        eventId = EID(UNVME_CONTROLLER_FATAL_STATUS);
-        POS_TRACE_WARN(static_cast<int>(eventId),
+        POS_TRACE_WARN(EID(UNVME_CONTROLLER_FATAL_STATUS),
             "Controller Fatal Status, reset required: SN: {}", ctrlData->sn);
 
         resetHandler(ctrlr, qpair, cid);

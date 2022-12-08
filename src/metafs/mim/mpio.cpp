@@ -50,6 +50,7 @@ Mpio::Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCr
   errorStopState(false),
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
+  mergedRequestList(nullptr),
   fileType(MetaFileType::General),
   partialMpioDoneNotifier(nullptr),
   mpioDoneCallback(callback),
@@ -77,6 +78,8 @@ Mpio::Reset(void)
     // clear error info
     error = 0;
     errorStopState = false;
+
+    mergedRequestList = nullptr;
 
     ResetTimestamp();
 

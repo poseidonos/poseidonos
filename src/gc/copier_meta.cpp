@@ -109,10 +109,11 @@ CopierMeta::~CopierMeta(void)
     }
 }
 
-void*
-CopierMeta::GetBuffer(StripeId stripeId)
+void
+CopierMeta::GetBuffers(uint32_t count, std::vector<void*>* retBuffers)
 {
-    return gcBufferPool->TryGetBuffer();
+    uint32_t minAcqCount = 1;
+    gcBufferPool->TryGetBuffers(count, retBuffers, minAcqCount);
 }
 
 void
@@ -267,7 +268,7 @@ CopierMeta::_CreateBufferPool(uint32_t chunkCnt, uint32_t chunkSize)
     BufferInfo info = {
         .owner = typeid(this).name(),
         .size = chunkSize,
-        .count = chunkCnt * ArrayConfig::GC_BUFFER_COUNT
+        .count = chunkCnt * ArrayConfig::GC_BUFFER_COUNT * 2
     };
     gcBufferPool = memoryManager->CreateBufferPool(info);
     assert(gcBufferPool != nullptr);

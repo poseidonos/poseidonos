@@ -34,12 +34,17 @@
 
 #include <atomic>
 #include <cstdint>
-#include <map>
 #include <string>
+#include <list>
 
 #include "src/event_scheduler/callback.h"
 #include "src/gc/gc_stripe_manager.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/include/address_type.h"
+#include "src/mapper/mapper.h"
+#include "src/mapper_service/mapper_service.h"
+
+using namespace std;
 
 namespace pos
 {
@@ -50,24 +55,38 @@ class IArrayInfo;
 class GcFlushCompletion : public Callback
 {
 public:
-    explicit GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
-    GcFlushCompletion(StripeSmartPtr stripe, std::string& arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
+    explicit GcFlushCompletion(StripeSmartPtr stripe, string arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer);
+    GcFlushCompletion(StripeSmartPtr stripe, string arrayName, GcStripeManager* gcStripeManager, GcWriteBuffer* dataBuffer,
                     EventSmartPtr inputEvent,
                     RBAStateManager* inputRbaStateManager,
-                    IArrayInfo* inputIArrayInfo);
+                    IArrayInfo* inputIArrayInfo,
+                    IVSAMap* iVSAMap);
     ~GcFlushCompletion(void) override;
+    void Init(void);
+    bool AcquireOwnership(void);
+    list<RbaAndSize>* GetRbaList(void) { return &sectorRbaList; }
 
 private:
     bool _DoSpecificJob(void) override;
+    bool _IsValidRba(BlkAddr rba, uint32_t offset);
 
     StripeSmartPtr stripe;
-    std::string arrayName;
+    string arrayName;
     GcStripeManager* gcStripeManager;
     GcWriteBuffer* dataBuffer;
 
     EventSmartPtr inputEvent;
     RBAStateManager* rbaStateManager;
     IArrayInfo* iArrayInfo;
+    IVSAMap* iVSAMap;
+    list<RbaAndSize> sectorRbaList;
+    list<RbaAndSize>::iterator currPos;
+    uint32_t ownershipProgress = 0;
+    uint32_t volId = 0;
+    uint32_t tryCnt = 0;
+    const uint32_t GC_RBA_TRYLOCK_RETRY_THRESHOLD = 50000;
+    bool isInit = false;
+    StripeId lsid = 0;
+    uint32_t totalBlksPerUserStripe = 0;
 };
-
 } // namespace pos

@@ -1017,9 +1017,7 @@ Array::_DetachData(ArrayDevice* target)
 
     if (needStopRebuild)
     {
-        POS_TRACE_WARN(EID(ARRAY_EVENT_DATA_SSD_DETACHED),
-            "Stop the rebuild due to detachment of the rebuild target device or Array broken");
-        rebuilder->StopRebuild(name_);
+        rebuilder->StopRebuild(name_, EID(REBUILD_STOPPED_OTHER_DEVS_DETACHMENT));
     }
     else if (state->IsRebuildable())
     {

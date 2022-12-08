@@ -92,6 +92,12 @@ BlockAllocationStatus::ProhibitUserBlockAllocation(void)
     userBlkAllocProhibited = true;
 }
 
+bool
+BlockAllocationStatus::IsProhibitedUserBlockAllocation(void)
+{
+    return userBlkAllocProhibited;
+}
+
 void
 BlockAllocationStatus::ProhibitBlockAllocation(void)
 {

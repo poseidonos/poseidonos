@@ -141,6 +141,11 @@ protected:
     Mpio* _AllocMpio(MpioIoInfo& mpioIoInfo, bool partialIO);
     void _HandleMpioDone(void* data);
     MpioType _LookupMpioType(MetaIoRequestType type);
+    bool _IsJournalRequest(const MetaStorageType type) const
+    {
+        return (MetaStorageType::SSD != type);
+    }
+    void _WaitingForFreeMpio(const MpioType ioType, const MetaStorageType type) const;
 
     MetaFsIoRequest* originReq;
     MetaIoOpcode opCode;

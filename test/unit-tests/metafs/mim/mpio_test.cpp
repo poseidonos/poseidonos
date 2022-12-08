@@ -182,9 +182,22 @@ TEST(MpioTester, IsCached_testIfTheResultReturnsByMpioCacheState)
 
     // then
     EXPECT_TRUE(mpio.IsCached());
+
+    // when
+    mpio.ChangeCacheStateTo(MpioCacheState::WriteDone);
+
+    // then
+    EXPECT_TRUE(mpio.IsCached());
+
+    free(buf);
 }
 
+<<<<<<< HEAD
 TEST(MpioTester, IsMergeable_testIfTheResultReturnsByMpioCacheState)
+=======
+
+TEST(MpioTester, IsRemovable_testIfTheResultReturnsByMpioCacheState)
+>>>>>>> origin/release/v0.12.0
 {
     // given
     char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
@@ -192,25 +205,70 @@ TEST(MpioTester, IsMergeable_testIfTheResultReturnsByMpioCacheState)
     MpioTester mpio(buf);
 
     // then
-    EXPECT_FALSE(mpio.IsMergeable());
+    EXPECT_FALSE(mpio.IsRemovable());
 
     // when
     mpio.ChangeCacheStateTo(MpioCacheState::Read);
 
     // then
-    EXPECT_FALSE(mpio.IsMergeable());
+    EXPECT_FALSE(mpio.IsRemovable());
 
     // when
     mpio.ChangeCacheStateTo(MpioCacheState::Merge);
 
     // then
-    EXPECT_FALSE(mpio.IsMergeable());
+    EXPECT_FALSE(mpio.IsRemovable());
 
     // when
     mpio.ChangeCacheStateTo(MpioCacheState::Write);
 
     // then
-    EXPECT_TRUE(mpio.IsMergeable());
+    EXPECT_FALSE(mpio.IsRemovable());
+
+    // when
+    mpio.ChangeCacheStateTo(MpioCacheState::WriteDone);
+
+    // then
+    EXPECT_TRUE(mpio.IsRemovable());
+
+    free(buf);
+}
+
+TEST(MpioTester, GetCacheState_testIfTheCacheStateIsCorrect)
+{
+    // given
+    char* buf = (char*)malloc(MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    memset(buf, 0, MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    MpioTester mpio(buf);
+
+    // then
+    EXPECT_EQ(mpio.GetCacheState(), MpioCacheState::Init);
+
+    // when
+    mpio.ChangeCacheStateTo(MpioCacheState::Read);
+
+    // then
+    EXPECT_EQ(mpio.GetCacheState(), MpioCacheState::Read);
+
+    // when
+    mpio.ChangeCacheStateTo(MpioCacheState::Merge);
+
+    // then
+    EXPECT_EQ(mpio.GetCacheState(), MpioCacheState::Merge);
+
+    // when
+    mpio.ChangeCacheStateTo(MpioCacheState::Write);
+
+    // then
+    EXPECT_EQ(mpio.GetCacheState(), MpioCacheState::Write);
+
+    // when
+    mpio.ChangeCacheStateTo(MpioCacheState::WriteDone);
+
+    // then
+    EXPECT_EQ(mpio.GetCacheState(), MpioCacheState::WriteDone);
+
+    free(buf);
 }
 
 TEST(MpioTester, IsCacheableVolumeType_testIfTheResultReturnsByMetaStorageType)
@@ -241,6 +299,8 @@ TEST(MpioTester, IsCacheableVolumeType_testIfTheResultReturnsByMetaStorageType)
 
     // when
     EXPECT_FALSE(mpio.IsCacheableVolumeType());
+
+    free(buf);
 }
 
 TEST(MpioTester, CheckReadStatus_testIfThereIsNoException)

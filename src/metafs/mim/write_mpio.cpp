@@ -114,8 +114,11 @@ WriteMpio::_MakeReady(MpAioState expNextState)
                     SetNextState(expNextState);
                     break;
 
+                case MpioCacheState::WriteDone:
+                    ChangeCacheStateTo(MpioCacheState::Write);
+                    // fall through
                 case MpioCacheState::Write:
-                    // cached, skip reading & merging, just write
+                    // cached, skip reading, just write
                     SetNextState(MpAioState::PrepareWrite);
                     break;
 
@@ -215,6 +218,12 @@ WriteMpio::_CompleteIO(MpAioState expNextState)
     mssIntf = nullptr;
     aioModeEnabled = false;
     _SetAllocated(false);
+
+    if (IsCacheableVolumeType() && IsCached())
+    {
+        ChangeCacheStateTo(MpioCacheState::WriteDone);
+        mergedRequestList = nullptr;
+    }
 
     return true;
 }

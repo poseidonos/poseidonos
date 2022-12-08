@@ -44,6 +44,7 @@
 #include "src/allocator/stripe_manager/stripe_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
+#include "src/master_context/config_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
@@ -72,6 +73,7 @@ Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
 : Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     _CreateSubmodules();
+    _SetGCThreshold();
     POS_TRACE_INFO(EID(ALLOCATOR_INFO), "Allocator in Array:{} was Created", arrayName);
 }
 
@@ -499,6 +501,61 @@ Allocator::_CreateSubmodules(void)
     blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
     wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager->GetAllocatorCtx(), arrayName, iArrayInfo->GetIndex());
     stripeManager = new StripeManager(contextManager, addrInfo, iArrayInfo->GetIndex());
+}
+
+void
+Allocator::_SetGCThreshold(void)
+{
+    uint32_t normal_gc_ratio = 1;
+    uint32_t urgent_gc_ratio = 10;
+    uint32_t normal_gc_lb = 20;
+    uint32_t urgent_gc_lb = 5;
+    uint32_t normalGcThreshold = normal_gc_lb;
+    uint32_t urgentGcThreshold = urgent_gc_lb;
+
+    int retNormalRatio = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_normal_gc_threshold_to_total_capacity",
+        &normal_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
+    int retNormalLb = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "normal_gc_threshold_count_lower_bound",
+        &normal_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
+    int retUrgentRatio = ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "percent_of_urgent_gc_threshold_to_normal_gc_threshold",
+        &urgent_gc_ratio, ConfigType::CONFIG_TYPE_UINT32);
+    int retUrgentLb= ConfigManagerSingleton::Instance()->GetValue("gc_threshold", "urgent_gc_threshold_count_lower_bound",
+        &urgent_gc_lb, ConfigType::CONFIG_TYPE_UINT32);
+
+    int ret = retNormalRatio + retNormalLb + retUrgentRatio + retUrgentLb;
+    if (ret != 0)
+    {
+        POS_TRACE_WARN(EID(GC_THRESHOLD_SETTING_NOT_FOUND),
+            "retNormalRatio:{}, retNormalLb:{}, retUrgentRatio:{}, retUrgentLb:{}",
+            retNormalRatio, retNormalLb, retUrgentRatio, retUrgentLb);
+    }
+    const PartitionLogicalSize* dataPartitionSize = iArrayInfo->GetSizeInfo(PartitionType::USER_DATA);
+    uint32_t baseCapacity = 0;
+    bool lbBounded = false;
+    if (dataPartitionSize != nullptr)
+    {
+        baseCapacity = dataPartitionSize->totalSegments;
+        normalGcThreshold = (uint32_t)(baseCapacity * normal_gc_ratio / 100);
+        if (normalGcThreshold < normal_gc_lb)
+        {
+            normalGcThreshold = normal_gc_lb;
+            lbBounded = true;
+        }
+        urgentGcThreshold = (uint32_t)(normalGcThreshold * urgent_gc_ratio / 100);
+        if (urgentGcThreshold < urgent_gc_lb)
+        {
+            urgentGcThreshold = urgent_gc_lb;
+            lbBounded = true;
+        }
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(GC_THRESHOLD_SETTING_ERROR_INVALID_ARRAY_SIZE), "");
+    }
+    POS_TRACE_INFO(EID(GC_THREHOLD_SETTING_PRINT), "normal_gc_ratio:{}, urgent_gc_ratio:{}, normal_gc_lb:{}, urgent_gc_lb:{}, base_capa:{}, normal_threshold:{}, urgent_threshold:{}, is_lower_bounded:{}",
+        normal_gc_ratio, urgent_gc_ratio, normal_gc_lb, urgent_gc_lb, baseCapacity, normalGcThreshold, urgentGcThreshold, lbBounded);
+    SetNormalGcThreshold(normalGcThreshold);
+    SetUrgentThreshold(urgentGcThreshold);
 }
 
 void

@@ -16,7 +16,7 @@ import MOUNT_ARRAY_BASIC
 import volume
 
 VOL_NAME = "vol1"
-VOL_SIZE = pos_constant.SIZE_1GB
+VOL_SIZE = pos_constant.SIZE_1GB * 50
 VOL_IOPS = 0
 VOL_BW = 0
 

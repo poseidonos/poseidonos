@@ -135,9 +135,6 @@ protected:
 
 TEST_F(GcMapUpdateCompletionTestFixture, Execute_testGcMapCompletionReleaseRbaOwnershipAndDecreasePendingIo)
 {
-    gcMapUpdateCompletion = new GcMapUpdateCompletion(StripeSmartPtr(stripe), arrayName, stripeMap, eventScheduler,
-        gcStripeManager, array, rbaStateManager, volumeManager);
-
     // given rba list
     std::list<RbaAndSize> rbaList;
     for (uint32_t index = 0; index < partitionLogicalSize.blksPerStripe; index++)
@@ -147,6 +144,10 @@ TEST_F(GcMapUpdateCompletionTestFixture, Execute_testGcMapCompletionReleaseRbaOw
         RbaAndSize rbaAndSize = {index * VolumeIo::UNITS_PER_BLOCK, BLOCK_SIZE};
         rbaList.push_back(rbaAndSize);
     }
+
+    gcMapUpdateCompletion = new GcMapUpdateCompletion(StripeSmartPtr(stripe), arrayName, stripeMap, eventScheduler,
+        gcStripeManager, array, rbaStateManager, volumeManager, rbaList);
+
     // when gc map update request
     // then release rba ownership and decrease pending io and set finished
     EXPECT_CALL(*rbaStateManager, ReleaseOwnershipRbaList(testVolumeId, rbaList)).Times(1);

@@ -48,6 +48,9 @@ public:
     MOCK_METHOD(MpioType, GetType, (), (const, override));
     MOCK_METHOD(uint64_t, GetId, (), (const, override));
     MOCK_METHOD(void, _InitStateHandler, (), (override));
+    MOCK_METHOD(bool, IsRemovable, (), (const));
+    MOCK_METHOD(MpioCacheState, GetCacheState, (), (const));
+    MOCK_METHOD(void, SetMergedRequestList, (std::vector<MetaFsIoRequest*>* list), (const));
 };
 
 } // namespace pos

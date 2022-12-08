@@ -95,6 +95,7 @@ public:
 private:
     void _CreateSubmodules(void);
     void _DeleteSubmodules(void);
+    void _SetGCThreshold(void);
     void _RegisterToAllocatorService(void);
     void _UnregisterFromAllocatorService(void);
 

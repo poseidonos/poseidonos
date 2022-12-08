@@ -163,9 +163,9 @@ void SegmentBasedRebuild::_RecoverCompleted(SegmentId segmentId, StripeId stripe
 {
     if (result != 0)
     {
-        ctx->SetResult(RebuildState::FAIL);
-        POS_TRACE_ERROR(result,
+        POS_TRACE_ERROR(EID(REBUILD_CANCELLED_RESTORATION_FAILURE),
             "segID:{}, stripeID:{}, result:{}", segmentId, stripeId, result);
+        ctx->SetResult(RebuildState::FAIL);
     }
     uint32_t currentTaskCnt = ctx->taskCnt -= 1;
     if (currentTaskCnt == 0)

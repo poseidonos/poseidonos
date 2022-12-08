@@ -42,28 +42,25 @@ class GcCtx
 {
 public:
     GcCtx(void) = default;
-    explicit GcCtx(BlockAllocationStatus* allocStatus);
+    explicit GcCtx(BlockAllocationStatus* allocStatus, uint32_t arrayId);
     virtual ~GcCtx(void) = default;
-    int GetNormalGcThreshold(void);
-    int GetUrgentThreshold(void);
-    void SetNormalGcThreshold(int inputThreshold);
-    void SetUrgentThreshold(int inputThreshold);
+    uint32_t GetNormalGcThreshold(void);
+    uint32_t GetUrgentThreshold(void);
+    void SetNormalGcThreshold(uint32_t inputThreshold);
+    void SetUrgentThreshold(uint32_t inputThreshold);
     virtual GcMode GetCurrentGcMode(void);
-    virtual GcMode UpdateCurrentGcMode(int numFreeSegments);
-
-    static const int DEFAULT_GC_THRESHOLD = 20;
-    static const int DEFAULT_URGENT_THRESHOLD = 5;
+    virtual GcMode UpdateCurrentGcMode(uint32_t numFreeSegments);
 
 private:
     void _UpdateGcMode(pos::GcMode newGcMode);
-    void _PrintInfo(pos::GcMode newGcMode, int numFreeSegments);
+    void _PrintInfo(pos::GcMode newGcMode, uint32_t numFreeSegments);
 
-    int normalGcThreshold;
-    int urgentGcThreshold;
+    uint32_t normalGcThreshold = 20;
+    uint32_t urgentGcThreshold = 5;
     GcMode curGcMode;
     GcMode prevGcMode;
-
     BlockAllocationStatus* blockAllocStatus;
+    uint32_t arrayId = 0;
 };
 
 } // namespace pos

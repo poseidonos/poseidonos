@@ -84,34 +84,24 @@ StripeCopier::Execute(void)
         }
 
         loadedValidBlock = true;
-        POS_TRACE_DEBUG(EID(GC_GET_VALID_BLOCKS),
-            "Get valid blocks, (victimStripeId:{})",
-            victimStripeId);
     }
 
     uint32_t listSize = meta->GetVictimStripe(copyIndex, stripeOffset)->GetBlkInfoListSize();
     if (0 != listSize)
     {
+        uint32_t count = listSize - listIndex;
+        vector<void*> buffers;
+        meta->GetBuffers(count, &buffers);
+        uint32_t bufCount = buffers.size();
         uint32_t requestCount = 0;
-
-        for (; listIndex < listSize;)
+        for (uint32_t i = 0; i < bufCount; i++)
         {
-            void* buffer;
-            buffer = meta->GetBuffer(victimStripeId);
-
-            if (nullptr == buffer)
-            {
-                meta->SetStartCopyBlks(requestCount);
-                POS_TRACE_DEBUG(EID(GC_GET_BUFFER_FAILED), "stipe_id:{}", victimStripeId);
-                return false;
-            }
-
+            void* buffer = buffers.back();
+            buffers.pop_back();
             std::list<BlkInfo> blkInfoList = meta->GetVictimStripe(copyIndex, stripeOffset)->GetBlkInfoList(listIndex);
             LogicalBlkAddr lsa;
             auto startBlkInfo = blkInfoList.begin();
-
             uint32_t startOffset = startBlkInfo->vsa.offset;
-
             uint32_t offset = (startOffset / BLOCKS_IN_CHUNK) * BLOCKS_IN_CHUNK;
             lsa = {victimStripeId, offset};
 
@@ -129,7 +119,18 @@ StripeCopier::Execute(void)
             listIndex++;
         }
         meta->SetStartCopyBlks(requestCount);
+        if (count > bufCount)
+        {
+            bufAllocRetryCnt++;
+            if (bufAllocRetryCnt % 100 == 0)
+            {
+                POS_TRACE_DEBUG(EID(GC_GET_READ_BUFFER_FAILED), "stipe_id:{}, required_buf_count:{}, acquired_buf_count:{}, retry_count:{}",
+                    victimStripeId, count, bufCount, bufAllocRetryCnt);
+            }
+            return false;
+        }
     }
+    bufAllocRetryCnt = 0;
     meta->SetStartCopyStripes();
 
     victimStripeId += CopierMeta::GC_CONCURRENT_COUNT;
@@ -146,7 +147,6 @@ StripeCopier::Execute(void)
         }
         eventScheduler->EnqueueEvent(stripeCopier);
     }
-
     return true;
 }
 

@@ -87,6 +87,7 @@ public:
     virtual void SetDeviceEventCallback(IDeviceEvent* event);
 
 private:
+    vector<UblockSharedPtr> _GetDeviceListLocal(void);
     void _InitDriver();
     void _InitMonitor();
     void _InitScan();

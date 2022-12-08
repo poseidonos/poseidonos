@@ -1497,8 +1497,49 @@ Root:
     Description:
     Cause:
     Solution:
-
-
+  -
+    Id: 2400
+    Name: RESET_MBR_TRYING
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2401
+    Name: RESET_MBR_COMPLETED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2402
+    Name: RESET_MBR_FAILED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2410
+    Name: LOAD_MBR_TRYING
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2411
+    Name: LOAD_MBR_COMPLETED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2412
+    Name: LOAD_MBR_FAILED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  
   # Array: 2500 - 2699
   -
     Id: 2500
@@ -1589,7 +1630,7 @@ Root:
     Name: CREATE_ARRAY_NO_AVAILABLE_DEVICE
     Severity:
     Description: Failed to create an array.
-    Cause: The devices you entered are not available.
+    Cause: There are no devices available in the requested device list.
     Solution: Enter available devices.
   -
     Id: 2513
@@ -1901,11 +1942,11 @@ Root:
     Solution: Please enter only one write buffer device and try again
   -
     Id: 2557
-    Name: UNABLE_TO_SET_NULL_NVM
+    Name: UNABLE_TO_SET_NVM_NO_OR_NULL
     Severity:
     Description: Failed to configure an array.
-    Cause: The write buffer device you entered exist but are not available.
-    Solution: Check write buffer status and try again
+    Cause: The write buffer is not entered or is not available.
+    Solution: Check the input and status of write buffer and try again.
   -
     Id: 2558
     Name: UNABLE_TO_SET_NVM_ALREADY_OCCUPIED
@@ -2007,6 +2048,13 @@ Root:
   -
     Id: 2572
     Name: FORMAT_PARTITION_DEBUG_MSG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2573
+    Name: FORMAT_PARTITION_TRIM_FAILED
     Severity:
     Description:
     Cause:
@@ -2222,7 +2270,35 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2701
+    Name: REBUILD_STOPPED_OTHER_DEVS_DETACHMENT
+    Severity:
+    Description: Rebuild stopped due to detachment of other devices
+    Cause:
+    Solution:
+  -
+    Id: 2702
+    Name: REBUILD_STOPPED_USER_REQUEST
+    Severity:
+    Description: Rebuild stopped due to user request
+    Cause:
+    Solution:
+  -
+    Id: 2703
+    Name: REBUILD_STOPPED_ARRAY_BROKEN
+    Severity:
+    Description: Rebuild is stopped due to array broken
+    Cause:
+    Solution:
+  -
+    Id: 2704
+    Name: REBUILD_CANCELLED_RESTORATION_FAILURE
+    Severity:
+    Description: Rebuild is cancelled due to restoration failure
+    Cause:
+    Solution:
   # Rebuild: 2800 - 2899
+  -
     Id: 2800
     Name: REBUILD_REQUEST
     Severity:
@@ -2427,7 +2503,7 @@ Root:
     Solution:
   -
     Id: 2845
-    Name: REBUILD_JOB_PREPARE
+    Name: REBUILD_JOB_PREPARED
     Severity:
     Description:
     Cause:
@@ -2435,6 +2511,20 @@ Root:
   -
     Id: 2846
     Name: REBUILD_JOB_PREPARE_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2847
+    Name: REBUILD_JOB_PREPARING
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2848
+    Name: REBUILD_JOB_COMPLETED
     Severity:
     Description:
     Cause:
@@ -4179,159 +4269,208 @@ Root:
     Description:
     Cause:
     Solution:
+  -
+    Id: 3390
+    Name: GC_THRESHOLD_IS_SET
+    Severity:
+    Description: GC threshold is set
+    Cause:
+    Solution:
+  -
+    Id: 3391
+    Name: GC_THRESHOLD_SETTING_NOT_FOUND
+    Severity:
+    Description: Failed to retrieve GC threshold setting from Config, so all or some values were replaced with default settings.
+    Cause:
+    Solution:
+  -
+    Id: 3392
+    Name: GC_THRESHOLD_IS_SET_TO_LOWER_BOUND
+    Severity:
+    Description: The GC threshold has been replaced by the lower bound value, since the Array size is smaller than the setting.
+    Cause:
+    Solution:
+  -
+    Id: 3393
+    Name: GC_THREHOLD_SETTING_PRINT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 3394
+    Name: GC_THRESHOLD_SETTING_ERROR_INVALID_ARRAY_SIZE
+    Severity:
+    Description: The GC threshold setting failed because the Array size is invalid.
+    Cause:
+    Solution:
 
 
   # Garbage Collector: 3400 - 3450
   -
     Id: 3400
-    Name: GC_TRIGGERED
+    Name: GC_STARTED
     Severity:
-    Description:
+    Description: GC started
     Cause:
     Solution:
   -
     Id: 3401
-    Name: GC_STARTED
+    Name: GC_DONE
     Severity:
-    Description:
+    Description: GC done
     Cause:
     Solution:
   -
     Id: 3402
-    Name: GC_DONE
+    Name: GC_ALREADY_STARTED
     Severity:
-    Description:
+    Description: GC is already in operation
     Cause:
     Solution:
   -
     Id: 3403
-    Name: GC_CANNOT_START
+    Name: GC_CANNOT_BE_STARTED
     Severity:
-    Description:
+    Description: GC cannot be started due to Array's state
+    Cause:
+    Solution:
+  -
+    Id: 3405
+    Name: GC_CONGESTED_VICTIM_SELECTION
+    Severity:
+    Description: GC is congested, so victim selection should be retried.
+    Cause:
+    Solution:
+  -
+    Id: 3406
+    Name: GC_RETRY_VICTIM_SELECTION
+    Severity:
+    Description: GC is busy, so victim selection should be retried.
+    Cause:
+    Solution:
+  -
+    Id: 3407
+    Name: GC_VICTIM_SELECTED
+    Severity:
+    Description: Victim segment is selected
+    Cause:
+    Solution:
+  -
+    Id: 3408
+    Name: GC_REVERSE_MAP_LOADED
+    Severity:
+    Description: Reversemap is loaded
+    Cause:
+    Solution:
+  -
+    Id: 3409
+    Name: GC_VALID_BLOCKS_LOADING
+    Severity:
+    Description: Loading valid blocks
     Cause:
     Solution:
   -
     Id: 3410
-    Name: GC_VICTIM_STRIPE_CONSTRUCTOR
+    Name: GC_VALID_BLOCKS_LOADED
     Severity:
-    Description:
+    Description: Valid blocks are loaded from a victim segment.
     Cause:
     Solution:
   -
     Id: 3411
-    Name: GC_LOAD_REVERSE_MAP
+    Name: GC_UNMAPPED_VSA
     Severity:
-    Description:
+    Description: Unmapped VSA was found
     Cause:
     Solution:
   -
     Id: 3412
-    Name: GC_LOAD_VALID_BLOCKS
+    Name: GC_UNMAPPED_LSA
     Severity:
-    Description:
+    Description: Unmapped LSA was found
     Cause:
     Solution:
   -
     Id: 3413
-    Name: GC_GET_UNMAP_VSA
+    Name: GC_COPY_SUBMISSION
     Severity:
-    Description: The current VSA map is in unmap state
+    Description: Copy event for victim was submitted
     Cause:
     Solution:
   -
     Id: 3414
-    Name: GC_GET_UNMAP_LSA
+    Name: GC_COPY_COMPLETION
     Severity:
-    Description: The current LSA map is in unmap state
+    Description: Copy event for victim is completed
     Cause:
     Solution:
   -
     Id: 3415
-    Name: GC_GET_VICTIM_SEGMENT
+    Name: GC_GET_READ_BUFFER_FAILED
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 3416
-    Name: GC_GET_VALID_BLOCKS
+    Name: GC_GET_WRITE_BUFFER_FAILED
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 3417
-    Name: GC_GET_VALID_BLOCK_INFO
+    Name: GC_STRIPE_FLUSH_SUBMISSION
     Severity:
-    Description:
+    Description: GC flush event submitted
     Cause:
     Solution:
   -
     Id: 3418
-    Name: GC_COPY_COMPLETE
+    Name: GC_STRIPE_FLUSH_COMPLETION
     Severity:
-    Description:
+    Description: GC flush event completed
     Cause:
     Solution:
   -
     Id: 3419
-    Name: GC_GET_BUFFER_FAILED
+    Name: GC_RBA_OWNERSHIP_ACQUIRED
     Severity:
-    Description:
+    Description: RBA ownership acquired
     Cause:
     Solution:
   -
     Id: 3420
-    Name: GC_STRIPE_COPIER_SUBMIT
+    Name: GC_RBA_OWNERSHIP_ACQUISITION_FAILED
     Severity:
-    Description:
+    Description: Failed to acquire RBA ownership
     Cause:
     Solution:
   -
     Id: 3421
-    Name: GC_STRIPE_FLUSH_SUBMIT
-    Severity:
-    Description: "GC flush submission"
-    Cause:
-    Solution:
-  -
-    Id: 3422
-    Name: GC_STRIPE_FLUSH_COMPLETION
-    Severity:
-    Description: "GC flush completion"
-    Cause:
-    Solution:
-  -
-    Id: 3423
-    Name: GC_ACQUIRE_OWNERSHIP_RBA_LIST
+    Name: GC_MAP_UPDATE_INIT
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 3424
-    Name: GC_MAP_UPDATE_REQUEST
+    Name: GC_MAP_UPDATE_SUCCESS
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 3425
-    Name: GC_MAP_UPDATE
+    Name: GC_MAP_UPDATE_FAILED
     Severity:
-    Description:
+    Description: Failed to update GC map
     Cause:
     Solution:
   -
     Id: 3426
     Name: GC_MAP_UPDATE_COMPLETION
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 3427
-    Name: GC_MAP_UPDATE_FAILED
     Severity:
     Description:
     Cause:
@@ -4352,16 +4491,16 @@ Root:
     Solution:
   -
     Id: 3430
-    Name: GC_ERROR_MSG
+    Name: GC_REVERSE_MAP_LOAD_ERROR
     Severity:
-    Description:
+    Description: Errors occurred during the reverse map load
     Cause:
     Solution:
   -
     Id: 3431
     Name: GC_RELEASE_VICTIM_SEGMENT
     Severity:
-    Description:
+    Description: Victim segment is released 
     Cause:
     Solution:
   -
@@ -4718,7 +4857,20 @@ Root:
     Description: Command execution error.
     Cause: Could not process get log page(02h-smart)
     Solution: Please device scan again
-
+  -
+    Id: 3703
+    Name: SMART_COLLECTOR_EXT_CMD_DBG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 3704
+    Name: SMART_COLLECTOR_EXT_CMD_EXEC_SKIP
+    Severity:
+    Description:
+    Cause:
+    Solution:
 
   # Meta File System: 4000 - 4499
   -
