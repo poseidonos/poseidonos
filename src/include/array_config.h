@@ -58,7 +58,7 @@ public:
     static const uint64_t META_SSD_SIZE_RATIO = 2; // 2% of USER_DATA
 
     static const uint32_t NVM_SEGMENT_SIZE = 1;
-    static const uint32_t JOURNAL_PART_SEGMENT_SIZE = 1;
+    static const uint32_t JOURNAL_PART_SEGMENT_SIZE = 2;
     static const uint32_t PARITY_COUNT = 1;
 
     static const uint32_t MIN_WRITE_BLOCK_COUNT = 1;
