@@ -31,36 +31,27 @@
  */
 
 #include "src/metafs/mim/mpio.h"
+#include "test/unit-tests/metafs/storage/mss_mock.h"
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 #include <list>
 #include <memory>
 
-#include "test/unit-tests/metafs/mim/mdpage_mock.h"
-#include "test/unit-tests/metafs/storage/mss_mock.h"
-
 using ::testing::NiceMock;
-using ::testing::Return;
 
 namespace pos
 {
 class MpioTester : public Mpio
 {
 public:
-    MpioTester(NiceMock<MockMDPage>* mdPage)
-    : Mpio(mdPage, false, false, nullptr)
+    explicit MpioTester(void* mdPageBuf)
+    : Mpio(mdPageBuf, false)
     {
         mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }
-
-    MpioTester(void* mdPageBuf)
-    : Mpio(mdPageBuf, false, false)
-    {
-        mss = new NiceMock<MockMetaStorageSubsystem>(0);
-    }
-    virtual ~MpioTester(void)
+    ~MpioTester(void)
     {
         delete mss;
     }
@@ -184,6 +175,7 @@ TEST(MpioTester, IsCached_testIfTheResultReturnsByMpioCacheState)
     EXPECT_TRUE(mpio.IsCached());
 }
 
+
 TEST(MpioTester, IsMergeable_testIfTheResultReturnsByMpioCacheState)
 {
     // given
@@ -241,65 +233,5 @@ TEST(MpioTester, IsCacheableVolumeType_testIfTheResultReturnsByMetaStorageType)
 
     // when
     EXPECT_FALSE(mpio.IsCacheableVolumeType());
-}
-
-TEST(MpioTester, CheckReadStatus_testIfThereIsNoException)
-{
-    NiceMock<MockMDPage>* mdPage = new NiceMock<MockMDPage>(nullptr);
-    MpioTester mpio(mdPage);
-    EXPECT_TRUE(mpio.CheckReadStatus(MpAioState::Complete));
-}
-
-TEST(MpioTester, CheckWriteStatus_testIfThereIsNoException)
-{
-    NiceMock<MockMDPage>* mdPage = new NiceMock<MockMDPage>(nullptr);
-    MpioTester mpio(mdPage);
-    EXPECT_TRUE(mpio.CheckWriteStatus(MpAioState::Complete));
-}
-
-TEST(MpioTester, DoE2ECheck_testIfDataIntegrityIsGood)
-{
-    // given
-    NiceMock<MockMDPage>* mdPage = new NiceMock<MockMDPage>(nullptr);
-    MpioTester mpio(mdPage);
-    EXPECT_CALL(*mdPage, AttachControlInfo).WillOnce(Return());
-
-    // when
-    EXPECT_CALL(*mdPage, IsValidSignature).WillOnce(Return(true));
-    EXPECT_CALL(*mdPage, CheckDataIntegrity).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_TRUE(mpio.DoE2ECheck(MpAioState::Complete));
-
-    // then
-    EXPECT_EQ(mpio.GetNextState(), MpAioState::Complete);
-}
-
-TEST(MpioTester, DoE2ECheck_testIfSignatureIsInvalidWhenFirstRead)
-{
-    // given
-    NiceMock<MockMDPage>* mdPage = new NiceMock<MockMDPage>(nullptr);
-    MpioTester mpio(mdPage);
-    EXPECT_CALL(*mdPage, AttachControlInfo).WillOnce(Return());
-
-    // when
-    EXPECT_CALL(*mdPage, IsValidSignature).WillOnce(Return(false));
-
-    // then
-    EXPECT_TRUE(mpio.DoE2ECheck(MpAioState::Complete));
-}
-
-TEST(MpioTester, DoE2ECheck_testIfThereIsSomeProblemWithDataIntigrity)
-{
-    // given
-    NiceMock<MockMDPage>* mdPage = new NiceMock<MockMDPage>(nullptr);
-    MpioTester mpio(mdPage);
-    EXPECT_CALL(*mdPage, AttachControlInfo).WillOnce(Return());
-
-    // when
-    EXPECT_CALL(*mdPage, IsValidSignature).WillOnce(Return(true));
-    EXPECT_CALL(*mdPage, CheckDataIntegrity).WillOnce(Return(EID(MFS_INVALID_META_LPN)));
-    mpio.DoE2ECheck(MpAioState::Complete);
-
-    // then
-    EXPECT_EQ(mpio.GetNextState(), MpAioState::Error);
 }
 } // namespace pos

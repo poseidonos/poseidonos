@@ -193,7 +193,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
     if (asyncCtx->CheckIOError())
     {
-        error = asyncCtx->GetErrorStatus();
+        error = ERRID(MFS_IO_FAILED_DUE_TO_ERROR);
     }
 
     delete asyncCtx;

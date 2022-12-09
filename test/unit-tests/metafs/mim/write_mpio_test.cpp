@@ -45,11 +45,11 @@ class WriteMpioTester : public WriteMpio
 {
 public:
     explicit WriteMpioTester(void* mdPageBuf)
-    : WriteMpio(mdPageBuf, false, false)
+    : WriteMpio(mdPageBuf, false)
     {
         mss = new NiceMock<MockMetaStorageSubsystem>(0);
     }
-    virtual ~WriteMpioTester(void)
+    ~WriteMpioTester(void)
     {
         delete mss;
     }

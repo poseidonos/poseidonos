@@ -41,8 +41,8 @@ namespace pos
 {
 std::atomic<uint64_t> Mpio::idAllocate_{0};
 
-Mpio::Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCrcWhenReading, AsyncCallback callback)
-: mdpage(mdPage),
+Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
+: mdpage(mdPageBuf),
   partialIO(false),
   mssIntf(nullptr),
   aioModeEnabled(false),
@@ -51,18 +51,11 @@ Mpio::Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCr
   forceSyncIO(false),
   cacheState(MpioCacheState::Init),
   fileType(MetaFileType::General),
-  partialMpioDoneNotifier(nullptr),
-  mpioDoneCallback(callback),
   UNIQUE_ID(idAllocate_++),
   DIRECT_ACCESS_ENABLED(directAccessEnabled),
-  SUPPORT_CHECKING_CRC_WHEN_READING(checkingCrcWhenReading),
   isAllocated(false)
 {
-}
-
-Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading)
-: Mpio(new MDPage(mdPageBuf), directAccessEnabled, checkingCrcWhenReading, AsEntryPointParam1(&Mpio::_HandlePartialDone, this))
-{
+    mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
 }
 
 void
@@ -72,7 +65,7 @@ Mpio::Reset(void)
     MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>::Init();
 
     // ctrl. info init.
-    mdpage->ClearControlInfo();
+    mdpage.ClearCtrlInfo();
 
     // clear error info
     error = 0;
@@ -86,7 +79,6 @@ Mpio::Reset(void)
 // LCOV_EXCL_START
 Mpio::~Mpio(void)
 {
-    delete mdpage;
 }
 // LCOV_EXCL_STOP
 
@@ -160,14 +152,26 @@ Mpio::_CheckIOStatus(const MpAioState expNextState)
 void
 Mpio::BuildCompositeMDPage(void)
 {
-    mdpage->AttachControlInfo();
-    mdpage->BuildControlInfo(io.metaLpn, io.targetFD, io.arrayId, io.signature);
+    mdpage.AttachControlInfo();
+    mdpage.Make(io.metaLpn, io.targetFD, io.arrayId, io.signature);
 }
 
 void*
 Mpio::GetMDPageDataBuf(void) const
 {
-    return mdpage->GetDataBuffer();
+    return mdpage.GetDataBuf();
+}
+
+bool
+Mpio::_CheckDataIntegrity(void) const
+{
+    if (false == mdpage.CheckLpnMismatch(io.metaLpn) ||
+        false == mdpage.CheckFileMismatch(io.targetFD))
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void
@@ -185,24 +189,18 @@ Mpio::_IsAllocated(void) const
 bool
 Mpio::DoE2ECheck(const MpAioState expNextState)
 {
-    bool skipCheckingCrc = false;
-    mdpage->AttachControlInfo();
-    SetNextState(expNextState);
+    mdpage.AttachControlInfo();
 
-    if ((DIRECT_ACCESS_ENABLED && MetaStorageType::NVRAM == io.targetMediaType) ||
-        (SUPPORT_CHECKING_CRC_WHEN_READING == false))
+    if (mdpage.CheckValid(io.arrayId, io.signature))
     {
-        skipCheckingCrc = true;
-    }
-
-    if (mdpage->IsValidSignature(io.signature))
-    {
-        if (mdpage->CheckDataIntegrity(io.metaLpn, io.targetFD, skipCheckingCrc))
+        if (!_CheckDataIntegrity())
         {
-            SetNextState(MpAioState::Error);
-            POS_TRACE_ERROR(EID(MFS_FAILED_TO_CHECK_INTEGRITY),
+            POS_TRACE_ERROR(EID(MFS_INVALID_INFORMATION),
                 "[Mpio][DoE2ECheck ] E2E Check fail!, arrayId={}, mediaType={}, lpn={}",
                 io.arrayId, (int)io.targetMediaType, io.metaLpn);
+
+            // FIXME: need to handle error
+            assert(false);
         }
     }
     else
@@ -214,9 +212,10 @@ Mpio::DoE2ECheck(const MpAioState expNextState)
                 io.arrayId, (int)io.targetMediaType, io.metaLpn, *(uint64_t*)GetMDPageDataBuf());
 
             // require to memset for invalid page?
-            _DoMemSetZero();
+            _DoMemSetZero(GetMDPageDataBuf(), mdpage.GetDefaultDataChunkSize());
         }
     }
+    SetNextState(expNextState);
 
     return true;
 }
@@ -336,12 +335,9 @@ Mpio::_DoMemCpy(void* dst, void* src, const size_t nbytes)
 }
 
 bool
-Mpio::_DoMemSetZero(void)
+Mpio::_DoMemSetZero(void* addr, const size_t nbytes)
 {
     bool syncOp = true;
-    auto addr = GetMDPageDataBuf();
-    auto nbytes = mdpage->GetDefaultDataChunkSize();
-
     if (MetaFsMemLib::IsResourceAvailable())
     {
         MetaFsMemLib::MemSetZero(addr, nbytes, _HandleAsyncMemOpDone, this);

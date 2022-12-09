@@ -47,7 +47,6 @@ MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
 {
     const size_t poolSize = configManager->GetMpioPoolCapacity();
     const bool directAccessEnabled = configManager->IsDirectAccessEnabled();
-    const bool checkingCrcWhenReading = configManager->IsSupportCheckingCrcWhenReading();
 
     if (poolSize == 0)
     {
@@ -67,7 +66,7 @@ MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
         int numMpio = poolSize;
         pool_[idx] = std::make_shared<MetaFsPool<Mpio*>>(poolSize);
         while (numMpio-- != 0)
-            pool_[idx]->AddToPool(_CreateMpio((MpioType)idx, directAccessEnabled, checkingCrcWhenReading));
+            pool_[idx]->AddToPool(_CreateMpio((MpioType)idx, directAccessEnabled));
     }
 
     POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
@@ -151,13 +150,13 @@ MpioAllocator::Release(Mpio* mpio)
 }
 
 Mpio*
-MpioAllocator::_CreateMpio(const MpioType type, const bool directAccessEnabled, const bool checkingCrcWhenReading)
+MpioAllocator::_CreateMpio(const MpioType type, const bool directAccessEnabled)
 {
     auto mdPageBuf = mdPageBufPool->PopNewBuf();
     assert(nullptr != mdPageBuf);
     if (MpioType::Read == type)
-        return new ReadMpio(mdPageBuf, directAccessEnabled, checkingCrcWhenReading);
-    return new WriteMpio(mdPageBuf, directAccessEnabled, checkingCrcWhenReading);
+        return new ReadMpio(mdPageBuf, directAccessEnabled);
+    return new WriteMpio(mdPageBuf, directAccessEnabled);
 }
 
 Mpio*

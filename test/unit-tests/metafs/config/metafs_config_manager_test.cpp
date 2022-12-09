@@ -100,8 +100,7 @@ protected:
         const bool directAccessEnabled, const size_t timeIntervalInMillisecondsForMetric,
         const size_t samplingSkipCount, const size_t wrrCountSpecialPurposeMap,
         const size_t wrrCountJournal, const size_t wrrCountMap,
-        const size_t wrrCountGeneral, const bool numaDedicated,
-        const bool supportCheckingCrc)
+        const size_t wrrCountGeneral, const bool numaDedicated)
     {
         config = new NiceMock<MockConfigManager>;
 
@@ -127,8 +126,6 @@ protected:
             .WillByDefault(SetArg2ToLongAndReturn0(wrrCountGeneral));
         ON_CALL(*config, GetValue("performance", "numa_dedicated", _, _))
             .WillByDefault(SetArg2ToBoolAndReturn0(numaDedicated));
-        ON_CALL(*config, GetValue("metafs", "checking_crc_when_reading_enable", _, _))
-            .WillByDefault(SetArg2ToLongAndReturn0(supportCheckingCrc));
 
         manager = new MetaFsConfigManagerTest(config);
     }
@@ -140,7 +137,7 @@ protected:
 TEST_F(MetaFsConfigManagerFixture, _ValidateConfig_testIfTheConfigIsInvalid)
 {
     const size_t CAPACITY = 0;
-    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, 50, 100, 2, 3, 5, 1, false, true);
+    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, 50, 100, 2, 3, 5, 1, false);
     EXPECT_FALSE(manager->ValidateConfig());
 }
 
@@ -148,7 +145,7 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
 {
     const size_t CAPACITY = 32;
     _CreateConfigManager(CAPACITY, CAPACITY + 1, CAPACITY + 2, true, CAPACITY + 3,
-        CAPACITY + 4, CAPACITY + 5, CAPACITY + 6, CAPACITY + 7, CAPACITY + 8, false, true);
+        CAPACITY + 4, CAPACITY + 5, CAPACITY + 6, CAPACITY + 7, CAPACITY + 8, false);
     manager->Init();
 
     EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
@@ -161,15 +158,13 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues)
     EXPECT_EQ(manager->GetWrrCountJournal(), CAPACITY + 6);
     EXPECT_EQ(manager->GetWrrCountMap(), CAPACITY + 7);
     EXPECT_EQ(manager->GetWrrCountGeneral(), CAPACITY + 8);
-    EXPECT_EQ(manager->IsSupportingNumaDedicatedScheduling(), false);
-    EXPECT_EQ(manager->IsSupportCheckingCrcWhenReading(), true);
 }
 
 TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse)
 {
     const size_t CAPACITY = 0;
     _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
-        CAPACITY, CAPACITY, CAPACITY, CAPACITY, false, true);
+        CAPACITY, CAPACITY, CAPACITY, CAPACITY, false);
     manager->Init();
 
     EXPECT_EQ(manager->GetMioPoolCapacity(), CAPACITY);
@@ -182,15 +177,13 @@ TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedValues_Inverse
     EXPECT_EQ(manager->GetWrrCountJournal(), CAPACITY);
     EXPECT_EQ(manager->GetWrrCountMap(), CAPACITY);
     EXPECT_EQ(manager->GetWrrCountGeneral(), CAPACITY);
-    EXPECT_EQ(manager->IsSupportingNumaDedicatedScheduling(), false);
-    EXPECT_EQ(manager->IsSupportCheckingCrcWhenReading(), true);
 }
 
 TEST_F(MetaFsConfigManagerFixture, testIfTheMethodsReturnsExpectedWeightForWrr)
 {
     const size_t CAPACITY = 0;
     _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
-        1, 2, 3, 4, false, true);
+        1, 2, 3, 4, false);
     manager->Init();
 
     std::vector<int> expected{1, 2, 3, 4};
@@ -201,31 +194,11 @@ TEST_F(MetaFsConfigManagerFixture, testIfConsideringNumaDependsOnIgnoring)
 {
     const size_t CAPACITY = 0;
     _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
-        1, 2, 3, 4, true, true);
+        1, 2, 3, 4, true);
     manager->Init();
     EXPECT_FALSE(manager->NeedToIgnoreNumaDedicatedScheduling());
 
     manager->SetIgnoreNumaDedicatedScheduling(true);
     EXPECT_TRUE(manager->NeedToIgnoreNumaDedicatedScheduling());
-}
-
-TEST_F(MetaFsConfigManagerFixture, IsSupportCheckingCrcWhenReading_testWhenCheckingCrcIsSupported)
-{
-    const size_t CAPACITY = 0;
-    const bool EXPECTED_RESULT = true;
-    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
-        1, 2, 3, 4, true, EXPECTED_RESULT);
-    manager->Init();
-    EXPECT_EQ(EXPECTED_RESULT, manager->IsSupportCheckingCrcWhenReading());
-}
-
-TEST_F(MetaFsConfigManagerFixture, IsSupportCheckingCrcWhenReading_testWhenCheckingCrcIsNotSupported)
-{
-    const size_t CAPACITY = 0;
-    const bool EXPECTED_RESULT = false;
-    _CreateConfigManager(CAPACITY, CAPACITY, CAPACITY, false, CAPACITY, CAPACITY,
-        1, 2, 3, 4, true, EXPECTED_RESULT);
-    manager->Init();
-    EXPECT_EQ(EXPECTED_RESULT, manager->IsSupportCheckingCrcWhenReading());
 }
 } // namespace pos

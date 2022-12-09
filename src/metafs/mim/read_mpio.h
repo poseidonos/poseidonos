@@ -39,7 +39,7 @@ namespace pos
 class ReadMpio : public Mpio
 {
 public:
-    explicit ReadMpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading);
+    explicit ReadMpio(void* mdPageBuf, const bool directAccessEnabled);
     virtual ~ReadMpio(void);
 
     virtual MpioType GetType(void) const override
