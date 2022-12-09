@@ -116,10 +116,10 @@ public:
             {
                 currMsg = fmt::format(fmt, args...);
             }
-            catch(const std::exception& e)
+            catch (const std::exception& e)
             {
                 // Proceed when an exception occurs in fmt::format()
-            }           
+            }
 
             // BurstFilter: we won't log this event when its ID and message are
             // the same as the previous ones.
@@ -135,7 +135,7 @@ public:
                         loggerMtx.unlock();
                         return;
                     }
-            
+
                     repeatCount++;
 
                     loggerMtx.unlock();
@@ -154,7 +154,7 @@ public:
 
             _Log(loc, lvl, eventId, currMsg, 0);
 
-            loggerMtx.unlock();          
+            loggerMtx.unlock();
         }
 #endif
     }
@@ -208,11 +208,17 @@ public:
 
         return false;
     }
+    void SetCommand(std::string command)
+    {
+        this->command = command;
+    }
 
 private:
-    std::string _ReplaceAll(std::string str, const std::string& from, const std::string& to) {
+    std::string _ReplaceAll(std::string str, const std::string& from, const std::string& to)
+    {
         size_t startPos = 0;
-        while((startPos = str.find(from, startPos)) != std::string::npos) {
+        while ((startPos = str.find(from, startPos)) != std::string::npos)
+        {
             str.replace(startPos, from.length(), to);
             startPos += to.length();
         }
@@ -231,16 +237,16 @@ private:
     }
 
     void _Log(spdlog::source_loc loc, spdlog::level::level_enum lvl, int eventId,
-    std::string msg, int repeatCount)
+        std::string msg, int repeatCount)
     {
         auto event_info = eventManager.GetEventInfo();
         auto it = event_info->find(eventId);
         try
         {
             msg = _ReplaceSpecialChars(msg);
-            
+
             if (it == event_info->end())
-            {                
+            {
                 // TODO (mj): currently, we print raw message
                 // when there is no information about the event in PosEventInfo.
                 // A method is required to enforce to add event information to
@@ -248,19 +254,23 @@ private:
                 // match with PosEventInfo)
                 logger->iboflog_sink(loc, lvl, eventId,
                     fmt::format(
-                        preferences.IsStrLoggingEnabled() ?
-                            "\"name:\":\"\",\"description\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"message\":\"\",\"repetition\":{}"
-                            : "\tnone - {} MESSAGE: none CAUSE: none REPETITION: {}",
+                        preferences.IsStrLoggingEnabled() ? "\"name:\":\"\",\"description\":\"{}\",\"cause\":\"\",\"solution\":\"\",\"message\":\"\",\"repetition\":{}"
+                                                          : "\tnone - {} MESSAGE: none CAUSE: none REPETITION: {}",
                         msg, repeatCount));
             }
             else
             {
+                std::string eventName = it->second.GetEventName();
+                if (command != "")
+                {
+                    eventName = command + " " + eventName;
+                }
+
                 logger->iboflog_sink(loc, lvl, eventId,
                     fmt::format(
-                        preferences.IsStrLoggingEnabled() ?
-                            "\"name:\":\"{}\",\"description\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"message\":\"{}\",\"repetition\":{}"
-                            : "\t{} - {} MESSAGE: {} CAUSE: {} REPETITION: {}",
-                        it->second.GetEventName(), it->second.GetDescription(), msg,
+                        preferences.IsStrLoggingEnabled() ? "\"name:\":\"{}\",\"description\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"message\":\"{}\",\"repetition\":{}"
+                                                          : "\t{} - {} MESSAGE: {} CAUSE: {} REPETITION: {}",
+                        eventName, it->second.GetDescription(), msg,
                         it->second.GetCause(), repeatCount));
             }
         }
@@ -285,6 +295,7 @@ private:
     std::string prevMsg;
     uint32_t repeatCount = 0;
     mutex loggerMtx;
+    std::string command = "";
     // LCOV_EXCL_STOP
 };
 
