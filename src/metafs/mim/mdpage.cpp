@@ -32,8 +32,6 @@
 
 #include "mdpage.h"
 
-#include <boost/crc.hpp>
-
 #include "mdpage_buf_pool.h"
 #include "meta_io_manager.h"
 #include "metafs_config.h"
@@ -54,7 +52,7 @@ MDPage::~MDPage(void)
 }
 
 void
-MDPage::ClearControlInfo(void)
+MDPage::ClearCtrlInfo(void)
 {
     // If there is an error when issuing a read command, the ctrlInfo is null.
     if (ctrlInfo)
@@ -75,35 +73,34 @@ MDPage::AttachControlInfo(void)
 }
 
 void
-MDPage::BuildControlInfo(const MetaLpnType metaLpn, const FileDescriptorType fd,
+MDPage::Make(const MetaLpnType metaLpn, const FileDescriptorType fd,
     const int arrayId, const uint64_t signature)
 {
     ctrlInfo->mfsSignature = MDPageControlInfo::MDPAGE_CTRL_INFO_SIG;
     ctrlInfo->epochSignature = signature;
     ctrlInfo->metaLpn = metaLpn;
     ctrlInfo->fd = fd;
-    ctrlInfo->crc = _GenerateCrc();
 }
 
 bool
-MDPage::IsValidSignature(const uint64_t signature) const
+MDPage::CheckValid(const int arrayId, const uint64_t signature) const
 {
     // detect mdpage validity by combining two signatures
     // note that it has to have additional logic to detect signature corruption case later on
     if (ctrlInfo->mfsSignature != MDPageControlInfo::MDPAGE_CTRL_INFO_SIG)
     {
-        MFS_TRACE_DEBUG(EID(MFS_INVALID_SIGNATURE),
-            "The mdpage signature in the control is invalid, {}",
-            _ToString());
+        MFS_TRACE_DEBUG(EID(MFS_INVALID_PARAMETER),
+            "The mdpage signature in the control is invalid, sig: {}",
+            ctrlInfo->mfsSignature);
 
         return false;
     }
 
     if (ctrlInfo->epochSignature != signature)
     {
-        MFS_TRACE_DEBUG(EID(MFS_INVALID_EPOCH_SIGNATURE),
-            "The epoch signature in the control is invalid, ideal epochSignature: {}, {}",
-            signature, _ToString());
+        MFS_TRACE_DEBUG(EID(MFS_INVALID_PARAMETER),
+            "The epoch signature in the control is invalid, ideal sig: {}, sig: {}",
+            signature, ctrlInfo->epochSignature);
 
         return false;
     }
@@ -112,88 +109,29 @@ MDPage::IsValidSignature(const uint64_t signature) const
 }
 
 bool
-MDPage::_DoesMetaLpnMatch(const MetaLpnType srcLpn) const
+MDPage::CheckLpnMismatch(const MetaLpnType srcLpn) const
 {
     if (ctrlInfo->metaLpn != srcLpn)
     {
+        POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
+            "Lpn mismatch detected: ideal lpn: {}, lpn: {}",
+            srcLpn, ctrlInfo->metaLpn);
+
         return false;
     }
     return true;
 }
 
 bool
-MDPage::_DoesFileDescriptorMatch(const FileDescriptorType fd) const
+MDPage::CheckFileMismatch(const FileDescriptorType fd) const
 {
     if (ctrlInfo->fd != fd)
     {
+        POS_TRACE_ERROR(EID(MFS_INVALID_PARAMETER),
+            "FD mismatch detected: ideal fd: {}, fd: {}, lpn: {}",
+            fd, ctrlInfo->fd, ctrlInfo->metaLpn);
         return false;
     }
     return true;
-}
-
-int
-MDPage::CheckDataIntegrity(const MetaLpnType srcLpn, const FileDescriptorType fd,
-    const bool skipCheckingCrc) const
-{
-    if (!_DoesMetaLpnMatch(srcLpn))
-    {
-        int result = EID(MFS_INVALID_META_LPN);
-        POS_TRACE_ERROR(result,
-            "Lpn mismatch detected: ideal lpn: {}, {}",
-            srcLpn, _ToString());
-        return result;
-    }
-
-    if (!_DoesFileDescriptorMatch(fd))
-    {
-        int result = EID(MFS_INVALID_FILE_DESCRIPTOR);
-        POS_TRACE_ERROR(result,
-            "FD mismatch detected: ideal fd: {}, {}",
-            fd, ctrlInfo->fd, _ToString());
-        return result;
-    }
-
-    if (!skipCheckingCrc)
-    {
-        uint32_t actualCrc = _GenerateCrc();
-        if (ctrlInfo->crc != actualCrc)
-        {
-            int result = EID(MFS_INVALID_CRC);
-            POS_TRACE_ERROR(result,
-                "Crc mismatch detected, crc generated: {}, {}",
-                actualCrc, _ToString());
-            return result;
-        }
-    }
-
-    return EID(SUCCESS);
-}
-
-uint32_t
-MDPage::GenerateCrcFromDataBuffer(void) const
-{
-    return _GenerateCrc();
-}
-
-uint32_t
-MDPage::_GenerateCrc(void) const
-{
-    boost::crc_32_type result;
-    result.reset();
-    result.process_bytes(dataAll, GetCrcCoveredSize());
-    return result.checksum();
-}
-
-std::string
-MDPage::_ToString(void) const
-{
-    std::string str("data from nvm ");
-    str = str.append("mfsSignature: " + std::to_string(ctrlInfo->mfsSignature));
-    str = str.append(", epochSignature: " + std::to_string(ctrlInfo->epochSignature));
-    str = str.append(", version: " + std::to_string(ctrlInfo->version));
-    str = str.append(", fd: " + std::to_string(ctrlInfo->fd));
-    str = str.append(", metaLpn: " + std::to_string(ctrlInfo->metaLpn));
-    str = str.append(", crc: " + std::to_string(ctrlInfo->crc));
-    return str;
 }
 } // namespace pos

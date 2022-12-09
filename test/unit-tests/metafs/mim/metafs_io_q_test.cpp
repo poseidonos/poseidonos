@@ -134,7 +134,7 @@ TEST(MetaFsIoQ_Mpio, CheckEnqueueAndDequeue)
 
     for (int i = 0; i < SIZE; i++)
     {
-        MockMpio* msg = new MockMpio(nullptr, false, false);
+        MockMpio* msg = new MockMpio(nullptr, false);
         q.Enqueue(msg);
         requests.insert(msg);
     }

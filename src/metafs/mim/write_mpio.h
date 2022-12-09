@@ -39,7 +39,7 @@ namespace pos
 class WriteMpio : public Mpio
 {
 public:
-    explicit WriteMpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading);
+    explicit WriteMpio(void* mdPageBuf, const bool directAccessEnabled);
     virtual ~WriteMpio(void);
     virtual MpioType GetType(void) const override
     {

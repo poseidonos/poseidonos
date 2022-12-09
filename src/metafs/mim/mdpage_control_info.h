@@ -45,15 +45,11 @@ public:
     union {
         struct
         {
-            /* total 64 byte = CONTROL_INFO_SIZE */
-            uint32_t mfsSignature;      //  4byte   0..3
-            uint32_t reserved;          //  4byte   4..7
-            uint64_t epochSignature;    //  8byte   8..15
-            uint32_t version;           //  4byte   16..19
-            FileDescriptorType fd;      //  4byte   20..23
-            MetaLpnType metaLpn;        //  8byte   24..31
-            uint8_t reserved2[28];      // 28byte   32..59
-            uint32_t crc;               //  4byte   60..63, have to be at the end
+            uint32_t mfsSignature;
+            uint64_t epochSignature;
+            uint32_t version;
+            FileDescriptorType fd;
+            MetaLpnType metaLpn;
         };
 
         uint8_t all[CONTROL_INFO_SIZE];
