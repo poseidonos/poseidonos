@@ -56,7 +56,7 @@ public:
       nbytes(nbytes),
       buf(buf),
       callback(func),
-      rc(EID(SUCCESS)),
+      rc(EID(MFS_END)),
       tagId(0)
     {
         callbackCount = 0;
@@ -70,7 +70,7 @@ public:
       nbytes(0),
       buf(buf),
       callback(func),
-      rc(EID(SUCCESS)),
+      rc(EID(MFS_END)),
       tagId(0)
     {
     }
@@ -83,7 +83,7 @@ public:
       nbytes(ctx->length),
       buf((void*)ctx->buffer),
       callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
-      rc(EID(SUCCESS)),
+      rc(EID(MFS_END)),
       tagId(0)
     {
         callbackCount = 0;
@@ -117,17 +117,16 @@ public:
         // need more error handling
         if (err.first != 0)
         {
-            rc = err.first;
+            rc = EID(MFS_IO_FAILED_DUE_TO_ERROR);
         }
         else if (err.second == true)
         {
             rc = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
         }
-    }
-
-    POS_EVENT_ID GetErrorStatus(void)
-    {
-        return rc;
+        else
+        {
+            rc = EID(SUCCESS);
+        }
     }
 
     void InvokeCallback(void)

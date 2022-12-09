@@ -92,7 +92,7 @@ public:
     }
 
 private:
-    Mpio* _CreateMpio(const MpioType type, const bool directAccessEnabled, const bool checkingCrcWhenReading);
+    Mpio* _CreateMpio(const MpioType type, const bool directAccessEnabled);
     Mpio* _TryAlloc(const MpioType type);
     void _ReleaseCache(void);
 

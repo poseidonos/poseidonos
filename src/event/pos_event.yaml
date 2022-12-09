@@ -5552,49 +5552,7 @@ Root:
     Description: The mpio is enqueued twice
     Cause: It is possible that the mpio is enqueued twice
     Solution: Need to debug
-  -
-    Id: 4092
-    Name: MFS_INVALID_CRC
-    Severity:
-    Description: It is failed to find to match crc values between written crc and generated crc from data buffer
-    Cause: Written crc or data might be damaged
-    Solution:
-  -
-    Id: 4093
-    Name: MFS_INVALID_META_LPN
-    Severity:
-    Description: It is failed to find to match lpn numbers between expected one and written
-    Cause: Written lpn number or data might be damaged
-    Solution:
-  -
-    Id: 4094
-    Name: MFS_INVALID_FILE_DESCRIPTOR
-    Severity:
-    Description: It is failed to find to match crc values between expected one and written
-    Cause: Written file descriptor or data might be damaged
-    Solution:
-  -
-    Id: 4095
-    Name: MFS_INVALID_SIGNATURE
-    Severity:
-    Description: It is failed to find to match signatures between expected one and written
-    Cause: Written signature or data might be damaged
-    Solution:
-  -
-    Id: 4096
-    Name: MFS_INVALID_EPOCH_SIGNATURE
-    Severity:
-    Description: It is failed to find to match epoch signatures between expected one and written
-    Cause: Written epoch signature or data might be damaged
-    Solution:
-  -
-    Id: 4097
-    Name: MFS_FAILED_TO_CHECK_INTEGRITY
-    Severity:
-    Description: There are some problems with data integrity
-    Cause: Data may be damaged
-    Solution:
-
+  
   -
     Id: 4500
     Name: VOLUME_EVENT

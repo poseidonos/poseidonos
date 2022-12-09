@@ -55,8 +55,7 @@ JournalLogBuffer::JournalLogBuffer(void)
   logFile(nullptr),
   initializedDataBuffer(nullptr),
   telemetryPublisher(nullptr),
-  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled()),
-  logbufferReadResult(EID(SUCCESS))
+  rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
 }
 
@@ -237,11 +236,6 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
         usleep(1);
     }
 
-    if (logbufferReadResult != EID(SUCCESS))
-    {
-        return -1 * logbufferReadResult;
-    }
-
     if (telemetryPublisher)
     {
         POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
@@ -382,7 +376,6 @@ void
 JournalLogBuffer::_LogBufferReadDone(AsyncMetaFileIoCtx* ctx)
 {
     logBufferReadDone = true;
-    logbufferReadResult = ctx->GetError();
     delete ctx;
 }
 

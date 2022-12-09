@@ -172,7 +172,6 @@ private:
         {"wrr_count_journal", "1"},
         {"wrr_count_map", "1"},
         {"wrr_count_general", "1"},
-        {"support_checking_crc_when_reading", "true"},
     };
     vector<ConfigKeyValue> wtData = {
         {"enable", "false"}
