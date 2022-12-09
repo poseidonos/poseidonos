@@ -49,6 +49,13 @@ const MetaFsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
         {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM},
         {MetaVolumeType::JournalVolume, MetaStorageType::JOURNAL_SSD}};
 
+const std::unordered_map<MetaVolumeType, std::string> MetaFileUtil::VOLUME_NAME =
+    {
+        {MetaVolumeType::SsdVolume, "SSD"},
+        {MetaVolumeType::NvRamVolume, "NVRAM/NVDIMM"},
+        {MetaVolumeType::JournalVolume, "Journal SSD"}};
+const std::string MetaFileUtil::UNKNOWN_VOLUME_NAME = "Unknown Volume";
+
 StringHashType
 MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
 {
@@ -56,35 +63,27 @@ MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
 }
 
 MetaStorageType
-MetaFileUtil::ConvertToMediaType(MetaVolumeType volume)
+MetaFileUtil::ConvertToMediaType(const MetaVolumeType volume)
 {
     return VOLUME_TO_MEDIA[(uint32_t)volume].media;
 }
 
 std::string
-MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType volume)
+MetaFileUtil::ConvertToMediaTypeName(const MetaVolumeType volume)
 {
-    switch (volume)
+    auto result = VOLUME_NAME.find(volume);
+    if (result == VOLUME_NAME.end())
     {
-        case MetaVolumeType::SsdVolume:
-        {
-            return std::string("SSD array");
-        }
-        break;
-        case MetaVolumeType::NvRamVolume:
-        {
-            return std::string("NVRAM/NVDIMM");
-        }
-        break;
-        default:
-        {
-            assert(false);
-        }
+        return UNKNOWN_VOLUME_NAME;
+    }
+    else
+    {
+        return result->second;
     }
 }
 
 MetaVolumeType
-MetaFileUtil::ConvertToVolumeType(MetaStorageType media)
+MetaFileUtil::ConvertToVolumeType(const MetaStorageType media)
 {
     return MEDIA_TO_VOLUME[(uint32_t)media].volumeType;
 }

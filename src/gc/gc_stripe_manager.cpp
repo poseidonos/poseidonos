@@ -64,7 +64,8 @@ GcStripeManager::_SetBufferPool(void)
     BufferInfo info = {
         .owner = typeid(this).name(),
         .size = CHUNK_SIZE,
-        .count = udSize->chunksPerStripe * ArrayConfig::GC_BUFFER_COUNT};
+        // Assign a buffer that is twice the size of the GC read buffer
+        .count = udSize->chunksPerStripe * ArrayConfig::GC_BUFFER_COUNT * 2};
 
     gcWriteBufferPool = memoryManager->CreateBufferPool(info);
     assert(gcWriteBufferPool != nullptr);
@@ -87,13 +88,28 @@ GcStripeManager::GcStripeManager(IArrayInfo* iArrayInfo,
         gcActiveWriteBuffers[volId] = nullptr;
         flushed[volId] = true;
     }
-    flushedStripeCnt = 0;
+
+    gcStripeCntRequested = 0;
+    gcStripeCntCompleted = 0;
+    gcStripeCntFlushRequested = 0;
+    gcStripeCntFlushCompleted = 0;
+    gcStripeCntMapUpdateRequested = 0;
+    gcStripeCntMapUpdateCompleted = 0;
+    gcStripeCntForceFlushRequested = 0;
+
     volumeEventPublisher->RegisterSubscriber(this, arrayName, arrayId);
     _SetBufferPool();
+    if (publisher == nullptr)
+    {
+        publisher = new TelemetryPublisher("GCStripeManager");
+        publisher->AddDefaultLabel("array_id", to_string(arrayId));
+        TelemetryClientSingleton::Instance()->RegisterPublisher(publisher);
+    }
 }
 
 GcStripeManager::~GcStripeManager(void)
 {
+    TelemetryClientSingleton::Instance()->DeregisterPublisher(publisher->GetName());
     for (auto t : timer)
     {
         delete t.second;
@@ -233,16 +249,58 @@ GcStripeManager::AllocateWriteBufferBlks(uint32_t volumeId, uint32_t numBlks)
 void
 GcStripeManager::_ReturnBuffer(GcWriteBuffer* buffer)
 {
-    for (auto it = buffer->begin(); it != buffer->end(); it++)
-    {
-        gcWriteBufferPool->ReturnBuffer(*it);
-    }
+    gcWriteBufferPool->ReturnBuffers(buffer);
 }
 
 void
 GcStripeManager::SetFinished(void)
 {
-    flushedStripeCnt--;
+    ++gcStripeCntCompleted;
+
+    POSMetricVector* v = new POSMetricVector();
+    {
+        POSMetric metric(TEL90000_GC_STRIPE_COUNT_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90001_GC_STRIPE_COUNT_COMPLETED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntCompleted);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90002_GC_STRIPE_COUNT_FLUSH_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntFlushRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90003_GC_STRIPE_COUNT_FLUSH_COMPLETED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntFlushCompleted);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90004_GC_STRIPE_COUNT_MAP_UPDATE_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntMapUpdateRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90005_GC_STRIPE_COUNT_MAP_UPDATE_COMPLETED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntMapUpdateCompleted);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    {
+        POSMetric metric(TEL90006_GC_STRIPE_COUNT_FORCE_FLUSH_REQUESTED, POSMetricTypes::MT_GAUGE);
+        metric.SetGaugeValue(gcStripeCntForceFlushRequested);
+        metric.AddLabel("array_id", to_string(arrayId));
+        v->push_back(metric);
+    }
+    publisher->PublishMetricList(v);
 }
 
 void
@@ -255,7 +313,7 @@ GcStripeManager::ReturnBuffer(GcWriteBuffer* buffer)
 bool
 GcStripeManager::IsAllFinished(void)
 {
-    return (flushedStripeCnt == 0);
+    return (gcStripeCntRequested - gcStripeCntCompleted == 0);
 }
 
 std::vector<BlkInfo>*
@@ -289,21 +347,24 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
         auto it = timer.find(volumeId);
         if (it != timer.end())
         {
-            POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_RESET), "vol_id:{}, elapsed(ns):{}",
-                volumeId, (*it).second->Elapsed());
             (*it).second->Reset();
         }
     }
     assert(flushed[volumeId] == false);
     blkInfoList[volumeId] = nullptr;
     gcActiveWriteBuffers[volumeId] = nullptr;
-    flushedStripeCnt++;
     flushed[volumeId] = true;
+    ++gcStripeCntRequested;
+    if (force == true)
+    {
+        ++gcStripeCntForceFlushRequested;
+    }
 }
 
 void
 GcStripeManager::CheckTimeout(void)
 {
+    uint32_t arrayId = iArrayInfo->GetIndex();
     unique_lock<mutex> lock(timerMtx);
     for (auto t : timer)
     {
@@ -311,12 +372,12 @@ GcStripeManager::CheckTimeout(void)
         {
             uint32_t volId = t.first;
             POS_TRACE_WARN(EID(GC_FORCE_FLUSH_TIMER_TIMEOUT),
-                "vol_id:{}, interval:{}", volId, timeoutInterval);
+                "array_id:{}, vol_id:{}, interval:{}", arrayId, volId, timeoutInterval);
 
             if (ffLocker.TryForceFlushLock(volId) == false)
             {
                 POS_TRACE_WARN(EID(GC_FORCE_FLUSH_TRYLOCK_FAILED),
-                    "vol_id:{}", volId);
+                    "array_id:{}, vol_id:{}", arrayId, volId);
                 continue;
             }
 
@@ -338,7 +399,7 @@ GcStripeManager::CheckTimeout(void)
                             allocatedBlkInfoList, volId, dataBuffer, this, forceFlush);
                 EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
                 SetFlushed(volId, forceFlush);
-                POS_TRACE_WARN(EID(GC_STRIPE_FORCIBLY_FLUSHED), "vol_id:{}", volId);
+                POS_TRACE_WARN(EID(GC_STRIPE_FORCIBLY_FLUSHED), "array_id:{}, vol_id:{}", arrayId, volId);
             }
             ffLocker.UnlockForceFlushLock(volId);
             t.second->Reset();
@@ -356,6 +417,30 @@ void
 GcStripeManager::ReleaseFlushLock(uint32_t volId)
 {
     ffLocker.Unlock(volId);
+}
+
+void
+GcStripeManager::FlushSubmitted(void)
+{
+    ++gcStripeCntFlushRequested;
+}
+
+void
+GcStripeManager::FlushCompleted(void)
+{
+    ++gcStripeCntFlushCompleted;
+}
+
+void
+GcStripeManager::UpdateMapRequested(void)
+{
+    ++gcStripeCntMapUpdateRequested;
+}
+
+void
+GcStripeManager::UpdateMapCompleted(void)
+{
+    ++gcStripeCntMapUpdateCompleted;
 }
 
 uint32_t
@@ -390,23 +475,24 @@ bool
 GcStripeManager::_CreateActiveWriteBuffer(uint32_t volumeId)
 {
     gcActiveWriteBuffers[volumeId] = new GcWriteBuffer();
-
-    for (uint32_t chunkCnt = 0; chunkCnt < udSize->chunksPerStripe; ++chunkCnt)
+    uint32_t bufCount = udSize->chunksPerStripe;
+    uint32_t minAcqCount = bufCount;
+    bool ret = gcWriteBufferPool->TryGetBuffers(bufCount, gcActiveWriteBuffers[volumeId], minAcqCount);
+    if (ret == false)
     {
-        void* buffer = gcWriteBufferPool->TryGetBuffer();
-        if (nullptr == buffer)
+        bufAllocRetryCnt++;
+        delete gcActiveWriteBuffers[volumeId];
+        if (bufAllocRetryCnt % 100 == 0)
         {
-            for (auto it = gcActiveWriteBuffers[volumeId]->begin(); it != gcActiveWriteBuffers[volumeId]->end(); it++)
-            {
-                gcWriteBufferPool->ReturnBuffer(*it);
-            }
-            delete gcActiveWriteBuffers[volumeId];
-            POS_TRACE_DEBUG(EID(GC_GET_BUFFER_FAILED), "vol_id:{}", volumeId);
-            return false;
+            POS_TRACE_DEBUG(EID(GC_GET_WRITE_BUFFER_FAILED), "vol_id:{}, failure_count:{}",
+                volumeId, bufAllocRetryCnt);
         }
-        gcActiveWriteBuffers[volumeId]->push_back(buffer);
     }
-    return true;
+    else
+    {
+        bufAllocRetryCnt = 0;
+    }
+    return ret;
 }
 
 bool
@@ -486,9 +572,6 @@ GcStripeManager::_StartTimer(uint32_t volumeId)
     }
     if (t->IsActive() == false)
     {
-        POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TIMER_START),
-            "vol_id:{}, interval(ns):{}",
-            volumeId, timeoutInterval);
         t->SetTimeout(timeoutInterval);
     }
     timerMtx.unlock();

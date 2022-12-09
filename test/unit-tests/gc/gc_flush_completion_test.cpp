@@ -6,6 +6,7 @@
 #include <test/unit-tests/gc/gc_stripe_manager_mock.h>
 #include <test/unit-tests/sys_event/volume_event_publisher_mock.h>
 #include <test/unit-tests/utils/mock_builder.h>
+#include <test/unit-tests/mapper/i_vsamap_mock.h>
 
 #include <test/unit-tests/allocator/stripe_manager/stripe_mock.h>
 #include <test/unit-tests/io/general_io/rba_state_manager_mock.h>
@@ -47,6 +48,8 @@ public:
         array = new NiceMock<MockIArrayInfo>;
         EXPECT_CALL(*array, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
 
+        vsaMap = new NiceMock<MockIVSAMap>;
+
         volumeEventPublisher = new NiceMock<MockVolumeEventPublisher>();
         memoryManager = new MockMemoryManager();
         {
@@ -74,6 +77,7 @@ public:
     {
         delete gcFlushCompletion;
         delete array;
+        delete vsaMap;
         delete gcStripeManager;
         delete volumeEventPublisher;
         delete rbaStateManager;
@@ -94,6 +98,7 @@ protected:
     NiceMock<MockGcStripeManager>* gcStripeManager;
     NiceMock<MockStripe>* stripe;
     StripeSmartPtr stripeSmartPtr;
+    NiceMock<MockIVSAMap>* vsaMap;
     NiceMock<MockRBAStateManager>* rbaStateManager;
     MockMemoryManager* memoryManager;
 
@@ -118,19 +123,29 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testIfgcFlushCompletionWhenAcquireR
     gcFlushCompletion = new GcFlushCompletion(stripeSmartPtr, arrayName, gcStripeManager, dataBuffer,
                                 inputEvent,
                                 rbaStateManager,
-                                array);
+                                array,
+                                vsaMap);
     EXPECT_CALL(*gcStripeManager, ReturnBuffer(dataBuffer)).Times(1);
-
-    for (uint32_t index = 1 ; index < partitionLogicalSize.blksPerStripe; index++)
+    for (uint32_t index = 0 ; index < partitionLogicalSize.blksPerStripe; index++)
     {
-        std::pair<uint32_t, uint32_t> revMapEntry = {index, testVolumeId};
-        EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
+        if (index > 0)
+        {
+            std::pair<uint32_t, uint32_t> revMapEntry = {index, testVolumeId};
+            EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
+        }
+        // VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
+        // EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, index, _)).WillOnce(Return(vsa));
+        // EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
     }
     std::pair<uint32_t, uint32_t> revMapEntry = {0, testVolumeId};
-    EXPECT_CALL(*stripe, GetReverseMapEntry(0)).WillOnce(Return(revMapEntry)).WillOnce(Return(revMapEntry));
-    EXPECT_CALL(*rbaStateManager, AcquireOwnershipRbaList(testVolumeId, _)).WillOnce(Return(false));
+    EXPECT_CALL(*stripe, GetReverseMapEntry(0)).WillRepeatedly(Return(revMapEntry));
+    gcFlushCompletion->Init();
+    list<RbaAndSize>* rbaList = gcFlushCompletion->GetRbaList();
+    EXPECT_CALL(*rbaStateManager, AcquireOwnershipRbaList(testVolumeId, _, _, _)).WillOnce(Return(rbaList->begin()));
+
     // when gc flush completion execute
     // then return false
+    EXPECT_CALL(*stripe, Flush(inputEvent)).Times(0);
     EXPECT_TRUE(gcFlushCompletion->Execute() == false);
 
     delete dataBuffer;
@@ -143,19 +158,69 @@ TEST_F(GcFlushCompletionTestFixture, Execute_testgcFlushExecuteWhenAcquireOwners
     gcFlushCompletion = new GcFlushCompletion(stripeSmartPtr, arrayName, gcStripeManager, dataBuffer,
                                 inputEvent,
                                 rbaStateManager,
-                                array);
+                                array,
+                                vsaMap);
 
-    for (uint32_t index = 1 ; index < partitionLogicalSize.blksPerStripe; index++)
+    for (uint32_t index = 0 ; index < partitionLogicalSize.blksPerStripe; index++)
     {
-        std::pair<uint32_t, uint32_t> revMapEntry = {index, testVolumeId};
-        EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
+        if (index > 0)
+        {
+            std::pair<uint32_t, uint32_t> revMapEntry = {index, testVolumeId};
+            EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
+        }
+        // VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
+        // EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, index, _)).WillOnce(Return(vsa));
+        // EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
     }
     std::pair<uint32_t, uint32_t> revMapEntry = {0, testVolumeId};
-    EXPECT_CALL(*stripe, GetReverseMapEntry(0)).WillOnce(Return(revMapEntry)).WillOnce(Return(revMapEntry));
-    EXPECT_CALL(*rbaStateManager, AcquireOwnershipRbaList(testVolumeId, _)).WillOnce(Return(true));
+    EXPECT_CALL(*stripe, GetReverseMapEntry(0)).WillRepeatedly(Return(revMapEntry));
+    gcFlushCompletion->Init();
+    list<RbaAndSize>* rbaList = gcFlushCompletion->GetRbaList();
+    EXPECT_CALL(*rbaStateManager, AcquireOwnershipRbaList(testVolumeId, _, _, _)).WillOnce(Return(rbaList->end()));
     EXPECT_CALL(*stripe, Flush(inputEvent)).Times(1);
     // when gc flush completion
     // then return true and stripe flushed
     EXPECT_TRUE(gcFlushCompletion->Execute() == true);
+}
+
+TEST_F(GcFlushCompletionTestFixture, Execute_testRbaListShouldBeUniqueAndBeSorted)
+{
+    // given create gc flush completion and acquire rba ownership
+    dataBuffer = nullptr;
+    gcFlushCompletion = new GcFlushCompletion(stripeSmartPtr, arrayName, gcStripeManager, dataBuffer,
+                                inputEvent,
+                                rbaStateManager,
+                                array,
+                                vsaMap);
+
+    // when RBAs are duplicated
+    uint32_t cnt = 0;
+    for (uint32_t index = 0 ; index < partitionLogicalSize.blksPerStripe; index++)
+    {
+        if (index > 0)
+        {
+            uint32_t rba = (4 - (index % 4)) * 100; // 400, 300, 200, or 100, Because it is a total of 16 cycles, it overlaps four times.
+            std::pair<uint32_t, uint32_t> revMapEntry = {rba, testVolumeId};
+            EXPECT_CALL(*stripe, GetReverseMapEntry(index)).WillOnce(Return(revMapEntry));
+        }
+        // VirtualBlkAddr vsa = {.stripeId = 100, .offset = index};
+        // EXPECT_CALL(*vsaMap, GetVSAInternal(testVolumeId, rba, _)).WillRepeatedly(Return(vsa));
+        // EXPECT_CALL(*stripe, GetVictimVsa(index)).WillOnce(Return(vsa));
+    }
+    uint32_t rba = (4 - (0 % 4)) * 100; // for index 0
+    std::pair<uint32_t, uint32_t> revMapEntry = {rba, testVolumeId};
+    EXPECT_CALL(*stripe, GetReverseMapEntry(0)).WillRepeatedly(Return(revMapEntry));
+    gcFlushCompletion->Init();
+    list<RbaAndSize>* rbaList = gcFlushCompletion->GetRbaList();
+
+    // then RBA list should be unique
+    EXPECT_TRUE(rbaList->size() == 4);
+    int count = 0;
+    for (auto rbaPair : *rbaList)
+    {
+        count++;
+        uint32_t expectedRba = count * 100 * 8; // since it is a sector unit, it should be multiplied by 8
+        EXPECT_TRUE(expectedRba == rbaPair.sectorRba);
+    }
 }
 } // namespace pos

@@ -92,6 +92,8 @@ public:
     }
 
 private:
+    std::string _BoolToString(bool val);
+
     static const BlkOffset INVALID_OFFSET = UINT64_MAX;
     uint32_t numUpdatedBlockMaps;
     uint32_t numInvalidatedBlocks;

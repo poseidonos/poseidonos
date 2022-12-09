@@ -244,8 +244,8 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
         bool removed = segmentList[prevState]->RemoveFromList(segId);
 
         POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-            "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}",
-            segId, prevState, removed);
+            "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}, array_id:{}",
+            segId, prevState, removed, arrayId);
         _SegmentFreed(segId);
     }
 
@@ -319,8 +319,12 @@ SegmentCtx::_RebuildSegmentList(void)
     {
         SegmentState state = segmentInfos[segId].GetState();
         segmentList[state]->AddToList(segId);
-        POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_ADDED_TO_LIST),
-            "segment_id:{}, state:{}", segId, state);
+
+        if (state != SegmentState::FREE)
+        {
+            POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_ADDED_TO_LIST),
+                "array_id: {}, segment_id:{}, state:{}, valid_block_count: {}, occupied_stripe_count: {}", arrayId, segId, state, segmentInfos[segId].GetValidBlockCount(), segmentInfos[segId].GetOccupiedStripeCount());
+        }
     }
 }
 
@@ -334,6 +338,7 @@ void
 SegmentCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
 {
     ctxStoredVersion = ((SegmentCtxHeader*)ctx->buffer)->ctxVersion;
+    POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG), "FinalizeIo, array_id: {}, context_version: {}", arrayId, ctxStoredVersion);
 }
 
 char*
@@ -428,7 +433,7 @@ SegmentCtx::AllocateFreeSegment(void)
         if (segId == UNMAP_SEGMENT)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_ALLOCATE_FAILURE_NO_FREE_SEGMENT),
-                "segment_id:{}, free_segment_count:{}", segId, GetNumOfFreeSegmentWoLock());
+                "segment_id:{}, free_segment_count:{}, array_id:{}", segId, GetNumOfFreeSegmentWoLock(), arrayId);
             break;
         }
         else
@@ -438,7 +443,7 @@ SegmentCtx::AllocateFreeSegment(void)
 
             int numFreeSegment = _OnNumFreeSegmentChanged();
             POS_TRACE_DEBUG(EID(ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS),
-                "segment_id:{}, num_free_segments:{}", segId, numFreeSegment);
+                "segment_id:{}, free_segment_count:{}, array_id:{}", segId, numFreeSegment, arrayId);
 
             return segId;
         }
@@ -494,7 +499,7 @@ SegmentCtx::_FindMostInvalidSSDSegment(void)
         }
     }
 
-    POS_TRACE_DEBUG(EID(ALLOCATOR_START),
+    POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM),
         "victim_segment:{}, min_valid_count:{}",
         victimSegment, minValidCount);
 
@@ -528,8 +533,8 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
 
         _UpdateTelemetryOnVictimSegmentAllocation(victimSegment);
 
-        POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM), "victim_segment_id:{}, free_segment_count:{}",
-            victimSegment, GetNumOfFreeSegmentWoLock());
+        POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM), "victim_segment_id:{}, free_segment_count:{}, array_id:{}",
+            victimSegment, GetNumOfFreeSegmentWoLock(), arrayId);
     }
 
     return stateChanged;
@@ -571,7 +576,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-        "segment_id:{}, num_of_free_segments:{}", segmentId, numOfFreeSegments);
+        "segment_id:{}, free_segment_count:{}, array_id:{}", segmentId, numOfFreeSegments, arrayId);
 }
 
 int
@@ -723,6 +728,12 @@ std::set<SegmentId>
 SegmentCtx::GetVictimSegmentList(void)
 {
     return segmentList[SegmentState::VICTIM]->GetList();
+}
+
+uint32_t
+SegmentCtx::GetVictimSegmentCount(void)
+{
+    return segmentList[SegmentState::VICTIM]->GetNumSegments();
 }
 
 void

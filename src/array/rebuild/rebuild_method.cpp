@@ -48,21 +48,11 @@ RebuildMethod::~RebuildMethod(void)
 {
     if (srcBuffer != nullptr)
     {
-        if (srcBuffer->IsFull() == false)
-        {
-            POS_TRACE_ERROR(EID(REBUILD_BUFFER_WARN),
-                "Some buffers in srcBuffer were not returned but deleted.");
-        }
         mm->DeleteBufferPool(srcBuffer);
         srcBuffer = nullptr;
     }
     if (dstBuffer != nullptr)
     {
-        if (dstBuffer->IsFull() == false)
-        {
-            POS_TRACE_ERROR(EID(REBUILD_BUFFER_WARN),
-                "Some buffers in dstBuffer were not returned but deleted.");
-        }
         mm->DeleteBufferPool(dstBuffer);
         dstBuffer = nullptr;
     }

@@ -47,6 +47,7 @@ public:
 
     virtual void ProhibitUserBlkAlloc(void) = 0;
     virtual void PermitUserBlkAlloc(void) = 0;
+    virtual bool IsProhibitedUserBlkAlloc(void) = 0;
 
     virtual bool BlockAllocating(uint32_t volumeId) = 0;
     virtual void UnblockAllocating(uint32_t volumeId) = 0;

@@ -109,8 +109,11 @@ NToMRebuild::Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalS
 void
 NToMRebuild::_Read(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_READ_BEGIN),
-        "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
+    if (enableDebugLog == true)
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_READ_BEGIN),
+            "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
+    }
     airlog("LAT_SegmentRebuildRead", "begin", 0, airKey);
     uint32_t sectorCnt = srcSize / ArrayConfig::SECTOR_SIZE_BYTE;
     void* mem = nullptr;
@@ -194,8 +197,11 @@ NToMRebuild::_ReadDone(int arrayIndex, StripeId stripeId, const PartitionPhysica
     }
     else
     {
-        POS_TRACE_DEBUG(EID(REBUILD_READ_DONE),
-            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        if (enableDebugLog == true)
+        {
+            POS_TRACE_DEBUG(EID(REBUILD_READ_DONE),
+                "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        }
         _Recover(arrayIndex, stripeId, pSize, callback, src);
     }
 }
@@ -203,8 +209,11 @@ NToMRebuild::_ReadDone(int arrayIndex, StripeId stripeId, const PartitionPhysica
 void
 NToMRebuild::_Recover(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* src)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_RECOVER_BEGIN),
-        "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
+    if (enableDebugLog == true)
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_RECOVER_BEGIN),
+            "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
+    }
     airlog("LAT_SegmentRebuildRecover", "begin", 0, airKey);
     void* mem = nullptr;
     mem = dstBuffer->TryGetBuffer();
@@ -235,8 +244,11 @@ NToMRebuild::_RecoverDone(int arrayIndex, StripeId stripeId, const PartitionPhys
     }
     else
     {
-        POS_TRACE_DEBUG(EID(REBUILD_RECOVER_DONE),
-            "RecoverDone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        if (enableDebugLog == true)
+        {
+            POS_TRACE_DEBUG(EID(REBUILD_RECOVER_DONE),
+                "RecoverDone, array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        }
         _Write(arrayIndex, stripeId, pSize, callback, mem);
     }
 }
@@ -245,8 +257,11 @@ NToMRebuild::_RecoverDone(int arrayIndex, StripeId stripeId, const PartitionPhys
 void
 NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSize* pSize, StripeRebuildDoneCallback callback, void* mem)
 {
-    POS_TRACE_DEBUG(EID(REBUILD_WRITE_BEGIN),
-        "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
+    if (enableDebugLog == true)
+    {
+        POS_TRACE_DEBUG(EID(REBUILD_WRITE_BEGIN),
+            "array_idx:{}, stripe_id:{}", arrayIndex, stripeId);
+    }
     uint32_t sectorCnt = dstSize / ArrayConfig::SECTOR_SIZE_BYTE;
     airlog("LAT_SegmentRebuildWrite", "begin", 0, airKey);
     UbioSmartPtr writeUbio(new Ubio(mem, sectorCnt, arrayIndex));
@@ -304,8 +319,11 @@ NToMRebuild::_WriteDone(int arrayIndex, StripeId stripeId, StripeRebuildDoneCall
     }
     else
     {
-        POS_TRACE_DEBUG(EID(REBUILD_WRITE_DONE),
-            "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        if (enableDebugLog == true)
+        {
+            POS_TRACE_DEBUG(EID(REBUILD_WRITE_DONE),
+                "array_idx:{}, stripe_id:{}, result:{}", arrayIndex, stripeId, result);
+        }
     }
     callback(result);
 }

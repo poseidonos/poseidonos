@@ -59,57 +59,38 @@ StripeReplayStatus::~StripeReplayStatus(void)
 void
 StripeReplayStatus::Print(void)
 {
-    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
+    int eventId = EID(JOURNAL_REPLAY_STATUS);
 
     std::ostringstream os;
 
-    os << "[Replay vsid " << GetVsid() << "] ";
-
-    if (stripeAllocated == true)
-    {
-        if (IsWbIndexValid() == true)
-        {
-            os << "wbIndex " << GetWbIndex() << ", ";
-        }
-
-        if (stripeFlushed == true)
-        {
-            os << "wbstripe alloced/flushed ";
-        }
-        else
-        {
-            os << "wbstripe alloced";
-        }
-        os << "(lsid " << GetWbLsid() << "), ";
-
-        if (segmentAllocated == true)
-        {
-            os << "userstripe/segment alloced ";
-        }
-        else
-        {
-            os << "userstripe alloced ";
-        }
-        os << "(lsid " << GetUserLsid() << "), ";
-    }
-    else if (stripeFlushed == true)
-    {
-        os << "wbstripe flushed (lsid " << GetWbLsid() << "), ";
-    }
+    os << "Replay stripe, vsid:" << GetVsid() << ", "
+        << "stripe_alloced:" << _BoolToString(stripeAllocated) << ", " 
+        << "stripe flushed:" << _BoolToString(stripeFlushed) << ", "
+        << "wbstripe_flushed:" << _BoolToString(stripeFlushed) << ", "
+        << "segment_alloced:" << _BoolToString(segmentAllocated) << ", "
+        << "wb_index:" << GetWbIndex() << ", "
+        << "wblsid:" << GetWbLsid() << ", "
+        << "userlsid:" << GetUserLsid() << ", ";
 
     if (numFoundBlockMaps != 0)
     {
-        os << "RBA " << smallestRba << " to " << largestRba << ", ";
-        os << numUpdatedBlockMaps << " block updated";
-        os << "(" << firstBlockOffset << "-" << lastBlockOffset << "), ";
+        os << "num_blocks_updated:" << numUpdatedBlockMaps << ", "
+            << "rba_range: " << smallestRba << "-" << largestRba << ", "
+            << "block_offset:" << firstBlockOffset << "-" << lastBlockOffset << ", ";
 
         int numSkippedStripeMapUpdate = (stripeMapReplayed == true) ? 0 : 1;
-        os << (numFoundBlockMaps - numUpdatedBlockMaps) << " blk/";
-        os << numSkippedStripeMapUpdate << "stripe update skipped";
+        os << "num_skipped_block_map:" << (numFoundBlockMaps - numUpdatedBlockMaps) <<", "
+            << "num_skipped_stripe_map:" << numSkippedStripeMapUpdate;
     }
 
-    POS_TRACE_DEBUG(eventId, os.str());
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+    POS_TRACE_TRACE(eventId, os.str());
+    POS_TRACE_TRACE_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
+}
+
+std::string 
+StripeReplayStatus::_BoolToString(bool val)
+{
+    return (val ? "true" : "false");
 }
 
 void

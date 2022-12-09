@@ -113,6 +113,7 @@ static const std::string TEL40302_METAFS_PROCESSED_MIO_COUNT = "processed_mio_co
 static const std::string TEL40303_METAFS_MPIO_TIME_FROM_WRITE_TO_RELEASE = "sampled_mpio_time_from_write_to_release";
 static const std::string TEL40304_METAFS_MPIO_TIME_FROM_PUSH_TO_POP = "sampled_mpio_time_from_push_to_pop";
 static const std::string TEL40305_METAFS_MPIO_SAMPLED_COUNT = "sampled_mpio_count";
+static const std::string TEL40306_METAFS_CACHED_MPIO_COUNT = "cached_mpio_count";
 
 static const std::string TEL50000_READ_IOPS_VOLUME = "read_iops_volume";
 static const std::string TEL50001_READ_BPS_VOLUME = "read_bps_volume";
@@ -136,6 +137,14 @@ static const std::string TEL70010_WRITE_IOPS_NETWORK = "write_iops_network";
 static const std::string TEL70011_WRITE_BPS_NETWORK = "write_bps_network";
 
 static const std::string TEL80000_DEVICE_PENDING_IO_COUNT = "device_pending_io_count";
+
+static const std::string TEL90000_GC_STRIPE_COUNT_REQUESTED = "gc_stripe_count_requested";
+static const std::string TEL90001_GC_STRIPE_COUNT_COMPLETED = "gc_stripe_count_completed";
+static const std::string TEL90002_GC_STRIPE_COUNT_FLUSH_REQUESTED  = "gc_stripe_count_flush_requested";
+static const std::string TEL90003_GC_STRIPE_COUNT_FLUSH_COMPLETED  = "gc_stripe_count_flush_completed";
+static const std::string TEL90004_GC_STRIPE_COUNT_MAP_UPDATE_REQUESTED  = "gc_stripe_count_map_update_requested";
+static const std::string TEL90005_GC_STRIPE_COUNT_MAP_UPDATE_COMPLETED  = "gc_stripe_count_map_update_completed";
+static const std::string TEL90006_GC_STRIPE_COUNT_FORCE_FLUSH_REQUESTED  = "gc_stripe_count_force_flush_requested";
 
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
 

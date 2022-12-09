@@ -37,6 +37,8 @@
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/logger/logger.h"
 
+#include "src/journal_manager/log/block_write_done_log_handler.h"
+
 namespace pos
 {
 ReplayLogList::ReplayLogList(void)

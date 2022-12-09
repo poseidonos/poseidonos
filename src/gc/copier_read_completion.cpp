@@ -95,7 +95,7 @@ CopierReadCompletion::_DoSpecificJob(void)
     assert(volId != UINT32_MAX);
     if (gcStripeManager->TryFlushLock(volId) == false)
     {
-        POS_TRACE_DEBUG(EID(GC_NORMAL_FLUSH_TRYLOCK_FAILED), "vol_id:{}", volId);
+        POS_TRACE_DEBUG(EID(GC_NORMAL_FLUSH_TRYLOCK_FAILED), "array_id:{}, vol_id:{}", meta->GetArrayIndex(), volId);
         return false;
     }
     uint32_t remainCnt = blkCnt - allocatedCnt;

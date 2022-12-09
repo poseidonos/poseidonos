@@ -67,8 +67,7 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     IBlockAllocator* inputIBlockAllocator,
     IContextManager* inputIContextManager,
     CallbackSmartPtr inputStripeCopySubmissionPtr, CallbackSmartPtr inputReverseMapLoadCompletionPtr)
-: currentStripeOffset(0),
-  victimId(victimId),
+: victimId(victimId),
   targetId(targetId),
   victimStripeId(UNMAP_STRIPE),
   copybackState(COPIER_THRESHOLD_CHECK_STATE),
@@ -77,16 +76,12 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
   iBlockAllocator(inputIBlockAllocator),
   iContextManager(inputIContextManager),
   gcStatus(gcStatus),
-  loadedValidBlock(false),
   stripeCopySubmissionPtr(inputStripeCopySubmissionPtr),
   reverseMapLoadCompletionPtr(inputReverseMapLoadCompletionPtr)
 {
     userDataMaxStripes = udSize->stripesPerSegment;
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
-
-    victimIndex = 0;
-
     SetEventType(BackendEvent_GC);
 }
 
@@ -165,8 +160,6 @@ Copier::_Stop(void)
 void
 Copier::_InitVariables(void)
 {
-    currentStripeOffset = 0;
-    loadedValidBlock = false;
     gcStatus->SetCopyInfo(false /*started*/, victimId,
         0 /*invalid cnt*/, 0 /*copy cnt*/);
 }
@@ -177,13 +170,36 @@ Copier::_CompareThresholdState(void)
     uint64_t objAddr = reinterpret_cast<uint64_t>(this);
     SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
     GcCtx* gcCtx = iContextManager->GetGcCtx();
-
     GcMode gcMode = gcCtx->GetCurrentGcMode();
+    uint32_t arrayId = array->GetIndex();
 
     _CleanUpVictimSegments();
 
     if ((false == thresholdCheck) || (gcMode != MODE_NO_GC))
     {
+        meta->GetGcStripeManager()->CheckTimeout();
+        const uint32_t gcBusyThreshold = 20;
+        uint32_t victimCnt = segmentCtx->GetVictimSegmentCount();
+        uint32_t numFreeSegments = (uint32_t)segmentCtx->GetNumOfFreeSegment();
+        uint32_t urgentThreshold = gcCtx->GetUrgentThreshold();
+        uint32_t normalThreshold = gcCtx->GetNormalGcThreshold();
+        if(victimCnt > gcBusyThreshold)
+        {
+            gcBusyRetryCnt++;
+            if (gcBusyRetryCnt % 10000 == 0)
+            {
+                POS_TRACE_WARN(EID(GC_CONGESTED_VICTIM_SELECTION),
+                    "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}, gc_busy_retried:{}",
+                    victimCnt, numFreeSegments, urgentThreshold, arrayId, gcBusyRetryCnt);
+            }
+            else if (gcBusyRetryCnt % 100 == 0)
+            {
+                POS_TRACE_DEBUG(EID(GC_RETRY_VICTIM_SELECTION),
+                    "victim_count:{}, free_segment_count:{}, urgent_threshold:{}, array_id:{}, gc_busy_retried:{}",
+                    victimCnt, numFreeSegments, urgentThreshold, arrayId, gcBusyRetryCnt);
+            }
+            return;
+        }
         airlog("LAT_GetVictimSegment", "begin", 0, objAddr);
         victimId = iContextManager->AllocateGCVictimSegment();
         airlog("LAT_GetVictimSegment", "end", 0, objAddr);
@@ -193,25 +209,28 @@ Copier::_CompareThresholdState(void)
             _InitVariables();
             _ChangeEventState(CopierStateType::COPIER_COPY_PREPARE_STATE);
 
-            int numFreeSegments = segmentCtx->GetNumOfFreeSegment();
-            POS_TRACE_DEBUG(EID(GC_GET_VICTIM_SEGMENT),
-                "trigger start, cnt:{}, victimId:{}",
-                numFreeSegments, victimId);
+            bool isUrgent = (numFreeSegments <= urgentThreshold);
+            if (isUrgent == true)
+            {
+                POS_TRACE_WARN(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_id:{}",
+                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayId);
+            }
+            else
+            {
+                POS_TRACE_DEBUG(EID(GC_VICTIM_SELECTED), "victim_segment_id:{}, free_segment_count:{}, urgent_threshold:{}, normal_threshold:{}, array_id:{}",
+                    victimId, numFreeSegments, urgentThreshold, normalThreshold, arrayId);
+            }
         }
-        meta->GetGcStripeManager()->CheckTimeout();
     }
+    gcBusyRetryCnt = 0;
 }
 
 void
 Copier::_CopyPrepareState(void)
 {
     uint32_t victimSegmentIndex = meta->SetInUseBitmap();
-    victimIndex = victimSegmentIndex;
-
+    uint32_t victimIndex = victimSegmentIndex;
     StripeId baseStripe = victimId * userDataMaxStripes;
-
-    loadedValidBlock = false;
-    validStripes.clear();
 
     CallbackSmartPtr callee;
     if (nullptr == stripeCopySubmissionPtr)
@@ -238,10 +257,6 @@ Copier::_CopyPrepareState(void)
         callback->SetCallee(callee);
         meta->GetVictimStripe(victimIndex, index)->Load(baseStripe + index, callback);
     }
-
-    POS_TRACE_DEBUG(EID(GC_LOAD_REVERSE_MAP),
-        "load reverse map, victimSegmentId:{}", victimId);
-
     _ChangeEventState(CopierStateType::COPIER_COPY_COMPLETE_STATE);
 }
 
@@ -254,8 +269,7 @@ Copier::_CopyCompleteState(void)
         return false;
     }
 
-    POS_TRACE_DEBUG(EID(GC_COPY_COMPLETE),
-        "copy complete, id:{}", victimId);
+    POS_TRACE_DEBUG(EID(GC_COPY_COMPLETION), "victim_segment_id:{}", victimId);
 
     uint32_t invalidBlkCnt = userDataMaxBlks - meta->GetDoneCopyBlks();
 
@@ -311,11 +325,11 @@ Copier::_CleanUpVictimSegments(void)
         if (0 == validCount && UNMAP_SEGMENT != victimSegId)
         {
             // Push to free list among the victim lists
-            POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
-                "Move to free list among the victim lists, VictimSegid:{}, validCount:{}", victimSegId, validCount);
             segmentCtx->MoveToFreeState(victimSegId);
             SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
             segmentCtxUpdater->ResetInfos(victimSegId);
+            POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
+                "victim_segment_id:{}, count:{}", victimSegId, validCount);
         }
     }
 }

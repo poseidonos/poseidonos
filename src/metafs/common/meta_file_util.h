@@ -35,6 +35,7 @@
 #include <string.h>
 
 #include <string>
+#include <unordered_map>
 
 #include "meta_storage_specific.h"
 #include "meta_volume_type.h"
@@ -61,13 +62,16 @@ class MetaFileUtil
 {
 public:
     static StringHashType GetHashKeyFromFileName(const std::string& fileName);
-    static MetaStorageType ConvertToMediaType(MetaVolumeType volume);
-    static std::string ConvertToMediaTypeName(MetaVolumeType volume);
-    static MetaVolumeType ConvertToVolumeType(MetaStorageType media);
+    static MetaStorageType ConvertToMediaType(const MetaVolumeType volume);
+    static std::string ConvertToMediaTypeName(const MetaVolumeType volume);
+    static MetaVolumeType ConvertToVolumeType(const MetaStorageType media);
     static uint64_t GetEpochSignature(std::time_t t = std::time(0));
+
+    static const std::string UNKNOWN_VOLUME_NAME;
 
 private:
     static const MetaFsMediaToVolume MEDIA_TO_VOLUME[(uint32_t)MetaStorageType::Max];
     static const MetaFsVolumeToMedia VOLUME_TO_MEDIA[(uint32_t)MetaVolumeType::Max];
+    static const std::unordered_map<MetaVolumeType, std::string> VOLUME_NAME;
 };
 } // namespace pos

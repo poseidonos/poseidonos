@@ -51,7 +51,7 @@ public:
         RebuildComplete cb, list<RebuildTarget*>& tgt) = 0;
     virtual void QuickRebuild(string array, uint32_t arrayId, QuickRebuildPair rebuildPair,
         RebuildComplete cb, list<RebuildTarget*>& tgt) = 0;
-    virtual void StopRebuild(string array) = 0;
+    virtual void StopRebuild(string array, int reason) = 0;
     virtual void RebuildDone(RebuildResult result) = 0;
     virtual void WaitRebuildDone(string array) = 0;
     virtual bool IsRebuilding(string array) = 0;

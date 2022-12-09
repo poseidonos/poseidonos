@@ -65,5 +65,6 @@ private:
     uint64_t airKey = 0;
     NToMRebuild* backupMethod = nullptr;
     bool isFailOver = false;
+    bool enableDebugLog = false;
 };
 } // namespace pos
