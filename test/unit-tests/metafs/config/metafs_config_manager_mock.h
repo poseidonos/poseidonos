@@ -62,6 +62,5 @@ public:
     MOCK_METHOD(int, GetNumberOfScheduler, (), (const));
     MOCK_METHOD(void, SetIgnoreNumaDedicatedScheduling, (const bool ignore));
     MOCK_METHOD(bool, NeedToIgnoreNumaDedicatedScheduling, (), (const));
-    MOCK_METHOD(bool, IsSupportCheckingCrcWhenReading, (), (const));
 };
 } // namespace pos

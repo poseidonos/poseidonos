@@ -85,7 +85,6 @@ MetaFsConfigManager::Init(void)
     }
     supportNumaDedicatedScheduling_ = _IsSupportingNumaDedicatedScheduling();
     needToIgnoreNumaDedicatedScheduling_ = false;
-    supportCheckingCrcWhenReading_ = _IsSupportCheckingCrcWhenReading();
 
     if (!_ValidateConfig())
     {
@@ -122,8 +121,6 @@ MetaFsConfigManager::_BuildConfigMap(void)
         {"wrr_count_general", CONFIG_TYPE_UINT64}});
     configMap_.insert({MetaFsConfigType::SupportNumaDedicatedScheduling,
         {"numa_dedicated", CONFIG_TYPE_BOOL}});
-    configMap_.insert({MetaFsConfigType::SupportCheckingCrcWhenReading,
-        {"checking_crc_when_reading_enable", CONFIG_TYPE_BOOL}});
 }
 
 bool
@@ -323,19 +320,6 @@ MetaFsConfigManager::_IsSupportingNumaDedicatedScheduling(void)
     POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
         configMap_[MetaFsConfigType::SupportNumaDedicatedScheduling].first +
             (enabled ? " is supported" : " is not supported"));
-
-    return enabled;
-}
-
-bool
-MetaFsConfigManager::_IsSupportCheckingCrcWhenReading(void)
-{
-    bool enabled = false;
-    if (_ReadConfiguration<bool>(MetaFsConfigType::SupportCheckingCrcWhenReading, &enabled))
-        return false;
-
-    POS_TRACE_INFO(static_cast<int>(EID(MFS_INFO_MESSAGE)),
-        configMap_[MetaFsConfigType::SupportCheckingCrcWhenReading].first + (enabled ? " is enabled" : " is disabled"));
 
     return enabled;
 }
