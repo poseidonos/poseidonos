@@ -252,6 +252,12 @@ MioHandler::_PublishPeriodicMetrics(void)
             totalProcessedMioCount = 0;
         }
 
+        {
+            POSMetric m("TEL40306_METAFS_CACHED_MPIO_COUNT", POSMetricTypes::MT_GAUGE);
+            m.SetGaugeValue(mpioAllocator->GetCacheSize());
+            metricVector->emplace_back(m);
+        }
+
         for (uint32_t idx = 0; idx < NUM_STORAGE; idx++)
         {
             POSMetric m(TEL40103_METAFS_WORKER_ISSUE_COUNT_PARTITION, POSMetricTypes::MT_GAUGE);
@@ -386,7 +392,14 @@ MioHandler::_ExecutePendedIo(MetaFsIoRequest* reqMsg)
         }
     }
 
-    mio->SetMergedRequestList(reqList);
+    if (reqList->size())
+    {
+        mio->SetMergedRequestList(reqList);
+    }
+    else
+    {
+        delete reqList;
+    }
 
     ExecuteMio(*mio);
 
@@ -406,7 +419,8 @@ MioHandler::_IsPendedRange(MetaFsIoRequest* reqMsg)
     {
         for (; it != pendingIoRetryQ.end(); ++it)
         {
-            if (reqMsg->targetMediaType == it->second->targetMediaType)
+            if ((reqMsg->targetMediaType == it->second->targetMediaType) &&
+                (reqMsg->arrayId == it->second->arrayId))
             {
                 return true;
             }
@@ -438,7 +452,6 @@ MioHandler::_FinalizeMio(Mio* mio)
 
     if (mio->GetMergedRequestList())
     {
-        // metricCountOfStorageType[(int)mio->GetTargetStorage()] -= mio->GetMergedRequestList()->size();
         MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "merged request count: {}",
             mio->GetMergedRequestList()->size());

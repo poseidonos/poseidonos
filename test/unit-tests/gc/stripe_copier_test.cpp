@@ -165,8 +165,8 @@ TEST_F(StripeCopierTestFixture, Execute_testIfExecuteFailsWhenBufferAllocationFa
     EXPECT_CALL(*meta, GetVictimStripe(copyIndex, baseStripeId % STRIPES_PER_SEGMENT)).WillRepeatedly(Return(&victimStripe));
     EXPECT_CALL(victimStripe, LoadValidBlock).WillOnce(Return(true));
     EXPECT_CALL(victimStripe, GetBlkInfoListSize).WillOnce(Return(1));
-    EXPECT_CALL(*meta, GetBuffer(baseStripeId)).WillOnce(Return(nullptr));
-
+    std::vector<void*> emptyVector;
+    EXPECT_CALL(*meta, GetBuffers(_,_)).WillOnce(testing::SetArgPointee<1>(emptyVector));
     EXPECT_TRUE(stripeCopier->Execute() == false);
 
     delete eventScheduler;
@@ -191,7 +191,8 @@ TEST_F(StripeCopierTestFixture, Execute_testIfExecuteSucceedsWhenThereIsOneValid
     EXPECT_CALL(*meta, GetVictimStripe(copyIndex, baseStripeId % STRIPES_PER_SEGMENT)).WillRepeatedly(Return(&victimStripe));
     EXPECT_CALL(victimStripe, LoadValidBlock).WillOnce(Return(true));
     EXPECT_CALL(victimStripe, GetBlkInfoListSize).WillOnce(Return(1));
-    EXPECT_CALL(*meta, GetBuffer(baseStripeId)).WillOnce(Return((void*)0x20000000));
+    std::vector<void*> oneBuffer{(void*)0x20000000};
+    EXPECT_CALL(*meta, GetBuffers(_,_)).WillOnce(testing::SetArgPointee<1>(oneBuffer));
     std::list<BlkInfo> blkInfoList;
     BlkInfo blkInfo = {.rba = testRba, .volID = testVolId,
                 .vsa = {.stripeId = testStripeId, .offset = testStripeOffset}};
@@ -227,7 +228,8 @@ TEST_F(StripeCopierTestFixture, Execute_CopyOneValidBlockCreateCopyEvent)
     EXPECT_CALL(*meta, GetVictimStripe(copyIndex, baseStripeId % STRIPES_PER_SEGMENT)).WillRepeatedly(Return(&victimStripe));
     EXPECT_CALL(victimStripe, LoadValidBlock).WillOnce(Return(true));
     EXPECT_CALL(victimStripe, GetBlkInfoListSize).WillOnce(Return(1));
-    EXPECT_CALL(*meta, GetBuffer(baseStripeId)).WillOnce(Return((void*)0x20000000));
+    std::vector<void*> oneBuffer{(void*)0x20000000};
+    EXPECT_CALL(*meta, GetBuffers(_,_)).WillOnce(testing::SetArgPointee<1>(oneBuffer));
     std::list<BlkInfo> blkInfoList;
     BlkInfo blkInfo = {.rba = testRba, .volID = testVolId,
                 .vsa = {.stripeId = testStripeId, .offset = testStripeOffset}};

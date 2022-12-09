@@ -137,19 +137,13 @@ StripeMapUpdateRequest::_DoSpecificJob(void)
     }
 
     eventId = EID(NFLSH_STRIPE_DEBUG_UPDATE);
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, "Stripe Map Update Request : stripe.vsid : {}",
-        stripe->GetVsid());
 
     int result = iMetaUpdater->UpdateStripeMap(stripe, completionEvent);
     if (unlikely(EID(SUCCESS) != result))
     {
         // TODO (dh.ihm) Need to make fatal error (ret < 0) handle path.
-        POS_EVENT_ID eventId =
-            EID(NFLSH_EVENT_MAP_UPDATE_FAILED);
-        std::stringstream message;
-        message << "FlushCompletion for vsid: " << stripe->GetVsid() << ", wbLsid: " << stripe->GetWbLsid() << ", userAreaLsid: " << stripe->GetUserLsid();
-        POS_TRACE_ERROR(static_cast<int>(eventId),
-            "Failed to update map: {}", message.str());
+        POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::IO_FLUSH, eventId, "Try Stripe Map flush again : stripe.vsid : {}",
+            stripe->GetVsid());
 
         return false;
     }

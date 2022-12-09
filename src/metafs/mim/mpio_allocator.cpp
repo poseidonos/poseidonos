@@ -171,10 +171,12 @@ MpioAllocator::_TryAlloc(const MpioType type)
 }
 
 void
-MpioAllocator::TryReleaseTheOldestCache(void)
+MpioAllocator::TryReleaseTheOldestCache(const bool forceReleaseCacheEntry)
 {
-    if (0 == pool_[(uint32_t)MpioType::Write]->GetFreeCount())
+    if ((0 == pool_[(uint32_t)MpioType::Write]->GetFreeCount()) || forceReleaseCacheEntry)
+    {
         _ReleaseCache();
+    }
 }
 
 void
@@ -191,10 +193,19 @@ MpioAllocator::_ReleaseCache(void)
     if (!victim)
         return;
 
-    victim->ChangeCacheStateTo(MpioCacheState::Init);
-    if (victim->GetCurrState() == MpAioState::First)
+    if (victim->IsRemovable())
     {
-        Release(victim);
+        victim->ChangeCacheStateTo(MpioCacheState::Init);
+        if (victim->GetCurrState() == MpAioState::First)
+        {
+            Release(victim);
+        }
+    }
+    else
+    {
+        // if the state of the victim is not in write done state
+        // the victim do not be released
+        writeCache_->Push({victim->io.arrayId, victim->io.metaLpn}, victim);
     }
 }
 } // namespace pos

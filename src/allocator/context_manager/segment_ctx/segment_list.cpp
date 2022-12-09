@@ -121,5 +121,4 @@ SegmentList::GetList(void)
     std::lock_guard<std::mutex> lock(m);
     return segments;
 }
-
 } // namespace pos

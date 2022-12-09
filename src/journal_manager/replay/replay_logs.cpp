@@ -85,6 +85,12 @@ ReplayLogs::~ReplayLogs(void)
     }
     replayedStripeList.clear();
 
+    for (auto replayLog : replayLogs)
+    {
+        delete replayLog.log;
+    }
+    replayLogs.clear();
+
     delete wbStripeReplayer;
     delete userStripeReplayer;
 }
@@ -100,7 +106,7 @@ ReplayLogs::Start(void)
 {
     int result = 0;
 
-    POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS),
+    POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
         "[ReplayTask] Log replay started");
 
     logDeleteChecker->Update(logList.GetDeletingLogs());
@@ -137,7 +143,7 @@ ReplayLogs::Start(void)
     reporter->SubTaskCompleted(GetId(), 1);
 
     std::ostringstream os;
-    os << "[Replay] " << replayedStripeList.size() << " stripes are replayed";
+    os << "numStripesReplayed:" << replayedStripeList.size();
 
     POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS), os.str());
     POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL,
@@ -149,7 +155,7 @@ ReplayLogs::Start(void)
 int
 ReplayLogs::_ReplayFinishedStripes(void)
 {
-    std::vector<ReplayLog> replayLogs;
+    replayLogs.clear();
 
     while (logList.IsEmpty() == false)
     {
@@ -166,8 +172,8 @@ ReplayLogs::_ReplayFinishedStripes(void)
                     it->segInfoFlushed = true;
                 }
 
-                POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS),
-                    "Segment context is flushed, skip replaying seginfo (last ver in the footer {}, current {}",
+                POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
+                    "Segment context is flushed, skip replaying seginfo (last_ver_in_footer:{}, current:{}",
                     logGroup.footer.lastCheckpointedSeginfoVersion, currentSegInfoVersion);
             }
         }
@@ -175,7 +181,14 @@ ReplayLogs::_ReplayFinishedStripes(void)
         replayLogs.insert(replayLogs.end(), logGroup.logs.begin(), logGroup.logs.end());
     }
 
+    POS_TRACE_TRACE(EID(JOURNAL_REPLAY_STATUS),
+        "Start replaying logs, numLogs:{}", replayLogs.size());
+
     int result = 0;
+
+    int numReplayedUserStripes = 0;
+    int numReplayedGcStripes = 0;
+
     for (auto replayLog : replayLogs)
     {
         LogHandlerInterface* log = replayLog.log;
@@ -194,6 +207,7 @@ ReplayLogs::_ReplayFinishedStripes(void)
             stripe->AddLog(replayLog);
 
             result = _ReplayStripe(stripe);
+            numReplayedUserStripes++;
             if (result != 0)
             {
                 break;
@@ -215,6 +229,7 @@ ReplayLogs::_ReplayFinishedStripes(void)
             stripe->AddLog(replayLog);
 
             result = _ReplayStripe(stripe);
+            numReplayedGcStripes++;
             if (result != 0)
             {
                 break;
@@ -224,16 +239,14 @@ ReplayLogs::_ReplayFinishedStripes(void)
         }
         else
         {
-            POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS),
+            POS_TRACE_WARN(EID(JOURNAL_REPLAY_STATUS),
                 "Unknwon log type {} found", log->GetType());
         }
     }
 
-    for (auto replayLog : replayLogs)
-    {
-        delete replayLog.log;
-    }
-    replayLogs.clear();
+    POS_TRACE_TRACE(EID(JOURNAL_REPLAY_STATUS), "Replayed finished stripes, numReplayedUserStripes:{}, numReplayedGcStripes:{}",
+        numReplayedUserStripes, numReplayedGcStripes);
+
     return result;
 }
 
@@ -300,8 +313,9 @@ ReplayLogs::_FindGcStripe(StripeId vsid)
 int
 ReplayLogs::_ReplayUnfinishedStripes(void)
 {
-    POS_TRACE_DEBUG(EID(JOURNAL_REPLAY_STATUS),
-        "{} stripes are not flushed", replayingStripeList.size());
+    POS_TRACE_TRACE(EID(JOURNAL_REPLAY_STATUS),
+        "Start replaying unflushed stripes, numUnflushedStripes:{}",
+        replayingStripeList.size());
 
     while (replayingStripeList.size() != 0)
     {

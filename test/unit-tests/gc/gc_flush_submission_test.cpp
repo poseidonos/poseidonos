@@ -179,7 +179,7 @@ TEST_F(GcFlushSubmissionTestFixture, Execute_testIfExecuteWhenGetTokenAndAllocat
     void* buffer = (void*)0x20000000;
     dataBuffer->push_back(buffer);
     StripeSmartPtr testStripe(new NiceMock<MockStripe>());
-    callback = std::make_shared<MockGcFlushCompletion>(testStripe, arrayName, gcStripeManager, dataBuffer, nullptr, nullptr, array);
+    callback = std::make_shared<MockGcFlushCompletion>(testStripe, arrayName, gcStripeManager, dataBuffer, nullptr, nullptr, array, nullptr);
 
     gcFlushSubmission = new GcFlushSubmission(arrayName, blkInfoList, testVolumeId,
                         dataBuffer, gcStripeManager, callback, blockAllocator,

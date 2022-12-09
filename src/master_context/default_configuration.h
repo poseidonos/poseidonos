@@ -137,6 +137,12 @@ private:
     vector<ConfigKeyValue> feQosData = {
         {"enable", "false"}
     };
+    vector<ConfigKeyValue> gcThresholdData = {
+        {"percent_of_normal_gc_threshold_to_total_capacity", "1"},
+        {"percent_of_urgent_gc_threshold_to_normal_gc_threshold", "10"},
+        {"normal_gc_threshold_count_lower_bound", "20"},
+        {"urgent_gc_threshold_count_lower_bound", "5"}
+    };
     vector<ConfigKeyValue> flowControlData = {
         {"enable", "true"},
         {"use_default", "true"},
@@ -193,6 +199,7 @@ private:
         {"user_nvme_driver", userNvmeDriverData},
         {"perf_impact", perfImpactData},
         {"fe_qos", feQosData},
+        {"gc_threshold", gcThresholdData},
         {"flow_control", flowControlData},
         {"transport", transportData},
         {"metafs", metaFsData},

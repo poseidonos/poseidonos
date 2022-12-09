@@ -171,6 +171,7 @@ TEST_F(MpioAllocatorFixture, CheckCounter)
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT - popCount);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), popCount);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), popCount);
+    EXPECT_EQ(allocator->GetCacheSize(), 0);
 
     for (uint32_t index = 0; index < popCount; index++)
     {
@@ -184,6 +185,7 @@ TEST_F(MpioAllocatorFixture, CheckCounter)
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Read), 0);
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
+    EXPECT_EQ(allocator->GetCacheSize(), 0);
 }
 
 TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRamCache)
@@ -207,9 +209,13 @@ TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRamCache)
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 1);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT - 1);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCacheSize(), 1);
 
     for (auto& i : mpioSet)
+    {
+        i->ChangeCacheStateTo(MpioCacheState::WriteDone);
         allocator->Release(i);
+    }
     mpioSet.clear();
 
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 1);
@@ -219,6 +225,7 @@ TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRamCache)
     EXPECT_EQ(allocator->GetUsedCount(MpioType::Write), 0);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Write), COUNT);
     EXPECT_EQ(allocator->GetFreeCount(MpioType::Read), COUNT);
+    EXPECT_EQ(allocator->GetCacheSize(), 0);
 }
 
 } // namespace pos

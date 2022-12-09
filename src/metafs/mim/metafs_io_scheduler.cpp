@@ -170,38 +170,28 @@ MetaFsIoScheduler::_SetCurrentContextFrom(MetaFsIoRequest* reqMsg)
     remainCount_ = requestCount_;
     extentsCount_ = currentReqMsg_->fileCtx->extentsCount;
     extents_ = currentReqMsg_->fileCtx->extents;
+    currentExtent_ = 0;
+    // currentExtent_ will be updated again at _UpdateCurrentExtentToNextExtentConditionally()
 
     // set the request count to process the callback count
     _SetRequestCountOrCallbackCountOfCurrentRequest(requestCount_);
 }
 
 void
-MetaFsIoScheduler::_ClearCurrentContext(void)
+MetaFsIoScheduler::_UpdateCurrentLpnAndExtentConditionally(void)
 {
-    currentReqMsg_ = nullptr;
-    chunkSize_ = 0;
-    fileBaseLpn_ = 0;
-    startLpn_ = 0;
-    currentLpn_ = 0;
-    requestCount_ = 0;
-    remainCount_ = 0;
-    extentsCount_ = 0;
-    currentExtent_ = 0;
-    extents_ = nullptr;
-}
-
-void
-MetaFsIoScheduler::_UpdateCurrentLpnToNextExtent(void)
-{
-    if (currentLpn_ > extents_[currentExtent_].GetLast())
+    if (remainCount_)
     {
-        ++currentExtent_;
-        currentLpn_ = extents_[currentExtent_].GetStartLpn();
+        if (currentLpn_ > extents_[currentExtent_].GetLast())
+        {
+            ++currentExtent_;
+            currentLpn_ = extents_[currentExtent_].GetStartLpn();
+        }
     }
 }
 
 void
-MetaFsIoScheduler::_UpdateCurrentLpnToNextExtentConditionally(void)
+MetaFsIoScheduler::_UpdateCurrentExtentToNextExtentConditionally(void)
 {
     while (currentExtent_ < extentsCount_)
     {
@@ -227,7 +217,7 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
     bool isFirstLpn = true;
 
     _SetCurrentContextFrom(reqMsg);
-    _UpdateCurrentLpnToNextExtentConditionally();
+    _UpdateCurrentExtentToNextExtentConditionally();
 
     issueCount_[(int)currentReqMsg_->targetMediaType] += requestCount_;
 
@@ -274,13 +264,11 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
 
         ++currentLpn_;
         --remainCount_;
-        _UpdateCurrentLpnToNextExtent();
+        _UpdateCurrentLpnAndExtentConditionally();
     }
 
     // delete msg instance, this instance was only for meta scheduler
     delete reqMsg;
-
-    _ClearCurrentContext();
 }
 
 uint32_t
@@ -486,5 +474,11 @@ MetaFsIoRequest*
 MetaFsIoScheduler::_FetchPendingNewReq(void)
 {
     return ioSQ_.Dequeue();
+}
+
+int
+MetaFsIoScheduler::GetCurrentExtent(void) const
+{
+    return currentExtent_;
 }
 } // namespace pos

@@ -54,6 +54,7 @@ public:
     virtual void PermitBlockAllocation(int volumeId);
 
     virtual void ProhibitUserBlockAllocation(void);
+    virtual bool IsProhibitedUserBlockAllocation(void);
     virtual void ProhibitBlockAllocation(void);
 
     virtual bool TryProhibitBlockAllocation(int volumeId);

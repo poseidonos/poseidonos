@@ -109,7 +109,7 @@ ArrayDeviceList::SetNvm(ArrayDevice* nvm)
 
     if (nvm == nullptr || nvm->GetUblock() == nullptr)
     {
-        int eventId = EID(UNABLE_TO_SET_NULL_NVM);
+        int eventId = EID(UNABLE_TO_SET_NO_OR_NULL_NVM);
         POS_TRACE_WARN(eventId, "");
         return eventId;
     }
