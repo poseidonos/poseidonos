@@ -43,16 +43,18 @@ class GrpcHealth;
 class GrpcReplicationController;
 class GrpcPosIo;
 class GrpcPosManagement;
+class PosReplicatorManager;
 
 class GrpcSubscriber
 {
 public:
-    GrpcSubscriber(ConfigManager* configManager);
+    GrpcSubscriber(PosReplicatorManager* replicatorManager, ConfigManager* configManager);
     ~GrpcSubscriber(void);
 
     void RunServer(std::string address);
 
 private:
+    PosReplicatorManager* replicatorManager;
     ConfigManager* configManager;
     GrpcHealth* healthChecker;
     GrpcReplicationController* replicationController;

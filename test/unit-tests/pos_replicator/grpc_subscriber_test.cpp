@@ -37,6 +37,7 @@
 #include "mock_grpc/mock_replicator_client.h"
 #include "mock_grpc/mock_replicator_server.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
+#include "test/unit-tests/pos_replicator/posreplicator_manager_mock.h"
 
 using ::testing::_;
 using testing::NiceMock;
@@ -56,6 +57,7 @@ protected:
     void SetUp(void) override;
     void TearDown(void) override;
 
+    NiceMock<MockPosReplicatorManager> replicatorManager;
     NiceMock<MockConfigManager>* configManager;
     GrpcSubscriber* grpcSubscriber;
     MockReplicatorClient* haClient;
@@ -67,7 +69,7 @@ GrpcSubscriberTestFixture::SetUp(void)
     configManager = new NiceMock<MockConfigManager>;
     ON_CALL(*configManager, GetValue("replicator", "ha_subscriber_address", _, _)).WillByDefault(SetArg2ToStringAndReturn0("localhost:50053"));
 
-    grpcSubscriber = new GrpcSubscriber(configManager);
+    grpcSubscriber = new GrpcSubscriber(&replicatorManager, configManager);
     sleep(1);
     haClient = new MockReplicatorClient(nullptr);
 }

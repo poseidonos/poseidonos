@@ -36,9 +36,16 @@
 
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/pos_replicator/posreplicator_manager.h"
+#include "src/pos_replicator/posreplicator_status.h"
 
 namespace pos
 {
+GrpcReplicationController::GrpcReplicationController(PosReplicatorManager* replicatorManager)
+: replicatorManager(replicatorManager)
+{
+}
+
 ::grpc::Status
 GrpcReplicationController::StartVolumeSync(
     ::grpc::ServerContext* context,
@@ -46,8 +53,18 @@ GrpcReplicationController::StartVolumeSync(
     pos_rpc::StartVolumeSyncResponse* response)
 {
     POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get StartVolumeSync from grpc client");
-    response->set_result(pos_rpc::PosResult::SUCCESS);
 
+    bool is_primary = request->is_primary();
+    if (is_primary)
+    {
+        replicatorManager->SetVolumeCopyStatus(ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy);
+    }
+    else
+    {
+        replicatorManager->SetVolumeCopyStatus(ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy);
+    }
+
+    response->set_result(pos_rpc::PosResult::SUCCESS);
     return ::grpc::Status::OK;
 }
 
@@ -58,8 +75,21 @@ GrpcReplicationController::FinishVolumeSync(
     pos_rpc::FinishVolumeSyncResponse* response)
 {
     POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get FinishVolumeSync from grpc client");
-    response->set_result(pos_rpc::PosResult::SUCCESS);
+    ReplicatorStatus status = replicatorManager->GetVolumeCopyStatus();
+    if (status == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopyWriteSuspend)
+    {
+        replicatorManager->SetVolumeCopyStatus(ReplicatorStatus::VOLUMECOPY_PrimaryLiveReplication);
+    }
+    else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
+    {
+        replicatorManager->SetVolumeCopyStatus(ReplicatorStatus::VOLUMECOPY_SecondaryLiveReplication);
+    }
+    else
+    {
+        assert(true);
+    }
 
+    response->set_result(pos_rpc::PosResult::SUCCESS);
     return ::grpc::Status::OK;
 }
 
@@ -69,11 +99,22 @@ GrpcReplicationController::SuspendWrite(
     const pos_rpc::SuspendWriteRequest* request,
     pos_rpc::SuspendWriteResponse* response)
 {
-    // TODO (cheolho.kang): Implement later
-    // Should suepend new io from initator
     POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get SuspendWrite from grpc client");
-    response->set_result(pos_rpc::PosResult::SUCCESS);
+    ReplicatorStatus status = replicatorManager->GetVolumeCopyStatus();
+    if (status == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy)
+    {
+        replicatorManager->SetVolumeCopyStatus(ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopyWriteSuspend);
+    }
+    else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
+    {
+        // do nothing
+    }
+    else
+    {
+        assert(true);
+    }
 
+    response->set_result(pos_rpc::PosResult::SUCCESS);
     return ::grpc::Status::OK;
 }
 
@@ -84,8 +125,21 @@ GrpcReplicationController::ResumeWrite(
     pos_rpc::ResumeWriteResponse* response)
 {
     POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get ResumeWrite from grpc client");
-    response->set_result(pos_rpc::PosResult::SUCCESS);
+    ReplicatorStatus status = replicatorManager->GetVolumeCopyStatus();
+    if (status == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopyWriteSuspend)
+    {
+        replicatorManager->SetVolumeCopyStatus(ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy);
+    }
+    else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
+    {
+        // do nothing
+    }
+    else
+    {
+        assert(true);
+    }
 
+    response->set_result(pos_rpc::PosResult::SUCCESS);
     return ::grpc::Status::OK;
 }
 } // namespace pos

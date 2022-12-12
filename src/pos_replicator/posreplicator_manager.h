@@ -81,10 +81,13 @@ public:
 
     void AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo);
 
-    int ConvertNametoIdx(std::pair<std::string, int>& arraySet, std::pair<std::string, int>& volumeSet);
+    int ConvertIdToName(int arrayId, int volumeId, std::string& arrayName, std::string& volumeName);
+    int ConvertNameToIdx(std::pair<std::string, int>& arraySet, std::pair<std::string, int>& volumeSet);
 
     int HandleHostWrite(VolumeIoSmartPtr volumeIo);
 
+    void SetVolumeCopyStatus(ReplicatorStatus status);
+    ReplicatorStatus GetVolumeCopyStatus(void);
     virtual bool IsEnabled(void) override;
 
 protected:
@@ -98,10 +101,10 @@ private:
     void _RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn);
     void _InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numChunks);
 
-    int _ConvertArrayIdtoArrayName(int arrayId, std::string& arrayName);
-    int _ConvertVolumeIdtoVolumeName(int volumeId, int arrayId, std::string& volumeName);
-    int _ConvertArrayNametoArrayId(std::string arrayName);
-    int _ConvertVolumeNametoVolumeId(std::string volumeName, int arrayId);
+    int _ConvertArrayIdToName(int arrayId, std::string& arrayName);
+    int _ConvertVolumeIdToName(int volumeId, int arrayId, std::string& volumeName);
+    int _ConvertArrayNameToId(std::string arrayName);
+    int _ConvertVolumeNameToId(std::string volumeName, int arrayId);
 
     AIO* aio;
     std::unordered_map<uint64_t, pos_io> waitPosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
@@ -110,6 +113,7 @@ private:
     int volumeSubscriberCnt;
     ReplicatorVolumeSubscriber* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];
     std::mutex listMutex;
+    std::mutex statusLock;
 
     vector<std::pair<int, string>> arrayConvertTable;
 

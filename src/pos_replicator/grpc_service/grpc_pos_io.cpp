@@ -172,7 +172,7 @@ GrpcPosIo::CompleteHostWrite(::grpc::ServerContext* context, const pos_rpc::Comp
 GrpcPosIo::_CheckArgumentValidityAndUpdateIndex(std::pair<std::string, int>& arraySet,
     std::pair<std::string, int>& volumeSet)
 {
-    int ret = PosReplicatorManagerSingleton::Instance()->ConvertNametoIdx(arraySet, volumeSet);
+    int ret = PosReplicatorManagerSingleton::Instance()->ConvertNameToIdx(arraySet, volumeSet);
 
     if (ret != EID(SUCCESS))
     {

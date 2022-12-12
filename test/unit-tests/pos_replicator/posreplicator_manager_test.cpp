@@ -85,7 +85,7 @@ PosReplicatorManagerTestFixture::SetUp(void)
 
     posReplicatorManager = new PosReplicatorManager(aio);
     grpcPublisher = new NiceMock<MockGrpcPublisher>(nullptr, configManager);
-    grpcSubscriber = new NiceMock<MockGrpcSubscriber>(configManager);
+    grpcSubscriber = new NiceMock<MockGrpcSubscriber>(posReplicatorManager, configManager);
     posReplicatorManager->Init(grpcPublisher, grpcSubscriber, configManager);
 }
 
