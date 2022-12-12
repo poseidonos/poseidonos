@@ -86,7 +86,7 @@ PosReplicatorManagerTestFixture::SetUp(void)
     posReplicatorManager = new PosReplicatorManager(aio);
     grpcPublisher = new NiceMock<MockGrpcPublisher>(nullptr, configManager);
     grpcSubscriber = new NiceMock<MockGrpcSubscriber>(configManager);
-    posReplicatorManager->Init(grpcPublisher, grpcSubscriber);
+    posReplicatorManager->Init(grpcPublisher, grpcSubscriber, configManager);
 }
 
 void
@@ -157,6 +157,7 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAIOSubmission_testIfIoTypeIsRe
     int volumeId = 0;
     uint64_t rba = 10;
     uint64_t numChunks = 8; // 4KB
+    uint64_t lsn = 0;
     std::shared_ptr<char*> dataList = nullptr;
 
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, numChunks, arrayId));
@@ -164,7 +165,7 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAIOSubmission_testIfIoTypeIsRe
     EXPECT_CALL(*aio, SubmitAsyncIO(volumeIo));
 
     // Then
-    int ret = posReplicatorManager->HAIOSubmission(ioType, arrayId, volumeId, rba, numChunks, dataList);
+    int ret = posReplicatorManager->HAIOSubmission(ioType, arrayId, volumeId, rba, numChunks, dataList, lsn);
     EXPECT_EQ(EID(SUCCESS), ret);
     // delete haServer;
 }
@@ -202,45 +203,35 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAReadCompletion_)
     posReplicatorManager->HAReadCompletion(lsn, volumeIo);
 }
 
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertArrayIdtoArrayName_)
+TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertIdToName_)
 {
     // Given
-
-    // Then
-    int arrayId;
-    string arrayName;
-    int ret = posReplicatorManager->ConvertArrayIdtoArrayName(arrayId, arrayName);
-    EXPECT_NE(EID(SUCCESS), ret);
-}
-
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertVolumeIdtoVolumeName_)
-{
-    // Given
-    int volumeId;
-    int arrayId;
-    string volumeName;
-
-    // Then
-    int ret = posReplicatorManager->ConvertVolumeIdtoVolumeName(volumeId, arrayId, volumeName);
-}
-
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertArrayNametoArrayId_)
-{
-    // Then
-    int volumeId;
-    int arrayId;
+    // When
+    int arrayId = 0;
+    int volumeId = 0;
     std::string arrayName;
-    int ret = posReplicatorManager->ConvertArrayNametoArrayId(arrayName);
+    std::string volumeName;
+
+    int ret = posReplicatorManager->ConvertIdToName(arrayId, volumeId, arrayName, volumeName);
+
+    // Then
     EXPECT_NE(EID(SUCCESS), ret);
 }
 
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertVolumeNametoVolumeId_)
+TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertNameToId_)
 {
-    // Then
-    int volumeId;
-    int arrayId;
+    // Given
+    // When
+    int arrayId = HA_INVALID_ARRAY_IDX;
+    int volumeId = HA_INVALID_VOLUME_IDX;
+    std::string arrayName;
     std::string volumeName;
-    int ret = posReplicatorManager->ConvertVolumeNametoVolumeId(volumeName, arrayId);
+    std::pair<std::string, int> arraySet(arrayName, arrayId);
+    std::pair<std::string, int> volumeSet(volumeName, volumeId);
+
+    int ret = posReplicatorManager->ConvertNameToIdx(arraySet, volumeSet);
+
+    // Then
     EXPECT_NE(EID(SUCCESS), ret);
 }
 
