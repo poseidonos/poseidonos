@@ -280,7 +280,7 @@
                     "TRANSPORT": "tcp",
                     "IP": "IP1",
                     "PORT": 1158,
-                    "KDD_MODE": false,
+                    "KDD_MODE": true,
                     "SUBSYSTEMs": [
                         {
                             "NUM_SUBSYSTEMS": 1,
@@ -294,11 +294,43 @@
                     ]
                 }
             ]
+        },
+        {
+            "NAME": "Initiator02",
+            "ID": "root",
+            "PW": "psd",
+            "NIC": {
+                "SSH": "127.0.0.1"
+            },
+            "SPDK": {
+                "DIR": "/remote_home/chkang0912/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            },
+            "TARGETs": [
+                {
+                    "NAME": "Target02",
+                    "TRANSPORT": "tcp",
+                    "IP": "IP1",
+                    "PORT": 1158,
+                    "KDD_MODE": true,
+                    "SUBSYSTEMs": [
+                        {
+                            "NUM_SUBSYSTEMS": 1,
+                            "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
+                            "NQN_INDEX": 3,
+                            "NUM_NS": 1,
+                            "NS_INDEX": 1,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 1
+                        }
+                    ]
+                }
+            ]
         }
     ],
     "SCENARIOs": [
         {
-            "PATH": "./test/system/benchmark/scenario/ha_volume_copy.py",
+            "PATH": "./test/system/benchmark/scenario/ha_volume_copy_with_io.py",
             "NAME": "ha_voloume_copy",
             "OUTPUT_DIR": "./output",
             "RESULT_FORMAT": "junit_xml",
