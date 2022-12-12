@@ -41,8 +41,8 @@ namespace pos
 {
 std::atomic<uint64_t> Mpio::idAllocate_{0};
 
-Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
-: mdpage(mdPageBuf),
+Mpio::Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCrcWhenReading, AsyncCallback callback)
+: mdpage(mdPage),
   partialIO(false),
   mssIntf(nullptr),
   aioModeEnabled(false),
@@ -52,11 +52,18 @@ Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled)
   cacheState(MpioCacheState::Init),
   mergedRequestList(nullptr),
   fileType(MetaFileType::General),
+  partialMpioDoneNotifier(nullptr),
+  mpioDoneCallback(callback),
   UNIQUE_ID(idAllocate_++),
   DIRECT_ACCESS_ENABLED(directAccessEnabled),
+  SUPPORT_CHECKING_CRC_WHEN_READING(checkingCrcWhenReading),
   isAllocated(false)
 {
-    mpioDoneCallback = AsEntryPointParam1(&Mpio::_HandlePartialDone, this);
+}
+
+Mpio::Mpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading)
+: Mpio(new MDPage(mdPageBuf), directAccessEnabled, checkingCrcWhenReading, AsEntryPointParam1(&Mpio::_HandlePartialDone, this))
+{
 }
 
 void
@@ -66,7 +73,7 @@ Mpio::Reset(void)
     MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>::Init();
 
     // ctrl. info init.
-    mdpage.ClearCtrlInfo();
+    mdpage->ClearControlInfo();
 
     // clear error info
     error = 0;
@@ -82,6 +89,7 @@ Mpio::Reset(void)
 // LCOV_EXCL_START
 Mpio::~Mpio(void)
 {
+    delete mdpage;
 }
 // LCOV_EXCL_STOP
 
@@ -155,26 +163,14 @@ Mpio::_CheckIOStatus(const MpAioState expNextState)
 void
 Mpio::BuildCompositeMDPage(void)
 {
-    mdpage.AttachControlInfo();
-    mdpage.Make(io.metaLpn, io.targetFD, io.arrayId, io.signature);
+    mdpage->AttachControlInfo();
+    mdpage->BuildControlInfo(io.metaLpn, io.targetFD, io.arrayId, io.signature);
 }
 
 void*
 Mpio::GetMDPageDataBuf(void) const
 {
-    return mdpage.GetDataBuf();
-}
-
-bool
-Mpio::_CheckDataIntegrity(void) const
-{
-    if (false == mdpage.CheckLpnMismatch(io.metaLpn) ||
-        false == mdpage.CheckFileMismatch(io.targetFD))
-    {
-        return false;
-    }
-
-    return true;
+    return mdpage->GetDataBuffer();
 }
 
 void
@@ -192,18 +188,24 @@ Mpio::_IsAllocated(void) const
 bool
 Mpio::DoE2ECheck(const MpAioState expNextState)
 {
-    mdpage.AttachControlInfo();
+    bool skipCheckingCrc = false;
+    mdpage->AttachControlInfo();
+    SetNextState(expNextState);
 
-    if (mdpage.CheckValid(io.arrayId, io.signature))
+    if ((DIRECT_ACCESS_ENABLED && MetaStorageType::NVRAM == io.targetMediaType) ||
+        (SUPPORT_CHECKING_CRC_WHEN_READING == false))
     {
-        if (!_CheckDataIntegrity())
+        skipCheckingCrc = true;
+    }
+
+    if (mdpage->IsValidSignature(io.signature))
+    {
+        if (mdpage->CheckDataIntegrity(io.metaLpn, io.targetFD, skipCheckingCrc))
         {
-            POS_TRACE_ERROR(EID(MFS_INVALID_INFORMATION),
+            SetNextState(MpAioState::Error);
+            POS_TRACE_ERROR(EID(MFS_FAILED_TO_CHECK_INTEGRITY),
                 "[Mpio][DoE2ECheck ] E2E Check fail!, arrayId={}, mediaType={}, lpn={}",
                 io.arrayId, (int)io.targetMediaType, io.metaLpn);
-
-            // FIXME: need to handle error
-            assert(false);
         }
     }
     else
@@ -215,10 +217,9 @@ Mpio::DoE2ECheck(const MpAioState expNextState)
                 io.arrayId, (int)io.targetMediaType, io.metaLpn, *(uint64_t*)GetMDPageDataBuf());
 
             // require to memset for invalid page?
-            _DoMemSetZero(GetMDPageDataBuf(), mdpage.GetDefaultDataChunkSize());
+            _DoMemSetZero();
         }
     }
-    SetNextState(expNextState);
 
     return true;
 }
@@ -338,9 +339,12 @@ Mpio::_DoMemCpy(void* dst, void* src, const size_t nbytes)
 }
 
 bool
-Mpio::_DoMemSetZero(void* addr, const size_t nbytes)
+Mpio::_DoMemSetZero(void)
 {
     bool syncOp = true;
+    auto addr = GetMDPageDataBuf();
+    auto nbytes = mdpage->GetDefaultDataChunkSize();
+
     if (MetaFsMemLib::IsResourceAvailable())
     {
         MetaFsMemLib::MemSetZero(addr, nbytes, _HandleAsyncMemOpDone, this);
@@ -371,6 +375,7 @@ Mpio::_CopyDataFromMergedRequestListAndRemoveTheListConditionally(void)
             FileBufType originBuf = request->buf;
             memcpy(targetBuf, originBuf, request->byteSize);
         }
+        mdpage->UpdateCrcToControlInfo();
     }
     mergedRequestList = nullptr;
 }

@@ -79,6 +79,8 @@ if [ -f /etc/debian_version ]; then
     # for address sanitizer
     apt install -y libasan4
     apt install -y libasan4-dbg
+    # for crc
+    apt install -y libboost-dev
     # for opentelemetry
     apt install -y libssl-dev
 elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then

@@ -184,7 +184,7 @@ TEST_F(MetaFsFileIntfFixture, CheckIoDoneStatus)
     MetaFsAioCbCxt* ctx = new MetaFsAioCbCxt(MetaFsIoOpcode::Read, 0, 0,
         nullptr, nullptr);
 
-    EXPECT_NE(metaFile->CheckIoDoneStatus(ctx), 0);
+    EXPECT_EQ(metaFile->CheckIoDoneStatus(ctx), 0);
 }
 
 TEST_F(MetaFsFileIntfFixture, CheckStorage)

@@ -47,40 +47,38 @@ TEST(MetaFsAioCbCxt, CheckTagId)
     EXPECT_EQ(cb.GetTagId(), 10);
 }
 
-TEST(MetaFsAioCbCxt, CheckError_Positive)
+TEST(MetaFsAioCbCxt, CheckError_testIfThereIsNoErrorByDefault)
 {
     MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
 
-    EXPECT_EQ(cb.CheckIOError(), true);
-
-    MfsError err = { 0, false };
-    cb.SetErrorStatus(err);
-
-    EXPECT_EQ(cb.CheckIOError(), false);
+    EXPECT_FALSE(cb.CheckIOError());
 }
 
-TEST(MetaFsAioCbCxt, CheckError_Negative0)
+TEST(MetaFsAioCbCxt, CheckError_testIfThereIsAnErrorWhenSomeErrorOccurs)
 {
     MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
-
-    EXPECT_EQ(cb.CheckIOError(), true);
-
     MfsError err = { 1, false };
     cb.SetErrorStatus(err);
 
-    EXPECT_EQ(cb.CheckIOError(), true);
+    EXPECT_TRUE(cb.CheckIOError());
 }
 
-TEST(MetaFsAioCbCxt, CheckError_Negative1)
+TEST(MetaFsAioCbCxt, CheckError_testIfThereIsAnErrorWhenArrayIsOnStopState)
 {
     MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
-
-    EXPECT_EQ(cb.CheckIOError(), true);
-
     MfsError err = { 0, true };
     cb.SetErrorStatus(err);
 
-    EXPECT_EQ(cb.CheckIOError(), true);
+    EXPECT_TRUE(cb.CheckIOError());
+}
+
+TEST(MetaFsAioCbCxt, CheckError_testIfThereIsAnErrorWhenSomeErrorOccursAndArrayIsOnStopState)
+{
+    MetaFsAioCbCxt cb(MetaFsIoOpcode::Read, 0, 0, nullptr, nullptr);
+    MfsError err = { 1, false };
+    cb.SetErrorStatus(err);
+
+    EXPECT_TRUE(cb.CheckIOError());
 }
 
 TEST(MetaFsAioCbCxt, CheckCallback)

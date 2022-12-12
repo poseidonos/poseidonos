@@ -56,6 +56,7 @@ enum class MetaFsConfigType
     WrrCountMap,
     WrrCountGeneral,
     SupportNumaDedicatedScheduling,
+    SupportCheckingCrcWhenReading,
 };
 
 class MetaFsConfigManager
@@ -134,6 +135,10 @@ public:
     {
         return needToIgnoreNumaDedicatedScheduling_;
     }
+    virtual bool IsSupportCheckingCrcWhenReading(void) const
+    {
+        return supportCheckingCrcWhenReading_;
+    }
 
 protected:
     virtual bool _ValidateConfig(void) const;
@@ -165,6 +170,7 @@ private:
     bool _IsRocksdbEnabled(void);
     std::string _GetRocksDbPath(void);
     bool _IsSupportingNumaDedicatedScheduling(void);
+    bool _IsSupportCheckingCrcWhenReading(void);
 
     std::unordered_map<MetaFsConfigType, std::pair<std::string, int>> configMap_;
     ConfigManager* configManager_;
@@ -182,6 +188,7 @@ private:
     std::string rocksDbPath_;
     bool supportNumaDedicatedScheduling_;
     bool needToIgnoreNumaDedicatedScheduling_;
+    bool supportCheckingCrcWhenReading_;
 };
 
 } // namespace pos
