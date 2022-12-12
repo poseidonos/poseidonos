@@ -44,7 +44,7 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendMountArray(req)
+		res, gRpcErr := grpcmgr.SendMountArray(req, cmd.Flags().Changed("timeout"))
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
