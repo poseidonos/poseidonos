@@ -39,12 +39,12 @@
 
 namespace pos
 {
+class PosReplicatorManager;
+
 class GrpcReplicationController final : public pos_rpc::ReplicationControl::Service
 {
 public:
-    GrpcReplicationController(void)
-    {
-    }
+    GrpcReplicationController(PosReplicatorManager* replicatorManager);
     ~GrpcReplicationController(void)
     {
     }
@@ -67,5 +67,7 @@ public:
         ::grpc::ServerContext* context,
         const pos_rpc::ResumeWriteRequest* request,
         pos_rpc::ResumeWriteResponse* response) override;
+private:
+    PosReplicatorManager* replicatorManager;
 };
 } // namespace pos

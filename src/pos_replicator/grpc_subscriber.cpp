@@ -49,11 +49,13 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 
 namespace pos
 {
-GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
-: haGrpcServer(nullptr)
+GrpcSubscriber::GrpcSubscriber(PosReplicatorManager* replicatorManager, ConfigManager* configManager)
+: replicatorManager(replicatorManager),
+  haGrpcServer(nullptr)
 {
     std::string address;
     int ret = configManager->GetValue("replicator", "ha_subscriber_address",
@@ -66,7 +68,7 @@ GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
     }
 
     healthChecker = new GrpcHealth();
-    replicationController = new GrpcReplicationController();
+    replicationController = new GrpcReplicationController(replicatorManager);
     posIo = new GrpcPosIo();
     posManagement = new GrpcPosManagement();
     new std::thread(&GrpcSubscriber::RunServer, this, address);
