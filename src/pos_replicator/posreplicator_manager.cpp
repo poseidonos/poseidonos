@@ -266,7 +266,7 @@ PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int v
 }
 
 int
-PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList)
+PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList, uint64_t lsn)
 {
     VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numChunks);
     // TODO (cheolho.kang): Should add the error handling. if nullptr return
@@ -275,7 +275,7 @@ PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, 
     {
         _InsertChunkToBlock(volumeIo, dataList, numChunks);
     }
-    _RequestVolumeIo(GrpcCallbackType::GrpcReply, volumeIo, REPLICATOR_INVALID_LSN);
+    _RequestVolumeIo(GrpcCallbackType::GrpcReply, volumeIo, lsn);
     return EID(SUCCESS);
 }
 
@@ -290,7 +290,7 @@ PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, u
     posIo.length = ChangeSectorToByte(numChunks);
     posIo.iov = nullptr;
 
-    return aio->CreatePosReplicatorVolumeIo(posIo, REPLICATOR_INVALID_LSN);
+    return aio->CreatePosReplicatorVolumeIo(posIo, 0);
 }
 
 void

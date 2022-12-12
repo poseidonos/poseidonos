@@ -74,7 +74,7 @@ public:
 
     int UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId);
 
-    int HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> data);
+    int HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> data, uint64_t lsn);
     void HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
     void HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
     void HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
