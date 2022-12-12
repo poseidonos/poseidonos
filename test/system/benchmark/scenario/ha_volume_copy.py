@@ -51,3 +51,5 @@ def play(tgts, inits, scenario, timestamp, data):
     except Exception as e:
         lib.printer.red(traceback.format_exc())
         input("bringup complete")
+
+    return data
