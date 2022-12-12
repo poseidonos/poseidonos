@@ -37,8 +37,8 @@
 
 namespace pos
 {
-ReadMpio::ReadMpio(void* mdPageBuf, const bool directAccessEnabled)
-: Mpio(mdPageBuf, directAccessEnabled)
+ReadMpio::ReadMpio(void* mdPageBuf, const bool directAccessEnabled, const bool checkingCrcWhenReading)
+: Mpio(mdPageBuf, directAccessEnabled, checkingCrcWhenReading)
 {
     if (!mdPageBuf)
     {
@@ -94,6 +94,7 @@ ReadMpio::_HandleError(MpAioState expNextState)
         io.tagId, io.mpioId);
 
     SetNextState(expNextState);
+    error = (EID(MFS_DATA_CORRUPTED));
     return true;
 }
 
