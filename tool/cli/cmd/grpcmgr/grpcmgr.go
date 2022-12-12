@@ -18,8 +18,10 @@ const dialErrorMsg = "Could not connect to the CLI server. Is PoseidonOS running
 const dialTimeout = 10
 
 // TODO (mj): We temporarily set long timeout values for mount/unmount array commands.
-const unmountArrayCmdTimeout = 1800
-const mountArrayCmdTimeout = 600
+const (
+	unmountArrayCmdTimeout uint32 = 1800
+	mountArrayCmdTimeout   uint32 = 600
+)
 
 func dialToCliServer() (*grpc.ClientConn, error) {
 	nodeName := globals.NodeName
@@ -445,7 +447,7 @@ func SendDeleteArray(req *pb.DeleteArrayRequest) (*pb.DeleteArrayResponse, error
 	return res, err
 }
 
-func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
+func SendMountArray(req *pb.MountArrayRequest, isTimeoutSpecified bool) (*pb.MountArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
 		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
@@ -455,7 +457,12 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(mountArrayCmdTimeout))
+
+	duration := mountArrayCmdTimeout
+	if isTimeoutSpecified == true {
+		duration = globals.ReqTimeout
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(duration))
 	defer cancel()
 
 	res, err := c.MountArray(ctx, req)
@@ -467,7 +474,7 @@ func SendMountArray(req *pb.MountArrayRequest) (*pb.MountArrayResponse, error) {
 	return res, err
 }
 
-func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, error) {
+func SendUnmountArray(req *pb.UnmountArrayRequest, isTimeoutSpecified bool) (*pb.UnmountArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
 		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
@@ -477,7 +484,12 @@ func SendUnmountArray(req *pb.UnmountArrayRequest) (*pb.UnmountArrayResponse, er
 	defer conn.Close()
 
 	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(unmountArrayCmdTimeout))
+
+	duration := unmountArrayCmdTimeout
+	if isTimeoutSpecified == true {
+		duration = globals.ReqTimeout
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(duration))
 	defer cancel()
 
 	res, err := c.UnmountArray(ctx, req)
