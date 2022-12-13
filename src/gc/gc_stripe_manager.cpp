@@ -154,12 +154,14 @@ GcStripeManager::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* v
         auto it = timer.find(volEventBase->volId);
         if (it != timer.end())
         {
+            POS_TRACE_INFO(EID(GC_FORCE_FLUSH_TIMER_DISPOSE),
+                "vol_id:{}", volEventBase->volId);
             timer.erase(it);
             delete (*it).second;
         }
         timerMtx.unlock();
 
-        POS_TRACE_DEBUG(EID(GC_FORCE_FLUSH_TRYLOCK_WAITING),
+        POS_TRACE_INFO(EID(GC_FORCE_FLUSH_TRYLOCK_WAITING),
                 "vol_id:{}", volEventBase->volId);
         do
         {
@@ -355,10 +357,6 @@ GcStripeManager::SetFlushed(uint32_t volumeId, bool force)
     gcActiveWriteBuffers[volumeId] = nullptr;
     flushed[volumeId] = true;
     ++gcStripeCntRequested;
-    if (force == true)
-    {
-        ++gcStripeCntForceFlushRequested;
-    }
 }
 
 void
@@ -370,6 +368,7 @@ GcStripeManager::CheckTimeout(void)
     {
         if (t.second->CheckTimeout() == true)
         {
+            bool isForceFlush = true;
             uint32_t volId = t.first;
             POS_TRACE_WARN(EID(GC_FORCE_FLUSH_TIMER_TIMEOUT),
                 "array_id:{}, vol_id:{}, interval:{}", arrayId, volId, timeoutInterval);
@@ -386,19 +385,20 @@ GcStripeManager::CheckTimeout(void)
             IVolumeManager* volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(iArrayInfo->GetIndex());
             if (unlikely(EID(SUCCESS) != volumeManager->IncreasePendingIOCountIfNotZero(volId, VolumeIoType::InternalIo)))
             {
-                SetFlushed(volId);
+                SetFlushed(volId, isForceFlush);
                 allocatedBlkInfoList->clear();
                 delete allocatedBlkInfoList;
                 ReturnBuffer(dataBuffer);
                 SetFinished();
+                POS_TRACE_WARN(EID(GC_FORCE_FLUSH_REJECTED), "array_id:{}, vol_id:{}", arrayId, volId);
             }
             else
             {
-                bool forceFlush = true;
                 EventSmartPtr flushEvent = std::make_shared<GcFlushSubmission>(iArrayInfo->GetName(),
-                            allocatedBlkInfoList, volId, dataBuffer, this, forceFlush);
+                            allocatedBlkInfoList, volId, dataBuffer, this, isForceFlush);
                 EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
-                SetFlushed(volId, forceFlush);
+                SetFlushed(volId, isForceFlush);
+                ++gcStripeCntForceFlushRequested;
                 POS_TRACE_WARN(EID(GC_STRIPE_FORCIBLY_FLUSHED), "array_id:{}, vol_id:{}", arrayId, volId);
             }
             ffLocker.UnlockForceFlushLock(volId);
