@@ -4407,10 +4407,24 @@ Root:
     Solution:
   -
     Id: 3437
+    Name: GC_FORCE_FLUSH_TIMER_DISPOSE
+    Severity:
+    Message: The GC force flush timer is disposed.
+    Cause: The volume has been deleted.
+    Solution:
+  -
+    Id: 3438
     Name: GC_STRIPE_FORCIBLY_FLUSHED
     Severity:
     Message: The GC stripe forcibly flushed because the timer expired.
     Cause:
+    Solution:
+  -
+    Id: 3439
+    Name: GC_FORCE_FLUSH_REJECTED
+    Severity:
+    Message: The GC stripe force flush cannot be performed
+    Cause: The target volume to perform force flush is invalid
     Solution:
   -
     Id: 3440
