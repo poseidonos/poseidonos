@@ -48,9 +48,19 @@ struct ReplayLog
 
 struct ReplayLogGroup
 {
-    uint64_t seqNum;
+    uint32_t seqNum;
     std::vector<ReplayLog> logs;
-    LogGroupFooter footer;
-    bool isFooterValid;
+
+    std::vector<int> logsFoundPerType;
+
+    ReplayLogGroup(void)
+    {
+        seqNum = UINT32_MAX;
+    }
+    ReplayLogGroup(uint64_t num)
+    {
+        seqNum = num;
+        logsFoundPerType.resize((int)LogType::NUM_LOG_TYPE, 0);
+    }
 };
 } // namespace pos

@@ -37,6 +37,7 @@
 
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
+#include "src/journal_manager/replay/filter_logs.h"
 #include "src/journal_manager/replay/flush_metadata.h"
 #include "src/journal_manager/replay/flush_pending_stripes.h"
 #include "src/journal_manager/replay/read_log_buffer.h"
@@ -69,6 +70,8 @@ ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     logBuffer = journalLogBuffer;
     telemetryPublisher = tp;
 
+    logList.Init(config->GetNumLogGroups());
+
     _InitializeTaskList(vsaMap, stripeMap, mapFlush, segmentCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
 }
@@ -80,8 +83,9 @@ ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager)
 {
     _AddTask(new ReadLogBuffer(config, logBuffer, logList, reporter));
+    _AddTask(new FilterLogs(config, logList, contextManager, reporter));
     _AddTask(new ReplayLogs(logList, logDeleteChecker, vsaMap, stripeMap, segmentCtx,
-        wbStripeAllocator, contextManager, contextReplayer, arrayInfo, reporter, pendingWbStripes));
+        wbStripeAllocator, contextReplayer, arrayInfo, reporter, pendingWbStripes));
     _AddTask(new ReplayVolumeDeletion(logDeleteChecker, contextManager, volumeManager, reporter));
     _AddTask(new FlushMetadata(mapFlush, contextManager, reporter));
     _AddTask(new ResetLogBuffer(logBuffer, reporter));
@@ -160,11 +164,13 @@ ReplayHandler::_ExecuteReplayTasks(void)
             // TODO (cheolho.kang): For debuggability, Add the process of dumping the journal log buffer before dispose.
             if (result > 0)
             {
+                POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS), "Complete replay, ret:{}", result);
                 reporter->CompleteAll();
                 return EID(SUCCESS);
             }
             else
             {
+                POS_TRACE_ERROR(EID(JOURNAL_REPLAY_STATUS), "Complete replay with error, ret:{}", result);
                 return result;
             }
         }

@@ -77,7 +77,7 @@ LogBufferParser::~LogBufferParser(void)
 }
 
 int
-LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
+LogBufferParser::GetLogs(void* buffer, int logGroupId, uint64_t bufferSize, LogList& logs)
 {
     ValidMarkFinder finder((char*)buffer, bufferSize);
 
@@ -100,35 +100,12 @@ LogBufferParser::GetLogs(void* buffer, uint64_t bufferSize, LogList& logs)
                 return event * -1;
             }
 
-            logs.AddLog(log);
-            _LogFound(log);
+            logs.AddLog(logGroupId, log);
         }
         else if (validMark == LOG_GROUP_FOOTER_VALID_MARK)
         {
             LogGroupFooter footer = *(LogGroupFooter*)(dataPtr);
-            if (footer.isReseted)
-            {
-                int event = static_cast<int>(EID(JOURNAL_LOG_GROUP_FOOTER_FOUND));
-                POS_TRACE_INFO(event, "LogGroup Footer Reset is found. Found logs with SeqNumber ({}) or less will be reset", footer.resetedSequenceNumber);
-                logs.EraseReplayLogGroup(footer.resetedSequenceNumber);
-                _LogResetFound(footer.resetedSequenceNumber);
-            }
-            else
-            {
-                logs.SetLogGroupFooter(_GetLatestSequenceNumber(), footer);
-            }
-
-            if (logsFound.size() > 1)
-            {
-                int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
-                std::string seqNumList = "";
-                for (auto it = logsFound.cbegin(); it != logsFound.cend(); it++)
-                {
-                    seqNumList += (std::to_string(it->first) + ", ");
-                }
-                POS_TRACE_ERROR(event, "Several sequence numbers are found in single log group, latest checkpointed log group: {}, seqNumSeen List: {}", footer.resetedSequenceNumber, seqNumList);
-                return event * -1;
-            }
+            logs.SetLogGroupFooter(logGroupId, footer);
         }
         _GetNextSearchOffset(searchOffset, foundOffset);
     }
@@ -164,65 +141,6 @@ LogBufferParser::_GetLogHandler(char* ptr)
     }
 
     return foundLog;
-}
-
-void
-LogBufferParser::_LogFound(LogHandlerInterface* log)
-{
-    uint32_t seqNumber = log->GetSeqNum();
-    LogType type = log->GetType();
-
-    if (logsFound.find(seqNumber) == logsFound.end())
-    {
-        logsFound[seqNumber].resize((int)LogType::COUNT, 0);
-    }
-    logsFound[seqNumber][(int)type]++;
-}
-
-void
-LogBufferParser::_LogResetFound(uint32_t seqNumber)
-{
-    // TODO (cheolho.kang): To handle the case where the valid mark is read incorrectly due to offset align.
-    // Need to add a LogGroup Header, record the sequence number to be used in the future
-    // and have to fix it to erase invalid logs based on this.
-    for (auto it = logsFound.cbegin(); it != logsFound.cend();)
-    {
-        if (it->first <= seqNumber || it->first == LOG_VALID_MARK)
-        {
-            logsFound.erase(it++);
-        }
-        else
-        {
-            it++;
-        }
-    }
-}
-
-uint32_t
-LogBufferParser::_GetLatestSequenceNumber(void)
-{
-    if (logsFound.size() > 1)
-    {
-        int event = static_cast<int>(EID(MULTIPLE_SEQ_NUM_FOUND_WITHOUT_CHECKPOINT));
-        POS_TRACE_ERROR(event, "Multiple sequence numbers are found without checkpoint.");
-    }
-
-    return logsFound.begin()->first;
-}
-
-void
-LogBufferParser::PrintFoundLogTypes(void)
-{
-    for (auto it = logsFound.cbegin(); it != logsFound.cend(); it++)
-    {
-        int numBlockMapUpdatedLogs = it->second[(int)LogType::BLOCK_WRITE_DONE];
-        int numStripeMapUpdatedLogs = it->second[(int)LogType::STRIPE_MAP_UPDATED];
-        int numGcStripeFlushedLogs = it->second[(int)LogType::GC_STRIPE_FLUSHED];
-        int numVolumeDeletedLogs = it->second[(int)LogType::VOLUME_DELETED];
-        POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
-            "Logs found: SeqNum: {}, total: {}, block_map: {}, stripe_map: {}, gc_stripes: {}, volumes_deleted: {}",
-            it->first, numBlockMapUpdatedLogs + numStripeMapUpdatedLogs + numGcStripeFlushedLogs + numVolumeDeletedLogs, numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
-    }
 }
 
 void

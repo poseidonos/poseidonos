@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "src/include/pos_event_id.h"
 #include "test/unit-tests/journal_manager/log/log_handler_mock.h"
 
 using ::testing::NiceMock;
@@ -28,15 +29,16 @@ TEST(ReplayLogList, AddLog_testIfMapUpdatedLogIsAdded)
     ON_CALL(log, GetSeqNum).WillByDefault(Return(10));
 
     ReplayLogList logList;
-    logList.AddLog(&log);
+    logList.Init(2);
 
-    ReplayLogGroup logGroup = std::move(logList.PopReplayLogGroup());
-    EXPECT_EQ(logGroup.seqNum, seqNum);
-    EXPECT_EQ(logGroup.logs.size(), 1);
-    EXPECT_EQ(logGroup.logs.front().time, 0);
-    EXPECT_EQ((logGroup.logs.front().log), &log);
-    EXPECT_EQ(logGroup.logs.front().segInfoFlushed, false);
-    EXPECT_EQ(logGroup.isFooterValid, false);
+    int logGroupId = 0;
+    logList.AddLog(logGroupId, &log);
+
+    auto replayLogs = std::move(logList.PopReplayLogGroup());
+    EXPECT_EQ(replayLogs.size(), 1);
+    EXPECT_EQ(replayLogs.front().time, 0);
+    EXPECT_EQ(replayLogs.front().log, &log);
+    EXPECT_EQ(replayLogs.front().segInfoFlushed, false);
 }
 
 TEST(ReplayLogList, AddLog_testIfLogsAddedToOneLogGroup)
@@ -50,23 +52,22 @@ TEST(ReplayLogList, AddLog_testIfLogsAddedToOneLogGroup)
     }
 
     ReplayLogList logList;
+    logList.Init(2);
+    int logGroupId = 0;
     for (int count = 0; count < numLogs; count++)
     {
-        logList.AddLog(&log[count]);
+        logList.AddLog(logGroupId, &log[count]);
     }
 
-    ReplayLogGroup logGroup = logList.PopReplayLogGroup();
-    EXPECT_EQ(logGroup.seqNum, seqNum);
-    EXPECT_EQ(logGroup.logs.size(), numLogs);
+    auto replayLogs = logList.PopReplayLogGroup();
+    EXPECT_EQ(replayLogs.size(), numLogs);
 
-    auto logs = logGroup.logs;
     for (int count = 0; count < numLogs; count++)
     {
-        EXPECT_EQ(logs[count].log, &(log[count]));
-        EXPECT_EQ(logs[count].time, count);
-        EXPECT_EQ(logs[count].segInfoFlushed, false);
+        EXPECT_EQ(replayLogs[count].log, &(log[count]));
+        EXPECT_EQ(replayLogs[count].time, count);
+        EXPECT_EQ(replayLogs[count].segInfoFlushed, false);
     }
-    EXPECT_EQ(logGroup.isFooterValid, false);
 }
 
 TEST(ReplayLogList, AddLog_testIfLogsAddedToTwoLogGroups)
@@ -83,39 +84,33 @@ TEST(ReplayLogList, AddLog_testIfLogsAddedToTwoLogGroups)
 
     // When: logs are added to the list
     ReplayLogList logList;
+    logList.Init(2);
     for (int count = 0; count < numLogsPerGroup; count++)
     {
-        logList.AddLog(&log[0][count]);
+        logList.AddLog(0, &log[0][count]);
     }
     for (int count = 0; count < numLogsPerGroup; count++)
     {
-        logList.AddLog(&log[1][count]);
+        logList.AddLog(1, &log[1][count]);
     }
 
     // Then
-    ReplayLogGroup logGroup0 = logList.PopReplayLogGroup();
-    EXPECT_EQ(logGroup0.seqNum, 0);
-    EXPECT_EQ(logGroup0.logs.size(), numLogsPerGroup);
-    auto logs0 = logGroup0.logs;
-    for (int count = 0; count < numLogsPerGroup; count++)
-    {
-        EXPECT_EQ(logs0[count].log, &(log[0][count]));
-        EXPECT_EQ(logs0[count].time, count);
-        EXPECT_EQ(logs0[count].segInfoFlushed, false);
-    }
-    EXPECT_EQ(logGroup0.isFooterValid, false);
+    auto replayLogs = logList.PopReplayLogGroup();
+    EXPECT_EQ(replayLogs.size(), numLogsPerGroup * 2);
 
-    ReplayLogGroup logGroup1 = logList.PopReplayLogGroup();
-    EXPECT_EQ(logGroup1.seqNum, 1);
-    EXPECT_EQ(logGroup1.logs.size(), numLogsPerGroup);
-    auto logs1 = logGroup1.logs;
     for (int count = 0; count < numLogsPerGroup; count++)
     {
-        EXPECT_EQ(logs1[count].log, &(log[1][count]));
-        EXPECT_EQ(logs1[count].time, numLogsPerGroup + count);
-        EXPECT_EQ(logs1[count].segInfoFlushed, false);
+        EXPECT_EQ(replayLogs[count].log, &(log[0][count]));
+        EXPECT_EQ(replayLogs[count].time, count);
+        EXPECT_EQ(replayLogs[count].segInfoFlushed, false);
     }
-    EXPECT_EQ(logGroup1.isFooterValid, false);
+
+    for (int count = 0; count < numLogsPerGroup; count++)
+    {
+        EXPECT_EQ(replayLogs[numLogsPerGroup + count].log, &(log[1][count]));
+        EXPECT_EQ(replayLogs[numLogsPerGroup + count].time, numLogsPerGroup + count);
+        EXPECT_EQ(replayLogs[numLogsPerGroup + count].segInfoFlushed, false);
+    }
 }
 
 TEST(ReplayLogList, AddLog_testIfVolumeDeletingLogsAreAdded)
@@ -134,9 +129,10 @@ TEST(ReplayLogList, AddLog_testIfVolumeDeletingLogsAreAdded)
 
     // When
     ReplayLogList logList;
+    logList.Init(2);
     for (int count = 0; count < numLogs; count++)
     {
-        logList.AddLog(logs[count]);
+        logList.AddLog(0, logs[count]);
     }
 
     // Then
@@ -162,7 +158,8 @@ TEST(ReplayLogList, IsEmpty_testIfReturnFalseWhenLogsAreAdded)
     ON_CALL(log, GetSeqNum).WillByDefault(Return(0));
 
     ReplayLogList logList;
-    logList.AddLog(&log);
+    logList.Init(2);
+    logList.AddLog(0, &log);
 
     EXPECT_TRUE(logList.IsEmpty() == false);
 }
@@ -172,35 +169,129 @@ TEST(ReplayLogList, SetLogGroupFooter_testIfFooterUpdatedCorrectly)
     // Given
     LogGroupFooter footer;
     footer.lastCheckpointedSeginfoVersion = 5;
-    uint64_t seqNum = 10;
-    int numLogs = 10;
-    NiceMock<MockLogHandlerInterface> log[numLogs];
-    for (int count = 0; count < numLogs; count++)
-    {
-        ON_CALL(log[count], GetSeqNum).WillByDefault(Return(seqNum));
-    }
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 2;
 
     // When
     ReplayLogList logList;
-    for (int count = 0; count < numLogs; count++)
-    {
-        logList.AddLog(&log[count]);
-    }
-    logList.SetLogGroupFooter(seqNum, footer);
+    logList.Init(2);
+
+    int logGroupId = 0;
+    logList.SetLogGroupFooter(logGroupId, footer);
 
     // Then
-    ReplayLogGroup logGroup = logList.PopReplayLogGroup();
-    EXPECT_EQ(logGroup.seqNum, seqNum);
-    EXPECT_EQ(logGroup.logs.size(), numLogs);
-    auto logs = logGroup.logs;
-    for (int count = 0; count < numLogs; count++)
+    auto actual = logList.GetLogGroupFooter(logGroupId);
+    EXPECT_EQ(actual, footer);
+}
+
+TEST(ReplayLogList, EraseReplayLogGroup_testIfLogsAreErased)
+{
+    // Given
+    ReplayLogList logList;
+    logList.Init(2);
+
+    int logGroupId = 0;
+    for (int count = 0; count < 5; count++)
     {
-        EXPECT_EQ(logs[count].log, &(log[count]));
-        EXPECT_EQ(logs[count].time, count);
-        EXPECT_EQ(logs[count].segInfoFlushed, false);
+        NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
+        ON_CALL(*log, GetSeqNum).WillByDefault(Return(count % 2)); // return 0 or 1
+        logList.AddLog(logGroupId, log);
     }
-    EXPECT_EQ(logGroup.isFooterValid, true);
-    EXPECT_EQ(logGroup.footer, footer);
+
+    LogGroupFooter footer;
+    footer.lastCheckpointedSeginfoVersion = 13;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 0;
+    logList.SetLogGroupFooter(logGroupId, footer);
+
+    // When
+    int result = logList.EraseReplayLogGroup(logGroupId, footer.resetedSequenceNumber);
+    EXPECT_EQ(result, EID(SUCCESS));
+
+    // Then
+    auto replayLogs = logList.PopReplayLogGroup();
+    EXPECT_EQ(replayLogs.size(), 2); // seqNum 0 will be erased
+
+    // Tear-Down
+    for (auto replayLog : replayLogs)
+    {
+        delete replayLog.log;
+    }
+}
+
+TEST(ReplayLogList, EraseReplayLogGroup_testIfLogsAreNotErased)
+{
+    // Given
+    ReplayLogList logList;
+    logList.Init(2);
+
+    int logGroupId = 0;
+    for (int count = 0; count < 5; count++)
+    {
+        NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
+        ON_CALL(*log, GetSeqNum).WillByDefault(Return(1));
+        logList.AddLog(logGroupId, log);
+    }
+
+    LogGroupFooter footer;
+    footer.lastCheckpointedSeginfoVersion = 13;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 0;
+    logList.SetLogGroupFooter(logGroupId, footer);
+
+    // When
+    int result = logList.EraseReplayLogGroup(logGroupId, footer.resetedSequenceNumber);
+    EXPECT_EQ(result, EID(SUCCESS));
+
+    // Then
+    auto replayLogs = logList.PopReplayLogGroup();
+    EXPECT_EQ(replayLogs.size(), 5);
+
+    // Tear-Down
+    for (auto replayLog : replayLogs)
+    {
+        delete replayLog.log;
+    }
+}
+
+TEST(ReplayLogList, EraseReplayLogGroup_testIfSeveralSequenceNumberSeen)
+{
+    // Given
+    ReplayLogList logList;
+    logList.Init(2);
+
+    int logGroupId = 0;
+    std::vector<NiceMock<MockLogHandlerInterface>*> logs;
+    for (int count = 0; count < 5; count++)
+    {
+        NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
+        ON_CALL(*log, GetSeqNum).WillByDefault(Return(count % 3)); // return 0 or 1 or 2
+
+        if (count % 3 != 0) // log whose sequence number is 3 will be deleted in EraseReplayLogGroup
+        {
+            logs.push_back(log);
+        }
+        logList.AddLog(logGroupId, log);
+    }
+
+    LogGroupFooter footer;
+    footer.lastCheckpointedSeginfoVersion = 13;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 0;
+    logList.SetLogGroupFooter(logGroupId, footer);
+
+    // When
+    int result = logList.EraseReplayLogGroup(logGroupId, footer.resetedSequenceNumber);
+
+    // Then
+    int expect = ERRID(JOURNAL_INVALID_LOG_FOUND);
+    EXPECT_EQ(result, expect);
+
+    // cleanup
+    for (auto log : logs)
+    {
+        delete log;
+    }
 }
 
 } // namespace pos
