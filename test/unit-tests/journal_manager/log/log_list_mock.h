@@ -1,9 +1,7 @@
 #include <gmock/gmock.h>
-
-#include <list>
 #include <string>
+#include <list>
 #include <vector>
-
 #include "src/journal_manager/log/log_list.h"
 
 namespace pos
@@ -12,10 +10,9 @@ class MockLogList : public LogList
 {
 public:
     using LogList::LogList;
-    MOCK_METHOD(void, AddLog, (LogHandlerInterface * log), (override));
+    MOCK_METHOD(void, AddLog, (int logGroupId, LogHandlerInterface* log), (override));
+    MOCK_METHOD(void, SetLogGroupFooter, (int logGroupId, LogGroupFooter footer), (override));
     MOCK_METHOD(bool, IsEmpty, (), (override));
-    MOCK_METHOD(void, SetLogGroupFooter, (uint32_t seqNum, LogGroupFooter footer), (override));
-    MOCK_METHOD(void, EraseReplayLogGroup, (uint32_t seqNum), (override));
 };
 
 } // namespace pos

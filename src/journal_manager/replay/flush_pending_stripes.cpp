@@ -72,8 +72,8 @@ FlushPendingStripes::Start(void)
     std::ostringstream os;
     os << "[ReplayTask] Flush pending stripes (num: " << pendingStripes.size() << ")";
 
-    POS_TRACE_DEBUG(loggingEventId, os.str());
-    POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
+    POS_TRACE_INFO(loggingEventId, os.str());
+    POS_TRACE_INFO_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, loggingEventId, os.str());
 
     int result = 0;
     for (auto pStripe : pendingStripes)

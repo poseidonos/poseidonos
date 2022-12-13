@@ -54,6 +54,7 @@ public:
     void Reset(void);
 
     uint32_t GetSeqNum(void);
+    uint32_t GetPrevSeqNum(void);
     int GetId(void);
 
     bool IsFull(void);
@@ -64,6 +65,7 @@ private:
 
     int id;
     uint32_t sequenceNumber;
+    uint32_t prevSequenceNumber;
     ReleaseStatus status;
 };
 

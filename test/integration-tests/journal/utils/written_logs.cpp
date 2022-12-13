@@ -29,7 +29,7 @@ void
 WrittenLogs::_AddToList(LogHandlerInterface* entry)
 {
     std::lock_guard<std::mutex> lock(logListLock);
-    writeLogList.AddLog(entry);
+    writeLogList.AddLog(0, entry); // logGroupId here is not used
 }
 
 void

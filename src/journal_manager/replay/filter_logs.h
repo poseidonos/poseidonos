@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,90 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/checkpoint/log_group_release_status.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
-#include <cassert>
+#include "src/journal_manager/replay/replay_task.h"
 
 namespace pos
 {
-LogGroupReleaseStatus::LogGroupReleaseStatus(int groupId)
-: id(groupId),
-  sequenceNumber(UINT32_MAX),
-  prevSequenceNumber(UINT32_MAX),
-  status(ReleaseStatus::INIT)
+class ReplayLogList;
+class JournalConfiguration;
+class IContextManager;
+
+class FilterLogs : public ReplayTask
 {
-}
+public:
+    FilterLogs(JournalConfiguration* config, ReplayLogList& logList,
+        IContextManager* contextManager,
+        ReplayProgressReporter* reporter);
 
-void
-LogGroupReleaseStatus::SetWaiting(uint32_t seqNum)
-{
-    assert(status == ReleaseStatus::INIT);
+    virtual int Start(void) override;
+    virtual ReplayTaskId GetId(void) override;
+    virtual int GetWeight(void) override;
+    virtual int GetNumSubTasks(void) override;
 
-    ReleaseStatus from = status;
+private:
+    int _EraseInvalidSequenceNumbers(void);
+    int _UpdateSegInfoFlushed(void);
 
-    prevSequenceNumber = sequenceNumber;
-    sequenceNumber = seqNum;
-    status = ReleaseStatus::WAITING;
+    JournalConfiguration* config;
+    ReplayLogList& logList;
 
-    _PrintStatusChangedLog(from);
-}
-
-void
-LogGroupReleaseStatus::SetReleasing(void)
-{
-    assert(status == ReleaseStatus::WAITING);
-
-    ReleaseStatus from = status;
-    status = ReleaseStatus::RELEASING;
-
-    _PrintStatusChangedLog(from);
-}
-
-void
-LogGroupReleaseStatus::Reset(void)
-{
-    ReleaseStatus from = status;
-    status = ReleaseStatus::INIT;
-
-    _PrintStatusChangedLog(from);
-}
-
-void
-LogGroupReleaseStatus::_PrintStatusChangedLog(ReleaseStatus from)
-{
-    POS_TRACE_DEBUG(EID(JOURNAL_LOG_GROUP_STATUS_CHANGED),
-        "logGroupId:{}, from:{}, to:{}", id, from, status);
-}
-
-uint32_t
-LogGroupReleaseStatus::GetSeqNum(void)
-{
-    return sequenceNumber;
-}
-
-uint32_t
-LogGroupReleaseStatus::GetPrevSeqNum(void)
-{
-    return prevSequenceNumber;
-}
-
-int
-LogGroupReleaseStatus::GetId(void)
-{
-    return id;
-}
-
-bool
-LogGroupReleaseStatus::IsFull(void)
-{
-    return (status != ReleaseStatus::INIT);
-}
-
-bool
-LogGroupReleaseStatus::IsReleasing(void)
-{
-    return (status == ReleaseStatus::RELEASING);
-}
+    IContextManager* contextManager;
+};
 
 } // namespace pos

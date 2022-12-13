@@ -195,7 +195,7 @@ JournalManagerSpy::_GetLogsFromBuffer(LogList& logList)
             break;
         }
 
-        result = parser.GetLogs(logGroupBuffer, groupSize, logList);
+        result = parser.GetLogs(logGroupBuffer, groupId, groupSize, logList);
         if (result != 0)
         {
             free(logGroupBuffer);

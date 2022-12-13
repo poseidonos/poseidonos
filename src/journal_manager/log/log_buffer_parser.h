@@ -47,7 +47,7 @@ class LogBufferParser
 public:
     LogBufferParser(void);
     virtual ~LogBufferParser(void);
-    virtual int GetLogs(void* buffer, uint64_t bufferSize, LogList& logs);
+    virtual int GetLogs(void* buffer, int logGroupId, uint64_t bufferSize, LogList& logs);
 
     void PrintFoundLogTypes(void);
 
@@ -63,14 +63,9 @@ private:
         uint64_t maxOffset;
     };
 
-    void _LogFound(LogHandlerInterface* log);
-    void _LogResetFound(uint32_t seqNumber);
-    uint32_t _GetLatestSequenceNumber(void);
     void _GetNextSearchOffset(uint64_t& searchOffset, uint64_t foundOffset);
 
     LogHandlerInterface* _GetLogHandler(char* ptr);
-
-    std::map<uint32_t, std::vector<int>> logsFound;
 };
 
 } // namespace pos

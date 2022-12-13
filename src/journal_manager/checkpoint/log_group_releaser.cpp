@@ -128,17 +128,10 @@ LogGroupReleaser::_IsFlushInProgress(void)
 void
 LogGroupReleaser::_TriggerCheckpoint(void)
 {
-    LogGroupFooter footer;
-    uint64_t footerOffset;
-
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STARTED),
         "logGroupId:{}", nextLogGroupId);
 
-    _CreateFlushingLogGroupFooter(footer, footerOffset);
-
-    EventSmartPtr checkpointSubmission = _CreateCheckpointSubmissionEvent();
-
-    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, nextLogGroupId, checkpointSubmission));
+    EventSmartPtr event = _CreateCheckpointSubmissionEvent();
     eventScheduler->EnqueueEvent(event);
 }
 
@@ -148,29 +141,41 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
     // Checkpoint will be in this sequence:
     // LogGroupFooterWriteEvent -> CheckpointSubmission -> ResetLogGroup -> LogGroupResetCompletion
     // TODO (huijeong.kim) to use Callback class instead of Event
-    LogGroupFooter footer;
-    uint64_t footerOffset;
-    _CreateFlushingLogGroupFooter(footer, footerOffset);
-    footer.isReseted = true;
-    footer.resetedSequenceNumber = logGroups[nextLogGroupId].GetSeqNum();
+
+    LogGroupLayout layout = config->GetLogBufferLayout(nextLogGroupId);
+    uint64_t footerOffset = layout.footerStartOffset;
+
+    LogGroupFooter footerBeforeMapFlush = _CreateLogGroupFooter(nextLogGroupId);
+    LogGroupFooter footerAfterMapFlush = _CreateLogGroupFooterForReset(nextLogGroupId, footerBeforeMapFlush);
 
     EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, nextLogGroupId));
-    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, nextLogGroupId, footer, footerOffset, resetLogGroupCompletion));
+    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, nextLogGroupId, footerAfterMapFlush, footerOffset, resetLogGroupCompletion));
     EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, nextLogGroupId));
+    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footerBeforeMapFlush, footerOffset, nextLogGroupId, checkpointSubmission));
 
-    return checkpointSubmission;
+    return event;
 }
 
-void
-LogGroupReleaser::_CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset)
+LogGroupFooter
+LogGroupReleaser::_CreateLogGroupFooter(int logGroupId)
 {
-    LogGroupLayout layout = config->GetLogBufferLayout(nextLogGroupId);
-    uint64_t version = contextManager->GetStoredContextVersion(SEGMENT_CTX);
+    LogGroupFooter footer;
 
-    footer.lastCheckpointedSeginfoVersion = version;
+    footer.lastCheckpointedSeginfoVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
     footer.isReseted = false;
-    footer.resetedSequenceNumber = UINT32_MAX;
-    footerOffset = layout.footerStartOffset;
+    footer.resetedSequenceNumber = logGroups[logGroupId].GetPrevSeqNum();
+
+    return footer;
+}
+
+LogGroupFooter
+LogGroupReleaser::_CreateLogGroupFooterForReset(int logGroupId, LogGroupFooter& prevFooter)
+{
+    LogGroupFooter footer = prevFooter;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = logGroups[logGroupId].GetSeqNum();
+
+    return footer;
 }
 
 void
