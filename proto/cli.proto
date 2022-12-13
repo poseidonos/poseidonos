@@ -1296,10 +1296,11 @@ message CreateVolumeRequest {
 		uint64 size = 3;
 		uint64 maxiops = 4;
 		uint64 maxbw = 5;
-		bool iswalvol = 6;
+		bool isWalVol = 6;
 		string uuid = 7;
 		int32 nsid = 8;
-		bool isprimary = 9;
+		bool isPrimary = 9;
+		bool isAnaNonoptimized = 10;
 	}
 	Param param = 4;
 }

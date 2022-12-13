@@ -70,7 +70,7 @@ public:
     void Flush(void) override;
 
     int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
-                int32_t nsid, bool isPrimary, std::string uuid) override;
+                int32_t nsid, bool isPrimary, bool isAnaNonoptimized, std::string uuid) override;
     int Delete(std::string name) override;
     int Mount(std::string name, std::string subnqn) override;
     int Unmount(std::string name) override;
