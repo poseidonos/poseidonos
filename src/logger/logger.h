@@ -126,10 +126,16 @@ public:
                 }
                 else
                 {
+                    std::string eventName = it->second.GetEventName();
+                    if (command != "")
+                    {
+                        eventName = command + " " + eventName;
+                    }
+
                     logger->iboflog_sink(loc, lvl, eventId,
                         fmt::format(
                             preferences.IsStrLoggingEnabled() ? "\"event_name:\":\"{}\",\"message\":\"{}\",\"cause\":\"{}\",\"solution\":\"{}\",\"variables\":\"{}\"" : "\t{} - {} (cause: {}, solution: {}, variables: {})",
-                            it->second.GetEventName(), it->second.GetMessage(),
+                            eventName, it->second.GetMessage(),
                             it->second.GetCause(), it->second.GetSolution(),
                             fmt),
                         args...);
@@ -189,6 +195,11 @@ public:
     {
         return preferences.ShouldLog(lvl, id);
     }
+    
+    void SetCommand(std::string command)
+    {
+        this->command = command;
+    }
 
 private:
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
@@ -196,6 +207,7 @@ private:
     DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
     pos_logger::Preferences preferences;
+    std::string command = "";
     // LCOV_EXCL_STOP
 };
 

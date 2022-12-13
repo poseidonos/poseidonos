@@ -16,7 +16,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SystemInfo(ServerContext* context, const SystemInfoRequest* request,
         SystemInfoResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSystemInfoCommand(request, reply);
         if (context->IsCancelled())
@@ -24,7 +24,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -33,7 +33,7 @@ class PosCliServiceImpl final : public PosCli::Service
     StopSystem(ServerContext* context, const StopSystemRequest* request,
         StopSystemResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteStopSystemCommand(request, reply);
         if (context->IsCancelled())
@@ -42,7 +42,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -51,7 +51,7 @@ class PosCliServiceImpl final : public PosCli::Service
     GetSystemProperty(ServerContext* context, const GetSystemPropertyRequest* request,
         GetSystemPropertyResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteGetSystemPropertyCommand(request, reply);
         if (context->IsCancelled())
@@ -60,7 +60,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -69,7 +69,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SetSystemProperty(ServerContext* context, const SetSystemPropertyRequest* request,
         SetSystemPropertyResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSetSystemPropertyCommand(request, reply);
         if (context->IsCancelled())
@@ -78,7 +78,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -87,7 +87,7 @@ class PosCliServiceImpl final : public PosCli::Service
     StartTelemetry(ServerContext* context, const StartTelemetryRequest* request,
         StartTelemetryResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteStartTelemetryCommand(request, reply);
         if (context->IsCancelled())
@@ -96,7 +96,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -105,7 +105,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ResetEventWrr(ServerContext* context, const ResetEventWrrRequest* request,
         ResetEventWrrResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteResetEventWrrCommand(request, reply);
         if (context->IsCancelled())
@@ -114,7 +114,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -123,7 +123,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ResetMbr(ServerContext* context, const ResetMbrRequest* request,
         ResetMbrResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteResetMbrCommand(request, reply);
         if (context->IsCancelled())
@@ -132,7 +132,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -141,7 +141,7 @@ class PosCliServiceImpl final : public PosCli::Service
     StopRebuilding(ServerContext* context, const StopRebuildingRequest* request,
         StopRebuildingResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteStopRebuildingCommand(request, reply);
         if (context->IsCancelled())
@@ -150,7 +150,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -159,7 +159,7 @@ class PosCliServiceImpl final : public PosCli::Service
     StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
         StopTelemetryResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteStopTelemetryCommand(request, reply);
         if (context->IsCancelled())
@@ -168,7 +168,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -177,7 +177,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SetTelemetryProperty(ServerContext* context, const SetTelemetryPropertyRequest* request,
         SetTelemetryPropertyResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSetTelemetryPropertyCommand(request, reply);
         if (context->IsCancelled())
@@ -186,7 +186,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -195,7 +195,7 @@ class PosCliServiceImpl final : public PosCli::Service
     GetTelemetryProperty(ServerContext* context, const GetTelemetryPropertyRequest* request,
         GetTelemetryPropertyResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteGetTelemetryPropertyCommand(request, reply);
         if (context->IsCancelled())
@@ -204,7 +204,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -213,7 +213,7 @@ class PosCliServiceImpl final : public PosCli::Service
     UpdateEventWrr(ServerContext* context, const UpdateEventWrrRequest* request,
         UpdateEventWrrResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteUpdateEventWrrCommand(request, reply);
         if (context->IsCancelled())
@@ -222,7 +222,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -231,7 +231,7 @@ class PosCliServiceImpl final : public PosCli::Service
     AddSpare(ServerContext* context, const AddSpareRequest* request,
         AddSpareResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteAddSpareCommand(request, reply);
         if (context->IsCancelled())
@@ -240,7 +240,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -249,7 +249,7 @@ class PosCliServiceImpl final : public PosCli::Service
     RemoveSpare(ServerContext* context, const RemoveSpareRequest* request,
         RemoveSpareResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteRemoveSpareCommand(request, reply);
         if (context->IsCancelled())
@@ -258,7 +258,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -267,7 +267,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ReplaceArrayDevice(ServerContext* context, const ReplaceArrayDeviceRequest* request,
         ReplaceArrayDeviceResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteReplaceArrayDeviceCommand(request, reply);
         if (context->IsCancelled())
@@ -276,7 +276,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -285,7 +285,7 @@ class PosCliServiceImpl final : public PosCli::Service
     CreateArray(ServerContext* context, const CreateArrayRequest* request,
         CreateArrayResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateArrayCommand(request, reply);
         if (context->IsCancelled())
@@ -294,7 +294,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -316,7 +316,7 @@ class PosCliServiceImpl final : public PosCli::Service
     DeleteArray(ServerContext* context, const DeleteArrayRequest* request,
         DeleteArrayResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteDeleteArrayCommand(request, reply);
         if (context->IsCancelled())
@@ -325,7 +325,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -334,7 +334,7 @@ class PosCliServiceImpl final : public PosCli::Service
     MountArray(ServerContext* context, const MountArrayRequest* request,
         MountArrayResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteMountArrayCommand(request, reply);
         if (context->IsCancelled())
@@ -343,7 +343,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -352,7 +352,7 @@ class PosCliServiceImpl final : public PosCli::Service
     UnmountArray(ServerContext* context, const UnmountArrayRequest* request,
         UnmountArrayResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteUnmountArrayCommand(request, reply);
         if (context->IsCancelled())
@@ -361,7 +361,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -370,7 +370,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ListArray(ServerContext* context, const ListArrayRequest* request,
         ListArrayResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteListArrayCommand(request, reply);
         if (context->IsCancelled())
@@ -379,7 +379,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -388,7 +388,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ArrayInfo(ServerContext* context, const ArrayInfoRequest* request,
         ArrayInfoResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteArrayInfoCommand(request, reply);
         if (context->IsCancelled())
@@ -397,7 +397,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -406,7 +406,7 @@ class PosCliServiceImpl final : public PosCli::Service
     RebuildArray(ServerContext* context, const RebuildArrayRequest* request,
         RebuildArrayResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteRebuildArrayCommand(request, reply);
         if (context->IsCancelled())
@@ -415,7 +415,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -424,7 +424,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SetLogLevel(ServerContext* context, const SetLogLevelRequest* request,
         SetLogLevelResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSetLogLevelCommand(request, reply);
         if (context->IsCancelled())
@@ -433,7 +433,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -442,7 +442,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SetLogPreference(ServerContext* context, const SetLogPreferenceRequest* request,
         SetLogPreferenceResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSetLogPreferenceCommand(request, reply);
         if (context->IsCancelled())
@@ -451,7 +451,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -460,7 +460,7 @@ class PosCliServiceImpl final : public PosCli::Service
     LoggerInfo(ServerContext* context, const LoggerInfoRequest* request,
         LoggerInfoResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteLoggerInfoCommand(request, reply);
         if (context->IsCancelled())
@@ -469,7 +469,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -478,7 +478,7 @@ class PosCliServiceImpl final : public PosCli::Service
     GetLogLevel(ServerContext* context, const GetLogLevelRequest* request,
         GetLogLevelResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteGetLogLevelCommand(request, reply);
         if (context->IsCancelled())
@@ -487,7 +487,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -496,7 +496,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ApplyLogFilter(ServerContext* context, const ApplyLogFilterRequest* request,
         ApplyLogFilterResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteApplyLogFilterCommand(request, reply);
         if (context->IsCancelled())
@@ -505,7 +505,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -514,7 +514,7 @@ class PosCliServiceImpl final : public PosCli::Service
     CreateDevice(ServerContext* context, const CreateDeviceRequest* request,
         CreateDeviceResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateDeviceCommand(request, reply);
         if (context->IsCancelled())
@@ -523,7 +523,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -532,7 +532,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ScanDevice(ServerContext* context, const ScanDeviceRequest* request,
         ScanDeviceResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteScanDeviceCommand(request, reply);
         if (context->IsCancelled())
@@ -541,7 +541,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -550,7 +550,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ListDevice(ServerContext* context, const ListDeviceRequest* request,
         ListDeviceResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteListDeviceCommand(request, reply);
         if (context->IsCancelled())
@@ -559,7 +559,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -568,7 +568,7 @@ class PosCliServiceImpl final : public PosCli::Service
     GetSmartLog(ServerContext* context, const GetSmartLogRequest* request,
         GetSmartLogResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteGetSmartLogCommand(request, reply);
         if (context->IsCancelled())
@@ -577,7 +577,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -586,7 +586,7 @@ class PosCliServiceImpl final : public PosCli::Service
     CreateSubsystem(ServerContext* context, const CreateSubsystemRequest* request,
         CreateSubsystemResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateSubsystemCommand(request, reply);
         if (context->IsCancelled())
@@ -595,7 +595,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -604,7 +604,7 @@ class PosCliServiceImpl final : public PosCli::Service
     DeleteSubsystem(ServerContext* context, const DeleteSubsystemRequest* request,
         DeleteSubsystemResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteDeleteSubsystemCommand(request, reply);
         if (context->IsCancelled())
@@ -613,7 +613,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -622,7 +622,7 @@ class PosCliServiceImpl final : public PosCli::Service
     AddListener(ServerContext* context, const AddListenerRequest* request,
         AddListenerResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteAddListenerCommand(request, reply);
         if (context->IsCancelled())
@@ -631,7 +631,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -640,7 +640,7 @@ class PosCliServiceImpl final : public PosCli::Service
     ListSubsystem(ServerContext* context, const ListSubsystemRequest* request,
         ListSubsystemResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteListSubsystemCommand(request, reply);
         if (context->IsCancelled())
@@ -649,7 +649,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -658,7 +658,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SubsystemInfo(ServerContext* context, const SubsystemInfoRequest* request,
         SubsystemInfoResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSubsystemInfoCommand(request, reply);
         if (context->IsCancelled())
@@ -667,7 +667,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -676,7 +676,7 @@ class PosCliServiceImpl final : public PosCli::Service
     CreateTransport(ServerContext* context, const CreateTransportRequest* request,
         CreateTransportResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateTransportCommand(request, reply);
         if (context->IsCancelled())
@@ -685,7 +685,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -694,7 +694,7 @@ class PosCliServiceImpl final : public PosCli::Service
     CreateVolume(ServerContext* context, const CreateVolumeRequest* request,
         CreateVolumeResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateVolumeCommand(request, reply);
         if (context->IsCancelled())
@@ -702,7 +702,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -711,7 +711,7 @@ class PosCliServiceImpl final : public PosCli::Service
     MountVolume(ServerContext* context, const MountVolumeRequest* request,
         MountVolumeResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteMountVolumeCommand(request, reply);
         if (context->IsCancelled())
@@ -719,7 +719,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -728,7 +728,7 @@ class PosCliServiceImpl final : public PosCli::Service
     UnmountVolume(ServerContext* context, const UnmountVolumeRequest* request,
         UnmountVolumeResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteUnmountVolumeCommand(request, reply);
         if (context->IsCancelled())
@@ -736,7 +736,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -745,7 +745,7 @@ class PosCliServiceImpl final : public PosCli::Service
     DeleteVolume(ServerContext* context, const DeleteVolumeRequest* request,
         DeleteVolumeResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteDeleteVolumeCommand(request, reply);
         if (context->IsCancelled())
@@ -753,7 +753,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -762,7 +762,7 @@ class PosCliServiceImpl final : public PosCli::Service
     SetVolumeProperty(ServerContext* context, const SetVolumePropertyRequest* request,
         SetVolumePropertyResponse* reply) override
     {
-        _LogCliRequest(request);
+        _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteSetVolumePropertyCommand(request, reply);
         if (context->IsCancelled())
@@ -770,7 +770,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status);
+        _LogCliResponse(reply, status, request->command());
 
         return status;
     }
@@ -791,21 +791,25 @@ _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf
 }
 
 void
-_LogCliRequest(const google::protobuf::Message* request)
+_LogCliRequest(const google::protobuf::Message* request, std::string command)
 {
+    logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
+    logger()->SetCommand("");
 }
 
 void
-_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status)
+_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, std::string command)
 {
     std::string replyJson = "";
     google::protobuf::util::JsonOptions printOptions;
     printOptions.always_print_primitive_fields = true;
     MessageToJsonString(*reply, &replyJson, printOptions);
 
+    logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
         replyJson, status.error_code(), status.error_details(), status.error_message());
+    logger()->SetCommand("");
 }
 
 void
