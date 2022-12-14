@@ -71,7 +71,7 @@ StripePartition::~StripePartition(void)
 int
 StripePartition::Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks)
 {
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "StripePartition::Create, RaidType:{}", RaidType(raidType).ToString());
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Create Partition, RaidType:{}", RaidType(raidType).ToString());
 
     if (raidType == RaidTypeEnum::RAID10 && 0 != devs.size() % 2)
     {
@@ -217,8 +217,8 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         bool result = raid5->AllocParityPools(reqBuffersPerNuma);
         if (result == false)
         {
-            POS_TRACE_WARN(EID(RAID_DEBUG_MSG),
-                "Failed to alloc ParityPools for RAID5, request:{}", reqBuffersPerNuma);
+            POS_TRACE_WARN(EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL),
+                "RAID5, buf_count:{}", reqBuffersPerNuma);
         }
         method = raid5;
     }
@@ -230,6 +230,12 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
         uint64_t parityCnt = 2;
         uint64_t reqBuffersPerNuma = (totalNvmStripes + maxGcStripes) * parityCnt;
         Raid6* raid6 = new Raid6(&physicalSize, reqBuffersPerNuma);
+        bool result = raid6->AllocParityPools(reqBuffersPerNuma);
+        if (result == false)
+        {
+            POS_TRACE_WARN(EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL),
+                "RAID6, buf_count:{}", reqBuffersPerNuma);
+        }
         method = raid6;
     }
     else if (raidType == RaidTypeEnum::NONE)

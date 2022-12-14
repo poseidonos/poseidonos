@@ -2151,6 +2151,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2604
+    Name: RAID_BUFFER_POOL_ALLOCATED
+    Severity:
+    Message: Buffer pool for RAID is allocated
+    Cause:
+    Solution:
+  -
     Id: 2701
     Name: REBUILD_STOPPED_OTHER_DEVS_DETACHMENT
     Severity:
