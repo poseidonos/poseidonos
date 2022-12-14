@@ -57,7 +57,7 @@ public:
 
     MOCK_METHOD(bool, TrimData, (const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg));
 
-    MOCK_METHOD(bool, CreateFile, (const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg));
+    MOCK_METHOD(FileControlResult, CreateFile, (const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg));
     MOCK_METHOD(bool, DeleteFile, (const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg));
 
     MOCK_METHOD(size_t, GetAvailableSpace, (const MetaVolumeType volumeType));

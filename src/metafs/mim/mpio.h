@@ -34,6 +34,7 @@
 
 #include <atomic>
 #include <string>
+#include <tuple>
 
 #include "src/metafs/log/metafs_log.h"
 #include "src/include/pos_event_id.h"
@@ -52,6 +53,8 @@
 
 namespace pos
 {
+class TelemetryPublisher;
+
 enum class MpioType
 {
     First,
@@ -73,6 +76,7 @@ enum class MpioCacheState
 class Mpio;
 using PartialMpioDoneCb = std::function<void(Mpio*)>;
 using MpioAsyncDoneCb = AsyncCallback;
+using MpioMetricRawData = std::tuple<uint64_t, uint64_t>;
 
 // meta page io class
 class Mpio : public MetaAsyncRunnable<MetaAsyncCbCxt, MpAioState, MpioStateExecuteEntry>, public MetaFsStopwatch<MpioTimestampStage>
@@ -142,6 +146,7 @@ public:
         MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             str + " id: {}, array: {}, lpn: {}", GetId(), array, lpn);
     }
+    virtual MpioMetricRawData GetMetricRawDataAndClear(void);
 
     MpioIoInfo io;
 
@@ -172,6 +177,8 @@ protected:
     void _SetAllocated(const bool flag);
     bool _IsAllocated(void) const;
 
+    void _ResetIoCount(void);
+
 private:
     MssOpcode _ConvertToMssOpcode(const MpAioState mpioState);
     bool _CheckIOStatus(const MpAioState expNextState);
@@ -188,5 +195,8 @@ private:
     const bool DIRECT_ACCESS_ENABLED;
     const bool SUPPORT_CHECKING_CRC_WHEN_READING;
     bool isAllocated;
+
+    static const uint32_t NUM_IO_TYPE = (int)MssOpcode::Max;
+    uint64_t ioCount[NUM_IO_TYPE];
 };
 } // namespace pos

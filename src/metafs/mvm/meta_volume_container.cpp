@@ -256,12 +256,10 @@ MetaVolumeContainer::TrimData(const MetaVolumeType volumeType, MetaFsFileControl
     return volumeContainer[volumeType]->TrimData(reqMsg);
 }
 
-bool
+FileControlResult
 MetaVolumeContainer::CreateFile(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg)
 {
-    auto result = volumeContainer[volumeType]->CreateFile(reqMsg);
-
-    return (result.second == EID(SUCCESS));
+    return volumeContainer[volumeType]->CreateFile(reqMsg);
 }
 
 bool

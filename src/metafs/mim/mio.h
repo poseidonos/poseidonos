@@ -105,7 +105,7 @@ public:
     void NotifiyPartialMpioDone(Mpio* mpio);
     virtual bool IsSyncIO(void);
 
-    virtual bool IsRead(void);
+    virtual bool IsRead(void) const;
     virtual MetaLpnType GetStartLpn(void);
     virtual MetaStorageType GetTargetStorage(void) const;
     virtual bool Init(MioState expNextState = MioState::Max);

@@ -78,7 +78,7 @@ public:
 
     virtual bool TrimData(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
 
-    virtual bool CreateFile(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
+    virtual FileControlResult CreateFile(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
     virtual bool DeleteFile(const MetaVolumeType volumeType, MetaFsFileControlRequest& reqMsg);
 
     virtual size_t GetAvailableSpace(const MetaVolumeType volumeType);

@@ -57,7 +57,8 @@ Mpio::Mpio(MDPage* mdPage, const bool directAccessEnabled, const bool checkingCr
   UNIQUE_ID(idAllocate_++),
   DIRECT_ACCESS_ENABLED(directAccessEnabled),
   SUPPORT_CHECKING_CRC_WHEN_READING(checkingCrcWhenReading),
-  isAllocated(false)
+  isAllocated(false),
+  ioCount()
 {
 }
 
@@ -84,6 +85,8 @@ Mpio::Reset(void)
     ResetTimestamp();
 
     _SetAllocated(false);
+
+    _ResetIoCount();
 }
 
 // LCOV_EXCL_START
@@ -271,6 +274,7 @@ Mpio::DoIO(const MpAioState expNextState)
         SetNextState(expNextState);
 
         ret = mssIntf->DoPageIOAsync(opcode, &mssAioCbCxt);
+        ioCount[(int)opcode]++;
 
         if (ret != EID(SUCCESS))
         {
@@ -378,5 +382,23 @@ Mpio::_CopyDataFromMergedRequestListAndRemoveTheListConditionally(void)
         mdpage->UpdateCrcToControlInfo();
     }
     mergedRequestList = nullptr;
+}
+
+void
+Mpio::_ResetIoCount(void)
+{
+    for (uint32_t i = 0; i < NUM_IO_TYPE; ++i)
+    {
+        ioCount[i] = 0;
+    }
+}
+
+MpioMetricRawData
+Mpio::GetMetricRawDataAndClear(void)
+{
+    // 0: write, 1: read
+    auto result = std::make_tuple(ioCount[0], ioCount[1]);
+    _ResetIoCount();
+    return result;
 }
 } // namespace pos

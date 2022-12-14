@@ -55,7 +55,8 @@ JournalLogBuffer::JournalLogBuffer(void)
   initializedDataBuffer(nullptr),
   telemetryPublisher(nullptr),
   rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled()),
-  logbufferReadResult(EID(SUCCESS))
+  logbufferReadResult(EID(SUCCESS)),
+  arrayId(INT_MAX)
 {
 }
 
@@ -103,6 +104,7 @@ JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogBufferIoCo
             POS_TRACE_INFO(EID(JOURNAL_LOG_BUFFER_INITIATED), "MetaFsFileIntf for JournalLogBuffer has been instantiated with MetaVolumeType {}", config->GetMetaVolumeToUse());
         }
     }
+    this->arrayId = arrayId;
     return 0;
 }
 
@@ -207,6 +209,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     {
         POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
         metric.AddLabel("group_id", std::to_string(groupId));
+        metric.AddLabel("array_id", std::to_string(arrayId));
         metric.SetGaugeValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -240,6 +243,7 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
     {
         POSMetric metric(TEL36004_JRN_LOAD_LOG_GROUP, POSMetricTypes::MT_GAUGE);
         metric.AddLabel("group_id", std::to_string(groupId));
+        metric.AddLabel("array_id", std::to_string(arrayId));
         metric.SetGaugeValue(0);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -310,6 +314,7 @@ JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
     {
         POSMetric metric(TEL36002_JRN_LOG_GROUP_RESET_CNT, POSMetricTypes::MT_COUNT);
         metric.AddLabel("group_id", std::to_string(id));
+        metric.AddLabel("array_id", std::to_string(arrayId));
         metric.SetCountValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
@@ -382,6 +387,7 @@ JournalLogBuffer::LogGroupResetCompleted(int logGroupId)
     {
         POSMetric metric(TEL36003_JRN_LOG_GROUP_RESET_DONE_CNT, POSMetricTypes::MT_COUNT);
         metric.AddLabel("group_id", std::to_string(logGroupId));
+        metric.AddLabel("array_id", std::to_string(arrayId));
         metric.SetCountValue(1);
         telemetryPublisher->PublishMetric(metric);
     }

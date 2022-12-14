@@ -510,7 +510,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         checkpointManager, mapFlush, contextManager, eventScheduler);
 
     logWriteHandler->Init(bufferAllocator, logBuffer, config, EasyTelemetryPublisherSingleton::Instance(),
-        new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
+        arrayInfo->GetIndex(), new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
     volumeEventHandler->Init(logWriteContextFactory, checkpointManager, dirtyMapManager, logWriteHandler,
         config, contextManager, eventScheduler);
     journalWriter->Init(logWriteHandler, logWriteContextFactory, eventFactory, &journalingStatus, eventScheduler);

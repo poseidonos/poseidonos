@@ -51,6 +51,7 @@ public:
     MOCK_METHOD(bool, IsRemovable, (), (const));
     MOCK_METHOD(MpioCacheState, GetCacheState, (), (const));
     MOCK_METHOD(void, SetMergedRequestList, (std::vector<MetaFsIoRequest*>* list), (const));
+    MOCK_METHOD(MpioMetricRawData, GetMetricRawDataAndClear, ());
 };
 
 } // namespace pos

@@ -39,6 +39,7 @@
 #include <thread>
 
 #include "src/metafs/config/metafs_config_manager.h"
+#include "src/metafs/include/meta_file_property.h"
 #include "src/metafs/include/metafs_aiocb_cxt.h"
 #include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/scalable_meta_io_worker.h"
@@ -99,13 +100,8 @@ MetaFsIoScheduler::MetaFsIoScheduler(const int threadId, const int coreId,
   extents_(nullptr),
   weight_(weight),
   needToIgnoreNuma_(false),
-  issueCount_(),
-  metricNameForStorage_()
+  issueCount_()
 {
-    metricNameForStorage_[0] = TEL40100_METAFS_SCHEDULER_ISSUE_COUNT_TO_SSD;
-    metricNameForStorage_[1] = TEL40101_METAFS_SCHEDULER_ISSUE_COUNT_TO_NVRAM;
-    metricNameForStorage_[2] = TEL40102_METAFS_SCHEDULER_ISSUE_COUNT_TO_JOURNAL_SSD;
-
     mioCoreCountInTheSameNuma_.resize(TOTAL_CORE_COUNT);
     ioSQ_.SetWeight(weight_);
 }
@@ -204,10 +200,10 @@ MetaFsIoScheduler::_UpdateCurrentExtentToNextExtentConditionally(void)
 }
 
 const int64_t*
-MetaFsIoScheduler::GetIssueCount(size_t& size /* output */) const
+MetaFsIoScheduler::GetIssueCount(const uint32_t array, size_t& size /* output */) const
 {
     size = NUM_STORAGE;
-    return issueCount_;
+    return issueCount_[array];
 }
 
 void
@@ -219,7 +215,7 @@ MetaFsIoScheduler::IssueRequestAndDelete(MetaFsIoRequest* reqMsg)
     _SetCurrentContextFrom(reqMsg);
     _UpdateCurrentExtentToNextExtentConditionally();
 
-    issueCount_[(int)currentReqMsg_->targetMediaType] += requestCount_;
+    issueCount_[(int)currentReqMsg_->arrayId][(int)currentReqMsg_->targetMediaType] += requestCount_;
 
     while (remainCount_)
     {
@@ -440,18 +436,7 @@ MetaFsIoScheduler::Execute(void)
 
     while (!threadExit_)
     {
-        if (tp_ && timeInterval_ && timeInterval_->CheckInterval())
-        {
-            POSMetricVector* metricList = new POSMetricVector();
-            for (uint32_t idx = 0; idx < NUM_STORAGE; ++idx)
-            {
-                POSMetric v(metricNameForStorage_[idx], POSMetricTypes::MT_GAUGE);
-                v.SetGaugeValue(issueCount_[idx]);
-                metricList->emplace_back(v);
-                issueCount_[idx] = 0;
-            }
-            tp_->PublishMetricList(metricList);
-        }
+        _PublishPeriodicMetrics();
 
         MetaFsIoRequest* reqMsg = _FetchPendingNewReq();
 
@@ -467,6 +452,28 @@ MetaFsIoScheduler::Execute(void)
         cpuStallCnt_ = 0;
 
         IssueRequestAndDelete(reqMsg);
+    }
+}
+
+void
+MetaFsIoScheduler::_PublishPeriodicMetrics(void)
+{
+    if (tp_ && timeInterval_ && timeInterval_->CheckInterval())
+    {
+        POSMetricVector* metricList = new POSMetricVector();
+        for (uint32_t array = 0; array < NUM_ARRAY; ++array)
+        {
+            for (uint32_t idx = 0; idx < NUM_STORAGE; ++idx)
+            {
+                POSMetric v(TEL40100_METAFS_SCHEDULER_ISSUE_COUNT, POSMetricTypes::MT_GAUGE);
+                v.SetGaugeValue(issueCount_[array][idx]);
+                v.AddLabel("type", std::to_string(idx));
+                v.AddLabel("array_id", std::to_string(array));
+                metricList->emplace_back(v);
+                issueCount_[array][idx] = 0;
+            }
+        }
+        tp_->PublishMetricList(metricList);
     }
 }
 
