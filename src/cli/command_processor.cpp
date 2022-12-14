@@ -413,6 +413,28 @@ CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* requ
 }
 
 grpc::Status
+CommandProcessor::ExecuteDumpMemorySnapshotCommand(const DumpMemorySnapshotRequest* request, DumpMemorySnapshotResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    grpc_cli::DumpMemorySnapshotRequest_Param param = request->param();
+    std::string path = param.path();
+
+    const std::string getPidCmd = "ps -a | awk \'$4==\"poseidonos\" {print $1}\'";
+    std::string pid = _ExecuteLinuxCmd(getPidCmd);
+
+    const std::string gcoreCmd = "gcore -o " + path + " " + pid;
+    std::string result = _ExecuteLinuxCmd(gcoreCmd);
+    POS_TRACE_DEBUG(EID(CLI_MEMORY_SNAPSHOT_DUMP_DONE), "pid:{}, gcoreCmd:{}, result:{}",
+        pid, gcoreCmd, result);
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply)
 {
     reply->set_command(request->command());
