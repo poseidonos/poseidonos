@@ -1623,6 +1623,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     string uuid = "";
     int32_t nsid = -1;
     bool isPrimary = true;
+    bool isAnaNonoptimized = false;
 
     volumeName = (request->param()).name();
     arrayName = (request->param()).array();
@@ -1633,6 +1634,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     uuid = (request->param()).uuid();
     nsid = (request->param()).nsid();
     isPrimary = (request->param()).isprimary();
+    isAnaNonoptimized = (request->param()).isananonoptimized();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
@@ -1664,7 +1666,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
 
     if (volMgr != nullptr)
     {
-        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, nsid, isPrimary, uuid);
+        int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, nsid, isPrimary, isAnaNonoptimized, uuid);
         if (ret == SUCCESS)
         {
             string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);

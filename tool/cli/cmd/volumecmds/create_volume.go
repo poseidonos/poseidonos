@@ -93,14 +93,15 @@ func buildCreateVolumeReq(command string) (*pb.CreateVolumeRequest, error) {
 	create_volume_isPrimary = !create_volume_isSecondary
 
 	param := &pb.CreateVolumeRequest_Param{
-		Name:      create_volume_volumeName,
-		Array:     create_volume_arrayName,
-		Size:      volumeSizeInByte,
-		Maxiops:   create_volume_maxIOPS,
-		Maxbw:     create_volume_maxBandwidth,
-		Uuid:      create_volume_uuid,
-		Nsid:      create_volume_nsid,
-		Isprimary: create_volume_isPrimary,
+		Name:      			create_volume_volumeName,
+		Array:     			create_volume_arrayName,
+		Size:      			volumeSizeInByte,
+		Maxiops:   			create_volume_maxIOPS,
+		Maxbw:     			create_volume_maxBandwidth,
+		Uuid:      			create_volume_uuid,
+		Nsid:      			create_volume_nsid,
+		IsPrimary:			create_volume_isPrimary,
+		IsAnaNonoptimized:	create_volume_isAnaNonoptimzed,
 	}
 
 	uuid := globals.GenerateUUID()
@@ -124,6 +125,7 @@ var (
 	create_volume_nsid          int32 = 0
 	create_volume_isPrimary           = true
 	create_volume_isSecondary         = false
+	create_volume_isAnaNonoptimzed    = false
 )
 
 func init() {
@@ -166,4 +168,9 @@ If you do not specify the unit, it will be B in default. (Note: the size must be
 		"secondary", "", false,
 		`If specified, the volume to be created will be a secondary volume for HA.
 If not specified, this volume will be created as a primary volume.`)
+
+	CreateVolumeCmd.Flags().BoolVarP(&create_volume_isAnaNonoptimzed,
+		"nonoptimized", "n", false,
+		`If specified, the volume to be created will be a state of ANA Non Optimized.
+If not specified, this volume will be created as a state of ANA Optimized.`)
 }

@@ -215,7 +215,7 @@ VolumeManager::_PublishTelemetryArrayUsage(void)
 
 int
 VolumeManager::Create(std::string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, bool checkWalVolume,
-                    int32_t nsid, bool isPrimary, std::string uuid)
+                    int32_t nsid, bool isPrimary, bool isAnaNonoptimized, std::string uuid)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))

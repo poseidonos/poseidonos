@@ -33503,9 +33503,10 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
     kSizeFieldNumber = 3,
     kMaxiopsFieldNumber = 4,
     kMaxbwFieldNumber = 5,
-    kIswalvolFieldNumber = 6,
-    kIsprimaryFieldNumber = 9,
     kNsidFieldNumber = 8,
+    kIsWalVolFieldNumber = 6,
+    kIsPrimaryFieldNumber = 9,
+    kIsAnaNonoptimizedFieldNumber = 10,
   };
   // string name = 1;
   void clear_name();
@@ -33582,7 +33583,16 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   void _internal_set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // bool iswalvol = 6;
+  // int32 nsid = 8;
+  void clear_nsid();
+  ::PROTOBUF_NAMESPACE_ID::int32 nsid() const;
+  void set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_nsid() const;
+  void _internal_set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // bool isWalVol = 6;
   void clear_iswalvol();
   bool iswalvol() const;
   void set_iswalvol(bool value);
@@ -33591,7 +33601,7 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   void _internal_set_iswalvol(bool value);
   public:
 
-  // bool isprimary = 9;
+  // bool isPrimary = 9;
   void clear_isprimary();
   bool isprimary() const;
   void set_isprimary(bool value);
@@ -33600,13 +33610,13 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   void _internal_set_isprimary(bool value);
   public:
 
-  // int32 nsid = 8;
-  void clear_nsid();
-  ::PROTOBUF_NAMESPACE_ID::int32 nsid() const;
-  void set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  // bool isAnaNonoptimized = 10;
+  void clear_isananonoptimized();
+  bool isananonoptimized() const;
+  void set_isananonoptimized(bool value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_nsid() const;
-  void _internal_set_nsid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  bool _internal_isananonoptimized() const;
+  void _internal_set_isananonoptimized(bool value);
   public:
 
   // @@protoc_insertion_point(class_scope:grpc_cli.CreateVolumeRequest.Param)
@@ -33622,9 +33632,10 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::uint64 size_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxiops_;
   ::PROTOBUF_NAMESPACE_ID::uint64 maxbw_;
+  ::PROTOBUF_NAMESPACE_ID::int32 nsid_;
   bool iswalvol_;
   bool isprimary_;
-  ::PROTOBUF_NAMESPACE_ID::int32 nsid_;
+  bool isananonoptimized_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -80093,7 +80104,7 @@ inline void CreateVolumeRequest_Param::set_maxbw(::PROTOBUF_NAMESPACE_ID::uint64
   // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.maxbw)
 }
 
-// bool iswalvol = 6;
+// bool isWalVol = 6;
 inline void CreateVolumeRequest_Param::clear_iswalvol() {
   iswalvol_ = false;
 }
@@ -80101,7 +80112,7 @@ inline bool CreateVolumeRequest_Param::_internal_iswalvol() const {
   return iswalvol_;
 }
 inline bool CreateVolumeRequest_Param::iswalvol() const {
-  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.iswalvol)
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.isWalVol)
   return _internal_iswalvol();
 }
 inline void CreateVolumeRequest_Param::_internal_set_iswalvol(bool value) {
@@ -80110,7 +80121,7 @@ inline void CreateVolumeRequest_Param::_internal_set_iswalvol(bool value) {
 }
 inline void CreateVolumeRequest_Param::set_iswalvol(bool value) {
   _internal_set_iswalvol(value);
-  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.iswalvol)
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.isWalVol)
 }
 
 // string uuid = 7;
@@ -80194,7 +80205,7 @@ inline void CreateVolumeRequest_Param::set_nsid(::PROTOBUF_NAMESPACE_ID::int32 v
   // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.nsid)
 }
 
-// bool isprimary = 9;
+// bool isPrimary = 9;
 inline void CreateVolumeRequest_Param::clear_isprimary() {
   isprimary_ = false;
 }
@@ -80202,7 +80213,7 @@ inline bool CreateVolumeRequest_Param::_internal_isprimary() const {
   return isprimary_;
 }
 inline bool CreateVolumeRequest_Param::isprimary() const {
-  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.isprimary)
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.isPrimary)
   return _internal_isprimary();
 }
 inline void CreateVolumeRequest_Param::_internal_set_isprimary(bool value) {
@@ -80211,7 +80222,27 @@ inline void CreateVolumeRequest_Param::_internal_set_isprimary(bool value) {
 }
 inline void CreateVolumeRequest_Param::set_isprimary(bool value) {
   _internal_set_isprimary(value);
-  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.isprimary)
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.isPrimary)
+}
+
+// bool isAnaNonoptimized = 10;
+inline void CreateVolumeRequest_Param::clear_isananonoptimized() {
+  isananonoptimized_ = false;
+}
+inline bool CreateVolumeRequest_Param::_internal_isananonoptimized() const {
+  return isananonoptimized_;
+}
+inline bool CreateVolumeRequest_Param::isananonoptimized() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.CreateVolumeRequest.Param.isAnaNonoptimized)
+  return _internal_isananonoptimized();
+}
+inline void CreateVolumeRequest_Param::_internal_set_isananonoptimized(bool value) {
+  
+  isananonoptimized_ = value;
+}
+inline void CreateVolumeRequest_Param::set_isananonoptimized(bool value) {
+  _internal_set_isananonoptimized(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.CreateVolumeRequest.Param.isAnaNonoptimized)
 }
 
 // -------------------------------------------------------------------

@@ -29,6 +29,8 @@ poseidonos-cli volume create [flags]
       --iswalvol             If specified, the volume to be created will be a wal volume for HA.
       --maxbw uint           The maximum bandwidth for the volume in MB/s.
       --maxiops uint         The maximum IOPS for the volume in Kilo.
+  -n, --nonoptimized         If specified, the volume to be created will be a state of ANA Non Optimized.
+                             If not specified, this volume will be created as a state of ANA Optimized.
       --nsid int32           Namespace ID for the volume to be created. (default -1)
       --secondary            If specified, the volume to be created will be a secondary volume for HA.
                              If not specified, this volume will be created as a primary volume.
