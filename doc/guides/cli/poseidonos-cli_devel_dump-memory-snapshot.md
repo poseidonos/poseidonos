@@ -20,7 +20,7 @@ poseidonos-cli devel dump-memory-snapshot [flags]
 ### Options
 
 ```
-      --force         Force to unmount this volume.
+      --force         Force to dump the memory snapshot.
   -h, --help          help for dump-memory-snapshot
       --path string   The path to store the snapshot
 ```

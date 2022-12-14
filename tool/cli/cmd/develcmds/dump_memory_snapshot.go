@@ -87,5 +87,5 @@ func init() {
 	DumpMemorySnapshotCmd.MarkFlagRequired("path")
 
 	DumpMemorySnapshotCmd.Flags().BoolVarP(&dump_memory_snapshot_isForced,
-		"force", "", false, "Force to unmount this volume.")
+		"force", "", false, "Force to dump the memory snapshot.")
 }
