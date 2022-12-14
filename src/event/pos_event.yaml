@@ -2853,6 +2853,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2995
+    Name: WBT_LIST_FETCH_ERROR
+    Severity:
+    Description: Failed to fetch the WBT Test list
+    Cause:
+    Solution:
+  -
     Id: 2996
     Name: CONFIG_UPDATED_VIA_WBT
     Severity:

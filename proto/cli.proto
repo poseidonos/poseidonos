@@ -290,6 +290,17 @@ service PosCli {
          };
     }
 
+    rpc ListWBT (ListWBTRequest) returns (ListWBTResponse) {
+        option (google.api.http) = {
+            post: "/v1/listwbt"
+        };
+    }
+
+    rpc WBT (WBTRequest) returns (WBTResponse) {
+        option (google.api.http) = {
+            post: "/v1/wbt"
+        };
+    }
 }
 
 message Status {
@@ -1570,6 +1581,30 @@ message VolumeRenameResponse {
     PosInfo info = 4;
 }
 
+message ListWBTRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+}
+
+message WBTTest {
+    string testname = 1;
+}
+
+message ListWBTResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+		Status status = 1;
+		message Tests {
+			repeated WBTTest testlist = 1;
+		}
+		Tests data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
 message ListQOSPolicyRequest {
     string command = 1;
     string rid = 2;
@@ -1620,3 +1655,27 @@ message ListQOSPolicyResponse {
     PosInfo info = 4;
 }
 
+message WBTRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+	message Param {
+		string testname = 1;
+		map<string, string> argv = 2;
+	}
+	Param param = 4;
+}
+
+message WBTResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+		Status status = 1;
+		message TestData {
+			string testdata = 1;
+		}
+        TestData data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}

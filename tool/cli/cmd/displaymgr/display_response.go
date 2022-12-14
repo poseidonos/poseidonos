@@ -39,6 +39,57 @@ func PrintProtoResponse(command string, res protoreflect.ProtoMessage) error {
 	return nil
 }
 
+func PrintWBTResponse(command string, res protoreflect.ProtoMessage) error {
+	grpcRes := res.(*pb.WBTResponse)
+	grpcStatus := grpcRes.GetResult().GetStatus()
+	status := messages.Status{
+		CODE:        int(grpcStatus.GetCode()),
+		EVENTNAME:   grpcStatus.GetEventName(),
+		DESCRIPTION: grpcStatus.GetDescription(),
+		CAUSE:       grpcStatus.GetCause(),
+		SOLUTION:    grpcStatus.GetSolution(),
+	}
+
+	if isFailed(*grpcStatus) && !globals.IsJSONRes {
+		printEventInfo(status.CODE, status.EVENTNAME,
+			status.DESCRIPTION, status.CAUSE,
+			status.SOLUTION)
+		return nil
+	}
+
+	wbtdata := grpcRes.GetResult().GetData().GetTestdata()
+	var dataString string
+	var dataMap map[string]interface{}
+	if len(wbtdata) > 7 {
+		dataString = wbtdata[7:]
+	}
+	if !globals.IsJSONRes {
+		fmt.Println(dataString)
+		return nil
+	}
+	json.Unmarshal([]byte(dataString), &dataMap)
+	cliRes := messages.Response{
+		COMMAND: command,
+		RID:     grpcRes.GetRid(),
+		RESULT: messages.Result{
+			STATUS: status,
+		},
+		INFO: messages.Info{
+			VERSION: grpcRes.GetInfo().GetVersion(),
+		},
+	}
+	if dataMap != nil {
+		cliRes.RESULT.DATA = dataMap
+	}
+	jsonRes, err := json.Marshal(&cliRes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	printResInJSON(string(jsonRes))
+	return nil
+}
+
 func PrintResponse(command string, resJson string, isDebug bool, isJSONRes bool, displayUnit bool) {
 	if isJSONRes {
 		printResInJSON(resJson)
@@ -740,6 +791,23 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		}
 
 		fmt.Println("PoseidonOS termination has been requested. PoseidonOS will be terminated soon.")
+
+	case "LISTWBT":
+		res := &pb.ListWBTResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		for _, test := range res.GetResult().GetData().GetTestlist() {
+			fmt.Fprintln(w, test.GetTestname())
+		}
+		w.Flush()
 
 	default:
 		res := messages.Response{}

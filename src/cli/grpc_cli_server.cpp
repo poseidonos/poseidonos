@@ -876,6 +876,38 @@ class PosCliServiceImpl final : public PosCli::Service
 
         return status;
     }
+
+  grpc::Status
+  ListWBT(ServerContext* context, const ListWBTRequest* request,
+                  ListWBTResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteListWBTCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
+
+  grpc::Status
+  WBT(ServerContext* context, const WBTRequest* request,
+                  WBTResponse* reply) override
+  {
+    _LogCliRequest(request);
+
+    grpc::Status status = pc->ExecuteWBTCommand(request, reply);
+    if (context->IsCancelled()) {
+      _LogGrpcTimeout(request, reply);
+      return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+    }
+    _LogCliResponse(reply, status);
+
+    return status;
+  }
 };
 
 void

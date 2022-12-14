@@ -153,6 +153,12 @@ using grpc_cli::VolumeInfoRequest;
 using grpc_cli::VolumeInfoResponse;
 using grpc_cli::VolumeRenameRequest;
 using grpc_cli::VolumeRenameResponse;
+using grpc_cli::ListWBTRequest;
+using grpc_cli::ListWBTResponse;
+using grpc_cli::WBTRequest;
+using grpc_cli::WBTResponse;
+
+using google::protobuf::RepeatedPtrField;
 
 class CommandProcessor
 {
@@ -231,6 +237,11 @@ public:
     // QoS Commands
     grpc::Status ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolicyRequest* request, QosCreateVolumePolicyResponse* reply);
     grpc::Status ExecuteQosResetVolumePolicyCommand(const QosResetVolumePolicyRequest* request, QosResetVolumePolicyResponse* reply);
+
+    // WBT Commands
+    grpc::Status ExecuteListWBTCommand(const ListWBTRequest* request, ListWBTResponse* reply);
+    grpc::Status ExecuteWBTCommand(const WBTRequest* request, WBTResponse* reply);
+
 
 private:
     bool _isPosTerminating {false};
