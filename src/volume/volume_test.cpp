@@ -299,7 +299,7 @@ TEST_F(VolumeTest, VolumeCountBasicTest)
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
     volMgr->Create("testvol1", SIZE, 0, 0, false, -1, true, false);
     EXPECT_EQ(1, volMgr->GetVolumeCount());
-    volMgr->Create("testvol2", SIZE, 0, 0, false, -1, true), false;
+    volMgr->Create("testvol2", SIZE, 0, 0, false, -1, true, false);
     EXPECT_EQ(2, volMgr->GetVolumeCount());
     volMgr->Create("testvol3", SIZE, 0, 0, false, -1, true, false);
     EXPECT_EQ(3, volMgr->GetVolumeCount());
