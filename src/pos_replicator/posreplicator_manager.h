@@ -67,7 +67,7 @@ public:
 
     int Register(int arrayId, ReplicatorVolumeSubscriber* volumeSubscriber);
     void Unregister(int arrayId);
-    ReplicatorVolumeSubscriber* GetReplicatorVolumeSubscriber(int arrayId);
+    // ReplicatorVolumeSubscriber* GetReplicatorVolumeSubscriber(int arrayId);
 
     int NotifyNewUserIORequest(pos_io io);
     int CompleteUserIO(uint64_t lsn, int arrayId, int volumeId);
@@ -90,13 +90,7 @@ public:
     ReplicatorStatus GetVolumeCopyStatus(void);
     virtual bool IsEnabled(void) override;
 
-protected:
-    std::thread* posRepilicatorManagerServerThread;
-    std::unique_ptr<::grpc::Server> server;
-
 private:
-    void _AddWaitPOSIoRequest(uint64_t lsn, pos_io io);
-
     VolumeIoSmartPtr _MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList = nullptr);
     void _RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn);
     void _InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numChunks);
@@ -105,6 +99,8 @@ private:
     int _ConvertVolumeIdToName(int volumeId, int arrayId, std::string& volumeName);
     int _ConvertArrayNameToId(std::string arrayName);
     int _ConvertVolumeNameToId(std::string volumeName, int arrayId);
+
+    void _AddWaitPOSIoRequest(uint64_t lsn, pos_io io);
 
     AIO* aio;
     std::unordered_map<uint64_t, pos_io> waitPosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
