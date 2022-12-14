@@ -13,7 +13,7 @@ the system seriously. Therefore, this command category must be carefully used
 by developers. 
 
 Syntax: 
-  poseidonos-cli devel [resetmbr|reset-event-wrr|stop-rebuilding|update--event-wrr]
+  poseidonos-cli devel [resetmbr|reset-event-wrr|stop-rebuilding|update-event-wrr|dump-memory-snapshot]
 
 	  `,
 	Args: cobra.MinimumNArgs(1),
@@ -26,4 +26,5 @@ func init() {
 	DevelCmd.AddCommand(StopRebuildingCmd)
 	DevelCmd.AddCommand(UpdateEventWrrCmd)
 	DevelCmd.AddCommand(ResetEventWrrCmd)
+	DevelCmd.AddCommand(DumpMemorySnapshotCmd)
 }
