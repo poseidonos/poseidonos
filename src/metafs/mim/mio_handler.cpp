@@ -211,7 +211,7 @@ MioHandler::_HandleIoSQ(void)
 void
 MioHandler::_UpdateSubmissionMetricsConditionally(const Mio& mio)
 {
-    uint32_t ioType = mio.IsRead() ? 1 : 0;
+    uint32_t ioType = mio.IsRead() ? (uint32_t)MetaIoRequestType::Read : (uint32_t)MetaIoRequestType::Write;
     issueCountByStorage[(int)mio.GetTargetStorage()][ioType]++;
     issueCountByFileType[(int)mio.GetFileType()][ioType]++;
 }
@@ -219,7 +219,7 @@ MioHandler::_UpdateSubmissionMetricsConditionally(const Mio& mio)
 void
 MioHandler::_UpdateCompletionMetricsConditionally(Mio* mio)
 {
-    uint32_t ioType = mio->IsRead() ? 1 : 0;
+    uint32_t ioType = mio->IsRead() ? (uint32_t)MetaIoRequestType::Read : (uint32_t)MetaIoRequestType::Write;
     totalProcessedMioCount[ioType]++;
 
     if (skipCount++ % SAMPLING_SKIP_COUNT == 0)
