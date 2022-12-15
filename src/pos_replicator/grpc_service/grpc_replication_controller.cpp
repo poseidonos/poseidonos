@@ -107,7 +107,7 @@ GrpcReplicationController::SuspendWrite(
     }
     else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
     {
-        // do nothing
+        assert(true);
     }
     else
     {
@@ -132,7 +132,7 @@ GrpcReplicationController::ResumeWrite(
     }
     else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
     {
-        // do nothing
+        assert(true);
     }
     else
     {

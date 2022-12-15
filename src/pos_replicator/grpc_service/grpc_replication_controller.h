@@ -67,6 +67,7 @@ public:
         ::grpc::ServerContext* context,
         const pos_rpc::ResumeWriteRequest* request,
         pos_rpc::ResumeWriteResponse* response) override;
+
 private:
     PosReplicatorManager* replicatorManager;
 };
