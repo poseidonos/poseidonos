@@ -115,23 +115,23 @@ GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
     string arrayName, void* buffer, uint64_t& lsn)
 {
     ::grpc::ClientContext cliContext;
-    replicator_rpc::PushHostWriteRequest* request = new replicator_rpc::PushHostWriteRequest;
+    replicator_rpc::PushHostWriteRequest request;
     replicator_rpc::PushHostWriteResponse response;
-    request->set_array_name(arrayName);
-    request->set_volume_name(volumeName);
-    request->set_rba(rba);
-    request->set_num_blocks(size);
+    request.set_array_name(arrayName);
+    request.set_volume_name(volumeName);
+    request.set_rba(rba);
+    request.set_num_blocks(size);
 
     /*
     [To do buffer process]    
     for (int iter = 0; iter < size; iter++)
     {
-        replicator_rpc::Chunk* dataChunk = request->add_data();
-        request->CopyFrom(buf);
+        replicator_rpc::Chunk* dataChunk = request.add_data();
+        request.CopyFrom(buf);
     }
     */
 
-    grpc::Status status = stub->PushHostWrite(&cliContext, *request, &response);
+    grpc::Status status = stub->PushHostWrite(&cliContext, request, &response);
     if (status.ok() == false)
     {
         POS_TRACE_ERROR(EID(HA_INVALID_RETURN_LSN), "Failed to send PushHostWrite");
@@ -147,15 +147,15 @@ GrpcPublisher::PushDirtyLog(std::string arrayName, std::string volumeName, uint6
 {
     ::grpc::ClientContext cliContext;
     // TODO (cheolho.kang): Make sure 'request' doesn't need to be delete later
-    replicator_rpc::PushDirtyLogRequest* request = new replicator_rpc::PushDirtyLogRequest;
+    replicator_rpc::PushDirtyLogRequest request;
     replicator_rpc::PushDirtyLogResponse response;
 
-    request->set_array_name(arrayName);
-    request->set_volume_name(volumeName);
-    request->set_rba(rba);
-    request->set_num_blocks(numBlocks);
+    request.set_array_name(arrayName);
+    request.set_volume_name(volumeName);
+    request.set_rba(rba);
+    request.set_num_blocks(numBlocks);
 
-    grpc::Status status = stub->PushDirtyLog(&cliContext, *request, &response);
+    grpc::Status status = stub->PushDirtyLog(&cliContext, request, &response);
     if (status.ok() == false)
     {
         return EID(HA_COMPLETION_FAIL);
@@ -168,14 +168,14 @@ int
 GrpcPublisher::CompleteUserWrite(uint64_t lsn, string volumeName, string arrayName)
 {
     ::grpc::ClientContext cliContext;
-    replicator_rpc::CompleteWriteRequest* request = new replicator_rpc::CompleteWriteRequest;
+    replicator_rpc::CompleteWriteRequest request;
     replicator_rpc::CompleteWriteResponse response;
 
-    request->set_lsn(lsn);
-    request->set_array_name(arrayName);
-    request->set_volume_name(volumeName);
+    request.set_lsn(lsn);
+    request.set_array_name(arrayName);
+    request.set_volume_name(volumeName);
 
-    grpc::Status status = stub->CompleteWrite(&cliContext, *request, &response);
+    grpc::Status status = stub->CompleteWrite(&cliContext, request, &response);
 
     if (status.ok() == false)
     {
@@ -189,16 +189,16 @@ int
 GrpcPublisher::CompleteWrite(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn)
 {
     ::grpc::ClientContext cliContext;
-    replicator_rpc::CompleteWriteRequest* request = new replicator_rpc::CompleteWriteRequest;
+    replicator_rpc::CompleteWriteRequest request;
     replicator_rpc::CompleteWriteResponse response;
 
-    request->set_array_name(arrayName);
-    request->set_volume_name(volumeName);
-    request->set_rba(rba);
-    request->set_num_blocks(numBlocks);
-    request->set_lsn(lsn);
+    request.set_array_name(arrayName);
+    request.set_volume_name(volumeName);
+    request.set_rba(rba);
+    request.set_num_blocks(numBlocks);
+    request.set_lsn(lsn);
 
-    grpc::Status status = stub->CompleteWrite(&cliContext, *request, &response);
+    grpc::Status status = stub->CompleteWrite(&cliContext, request, &response);
 
     if (status.ok() == false)
     {
@@ -212,20 +212,20 @@ int
 GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer)
 {
     ::grpc::ClientContext cliContext;
-    replicator_rpc::CompleteReadRequest* request = new replicator_rpc::CompleteReadRequest;
+    replicator_rpc::CompleteReadRequest request;
     replicator_rpc::CompleteReadResponse response;
 
-    request->set_array_name(arrayName);
-    request->set_volume_name(volumeName);
-    request->set_rba(rba);
-    request->set_num_blocks(numBlocks);
+    request.set_array_name(arrayName);
+    request.set_volume_name(volumeName);
+    request.set_rba(rba);
+    request.set_num_blocks(numBlocks);
 
     _InsertBlockToChunk(request, buffer, numBlocks);
 
     grpc::Status status;
     if (_WaitUntilReady() == true)
     {
-        status = stub->CompleteRead(&cliContext, *request, &response);
+        status = stub->CompleteRead(&cliContext, request, &response);
         if (status.ok() == true)
         {
             POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::REPLICATOR, EID(HA_DEBUG_MSG), "Complete to send CompleteRead response to replicator. volume name: {}, rba:{}, num_block: {}", volumeName, rba, numBlocks);
@@ -240,7 +240,7 @@ GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, u
 }
 
 void
-GrpcPublisher::_InsertBlockToChunk(replicator_rpc::CompleteReadRequest* request, void* data, uint64_t numBlocks)
+GrpcPublisher::_InsertBlockToChunk(replicator_rpc::CompleteReadRequest& request, void* data, uint64_t numBlocks)
 {
     struct Chunk
     {
@@ -249,7 +249,7 @@ GrpcPublisher::_InsertBlockToChunk(replicator_rpc::CompleteReadRequest* request,
 
     for (uint64_t index = 0; index < numBlocks; index++)
     {
-        replicator_rpc::Chunk* chunkPtr = request->add_data();
+        replicator_rpc::Chunk* chunkPtr = request.add_data();
 
         char* dataPtr = (char*)data + index * ArrayConfig::SECTOR_SIZE_BYTE;
         chunkPtr->set_content(dataPtr, ArrayConfig::SECTOR_SIZE_BYTE);
