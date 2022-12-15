@@ -356,14 +356,14 @@ PosReplicatorManager::ConvertIdToName(int arrayId, int volumeId, std::string& ar
     if (ret != EID(SUCCESS))
     {
         POS_TRACE_WARN(EID(HA_DEBUG_MSG),
-            "Cannot convert array id. ID: {}", arrayId);
+            "Cannot convert array id. ID: {}, error_code: {}", arrayId, ret);
     }
 
     ret = _ConvertVolumeIdToName(volumeId, arrayId, volumeName);
     if (ret != EID(SUCCESS))
     {
         POS_TRACE_WARN(EID(HA_DEBUG_MSG),
-            "Cannot convert volume id. ID: {}", volumeId);
+            "Cannot convert volume id. ID: {}, error_code: {}", volumeId, ret);
     }
 
     return ret;
@@ -416,7 +416,6 @@ PosReplicatorManager::HandleHostWrite(VolumeIoSmartPtr volumeIo)
         else if (currentStatus == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopyWriteSuspend)
         {
             // Hold until state changes to volume copy
-            return -1;
             while (replicatorStatus.Get() != ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy)
             {
                 usleep(1);
