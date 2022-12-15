@@ -86,7 +86,7 @@ GrpcReplicationController::FinishVolumeSync(
     }
     else
     {
-        assert(true);
+        assert(false);
     }
 
     response->set_result(pos_rpc::PosResult::SUCCESS);
@@ -107,11 +107,11 @@ GrpcReplicationController::SuspendWrite(
     }
     else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
     {
-        assert(true);
+        assert(false);
     }
     else
     {
-        assert(true);
+        assert(false);
     }
 
     response->set_result(pos_rpc::PosResult::SUCCESS);
@@ -132,11 +132,11 @@ GrpcReplicationController::ResumeWrite(
     }
     else if (status == ReplicatorStatus::VOLUMECOPY_SecondaryVolumeCopy)
     {
-        assert(true);
+        assert(false);
     }
     else
     {
-        assert(true);
+        assert(false);
     }
 
     response->set_result(pos_rpc::PosResult::SUCCESS);
