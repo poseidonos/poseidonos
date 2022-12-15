@@ -442,7 +442,7 @@ Raid6::AllocParityPools(uint64_t maxParityBufferCntPerNuma,
             return false;
         }
         parityPools.push_back(pool);
-        POS_TRACE_DEBUG(EID(RAID_DEBUG_MSG), "BufferPool for RAID6 is created, {}", pool->GetOwner());
+        POS_TRACE_INFO(EID(RAID_BUFFER_POOL_ALLOCATED), "RAID6, buf_count:{}, owner:{}", maxParityBufferCntPerNuma, pool->GetOwner());
     }
     return true;
 }
