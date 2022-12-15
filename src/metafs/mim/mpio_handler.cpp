@@ -115,7 +115,12 @@ MpioHandler::BottomhalfMioProcessing(void)
 void
 MpioHandler::_UpdateMetricsConditionally(Mpio* mpio)
 {
-    uint32_t ioType = (MetaIoOpcode::Read == mpio->io.opcode) ? 1 : 0;
+    uint32_t ioType = (uint32_t)mpio->io.opcode;
+    if (ioType >= NUM_IO_TYPE)
+    {
+        POS_TRACE_ERROR(EID(MFS_INVALID_OPCODE), "ioType:{}", ioType);
+        assert(false);
+    }
     uint32_t filetype = (uint32_t)mpio->GetFileType();
     uint32_t storageType = (int)mpio->io.targetMediaType;
     uint32_t arrayId = mpio->io.arrayId;
