@@ -632,6 +632,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 1252
+    Name: CLI_MEMORY_SNAPSHOT_DUMP_DONE
+    Severity:
+    Description: Memory snapshot dump has been done.
+    Cause:
+    Solution:
+  -
     Id: 1600
     Name: INVALID_PARAM
     Severity:

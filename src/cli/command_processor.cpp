@@ -1,6 +1,7 @@
 #include "src/cli/command_processor.h"
 
 #include <spdk/nvme_spec.h>
+#include <sys/time.h>
 
 #include <string>
 #include <vector>
@@ -14,6 +15,7 @@
 #include "src/device/device_manager.h"
 #include "src/event/event_manager.h"
 #include "src/helper/rpc/spdk_rpc_client.h"
+#include "src/include/array_config.h"
 #include "src/include/nvmf_const.h"
 #include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
@@ -24,10 +26,9 @@
 #include "src/qos/qos_manager.h"
 #include "src/resource_checker/smart_collector.h"
 #include "src/sys_info/space_info.h"
+#include "src/volume/volume_base.h"
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_status_property.h"
-#include "src/volume/volume_base.h"
-#include "src/include/array_config.h"
 
 CommandProcessor::CommandProcessor(void)
 {
@@ -408,6 +409,38 @@ CommandProcessor::ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* requ
     QosManagerSingleton::Instance()->SetEventWeightWRR(event, weight);
 
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteDumpMemorySnapshotCommand(const DumpMemorySnapshotRequest* request, DumpMemorySnapshotResponse* reply)
+{
+    reply->set_command(request->command());
+    reply->set_rid(request->rid());
+
+    grpc_cli::DumpMemorySnapshotRequest_Param param = request->param();
+    std::string path = param.path();
+
+    const std::string getPidCmd = "ps -a | awk \'$4==\"poseidonos\" {print $1}\'";
+    std::string pid = _ExecuteLinuxCmd(getPidCmd);
+
+    const std::string gcoreCmd = "gcore -o " + path + " " + pid;
+    struct timeval begin, end;
+
+    gettimeofday(&begin, 0);
+    std::string result = _ExecuteLinuxCmd(gcoreCmd);
+    gettimeofday(&end, 0);
+
+    long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = seconds + microseconds * 1e-6;
+
+    POS_TRACE_INFO(EID(CLI_MEMORY_SNAPSHOT_DUMP_DONE),
+        "pid:{}, command:{}, result:{}, elapsed_time:{}",
+        pid, gcoreCmd, result, elapsed);
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }

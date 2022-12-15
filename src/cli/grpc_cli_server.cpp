@@ -154,6 +154,24 @@ class PosCliServiceImpl final : public PosCli::Service
     }
 
     grpc::Status
+    DumpMemorySnapshot(ServerContext* context, const DumpMemorySnapshotRequest* request,
+        DumpMemorySnapshotResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteDumpMemorySnapshotCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, request->command());
+
+        return status;
+    }
+
+    grpc::Status
     StopTelemetry(ServerContext* context, const StopTelemetryRequest* request,
         StopTelemetryResponse* reply) override
     {
