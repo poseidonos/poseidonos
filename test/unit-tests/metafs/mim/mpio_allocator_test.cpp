@@ -37,16 +37,17 @@
 #include <unordered_set>
 
 #include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
+#include "test/unit-tests/metafs/common/fifo_cache_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
 
 namespace pos
 {
-class MpioAllocatorFixture : public ::testing::Test
+class MpioAllocatorFixtureWithRealCache : public ::testing::Test
 {
 public:
-    MpioAllocatorFixture(void)
+    MpioAllocatorFixtureWithRealCache(void)
     {
         config = new NiceMock<MockMetaFsConfigManager>(nullptr);
         EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(COUNT));
@@ -56,7 +57,7 @@ public:
         allocator = new MpioAllocator(config);
     }
 
-    virtual ~MpioAllocatorFixture()
+    virtual ~MpioAllocatorFixtureWithRealCache()
     {
         delete allocator;
         delete config;
@@ -95,7 +96,7 @@ protected:
     };
 };
 
-TEST_F(MpioAllocatorFixture, AllocAndReleaseForSsd)
+TEST_F(MpioAllocatorFixtureWithRealCache, AllocAndReleaseForSsd)
 {
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
@@ -121,7 +122,7 @@ TEST_F(MpioAllocatorFixture, AllocAndReleaseForSsd)
     }
 }
 
-TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRam)
+TEST_F(MpioAllocatorFixtureWithRealCache, AllocAndReleaseForNvRam)
 {
     for (int i = 0; i < static_cast<int>(MpioType::Max); i++)
     {
@@ -144,7 +145,7 @@ TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRam)
     }
 }
 
-TEST_F(MpioAllocatorFixture, CheckCounter)
+TEST_F(MpioAllocatorFixtureWithRealCache, CheckCounter)
 {
     EXPECT_EQ(allocator->GetCapacity(MpioType::Read), COUNT);
     EXPECT_EQ(allocator->GetCapacity(MpioType::Write), COUNT);
@@ -188,7 +189,7 @@ TEST_F(MpioAllocatorFixture, CheckCounter)
     EXPECT_EQ(allocator->GetCacheSize(), 0);
 }
 
-TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRamCache)
+TEST_F(MpioAllocatorFixtureWithRealCache, AllocAndReleaseForNvRamCache)
 {
     std::unordered_set<Mpio*> mpioSet;
 
@@ -228,4 +229,79 @@ TEST_F(MpioAllocatorFixture, AllocAndReleaseForNvRamCache)
     EXPECT_EQ(allocator->GetCacheSize(), 0);
 }
 
+class MpioAllocatorFixture : public ::testing::Test
+{
+public:
+    MpioAllocatorFixture(void)
+    {
+        config = new NiceMock<MockMetaFsConfigManager>(nullptr);
+        EXPECT_CALL(*config, GetMpioPoolCapacity).WillRepeatedly(Return(COUNT));
+        EXPECT_CALL(*config, GetWriteMpioCacheCapacity).WillRepeatedly(Return(COUNT));
+        EXPECT_CALL(*config, IsDirectAccessEnabled).WillRepeatedly(Return(false));
+
+        writeCache = std::make_shared<NiceMock<MockFifoCache<int, MetaLpnType, Mpio*>>>(COUNT);
+
+        allocator = new MpioAllocator(config, writeCache);
+    }
+
+    virtual ~MpioAllocatorFixture()
+    {
+        delete allocator;
+        delete config;
+    }
+
+    virtual void SetUp(void) override
+    {
+    }
+
+    virtual void TearDown(void) override
+    {
+    }
+
+    virtual void BuildIoInfo(MpioIoInfo& io, const MetaIoOpcode opcode,
+        const int arrayId, const MetaLpnType lpn) const
+    {
+        io.opcode = opcode;
+        io.arrayId = arrayId;
+        io.metaLpn = lpn;
+    }
+
+protected:
+    NiceMock<MockMetaFsConfigManager>* config;
+    MpioAllocator* allocator;
+    std::shared_ptr<NiceMock<MockFifoCache<int, MetaLpnType, Mpio*>>> writeCache;
+
+    const uint32_t COUNT = 10;
+    const int arrayId = 0;
+    Mpio* mpioList[10] = {
+        0,
+    };
+    Mpio* mpioList_r[10] = {
+        0,
+    };
+    Mpio* mpioList_w[10] = {
+        0,
+    };
+};
+
+TEST_F(MpioAllocatorFixture, GetCacheSize_testIfExpectedSizeIsReturns)
+{
+    size_t expectedValue = 10;
+    EXPECT_CALL(*writeCache, GetSize).WillOnce(Return(expectedValue));
+    EXPECT_EQ(allocator->GetCacheSize(), expectedValue);
+}
+
+TEST_F(MpioAllocatorFixture, IsCacheFull_testIfFalseIsReturnedWhenCacheIsFull)
+{
+    bool expectedValue = false;
+    EXPECT_CALL(*writeCache, IsFull).WillOnce(Return(expectedValue));
+    EXPECT_EQ(allocator->IsCacheFull(), expectedValue);
+}
+
+TEST_F(MpioAllocatorFixture, IsCacheFull_testIfTrueIsReturnedWhenCacheIsFull)
+{
+    bool expectedValue = true;
+    EXPECT_CALL(*writeCache, IsFull).WillOnce(Return(expectedValue));
+    EXPECT_EQ(allocator->IsCacheFull(), expectedValue);
+}
 } // namespace pos
