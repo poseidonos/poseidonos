@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -36,22 +36,18 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/mim/mpio_allocator.h"
+#include "src/metafs/common/fifo_cache.h"
 
 namespace pos
 {
-class MockMpioAllocator : public MpioAllocator
+template<typename Key_1, typename Key_2, typename Value>
+class MockFifoCache : public FifoCache<Key_1, Key_2, Value>
 {
 public:
-    using MpioAllocator::MpioAllocator;
-    MOCK_METHOD(Mpio*, TryAlloc, (const MpioType mpioType, const MetaStorageType storageType,
-        const MetaLpnType lpn, const bool partialIO, const int arrayId), (override));
-    MOCK_METHOD(size_t, GetCapacity, (const MpioType type), (const, override));
-    MOCK_METHOD(void, Release, (Mpio* mpio), (override));
-    MOCK_METHOD(void, TryReleaseTheOldestCache, (const bool forceReleaseCacheEntry), (override));
-    MOCK_METHOD(void, ReleaseAllCache, (), (override));
-    MOCK_METHOD(size_t, GetCacheSize, (), (const));
-    MOCK_METHOD(bool, IsCacheFull, (), (const));
+    using FifoCache<Key_1, Key_2, Value>::FifoCache;
+
+    MOCK_METHOD(size_t, GetSize, (), (const));
+    MOCK_METHOD(bool, IsFull, (), (const));
 };
 
 } // namespace pos

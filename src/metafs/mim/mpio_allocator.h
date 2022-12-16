@@ -51,7 +51,8 @@ class MetaFsConfigManager;
 class MpioAllocator
 {
 public:
-    explicit MpioAllocator(MetaFsConfigManager* configManager);
+    explicit MpioAllocator(MetaFsConfigManager* configManager,
+        std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache = nullptr);
     virtual ~MpioAllocator(void);
 
     virtual Mpio* TryAlloc(const MpioType mpioType, const MetaStorageType storageType,
@@ -86,7 +87,7 @@ public:
     {
         return writeCache_->GetSize();
     }
-    virtual bool IsFullyCached(void) const
+    virtual bool IsCacheFull(void) const
     {
         return writeCache_->IsFull();
     }

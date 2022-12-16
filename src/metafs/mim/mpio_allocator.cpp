@@ -42,8 +42,9 @@
 
 namespace pos
 {
-MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
-: WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity())
+MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager, std::shared_ptr<FifoCache<int, MetaLpnType, Mpio*>> writeCache)
+: WRITE_CACHE_CAPACITY(configManager->GetWriteMpioCacheCapacity()),
+  writeCache_(writeCache)
 {
     const size_t poolSize = configManager->GetMpioPoolCapacity();
     const bool directAccessEnabled = configManager->IsDirectAccessEnabled();
@@ -57,7 +58,10 @@ MpioAllocator::MpioAllocator(MetaFsConfigManager* configManager)
     }
 
     // tuple of array id, meta lpn, and mpio
-    writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(WRITE_CACHE_CAPACITY);
+    if (!writeCache_)
+    {
+        writeCache_ = std::make_shared<FifoCache<int, MetaLpnType, Mpio*>>(WRITE_CACHE_CAPACITY);
+    }
 
     mdPageBufPool = std::make_shared<MDPageBufPool>(poolSize * (uint32_t)MpioType::Max);
     mdPageBufPool->Init();
