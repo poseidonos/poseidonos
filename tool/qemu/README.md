@@ -8,10 +8,12 @@ PoseidonOS has some server requirements to run (several NVMe devices, NUMA etc.,
 - qemu-system-x86_64
 - enabled virtualization (KVM)
 - [Ubuntu 18.04 iso](https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso)
+- 128GB + 5 * 20GB is required minimum space for virtual OS disk and virtual nvme devices. But you can chnage the size.
+
 ## How to Run script?
 Run QEMU script
 ```bash
-./run_qemu.py -q False -m False -c False -i 1
+./run_qemu.py -i 1 -q False -m False -c False
 ```
 
 ## Usage Notes

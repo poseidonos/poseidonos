@@ -13,7 +13,7 @@ qemu_dir = "/mnt/d/Virtual/qemu-ubuntu"
 device_dir = "devices"
 image_dir = "images"
 vm_prefix = "vm"
-nvme_device_prefix = "tlc"
+nvme_device_prefix = "nvme"
 num_device = 5
 
 ###########################
