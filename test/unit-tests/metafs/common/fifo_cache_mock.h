@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,23 +30,24 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <functional>
+#include <list>
+#include <string>
+#include <vector>
 
-#include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/log_buffer/log_buffer_io_context.h"
+#include "src/metafs/common/fifo_cache.h"
 
 namespace pos
 {
-class LogGroupResetContext : public LogBufferIoContext
+template<typename Key_1, typename Key_2, typename Value>
+class MockFifoCache : public FifoCache<Key_1, Key_2, Value>
 {
 public:
-    LogGroupResetContext(void) = default;
-    explicit LogGroupResetContext(int logGroupId, EventSmartPtr callbackEvent);
-    virtual ~LogGroupResetContext(void) = default;
+    using FifoCache<Key_1, Key_2, Value>::FifoCache;
 
-    void SetIoRequest(uint64_t offset, uint64_t len, char* buf);
+    MOCK_METHOD(size_t, GetSize, (), (const));
+    MOCK_METHOD(bool, IsFull, (), (const));
 };
 
 } // namespace pos

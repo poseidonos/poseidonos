@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,43 +30,57 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
 
-#include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mapper_const.h"
-#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 
 namespace pos
 {
-class LogHandlerInterface;
-
-class LogWriteContext
+LogBufferIoContextFactory::LogBufferIoContextFactory(void)
+: config(nullptr),
+  notifier(nullptr),
+  sequenceController(nullptr)
 {
-public:
-    LogWriteContext(void);
-    LogWriteContext(LogHandlerInterface* inputLog, EventSmartPtr callbackEvent);
-    LogWriteContext(LogHandlerInterface* inputLog, MapList inputMapList, EventSmartPtr callbackEvent);
-    virtual ~LogWriteContext(void);
+}
 
-    virtual void SetLogAllocated(int logGroupId, uint64_t sequenceNumber);
+LogBufferIoContextFactory::~LogBufferIoContextFactory(void)
+{
+}
 
-    virtual const MapList& GetDirtyMapList(void);
-    virtual int GetLogGroupId(void);
+void
+LogBufferIoContextFactory::Init(JournalConfiguration* journalConfig,
+    LogBufferWriteDoneNotifier* target, CallbackSequenceController* sequencer)
+{
+    config = journalConfig;
+    notifier = target;
+    sequenceController = sequencer;
+}
 
-    virtual uint64_t GetLogSize(void);
-    virtual char* GetBuffer(void);
-    virtual EventSmartPtr GetCallback(void);
+LogBufferIoContext*
+LogBufferIoContextFactory::CreateLogBufferIoContext(int groupId, EventSmartPtr event)
+{
+    return new LogBufferIoContext(groupId, event);
+}
 
-    virtual LogHandlerInterface* GetLog(void);
+MapUpdateLogWriteContext*
+LogBufferIoContextFactory::CreateMapUpdateLogWriteIoContext(LogWriteContext* context)
+{
+    return new MapUpdateLogWriteContext(context, notifier, sequenceController);
+}
 
-private:
-    LogHandlerInterface* log;
-    MapList dirtyMap;
+LogWriteIoContext*
+LogBufferIoContextFactory::CreateLogWriteIoContext(LogWriteContext* context)
+{
+    return new LogWriteIoContext(context, notifier);
+}
 
-    int logGroupId;
-    EventSmartPtr callback;
-
-    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
-};
+LogBufferIoContext*
+LogBufferIoContextFactory::CreateLogGroupFooterWriteContext(uint64_t offset,
+    LogGroupFooter footer, int logGroupId, EventSmartPtr callback)
+{
+    return new LogGroupFooterWriteContext(logGroupId, callback, footer, offset);
+}
 
 } // namespace pos

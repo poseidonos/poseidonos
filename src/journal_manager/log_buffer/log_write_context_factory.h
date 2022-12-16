@@ -32,30 +32,22 @@
 
 #pragma once
 
-#include <vector>
-
-#include "src/bio/volume_io.h"
-#include "src/event_scheduler/event.h"
-#include "src/include/address_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
-#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
-#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
-#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
+#include "src/journal_manager/log/log_event.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-class LogGroupResetContext;
 class JournalConfiguration;
 
 class LogWriteContextFactory
 {
 public:
     LogWriteContextFactory(void);
-    virtual ~LogWriteContextFactory(void);
+    virtual ~LogWriteContextFactory(void) = default;
 
-    virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target,
-        CallbackSequenceController* sequencer);
+    virtual void Init(JournalConfiguration* config);
 
     virtual LogWriteContext* CreateBlockMapLogWriteContext(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateStripeMapLogWriteContext(StripeSmartPtr stripe,
@@ -68,27 +60,11 @@ public:
         GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
         uint64_t contextVersion, EventSmartPtr callback);
-    virtual LogGroupResetContext* CreateLogGroupResetContext(uint64_t offset, int id,
-        uint64_t groupSize, EventSmartPtr callbackEvent, char* dataBuffer);
-
-    // For UT
-    inline LogBufferWriteDoneNotifier*
-    GetLogBufferWriteDoneNotifier(void)
-    {
-        return notifier;
-    }
-    inline CallbackSequenceController*
-    GetCallbackSequenceController(void)
-    {
-        return sequenceController;
-    }
 
 private:
     uint64_t _GetMaxNumGcBlockMapUpdateInAContext(void);
 
     JournalConfiguration* config;
-    LogBufferWriteDoneNotifier* notifier;
-    CallbackSequenceController* sequenceController;
 };
 
 } // namespace pos

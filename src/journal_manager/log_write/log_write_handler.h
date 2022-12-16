@@ -49,6 +49,7 @@ class IJournalLogBuffer;
 class JournalConfiguration;
 class LogWriteStatistics;
 class EasyTelemetryPublisher;
+class LogWriteIoContext;
 
 class LogWriteHandler : public LogBufferWriteDoneEvent
 {
@@ -66,12 +67,12 @@ public:
     virtual void AddLogToWaitingList(LogWriteContext* context);
     void LogWriteDone(AsyncMetaFileIoCtx* ctx);
 
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
 private:
     void _StartWaitingIos(void);
-    void _PublishPeriodicMetrics(LogWriteContext* context);
+    void _PublishPeriodicMetrics(LogWriteIoContext* context);
 
     IJournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;

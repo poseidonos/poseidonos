@@ -51,7 +51,7 @@ public:
     MOCK_METHOD(void, TryReleaseTheOldestCache, (const bool forceReleaseCacheEntry), (override));
     MOCK_METHOD(void, ReleaseAllCache, (), (override));
     MOCK_METHOD(size_t, GetCacheSize, (), (const));
-    MOCK_METHOD(bool, IsFullyCached, (), (const));
+    MOCK_METHOD(bool, IsCacheFull, (), (const));
 };
 
 } // namespace pos

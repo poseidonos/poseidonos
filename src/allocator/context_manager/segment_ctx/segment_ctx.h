@@ -71,7 +71,7 @@ public:
     virtual void AfterLoad(char* buf);
     virtual void BeforeFlush(char* buf);
     virtual std::mutex& GetCtxLock(void) { return segCtxLock; }
-    virtual void FinalizeIo(AsyncMetaFileIoCtx* ctx);
+    virtual void FinalizeIo(char* buf);
     virtual char* GetSectionAddr(int section);
     virtual int GetSectionSize(int section);
     virtual uint64_t GetStoredVersion(void);

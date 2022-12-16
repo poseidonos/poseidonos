@@ -30,24 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/journal_manager/log_buffer/log_group_reset_context.h"
+#include "src/journal_manager/log_buffer/log_write_io_context.h"
 
-#include "src/event_scheduler/event.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
 
 namespace pos
 {
-LogGroupResetContext::LogGroupResetContext(int id, EventSmartPtr callbackEvent)
-: LogBufferIoContext(id, callbackEvent)
+LogWriteIoContext::LogWriteIoContext(LogWriteContext* context,
+    LogBufferWriteDoneNotifier* notifier)
+: LogBufferIoContext(context->GetLogGroupId(), context->GetCallback()),
+  logFilledNotifier(notifier),
+  logWriteContext(context)
 {
-    this->opcode = MetaFsIoOpcode::Write;
+}
+
+LogHandlerInterface*
+LogWriteIoContext::GetLog(void)
+{
+    return logWriteContext->GetLog();
+}
+
+LogWriteContext*
+LogWriteIoContext::GetLogWriteContext(void)
+{
+    return logWriteContext;
+}
+
+int
+LogWriteIoContext::GetLogGroupId(void)
+{
+    return logWriteContext->GetLogGroupId();
 }
 
 void
-LogGroupResetContext::SetIoRequest(uint64_t offset, uint64_t len, char* buf)
+LogWriteIoContext::IoDone(void)
 {
-    this->fileOffset = offset;
-    this->length = len;
-    this->buffer = buf;
+    auto dirty = logWriteContext->GetDirtyMapList();
+    logFilledNotifier->NotifyLogFilled(logWriteContext->GetLogGroupId(), dirty);
+
+    LogBufferIoContext::IoDone();
 }
 
 } // namespace pos

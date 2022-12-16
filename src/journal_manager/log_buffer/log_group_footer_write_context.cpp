@@ -34,25 +34,17 @@
 
 namespace pos
 {
-LogGroupFooterWriteContext::LogGroupFooterWriteContext(int id, EventSmartPtr callback)
+LogGroupFooterWriteContext::LogGroupFooterWriteContext(int id,
+    EventSmartPtr callback, LogGroupFooter footer, uint64_t offset)
 : LogBufferIoContext(id, callback)
 {
-    data = new LogGroupFooter();
+    data = footer;
+
+    SetIoInfo(MetaFsIoOpcode::Write, offset, sizeof(data), (char*)&data);
 }
 
 LogGroupFooterWriteContext::~LogGroupFooterWriteContext(void)
 {
-    delete data;
-}
-
-void
-LogGroupFooterWriteContext::SetIoRequest(uint64_t offset, LogGroupFooter footer)
-{
-    *data = footer;
-
-    this->fileOffset = offset;
-    this->length = sizeof(*data);
-    this->buffer = (char*)data;
 }
 
 } // namespace pos

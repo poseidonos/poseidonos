@@ -145,9 +145,9 @@ RebuildCtx::BeforeFlush(char* buf)
 }
 
 void
-RebuildCtx::FinalizeIo(AsyncMetaFileIoCtx* ctx)
+RebuildCtx::FinalizeIo(char* buf)
 {
-    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(ctx->buffer);
+    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(buf);
     ctxStoredVersion = header->ctxVersion;
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "RebuildCtx file stored, version:{}, segmentCount:{}", header->ctxVersion, header->numTargetSegments);
 }
@@ -225,7 +225,7 @@ RebuildCtx::GetNumSections(void)
 int
 RebuildCtx::_FlushContext(void)
 {
-    AllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
+    FnAllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
     int ret = fileIo->Flush(completion, INVALID_SECTION_ID);
 
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),

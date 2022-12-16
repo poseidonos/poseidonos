@@ -199,7 +199,7 @@ BufferOffsetAllocator::LogWriteCanceled(int id)
 }
 
 void
-BufferOffsetAllocator::LogFilled(int id, MapList& dirty)
+BufferOffsetAllocator::LogFilled(int id, const MapList& dirty)
 {
     statusList[id]->LogFilled();
     _TryToSetFull(id);

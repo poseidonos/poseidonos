@@ -16,7 +16,7 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, AddLog, (LogWriteContext* context), (override));
     MOCK_METHOD(void, AddLogToWaitingList, (LogWriteContext* context), (override));
-    MOCK_METHOD(void, LogFilled, (int logGroupId, MapList& dirty), (override));
+    MOCK_METHOD(void, LogFilled, (int logGroupId, const MapList& dirty), (override));
     MOCK_METHOD(void, LogBufferReseted, (int logGroupId), (override));
 };
 

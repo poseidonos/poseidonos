@@ -3,10 +3,10 @@
 #include <atomic>
 
 #include "src/dump/dump_shared_ptr.h"
+#include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/mapper/include/mapper_const.h"
 #include "src/meta_file_intf/async_context.h"
-
 namespace pos
 {
 enum IoDirection
@@ -71,7 +71,14 @@ using ReverseMapIoPtr = std::shared_ptr<ReverseMapIo>;
 class RevMapPageAsyncIoCtx : public AsyncMetaFileIoCtx
 {
 public:
+    RevMapPageAsyncIoCtx(int mpageNum, StripeId vsid);
+    virtual ~RevMapPageAsyncIoCtx(void) = default;
+
+    int GetMpageNum(void) const;
+
+private:
     int mpageNum;
+    StripeId vsid;
 };
 
 } // namespace pos

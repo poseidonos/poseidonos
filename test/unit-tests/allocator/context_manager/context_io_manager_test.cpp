@@ -171,13 +171,13 @@ TEST(ContextIoManager, FlushContexts_IfSyncSuccessAllFile)
     ContextIoManager ioManager(&info, &tp, &scheduler, segmentCtxIo, allocatorCtxIo, nullptr);
 
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
         {
             completion();
             return 0;
         });
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
         {
             completion();
             return 0;

@@ -19,7 +19,8 @@ TEST(LogWriteContext, LogWriteContext_testIfConstructedSuccessfully)
 {
     // Given, When
     NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
-    LogWriteContext logWriteContext(log, nullptr, nullptr);
+    MapList dirtyList;
+    LogWriteContext logWriteContext(log, dirtyList, nullptr);
 
     // Then: Log group id is invalid
     int result = logWriteContext.GetLogGroupId();
@@ -30,7 +31,8 @@ TEST(LogWriteContext, GetLog_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
-    LogWriteContext logWriteContext(log, nullptr, nullptr);
+    MapList dirtyList;
+    LogWriteContext logWriteContext(log, dirtyList, nullptr);
 
     // When
     LogHandlerInterface* result = logWriteContext.GetLog();
@@ -43,32 +45,22 @@ TEST(LogWriteContext, SetBufferAllocated_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
-    LogWriteContext logWriteContext(log, nullptr, nullptr);
+    MapList dirtyList;
+    LogWriteContext logWriteContext(log, dirtyList, nullptr);
 
     // When
     uint64_t fileOffset = 0;
     int logGroupId = 1;
     uint32_t seqNum = 1;
+    
+    ON_CALL(*log, GetSize).WillByDefault(Return(10));
+    ON_CALL(*log, GetData).WillByDefault(Return(nullptr));
+
     EXPECT_CALL(*log, SetSeqNum(seqNum));
 
-    logWriteContext.SetBufferAllocated(fileOffset, logGroupId, seqNum);
+    logWriteContext.SetLogAllocated(logGroupId, seqNum);
 
     // Then
-    EXPECT_EQ(fileOffset, logWriteContext.fileOffset);
     EXPECT_EQ(logGroupId, logWriteContext.GetLogGroupId());
-}
-
-TEST(LogWriteContext, IoDone_testIfExecutedSuccessfully)
-{
-    // Given
-    NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
-    NiceMock<MockEvent>* callback = new NiceMock<MockEvent>;
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    LogWriteContext logWriteContext(log, EventSmartPtr(callback), &notifier);
-
-    // When, Then
-    EXPECT_CALL(notifier, NotifyLogFilled);
-    EXPECT_CALL(*callback, Execute).WillOnce(Return(true));
-    logWriteContext.IoDone();
 }
 } // namespace pos

@@ -37,12 +37,14 @@
 #include "buffer_offset_allocator.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_write_context.h"
+#include "src/journal_manager/log_buffer/log_write_io_context.h"
 #include "src/journal_manager/log_write/log_write_statistics.h"
 #include "src/journal_manager/replay/replay_stripe.h"
 #include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/telemetry/telemetry_client/easy_telemetry_publisher.h"
 #include "src/metadata/block_map_update.h"
+#include "src/telemetry/telemetry_client/easy_telemetry_publisher.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
@@ -91,7 +93,8 @@ LogWriteHandler::~LogWriteHandler(void)
 
 void
 LogWriteHandler::Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-    JournalConfiguration* journalConfig, EasyTelemetryPublisher* tp, ConcurrentMetaFsTimeInterval* timeInterval)
+    JournalConfiguration* journalConfig, EasyTelemetryPublisher* tp,
+    ConcurrentMetaFsTimeInterval* timeInterval)
 {
     bufferAllocator = allocator;
     logBuffer = buffer;
@@ -119,7 +122,7 @@ LogWriteHandler::AddLog(LogWriteContext* context)
 {
     uint64_t allocatedOffset = 0;
 
-    int result = bufferAllocator->AllocateBuffer(context->GetLength(), allocatedOffset);
+    int result = bufferAllocator->AllocateBuffer(context->GetLogSize(), allocatedOffset);
 
     if (EID(SUCCESS) == result)
     {
@@ -127,25 +130,10 @@ LogWriteHandler::AddLog(LogWriteContext* context)
         assert(groupId < numLogGroups);
         uint32_t seqNum = bufferAllocator->GetSequenceNumber(groupId);
 
-        context->SetBufferAllocated(allocatedOffset, groupId, seqNum);
-        context->SetInternalCallback(std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
+        context->SetLogAllocated(groupId, seqNum);
 
-        EventSmartPtr metaUpdateEvent = context->GetClientCallback();
-        MetaUpdateCallback* metaUpdateCb = dynamic_cast<MetaUpdateCallback*>(metaUpdateEvent.get());
-
-        if (nullptr != metaUpdateCb)
-        {
-            metaUpdateCb->SetLogGroupId(groupId);
-        }
-        else
-        {
-            // log writes that not use MetaUpdateCallback will be skipped intentionally.
-            // metaUpdateCb is nullable by design since certain callback (e.g. VolumeDeletedLogWriteCallback)
-            // may not want to use VersionedSegmentContext feature (hence, not inheriting MetaUpdateCallback)
-        }
-
-        context->stopwatch.StoreTimestamp(LogStage::Issue);
-        result = logBuffer->WriteLog(context);
+        result = logBuffer->WriteLog(context, allocatedOffset,
+            std::bind(&LogWriteHandler::LogWriteDone, this, std::placeholders::_1));
         if (EID(SUCCESS) == result)
         {
             (*numIosRequested)[groupId]++;
@@ -172,19 +160,20 @@ LogWriteHandler::AddLogToWaitingList(LogWriteContext* context)
 void
 LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
 {
-    LogWriteContext* context = dynamic_cast<LogWriteContext*>(ctx);
+    LogWriteIoContext* ioContext = dynamic_cast<LogWriteIoContext*>(ctx);
 
-    if (context != nullptr)
+    if (ioContext != nullptr)
     {
-        assert(context->GetLogGroupId() < numLogGroups);
-        (*numIosCompleted)[context->GetLogGroupId()]++;
+        LogWriteContext* logWriteContext = ioContext->GetLogWriteContext();
 
-        context->stopwatch.StoreTimestamp(LogStage::Complete);
-        _PublishPeriodicMetrics(context);
+        (*numIosCompleted)[ioContext->GetLogGroupId()]++;
+
+        ioContext->stopwatch.StoreTimestamp(LogStage::Complete);
+        _PublishPeriodicMetrics(ioContext);
 
         bool statusUpdatedToStats = false;
 
-        if (context->GetError() != 0)
+        if (ioContext->GetError() != 0)
         {
             // When log write fails due to error, should log the error and complete write
             POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED),
@@ -195,25 +184,32 @@ LogWriteHandler::LogWriteDone(AsyncMetaFileIoCtx* ctx)
         else
         {
             // Status update should be followed by LogWriteDone callback
-            statusUpdatedToStats = logWriteStats->UpdateStatus(context);
+            statusUpdatedToStats = logWriteStats->UpdateStatus(logWriteContext);
         }
 
-        context->IoDone();
+        ioContext->IoDone();
 
         if (statusUpdatedToStats == true)
         {
-            logWriteStats->AddToList(context);
+            logWriteStats->AddToList(logWriteContext);
         }
         else
         {
-            delete context;
+            delete logWriteContext;
         }
+
+        delete ioContext;
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_CRITICAL_ERROR),
+            "Cannot complete log write request, {}", ctx->ToString());
     }
     _StartWaitingIos();
 }
 
 void
-LogWriteHandler::_PublishPeriodicMetrics(LogWriteContext* context)
+LogWriteHandler::_PublishPeriodicMetrics(LogWriteIoContext* context)
 {
     uint64_t elapsedTime = context->stopwatch.GetElapsedInMilli(LogStage::Issue, LogStage::Complete).count();
     uint64_t time = sumOfTimeSpentPerInterval.fetch_and(elapsedTime) + elapsedTime;
@@ -250,7 +246,7 @@ LogWriteHandler::_StartWaitingIos(void)
 }
 
 void
-LogWriteHandler::LogFilled(int logGroupId, MapList& dirty)
+LogWriteHandler::LogFilled(int logGroupId, const MapList& dirty)
 {
     // Nothing to do
 }

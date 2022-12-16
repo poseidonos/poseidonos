@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -33,40 +33,44 @@
 #pragma once
 
 #include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mapper_const.h"
-#include "src/mapper/include/mpage_info.h"
+#include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context.h"
+#include "src/metafs/common/metafs_stopwatch.h"
 
 namespace pos
 {
-class LogHandlerInterface;
+class LogWriteContext;
+class LogBufferWriteDoneNotifier;
 
-class LogWriteContext
+// TODO stopwatch
+enum class LogStage
+{
+    Issue,
+    Complete,
+    Count
+};
+
+class LogWriteIoContext : public LogBufferIoContext
 {
 public:
-    LogWriteContext(void);
-    LogWriteContext(LogHandlerInterface* inputLog, EventSmartPtr callbackEvent);
-    LogWriteContext(LogHandlerInterface* inputLog, MapList inputMapList, EventSmartPtr callbackEvent);
-    virtual ~LogWriteContext(void);
+    LogWriteIoContext(void) = default;
 
-    virtual void SetLogAllocated(int logGroupId, uint64_t sequenceNumber);
+    LogWriteIoContext(LogWriteContext* logWriteContext,
+        LogBufferWriteDoneNotifier* notifier);
+    virtual ~LogWriteIoContext(void) = default;
 
-    virtual const MapList& GetDirtyMapList(void);
+    virtual void IoDone(void) override;
+
+    // This two methods are for log write statistics
+    virtual LogHandlerInterface* GetLog(void);
+    virtual LogWriteContext* GetLogWriteContext(void);
     virtual int GetLogGroupId(void);
 
-    virtual uint64_t GetLogSize(void);
-    virtual char* GetBuffer(void);
-    virtual EventSmartPtr GetCallback(void);
+    MetaFsStopwatch<LogStage> stopwatch;
 
-    virtual LogHandlerInterface* GetLog(void);
-
-private:
-    LogHandlerInterface* log;
-    MapList dirtyMap;
-
-    int logGroupId;
-    EventSmartPtr callback;
-
-    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
+protected:
+    LogBufferWriteDoneNotifier* logFilledNotifier;
+    LogWriteContext* logWriteContext;
 };
 
 } // namespace pos

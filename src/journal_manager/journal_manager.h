@@ -51,6 +51,7 @@ class JournalConfiguration;
 class JournalLogBuffer;
 
 class LogWriteContextFactory;
+class LogBufferIoContextFactory;
 class JournalEventFactory;
 
 class LogWriteHandler;
@@ -95,6 +96,7 @@ public:
     JournalManager(JournalConfiguration* config,
         JournalStatusProvider* journalStatusProvider,
         LogWriteContextFactory* logWriteContextFactory,
+        LogBufferIoContextFactory* logBufferIoContextFactory,
         JournalEventFactory* journalEventFactory,
         LogWriteHandler* writeHandler,
         JournalVolumeEventHandler* journalVolumeEventHandler,
@@ -164,8 +166,10 @@ protected:
 
     IJournalLogBuffer* logBuffer;
 
-    LogWriteContextFactory* logFactory;
+    LogWriteContextFactory* logWriteContextFactory;
+    LogBufferIoContextFactory* logBufferIoContextFactory;
     JournalEventFactory* eventFactory;
+
     LogWriteHandler* logWriteHandler;
     JournalVolumeEventHandler* volumeEventHandler;
     JournalWriter* journalWriter;

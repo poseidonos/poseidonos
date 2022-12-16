@@ -2962,7 +2962,7 @@ Root:
     Solution:
   -
     Id: 3014
-    Name: JOURNAL_LOG_BUFFER_RESET_FAILED
+    Name: JOURNAL_LOG_BUFFER_INTERNAL_IO_FAILED
     Severity:
     Description:
     Cause:
@@ -2983,9 +2983,9 @@ Root:
     Solution:
   -
     Id: 3017
-    Name: JOURNAL_LOG_BUFFER_READ_FAILED
+    Name: JOURNAL_CRITICAL_ERROR
     Severity:
-    Description:
+    Description: Critical error that can't complete write request
     Cause:
     Solution:
   -

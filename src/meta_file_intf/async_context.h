@@ -41,8 +41,11 @@ namespace pos
 {
 class AsyncMetaFileIoCtx;
 
-using MetaIoCbPtr = std::function<void(AsyncMetaFileIoCtx*)>;
-using MetaFileIoCbPtr = std::function<int(void*)>;
+// Callback function to be called when async I/O is completed
+using FnCompleteMetaFileIo = std::function<void(AsyncMetaFileIoCtx*)>;
+
+// Function to be called to handle I/O result. It depends on file type (MockFileIntf/MetaFsFileIntf)
+using FnCheckMetaFileIoDone = std::function<int(void*)>;
 
 class AsyncMetaFileIoCtx
 {
@@ -53,21 +56,37 @@ public:
 // LCOV_EXCL_STOP
 
     virtual void HandleIoComplete(void* data);
+    virtual char* GetBuffer(void);
+    virtual FnCompleteMetaFileIo GetCallback(void);
     virtual int GetError(void) const;
     virtual uint64_t GetLength(void) const;
+    virtual MetaFsIoOpcode GetOpcode(void) const;
+    virtual int GetFd(void) const;
+    virtual uint64_t GetFileOffset(void) const;
 
     virtual std::string ToString(void) const;
 
+    virtual bool IsReadyToUse(void) const;
+
+    virtual void SetIoInfo(MetaFsIoOpcode opcode, uint64_t fileOffset, uint64_t length, char* buffer);
+    virtual void SetFileInfo(int fd, FnCheckMetaFileIoDone ioDoneCheckCallback);
+    virtual void SetCallback(FnCompleteMetaFileIo callback);
+
+    int error;
+
+private:
     MetaFsIoOpcode opcode;
     int fd;
     uint64_t fileOffset;
     uint64_t length;
     char* buffer;
-    MetaIoCbPtr callback;
+    FnCompleteMetaFileIo callback;
 
-    int error;
-    MetaFileIoCbPtr ioDoneCheckCallback;
-    uint32_t vsid;
+    FnCheckMetaFileIoDone ioDoneCheckFunc;
+
+    bool fileInfoUpdated;
+    bool ioInfoUpdated;
+    bool callbackUpdated;
 };
 
 } // namespace pos

@@ -32,41 +32,47 @@
 
 #pragma once
 
-#include "src/include/smart_ptr_type.h"
-#include "src/mapper/include/mapper_const.h"
+#include <vector>
+
+#include "src/bio/volume_io.h"
+#include "src/event_scheduler/event.h"
+#include "src/include/address_type.h"
+#include "src/journal_manager/log/gc_map_update_list.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/journal_manager/log_buffer/callback_sequence_controller.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
 #include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-class LogHandlerInterface;
+class LogWriteContext;
+class LogBufferIoContext;
+class LogGroupFooterWriteContext;
 
-class LogWriteContext
+class JournalConfiguration;
+class LogGroupFooter;
+
+class LogBufferIoContextFactory
 {
 public:
-    LogWriteContext(void);
-    LogWriteContext(LogHandlerInterface* inputLog, EventSmartPtr callbackEvent);
-    LogWriteContext(LogHandlerInterface* inputLog, MapList inputMapList, EventSmartPtr callbackEvent);
-    virtual ~LogWriteContext(void);
+    LogBufferIoContextFactory(void);
+    virtual ~LogBufferIoContextFactory(void);
 
-    virtual void SetLogAllocated(int logGroupId, uint64_t sequenceNumber);
+    virtual void Init(JournalConfiguration* config, LogBufferWriteDoneNotifier* target,
+        CallbackSequenceController* sequencer);
 
-    virtual const MapList& GetDirtyMapList(void);
-    virtual int GetLogGroupId(void);
-
-    virtual uint64_t GetLogSize(void);
-    virtual char* GetBuffer(void);
-    virtual EventSmartPtr GetCallback(void);
-
-    virtual LogHandlerInterface* GetLog(void);
+    virtual LogBufferIoContext* CreateLogBufferIoContext(int groupId, EventSmartPtr event);
+    virtual MapUpdateLogWriteContext* CreateMapUpdateLogWriteIoContext(LogWriteContext* context);
+    virtual LogWriteIoContext* CreateLogWriteIoContext(LogWriteContext* context);
+    virtual LogBufferIoContext* CreateLogGroupFooterWriteContext(
+        uint64_t offset, LogGroupFooter footer, int logGroupId, EventSmartPtr callback);
 
 private:
-    LogHandlerInterface* log;
-    MapList dirtyMap;
+    uint64_t _GetMaxNumGcBlockMapUpdateInAContext(void);
 
-    int logGroupId;
-    EventSmartPtr callback;
-
-    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
+    JournalConfiguration* config;
+    LogBufferWriteDoneNotifier* notifier;
+    CallbackSequenceController* sequenceController;
 };
 
 } // namespace pos

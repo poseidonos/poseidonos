@@ -35,21 +35,20 @@
 #include <string>
 
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
-#include "src/journal_manager/log_buffer/log_group_reset_context.h"
 #include "src/journal_manager/log_buffer/log_write_context.h"
-#include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/logger/logger.h"
-#include "src/metafs/metafs_file_intf.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
 #include "src/metafs/config/metafs_config_manager.h"
 #include "src/metafs/include/metafs_service.h"
-#include "src/meta_file_intf/rocksdb_metafs_intf.h"
+#include "src/metafs/metafs_file_intf.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 namespace pos
 {
 JournalLogBuffer::JournalLogBuffer(void)
 : config(nullptr),
-  logFactory(nullptr),
+  ioContextFactory(nullptr),
   numInitializedLogGroup(0),
   logBufferReadDone(0),
   logFile(nullptr),
@@ -82,11 +81,11 @@ JournalLogBuffer::~JournalLogBuffer(void)
 }
 
 int
-JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+JournalLogBuffer::Init(JournalConfiguration* journalConfiguration, LogBufferIoContextFactory* logBufferIoContextFactory,
     int arrayId, TelemetryPublisher* tp)
 {
     config = journalConfiguration;
-    logFactory = logWriteContextFactory;
+    ioContextFactory = logBufferIoContextFactory;
     telemetryPublisher = tp;
 
     if (logFile == nullptr)
@@ -212,24 +211,19 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
         telemetryPublisher->PublishMetric(metric);
     }
 
-    AsyncMetaFileIoCtx* logBufferReadReq = new AsyncMetaFileIoCtx();
-    logBufferReadReq->opcode = MetaFsIoOpcode::Read;
-    logBufferReadReq->fd = logFile->GetFd();
-    logBufferReadReq->fileOffset = _GetFileOffset(groupId, 0);
-    logBufferReadReq->length = groupSize;
-    logBufferReadReq->buffer = (char*)buffer;
-    logBufferReadReq->callback = std::bind(&JournalLogBuffer::_LogBufferReadDone,
-        this, std::placeholders::_1);
+    LogBufferIoContext* logBufferReadReq = new LogBufferIoContext(groupId, nullptr);
+    uint64_t fileOffset = _GetFileOffset(groupId, 0);
+    auto callback = std::bind(&JournalLogBuffer::_LogBufferReadDone, this, std::placeholders::_1);
+
+    logBufferReadReq->SetIoInfo(MetaFsIoOpcode::Read, fileOffset, groupSize, (char*)buffer);
+    logBufferReadReq->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+    logBufferReadReq->SetCallback(callback);
 
     logBufferReadDone = false;
-    int ret = logFile->AsyncIO(logBufferReadReq);
+    int ret = _InternalIo(logBufferReadReq);
     if (ret != 0)
     {
-        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_READ_FAILED),
-            "Failed to read log buffer");
-        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED), logBufferReadReq->ToString());
-        delete logBufferReadReq;
-        return -1 * (EID(JOURNAL_LOG_BUFFER_READ_FAILED));
+        return ret;
     }
 
     while (logBufferReadDone == false)
@@ -254,16 +248,26 @@ JournalLogBuffer::ReadLogBuffer(int groupId, void* buffer)
 }
 
 int
-JournalLogBuffer::WriteLog(LogWriteContext* context)
+JournalLogBuffer::WriteLog(LogWriteContext* context, uint64_t offset, FnCompleteMetaFileIo func)
 {
-    context->SetFile(logFile->GetFd());
-    int ret = logFile->AsyncIO(context);
+    LogWriteIoContext* ioContext =
+        ioContextFactory->CreateMapUpdateLogWriteIoContext(context);
+
+    ioContext->SetIoInfo(MetaFsIoOpcode::Write, offset, context->GetLogSize(), context->GetBuffer());
+    ioContext->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+    ioContext->SetCallback(func);
+
+    ioContext->stopwatch.StoreTimestamp(LogStage::Issue);
+
+    int ret = logFile->AsyncIO(ioContext);
 
     if (ret != 0)
     {
         POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED),
             "Failed to write journal log");
-        POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED), context->ToString());
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_WRITE_FAILED), ioContext->ToString());
+
+        delete ioContext;
         ret = -1 * EID(JOURNAL_LOG_WRITE_FAILED);
     }
 
@@ -312,30 +316,41 @@ JournalLogBuffer::AsyncReset(int id, EventSmartPtr callbackEvent)
 
     uint64_t offset = _GetFileOffset(id, 0);
     uint64_t groupSize = config->GetLogGroupSize();
-    LogGroupResetContext* resetRequest = logFactory->CreateLogGroupResetContext(offset, id, groupSize, callbackEvent, initializedDataBuffer);
+    LogBufferIoContext* resetRequest = ioContextFactory->CreateLogBufferIoContext(id, callbackEvent);
 
-    return InternalIo(resetRequest);
+    resetRequest->SetIoInfo(MetaFsIoOpcode::Write, offset, groupSize, initializedDataBuffer);
+    resetRequest->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+    resetRequest->SetCallback(std::bind(&JournalLogBuffer::_InternalIoDone, this, std::placeholders::_1));
+
+    return _InternalIo(resetRequest);
 }
 
 int
-JournalLogBuffer::InternalIo(LogBufferIoContext* context)
+JournalLogBuffer::WriteLogGroupFooter(uint64_t offset, LogGroupFooter footer,
+    int logGroupId, EventSmartPtr callback)
 {
-    MetaIoCbPtr callbackFunc = std::bind(&JournalLogBuffer::InternalIoDone, this, std::placeholders::_1);
-    context->SetInternalCallback(callbackFunc);
-    context->SetFile(logFile->GetFd());
+    LogBufferIoContext* context = ioContextFactory->CreateLogGroupFooterWriteContext(
+        offset, footer, logGroupId, callback);
 
+    context->SetFileInfo(logFile->GetFd(), logFile->GetIoDoneCheckFunc());
+    context->SetCallback(std::bind(&JournalLogBuffer::_InternalIoDone, this, std::placeholders::_1));
+
+    return _InternalIo(context);
+}
+
+int
+JournalLogBuffer::_InternalIo(LogBufferIoContext* context)
+{
     int ret = logFile->AsyncIO(context);
     if (ret != 0)
     {
-        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED),
-            "Failed to reset log buffer");
-        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_RESET_FAILED), context->ToString());
+        POS_TRACE_ERROR(EID(JOURNAL_LOG_BUFFER_INTERNAL_IO_FAILED), context->ToString());
+        delete context;
     }
     return ret;
 }
-
 void
-JournalLogBuffer::InternalIoDone(AsyncMetaFileIoCtx* ctx)
+JournalLogBuffer::_InternalIoDone(AsyncMetaFileIoCtx* ctx)
 {
     LogBufferIoContext* context = dynamic_cast<LogBufferIoContext*>(ctx);
     if (context != nullptr)

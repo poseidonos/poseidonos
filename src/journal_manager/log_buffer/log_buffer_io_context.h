@@ -50,9 +50,6 @@ public:
     virtual ~LogBufferIoContext(void) = default;
 // LCOV_EXCL_STOP
 
-    virtual void SetInternalCallback(MetaIoCbPtr cb);
-    virtual void SetFile(int fileDescriptor);
-
     virtual void IoDone(void);
 
     // For UT
@@ -70,8 +67,6 @@ public:
 protected:
     int logGroupId;
     EventSmartPtr clientCallback;
-
-    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
 };
 
 } // namespace pos
