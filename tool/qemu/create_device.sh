@@ -13,7 +13,7 @@ tlc_size=$((20 * 1024 * 1024 * 1024))
 mkdir -p $image_dir
 
 if [ `ls -1 $image_dir/tlc.*.raw | awk 'END{print NR}'` -eq $num_dev ]; then
-	echo NVME device images already exists.
+	echo 'NVME device image(s) already exists.'
 	exit 1
 fi
 
