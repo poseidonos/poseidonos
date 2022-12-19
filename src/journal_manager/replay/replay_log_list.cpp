@@ -113,7 +113,14 @@ ReplayLogList::_GetTime(void)
 bool
 ReplayLogList::IsEmpty(void)
 {
-    return (logGroups.size() == 0);
+    for (auto logGroup: logGroups)
+    {
+        if (logGroup.size() != 0)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void

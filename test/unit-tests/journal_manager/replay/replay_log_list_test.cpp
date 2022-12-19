@@ -149,6 +149,7 @@ TEST(ReplayLogList, AddLog_testIfVolumeDeletingLogsAreAdded)
 TEST(ReplayLogList, IsEmpty_testIfReturnTrueWhenNoLogsAreAdded)
 {
     ReplayLogList logList;
+    logList.Init(2);
     EXPECT_TRUE(logList.IsEmpty() == true);
 }
 
