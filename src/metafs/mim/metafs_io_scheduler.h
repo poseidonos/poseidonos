@@ -117,8 +117,8 @@ private:
     std::vector<int> weight_;
     bool needToIgnoreNuma_;
 
-    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
+    static const uint32_t NUM_STORAGE_TYPE = (int)MetaStorageType::Max;
     static const uint32_t NUM_ARRAY = (int)MetaFsConfig::MAX_ARRAY_CNT;
-    int64_t issueCount_[NUM_ARRAY][NUM_STORAGE];
+    int64_t issueCount_[NUM_ARRAY][NUM_STORAGE_TYPE];
 };
 } // namespace pos

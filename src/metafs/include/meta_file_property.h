@@ -46,6 +46,7 @@ enum class MetaFileType
     General,
     MAX
 };
+static_assert((int)MetaFileType::MAX == 4, "SpecialPurposeMap, Journal, Map and General");
 
 class MetaFilePropertySet
 {

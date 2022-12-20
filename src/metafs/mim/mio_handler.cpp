@@ -127,7 +127,7 @@ MioHandler::~MioHandler(void)
 
     for (uint32_t index = 0; index < MetaFsConfig::MAX_ARRAY_CNT; index++)
     {
-        for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+        for (uint32_t storage = 0; storage < NUM_STORAGE_TYPE; storage++)
         {
             if (ioRangeOverlapChker[index][storage])
             {
@@ -252,7 +252,7 @@ MioHandler::_PublishPeriodicMetrics(void)
             {
                 POSMetric m(TEL40302_METAFS_PROCESSED_MIO_COUNT, POSMetricTypes::MT_GAUGE);
                 m.SetGaugeValue(totalProcessedMioCount[ioType]);
-                m.AddLabel("direction", std::to_string(ioType));
+                m.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
                 metricVector->emplace_back(m);
                 totalProcessedMioCount[ioType] = 0;
             }
@@ -264,13 +264,13 @@ MioHandler::_PublishPeriodicMetrics(void)
             metricVector->emplace_back(m);
         }
 
-        for (uint32_t idx = 0; idx < NUM_STORAGE; idx++)
+        for (uint32_t idx = 0; idx < NUM_STORAGE_TYPE; idx++)
         {
             for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
             {
                 POSMetric m(TEL40103_METAFS_WORKER_ISSUE_COUNT_PARTITION, POSMetricTypes::MT_GAUGE);
                 m.AddLabel("type", std::to_string(idx));
-                m.AddLabel("direction", std::to_string(ioType));
+                m.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
                 m.SetGaugeValue(issueCountByStorage[idx][ioType]);
                 metricVector->emplace_back(m);
                 issueCountByStorage[idx][ioType] = 0;
@@ -283,7 +283,7 @@ MioHandler::_PublishPeriodicMetrics(void)
             {
                 POSMetric m(TEL40105_METAFS_WORKER_ISSUE_COUNT_FILE_TYPE, POSMetricTypes::MT_GAUGE);
                 m.AddLabel("type", std::to_string(idx));
-                m.AddLabel("direction", std::to_string(ioType));
+                m.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
                 m.SetGaugeValue(issueCountByFileType[idx][ioType]);
                 metricVector->emplace_back(m);
                 issueCountByFileType[idx][ioType] = 0;
@@ -296,17 +296,17 @@ MioHandler::_PublishPeriodicMetrics(void)
             {
                 POSMetric mTimeSpentAllStage(TEL40301_METAFS_MIO_TIME_SPENT_PROCESSING_ALL_STAGES, POSMetricTypes::MT_GAUGE);
                 mTimeSpentAllStage.SetGaugeValue(sampledTimeSpentProcessingAllStages[ioType]);
-                mTimeSpentAllStage.AddLabel("direction", std::to_string(ioType));
+                mTimeSpentAllStage.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
                 metricVector->emplace_back(mTimeSpentAllStage);
 
                 POSMetric mTimeSpentIssueToComplete(TEL40203_METAFS_MIO_TIME_FROM_ISSUE_TO_COMPLETE, POSMetricTypes::MT_GAUGE);
                 mTimeSpentIssueToComplete.SetGaugeValue(sampledTimeSpentFromIssueToComplete[ioType]);
-                mTimeSpentIssueToComplete.AddLabel("direction", std::to_string(ioType));
+                mTimeSpentIssueToComplete.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
                 metricVector->emplace_back(mTimeSpentIssueToComplete);
 
                 POSMetric m(TEL40204_METAFS_MIO_SAMPLED_COUNT, POSMetricTypes::MT_GAUGE);
                 m.SetGaugeValue(sampledProcessedMioCount[ioType]);
-                m.AddLabel("direction", std::to_string(ioType));
+                m.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
                 metricVector->emplace_back(m);
 
                 sampledTimeSpentProcessingAllStages[ioType] = 0;
@@ -607,7 +607,7 @@ MioHandler::RemoveArrayInfo(const int arrayId)
 {
     bool result = true;
 
-    for (uint32_t storage = 0; storage < NUM_STORAGE; storage++)
+    for (uint32_t storage = 0; storage < NUM_STORAGE_TYPE; storage++)
     {
         if (!ioRangeOverlapChker[arrayId][storage])
         {

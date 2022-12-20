@@ -110,9 +110,9 @@ private:
     MpioDonePollerCb mpioDonePoller;
 
     std::multimap<MetaLpnType, MetaFsIoRequest*> pendingIoRetryQ;
-    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
+    static const uint32_t NUM_STORAGE_TYPE = (int)MetaStorageType::Max;
 
-    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = {0};
+    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE_TYPE] = {0};
 
     const size_t MIO_POOL_SIZE;
     const size_t MPIO_POOL_SIZE;
@@ -131,7 +131,7 @@ private:
     size_t skipCount;
     const size_t SAMPLING_SKIP_COUNT;
 
-    int64_t issueCountByStorage[NUM_STORAGE][NUM_IO_TYPE];
+    int64_t issueCountByStorage[NUM_STORAGE_TYPE][NUM_IO_TYPE];
     int64_t issueCountByFileType[NUM_FILE_TYPE][NUM_IO_TYPE];
 };
 } // namespace pos

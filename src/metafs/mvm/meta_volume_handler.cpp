@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 
+#include "src/metafs/common/meta_file_util.h"
 #include "src/metafs/mvm/volume/inode_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -389,8 +390,8 @@ MetaVolumeHandler::_PublishMetricConditionally(const std::string& name,
         POSMetric m(name, metricType);
         m.SetCountValue(1);
         m.AddLabel("array_id", std::to_string(arrayId));
-        m.AddLabel("volume_type", std::to_string((int)volType));
-        m.AddLabel("file_type", std::to_string((int)fileType));
+        m.AddLabel("volume_type", MetaFileUtil::ConvertToMediaTypeName(volType));
+        m.AddLabel("file_type", MetaFileUtil::ConvertToFileTypeName(fileType));
         m.AddLabel("result", requestResult ? "success" : "failed");
         m.AddLabel("fd", std::to_string(fd));
         tp->PublishMetric(m);

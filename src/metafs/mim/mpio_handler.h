@@ -50,6 +50,7 @@ enum class WriteIoType
     FullIo = 1,
     Max
 };
+static_assert((int)WriteIoType::Max == 2, "partial and full io");
 
 class MpioHandler
 {
@@ -69,7 +70,6 @@ private:
 
     static const uint32_t NUM_IO_TYPE = (int)MetaIoRequestType::Max;
     static const uint32_t NUM_WRITE_IO_TYPE = (int)WriteIoType::Max;
-
     static const uint32_t NUM_STORAGE_TYPE = (int)MetaStorageType::Max;
     static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
 

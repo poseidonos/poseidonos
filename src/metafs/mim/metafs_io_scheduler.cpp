@@ -202,7 +202,7 @@ MetaFsIoScheduler::_UpdateCurrentExtentToNextExtentConditionally(void)
 const int64_t*
 MetaFsIoScheduler::GetIssueCount(const uint32_t array, size_t& size /* output */) const
 {
-    size = NUM_STORAGE;
+    size = NUM_STORAGE_TYPE;
     return issueCount_[array];
 }
 
@@ -463,11 +463,11 @@ MetaFsIoScheduler::_PublishPeriodicMetrics(void)
         POSMetricVector* metricList = new POSMetricVector();
         for (uint32_t array = 0; array < NUM_ARRAY; ++array)
         {
-            for (uint32_t idx = 0; idx < NUM_STORAGE; ++idx)
+            for (uint32_t idx = 0; idx < NUM_STORAGE_TYPE; ++idx)
             {
                 POSMetric v(TEL40100_METAFS_SCHEDULER_ISSUE_COUNT, POSMetricTypes::MT_GAUGE);
                 v.SetGaugeValue(issueCount_[array][idx]);
-                v.AddLabel("type", std::to_string(idx));
+                v.AddLabel("volume_type", MetaFileUtil::ConvertToMediaTypeName((MetaVolumeType)idx));
                 v.AddLabel("array_id", std::to_string(array));
                 metricList->emplace_back(v);
                 issueCount_[array][idx] = 0;
