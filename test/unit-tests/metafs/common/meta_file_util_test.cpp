@@ -118,4 +118,28 @@ TEST(MetaFileUtil, ConvertToMediaTypeName_testIfMetaVolumeTypesMatcheToTheirName
             MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType::Max));
 }
 
+TEST(MetaFileUtil, ConvertToFileTypeName_testIfFileTypesMatcheToTheirNames)
+{
+    std::unordered_map<MetaFileType, std::string> expectedResult =
+    {
+        {MetaFileType::SpecialPurposeMap, "SpecialPurposeMap"},
+        {MetaFileType::Journal, "Journal"},
+        {MetaFileType::Map, "Map"},
+        {MetaFileType::General, "General"}};
+
+    for (int i = 0; i < (int)MetaFileType::MAX; i++)
+    {
+        MetaFileType type = (MetaFileType)i;
+        EXPECT_EQ(expectedResult[type], MetaFileUtil::ConvertToFileTypeName(type));
+    }
+    EXPECT_EQ(MetaFileUtil::UNKNOWN_FILE_TYPE_NAME,
+            MetaFileUtil::ConvertToFileTypeName(MetaFileType::MAX));
+}
+
+TEST(MetaFileUtil, ConvertToDirectionName_testIfDirectionTypesMatchedToTheirNames)
+{
+    EXPECT_EQ("write", MetaFileUtil::ConvertToDirectionName(0));
+    EXPECT_EQ("read", MetaFileUtil::ConvertToDirectionName(1));
+    EXPECT_DEATH(MetaFileUtil::ConvertToDirectionName(2), "");
+}
 } // namespace pos

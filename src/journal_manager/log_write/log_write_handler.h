@@ -60,7 +60,7 @@ public:
 
     virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
         JournalConfiguration* config, EasyTelemetryPublisher* telemetryPublisher,
-        ConcurrentMetaFsTimeInterval* timeInterval = nullptr);
+        const int arrayId, ConcurrentMetaFsTimeInterval* timeInterval = nullptr);
     virtual void Dispose(void);
 
     virtual int AddLog(LogWriteContext* context);
@@ -88,6 +88,7 @@ private:
     ConcurrentMetaFsTimeInterval* interval;
     std::atomic<uint64_t> sumOfTimeSpentPerInterval;
     std::atomic<uint64_t> doneCountPerInterval;
+    int arrayId;
 };
 
 } // namespace pos

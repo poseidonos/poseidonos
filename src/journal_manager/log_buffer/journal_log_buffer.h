@@ -118,5 +118,6 @@ private:
     TelemetryPublisher* telemetryPublisher;
     bool rocksDbEnabled;
     int logbufferReadResult;
+    int arrayId;
 };
 } // namespace pos

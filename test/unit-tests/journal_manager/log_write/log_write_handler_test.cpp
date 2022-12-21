@@ -105,7 +105,7 @@ TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessf
     LogWriteContextFactory logWriteContextFactory;
     logWriteContextFactory.Init(config);
 
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     int targetLogGroupId = 1;
     EXPECT_CALL(*bufferAllocator, GetLogGroupId).WillRepeatedly(Return(targetLogGroupId));
@@ -145,7 +145,7 @@ TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsInitialized)
     EXPECT_CALL(*logWriteStats, Init);
 
     // When: LogWriteHandler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 }
 
 TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsNotInitialized)
@@ -154,13 +154,13 @@ TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsNotInitialized)
     EXPECT_CALL(*config, IsDebugEnabled).WillOnce(Return(false));
 
     // When: LogWriteHandler is initialized without initializing LogWriteStatistics
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 }
 
 TEST_F(LogWriteHandlerTestFixture, AddLog_testIfLogWritten)
 {
     // Given: Log write handler is initialized and context with dummy value is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty and buffer allocation succeeds
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
@@ -178,7 +178,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfLogWritten)
 TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithPositiveReturn)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty and buffer allocation does not succeed
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(EID(JOURNAL_LOG_GROUP_FULL)));
@@ -193,7 +193,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithPositiveRetur
 TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithNegativeReturn)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty, log is added and buffer allocation fails and
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(-1 * EID(JOURNAL_INVALID_SIZE_LOG_REQUESTED)));
@@ -208,7 +208,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithNegativeRetur
 TEST_F(LogWriteHandlerTestFixture, AddLog_testIfContextCleanedUpWhenWriteLogFailed)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty, buffer allocation succeed, and write log fails
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
@@ -235,7 +235,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
 {
     // Given: Log write handler is initialized, waiting list is empty,
     // LogWriteStatistics update failed
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
     EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(false));
 
@@ -253,7 +253,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
 {
     // Given: Log write handler is initialized, waiting list is empty, and
     // LogWriteContext is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
 
     NiceMock<MockLogWriteIoContext>* context = new NiceMock<MockLogWriteIoContext>;
@@ -275,7 +275,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
 TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfExcutionSucessWhenIoFails)
 {
     // Given: Log write handler is initialized, and log write context is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
     NiceMock<MockLogWriteIoContext>* context = new NiceMock<MockLogWriteIoContext>;
 
     // When: The context has an error
@@ -295,7 +295,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfExcutionSucessWhenIoFails)
 TEST_F(LogWriteHandlerTestFixture, LogFilled_testIfExecutionSuccess)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Log is filled
     MapList dummyDirty;
@@ -307,7 +307,7 @@ TEST_F(LogWriteHandlerTestFixture, LogFilled_testIfExecutionSuccess)
 TEST_F(LogWriteHandlerTestFixture, LogBufferReseted_testIfWaitingListIsRestarted)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting log list is not empty
     NiceMock<MockLogWriteContext>* waitingContext = new NiceMock<MockLogWriteContext>;

@@ -58,15 +58,14 @@ enum class MetaIoRequestType
 
     Max
 };
+static_assert((int)MetaIoRequestType::Max == 2, "write and read");
 
 enum class MetaIoOpcode
 {
     Write = 0,
     Read,
 
-    // Delete,
-
-    Max,
+    Max
 };
 
 enum class MetaIoRange

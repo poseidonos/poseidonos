@@ -157,7 +157,7 @@ Mio::_HandleMpioDone(void* data)
 }
 
 bool
-Mio::IsRead(void)
+Mio::IsRead(void) const
 {
     return originReq->reqType == MetaIoRequestType::Read;
 }

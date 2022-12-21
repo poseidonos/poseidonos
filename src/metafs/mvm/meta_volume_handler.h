@@ -94,7 +94,7 @@ private:
     POS_EVENT_ID _CheckFileCreateReqSanity(const MetaVolumeType volType, MetaFsFileControlRequest& reqMsg);
     void _PublishMetricConditionally(const std::string& name, const POSMetricTypes metricType,
         const int arrayId, const MetaVolumeType volType, const MetaFileType fileType,
-        const bool requestResult);
+        const bool requestResult, const FileDescriptorType fd);
 
     MetaVolumeContainer* volContainer;
     TelemetryPublisher* tp;

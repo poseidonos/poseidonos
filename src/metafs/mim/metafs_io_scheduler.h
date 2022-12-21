@@ -72,7 +72,7 @@ public:
     void RegisterMetaIoWorkerForTest(ScalableMetaIoWorker* metaIoWorker);
 
     // for test
-    const int64_t* GetIssueCount(size_t& size /* output */) const;
+    const int64_t* GetIssueCount(const uint32_t array, size_t& size /* output */) const;
     int GetCurrentExtent(void) const;
     // for test
 
@@ -88,6 +88,7 @@ private:
     bool _DoesMioWorkerForNumaExist(const int numaId);
     uint32_t _GetNumaIdConsideringNumaDedicatedScheduling(const uint32_t numaId);
     uint32_t _GetIndexOfWorkerConsideringNumaDedicatedScheduling(const uint32_t numaId);
+    void _PublishPeriodicMetrics(void);
 
     const size_t TOTAL_NUMA_COUNT;
     const bool SUPPORT_NUMA_DEDICATED_SCHEDULING;
@@ -116,8 +117,8 @@ private:
     std::vector<int> weight_;
     bool needToIgnoreNuma_;
 
-    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
-    int64_t issueCount_[NUM_STORAGE];
-    std::string metricNameForStorage_[NUM_STORAGE];
+    static const uint32_t NUM_STORAGE_TYPE = (int)MetaStorageType::Max;
+    static const uint32_t NUM_ARRAY = (int)MetaFsConfig::MAX_ARRAY_CNT;
+    int64_t issueCount_[NUM_ARRAY][NUM_STORAGE_TYPE];
 };
 } // namespace pos

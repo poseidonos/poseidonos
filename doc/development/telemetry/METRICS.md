@@ -23,16 +23,13 @@
   - [_**meta\_file\_open\_request**_](#meta_file_open_request)
   - [_**meta\_file\_close\_request**_](#meta_file_close_request)
   - [_**meta\_file\_delete\_request**_](#meta_file_delete_request)
-  - [_**metafs\_scheduler\_issued\_request\_count\_to\_ssd**_](#metafs_scheduler_issued_request_count_to_ssd)
-  - [_**metafs\_scheduler\_issued\_request\_count\_to\_nvram**_](#metafs_scheduler_issued_request_count_to_nvram)
-  - [_**metafs\_scheduler\_issued\_request\_count\_to\_journal\_ssd**_](#metafs_scheduler_issued_request_count_to_journal_ssd)
+  - [_**metafs\_scheduler\_issued\_request\_count**_](#metafs_scheduler_issued_request_count)
   - [_**metafs\_worker\_issued\_request\_count\_partition**_](#metafs_worker_issued_request_count_partition)
   - [_**metafs\_worker\_done\_request\_count\_partition**_](#metafs_worker_done_request_count_partition)
   - [_**metafs\_worker\_issued\_request\_count\_file\_type**_](#metafs_worker_issued_request_count_file_type)
   - [_**metafs\_worker\_done\_request\_count\_file\_type**_](#metafs_worker_done_request_count_file_type)
   - [_**free\_mio\_count**_](#free_mio_count)
   - [_**sampled\_mpio\_time\_spent\_all\_stages**_](#sampled_mpio_time_spent_all_stages)
-  - [_**processed\_mpio\_count**_](#processed_mpio_count)
   - [_**sampled\_mio\_time\_from\_issue\_to\_complete**_](#sampled_mio_time_from_issue_to_complete)
   - [_**sampled\_mio\_count**_](#sampled_mio_count)
   - [_**mio\_handler\_is\_working**_](#mio_handler_is_working)
@@ -43,6 +40,8 @@
   - [_**sampled\_mpio\_time\_from\_push\_to\_pop**_](#sampled_mpio_time_from_push_to_pop)
   - [_**sampled\_mpio\_count**_](#sampled_mpio_count)
   - [_**cached\_mpio\_count**_](#cached_mpio_count)
+  - [_**mpio\_write\_type\_count**_](#mpio_write_type_count)
+  - [_**mpio\_total\_io\_count**_](#mpio_total_io_count)
 - [**Volume**](#volume)
   - [_**read\_iops\_volume**_](#read_iops_volume)
   - [_**read\_bps\_volume**_](#read_bps_volume)
@@ -487,7 +486,7 @@ The count of deleting meta file
 
 ---
 
-### _**metafs_scheduler_issued_request_count_to_ssd**_
+### _**metafs_scheduler_issued_request_count**_
 
 **ID**: 40100
 
@@ -499,39 +498,7 @@ The count of deleting meta file
 
 **Introduced**: v0.11.0
 
-The request count that the meta scheduler issues to the ssd periodically
-
----
-
-### _**metafs_scheduler_issued_request_count_to_nvram**_
-
-**ID**: 40101
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {}
-
-**Introduced**: v0.11.0
-
-The request count that the meta scheduler issues to the nvram periodically
-
----
-
-### _**metafs_scheduler_issued_request_count_to_journal_ssd**_
-
-**ID**: 40102
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {}
-
-**Introduced**: v0.11.0
-
-The request count that the meta scheduler issues to the journal ssd periodically
+The request count that the meta scheduler issues to storages periodically
 
 ---
 
@@ -628,22 +595,6 @@ The count of mio resource which can be allocated
 **Introduced**: v0.11.0
 
 The time in ms during processing mpio
-
----
-
-### _**processed_mpio_count**_
-
-**ID**: 40202
-
-**Type**: Gauge
-
-**Monitoring**: Mandatory
-
-**Labels**: {}
-
-**Introduced**: v0.11.0
-
-The count of processed mpio
 
 ---
 
@@ -804,6 +755,38 @@ The count of sampled mpio
 **Introduced**: v0.12.0
 
 The count of cached mpio (for journal)
+
+---
+
+### _**mpio_write_type_count**_
+
+**ID**: 40307
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "full_io": Boolean}
+
+**Introduced**: v0.12.0
+
+The count of write io type of mpio
+
+---
+
+### _**mpio_total_io_count**_
+
+**ID**: 40308
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"array_id": Integer, "type": Integer, "direction": Integer}
+
+**Introduced**: v0.12.0
+
+The mpio io count
 
 ---
 

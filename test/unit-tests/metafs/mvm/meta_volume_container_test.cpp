@@ -234,11 +234,14 @@ TEST_F(MetaVolumeContainerTexture, Trim)
 TEST_F(MetaVolumeContainerTexture, FileCreation)
 {
     MetaFsFileControlRequest reqMsg;
+    FileDescriptorType expected = 1;
 
     EXPECT_CALL(*ssdVolume, CreateFile)
-        .WillOnce(Return(std::make_pair(0, EID(SUCCESS))));
+        .WillOnce(Return(std::make_pair(expected, EID(SUCCESS))));
 
-    EXPECT_EQ(container->CreateFile(MetaVolumeType::SsdVolume, reqMsg), true);
+    auto result = container->CreateFile(MetaVolumeType::SsdVolume, reqMsg);
+    EXPECT_EQ(result.first, expected);
+    EXPECT_EQ(result.second, EID(SUCCESS));
 }
 
 TEST_F(MetaVolumeContainerTexture, FileDeletion)

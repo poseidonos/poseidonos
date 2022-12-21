@@ -66,7 +66,8 @@ LogWriteHandler::LogWriteHandler(LogWriteStatistics* statistics, WaitingLogList*
   easyTp(nullptr),
   interval(nullptr),
   sumOfTimeSpentPerInterval(0),
-  doneCountPerInterval(0)
+  doneCountPerInterval(0),
+  arrayId(INT_MAX)
 {
 }
 
@@ -93,7 +94,7 @@ LogWriteHandler::~LogWriteHandler(void)
 
 void
 LogWriteHandler::Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-    JournalConfiguration* journalConfig, EasyTelemetryPublisher* tp,
+    JournalConfiguration* journalConfig, EasyTelemetryPublisher* tp, const int arrayId,
     ConcurrentMetaFsTimeInterval* timeInterval)
 {
     bufferAllocator = allocator;
@@ -101,6 +102,7 @@ LogWriteHandler::Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffe
     easyTp = tp;
     interval = timeInterval;
     numLogGroups = journalConfig->GetNumLogGroups();
+    this->arrayId = arrayId;
 
     if (journalConfig->IsDebugEnabled() == true)
     {
@@ -224,6 +226,7 @@ LogWriteHandler::_PublishPeriodicMetrics(LogWriteIoContext* context)
         {
             VectorLabels labels;
             labels.push_back({"group_id", std::to_string(i)});
+            labels.push_back({"array_id", std::to_string(arrayId)});
             easyTp->UpdateGauge(TEL36005_JRN_LOG_COUNT, (*numIosRequested)[i], labels);
             easyTp->UpdateGauge(TEL36006_JRN_LOG_DONE_COUNT, (*numIosCompleted)[i], labels);
         }

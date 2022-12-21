@@ -5608,6 +5608,13 @@ Root:
     Description:
     Cause:
     Solution:
+  -
+    Id: 4099
+    Name: MFS_INVALID_OPCODE
+    Severity:
+    Description: opcode is not expected value
+    Cause:
+    Solution:
 
   -
     Id: 4500

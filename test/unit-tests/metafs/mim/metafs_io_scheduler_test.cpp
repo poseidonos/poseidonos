@@ -142,6 +142,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnAlignedRequestCreatesOneRe
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 0;
+    req->arrayId = 0;
     req->byteSize = 4032;
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -161,6 +162,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnAlignedRequestCreatesOneRe
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
+    req->arrayId = 0;
     req->byteSize = 4032;
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -180,6 +182,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnAlignedRequestCreatesOneRe
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
+    req->arrayId = 0;
     req->byteSize = 2016;
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -213,6 +216,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnUnalignedRequestCreatesTwo
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 0;
+    req->arrayId = 0;
     req->byteSize = 4032 + 2016;
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -232,6 +236,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnUnalignedRequestCreatesTwo
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 2016;
+    req->arrayId = 0;
     req->byteSize = 4032;
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -251,6 +256,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfAnUnalignedRequestCreatesTwo
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
+    req->arrayId = 0;
     req->byteSize = 4032 + 2016;
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -284,6 +290,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testIfABigAlignedRequestCreatesMan
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 0;
+    req->arrayId = 0;
     req->byteSize = 4032 * 1048; // 1048 lpns
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -321,6 +328,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032;
+    req->arrayId = 0;
     req->byteSize = 4032; // lpn 6
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -340,6 +348,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 2;
+    req->arrayId = 0;
     req->byteSize = 4032 * 6; // lpn 7,8,9,20,21,22
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -359,6 +368,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
     req->byteOffsetInFile = 4032 * 4;
+    req->arrayId = 0;
     req->byteSize = 4032 * 12; // lpn 9,20...29,40
     req->targetMediaType = MetaStorageType::SSD;
 
@@ -395,6 +405,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extents = req->fileCtx->extents;
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
+    req->arrayId = 0;
     req->byteOffsetInFile = 4032; // from 2nd lpn (43082495 + 1)
     req->byteSize = 4032;         // to 2nd lpn (43082495 + 1)
     req->targetMediaType = MetaStorageType::SSD;
@@ -414,6 +425,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extents = req->fileCtx->extents;
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
+    req->arrayId = 0;
     req->byteOffsetInFile = 4032 * 2; // from 3rd lpn (43082495 + 2)
     req->byteSize = 4032 * 1024;      // to 1026th lpn (43082495 + 1025)
     req->targetMediaType = MetaStorageType::SSD;
@@ -433,6 +445,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extents = req->fileCtx->extents;
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
+    req->arrayId = 0;
     req->byteOffsetInFile = 4032 * 1026; // from 1027th lpn (43082495 + 1026)
     req->byteSize = 4032 * 1024;         // to 1002nd of next extent (43085111 + 1001)
     req->targetMediaType = MetaStorageType::SSD;
@@ -452,6 +465,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
     req->extents = req->fileCtx->extents;
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
+    req->arrayId = 0;
     req->byteOffsetInFile = 4032 * 2050; // from 1003rd lpn of 2nd extent (43085111 + 1002)
     req->byteSize = 4032 * 1024;         // to 2026th of the extent (43085111 + 2025)
     req->targetMediaType = MetaStorageType::SSD;
@@ -466,12 +480,19 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_testForProcessingRequestsForFilesW
 
     // then, check for metric
     size_t arraySize = 0;
-    const int64_t* countArray = scheduler->GetIssueCount(arraySize);
+    const int64_t* countArray = scheduler->GetIssueCount(0, arraySize);
 
     EXPECT_EQ(arraySize, (size_t)MetaStorageType::Max);
     EXPECT_EQ(countArray[(size_t)MetaStorageType::SSD], 1 + 1024 + 1024 + 1024);
     EXPECT_EQ(countArray[(size_t)MetaStorageType::NVRAM], 0);
     EXPECT_EQ(countArray[(size_t)MetaStorageType::JOURNAL_SSD], 0);
+
+    const int64_t* countArray_1 = scheduler->GetIssueCount(1, arraySize);
+
+    EXPECT_EQ(arraySize, (size_t)MetaStorageType::Max);
+    EXPECT_EQ(countArray_1[(size_t)MetaStorageType::SSD], 0);
+    EXPECT_EQ(countArray_1[(size_t)MetaStorageType::NVRAM], 0);
+    EXPECT_EQ(countArray_1[(size_t)MetaStorageType::JOURNAL_SSD], 0);
 }
 
 TEST_F(MetaFsIoSchedulerTexture, IssueRequest_TheCurrentExtentShouldBeUpdatedOnlyWhenTheExtentIsUsed)
@@ -496,6 +517,7 @@ TEST_F(MetaFsIoSchedulerTexture, IssueRequest_TheCurrentExtentShouldBeUpdatedOnl
     req->extents = req->fileCtx->extents;
     req->extentsCount = req->fileCtx->extentsCount;
     req->originalMsg = &originReq;
+    req->arrayId = 0;
     req->byteOffsetInFile = 4032 * 9;
     req->byteSize = 4032;
     req->targetMediaType = MetaStorageType::SSD;

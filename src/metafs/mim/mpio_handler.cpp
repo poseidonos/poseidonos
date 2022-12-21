@@ -33,7 +33,9 @@
 #include "mpio_handler.h"
 
 #include <string>
+#include <tuple>
 
+#include "src/metafs/common/meta_file_util.h"
 #include "src/metafs/config/metafs_config_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 
@@ -46,11 +48,12 @@ MpioHandler::MpioHandler(const int threadId, const int coreId,
   mpioAllocator(nullptr),
   coreId(coreId),
   telemetryPublisher(tp),
-  sampledTimeSpentProcessingAllStages(0),
-  sampledTimeSpentFromWriteToRelease(0),
-  sampledTimeSpentFromPushToPop(0),
-  totalProcessedMpioCount(0),
-  sampledProcessedMpioCount(0),
+  sampledTimeSpentProcessingAllStages(),
+  sampledTimeSpentFromWriteToRelease(),
+  sampledTimeSpentFromPushToPop(),
+  sampledProcessedMpioCount(),
+  writeIoTypeCount(),
+  ioCount(),
   metaFsTimeInterval(configManager->GetTimeIntervalInMillisecondsForMetric()),
   skipCount(0),
   SAMPLING_SKIP_COUNT(configManager->GetSamplingSkipCount()),
@@ -113,20 +116,41 @@ MpioHandler::BottomhalfMioProcessing(void)
 void
 MpioHandler::_UpdateMetricsConditionally(Mpio* mpio)
 {
-    totalProcessedMpioCount++;
+    uint32_t ioType = (uint32_t)mpio->io.opcode;
+    if (ioType >= NUM_IO_TYPE)
+    {
+        POS_TRACE_ERROR(EID(MFS_INVALID_OPCODE), "ioType:{}", ioType);
+        assert(false);
+    }
+    uint32_t filetype = (uint32_t)mpio->GetFileType();
+    uint32_t storageType = (int)mpio->io.targetMediaType;
+    uint32_t arrayId = mpio->io.arrayId;
 
-    doneCountByFileType[(int)mpio->GetFileType()]++;
-    doneCountByStorage[(int)mpio->io.targetMediaType]++;
+    doneCountByFileType[filetype]++;
+    doneCountByStorage[storageType]++;
+
+    auto rawData = mpio->GetMetricRawDataAndClear();
+    ioCount[arrayId][storageType][(int)MetaIoOpcode::Write] += std::get<0>(rawData);
+    ioCount[arrayId][storageType][(int)MetaIoOpcode::Read] += std::get<1>(rawData);
 
     if (mpio->GetType() == MpioType::Write)
     {
         if (skipCount++ % SAMPLING_SKIP_COUNT == 0)
         {
-            sampledTimeSpentProcessingAllStages += mpio->GetElapsedInMilli(MpioTimestampStage::Allocate, MpioTimestampStage::Release).count();
-            sampledTimeSpentFromWriteToRelease += mpio->GetElapsedInMilli(MpioTimestampStage::Write, MpioTimestampStage::Release).count();
-            sampledTimeSpentFromPushToPop += mpio->GetElapsedInMilli(MpioTimestampStage::PushToDoneQ, MpioTimestampStage::PopFromDoneQ).count();
-            sampledProcessedMpioCount++;
+            sampledTimeSpentProcessingAllStages[ioType] += mpio->GetElapsedInMilli(MpioTimestampStage::Allocate, MpioTimestampStage::Release).count();
+            sampledTimeSpentFromWriteToRelease[ioType] += mpio->GetElapsedInMilli(MpioTimestampStage::Write, MpioTimestampStage::Release).count();
+            sampledTimeSpentFromPushToPop[ioType] += mpio->GetElapsedInMilli(MpioTimestampStage::PushToDoneQ, MpioTimestampStage::PopFromDoneQ).count();
+            sampledProcessedMpioCount[ioType]++;
             skipCount = 0;
+        }
+
+        if (mpio->IsPartialIO())
+        {
+            writeIoTypeCount[filetype][(int)WriteIoType::PartialIo]++;
+        }
+        else
+        {
+            writeIoTypeCount[filetype][(int)WriteIoType::FullIo]++;
         }
     }
 }
@@ -141,32 +165,51 @@ MpioHandler::_PublishPeriodicMetrics()
         for (int i = 0; i < (int)MpioType::Max; ++i)
         {
             POSMetric mFreeMpioCount(TEL40300_METAFS_FREE_MPIO_CNT, POSMetricTypes::MT_GAUGE);
-            mFreeMpioCount.AddLabel("type", std::to_string(i));
+            mFreeMpioCount.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(i));
             mFreeMpioCount.SetGaugeValue(mpioAllocator->GetFreeCount((MpioType)i));
             metricVector->emplace_back(mFreeMpioCount);
         }
 
-        if (totalProcessedMpioCount)
+        for (uint32_t fileType = 0; fileType < (uint32_t)MetaFileType::MAX; ++fileType)
         {
-            POSMetric m(TEL40202_METAFS_PROCESSED_MPIO_COUNT, POSMetricTypes::MT_GAUGE);
-            m.SetGaugeValue(totalProcessedMpioCount);
-            metricVector->emplace_back(m);
-            totalProcessedMpioCount = 0;
+            for (uint32_t i = 0; i < NUM_WRITE_IO_TYPE; ++i)
+            {
+                POSMetric m(TEL40307_METAFS_MPIO_WRITE_TYPE_COUNT, POSMetricTypes::MT_GAUGE);
+                m.AddLabel("full_io", (i == 0) ? "true" : "false");
+                m.AddLabel("file_type", MetaFileUtil::ConvertToFileTypeName((MetaFileType)fileType));
+                m.SetGaugeValue(writeIoTypeCount[fileType][i]);
+                metricVector->emplace_back(m);
+                writeIoTypeCount[fileType][i] = 0;
+            }
         }
 
-        for (uint32_t idx = 0; idx < NUM_STORAGE; idx++)
+        for (uint32_t storage = 0; storage < NUM_STORAGE_TYPE; ++storage)
         {
             POSMetric m(TEL40104_METAFS_WORKER_DONE_COUNT_PARTITION, POSMetricTypes::MT_GAUGE);
-            m.AddLabel("type", std::to_string(idx));
-            m.SetGaugeValue(doneCountByStorage[idx]);
+            m.AddLabel("volume_type", MetaFileUtil::ConvertToMediaTypeName((MetaVolumeType)storage));
+            m.SetGaugeValue(doneCountByStorage[storage]);
             metricVector->emplace_back(m);
-            doneCountByStorage[idx] = 0;
+            doneCountByStorage[storage] = 0;
+
+            for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
+            {
+                for (uint32_t arrayId = 0; arrayId < MetaFsConfig::MAX_ARRAY_CNT; ++arrayId)
+                {
+                    POSMetric m(TEL40308_METAFS_MPIO_TOTAL_IO_COUNT, POSMetricTypes::MT_GAUGE);
+                    m.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
+                    m.AddLabel("volume_type", MetaFileUtil::ConvertToMediaTypeName((MetaVolumeType)storage));
+                    m.AddLabel("array_id", std::to_string(arrayId));
+                    m.SetGaugeValue(ioCount[arrayId][storage][ioType]);
+                    metricVector->emplace_back(m);
+                    ioCount[arrayId][storage][ioType] = 0;
+                }
+            }
         }
 
         for (uint32_t idx = 0; idx < NUM_FILE_TYPE; idx++)
         {
             POSMetric m(TEL40106_METAFS_WORKER_DONE_COUNT_FILE_TYPE, POSMetricTypes::MT_GAUGE);
-            m.AddLabel("type", std::to_string(idx));
+            m.AddLabel("file_type", MetaFileUtil::ConvertToFileTypeName((MetaFileType)idx));
             m.SetGaugeValue(doneCountByFileType[idx]);
             metricVector->emplace_back(m);
             doneCountByFileType[idx] = 0;
@@ -174,26 +217,33 @@ MpioHandler::_PublishPeriodicMetrics()
 
         if (sampledProcessedMpioCount)
         {
-            POSMetric mTimeSpentAllStage(TEL40201_METAFS_MPIO_TIME_SPENT_PROCESSING_ALL_STAGES, POSMetricTypes::MT_GAUGE);
-            mTimeSpentAllStage.SetGaugeValue(sampledTimeSpentProcessingAllStages);
-            metricVector->emplace_back(mTimeSpentAllStage);
+            for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
+            {
+                POSMetric mTimeSpentAllStage(TEL40201_METAFS_MPIO_TIME_SPENT_PROCESSING_ALL_STAGES, POSMetricTypes::MT_GAUGE);
+                mTimeSpentAllStage.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
+                mTimeSpentAllStage.SetGaugeValue(sampledTimeSpentProcessingAllStages[ioType]);
+                metricVector->emplace_back(mTimeSpentAllStage);
 
-            POSMetric mTimeSpentWriteToRelease(TEL40303_METAFS_MPIO_TIME_FROM_WRITE_TO_RELEASE, POSMetricTypes::MT_GAUGE);
-            mTimeSpentWriteToRelease.SetGaugeValue(sampledTimeSpentFromWriteToRelease);
-            metricVector->emplace_back(mTimeSpentWriteToRelease);
+                POSMetric mTimeSpentWriteToRelease(TEL40303_METAFS_MPIO_TIME_FROM_WRITE_TO_RELEASE, POSMetricTypes::MT_GAUGE);
+                mTimeSpentWriteToRelease.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
+                mTimeSpentWriteToRelease.SetGaugeValue(sampledTimeSpentFromWriteToRelease[ioType]);
+                metricVector->emplace_back(mTimeSpentWriteToRelease);
 
-            POSMetric mTimeSpentPushToPop(TEL40304_METAFS_MPIO_TIME_FROM_PUSH_TO_POP, POSMetricTypes::MT_GAUGE);
-            mTimeSpentPushToPop.SetGaugeValue(sampledTimeSpentFromPushToPop);
-            metricVector->emplace_back(mTimeSpentPushToPop);
+                POSMetric mTimeSpentPushToPop(TEL40304_METAFS_MPIO_TIME_FROM_PUSH_TO_POP, POSMetricTypes::MT_GAUGE);
+                mTimeSpentPushToPop.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
+                mTimeSpentPushToPop.SetGaugeValue(sampledTimeSpentFromPushToPop[ioType]);
+                metricVector->emplace_back(mTimeSpentPushToPop);
 
-            POSMetric m(TEL40305_METAFS_MPIO_SAMPLED_COUNT, POSMetricTypes::MT_GAUGE);
-            m.SetGaugeValue(sampledProcessedMpioCount);
-            metricVector->emplace_back(m);
+                POSMetric m(TEL40305_METAFS_MPIO_SAMPLED_COUNT, POSMetricTypes::MT_GAUGE);
+                m.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));
+                m.SetGaugeValue(sampledProcessedMpioCount[ioType]);
+                metricVector->emplace_back(m);
 
-            sampledTimeSpentProcessingAllStages = 0;
-            sampledTimeSpentFromPushToPop = 0;
-            sampledTimeSpentFromWriteToRelease = 0;
-            sampledProcessedMpioCount = 0;
+                sampledTimeSpentProcessingAllStages[ioType] = 0;
+                sampledTimeSpentFromPushToPop[ioType] = 0;
+                sampledTimeSpentFromWriteToRelease[ioType] = 0;
+                sampledProcessedMpioCount[ioType] = 0;
+            }
         }
 
         for (auto& item : *metricVector)

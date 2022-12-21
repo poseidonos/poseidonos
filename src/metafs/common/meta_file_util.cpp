@@ -56,6 +56,14 @@ const std::unordered_map<MetaVolumeType, std::string> MetaFileUtil::VOLUME_NAME 
         {MetaVolumeType::JournalVolume, "Journal SSD"}};
 const std::string MetaFileUtil::UNKNOWN_VOLUME_NAME = "Unknown Volume";
 
+const std::unordered_map<MetaFileType, std::string> FILE_TYPE_NAME =
+    {
+        {MetaFileType::SpecialPurposeMap, "SpecialPurposeMap"},
+        {MetaFileType::Journal, "Journal"},
+        {MetaFileType::Map, "Map"},
+        {MetaFileType::General, "General"}};
+const std::string MetaFileUtil::UNKNOWN_FILE_TYPE_NAME = "Unknown File Type";
+
 StringHashType
 MetaFileUtil::GetHashKeyFromFileName(const std::string& fileName)
 {
@@ -80,6 +88,28 @@ MetaFileUtil::ConvertToMediaTypeName(const MetaVolumeType volume)
     {
         return result->second;
     }
+}
+
+std::string
+MetaFileUtil::ConvertToFileTypeName(const MetaFileType file)
+{
+    auto result = FILE_TYPE_NAME.find(file);
+    if (result == FILE_TYPE_NAME.end())
+    {
+        return UNKNOWN_FILE_TYPE_NAME;
+    }
+    else
+    {
+        return result->second;
+    }
+}
+
+std::string
+MetaFileUtil::ConvertToDirectionName(const uint32_t type)
+{
+    // write and read
+    assert(type < 2);
+    return (type == 0) ? "write" : "read";
 }
 
 MetaVolumeType
