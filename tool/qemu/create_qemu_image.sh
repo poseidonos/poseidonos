@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 if [ $# -ne 3 ]
 then
@@ -8,18 +8,22 @@ fi
 
 image_dir=$1
 vm_image=$2
-install_img=$3
+install_img="ubuntu-18.04.6-live-server-amd64.iso"
+
+if [ -f "$install_img" ];then
+	echo "ubuntu-18.04.6-live-server-amd64.iso is already exists"
+else
+	echo "Download ubuntu-18.04.6-live-server-amd64.iso on current directory"
+	wget https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso
+fi
 
 if [ ! -f ${image_dir}/${vm_image} ]; then
 	echo "# Install ${vm_image}"
 	mkdir -p ${image_dir}
-	qemu-img create -f qcow2 ${image_dir}/${vm_image} 128G
+	qemu-img create -f qcow2 ${image_dir}/${vm_image} 30G
 	qemu-system-x86_64 \
-		-cpu qemu64,+ssse3,+sse4.1,+sse4.2 \
 		-m 8G \
 		-enable-kvm \
 		-drive if=virtio,file=${image_dir}/${vm_image},cache=none \
-		-drive if=pflash,format=raw,readonly=yes,file=/usr/share/OVMF/OVMF_CODE.fd \
-		-drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_VARS.fd \
 		-cdrom ${install_img}
 fi

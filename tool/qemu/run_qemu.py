@@ -7,9 +7,10 @@ import argparse
 import re
 from uuid import getnode
 
-iso_path = "/mnt/d/Download/ubuntu-18.04.6-live-server-amd64.iso"
+cwd = os.getcwd()
+iso_path = cwd + "/ubuntu-18.04.6-live-server-amd64.iso"
 vm_img = "pos-ubuntu1804.qcow2"
-qemu_dir = "/mnt/d/Virtual/qemu-ubuntu"
+qemu_dir = cwd + "/qemu"
 device_dir = "devices"
 image_dir = "images"
 vm_prefix = "vm"
@@ -46,8 +47,8 @@ def start_qemu(vm_dir):
     qemu_command = f"qemu-system-x86_64 "
     qemu_command += "-m 24G "
     qemu_command += "-enable-kvm "
-    qemu_command += "-drive if=pflash,format=raw,readonly=yes,file=/usr/share/OVMF/OVMF_CODE.fd "
-    qemu_command += "-drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_VARS.fd "
+    # qemu_command += "-drive if=pflash,format=raw,readonly=yes,file=/usr/share/OVMF/OVMF_CODE.fd "
+    # qemu_command += "-drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_VARS.fd "
     qemu_command += f"-drive if=virtio,file={dest_image}/{vm_img},cache=none "
     qemu_command += "-smp 8,sockets=2,cores=4,maxcpus=8 "
     qemu_command += "-object memory-backend-ram,id=ram-node0,size=12G "
@@ -59,13 +60,13 @@ def start_qemu(vm_dir):
     qemu_command += "-global ICH9-LPC.disable_s3=1 "
     qemu_command += "-global ICH9-LPC.disable_s4=1 "
     qemu_command += "-boot strict=on "
-    qemu_command += "-machine q35,accel=kvm,kernel-irqchip=split "
+    # qemu_command += "-machine q35,accel=kvm,kernel-irqchip=split "
     qemu_command += "-object rng-random,id=objrng0,filename=/dev/urandom "
     qemu_command += "-msg timestamp=on "
-    qemu_command += "-device intel-iommu "
+    # qemu_command += "-device intel-iommu "
     qemu_command += "-net user,hostfwd=tcp::2222-:22 "
     qemu_command += f"-net nic -device virtio-net "
-    qemu_command += "-device pcie-root-port,port=0x10,chassis=1,id=pci.1,bus=pcie.0,multifunction=on,addr=0x4 "
+    # qemu_command += "-device pcie-root-port,port=0x10,chassis=1,id=pci.1,bus=pcie.0,multifunction=on,addr=0x4 "
 
     for index in range(0, num_device):
         qemu_command += f"-device nvme,id=nvme-ctrl-{nvme_device_prefix}{index},serial=pos{nvme_device_prefix}{index} "
@@ -75,11 +76,21 @@ def start_qemu(vm_dir):
     subprocess.call(qemu_command, shell=True)
 
 
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 def parse_arguments(args):
     parser = argparse.ArgumentParser(description='code formatter')
-    parser.add_argument('-q', '--need_install_qemu', default=False, type=bool, help='Enable the option to install QWEMU on this system')
-    parser.add_argument('-m', '--need_make_qemu_image', default=False, type=bool, help='Enable the option to create the ubuntu virtual server using QEMU')
-    parser.add_argument('-c', '--need_create_nvme_device', default=False, type=bool, help='Enable the option to create the virtual nvme block device')
+    parser.add_argument('-q', '--need_install_qemu', default=False, type=str2bool, help='Enable the option to install QEMU on this system')
+    parser.add_argument('-m', '--need_make_qemu_image', default=False, type=str2bool, help='Enable the option to create the ubuntu virtual server using QEMU')
+    parser.add_argument('-c', '--need_create_nvme_device', default=False, type=str2bool, help='Enable the option to create the virtual nvme block device')
     parser.add_argument('-i', '--id', default='', type=int, help='VM id')
     args = parser.parse_args()
 
