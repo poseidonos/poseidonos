@@ -18,7 +18,7 @@ if [ -f /etc/debian_version ]; then
         # Build and Install QEMU
         echo "Build QEMU v7.1.0"
         cd qemu
-	    ./configure --with-git-submodules=validate
+	./configure --with-git-submodules=update
         make -j ; make install
     fi
 else
