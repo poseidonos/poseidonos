@@ -1,0 +1,341 @@
+{
+    "TARGETs": [
+        {
+            "NAME": "Target01",
+            "ID": "root",
+            "PW": "psd",
+            "NIC": {
+                "SSH": "127.0.0.1",
+                "IP1": "127.0.0.1"
+            },
+            "PREREQUISITE": {
+                "CPU": {
+                    "RUN": false,
+                    "SCALING": "max"
+                },
+                "SSD": {
+                    "RUN": false,
+                    "FORMAT": true,
+                    "UDEV_FILE": "/etc/udev/rules.d/99-custom-nvme.rules"
+                },
+                "MEMORY": {
+                    "RUN": false,
+                    "MAX_MAP_COUNT": 65535,
+                    "DROP_CACHES": 3
+                },
+                "NETWORK": {
+                    "RUN": false,
+                    "IRQ_BALANCE": "stop",
+                    "TCP_TUNE": "max",
+                    "IRQ_AFFINITYs": [
+                        {
+                            "NIC": "ens5f0",
+                            "CPU_LIST": "88-94"
+                        }
+                    ],
+                    "NICs": [
+                        {
+                            "INTERFACE": "ens5f0",
+                            "IP": "10.100.2.12",
+                            "NETMASK": 24,
+                            "MTU": 9000
+                        }
+                    ]
+                },
+                "MODPROBE": {
+                    "RUN": false,
+                    "MODs": [
+                        "nvme",
+                        "nvme_core",
+                        "nvme_fabrics",
+                        "nvme_tcp",
+                        "nvme_rdma"
+                    ]
+                },
+                "SPDK": {
+                    "RUN": false,
+                    "HUGE_EVEN_ALLOC": "no",
+                    "NRHUGE": 10705
+                },
+                "DEBUG": {
+                    "RUN": false,
+                    "ULIMIT": "unlimited",
+                    "APPORT": "disable",
+                    "DUMP_DIR": "/etc/pos/core",
+                    "CORE_PATTERN": "/etc/pos/core/%E.core"
+                }
+            },
+            "POS": {
+                "DIR": "/remote_home/chkang0912/ibofos",
+                "BIN": "poseidonos",
+                "CLI": "poseidonos-cli",
+                "CLI_LOCAL_RUN": true,
+                "CFG": "pos_for_ha_primary_psd.conf",
+                "LOG": "pos.log",
+                "TELEMETRY": false,
+                "LOGGER_LEVEL": "debug",
+                "WAIT_AFTER_EXE": 10,
+                "TRANSPORT": {
+                    "TYPE": "tcp",
+                    "NUM_SHARED_BUFFER": 4096
+                },
+                "SUBSYSTEMs": [
+                    {
+                        "NUM_SUBSYSTEMS": 1,
+                        "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                        "NQN_INDEX": 1,
+                        "SN_PREFIX": "POS00000000000",
+                        "SN_INDEX": 1,
+                        "IP": "IP1",
+                        "PORT": 1158
+                    }
+                ],
+                "DEVICEs": [
+                    {
+                        "NAME": "uram0",
+                        "TYPE": "uram",
+                        "NUM_BLOCKS": 2097152,
+                        "BLOCK_SIZE": 512,
+                        "NUMA": 0
+                    }
+                ],
+                "ARRAYs": [
+                    {
+                        "NAME": "ARR0",
+                        "RAID_OR_MEDIA": "RAID5",
+                        "WRITE_THROUGH": true,
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2",
+                        "SPARE_DEVICE_LIST": "unvme-ns-3",
+                        "BUFFER_DEV": "uram0",
+                        "VOLUMEs": [
+                            {
+                                "NUM_VOLUMES": 1,
+                                "NAME_PREFIX": "DataVol",
+                                "NAME_INDEX": 1,
+                                "SIZE_MiB": 16,
+                                "USE_SUBSYSTEMS": 1,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 1
+                            },
+                            {
+                                "NUM_VOLUMES": 1,
+                                "NAME_PREFIX": "WalVol",
+                                "NAME_INDEX": 1,
+                                "SIZE_MiB": 4,
+                                "USE_SUBSYSTEMS": 1,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 2
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "NAME": "Target02",
+            "ID": "root",
+            "PW": "psd",
+            "NIC": {
+                "SSH": "10.1.3.28",
+                "IP1": "10.1.3.28"
+            },
+            "PREREQUISITE": {
+                "CPU": {
+                    "RUN": false,
+                    "SCALING": "max"
+                },
+                "SSD": {
+                    "RUN": false,
+                    "FORMAT": true,
+                    "UDEV_FILE": "/etc/udev/rules.d/99-custom-nvme.rules"
+                },
+                "MEMORY": {
+                    "RUN": false,
+                    "MAX_MAP_COUNT": 65535,
+                    "DROP_CACHES": 3
+                },
+                "NETWORK": {
+                    "RUN": false,
+                    "IRQ_BALANCE": "stop",
+                    "TCP_TUNE": "max",
+                    "IRQ_AFFINITYs": [
+                        {
+                            "NIC": "ens5f0",
+                            "CPU_LIST": "88-94"
+                        }
+                    ],
+                    "NICs": [
+                        {
+                            "INTERFACE": "ens5f0",
+                            "IP": "10.100.2.12",
+                            "NETMASK": 24,
+                            "MTU": 9000
+                        }
+                    ]
+                },
+                "MODPROBE": {
+                    "RUN": false,
+                    "MODs": [
+                        "nvme",
+                        "nvme_core",
+                        "nvme_fabrics",
+                        "nvme_tcp",
+                        "nvme_rdma"
+                    ]
+                },
+                "SPDK": {
+                    "RUN": false,
+                    "HUGE_EVEN_ALLOC": "no",
+                    "NRHUGE": 10705
+                },
+                "DEBUG": {
+                    "RUN": false,
+                    "ULIMIT": "unlimited",
+                    "APPORT": "disable",
+                    "DUMP_DIR": "/etc/pos/core",
+                    "CORE_PATTERN": "/etc/pos/core/%E.core"
+                }
+            },
+            "POS": {
+                "DIR": "/remote_home/chkang0912/ibofos",
+                "BIN": "poseidonos",
+                "CLI": "poseidonos-cli",
+                "CLI_LOCAL_RUN": false,
+                "CFG": "pos_for_ha_secondary_psd.conf",
+                "LOG": "pos.log",
+                "TELEMETRY": false,
+                "LOGGER_LEVEL": "debug",
+                "WAIT_AFTER_EXE": 10,
+                "TRANSPORT": {
+                    "TYPE": "tcp",
+                    "NUM_SHARED_BUFFER": 4096
+                },
+                "SUBSYSTEMs": [
+                    {
+                        "NUM_SUBSYSTEMS": 1,
+                        "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                        "NQN_INDEX": 3,
+                        "SN_PREFIX": "POS00000000000",
+                        "SN_INDEX": 1,
+                        "IP": "IP1",
+                        "PORT": 1158
+                    }
+                ],
+                "DEVICEs": [
+                    {
+                        "NAME": "uram0",
+                        "TYPE": "uram",
+                        "NUM_BLOCKS": 2097152,
+                        "BLOCK_SIZE": 512,
+                        "NUMA": 0
+                    }
+                ],
+                "ARRAYs": [
+                    {
+                        "NAME": "ARR0",
+                        "RAID_OR_MEDIA": "RAID5",
+                        "WRITE_THROUGH": true,
+                        "USER_DEVICE_LIST": "unvme-ns-0,unvme-ns-1,unvme-ns-2",
+                        "SPARE_DEVICE_LIST": "unvme-ns-3",
+                        "BUFFER_DEV": "uram0",
+                        "VOLUMEs": [
+                            {
+                                "NUM_VOLUMES": 1,
+                                "NAME_PREFIX": "DataVol",
+                                "NAME_INDEX": 1,
+                                "SIZE_MiB": 16,
+                                "USE_SUBSYSTEMS": 1,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 3
+                            },
+                            {
+                                "NUM_VOLUMES": 1,
+                                "NAME_PREFIX": "WalVol",
+                                "NAME_INDEX": 1,
+                                "SIZE_MiB": 4,
+                                "USE_SUBSYSTEMS": 1,
+                                "NQN_PREFIX": "nqn.2022-04.pos:subsystem",
+                                "NQN_INDEX": 4
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    ],
+    "INITIATORs": [
+        {
+            "NAME": "Initiator01",
+            "ID": "root",
+            "PW": "psd",
+            "NIC": {
+                "SSH": "127.0.0.1"
+            },
+            "SPDK": {
+                "DIR": "/remote_home/chkang0912/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            },
+            "TARGETs": [
+                {
+                    "NAME": "Target01",
+                    "TRANSPORT": "tcp",
+                    "IP": "IP1",
+                    "PORT": 1158,
+                    "KDD_MODE": true,
+                    "SUBSYSTEMs": [
+                        {
+                            "NUM_SUBSYSTEMS": 1,
+                            "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
+                            "NQN_INDEX": 1,
+                            "NUM_NS": 1,
+                            "NS_INDEX": 1,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 1
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "NAME": "Initiator02",
+            "ID": "root",
+            "PW": "psd",
+            "NIC": {
+                "SSH": "127.0.0.1"
+            },
+            "SPDK": {
+                "DIR": "/remote_home/chkang0912/ibofos/lib/spdk",
+                "TRANSPORT": "tcp"
+            },
+            "TARGETs": [
+                {
+                    "NAME": "Target02",
+                    "TRANSPORT": "tcp",
+                    "IP": "IP1",
+                    "PORT": 1158,
+                    "KDD_MODE": true,
+                    "SUBSYSTEMs": [
+                        {
+                            "NUM_SUBSYSTEMS": 1,
+                            "NQN_PREFIX": "nqn.2022-04.pos\\:subsystem",
+                            "NQN_INDEX": 3,
+                            "NUM_NS": 1,
+                            "NS_INDEX": 1,
+                            "SN_PREFIX": "POS00000000000",
+                            "SN_INDEX": 1
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "SCENARIOs": [
+        {
+            "PATH": "./test/system/benchmark/scenario/ha_live_replication.py",
+            "NAME": "ha_live_replication",
+            "OUTPUT_DIR": "./output",
+            "RESULT_FORMAT": "junit_xml",
+            "SUBPROC_LOG": true
+        }
+    ]
+}
