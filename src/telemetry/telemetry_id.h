@@ -215,4 +215,6 @@ static const std::string TEL140011_COUNT_OF_INTERNAL_IO_PENDING_CNT = "count_of_
 static const std::string TEL140012_CALLBACK_OLDEST_TIME_INDEX = "callback_oldest_time_idx";
 static const std::string TEL140013_CALLBACK_CURRENT_TIME_INDEX = "callback_current_time_idx";
 
+static const std::string TEL150000_REPLICATION_STATUS = "replication_status";
+
 } // namespace pos

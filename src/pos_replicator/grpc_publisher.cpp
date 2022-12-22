@@ -33,6 +33,7 @@
 #include "grpc_publisher.h"
 
 #include <time.h>
+
 #include <memory>
 #include <string>
 #include <thread>
@@ -111,38 +112,6 @@ GrpcPublisher::WaitClientConnected(void)
 }
 
 int
-GrpcPublisher::PushHostWrite(uint64_t rba, uint64_t size, string volumeName,
-    string arrayName, void* buffer, uint64_t& lsn)
-{
-    ::grpc::ClientContext cliContext;
-    replicator_rpc::PushHostWriteRequest request;
-    replicator_rpc::PushHostWriteResponse response;
-    request.set_array_name(arrayName);
-    request.set_volume_name(volumeName);
-    request.set_rba(rba);
-    request.set_num_blocks(size);
-
-    /*
-    [To do buffer process]    
-    for (int iter = 0; iter < size; iter++)
-    {
-        replicator_rpc::Chunk* dataChunk = request.add_data();
-        request.CopyFrom(buf);
-    }
-    */
-
-    grpc::Status status = stub->PushHostWrite(&cliContext, request, &response);
-    if (status.ok() == false)
-    {
-        POS_TRACE_ERROR(EID(HA_INVALID_RETURN_LSN), "Failed to send PushHostWrite");
-        return EID(HA_INVALID_RETURN_LSN);
-    }
-    lsn = response.lsn();
-
-    return EID(SUCCESS);
-}
-
-int
 GrpcPublisher::PushDirtyLog(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks)
 {
     ::grpc::ClientContext cliContext;
@@ -160,6 +129,31 @@ GrpcPublisher::PushDirtyLog(std::string arrayName, std::string volumeName, uint6
     {
         return EID(HA_COMPLETION_FAIL);
     }
+
+    return EID(SUCCESS);
+}
+
+int
+GrpcPublisher::PushHostWrite(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, void* buffer, uint64_t& lsn)
+{
+    ::grpc::ClientContext cliContext;
+    replicator_rpc::PushHostWriteRequest request;
+    replicator_rpc::PushHostWriteResponse response;
+    request.set_array_name(arrayName);
+    request.set_volume_name(volumeName);
+    request.set_rba(rba);
+    request.set_num_blocks(numBlocks);
+
+    _InsertBlockToChunk(request, buffer, numBlocks);
+
+    grpc::Status status = stub->PushHostWrite(&cliContext, request, &response);
+    if (status.ok() == false)
+    {
+        POS_TRACE_ERROR(EID(HA_INVALID_RETURN_LSN), "Failed to send PushHostWrite");
+        return EID(HA_INVALID_RETURN_LSN);
+    }
+    lsn = response.lsn();
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "PushHostWrite, array_name: {}, volume_name: {}, rba: {}, num_blocks:{}, lsn: {}", request.array_name(), request.volume_name(), request.rba(), request.num_blocks(), lsn);
 
     return EID(SUCCESS);
 }
@@ -197,7 +191,7 @@ GrpcPublisher::CompleteWrite(string arrayName, string volumeName, uint64_t rba, 
     request.set_rba(rba);
     request.set_num_blocks(numBlocks);
     request.set_lsn(lsn);
-
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "CompleteWrite, array_name: {}, volume_name: {}, rba: {}, num_blocks:{}, lsn: {}", request.array_name(), request.volume_name(), request.rba(), request.num_blocks(), lsn);
     grpc::Status status = stub->CompleteWrite(&cliContext, request, &response);
 
     if (status.ok() == false)
@@ -241,6 +235,23 @@ GrpcPublisher::CompleteRead(string arrayName, string volumeName, uint64_t rba, u
 
 void
 GrpcPublisher::_InsertBlockToChunk(replicator_rpc::CompleteReadRequest& request, void* data, uint64_t numBlocks)
+{
+    struct Chunk
+    {
+        char contents[ArrayConfig::BLOCK_SIZE_BYTE];
+    };
+
+    for (uint64_t index = 0; index < numBlocks; index++)
+    {
+        replicator_rpc::Chunk* chunkPtr = request.add_data();
+
+        char* dataPtr = (char*)data + index * ArrayConfig::SECTOR_SIZE_BYTE;
+        chunkPtr->set_content(dataPtr, ArrayConfig::SECTOR_SIZE_BYTE);
+    }
+}
+
+void
+GrpcPublisher::_InsertBlockToChunk(replicator_rpc::PushHostWriteRequest& request, void* data, uint64_t numBlocks)
 {
     struct Chunk
     {

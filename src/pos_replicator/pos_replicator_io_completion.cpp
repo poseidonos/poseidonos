@@ -40,10 +40,11 @@
 
 namespace pos
 {
-PosReplicatorIOCompletion::PosReplicatorIOCompletion(GrpcCallbackType callbackType, VolumeIoSmartPtr inputVolumeIo, uint64_t lsn_, CallbackSmartPtr originCallback_)
+PosReplicatorIOCompletion::PosReplicatorIOCompletion(VolumeIoSmartPtr inputVolumeIo, uint64_t originRba, uint64_t originNumChunks, uint64_t lsn_, CallbackSmartPtr originCallback_)
 : Callback(true, CallbackType_PosReplicatorIOCompletion),
-  grpcCallbackType(callbackType),
   volumeIo(inputVolumeIo),
+  originRba(originRba),
+  originNumChunks(originNumChunks),
   lsn(lsn_),
   originCallback(originCallback_)
 {
@@ -56,21 +57,13 @@ PosReplicatorIOCompletion::~PosReplicatorIOCompletion(void)
 bool
 PosReplicatorIOCompletion::_DoSpecificJob(void)
 {
-    if (grpcCallbackType == GrpcCallbackType::WaitGrpc)
+    try
     {
-        volumeIo->SetCallback(originCallback);
-        PosReplicatorManagerSingleton::Instance()->AddDonePOSIoRequest(lsn, volumeIo);
+        PosReplicatorManagerSingleton::Instance()->HAIOCompletion(lsn, volumeIo, originRba, originNumChunks);
     }
-    else
+    catch (const char* errorMsg)
     {
-        try
-        {
-            PosReplicatorManagerSingleton::Instance()->HAIOCompletion(lsn, volumeIo);
-        }
-        catch (const char* errorMsg)
-        {
-            POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "{}", errorMsg);
-        }
+        POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "{}", errorMsg);
     }
 
     return true;

@@ -47,19 +47,10 @@ namespace pos
 GrpcPosIo::WriteHostBlocks(::grpc::ServerContext* context,
     const pos_rpc::WriteHostBlocksRequest* request, pos_rpc::WriteHostBlocksResponse* response)
 {
-    std::pair<std::string, int> arraySet(request->array_name(), HA_INVALID_ARRAY_IDX);
-    std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get WriteHostBlocks from grpc client");
-
-    ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-
-    if (ret.ok() == false)
-    {
-        return ret;
-    }
-
-    PosReplicatorManagerSingleton::Instance()->UserVolumeWriteSubmission(request->lsn(), arraySet.second, volumeSet.second);
-    return ::grpc::Status::OK;
+    // For Test drvier command to test fake-pos
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get WriteHostBlocksSync from grpc client");
+    ::grpc::Status ret(::grpc::StatusCode::UNIMPLEMENTED, "Not implemented");
+    return ret;
 }
 
 ::grpc::Status
@@ -67,7 +58,7 @@ GrpcPosIo::WriteHostBlocksSync(::grpc::ServerContext* context,
     const pos_rpc::WriteHostBlocksSyncRequest* request, pos_rpc::WriteHostBlocksSyncResponse* response)
 {
     // For Test drvier command to test fake-pos
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get WriteHostBlocksSync from grpc client");
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get WriteHostBlocksSync from grpc client");
     ::grpc::Status ret(::grpc::StatusCode::UNIMPLEMENTED, "Not implemented");
     return ret;
 }
@@ -87,7 +78,7 @@ GrpcPosIo::WriteBlocks(::grpc::ServerContext* context,
     }
 
     ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get WriteBlocks from grpc client");
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get WriteBlocks, array_name: {}, volume_name: {}, rba: {}, num_blocks:{}", request->array_name(), request->volume_name(), request->rba(), request->num_blocks());
 
     if (ret.ok() == false)
     {
@@ -104,7 +95,7 @@ GrpcPosIo::WriteBlocksSync(::grpc::ServerContext* context,
     const pos_rpc::WriteBlocksSyncRequest* request, pos_rpc::WriteBlocksSyncResponse* response)
 {
     // For Test drvier command to test fake-pos
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get WriteBlocksSync from grpc client");
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get WriteBlocksSync from grpc client");
     ::grpc::Status ret(::grpc::StatusCode::UNIMPLEMENTED, "Not implemented");
     return ret;
 }
@@ -117,7 +108,7 @@ GrpcPosIo::ReadBlocks(::grpc::ServerContext* context,
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
     ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get ReadBlocks from grpc client, rba: {}, num_blocks:{}", request->rba(), request->num_blocks());
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get ReadBlocks from grpc client, rba: {}, num_blocks:{}", request->rba(), request->num_blocks());
 
     if (ret.ok() == false)
     {
@@ -136,7 +127,7 @@ GrpcPosIo::ReadBlocksSync(::grpc::ServerContext* context,
     // For Test drvier command to test fake-pos
     pos_rpc::ReadBlocksRequest asyncRequest;
     pos_rpc::ReadBlocksResponse asyncResponse;
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get ReadBlocksSync from grpc client");
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get ReadBlocksSync from grpc client");
 
     asyncRequest.set_array_name(request->array_name());
     asyncRequest.set_volume_name(request->volume_name());
@@ -158,7 +149,7 @@ GrpcPosIo::CompleteHostWrite(::grpc::ServerContext* context, const pos_rpc::Comp
     std::pair<std::string, int> volumeSet(request->volume_name(), HA_INVALID_VOLUME_IDX);
 
     ::grpc::Status ret = _CheckArgumentValidityAndUpdateIndex(arraySet, volumeSet);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get CompleteHostWrite from grpc client");
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get CompleteHostWrite from grpc client");
 
     if (ret.ok() == false)
     {

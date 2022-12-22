@@ -47,6 +47,7 @@
 #include "test/unit-tests/master_context/config_manager_mock.h"
 #include "test/unit-tests/pos_replicator/grpc_publisher_mock.h"
 #include "test/unit-tests/pos_replicator/grpc_subscriber_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using namespace ::testing;
 using ::testing::_;
@@ -72,6 +73,7 @@ protected:
     PosReplicatorManager* posReplicatorManager;
     NiceMock<MockGrpcPublisher>* grpcPublisher;
     NiceMock<MockGrpcSubscriber>* grpcSubscriber;
+    NiceMock<MockTelemetryPublisher> tp;
 };
 
 void
@@ -83,7 +85,7 @@ PosReplicatorManagerTestFixture::SetUp(void)
     ON_CALL(*configManager, GetValue("replicator", "ha_publisher_address", _, _)).WillByDefault(SetArg2ToStringAndReturn0("0.0.0.0:50003"));
     ON_CALL(*configManager, GetValue("replicator", "ha_subscriber_address", _, _)).WillByDefault(SetArg2ToStringAndReturn0("0.0.0.0:50053"));
 
-    posReplicatorManager = new PosReplicatorManager(aio);
+    posReplicatorManager = new PosReplicatorManager(aio, &tp);
     grpcPublisher = new NiceMock<MockGrpcPublisher>(nullptr, configManager);
     grpcSubscriber = new NiceMock<MockGrpcSubscriber>(posReplicatorManager, configManager);
     posReplicatorManager->Init(grpcPublisher, grpcSubscriber, configManager);
@@ -100,22 +102,6 @@ PosReplicatorManagerTestFixture::TearDown(void)
     delete posReplicatorManager;
 }
 
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_NotifyNewUserIORequest_)
-{
-    // Given
-
-    pos_io io;
-    io.ioType = IO_TYPE::WRITE;
-    io.array_id = 0;
-    io.volume_id = 0;
-    io.arrayName = const_cast<char*>("ARR0");
-
-    // Then
-    int ret = posReplicatorManager->NotifyNewUserIORequest(io);
-
-    EXPECT_NE(EID(SUCCESS), ret);
-}
-
 TEST_F(PosReplicatorManagerTestFixture, DISABLED_CompelteUserIO_)
 {
     // Given
@@ -127,19 +113,6 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_CompelteUserIO_)
 
     int ret = posReplicatorManager->CompleteUserIO(lsn, arrayId, volumeId);
 
-    EXPECT_NE(EID(SUCCESS), ret);
-}
-
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_UserVolumeWriteSubmission_) // To do
-{
-    // Given
-
-    // Then
-    uint64_t lsn = 0;
-    int arrayId = 0;
-    int volumeId = 0;
-
-    int ret = posReplicatorManager->UserVolumeWriteSubmission(lsn, arrayId, volumeId);
     EXPECT_NE(EID(SUCCESS), ret);
 }
 
@@ -176,9 +149,12 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAIOCompletion_)
 
     // Then
     uint64_t lsn;
+    uint64_t rba = 0;
+    uint64_t numChunks = 8;
+
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
 
-    posReplicatorManager->HAIOCompletion(lsn, volumeIo);
+    posReplicatorManager->HAIOCompletion(lsn, volumeIo, rba, numChunks);
 }
 
 TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAWriteCompletion_)
@@ -187,9 +163,12 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAWriteCompletion_)
 
     // Then
     uint64_t lsn;
+    uint64_t rba = 0;
+    uint64_t numChunks = 8;
+
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
 
-    posReplicatorManager->HAWriteCompletion(lsn, volumeIo);
+    posReplicatorManager->HAWriteCompletion(lsn, volumeIo, rba, numChunks);
 }
 
 TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAReadCompletion_)
@@ -198,9 +177,12 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_HAReadCompletion_)
 
     // Then
     uint64_t lsn;
+    uint64_t rba = 0;
+    uint64_t numChunks = 8;
+
     VolumeIoSmartPtr volumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
 
-    posReplicatorManager->HAReadCompletion(lsn, volumeIo);
+    posReplicatorManager->HAReadCompletion(lsn, volumeIo, rba, numChunks);
 }
 
 TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertIdToName_)
@@ -234,20 +216,4 @@ TEST_F(PosReplicatorManagerTestFixture, DISABLED_ConvertNameToId_)
     // Then
     EXPECT_NE(EID(SUCCESS), ret);
 }
-
-TEST_F(PosReplicatorManagerTestFixture, DISABLED_AddDonePOSIoRequest_)
-{
-    // Then
-    uint64_t lsn;
-    MockVolumeIo* mockVolumeIo = new NiceMock<MockVolumeIo>(nullptr, 0, 0);
-    VolumeIoSmartPtr volumeIo(mockVolumeIo);
-
-    EXPECT_CALL(*mockVolumeIo, GetArrayId()).WillOnce(Return(0));
-    EXPECT_CALL(*mockVolumeIo, GetVolumeId()).WillOnce(Return(0));
-
-    posReplicatorManager->AddDonePOSIoRequest(lsn, volumeIo);
-
-    //delete mockVolumeIo;
-}
-
 } // namespace pos

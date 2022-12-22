@@ -39,12 +39,6 @@
 
 namespace pos
 {
-enum GrpcCallbackType
-{
-    GrpcReply,
-    WaitGrpc
-};
-
 const int HA_INVALID_ARRAY_IDX = 0xFFFFFFFF;
 const int HA_INVALID_VOLUME_IDX = 0xFFFFFFFF;
 } // namespace pos

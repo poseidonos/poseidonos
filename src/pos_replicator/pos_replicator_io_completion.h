@@ -40,14 +40,15 @@ namespace pos
 class PosReplicatorIOCompletion : public Callback, public std::enable_shared_from_this<PosReplicatorIOCompletion>
 {
 public:
-    PosReplicatorIOCompletion(GrpcCallbackType grpcCallbackType, VolumeIoSmartPtr inputVolumeIo, uint64_t lsn_, CallbackSmartPtr originCallback_);
+    PosReplicatorIOCompletion(VolumeIoSmartPtr inputVolumeIo, uint64_t originRba, uint64_t originNumChunks, uint64_t lsn_, CallbackSmartPtr originCallback_);
     ~PosReplicatorIOCompletion(void) override;
 
 private:
     bool _DoSpecificJob(void) override;
 
-    GrpcCallbackType grpcCallbackType;
     VolumeIoSmartPtr volumeIo;
+    uint64_t originRba;
+    uint64_t originNumChunks;
     uint64_t lsn;
     CallbackSmartPtr originCallback;
 };
