@@ -50,8 +50,8 @@ public:
     GrpcPublisher(std::shared_ptr<grpc::Channel> channel_, ConfigManager* configManager);
     ~GrpcPublisher(void);
 
-    int PushHostWrite(uint64_t rba, uint64_t size, string volumeName, string arrayName, void* buffer, uint64_t& lsn);
     int PushDirtyLog(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks);
+    int PushHostWrite(string arrayName, string volumeName, uint64_t rba, uint64_t numBlocks, void* buffer, uint64_t& lsn);
     int CompleteUserWrite(uint64_t lsn, std::string volumeName, string arrayName);
     int CompleteWrite(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn);
     int CompleteRead(std::string arrayName, std::string volumeName, uint64_t rba, uint64_t numBlocks, uint64_t lsn, void* buffer);
@@ -62,6 +62,7 @@ private:
     void _ConnectGrpcServer(std::string targetAddress);
     bool _WaitUntilReady(void);
     void _InsertBlockToChunk(replicator_rpc::CompleteReadRequest& request, void* data, uint64_t numBlocks);
+    void _InsertBlockToChunk(replicator_rpc::PushHostWriteRequest& request, void* data, uint64_t numBlocks);
 
     std::shared_ptr<grpc::Channel> channel;
     ConfigManager* configManager;

@@ -129,8 +129,6 @@ UNVMfSubmitHandler(struct pos_io* io)
             }
         }
 
-        QosManager* qosManager = QosManagerSingleton::Instance();
-
         IVolumeIoManager* volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
 
         AIO aio;
@@ -147,12 +145,9 @@ UNVMfSubmitHandler(struct pos_io* io)
 
 #ifdef IBOF_CONFIG_REPLICATOR
         PosReplicatorManager* replicatorManager = PosReplicatorManagerSingleton::Instance();
-        if (replicatorManager->IsEnabled())
-        {
-            replicatorManager->HandleHostWrite(volumeIo);
-        }
-#endif
-
+        replicatorManager->HandleHostWrite(volumeIo);
+#else
+        QosManager* qosManager = QosManagerSingleton::Instance();
         if (true == qosManager->IsFeQosEnabled())
         {
             AioSubmissionAdapter aioSubmission;
@@ -162,6 +157,7 @@ UNVMfSubmitHandler(struct pos_io* io)
         {
             aio.SubmitAsyncIO(volumeIo);
         }
+#endif
     }
     catch (...)
     {

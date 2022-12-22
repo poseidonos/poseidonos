@@ -35,6 +35,7 @@
 #include "src/event_scheduler/callback.h"
 #include "src/include/pos_event_id.h"
 #include "src/io/frontend_io/aio.h"
+#include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/io/frontend_io/unvmf_io_handler.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
@@ -43,22 +44,28 @@
 #include "src/pos_replicator/pos_replicator_io_completion.h"
 #include "src/pos_replicator/posreplicator_status.h"
 #include "src/pos_replicator/replicator_volume_subscriber.h"
+#include "src/qos/qos_manager.h"
 #include "src/sys_event/volume_event.h"
 #include "src/sys_event/volume_event_publisher.h"
+#include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/volume/i_volume_info_manager.h"
 #include "src/volume/volume_base.h"
+
 namespace pos
 {
 PosReplicatorManager::PosReplicatorManager(void)
-: PosReplicatorManager(new AIO())
+: PosReplicatorManager(new AIO(), new TelemetryPublisher("pos_replicator"))
 {
 }
 
-PosReplicatorManager::PosReplicatorManager(AIO* aio)
+PosReplicatorManager::PosReplicatorManager(AIO* aio, TelemetryPublisher* telemetryPublisher)
 : aio(aio),
+  telemetryPublisher(telemetryPublisher),
   volumeSubscriberCnt(0),
   isEnabled(false)
 {
+    TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
     for (int i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
     {
         items[i] = nullptr;
@@ -70,6 +77,13 @@ PosReplicatorManager::PosReplicatorManager(AIO* aio)
 
 PosReplicatorManager::~PosReplicatorManager(void)
 {
+    if (telemetryPublisher != nullptr)
+    {
+        TelemetryClientSingleton::Instance()->DeregisterPublisher(telemetryPublisher->GetName());
+        delete telemetryPublisher;
+        telemetryPublisher = nullptr;
+    }
+
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "PosReplicatorManager has been destructed");
 }
 
@@ -185,88 +199,6 @@ PosReplicatorManager::Unregister(int arrayId)
 }
 
 int
-PosReplicatorManager::NotifyNewUserIORequest(pos_io io)
-{
-    uint64_t lsn;
-    char buf[4096]; // TODO(jeddy.choi): need to implement copy bytes between io and buf
-
-    std::string arrayName;
-    std::string volumeName;
-    int ret;
-
-    ret = _ConvertVolumeIdToName(io.volume_id, io.array_id, volumeName);
-    if (ret != EID(SUCCESS))
-    {
-        POS_TRACE_WARN(ret, "Invalid Input. Volume_ID: {}", io.volume_id);
-        return ret;
-    }
-    ret = _ConvertArrayIdToName(io.array_id, arrayName);
-    if (ret != EID(SUCCESS))
-    {
-        POS_TRACE_WARN(ret, "Invalid Input. Array_ID: {}", io.array_id);
-        return ret;
-    }
-
-    ret = grpcPublisher->PushHostWrite(io.offset, io.length,
-        arrayName, volumeName, buf, lsn);
-
-    if (ret != EID(SUCCESS))
-    {
-        POS_TRACE_WARN(ret, "Fail PushHostWrite");
-        return ret;
-    }
-    _AddWaitPOSIoRequest(lsn, io);
-
-    return EID(SUCCESS);
-}
-
-int
-PosReplicatorManager::CompleteUserIO(uint64_t lsn, int arrayId, int volumeId)
-{
-    VolumeIoSmartPtr volumeIo;
-    auto itr = donePosIoRequest[arrayId][volumeId].find(lsn);
-    if (itr != donePosIoRequest[arrayId][volumeId].end())
-    {
-        volumeIo = itr->second;
-    }
-    else
-    {
-        POS_TRACE_WARN(EID(HA_REQUESTED_NOT_FOUND), "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}",
-            lsn, arrayId, volumeId);
-        return EID(HA_REQUESTED_NOT_FOUND);
-    }
-
-    volumeIo->GetCallback()->Execute();
-
-    donePosIoRequest[arrayId][volumeId].erase(lsn);
-
-    return EID(SUCCESS);
-}
-
-int
-PosReplicatorManager::UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId)
-{
-    pos_io userRequest;
-
-    auto itr = waitPosIoRequest[arrayId][volumeId].find(lsn);
-    if (itr != waitPosIoRequest[arrayId][volumeId].end())
-    {
-        userRequest = itr->second;
-    }
-    else
-    {
-        return EID(HA_REQUESTED_NOT_FOUND);
-    }
-
-    // TODO (cheolho.kang): Check funtionality later
-    // _MakeIoRequest(GrpcCallbackType::WaitGrpc, &userRequest, lsn);
-
-    waitPosIoRequest[arrayId][volumeId].erase(lsn);
-
-    return EID(SUCCESS);
-}
-
-int
 PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList, uint64_t lsn)
 {
     VolumeIoSmartPtr volumeIo = _MakeVolumeIo(ioType, arrayId, volumeId, rba, numChunks);
@@ -276,20 +208,21 @@ PosReplicatorManager::HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, 
     {
         _InsertChunkToBlock(volumeIo, dataList, numChunks);
     }
-    _RequestVolumeIo(GrpcCallbackType::GrpcReply, volumeIo, lsn);
+    _RequestVolumeIo(volumeIo, lsn);
+    _PublishIopsMetrics(ioType, volumeIo);
     return EID(SUCCESS);
 }
 
 void
-PosReplicatorManager::HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
+PosReplicatorManager::HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo, uint64_t originRba, uint64_t originNumChunks)
 {
     switch (volumeIo->dir)
     {
         case UbioDir::Read:
-            HAReadCompletion(lsn, volumeIo);
+            HAReadCompletion(lsn, volumeIo, originRba, originNumChunks);
             break;
         case UbioDir::Write:
-            HAWriteCompletion(lsn, volumeIo);
+            HAWriteCompletion(lsn, volumeIo, originRba, originNumChunks);
             break;
         default:
             std::string errorMsg = "Wrong IO direction (only read/write types are supported). input dir: " + std::to_string((uint32_t)volumeIo->dir);
@@ -299,7 +232,7 @@ PosReplicatorManager::HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
 }
 
 void
-PosReplicatorManager::HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
+PosReplicatorManager::HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo, uint64_t originRba, uint64_t originNumChunks)
 {
     std::string volumeName;
     std::string arrayName;
@@ -314,13 +247,12 @@ PosReplicatorManager::HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
             return;
         }
     }
-    uint64_t numBlocks = ChangeByteToSector(volumeIo->GetSize());
 
-    grpcPublisher->CompleteRead(arrayName, volumeName, volumeIo->GetSectorRba(), numBlocks, lsn, volumeIo->GetBuffer());
+    grpcPublisher->CompleteRead(arrayName, volumeName, originRba, originNumChunks, lsn, volumeIo->GetBuffer());
 }
 
 void
-PosReplicatorManager::HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
+PosReplicatorManager::HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo, uint64_t originRba, uint64_t originNumChunks)
 {
     // TODO (cheolho.kang): Need to combine HAWriteCompletion() and HAReadCompletion()
     std::string volumeName;
@@ -337,14 +269,7 @@ PosReplicatorManager::HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo)
             return;
         }
     }
-    uint64_t numBlocks = ChangeByteToSector(volumeIo->GetSize());
-    grpcPublisher->CompleteWrite(arrayName, volumeName, volumeIo->GetSectorRba(), numBlocks, lsn);
-}
-
-void
-PosReplicatorManager::AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo)
-{
-    donePosIoRequest[volumeIo->GetArrayId()][volumeIo->GetVolumeId()].insert({lsn, volumeIo});
+    grpcPublisher->CompleteWrite(arrayName, volumeName, originRba, originNumChunks, lsn);
 }
 
 int
@@ -396,7 +321,7 @@ int
 PosReplicatorManager::HandleHostWrite(VolumeIoSmartPtr volumeIo)
 {
     int result = EID(SUCCESS);
-    if (isEnabled)
+    if (isEnabled && volumeIo->dir == UbioDir::Write)
     {
         std::string arrayName;
         std::string volumeName;
@@ -406,8 +331,6 @@ PosReplicatorManager::HandleHostWrite(VolumeIoSmartPtr volumeIo)
             return result;
         }
 
-        // Check VolumeSyncStatus
-        // if status is ISS2 request PushDirtyLog
         ReplicatorStatus currentStatus = replicatorStatus.Get();
         if (currentStatus == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy)
         {
@@ -415,17 +338,63 @@ PosReplicatorManager::HandleHostWrite(VolumeIoSmartPtr volumeIo)
         }
         else if (currentStatus == ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopyWriteSuspend)
         {
-            // Hold until state changes to volume copy
+            // Hold IO until state changes to VolumeCopy
             while (replicatorStatus.Get() != ReplicatorStatus::VOLUMECOPY_PrimaryVolumeCopy)
             {
                 usleep(1);
             }
             result = grpcPublisher->PushDirtyLog(arrayName, volumeName, volumeIo->GetSectorRba(), ChangeByteToSector(volumeIo->GetSize()));
         }
-        // TODO(cheolho.kang): if status is Normal (Live Replication)
-        // Push it to pending list
+        else if (currentStatus == ReplicatorStatus::VOLUMECOPY_PrimaryLiveReplication)
+        {
+            uint64_t lsn = 0;
+            result = grpcPublisher->PushHostWrite(arrayName, volumeName, volumeIo->GetSectorRba(), ChangeByteToSector(volumeIo->GetSize()), volumeIo->GetBuffer(), lsn);
+            _AddWaitPOSIoRequest(lsn, volumeIo);
+            return result;
+        }
+    }
+
+    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        AioSubmissionAdapter aioSubmission;
+        QosManagerSingleton::Instance()->HandlePosIoSubmission(&aioSubmission, volumeIo);
+    }
+    else
+    {
+        AIO aio;
+        aio.SubmitAsyncIO(volumeIo);
     }
     return result;
+}
+
+int
+PosReplicatorManager::CompleteUserIO(uint64_t lsn, int arrayId, int volumeId)
+{
+    VolumeIoSmartPtr volumeIo;
+    auto itr = waitPosIoRequest[arrayId][volumeId].find(lsn);
+    if (itr != waitPosIoRequest[arrayId][volumeId].end())
+    {
+        volumeIo = itr->second;
+    }
+    else
+    {
+        POS_TRACE_WARN(EID(HA_REQUESTED_NOT_FOUND), "Not Found Request lsn : {}, array Idx : {}, volume Idx : {}", lsn, arrayId, volumeId);
+        return EID(HA_REQUESTED_NOT_FOUND);
+    }
+    waitPosIoRequest[arrayId][volumeId].erase(lsn);
+
+    if (true == QosManagerSingleton::Instance()->IsFeQosEnabled())
+    {
+        AioSubmissionAdapter aioSubmission;
+        QosManagerSingleton::Instance()->HandlePosIoSubmission(&aioSubmission, volumeIo);
+    }
+    else
+    {
+        AIO aio;
+        aio.SubmitAsyncIO(volumeIo);
+    }
+
+    return EID(SUCCESS);
 }
 
 bool
@@ -441,6 +410,10 @@ PosReplicatorManager::SetVolumeCopyStatus(ReplicatorStatus status)
     // TODO(cheolho.kang): add argument to speicific volume index
     // TODO(cheolho.kang): add status list each volume
     replicatorStatus.Set(status);
+
+    POSMetricValue v;
+    v.gauge = static_cast<uint64_t>(status);
+    telemetryPublisher->PublishData(TEL150000_REPLICATION_STATUS, v, POSMetricTypes::MT_GAUGE);
 }
 
 ReplicatorStatus
@@ -468,13 +441,9 @@ PosReplicatorManager::_MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, u
 }
 
 void
-PosReplicatorManager::_RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn)
+PosReplicatorManager::_RequestVolumeIo(VolumeIoSmartPtr volumeIo, uint64_t lsn)
 {
-    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG),
-        "Io Submmit from replicator, rba: {}", volumeIo->GetSectorRba());
-
-    CallbackSmartPtr posReplicatorIOCompletion(new PosReplicatorIOCompletion(callbackType, volumeIo, lsn, volumeIo->GetCallback()));
-
+    CallbackSmartPtr posReplicatorIOCompletion(new PosReplicatorIOCompletion(volumeIo, volumeIo->GetSectorRba(), ChangeByteToSector(volumeIo->GetSize()), lsn, volumeIo->GetCallback()));
     volumeIo->SetCallback(posReplicatorIOCompletion);
 
     aio->SubmitAsyncIO(volumeIo);
@@ -496,7 +465,6 @@ PosReplicatorManager::_ConvertArrayIdToName(int arrayId, std::string& arrayName)
 {
     int ret = EID(HA_INVALID_INPUT_ARGUMENT);
 
-    // Array Idx <-> Array Name
     for (auto it = arrayConvertTable.begin(); it != arrayConvertTable.end(); ++it)
     {
         if (it->first == arrayId)
@@ -513,7 +481,6 @@ PosReplicatorManager::_ConvertArrayIdToName(int arrayId, std::string& arrayName)
 int
 PosReplicatorManager::_ConvertVolumeIdToName(int volumeId, int arrayId, std::string& volumeName)
 {
-    // Volume Idx <-> Volume Name
     IVolumeInfoManager* volMgr =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayId);
 
@@ -562,9 +529,21 @@ PosReplicatorManager::_ConvertVolumeNameToId(std::string volumeName, int arrayId
 }
 
 void
-PosReplicatorManager::_AddWaitPOSIoRequest(uint64_t lsn, pos_io io)
+PosReplicatorManager::_AddWaitPOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo)
 {
-    waitPosIoRequest[io.array_id][io.volume_id].insert({lsn, io});
+    waitPosIoRequest[volumeIo->GetArrayId()][volumeIo->GetVolumeId()].insert({lsn, volumeIo});
 }
 
+void
+PosReplicatorManager::_PublishIopsMetrics(IO_TYPE ioType, VolumeIoSmartPtr volumeIo)
+{
+    std::string volumeName;
+    _ConvertVolumeIdToName(volumeIo->GetVolumeId(), volumeIo->GetArrayId(), volumeName);
+    POSMetric metric(TEL50010_WRITE_IOPS_VOLUME, POSMetricTypes::MT_GAUGE);
+    metric.AddLabel("array_id", to_string(volumeIo->GetArrayId()));
+    metric.AddLabel("volume_name", volumeName);
+    metric.AddLabel("type", ioType == IO_TYPE::READ ? "read" : "write");
+    metric.SetGaugeValue(ChangeByteToSector(volumeIo->GetSize()));
+    telemetryPublisher->PublishMetric(metric);
+}
 } // namespace pos

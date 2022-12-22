@@ -110,7 +110,7 @@ TEST_F(GrpcPublisherTestFixture, DISABLED_GrpcPublisher_PushHostWrite)
     void* buf;
 
     // When
-    int ret = grpcPublisher->PushHostWrite(rba, size, volumeName, arrayName, buf, lsn);
+    int ret = grpcPublisher->PushHostWrite(arrayName, volumeName, rba, size, buf, lsn);
 
     // Then: Do Nothing
     EXPECT_EQ(EID(SUCCESS), ret);

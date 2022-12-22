@@ -53,12 +53,13 @@ class ConfigManager;
 class GrpcPublisher;
 class GrpcSubscriber;
 class ReplicatorVolumeSubscriber;
+class TelemetryPublisher;
 
 class PosReplicatorManager : public IPosReplicatorManager
 {
 public:
     PosReplicatorManager(void);
-    PosReplicatorManager(AIO* aio);
+    PosReplicatorManager(AIO* aio, TelemetryPublisher* telemetryPublisher);
     virtual ~PosReplicatorManager(void);
 
     void Init(GrpcPublisher* publisher, GrpcSubscriber* subscriber, ConfigManager* configManager);
@@ -69,22 +70,15 @@ public:
     void Unregister(int arrayId);
     // ReplicatorVolumeSubscriber* GetReplicatorVolumeSubscriber(int arrayId);
 
-    int NotifyNewUserIORequest(pos_io io);
-    int CompleteUserIO(uint64_t lsn, int arrayId, int volumeId);
-
-    int UserVolumeWriteSubmission(uint64_t lsn, int arrayId, int volumeId);
-
     int HAIOSubmission(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> data, uint64_t lsn);
-    void HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
-    void HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
-    void HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo);
-
-    void AddDonePOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo);
+    void HAIOCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo, uint64_t originRba, uint64_t originNumChunks);
+    void HAWriteCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo, uint64_t originRba, uint64_t originNumChunks);
+    void HAReadCompletion(uint64_t lsn, VolumeIoSmartPtr volumeIo, uint64_t originRba, uint64_t originNumChunks);
+    int HandleHostWrite(VolumeIoSmartPtr volumeIo);
+    int CompleteUserIO(uint64_t lsn, int arrayId, int volumeId);
 
     int ConvertIdToName(int arrayId, int volumeId, std::string& arrayName, std::string& volumeName);
     int ConvertNameToIdx(std::pair<std::string, int>& arraySet, std::pair<std::string, int>& volumeSet);
-
-    int HandleHostWrite(VolumeIoSmartPtr volumeIo);
 
     void SetVolumeCopyStatus(ReplicatorStatus status);
     ReplicatorStatus GetVolumeCopyStatus(void);
@@ -92,7 +86,7 @@ public:
 
 private:
     VolumeIoSmartPtr _MakeVolumeIo(IO_TYPE ioType, int arrayId, int volumeId, uint64_t rba, uint64_t numChunks, std::shared_ptr<char*> dataList = nullptr);
-    void _RequestVolumeIo(GrpcCallbackType callbackType, VolumeIoSmartPtr volumeIo, uint64_t lsn);
+    void _RequestVolumeIo(VolumeIoSmartPtr volumeIo, uint64_t lsn);
     void _InsertChunkToBlock(VolumeIoSmartPtr volumeIo, std::shared_ptr<char*> dataList, uint64_t numChunks);
 
     int _ConvertArrayIdToName(int arrayId, std::string& arrayName);
@@ -100,11 +94,13 @@ private:
     int _ConvertArrayNameToId(std::string arrayName);
     int _ConvertVolumeNameToId(std::string volumeName, int arrayId);
 
-    void _AddWaitPOSIoRequest(uint64_t lsn, pos_io io);
+    void _AddWaitPOSIoRequest(uint64_t lsn, VolumeIoSmartPtr volumeIo);
+
+    void _PublishIopsMetrics(IO_TYPE ioType, VolumeIoSmartPtr volumeIo);
 
     AIO* aio;
-    std::unordered_map<uint64_t, pos_io> waitPosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
-    std::unordered_map<uint64_t, VolumeIoSmartPtr> donePosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
+    TelemetryPublisher* telemetryPublisher;
+    std::unordered_map<uint64_t, VolumeIoSmartPtr> waitPosIoRequest[ArrayMgmtPolicy::MAX_ARRAY_CNT][MAX_VOLUME_COUNT];
 
     int volumeSubscriberCnt;
     ReplicatorVolumeSubscriber* items[ArrayMgmtPolicy::MAX_ARRAY_CNT];

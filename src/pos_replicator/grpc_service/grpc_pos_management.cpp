@@ -70,7 +70,7 @@ GrpcPosManagement::GetVolumeList(::grpc::ServerContext* context,
     const ::pos_rpc::GetVolumeListRequest* request, ::pos_rpc::VolumeListResponse* response)
 {
     string arrayName = request->array_name();
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Get GetVolumeList from grpc client");
+    POS_TRACE_DEBUG(EID(HA_DEBUG_MSG), "Get GetVolumeList from grpc client");
 
     IVolumeInfoManager* volumeManager =
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
