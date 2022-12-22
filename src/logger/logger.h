@@ -45,8 +45,8 @@
 #include "preferences.h"
 #include "spdlog/spdlog.h"
 #include "src/cli/cli_event_code.h"
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 #include "src/event/event_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/include/pos_event_id.hpp"
@@ -94,9 +94,9 @@ public:
             uint32_t moduleId = static_cast<uint32_t>(module);
             fmt::memory_buffer buf;
             fmt::format_to(buf, fmt, args...);
-            DumpModule<DumpBuffer>* dumpModulePtr = dumpModule[moduleId];
+            DebugInfoQueue<DumpBuffer>* dumpModulePtr = dumpModule[moduleId];
             DumpBuffer dumpBuffer(buf.data(), buf.size(), dumpModulePtr);
-            dumpModulePtr->AddDump(dumpBuffer, 0);
+            dumpModulePtr->AddDebugInfo(dumpBuffer, 0);
         }
 #endif
     }
@@ -288,7 +288,7 @@ private:
     }
     const uint32_t MAX_LOGGER_DUMP_SIZE = 1 * 1024 * 1024;
     const uint32_t AVG_LINE = 80;
-    DumpModule<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
+    DebugInfoQueue<DumpBuffer>* dumpModule[static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE)];
     shared_ptr<spdlog::logger> logger;
     pos_logger::Preferences preferences;
     int prevEventId = NO_PREV_EVENT;

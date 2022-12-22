@@ -26,13 +26,13 @@ class DebugMetaCmd(gdb.Command):
         )
 
 
-    def show_debug_info(self):
-        print("- debugInfo.allocatorService")
-        gdb.execute('p *(pos::AllocatorService*)debugInfo.allocatorService')
-        print("- debugInfo.arrayManager")
-        gdb.execute('p *(pos::ArrayManager*)debugInfo.arrayManager')
-        print("- debugInfo.mapperService")
-        gdb.execute('p *(pos::MapperService*)debugInfo.mapperService')
+    def show_singleton_info(self):
+        print("- singletonInfo.allocatorService")
+        gdb.execute('p *(pos::AllocatorService*)singletonInfo.allocatorService')
+        print("- singletonInfo.arrayManager")
+        gdb.execute('p *(pos::ArrayManager*)singletonInfo.arrayManager')
+        print("- singletonInfo.mapperService")
+        gdb.execute('p *(pos::MapperService*)singletonInfo.mapperService')
 
 
     def complete(self, text, word):
@@ -52,14 +52,14 @@ class DebugMetaCmd(gdb.Command):
 
         gdb_lib.switch_to_pos_stack()
 
-        if(args == 'debuginfo'):
-            self.show_debug_info()
+        if(args == 'singletonInfo'):
+            self.show_singleton_info()
 
         if(args == 'status'):
-            arrayCount = gdb.execute("p debugInfo.arrayManager.arrayList.size()", to_string=True)
+            arrayCount = gdb.execute("p singletonInfo.arrayManager.arrayList.size()", to_string=True)
             arrayCount = int(arrayCount.split('=')[1].strip(',\n {}'))
             if arrayCount != 0:
-                arrayList = gdb.execute("p debugInfo.arrayManager.arrayList", to_string=True)
+                arrayList = gdb.execute("p singletonInfo.arrayManager.arrayList", to_string=True)
                 arrayList = arrayList.split('\n')
                 for idx in range(1, arrayCount + 1):
                     arrayName = arrayList[idx].split('=')[0].strip()

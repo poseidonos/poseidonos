@@ -38,8 +38,9 @@
 
 #include <string>
 
-#include "src/dump/dump_manager.h"
-#include "src/dump/dump_module.h"
+#include "src/debug_lib/dump_manager.h"
+#include "src/debug_lib/debug_info_queue.h"
+
 template<typename T>
 class DumpSharedPtr;
 
@@ -70,7 +71,28 @@ DumpObject<T>::~DumpObject()
 }
 
 template<typename T>
-DumpModule<T>::DumpModule()
+DumpObjectPtr<T>::DumpObjectPtr(void)
+: buffer{},
+  userSpecificData(0)
+{
+    memset(&date, 0x00, sizeof(date));
+}
+
+template<typename T>
+DumpObjectPtr<T>::DumpObjectPtr(T& t, uint64_t userSpecific)
+: buffer(t),
+  userSpecificData(userSpecific)
+{
+    gettimeofday(&date, NULL);
+}
+
+template<typename T>
+DumpObjectPtr<T>::~DumpObjectPtr()
+{
+}
+
+template<typename T>
+DebugInfoQueue<T>::DebugInfoQueue()
 {
     isEnabled = false;
     entryBufSize = 0;
@@ -78,7 +100,7 @@ DumpModule<T>::DumpModule()
 }
 
 template<typename T>
-DumpModule<T>::DumpModule(std::string moduleName, uint32_t num, bool defaultEnable)
+DebugInfoQueue<T>::DebugInfoQueue(std::string moduleName, uint32_t num, bool defaultEnable)
 {
     entryMaxNum = num;
     entryBufSize = sizeof(T);
@@ -87,20 +109,30 @@ DumpModule<T>::DumpModule(std::string moduleName, uint32_t num, bool defaultEnab
 }
 
 template<typename T>
-DumpModule<T>::~DumpModule()
+void
+DebugInfoQueue<T>::RegisterDebugInfoQueue(std::string moduleName, uint32_t num, bool defaultEnable)
+{
+    entryMaxNum = num;
+    entryBufSize = sizeof(T);
+    isEnabled = defaultEnable;
+    DumpManagerSingleton::Instance()->RegisterDump(moduleName, this);
+}
+
+template<typename T>
+DebugInfoQueue<T>::~DebugInfoQueue()
 {
 }
 
 template<typename T>
 uint64_t
-DumpModule<T>::GetPoolSize()
+DebugInfoQueue<T>::GetPoolSize()
 {
     return entryMaxNum * (entryBufSize + sizeof(DumpObject<T>));
 }
 
 template<typename T>
 int
-DumpModule<T>::AddDump(T& t, uint64_t userSpecific, bool lock_enable)
+DebugInfoQueue<T>::AddDebugInfo(T& t, uint64_t userSpecific, bool lock_enable)
 {
     // We assume that there is no simulataneous access to isEnabled.
     if (isEnabled)
@@ -129,14 +161,14 @@ DumpModule<T>::AddDump(T& t, uint64_t userSpecific, bool lock_enable)
 
 template<typename T>
 void
-DumpModule<T>::SetEnable(bool enable)
+DebugInfoQueue<T>::SetEnable(bool enable)
 {
     isEnabled = enable;
 }
 
 template<typename T>
 bool
-DumpModule<T>::IsEnable()
+DebugInfoQueue<T>::IsEnable()
 {
     return isEnabled;
 }

@@ -1,5 +1,5 @@
-#include "src/dump/dump_shared_ptr.h"
-#include "src/dump/dump_shared_ptr.hpp"
+#include "src/debug_lib/dump_shared_ptr.h"
+#include "src/debug_lib/dump_shared_ptr.hpp"
 
 #include <gtest/gtest.h>
 

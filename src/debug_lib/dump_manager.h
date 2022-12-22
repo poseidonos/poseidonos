@@ -30,18 +30,39 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef DUMP_MANAGER_H_
+#define DUMP_MANAGER_H_
+
+#include <cstdint>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/lib/singleton.h"
 
 namespace pos
 {
+#define MAX_MEMORY_SIZE_IN_DUMP (20 * 1024)
 
-class DebugInfoUpdater
+using namespace std;
+
+class DumpManager
 {
 public:
-    virtual ~DebugInfoUpdater(void);
-    virtual void Update(void) = 0;
+    DumpManager(void);
+    ~DumpManager(void);
+    int RegisterDump(string moduleName, DebugInfoQueueInstance* dumpModule);
+    int SetEnableModuleByCLI(string moduleStr, bool enable);
+
+private:
+    unordered_map<string, DebugInfoQueueInstance*> dumpModules;
+    uint32_t usedMemorySize;
+    mutex dumpManagerMutex;
 };
 
-extern DebugInfoUpdater* debugInfoUpdater;
+using DumpManagerSingleton = Singleton<DumpManager>;
+
 } // namespace pos
 
+#endif // DUMP_MANAGER_H_

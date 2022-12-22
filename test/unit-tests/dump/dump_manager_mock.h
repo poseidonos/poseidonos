@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/dump/dump_manager.h"
+#include "src/debug_lib/dump_manager.h"
 
 namespace pos
 {

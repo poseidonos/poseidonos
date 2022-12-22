@@ -30,33 +30,29 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-
-#include "dump_module.h"
+#include "debug_info_maker.h"
+#include "debug_info_queue.h"
+#include <cassert>
+#include <unordered_map>
 
 namespace pos
 {
-DumpBuffer::DumpBuffer(void)
-: ptr(nullptr),
-  dumpModule(nullptr)
+
+std::unordered_map<std::string, DebugInfoInstance*> debugInfo;
+std::mutex DebugInfoInstance::registeringMutex;
+
+DebugInfoInstance::DebugInfoInstance(void)
 {
 }
 
-DumpBuffer::DumpBuffer(void* inputPtr, size_t size, AbstractDumpModule* module)
-: ptr(nullptr),
-  dumpModule(nullptr)
-{
-    if (module->IsEnable())
-    {
-        dumpModule = module;
-        ptr = std::shared_ptr<uint8_t>(new uint8_t[size + 1], DumpBufferDeleter());
-        memcpy(ptr.get(), inputPtr, size);
-        memset(ptr.get() + size, 0, 1);
-    }
-}
-
-DumpBuffer::~DumpBuffer(void)
+DebugInfoInstance::~DebugInfoInstance(void)
 {
 }
 
-} // namespace pos
+void
+DebugInfoInstance::RegisterDebugInfoInstance(std::string str)
+{
+    std::lock_guard<std::mutex> lock(registeringMutex);
+    debugInfo[str] = this;
+}
+}

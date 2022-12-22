@@ -38,17 +38,17 @@
 4. API
 
 
-(1) Constructor of DumpModule (Registration)
+(1) Constructor of DebugInfoQueue (Registration)
 
 
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-               #include "src/dump/dump_module.h"
+               #include "src/debug_lib/debug_info_queue.h"
 
-               #include "src/dump/dump_module.hpp"
+               #include "src/debug_lib/debug_info_queue.hpp"
 
-               DumpModule <Ubio> dumpUbio ("Read_Ubio_Handler", 10, defaultEnable)
+               DebugInfoQueue <Ubio> dumpUbio ("Read_Ubio_Handler", 10, defaultEnable)
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
@@ -63,7 +63,7 @@
 
               ..........
 
-               dumpUbio.AddDump(ubio)
+               dumpUbio.AddDebugInfo(ubio)
 
               ........
 
@@ -75,7 +75,7 @@
 
 --------------------------------------------------------------------------------------------------------------------------------------
 
-              DumpModule <DumpBuffer> dumpUbio (module, submodule, 10, defaultEnable)          // register DumpModule
+              DebugInfoQueue <DumpBuffer> dumpUbio (module, submodule, 10, defaultEnable)          // register DebugInfoQueue
 
          
 
@@ -85,7 +85,7 @@
 
                DumpBuffer dumpbuffer (ptr, size,dumpMemDump);
 
-               dumpMemDump.AddDump(dumpbuffer);
+               dumpMemDump.AddDebugInfo(dumpbuffer);
 
              ........
 

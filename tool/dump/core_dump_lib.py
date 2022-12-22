@@ -8,7 +8,7 @@ import pytz
 GDB_SCRIPT = 'parse_debug_dumpmanager_trace.gdb'
 GDB_SCRIPT_OUT = 'parse_debug_dumpmanager_trace.gdb.out'
 LOGGER_HEADER = 'src/logger/logger.h'
-DUMP_HEADER = 'src/dump/dump_shared_ptr.h'
+DUMP_HEADER = 'src/debug_lib/dump_shared_ptr.h'
 
 
 def parse_logger_header(ibofos_root):
@@ -102,7 +102,7 @@ def check_module_number_and_change_script():
     for line in f:
         if ("ReplaceThisStatement" in line):
             for index in range(0, max_count):
-                f_write.write("p (pos::debugInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index))
+                f_write.write("p (pos::singletonInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index))
         else:
             f_write.write(line)
 

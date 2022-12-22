@@ -39,7 +39,7 @@ def show_pending_ubio():
             output_ubio = gdb.execute(
                 "p *((Ubio *)%s)" % (ubio_memaddr), to_string=True).split('\n')
             for line in output_ubio:
-                if ("_vptr.Ubio" in line):
+                if ("_vptr.DebugInfoInstance" in line):
                     if ("pos::VolumeIo" in line):
                         output_rba = gdb.parse_and_eval(
                             "((VolumeIo *) %s)->sectorRba " % (ubio_memaddr))

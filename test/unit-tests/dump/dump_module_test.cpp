@@ -1,5 +1,5 @@
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 
 #include <gtest/gtest.h>
 
@@ -22,47 +22,47 @@ TEST(DumpObject, DumpObject_Constructor)
 
 namespace pos
 {
-TEST(DumpModule, DumpModule)
+TEST(DebugInfoQueue, DebugInfoQueue)
 {
-    DumpModule<int>* dumpModule;
+    DebugInfoQueue<int>* dumpModule;
     // Without Argument
-    dumpModule = new DumpModule<int>();
+    dumpModule = new DebugInfoQueue<int>();
     delete dumpModule;
-    dumpModule = new DumpModule<int>("test1", 30, true);
+    dumpModule = new DebugInfoQueue<int>("test1", 30, true);
     delete dumpModule;
 
 }
 
-TEST(DumpModule, AddDump)
+TEST(DebugInfoQueue, AddDebugInfo)
 {
-    DumpModule<int>* dumpModule;
-    dumpModule = new DumpModule<int>("test2", 30, true);
+    DebugInfoQueue<int>* dumpModule;
+    dumpModule = new DebugInfoQueue<int>("test2", 30, true);
     int a = 3;
-    dumpModule->AddDump(a, 0);
+    dumpModule->AddDebugInfo(a, 0);
     a = 8;
     // Without lock
-    dumpModule->AddDump(a, 0, false);
+    dumpModule->AddDebugInfo(a, 0, false);
 
     delete dumpModule;
 }
 
-TEST(DumpModule, SetEnable)
+TEST(DebugInfoQueue, SetEnable)
 {
-    DumpModule<int>* dumpModule;
-    dumpModule = new DumpModule<int>("test3", 30, false);
+    DebugInfoQueue<int>* dumpModule;
+    dumpModule = new DebugInfoQueue<int>("test3", 30, false);
     int a = 8;
-    dumpModule->AddDump(a, 0, false);
+    dumpModule->AddDebugInfo(a, 0, false);
     dumpModule->SetEnable(true);
-    dumpModule->AddDump(a, 0, false);
+    dumpModule->AddDebugInfo(a, 0, false);
     EXPECT_EQ(dumpModule->IsEnable(), true);
 
     delete dumpModule;
 }
 
-TEST(DumpModule, GetPoolSize)
+TEST(DebugInfoQueue, GetPoolSize)
 {
-    DumpModule<int>* dumpModule;
-    dumpModule = new DumpModule<int>("test4", 30, false);
+    DebugInfoQueue<int>* dumpModule;
+    dumpModule = new DebugInfoQueue<int>("test4", 30, false);
     uint32_t poolSize = dumpModule->GetPoolSize();
     EXPECT_GT(poolSize, 0);
     delete dumpModule;

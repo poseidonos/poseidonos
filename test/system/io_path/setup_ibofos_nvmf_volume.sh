@@ -96,7 +96,7 @@ ibofos_bringup(){
     fi
 
     sudo ${CLI} subsystem list
-    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level info
+    sudo $ROOT_DIR/bin/poseidonos-cli logger set-level --level debug
 
 }
 

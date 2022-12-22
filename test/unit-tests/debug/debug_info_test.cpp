@@ -1,19 +1,19 @@
-#include "src/debug/debug_info.h"
+#include "src/singleton_info/singleton_info.h"
 #include "src/qos/qos_spdk_manager.h"
 #include <gtest/gtest.h>
 
 namespace pos
 {
-TEST(DebugInfo, DebugInfo)
+TEST(SingletonInfo, SingletonInfo)
 {
     // Given : new debug Info object is constructed.
-    DebugInfo* localDebugInfo = new DebugInfo;
+    SingletonInfo* localsingletonInfo = new SingletonInfo;
     // When : Nothing
     // Then : delete.
-    delete localDebugInfo;
+    delete localsingletonInfo;
 }
 
-TEST(DebugInfo, Update)
+TEST(SingletonInfo, Update)
 {
 }
 

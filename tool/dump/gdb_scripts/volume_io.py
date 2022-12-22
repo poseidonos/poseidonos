@@ -37,7 +37,7 @@ def bdev_information():
 
 
 def pending_volume_io():
-    output = gdb.execute("p pos::debugInfo->arrayManager->arrayList", to_string=True)
+    output = gdb.execute("p pos::singletonInfo->arrayManager->arrayList", to_string=True)
     output_list = output.split('\n')
     array_components = []
     array_name = []

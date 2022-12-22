@@ -7,7 +7,7 @@ custom gdb command for utilizing debugging.
 source posgdb.py
 posgdb [command] [subcommand]
 
-1) posgdb debuginfo
+1) posgdb singletonInfo
    show debug info and simple report
 
 2) posgdb pending io

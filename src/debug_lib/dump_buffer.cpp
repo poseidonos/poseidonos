@@ -30,37 +30,33 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DUMP_BUFFER_H_
-#define DUMP_BUFFER_H_
+#include <cstring>
 
-#include "dump_module.h"
-
-#include <memory>
+#include "debug_info_queue.h"
 
 namespace pos
 {
-class AbstractDumpModule;
-
-struct DumpBufferDeleter
+DumpBuffer::DumpBuffer(void)
+: ptr(nullptr),
+  dumpModule(nullptr)
 {
-    void
-    operator()(uint8_t* ptr)
+}
+
+DumpBuffer::DumpBuffer(void* inputPtr, size_t size, DebugInfoQueueInstance* module)
+: ptr(nullptr),
+  dumpModule(nullptr)
+{
+    if (module->IsEnable())
     {
-        delete[] ptr;
+        dumpModule = module;
+        ptr = std::shared_ptr<uint8_t>(new uint8_t[size + 1], DumpBufferDeleter());
+        memcpy(ptr.get(), inputPtr, size);
+        memset(ptr.get() + size, 0, 1);
     }
-};
+}
 
-class DumpBuffer
+DumpBuffer::~DumpBuffer(void)
 {
-public:
-    DumpBuffer(void);
-    DumpBuffer(void* inputPtr, size_t size, AbstractDumpModule* module);
-    ~DumpBuffer(void);
+}
 
-private:
-    std::shared_ptr<uint8_t> ptr;
-    AbstractDumpModule* dumpModule;
-};
 } // namespace pos
-
-#endif // DUMP_BUFFER_H_

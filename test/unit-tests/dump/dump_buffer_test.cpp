@@ -1,4 +1,4 @@
-#include "src/dump/dump_buffer.h"
+#include "src/debug_lib/dump_buffer.h"
 
 #include <gtest/gtest.h>
 
@@ -23,7 +23,7 @@ TEST(DumpBuffer, Constructor)
 {
     // Given : New DummyBufferTest is created and dump module is created
     DummyBufferTest* dummyBuffer = new DummyBufferTest;
-    DumpModule<DumpBuffer> dumpModule("test", 10, true);
+    DebugInfoQueue<DumpBuffer> dumpModule("test", 10, true);
     // When : DumpBuffer is created with dump Module
     DumpBuffer dumpBuffer(dummyBuffer, 10, &dumpModule);
 
@@ -31,7 +31,7 @@ TEST(DumpBuffer, Constructor)
     DumpBuffer dumpBuffer3;
 
     // Given : New dumpModule is created
-    DumpModule<DumpBuffer> dumpModule2("test2", 10, false);
+    DebugInfoQueue<DumpBuffer> dumpModule2("test2", 10, false);
     // When : DumpBuffer is created with dump Module
     DumpBuffer dumpBuffer2(dummyBuffer, 10, &dumpModule2);
     delete dummyBuffer;

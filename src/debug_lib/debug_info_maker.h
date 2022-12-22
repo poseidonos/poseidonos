@@ -29,65 +29,54 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #pragma once
-
+#include <atomic>
 #include <cstdint>
-#include <string>
+#include <unordered_map>
+#include <mutex>
 #include <thread>
-
-#include "mk/ibof_config.h"
-#include "src/singleton_info/singleton_info.h"
-#include "src/master_context/config_manager.h"
-#include "src/master_context/version_provider.h"
-#include "src/trace/trace_exporter.h"
+#include "debug_info_queue.h"
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
 
-class Poseidonos
+class DebugInfoQueueInstance;
+using CopyFunc = void (*)(void*, void *);
+#define MAX_DEBUG_INFO_MODULE_NUM (1024)
+
+static const uint32_t INVALID_UINT32 = 0xFFFFFFFF;
+static const uint8_t INVALID_UINT8 = 0xFF;
+
+class DebugInfoInstance
 {
 public:
-    int Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
-    // This function should be private. But being public for only UT
-    int _InitTraceExporter(char* procFullName,
-                            ConfigManager *cm,
-                            VersionProvider *vp,
-                            TraceExporter *te);
-
+    DebugInfoInstance(void);
+    virtual ~DebugInfoInstance(void);
+    void RegisterDebugInfoInstance(std::string str);
 private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-    void _InitResourceChecker(void);
-#ifdef IBOF_CONFIG_REPLICATOR
-    void _InitReplicatorManager(void);
-#endif
-    void _SetPerfImpact(void);
-    int _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-
-    std::thread *GrpcCliServerThread = nullptr;
+    static std::mutex registeringMutex;
 };
+
+template<typename T>
+class DebugInfoMaker
+{
+public:
+    DebugInfoMaker(void);
+    ~DebugInfoMaker(void);
+    virtual void MakeDebugInfo(T& obj) = 0;
+    virtual void RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue);
+    void SetTimer(uint64_t inputTimerUsec);
+    virtual void AddDebugInfo(uint64_t userSpecific = 0);
+private:
+    uint64_t timerUsec = 1 * 1000ULL * 1000ULL; // 1sec
+    void _DebugInfoThread(void);
+    T* debugInfoObject;
+    DebugInfoQueue<T>* debugInfoQueue;
+    std::atomic<bool> run;
+    std::thread* debugInfoThread;
+    static const uint64_t TIMER_TRIGGERED = 0xFFFFCCCC;
+};
+
+extern std::unordered_map<std::string, DebugInfoInstance*> debugInfo;
+
 } // namespace pos

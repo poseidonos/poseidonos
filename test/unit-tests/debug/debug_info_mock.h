@@ -4,14 +4,14 @@
 #include <string>
 #include <vector>
 
-#include "src/debug/debug_info.h"
+#include "src/singleton_info/singleton_info.h"
 
 namespace pos
 {
-class MockDebugInfo : public DebugInfo
+class MocksingletonInfo : public SingletonInfo
 {
 public:
-    using DebugInfo::DebugInfo;
+    using SingletonInfo::SingletonInfo;
     MOCK_METHOD(void, Update, (), (override));
 };
 

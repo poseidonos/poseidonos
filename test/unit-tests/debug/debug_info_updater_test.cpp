@@ -1,14 +1,14 @@
-#include "src/debug/debug_info_updater.h"
+#include "src/singleton_info/singleton_info_updater.h"
 
 #include <gtest/gtest.h>
 
 namespace pos
 {
-TEST(DebugInfoUpdater, DebugInfoUpdater_)
+TEST(SingletonInfo, singletonInfoUpdater_)
 {
 }
 
-TEST(DebugInfoUpdater, Update_)
+TEST(SingletonInfo, Update_)
 {
 }
 

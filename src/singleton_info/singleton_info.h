@@ -34,7 +34,9 @@
 #define DEBUG_INFO_H_
 
 #include "mk/ibof_config.h"
-#include "src/debug/debug_info_updater.h"
+#include "src/debug/singleton_info_updater.h"
+
+#include "src/singleton_info/singleton_info_updater.h"
 
 namespace pos
 {
@@ -43,7 +45,7 @@ class AllocatorService;
 class ArrayManager;
 class CommandTimeoutHandler;
 class ConfigManager;
-class DebugInfo;
+class SingletonInfo;
 class DeviceManager;
 class DumpManager;
 class EventScheduler;
@@ -79,13 +81,13 @@ class PosReplicatorManager;
 class ResourceChecker;
 class IoTimeoutChecker;
 
-extern DebugInfo* debugInfo;
+extern SingletonInfo* singletonInfo;
 
-class DebugInfo : public DebugInfoUpdater
+class SingletonInfo : public SingletonInfoUpdater
 {
 public:
-    DebugInfo(void);
-    ~DebugInfo(void) override;
+    SingletonInfo(void);
+    ~SingletonInfo(void) override;
 
     void Update(void) override;
 

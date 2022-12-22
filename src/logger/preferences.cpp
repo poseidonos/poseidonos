@@ -33,7 +33,7 @@
 #include "preferences.h"
 
 #include "configuration.h"
-#include "src/dump/dump_shared_ptr.h"
+#include "src/debug_lib/dump_shared_ptr.h"
 #include "src/include/pos_event_id.h"
 #include "src/event_scheduler/callback.h"
 

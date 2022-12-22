@@ -28,7 +28,7 @@ spdk_conf = ibof_root + "test/system/nvmf/initiator/spdk_tcp_fio/BDEV.conf"
 
 file_base = 0
 file_num = 1
-traddr='10.100.11.1'
+traddr='127.0.0.1'
 # could be either nvme or nvmf or bdev
 trtype="tcp"
 port_num = "1158"
@@ -60,7 +60,7 @@ buffer_pattern=""
 
 # run_time parameter specifies how long to run each test.
 # Set run_time = ['10', '600'] to run the test for given seconds
-run_time=['0']
+run_time=['2000']
 
 # mixed rw ratio
 mix=['100']
@@ -78,7 +78,7 @@ profile_mode=False
 verbose=True
 
 numjobs='1'
-time_based='0'
+time_based='1'
 ramp_time='0'
 offset=0
 

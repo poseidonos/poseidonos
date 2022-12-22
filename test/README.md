@@ -175,7 +175,7 @@ build/integration-tests/array/array_device_manager_it
 build/libpostestlib.a
 build/unit-tests
 build/unit-tests/debug
-build/unit-tests/debug/debug_info_ut
+build/unit-tests/singleton_info/singleton_info_ut
 build/unit-tests/debug/memory_checker_ut
 build/unit-tests/admin
 build/unit-tests/admin/smart_log_page_handler_ut

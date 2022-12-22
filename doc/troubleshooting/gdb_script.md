@@ -35,7 +35,7 @@ You can also execute gdb with "load_dump.sh"
 
 ## posgdb Commands
 
-1) posgdb debuginfo
+1) posgdb SingletonInfo
    - show debug info and entry point for global objects.
 </br>
 2) posgdb pending io

@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/dump/dump_shared_ptr.h"
+#include "src/debug_lib/dump_shared_ptr.h"
 
 namespace pos
 {

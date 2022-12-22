@@ -24,7 +24,7 @@ TEST(Poseidonos, Terminate_)
 {
 }
 
-TEST(Poseidonos, _InitDebugInfo_)
+TEST(Poseidonos, _InitsingletonInfo_)
 {
 }
 

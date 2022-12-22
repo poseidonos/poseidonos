@@ -51,8 +51,11 @@
 #include "src/logger/logger.h"
 #include "src/metadata/segment_context_updater.h"
 
+#include <iostream>
+
 namespace pos
 {
+
 Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array)
 : Copier(victimId, targetId, gcStatus, array,
       array->GetSizeInfo(PartitionType::USER_DATA), new CopierMeta(array),
@@ -60,6 +63,22 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
       AllocatorServiceSingleton::Instance()->GetIContextManager(array->GetName()),
       nullptr, nullptr)
 {
+}
+
+void Copier::MakeDebugInfo(DebugCopier& obj)
+{
+    obj.arrayId = array->GetIndex();
+    obj.userDataMaxStripes = userDataMaxStripes;
+    obj.userDataMaxBlks = userDataMaxBlks;
+    obj.blocksPerChunk = blocksPerChunk;
+    obj.victimId = victimId;
+    obj.targetId = targetId;
+    obj.victimStripeId = victimStripeId;
+    obj.copybackState = copybackState;
+    obj.invalidBlkCnt = userDataMaxBlks - meta->GetDoneCopyBlks();
+    obj.copyDoneCnt = meta->GetDoneCopyBlks();
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    obj.numFreeSegment = (uint32_t)(segmentCtx->GetNumOfFreeSegment());
 }
 
 Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array,
@@ -83,6 +102,10 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
     SetEventType(BackendEvent_GC);
+
+    debugCopier.RegisterDebugInfoInstance("GC_Copier_Array" + std::to_string(array->GetIndex()));
+    copierQueue.RegisterDebugInfoQueue("GC_Copier_Array" + std::to_string(array->GetIndex()), 1000, true);
+    RegisterDebugInfoMaker(&debugCopier, &copierQueue);
 }
 
 Copier::~Copier(void)
@@ -160,6 +183,7 @@ Copier::_Stop(void)
 void
 Copier::_InitVariables(void)
 {
+    AddDebugInfo();
     gcStatus->SetCopyInfo(false /*started*/, victimId,
         0 /*invalid cnt*/, 0 /*copy cnt*/);
 }
@@ -273,6 +297,7 @@ Copier::_CopyCompleteState(void)
 
     uint32_t invalidBlkCnt = userDataMaxBlks - meta->GetDoneCopyBlks();
 
+    AddDebugInfo();
     gcStatus->SetCopyInfo(true /*started*/, victimId,
         invalidBlkCnt /*invalid cnt*/, meta->GetDoneCopyBlks() /*copy cnt*/);
 

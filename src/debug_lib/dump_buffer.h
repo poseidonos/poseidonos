@@ -30,64 +30,37 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#ifndef DUMP_BUFFER_H_
+#define DUMP_BUFFER_H_
 
-#include <cstdint>
-#include <string>
-#include <thread>
+#include "src/debug_lib/debug_info_queue.h"
 
-#include "mk/ibof_config.h"
-#include "src/singleton_info/singleton_info.h"
-#include "src/master_context/config_manager.h"
-#include "src/master_context/version_provider.h"
-#include "src/trace/trace_exporter.h"
+#include <memory>
 
 namespace pos
 {
-class IoRecoveryEventFactory;
-class TelemetryAirDelegator;
-class TelemetryPublisher;
-class SignalHandler;
+class DebugInfoQueueInstance;
 
-class Poseidonos
+struct DumpBufferDeleter
+{
+    void
+    operator()(uint8_t* ptr)
+    {
+        delete[] ptr;
+    }
+};
+
+class DumpBuffer
 {
 public:
-    int Init(int argc, char** argv);
-    void Run(void);
-    void Terminate(void);
-    // This function should be private. But being public for only UT
-    int _InitTraceExporter(char* procFullName,
-                            ConfigManager *cm,
-                            VersionProvider *vp,
-                            TraceExporter *te);
+    DumpBuffer(void);
+    DumpBuffer(void* inputPtr, size_t size, DebugInfoQueueInstance* module);
+    ~DumpBuffer(void);
 
 private:
-    void _InitDebugInfo(void);
-    void _InitSignalHandler(void);
-    void _InitSpdk(int argc, char** argv);
-
-    void _InitAffinity(void);
-    void _InitIOInterface(void);
-    void _LoadVersion(void);
-
-    void _InitAIR(void);
-    void _InitMemoryChecker(void);
-    void _InitResourceChecker(void);
-#ifdef IBOF_CONFIG_REPLICATOR
-    void _InitReplicatorManager(void);
-#endif
-    void _SetPerfImpact(void);
-    int _LoadConfiguration(void);
-    void _RunCLIService(void);
-    void _SetupThreadModel(void);
-
-    static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
-
-    IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
-    TelemetryAirDelegator* telemetryAirDelegator = nullptr;
-    TelemetryPublisher* telemtryPublisherForAir = nullptr;
-    SignalHandler* signalHandler = nullptr;
-
-    std::thread *GrpcCliServerThread = nullptr;
+    std::shared_ptr<uint8_t> ptr;
+    DebugInfoQueueInstance* dumpModule;
 };
 } // namespace pos
+
+#endif // DUMP_BUFFER_H_

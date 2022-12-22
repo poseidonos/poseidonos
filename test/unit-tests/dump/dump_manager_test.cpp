@@ -1,5 +1,5 @@
-#include "src/dump/dump_manager.h"
-#include "src/dump/dump_module.h"
+#include "src/debug_lib/dump_manager.h"
+#include "src/debug_lib/debug_info_queue.h"
 
 #include <gtest/gtest.h>
 
@@ -13,14 +13,14 @@ TEST(DumpManager, Constructor)
 TEST(DumpManager, RegisterDump)
 {
     DumpManager dumpManager;
-    DumpModule<int> dumpModule("test5", 30, false);
+    DebugInfoQueue<int> dumpModule("test5", 30, false);
     dumpManager.RegisterDump("test5", &dumpModule);
 }
 
 TEST(DumpManager, SetEnableModuleByCLI)
 {
     DumpManager dumpManager;
-    DumpModule<int> dumpModule("test5", 30, false);
+    DebugInfoQueue<int> dumpModule("test5", 30, false);
     dumpManager.RegisterDump("test5", &dumpModule);
     dumpManager.SetEnableModuleByCLI("test5", true);
     EXPECT_EQ(dumpModule.IsEnable(), true);

@@ -36,8 +36,8 @@
 #include <cstring>
 #include <string>
 
-#include "src/dump/dump_manager.h"
-#include "src/dump/dump_shared_ptr.h"
+#include "src/debug_lib/dump_manager.h"
+#include "src/debug_lib/dump_shared_ptr.h"
 #include "src/include/pos_event_id.h"
 #include "src/memory_checker/memory_checker.h"
 
@@ -164,7 +164,7 @@ DumpSharedModule<T, moduleNumber>::Add(T t, bool lock_enable)
 
         if (dumpMap.find(key) == dumpMap.end())
         {
-            DumpObject<T> dumpObj(t, 0);
+            DumpObjectPtr<T> dumpObj(t, 0);
             dumpMap[key] = dumpObj;
         }
 

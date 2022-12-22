@@ -12,6 +12,7 @@ import argparse
 import shutil
 import gdb
 
+import debug_info
 import dump_buffer
 import gdb_lib
 import log_memory
@@ -33,8 +34,8 @@ class PosGdbCmd(gdb.Command):
             "posgdb", gdb.COMMAND_USER
         )
 
-    def show_debug_info(self):
-        gdb.execute("p *pos::debugInfo")
+    def show_singleton_info(self):
+        gdb.execute("p *pos::singletonInfo")
 
     def complete(self, text, word):
         # We expect the argument passed to be a symbol so fallback to the
@@ -52,8 +53,14 @@ class PosGdbCmd(gdb.Command):
 
         gdb_lib.switch_to_pos_stack()
 
-        if(args == 'debuginfo'):
-            self.show_debug_info()
+        if(args == 'singletonInfo'):
+            self.show_singleton_info()
+
+        elif(args == 'debugInfo'):
+            debug_info.show_debug_info()
+
+        elif(args == 'debugInfo history'):
+            debug_info.show_debug_info()
 
         elif(args == 'pending io'):
             pending_io.show_pending_io()

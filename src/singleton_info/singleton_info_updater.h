@@ -30,39 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DUMP_MANAGER_H_
-#define DUMP_MANAGER_H_
-
-#include <cstdint>
-#include <mutex>
-#include <string>
-#include <unordered_map>
-
-#include "src/dump/dump_module.h"
-#include "src/lib/singleton.h"
+#pragma once
 
 namespace pos
 {
-#define MAX_MEMORY_SIZE_IN_DUMP (20 * 1024)
 
-using namespace std;
-
-class DumpManager
+class SingletonInfoUpdater
 {
 public:
-    DumpManager(void);
-    ~DumpManager(void);
-    int RegisterDump(string moduleName, AbstractDumpModule* dumpModule);
-    int SetEnableModuleByCLI(string moduleStr, bool enable);
-
-private:
-    unordered_map<string, AbstractDumpModule*> dumpModules;
-    uint32_t usedMemorySize;
-    mutex dumpManagerMutex;
+    virtual ~SingletonInfoUpdater(void);
+    virtual void Update(void) = 0;
 };
 
-using DumpManagerSingleton = Singleton<DumpManager>;
-
+extern SingletonInfoUpdater* singletonInfoUpdater;
 } // namespace pos
 
-#endif // DUMP_MANAGER_H_

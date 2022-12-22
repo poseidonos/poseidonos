@@ -30,65 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef DUMP_MODULE_H_
-#define DUMP_MODULE_H_
-
-#include <sys/time.h>
-#include <unistd.h>
-
-#include <cstdint>
-#include <memory>
-#include <mutex>
-#include <queue>
-#include <string>
-
-#include "src/dump/dump_buffer.h"
+#include "src/singleton_info/singleton_info_updater.h"
 
 namespace pos
 {
-template<typename T>
-class DumpObject
+SingletonInfoUpdater* singletonInfoUpdater;
+
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
+SingletonInfoUpdater::~SingletonInfoUpdater(void)
 {
-public:
-    DumpObject(void);
-    DumpObject(T& t, uint64_t userSpecific);
-    ~DumpObject(void);
-    T buffer;
-    uint64_t userSpecificData;
-    struct timeval date; // 8 byte
-};
-
-class AbstractDumpModule
-{
-public:
-    virtual void SetEnable(bool enable) = 0;
-    virtual bool IsEnable(void) = 0;
-    virtual uint64_t GetPoolSize(void) = 0;
-};
-
-template<typename T>
-class DumpModule : public AbstractDumpModule
-{
-public:
-    DumpModule(void);
-
-    DumpModule(std::string moduleName,
-        uint32_t num, bool enable);
-    virtual ~DumpModule(void);
-    std::mutex dumpQueueLock;
-    int AddDump(T& t, uint64_t userSpecific, bool lock_enable = true);
-    virtual void SetEnable(bool enable);
-    virtual bool IsEnable(void);
-    virtual uint64_t GetPoolSize(void);
-
-    static const int MAX_ENTRIES_FOR_CALLBACK_ERROR = 10000; // temporary value
-
-protected:
-    bool isEnabled;
-    std::queue<DumpObject<T>> dumpQueue;
-    uint32_t entryBufSize;
-    uint32_t entryMaxNum;
-};
+}
+// LCOV_EXCL_STOP
 
 } // namespace pos
-#endif // DUMP_MODULE_H_
+

@@ -30,18 +30,79 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/debug/debug_info_updater.h"
+#ifndef DUMP_MODULE_H_
+#define DUMP_MODULE_H_
+
+#include <sys/time.h>
+#include <unistd.h>
+
+#include <cstdint>
+#include <memory>
+#include <mutex>
+#include <queue>
+#include <string>
+
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/dump_buffer.h"
 
 namespace pos
 {
-DebugInfoUpdater* debugInfoUpdater;
-
-// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
-// LCOV_EXCL_START
-DebugInfoUpdater::~DebugInfoUpdater(void)
+template<typename T>
+class DumpObject
 {
-}
-// LCOV_EXCL_STOP
+public:
+    DumpObject(void);
+    DumpObject(T& t, uint64_t userSpecific);
+    ~DumpObject(void);
+    T buffer;
+    uint64_t userSpecificData;
+    struct timeval date; // 8 byte
+};
+
+template<typename T>
+class DumpObjectPtr
+{
+public:
+    DumpObjectPtr(void);
+    DumpObjectPtr(T& t, uint64_t userSpecific);
+    ~DumpObjectPtr(void);
+    T buffer;
+    uint64_t userSpecificData;
+    struct timeval date; // 8 byte
+};
+
+class DebugInfoQueueInstance
+{
+public:
+    virtual void SetEnable(bool enable) = 0;
+    virtual bool IsEnable(void) = 0;
+    virtual uint64_t GetPoolSize(void) = 0;
+};
+
+template<typename T>
+class DebugInfoQueue : public DebugInfoQueueInstance
+{
+public:
+    DebugInfoQueue(void);
+
+    DebugInfoQueue(std::string moduleName,
+        uint32_t num, bool enable);
+    virtual ~DebugInfoQueue(void);
+    std::mutex dumpQueueLock;
+    int AddDebugInfo(T& t, uint64_t userSpecific, bool lock_enable = true);
+    void RegisterDebugInfoQueue(std::string moduleName, uint32_t num, bool enable);
+    virtual void SetEnable(bool enable);
+    virtual bool IsEnable(void);
+    virtual uint64_t GetPoolSize(void);
+
+    static const int MAX_ENTRIES_FOR_CALLBACK_ERROR = 10000; // temporary value
+
+protected:
+    bool isEnabled;
+    std::queue<DumpObject<T>> dumpQueue;
+    uint32_t entryBufSize;
+    uint32_t entryMaxNum;
+};
 
 } // namespace pos
-
+#endif // DUMP_MODULE_H_

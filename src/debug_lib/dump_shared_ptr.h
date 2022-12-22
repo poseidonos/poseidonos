@@ -45,8 +45,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 #include "src/lib/singleton.h"
 
 enum class DumpSharedPtrType
@@ -80,12 +80,12 @@ private:
 class T;
 
 template<typename T, int>
-class DumpSharedModule : public DumpModule<T>
+class DumpSharedModule : public DebugInfoQueue<T>
 {
 public:
     DumpSharedModule(std::string moduleName, bool defaultEnable);
     ~DumpSharedModule(void) override;
-    std::unordered_map<uint64_t, DumpObject<T>> dumpMap;
+    std::unordered_map<uint64_t, DumpObjectPtr<T>> dumpMap;
     int Add(T t, bool lock_enable = true);
     int Delete(T t, bool lock_enable = true);
 };

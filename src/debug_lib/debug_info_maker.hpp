@@ -29,37 +29,66 @@
  *   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#pragma once
+#include <cassert>
+#include <unistd.h>
 
-#include "src/dump/dump_manager.h"
-
-#include <string>
-
+#include "debug_info_maker.h"
+#include "debug_info_queue.h"
 namespace pos
 {
-DumpManager::DumpManager(void)
+
+template<typename T>
+DebugInfoMaker<T>::DebugInfoMaker(void)
 {
-    usedMemorySize = 0;
+    run = true;
+    debugInfoThread = new std::thread(&DebugInfoMaker<T>::_DebugInfoThread, this);
 }
 
-DumpManager::~DumpManager(void)
+template<typename T>
+DebugInfoMaker<T>::~DebugInfoMaker(void)
 {
+    run = false;
+    if (nullptr != debugInfoThread)
+    {
+        debugInfoThread->join();
+    }
+    delete debugInfoThread;
 }
 
-int
-DumpManager::RegisterDump(std::string moduleName, AbstractDumpModule* registeredDumpModule)
+template<typename T>
+void
+DebugInfoMaker<T>::RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue)
 {
-    std::lock_guard<std::mutex> guard(dumpManagerMutex);
-    usedMemorySize += registeredDumpModule->GetPoolSize();
-    dumpModules[moduleName] = registeredDumpModule;
-    return 0;
+    debugInfoObject = obj;
+    debugInfoQueue = queue;
+    AddDebugInfo();
 }
 
-int
-DumpManager::SetEnableModuleByCLI(string moduleName, bool enable)
+template<typename T>
+void
+DebugInfoMaker<T>::AddDebugInfo(uint64_t userSpecific)
 {
-    std::lock_guard<std::mutex> guard(dumpManagerMutex);
-    dumpModules[moduleName]->SetEnable(enable);
-    return 0;
+    MakeDebugInfo(*debugInfoObject);
+    debugInfoQueue->AddDebugInfo(*debugInfoObject, userSpecific);
 }
 
-} // namespace pos
+template<typename T>
+void
+DebugInfoMaker<T>::SetTimer(uint64_t inputTimerUsec)
+{
+    timerUsec = inputTimerUsec;
+}
+
+template<typename T>
+void
+DebugInfoMaker<T>::_DebugInfoThread(void)
+{
+    while(run)
+    {
+        AddDebugInfo(TIMER_TRIGGERED);
+        usleep(timerUsec);
+    }
+}
+
+}

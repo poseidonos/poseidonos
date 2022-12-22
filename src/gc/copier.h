@@ -44,6 +44,10 @@
 #include "src/gc/gc_status.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/event_scheduler/event.h"
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 
 namespace pos
 {
@@ -58,7 +62,23 @@ enum CopierStateType
 class StripeCopySubmission;
 class ReverseMapLoadCompletion;
 
-class Copier : public Event
+class DebugCopier : public DebugInfoInstance
+{
+public:
+    uint32_t userDataMaxStripes;
+    uint32_t userDataMaxBlks;
+    uint32_t blocksPerChunk;
+    SegmentId victimId;
+    SegmentId targetId;
+    StripeId victimStripeId;
+    uint32_t invalidBlkCnt;
+    uint32_t copyDoneCnt;
+    CopierStateType copybackState;
+    uint32_t arrayId;
+    uint32_t numFreeSegment;
+};
+
+class Copier : public Event, public DebugInfoMaker<DebugCopier>
 {
 public:
     explicit Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array);
@@ -70,6 +90,7 @@ public:
 
     virtual ~Copier(void);
     virtual bool Execute(void);
+    virtual void MakeDebugInfo(DebugCopier& obj) final;
 
     virtual void
     Stop(void)
@@ -156,6 +177,8 @@ private:
 
     CallbackSmartPtr stripeCopySubmissionPtr;
     CallbackSmartPtr reverseMapLoadCompletionPtr;
+    DebugCopier debugCopier;
+    DebugInfoQueue<DebugCopier> copierQueue;;
 };
 
 } // namespace pos

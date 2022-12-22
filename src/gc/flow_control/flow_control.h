@@ -43,6 +43,11 @@
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/gc/flow_control/flow_control_configuration.h"
 
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
+
 namespace pos
 {
 
@@ -69,7 +74,29 @@ class IArrayInfo;
 class PartitionLogicalSize;
 class TokenDistributer;
 
-class FlowControl : public IMountSequence
+class DebugFlowControl : public DebugInfoInstance
+{
+public:
+    int bucket[FlowControlType::MAX_FLOW_CONTROL_TYPE];
+    int previousBucket[FlowControlType::MAX_FLOW_CONTROL_TYPE];
+
+    uint32_t totalToken;
+    uint32_t totalTokenInStripe;
+    uint32_t totalSegments;
+    uint32_t gcThreshold;
+    uint32_t gcUrgentThreshold;
+    uint32_t freeSegments;
+
+    uint32_t targetPercent;
+    uint32_t urgentPercent;
+    uint32_t targetSegment;
+    uint32_t urgentSegment;
+
+    uint64_t forceResetTimeout;
+    uint32_t arrayId = 0;
+};
+
+class FlowControl : public IMountSequence, public DebugInfoMaker<DebugFlowControl>
 {
 public:
     explicit FlowControl(IArrayInfo* arrayInfo);
@@ -90,6 +117,7 @@ public:
     virtual void ReturnToken(FlowControlType type, int token);
     virtual void InitDistributer(void);
     virtual void Reset(void);
+    virtual void MakeDebugInfo(DebugFlowControl& obj) final;
 
 private:
     bool _RefillToken(FlowControlType type);
@@ -135,5 +163,7 @@ private:
     FlowControlService* flowControlService = nullptr;
     TokenDistributer* tokenDistributer = nullptr;
     FlowControlConfiguration* flowControlConfiguration = nullptr;
+    DebugFlowControl debugFlowControl;
+    DebugInfoQueue<DebugFlowControl> flowControlQueue;
 };
 } // namespace pos

@@ -72,6 +72,9 @@ FlowControl::FlowControl(IArrayInfo* arrayInfo,
   tokenDistributer(inputTokenDistributer),
   flowControlConfiguration(inputFlowControlConfiguration)
 {
+    debugFlowControl.RegisterDebugInfoInstance("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()));
+    flowControlQueue.RegisterDebugInfoQueue("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
+    RegisterDebugInfoMaker(&debugFlowControl, &flowControlQueue);
 }
 
 FlowControl::~FlowControl(void)
@@ -88,6 +91,26 @@ FlowControl::~FlowControl(void)
     {
         delete flowControlConfiguration;
     }
+}
+
+void
+FlowControl::MakeDebugInfo(DebugFlowControl& obj)
+{
+    obj.bucket[FlowControlType::USER] = bucket[FlowControlType::USER].load();
+    obj.bucket[FlowControlType::GC] = bucket[FlowControlType::GC].load();
+
+    obj.totalToken = totalToken;
+    obj.totalTokenInStripe = totalTokenInStripe;
+    obj.totalSegments = totalSegments;
+    obj.gcThreshold = gcThreshold;
+    obj.gcUrgentThreshold = gcUrgentThreshold;
+    obj.freeSegments = freeSegments;
+    obj.targetPercent = targetPercent;
+    obj.urgentPercent = urgentPercent;
+    obj.targetSegment = targetSegment;
+    obj.urgentSegment = urgentSegment;
+    obj.forceResetTimeout = forceResetTimeout;
+    obj.arrayId = arrayInfo->GetIndex();
 }
 
 int
@@ -160,6 +183,7 @@ FlowControl::Flush(void)
 int
 FlowControl::GetToken(FlowControlType type, int token)
 {
+    AddDebugInfo();
     if (token < 0)
     {
         POS_TRACE_DEBUG(EID(FLOW_CONTROL_REQUESTED_TOKEN_NEGATIVE), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
@@ -265,6 +289,7 @@ FlowControl::_RefillToken(FlowControlType type)
 
     uint32_t arrayId = arrayInfo->GetIndex();
     std::tie(userToken, gcToken) = _DistributeToken();
+    AddDebugInfo();
     POS_TRACE_INFO(EID(FLOW_CONTROL_TOKEN_DISTRIBUTED),
         "userToken:{}, gcToken:{}, userBucket:{}, gcBucket:{}, array_id:{}",
         userToken, gcToken, bucket[FlowControlType::USER], bucket[FlowControlType::GC], arrayId);
@@ -305,6 +330,7 @@ FlowControl::_TryForceResetToken(FlowControlType type)
 
     isForceReset = false;
     uint32_t arrayId = arrayInfo->GetIndex();
+    AddDebugInfo();
     POS_TRACE_INFO(EID(FLOW_CONTROL_FORCERESET_DONE),
         "userPrevBucket:{}, gcPrevBucket:{}, gc_normal_threshold:{}, free_segment_count:{}, array_id:{}",
         previousBucket[FlowControlType::USER], previousBucket[FlowControlType::GC],

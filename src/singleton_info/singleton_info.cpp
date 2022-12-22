@@ -30,7 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/debug/debug_info.h"
+#include "src/singleton_info/singleton_info.h"
 
 #include <vector>
 
@@ -40,7 +40,7 @@
 #include "src/device/device_manager.h"
 #include "src/device/unvme/unvme_drv.h"
 #include "src/device/uram/uram_drv.h"
-#include "src/dump/dump_manager.h"
+#include "src/debug_lib/dump_manager.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/flush_count.h"
 #include "src/io/frontend_io/aio.h"
@@ -72,9 +72,9 @@
 namespace pos
 {
 
-DebugInfo* debugInfo;
+SingletonInfo* singletonInfo;
 
-DebugInfo::DebugInfo(void)
+SingletonInfo::SingletonInfo(void)
 : affinityManager(nullptr),
   allocatorService(nullptr),
   arrayManager(nullptr),
@@ -115,13 +115,13 @@ DebugInfo::DebugInfo(void)
 {
 }
 
-DebugInfo::~DebugInfo(void)
+SingletonInfo::~SingletonInfo(void)
 {
 }
 // Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
 // LCOV_EXCL_START
 void
-DebugInfo::Update(void)
+SingletonInfo::Update(void)
 {
     affinityManager = AffinityManagerSingleton::Instance();
     deviceManager = DeviceManagerSingleton::Instance();

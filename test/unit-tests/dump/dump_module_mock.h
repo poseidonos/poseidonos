@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "src/dump/dump_module.h"
+#include "src/debug_lib/debug_info_queue.h"
 
 namespace pos
 {
@@ -15,20 +15,20 @@ public:
     using DumpObject::DumpObject;
 };
 
-class MockAbstractDumpModule : public AbstractDumpModule
+class MockAbstractDumpModule : public DebugInfoQueueInstance
 {
 public:
-    using AbstractDumpModule::AbstractDumpModule;
+    using DebugInfoQueueInstance::DebugInfoQueueInstance;
     MOCK_METHOD(void, SetEnable, (bool enable), (override));
     MOCK_METHOD(bool, IsEnable, (), (override));
     MOCK_METHOD(uint32_t, GetPoolSize, (), (override));
 };
 
 template<typename T>
-class MockDumpModule : public DumpModule<T>
+class MockDumpModule : public DebugInfoQueue<T>
 {
 public:
-    using DumpModule::DumpModule;
+    using DebugInfoQueue::DebugInfoQueue;
     MOCK_METHOD(void, SetEnable, (bool enable), (override));
     MOCK_METHOD(bool, IsEnable, (), (override));
     MOCK_METHOD(uint32_t, GetPoolSize, (), (override));
