@@ -48,7 +48,7 @@ protected:
     VolumeList list;
 };
 
-TEST_F(VolumeMetaIntfFixture, LoadVolumes_testIfAnErrorCodeWillBeReturnedWhenTheFileIsNotExisted)
+TEST_F(VolumeMetaIntfFixture, LoadVolumes_testIfAnErrorCodeWillBeReturnedWhenTheFileDoesNotExist)
 {
     EXPECT_CALL(*file, DoesFileExist()).WillOnce(Return(false));
 
