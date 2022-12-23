@@ -260,7 +260,7 @@ VSAMapManager::FlushTouchedPages(int volId, EventSmartPtr cb)
 {
     if (mapFlushState[volId] != MapFlushState::FLUSH_DONE)
     {
-        POS_TRACE_DEBUG(EID(MAP_FLUSH_COMPLETED), "Failed to Issue Flush, Another Flush is still progressing, volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
+        POS_TRACE_WARN(EID(MAP_FLUSH_COMPLETED), "Failed to Issue Flush, Another Flush is still progressing, volume:{}, issuedCount:{}", volId, numWriteIssuedCount);
         return ERRID(MAP_FLUSH_IN_PROGRESS);
     }
     POS_TRACE_INFO(EID(MAP_FLUSH_STARTED), "map:vsamap, volume:{}, arrayId:{}", volId, addrInfo->GetArrayId());
@@ -399,18 +399,25 @@ VSAMapManager::MapFlushDone(int mapId)
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED),
         "map:vsamap, mapId:{}, arrayId:{}, numWriteIssued:{}",
         mapId, addrInfo->GetArrayId(), numWriteIssuedCount);
+
+    assert(numWriteIssuedCount > 0);
+    mapFlushState[mapId] = MapFlushState::FLUSH_DONE;
+
+    POSMetricValue v;
+    v.gauge = numWriteIssuedCount - 1; // To report updated count
+    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
+
+    // Callback should be enqueued after all jobs done
     EventSmartPtr callback = vsaMaps[mapId]->GetCallback();
     if (callback != nullptr)
     {
-        eventScheduler->EnqueueEvent(callback);
         vsaMaps[mapId]->SetCallback(nullptr);
+        eventScheduler->EnqueueEvent(callback);
     }
-    assert(numWriteIssuedCount > 0);
+
+    // Temporal Workaround. This should be the last statements of this function
+    // because Mapper will check this value on Dispose before deleteting this object
     numWriteIssuedCount--;
-    POSMetricValue v;
-    v.gauge = numWriteIssuedCount;
-    tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
-    mapFlushState[mapId] = MapFlushState::FLUSH_DONE;
 }
 
 int

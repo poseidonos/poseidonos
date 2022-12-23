@@ -109,7 +109,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
             {
                 // TODO(Cheolho.kang): Add status that can additionally indicate checkpoint status
                 POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
-                    "mapId:{}, arrayId:{}", mapId, arrayId);
+                    "mapId:{}, arrayId:{}, ret:{}", mapId, arrayId, ret);
                 return ret;
             }
         }
