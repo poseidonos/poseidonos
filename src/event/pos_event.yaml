@@ -1250,6 +1250,20 @@ Root:
     Cause: The volume of the requested name or ID could not be found
     Solution: Please check volume name or ID and try again
   -
+    Id: 1880
+    Name: VOL_INVALID_FILE_POINTER
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 1881
+    Name: VOL_UNABLE_TO_CLOSE_FILE
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
     Id: 2200
     Name: CREATE_SUBSYSTEM_SUBNQN_ALREADY_EXIST
     Severity:

@@ -39,11 +39,20 @@
 
 namespace pos
 {
+class MetaFsFileIntf;
+
 class VolumeMetaIntf
 {
 public:
-    static int LoadVolumes(VolumeList& volList, std::string arrayName, int arrayID);
-    static int SaveVolumes(VolumeList& volList, std::string arrayName, int arrayID);
+    // test file is used by ut
+    static int LoadVolumes(VolumeList& volList, const std::string& arrayName,
+        const int arrayID, MetaFsFileIntf* testFile = nullptr);
+    // test file is used by ut
+    static int SaveVolumes(VolumeList& volList, const std::string& arrayName,
+        const int arrayID, MetaFsFileIntf* testFile = nullptr);
+
+private:
+    static int _CloseFile(MetaFsFileIntf* file);
 };
 } // namespace pos
 

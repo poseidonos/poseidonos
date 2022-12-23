@@ -35,6 +35,7 @@
 #include <rapidjson/document.h>
 #include <string>
 #include "src/metafs/include/metafs_service.h"
+#include "src/metafs/metafs_file_intf.h"
 #include "src/helper/json/json_helper.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -43,40 +44,52 @@
 namespace pos
 {
 int
-VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arrayID)
+VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
+    const int arrayID, MetaFsFileIntf* testFile)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    MetaFsFileIntf* file = (nullptr == testFile) ? new MetaFsFileIntf(volFile, arrayID, MetaFileType::General) : testFile;
 
-    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
-    if (EID(SUCCESS) != (int)rc)
+    if (false == file->DoesFileExist())
     {
-        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED), "array_name: {}", arrayName);
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED),
+            "array_name: {}, array_id: {}",
+            arrayName, arrayID);
+        delete file;
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
-    int fd = 0;
-    rc = metaFs->ctrl->Open(volFile, fd);
-    if (EID(SUCCESS) != (int)rc)
+    int rc = file->Open();
+    if (EID(SUCCESS) != rc)
     {
-        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED), "array_name: {}", arrayName);
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED),
+            "error: {}, array_name: {}, array_id: {}",
+            rc, arrayName, arrayID);
+        delete file;
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
     char* rBuf = (char*)malloc(fileSize);
     memset(rBuf, 0, fileSize);
 
-    // for partial read: metaFsMgr.io.Read(fd, byteOffset, dataChunkSize, rBuf);
-    rc = metaFs->io->Read(fd, rBuf);
-    metaFs->ctrl->Close(fd);
-
-    if (EID(SUCCESS) != (int)rc)
+    rc = file->IssueIO(MetaFsIoOpcode::Read, 0, file->GetFileSize(), rBuf);
+    if (EID(SUCCESS) != rc)
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_READ_FAILED),
-            "array_name: {}", arrayName);
+            "error: {}, array_name: {}, array_id: {}",
+            rc, arrayName, arrayID);
+        _CloseFile(file);
+        delete file;
         free(rBuf);
         return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
+    }
+
+    rc = _CloseFile(file);
+    delete file;
+    if (EID(SUCCESS) != rc)
+    {
+        return rc;
     }
 
     std::string contents = rBuf;
@@ -123,12 +136,13 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, std::string arrayName, int arra
 }
 
 int
-VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arrayID)
+VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
+    const int arrayID, MetaFsFileIntf* testFile)
 {
     std::string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
     std::string contents = "";
-    MetaFs* metaFs = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayName);
+    MetaFsFileIntf* file = (nullptr == testFile) ? new MetaFsFileIntf(volFile, arrayID, MetaFileType::General) : testFile;
 
     int vol_cnt = volList.Count();
     if (vol_cnt > 0)
@@ -165,25 +179,24 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
         contents = root.ToJson();
     }
 
-    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(volFile);
-    if (EID(SUCCESS) != (int)rc)
+    if (false == file->DoesFileExist())
     {
-        MetaFilePropertySet property(MetaFileType::General);
-        rc = metaFs->ctrl->Create(volFile, fileSize, property);
-        if (EID(SUCCESS) != (int)rc)
+        if (EID(SUCCESS) != file->Create(fileSize))
         {
             POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED),
                 "array_name: {}", arrayName);
+            delete file;
             return EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED);
         }
     }
 
-    int fd = 0;
-    rc = metaFs->ctrl->Open(volFile, fd);
-    if (EID(SUCCESS) != (int)rc)
+    int rc = file->Open();
+    if (EID(SUCCESS) != rc)
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED),
-            "array_name: {}", arrayName);
+            "error: {}, array_name: {}, array_id: {}",
+            rc, arrayName, arrayID);
+        delete file;
         return EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED);
     }
 
@@ -192,6 +205,7 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW),
             "array_name: {}", arrayName);
+        delete file;
         return EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW);
     }
 
@@ -199,21 +213,48 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, std::string arrayName, int arra
     memset(wBuf, 0, fileSize);
     strncpy(wBuf, contents.c_str(), contentsSize);
 
-    POS_EVENT_ID ioRC = metaFs->io->Write(fd, wBuf);
+    rc = file->IssueIO(MetaFsIoOpcode::Write, 0, file->GetFileSize(), wBuf);
+    free(wBuf);
 
-    metaFs->ctrl->Close(fd);
-
-    if (EID(SUCCESS) != (int)ioRC)
+    if (EID(SUCCESS) != rc)
     {
-        free(wBuf);
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED),
-            "array_name: {}", arrayName);
+            "error: {}, array_name: {}, array_id: {}",
+            rc, arrayName, arrayID);
+        _CloseFile(file);
+        delete file;
         return EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
     }
 
-    free(wBuf);
+    rc = _CloseFile(file);
+    delete file;
+    if (EID(SUCCESS) != rc)
+    {
+        return rc;
+    }
+
     POS_TRACE_DEBUG(EID(SUCCESS), "SaveVolumes succeed");
     return EID(SUCCESS);
 }
 
+int
+VolumeMetaIntf::_CloseFile(MetaFsFileIntf* file)
+{
+    if (file == nullptr)
+    {
+        POS_TRACE_ERROR(EID(VOL_INVALID_FILE_POINTER), "");
+        assert(false);
+    }
+
+    int rc = file->Close();
+    if (EID(SUCCESS) != rc)
+    {
+        POS_TRACE_ERROR(rc,
+            "error:{}, fileName:{}, fd:{}",
+            rc, file->GetFileName(), file->GetFd());
+        return EID(VOL_UNABLE_TO_CLOSE_FILE);
+    }
+
+    return EID(SUCCESS);
+}
 } // namespace pos
