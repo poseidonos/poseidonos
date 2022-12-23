@@ -35,28 +35,32 @@
 #include <rapidjson/document.h>
 #include <string>
 #include "src/metafs/include/metafs_service.h"
-#include "src/metafs/metafs_file_intf.h"
 #include "src/helper/json/json_helper.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume.h"
 
+using namespace std;
+
 namespace pos
 {
 int
 VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
-    const int arrayID, MetaFsFileIntf* testFile)
+    const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile)
 {
-    std::string volFile = "vbr";
+    string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
-    MetaFsFileIntf* file = (nullptr == testFile) ? new MetaFsFileIntf(volFile, arrayID, MetaFileType::General) : testFile;
+    unique_ptr<MetaFsFileIntf> file = move(testFile);
+    if (nullptr == file)
+    {
+        file = make_unique<MetaFsFileIntf>(volFile, arrayID, MetaFileType::General);
+    }
 
     if (false == file->DoesFileExist())
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED),
             "array_name: {}, array_id: {}",
             arrayName, arrayID);
-        delete file;
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
@@ -66,7 +70,6 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED),
             "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
-        delete file;
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
@@ -79,20 +82,18 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_READ_FAILED),
             "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
-        _CloseFile(file);
-        delete file;
+        _CloseFile(move(file));
         free(rBuf);
         return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
     }
 
-    rc = _CloseFile(file);
-    delete file;
+    rc = _CloseFile(move(file));
     if (EID(SUCCESS) != rc)
     {
         return rc;
     }
 
-    std::string contents = rBuf;
+    string contents = rBuf;
     if (contents != "")
     {
         try
@@ -104,8 +105,8 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
                 for (rapidjson::SizeType i = 0; i < doc["volumes"].Size(); i++)
                 {
                     int id = doc["volumes"][i]["id"].GetInt();
-                    std::string name = doc["volumes"][i]["name"].GetString();
-                    std::string uuid = doc["volumes"][i]["uuid"].GetString();
+                    string name = doc["volumes"][i]["name"].GetString();
+                    string uuid = doc["volumes"][i]["uuid"].GetString();
                     uint64_t total = doc["volumes"][i]["total"].GetUint64();
                     uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
                     uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
@@ -123,7 +124,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
                 }
             }
         }
-        catch (const std::exception& e)
+        catch (const exception& e)
         {
             POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN),
                 "reason: {}, array_name: {}", e.what(), arrayName);
@@ -136,13 +137,17 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
 }
 
 int
-VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
-    const int arrayID, MetaFsFileIntf* testFile)
+VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
+    const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile)
 {
-    std::string volFile = "vbr";
+    string volFile = "vbr";
     uint32_t fileSize = 256 * 1024; // 256KB
-    std::string contents = "";
-    MetaFsFileIntf* file = (nullptr == testFile) ? new MetaFsFileIntf(volFile, arrayID, MetaFileType::General) : testFile;
+    string contents = "";
+    unique_ptr<MetaFsFileIntf> file = move(testFile);
+    if (nullptr == file)
+    {
+        file = make_unique<MetaFsFileIntf>(volFile, arrayID, MetaFileType::General);
+    }
 
     int vol_cnt = volList.Count();
     if (vol_cnt > 0)
@@ -163,15 +168,15 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
                 JsonElement elem("");
                 elem.SetAttribute(JsonAttribute("name", "\"" + vol->GetVolumeName() + "\""));
                 elem.SetAttribute(JsonAttribute("uuid", "\"" + vol->GetUuid() + "\""));
-                elem.SetAttribute(JsonAttribute("id", std::to_string(vol->ID)));
-                elem.SetAttribute(JsonAttribute("total", std::to_string(vol->GetTotalSize())));
-                elem.SetAttribute(JsonAttribute("maxiops", std::to_string(vol->GetMaxIOPS())));
-                elem.SetAttribute(JsonAttribute("maxbw", std::to_string(vol->GetMaxBW())));
-                elem.SetAttribute(JsonAttribute("miniops", std::to_string(vol->GetMinIOPS())));
-                elem.SetAttribute(JsonAttribute("minbw", std::to_string(vol->GetMinBW())));
-                elem.SetAttribute(JsonAttribute("nsid", std::to_string(vol->GetNsid())));
-                elem.SetAttribute(JsonAttribute("dataattribute", std::to_string(vol->GetDataAttribute())));
-                elem.SetAttribute(JsonAttribute("role", std::to_string(vol->GetReplicationRole())));                
+                elem.SetAttribute(JsonAttribute("id", to_string(vol->ID)));
+                elem.SetAttribute(JsonAttribute("total", to_string(vol->GetTotalSize())));
+                elem.SetAttribute(JsonAttribute("maxiops", to_string(vol->GetMaxIOPS())));
+                elem.SetAttribute(JsonAttribute("maxbw", to_string(vol->GetMaxBW())));
+                elem.SetAttribute(JsonAttribute("miniops", to_string(vol->GetMinIOPS())));
+                elem.SetAttribute(JsonAttribute("minbw", to_string(vol->GetMinBW())));
+                elem.SetAttribute(JsonAttribute("nsid", to_string(vol->GetNsid())));
+                elem.SetAttribute(JsonAttribute("dataattribute", to_string(vol->GetDataAttribute())));
+                elem.SetAttribute(JsonAttribute("role", to_string(vol->GetReplicationRole())));                
                 array.AddElement(elem);
             }
         }
@@ -185,7 +190,6 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
         {
             POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED),
                 "array_name: {}", arrayName);
-            delete file;
             return EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED);
         }
     }
@@ -196,7 +200,6 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED),
             "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
-        delete file;
         return EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED);
     }
 
@@ -205,7 +208,6 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW),
             "array_name: {}", arrayName);
-        delete file;
         return EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW);
     }
 
@@ -221,13 +223,11 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED),
             "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
-        _CloseFile(file);
-        delete file;
+        _CloseFile(move(file));
         return EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
     }
 
-    rc = _CloseFile(file);
-    delete file;
+    rc = _CloseFile(move(file));
     if (EID(SUCCESS) != rc)
     {
         return rc;
@@ -238,7 +238,7 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const std::string& arrayName,
 }
 
 int
-VolumeMetaIntf::_CloseFile(MetaFsFileIntf* file)
+VolumeMetaIntf::_CloseFile(unique_ptr<MetaFsFileIntf> file)
 {
     if (file == nullptr)
     {
