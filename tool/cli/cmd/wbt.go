@@ -1,21 +1,20 @@
 package cmd
 
 import (
+	pb "cli/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"encoding/json"
+	"cli/cmd/grpcmgr"
 	_ "encoding/json"
 	"fmt"
 	"pnconnector/src/errors"
-	iBoFOS "pnconnector/src/routers/m9k/api/ibofos"
-	"pnconnector/src/routers/m9k/model"
 	_ "pnconnector/src/setting"
-	"reflect"
 	"strings"
 
 	_ "github.com/c2h5oh/datasize"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 type arg struct {
@@ -87,8 +86,8 @@ Default values are as below:
 		return nil
 	},
 
-	Run: func(cmd *cobra.Command, args []string) {
-		WBT(cmd, args)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return WBT(cmd, args)
 	},
 }
 
@@ -99,10 +98,8 @@ func init() {
 	}
 }
 
-func WBT(cmd *cobra.Command, args []string) (model.Response, error) {
+func WBT(cmd *cobra.Command, args []string) error {
 
-	var req model.Request
-	var res model.Response
 	var err error
 
 	var xrId string
@@ -115,32 +112,75 @@ func WBT(cmd *cobra.Command, args []string) (model.Response, error) {
 	InitConnect()
 
 	if args[0] == "list_wbt" {
-		req, res, err = iBoFOS.ListWBT(xrId, nil)
-	} else {
-
-		param := model.WBTParam{}
-		param.TestName = args[0]
-
-		for _, attr := range argList {
-			if cmd.PersistentFlags().Changed(attr.name) {
-				reflect.ValueOf(&param.Argv).Elem().FieldByName(strings.Title(strings.ToLower(attr.name))).SetString(attr.value)
-			}
+		var command = "LISTWBT"
+		req := &pb.ListWBTRequest{
+			Command:   command,
+			Rid:       xrId,
+			Requestor: "cli",
 		}
-		req, res, err = iBoFOS.WBT(xrId, param)
-	}
 
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		reqJson, _ := json.Marshal(req)
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
+		if err != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		resJson, _ := json.Marshal(res)
-		// mj: isDebug is true for WBT commands at default.
-		// If globals.IsJSONRes is true, PrintResponse does not
-		// display the debug output
-		displaymgr.PrintResponse("WBT", string(resJson), true, globals.IsJSONRes, globals.DisplayUnit)
-	}
+		res, gRpcErr := grpcmgr.SendListWBT(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
+		}
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
+		}
+		return nil
+	} else {
+		argv := make(map[string]string)
+		var command = "WBT"
 
-	return res, err
+		for _, attr := range argList {
+			if cmd.PersistentFlags().Changed(attr.name) && attr.value != "" {
+				argv[strings.ToLower(attr.name)] = attr.value
+			}
+		}
+
+		param := &pb.WBTRequest_Param{
+			Testname: args[0],
+			Argv:     argv,
+		}
+
+		req := &pb.WBTRequest{
+			Command:   command,
+			Rid:       xrId,
+			Requestor: "cli",
+			Param:     param,
+		}
+
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
+		if err != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
+		displaymgr.PrintRequest(string(reqJson))
+
+		res, gRpcErr := grpcmgr.SendWBT(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
+		}
+		printErr := displaymgr.PrintWBTResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
+		}
+		return nil
+	}
+	return nil
 }

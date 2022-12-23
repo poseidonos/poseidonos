@@ -1102,6 +1102,28 @@ func SendQosResetVolumePolicy(req *pb.QosResetVolumePolicyRequest) (*pb.QosReset
 }
 
 func SendVolumeRename(req *pb.VolumeRenameRequest) (*pb.VolumeRenameResponse, error) {
+    conn, err := dialToCliServer()
+    if err != nil {
+        log.Error(err)
+        errToReturn := errors.New(dialErrorMsg)
+        return nil, errToReturn
+    }
+    defer conn.Close()
+
+    c := pb.NewPosCliClient(conn)
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+    defer cancel()
+    res, err := c.VolumeRename(ctx, req)
+    if err != nil {
+        log.Error("error: ", err.Error())
+        return nil, err
+    }
+
+    return res, err
+
+}
+
+func SendListWBT(req *pb.ListWBTRequest) (*pb.ListWBTResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
@@ -1113,7 +1135,8 @@ func SendVolumeRename(req *pb.VolumeRenameRequest) (*pb.VolumeRenameResponse, er
 	c := pb.NewPosCliClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
-	res, err := c.VolumeRename(ctx, req)
+
+	res, err := c.ListWBT(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err
@@ -1123,6 +1146,27 @@ func SendVolumeRename(req *pb.VolumeRenameRequest) (*pb.VolumeRenameResponse, er
 }
 
 func SendListQOSPolicy(req *pb.ListQOSPolicyRequest) (*pb.ListQOSPolicyResponse, error) {
+    conn, err := dialToCliServer()
+    if err != nil {
+        log.Error(err)
+        errToReturn := errors.New(dialErrorMsg)
+        return nil, errToReturn
+    }
+    defer conn.Close()
+
+    c := pb.NewPosCliClient(conn)
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+    defer cancel()
+    res, err := c.ListQOSPolicy(ctx, req)
+    if err != nil {
+        log.Error("error: ", err.Error())
+        return nil, err
+    }
+
+    return res, err
+}
+
+func SendWBT(req *pb.WBTRequest) (*pb.WBTResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
 		log.Error(err)
@@ -1134,7 +1178,8 @@ func SendListQOSPolicy(req *pb.ListQOSPolicyRequest) (*pb.ListQOSPolicyResponse,
 	c := pb.NewPosCliClient(conn)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
-	res, err := c.ListQOSPolicy(ctx, req)
+
+	res, err := c.WBT(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err

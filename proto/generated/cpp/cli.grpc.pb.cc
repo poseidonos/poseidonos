@@ -72,6 +72,8 @@ static const char* PosCli_method_names[] = {
   "/grpc_cli.PosCli/VolumeInfo",
   "/grpc_cli.PosCli/VolumeRename",
   "/grpc_cli.PosCli/ListQOSPolicy",
+  "/grpc_cli.PosCli/ListWBT",
+  "/grpc_cli.PosCli/WBT",
 };
 
 std::unique_ptr< PosCli::Stub> PosCli::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -131,6 +133,8 @@ PosCli::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, co
   , rpcmethod_VolumeInfo_(PosCli_method_names[47], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_VolumeRename_(PosCli_method_names[48], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ListQOSPolicy_(PosCli_method_names[49], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ListWBT_(PosCli_method_names[50], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_WBT_(PosCli_method_names[51], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status PosCli::Stub::SystemInfo(::grpc::ClientContext* context, const ::grpc_cli::SystemInfoRequest& request, ::grpc_cli::SystemInfoResponse* response) {
@@ -1283,6 +1287,52 @@ void PosCli::Stub::experimental_async::ListQOSPolicy(::grpc::ClientContext* cont
   return result;
 }
 
+::grpc::Status PosCli::Stub::ListWBT(::grpc::ClientContext* context, const ::grpc_cli::ListWBTRequest& request, ::grpc_cli::ListWBTResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::ListWBTRequest, ::grpc_cli::ListWBTResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ListWBT_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::ListWBT(::grpc::ClientContext* context, const ::grpc_cli::ListWBTRequest* request, ::grpc_cli::ListWBTResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::ListWBTRequest, ::grpc_cli::ListWBTResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ListWBT_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::ListWBT(::grpc::ClientContext* context, const ::grpc_cli::ListWBTRequest* request, ::grpc_cli::ListWBTResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ListWBT_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ListWBTResponse>* PosCli::Stub::PrepareAsyncListWBTRaw(::grpc::ClientContext* context, const ::grpc_cli::ListWBTRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::ListWBTResponse, ::grpc_cli::ListWBTRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ListWBT_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::ListWBTResponse>* PosCli::Stub::AsyncListWBTRaw(::grpc::ClientContext* context, const ::grpc_cli::ListWBTRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncListWBTRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status PosCli::Stub::WBT(::grpc::ClientContext* context, const ::grpc_cli::WBTRequest& request, ::grpc_cli::WBTResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::grpc_cli::WBTRequest, ::grpc_cli::WBTResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_WBT_, context, request, response);
+}
+
+void PosCli::Stub::experimental_async::WBT(::grpc::ClientContext* context, const ::grpc_cli::WBTRequest* request, ::grpc_cli::WBTResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::grpc_cli::WBTRequest, ::grpc_cli::WBTResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_WBT_, context, request, response, std::move(f));
+}
+
+void PosCli::Stub::experimental_async::WBT(::grpc::ClientContext* context, const ::grpc_cli::WBTRequest* request, ::grpc_cli::WBTResponse* response, ::grpc::experimental::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_WBT_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::WBTResponse>* PosCli::Stub::PrepareAsyncWBTRaw(::grpc::ClientContext* context, const ::grpc_cli::WBTRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::grpc_cli::WBTResponse, ::grpc_cli::WBTRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_WBT_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::grpc_cli::WBTResponse>* PosCli::Stub::AsyncWBTRaw(::grpc::ClientContext* context, const ::grpc_cli::WBTRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncWBTRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 PosCli::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       PosCli_method_names[0],
@@ -1784,6 +1834,26 @@ PosCli::Service::Service() {
              ::grpc_cli::ListQOSPolicyResponse* resp) {
                return service->ListQOSPolicy(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[50],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::ListWBTRequest, ::grpc_cli::ListWBTResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::ListWBTRequest* req,
+             ::grpc_cli::ListWBTResponse* resp) {
+               return service->ListWBT(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      PosCli_method_names[51],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< PosCli::Service, ::grpc_cli::WBTRequest, ::grpc_cli::WBTResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](PosCli::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::grpc_cli::WBTRequest* req,
+             ::grpc_cli::WBTResponse* resp) {
+               return service->WBT(ctx, req, resp);
+             }, this)));
 }
 
 PosCli::Service::~Service() {
@@ -2133,6 +2203,20 @@ PosCli::Service::~Service() {
 }
 
 ::grpc::Status PosCli::Service::ListQOSPolicy(::grpc::ServerContext* context, const ::grpc_cli::ListQOSPolicyRequest* request, ::grpc_cli::ListQOSPolicyResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::ListWBT(::grpc::ServerContext* context, const ::grpc_cli::ListWBTRequest* request, ::grpc_cli::ListWBTResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status PosCli::Service::WBT(::grpc::ServerContext* context, const ::grpc_cli::WBTRequest* request, ::grpc_cli::WBTResponse* response) {
   (void) context;
   (void) request;
   (void) response;
