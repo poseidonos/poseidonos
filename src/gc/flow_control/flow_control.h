@@ -163,6 +163,8 @@ private:
     FlowControlService* flowControlService = nullptr;
     TokenDistributer* tokenDistributer = nullptr;
     FlowControlConfiguration* flowControlConfiguration = nullptr;
+
+    // Debug Information
     DebugFlowControl debugFlowControl;
     DebugInfoQueue<DebugFlowControl> flowControlQueue;
 };
