@@ -36,6 +36,7 @@
 #include <mutex>
 #include <thread>
 #include "debug_info_queue.h"
+#include "src/cpu_affinity/affinity_manager.h"
 
 namespace pos
 {
@@ -67,7 +68,6 @@ public:
     virtual void RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue);
     void SetTimer(uint64_t inputTimerUsec);
     virtual void AddDebugInfo(uint64_t userSpecific = 0);
-    virtual void MakeDebugInfo(DebugFlowControl& obj) final;
 private:
     uint64_t timerUsec = 1 * 1000ULL * 1000ULL; // 1sec
     void _DebugInfoThread(void);

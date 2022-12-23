@@ -104,7 +104,7 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     SetEventType(BackendEvent_GC);
 
     debugCopier.RegisterDebugInfoInstance("GC_Copier_Array" + std::to_string(array->GetIndex()));
-    copierQueue.RegisterDebugInfoQueue("GC_Copier_Array" + std::to_string(array->GetIndex()), 1000, true);
+    copierQueue.RegisterDebugInfoQueue("History_GC_Copier_Array" + std::to_string(array->GetIndex()), 1000, true);
     RegisterDebugInfoMaker(&debugCopier, &copierQueue);
 }
 

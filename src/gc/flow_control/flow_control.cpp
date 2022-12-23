@@ -73,7 +73,7 @@ FlowControl::FlowControl(IArrayInfo* arrayInfo,
   flowControlConfiguration(inputFlowControlConfiguration)
 {
     debugFlowControl.RegisterDebugInfoInstance("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()));
-    flowControlQueue.RegisterDebugInfoQueue("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
+    flowControlQueue.RegisterDebugInfoQueue("History_GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
     RegisterDebugInfoMaker(&debugFlowControl, &flowControlQueue);
 }
 

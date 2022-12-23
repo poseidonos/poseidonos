@@ -84,6 +84,8 @@ template<typename T>
 void
 DebugInfoMaker<T>::_DebugInfoThread(void)
 {
+    cpu_set_t cpuSet = AffinityManagerSingleton::Instance()->GetCpuSet(CoreType::GENERAL_USAGE);
+    sched_setaffinity(0, sizeof(cpuSet), &cpuSet);
     while(run)
     {
         AddDebugInfo(TIMER_TRIGGERED);

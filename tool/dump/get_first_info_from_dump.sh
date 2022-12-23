@@ -24,8 +24,9 @@ fi
 
 rm call_stack.info pending_io.info -rf 
 cat get_first_info_from_dump.gdb >> attach_or_load.gdb
-gdb $CURR_PATH/bin/poseidonos -x attach_or_load.gdb -batch
-
+gdb $CURR_PATH/bin/poseidonos -x attach_or_load.gdb -batch 1>/dev/null
+echo ""
+echo "Complete"
 cd -;
 
 

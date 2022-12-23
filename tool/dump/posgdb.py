@@ -56,11 +56,11 @@ class PosGdbCmd(gdb.Command):
         if(args == 'singletonInfo'):
             self.show_singleton_info()
 
-        elif(args == 'debugInfo'):
+        elif(args == 'debug info'):
             debug_info.show_debug_info()
 
-        elif(args == 'debugInfo history'):
-            debug_info.show_debug_info()
+        elif(args == 'debug history'):
+            debug_info.show_debug_info_history()
 
         elif(args == 'pending io'):
             pending_io.show_pending_io()
