@@ -224,16 +224,25 @@ StripeMapManager::MapFlushDone(int mapId)
     POS_TRACE_INFO(EID(MAP_FLUSH_COMPLETED),
         "map:stripemap, mapId:{}, arrayId:{}, numWriteIssued:{}",
         mapId, addrInfo->GetArrayId(), numWriteIssuedCount);
+
+    assert(numWriteIssuedCount > 0);
+
+    POSMetricValue v;
+    v.gauge = numWriteIssuedCount - 1; // To report updated count
+    tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
+
     if (callback != nullptr)
     {
-        eventScheduler->EnqueueEvent(callback);
+        auto callbackEvent = callback;
         callback = nullptr;
+
+        // Callback should be enqueued after all jobs done
+        eventScheduler->EnqueueEvent(callbackEvent);
     }
-    assert(numWriteIssuedCount > 0);
+
+    // Temporal Workaround. This should be the last statements of this function
+    // because Mapper will check this value on Dispose before deleteting this object
     numWriteIssuedCount--;
-    POSMetricValue v;
-    v.gauge = numWriteIssuedCount;
-    tp->PublishData(TEL33009_MAP_STRIPE_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
 }
 
 void
