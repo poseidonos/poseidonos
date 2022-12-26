@@ -47,6 +47,12 @@
 #include "src/array_models/interface/i_array_info.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/bio/ubio.h"
+
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
+
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
@@ -65,7 +71,15 @@ class IAbrControl;
 class IStateControl;
 class TelemetryPublishser;
 
-class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
+class DebugArray : public DebugInfoInstance
+{
+public:
+    std::string state;
+    std::string arrayInfo;
+    uint32_t rebuildProgress;
+    bool isWTEnabled;
+};
+class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker, public DebugInfoMaker<DebugArray>
 {
     friend class ParityLocationWbtCommand;
     friend class GcWbtCommand;
@@ -91,6 +105,7 @@ public:
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual string Serialize(void);
+    void MakeDebugInfo(DebugArray& obj);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
@@ -155,7 +170,10 @@ private:
     id_t uniqueId = 0;
     bool isWTEnabled = false;
     string targetAddress = "";
+
     bool needWriteBypass = false;
+    DebugArray debugArray;
+    DebugInfoQueue<DebugArray> debugArrayQueue;
 };
 } // namespace pos
 #endif // ARRAY_H_

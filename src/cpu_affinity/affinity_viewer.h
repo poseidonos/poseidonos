@@ -59,6 +59,7 @@ private:
         QOS,
         AIR,
         EVENT_REACTOR,
+        DEBUG,
         ROLE_COUNT,
     };
 
@@ -116,6 +117,7 @@ private:
         void _RegisterMetaCpu(void);
         void _RegisterAirCpu(void);
         void _RegisterEventReactorCpu(void);
+        void _RegisterDebugCpu(void);
         void _RegisterCpuRole(int cpuId, Role role);
         void _RegisterCpuSetRole(cpu_set_t cpuSet, Role role);
     };

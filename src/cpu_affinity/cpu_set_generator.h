@@ -56,6 +56,7 @@ enum class CoreType
     META_IO,
     AIR,
     EVENT_REACTOR,
+    DEBUG,
     COUNT,
 };
 

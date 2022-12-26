@@ -75,6 +75,9 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
   arrayService(arrayService)
 {
     pthread_rwlock_init(&stateLock, nullptr);
+    debugArray.RegisterDebugInfoInstance("Array_Info_Array" + std::to_string(GetIndex()));
+    debugArrayQueue.RegisterDebugInfoQueue("History_Array_Info_Array" + std::to_string(GetIndex()), 1000, true);
+    RegisterDebugInfoMaker(&debugArray, &debugArrayQueue, false);
 }
 
 Array::~Array(void)
@@ -86,6 +89,14 @@ Array::~Array(void)
     delete devMgr_;
 }
 
+void
+Array::MakeDebugInfo(DebugArray& obj)
+{
+    obj.arrayInfo = Serialize();
+    obj.state = GetState().ToString();
+    obj.rebuildProgress = rebuilder->GetRebuildProgress(name_);
+    obj.isWTEnabled = isWTEnabled;
+}
 int
 Array::Load(void)
 {
@@ -108,6 +119,7 @@ Array::Load(void)
     {
         POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_LOADED), "{}", Serialize());
     }
+    AddDebugInfo();
     return ret;
 }
 
@@ -225,6 +237,7 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_CREATED), "{}", Serialize());
+    AddDebugInfo();
     return 0;
 
 error:
@@ -570,6 +583,7 @@ Array::Rebuild(void)
     bool forceRebuild = true;
     InvokeRebuild(targets, isResume, forceRebuild);
     pthread_rwlock_unlock(&stateLock);
+    AddDebugInfo();
     return 0;
 }
 
@@ -644,6 +658,7 @@ Array::GetStateCtx(void)
 uint32_t
 Array::GetRebuildingProgress(void)
 {
+    AddDebugInfo();
     return rebuilder->GetRebuildProgress(name_);
 }
 
@@ -789,7 +804,6 @@ Array::DetachDevice(UblockSharedPtr uBlock)
             break;
         }
     }
-
     return eventId;
 }
 
@@ -814,6 +828,7 @@ Array::MountDone(void)
 {
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_MOUNTED), "{}", Serialize());
     vector<IArrayDevice*> suspendedTargets = devMgr_->GetRebuilding();
+    AddDebugInfo();
     if (suspendedTargets.size() > 0 && state->IsRebuildable())
     {
         POS_TRACE_INFO(EID(INVOKE_RESUME_REBUILD), "array_name:{}, targetCnt:{}",
@@ -962,6 +977,7 @@ void
 Array::_DetachSpare(ArrayDevice* target)
 {
     UblockSharedPtr uBlock = target->GetUblock();
+    AddDebugInfo();
     if (uBlock == nullptr)
     {
         return;
@@ -1027,6 +1043,7 @@ Array::_DetachData(ArrayDevice* target)
         bool isResume = false;
         InvokeRebuild(targets, isResume);
     }
+    AddDebugInfo();
 }
 
 void

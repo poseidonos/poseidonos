@@ -56,6 +56,7 @@ const CoreDescriptionArray AffinityConfigParser::DEFAULT_CORE_DESCRIPTIONS =
         CoreDescription{CoreType::META_IO, {2, 0}, "9-10"},
         CoreDescription{CoreType::AIR, {1, 0}, "11"},
         CoreDescription{CoreType::EVENT_REACTOR, {3, 0}, "3-5"},
+        CoreDescription{CoreType::DEBUG, {3, 0}, "6"},
 };
 
 const AffinityConfigParser::ConfigKeyAndCoreTypes
@@ -71,6 +72,7 @@ const AffinityConfigParser::ConfigKeyAndCoreTypes
             ConfigKeyAndCoreType{CoreType::META_IO, "meta_io"},
             ConfigKeyAndCoreType{CoreType::AIR, "air"},
             ConfigKeyAndCoreType{CoreType::EVENT_REACTOR, "event_reactor"},
+            ConfigKeyAndCoreType{CoreType::DEBUG, "debug"},
 };
 
 AffinityConfigParser::AffinityConfigParser(ConfigManager& configManager_)

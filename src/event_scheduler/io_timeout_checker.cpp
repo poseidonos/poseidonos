@@ -56,6 +56,9 @@ currentIdx(0)
     }
     telemetryPublisher = new TelemetryPublisher("PublishPendingIo");
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
+    debugIoTimeoutChecker.RegisterDebugInfoInstance("Callback_Timeout");
+    debugIoTimeoutCheckerQueue.RegisterDebugInfoQueue("History_Callback_Timeout", 10000, true);
+    RegisterDebugInfoMaker(&debugIoTimeoutChecker, &debugIoTimeoutCheckerQueue, false);
 }
 
 IoTimeoutChecker::~IoTimeoutChecker(void)
@@ -172,6 +175,7 @@ IoTimeoutChecker::_CheckPeningOverTime(CallbackType callbackType)
 
     if (CHECK_TIMEOUT_THRESHOLD <= calPendingTime)
     {
+        AddDebugInfo();
         POS_TRACE_WARN(EID(PENDING_IO_TIMEOUT), "Pending Callback Type : {} current Time Idx {}, oldest Time Idx {} ",
                                             callbackType, currentIdx, pendingIoCnt[callbackType].oldestIdx);
         ret = true;
@@ -209,6 +213,25 @@ IoTimeoutChecker::GetCurrentRoughTime(void)
     }
 
     return publisher->GetCurrentRoughTime();
+}
+
+void
+IoTimeoutChecker::MakeDebugInfo(DebugIoTimeoutChecker& obj)
+{
+    int index = 0;
+    for (index = 0; index < Total_CallbackType_Cnt; index++)
+    {
+        obj.timeoutInfo[index].callbackType = (CallbackType)index;
+        if (currentIdx >= pendingIoCnt[index].oldestIdx)
+        {
+            obj.timeoutInfo[index].ioDelaySec = (float)(currentIdx - pendingIoCnt[index].oldestIdx) / ONE_SEC_IN_MS * TIMER_RESOLUTION_MS;
+        }
+        else
+        {
+            obj.timeoutInfo[index].ioDelaySec = (float)(CHECK_RESOLUTION_RANGE + currentIdx - pendingIoCnt[index].oldestIdx) / ONE_SEC_IN_MS * TIMER_RESOLUTION_MS;
+        }
+    }
+    obj.currentIdx = currentIdx;
 }
 
 void

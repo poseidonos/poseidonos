@@ -183,7 +183,6 @@ FlowControl::Flush(void)
 int
 FlowControl::GetToken(FlowControlType type, int token)
 {
-    AddDebugInfo();
     if (token < 0)
     {
         POS_TRACE_DEBUG(EID(FLOW_CONTROL_REQUESTED_TOKEN_NEGATIVE), "FlowControl GetToken should be greater than or equal to zero token:{}", token);
