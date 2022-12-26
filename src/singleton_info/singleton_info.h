@@ -34,7 +34,6 @@
 #define DEBUG_INFO_H_
 
 #include "mk/ibof_config.h"
-#include "src/debug/singleton_info_updater.h"
 
 #include "src/singleton_info/singleton_info_updater.h"
 

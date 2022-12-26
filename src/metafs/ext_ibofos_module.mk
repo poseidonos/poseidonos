@@ -28,7 +28,7 @@ VPATH += \
     $(IBOF_SRC_DIR)/src/device \
     $(IBOF_SRC_DIR)/src/master_context \
     $(IBOF_SRC_DIR)/src/lib \
-    $(IBOF_SRC_DIR)/src/dump \
+    $(IBOF_SRC_DIR)/src/debug_lib \
     $(IBOF_SRC_DIR)/src/spdk_wrapper \
     $(IBOF_SRC_DIR)/src/cpu_affinity \
     $(SPDLOG_ROOT_DIR)/include
