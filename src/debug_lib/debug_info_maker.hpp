@@ -41,7 +41,7 @@ namespace pos
 template<typename T>
 DebugInfoMaker<T>::DebugInfoMaker(void)
 {
-    run = true;
+    run = false;
     debugInfoThread = new std::thread(&DebugInfoMaker<T>::_DebugInfoThread, this);
 }
 
@@ -58,11 +58,14 @@ DebugInfoMaker<T>::~DebugInfoMaker(void)
 
 template<typename T>
 void
-DebugInfoMaker<T>::RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue)
+DebugInfoMaker<T>::RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue, bool asyncLogging)
 {
+    if (asyncLogging)
+    {
+        run = true;
+    }
     debugInfoObject = obj;
     debugInfoQueue = queue;
-    AddDebugInfo();
 }
 
 template<typename T>

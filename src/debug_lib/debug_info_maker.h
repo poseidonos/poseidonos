@@ -32,7 +32,7 @@
 #pragma once
 #include <atomic>
 #include <cstdint>
-#include <unordered_map>
+#include <map>
 #include <mutex>
 #include <thread>
 #include "debug_info_queue.h"
@@ -63,13 +63,13 @@ class DebugInfoMaker
 {
 public:
     DebugInfoMaker(void);
-    ~DebugInfoMaker(void);
+    virtual ~DebugInfoMaker(void);
     virtual void MakeDebugInfo(T& obj) = 0;
-    virtual void RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue);
+    virtual void RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue, bool asyncLogging = false);
     void SetTimer(uint64_t inputTimerUsec);
     virtual void AddDebugInfo(uint64_t userSpecific = 0);
 private:
-    uint64_t timerUsec = 1 * 1000ULL * 1000ULL; // 1sec
+    uint64_t timerUsec = 2 * 1000ULL * 1000ULL; // 1sec
     void _DebugInfoThread(void);
     T* debugInfoObject;
     DebugInfoQueue<T>* debugInfoQueue;
@@ -78,6 +78,6 @@ private:
     static const uint64_t TIMER_TRIGGERED = 0xFFFFCCCC;
 };
 
-extern std::unordered_map<std::string, DebugInfoInstance*> debugInfo;
+extern std::map<std::string, DebugInfoInstance*> debugInfo;
 
 } // namespace pos

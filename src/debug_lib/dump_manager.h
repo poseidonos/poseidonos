@@ -36,7 +36,7 @@
 #include <cstdint>
 #include <mutex>
 #include <string>
-#include <unordered_map>
+#include <map>
 
 #include "src/debug_lib/debug_info_queue.h"
 #include "src/lib/singleton.h"
@@ -56,7 +56,7 @@ public:
     int SetEnableModuleByCLI(string moduleStr, bool enable);
 
 private:
-    unordered_map<string, DebugInfoQueueInstance*> dumpModules;
+    map<string, DebugInfoQueueInstance*> dumpModules;
     uint32_t usedMemorySize;
     mutex dumpManagerMutex;
 };

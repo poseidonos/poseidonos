@@ -6,9 +6,53 @@
 #include <memory>
 #include <string>
 
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+
+using namespace pos;
 #define MAX_NUM_CONCURRENT_CLIENTS 1
 
 CommandProcessor* pc;
+
+namespace pos
+{
+class DebugCLIInfo
+{
+public:
+    std::string sendReceive;
+    std::string message;
+};
+class DebugCLI : public DebugInfoInstance
+{
+public:
+    DebugCLIInfo info; 
+};
+
+class DebugCLIInfoMaker : public DebugInfoMaker<DebugCLI>
+{
+private:
+    DebugCLI debugCli;
+    DebugInfoQueue<DebugCLI> debugCliQueue;
+public:
+    DebugCLIInfoMaker(void)
+    {
+        debugCli.RegisterDebugInfoInstance("CLI");
+        debugCliQueue.RegisterDebugInfoQueue("History_Cli", 500, true);
+        RegisterDebugInfoMaker(&debugCli, &debugCliQueue);
+    }
+    ~DebugCLIInfoMaker(void)
+    {
+    }
+    DebugCLIInfo info;
+    virtual void MakeDebugInfo(DebugCLI& obj) final
+    {
+        obj.info.sendReceive = info.sendReceive;
+        obj.info.message = info.message;
+    }
+};
+DebugCLIInfoMaker* debugCliInfoMaker;
+}
+// namespace pos
 
 class PosCliServiceImpl final : public PosCli::Service
 {
@@ -929,6 +973,9 @@ _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf
 void
 _LogCliRequest(const google::protobuf::Message* request, std::string command)
 {
+    pos::debugCliInfoMaker->info.sendReceive = "ReceiveCLI";
+    pos::debugCliInfoMaker->info.message = request->ShortDebugString();
+    pos::debugCliInfoMaker->AddDebugInfo();
     logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
     logger()->SetCommand("");
@@ -937,10 +984,14 @@ _LogCliRequest(const google::protobuf::Message* request, std::string command)
 void
 _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, std::string command)
 {
+
     std::string replyJson = "";
     google::protobuf::util::JsonOptions printOptions;
     printOptions.always_print_primitive_fields = true;
     MessageToJsonString(*reply, &replyJson, printOptions);
+    pos::debugCliInfoMaker->info.sendReceive = "SendCLI";
+    pos::debugCliInfoMaker->info.message = reply->ShortDebugString();
+    pos::debugCliInfoMaker->AddDebugInfo(status.error_code());
 
     logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
@@ -960,7 +1011,7 @@ RunGrpcServer()
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
     ServerBuilder builder;
     grpc::ResourceQuota rq;
-
+    pos::debugCliInfoMaker = new pos::DebugCLIInfoMaker;
     rq.SetMaxThreads(MAX_NUM_CONCURRENT_CLIENTS + 1);
     builder.SetResourceQuota(rq);
     // Listen on the given address without any authentication mechanism.
@@ -975,4 +1026,5 @@ RunGrpcServer()
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
+    delete debugCliInfoMaker;
 }

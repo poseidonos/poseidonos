@@ -38,7 +38,7 @@
 namespace pos
 {
 
-std::unordered_map<std::string, DebugInfoInstance*> debugInfo;
+std::map<std::string, DebugInfoInstance*> debugInfo;
 std::mutex DebugInfoInstance::registeringMutex;
 
 DebugInfoInstance::DebugInfoInstance(void)

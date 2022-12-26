@@ -59,9 +59,9 @@ DumpObject<T>::DumpObject(void)
 
 template<typename T>
 DumpObject<T>::DumpObject(T& t, uint64_t userSpecific)
-: buffer(t),
-  userSpecificData(userSpecific)
+:buffer(t)
 {
+    userSpecificData = userSpecific;
     gettimeofday(&date, NULL);
 }
 
