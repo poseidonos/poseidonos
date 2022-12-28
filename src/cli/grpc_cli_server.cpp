@@ -16,41 +16,36 @@ CommandProcessor* pc;
 
 namespace pos
 {
-class DebugCLIInfo
+class CLIDebugMessage
 {
 public:
     std::string sendReceive;
     std::string message;
 };
-class DebugCLI : public DebugInfoInstance
+class CLIDebugInfo : public DebugInfoInstance
 {
 public:
-    DebugCLIInfo info; 
+    CLIDebugMessage info; 
 };
 
-class DebugCLIInfoMaker : public DebugInfoMaker<DebugCLI>
+class CLIInfo : public DebugInfoMaker<CLIDebugInfo>
 {
-private:
-    DebugCLI debugCli;
-    DebugInfoQueue<DebugCLI> debugCliQueue;
 public:
-    DebugCLIInfoMaker(void)
+    CLIInfo(void)
     {
-        debugCli.RegisterDebugInfoInstance("CLI");
-        debugCliQueue.RegisterDebugInfoQueue("History_Cli", 500, true);
-        RegisterDebugInfoMaker(&debugCli, &debugCliQueue);
+        RegisterDebugInfo("Cli", 500);
     }
-    ~DebugCLIInfoMaker(void)
+    ~CLIInfo(void)
     {
     }
-    DebugCLIInfo info;
-    virtual void MakeDebugInfo(DebugCLI& obj) final
+    CLIDebugMessage info;
+    virtual void MakeDebugInfo(CLIDebugInfo& obj) final
     {
         obj.info.sendReceive = info.sendReceive;
         obj.info.message = info.message;
     }
 };
-DebugCLIInfoMaker* debugCliInfoMaker;
+CLIInfo* debugCliInfoMaker;
 }
 // namespace pos
 
@@ -1011,7 +1006,7 @@ RunGrpcServer()
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
     ServerBuilder builder;
     grpc::ResourceQuota rq;
-    pos::debugCliInfoMaker = new pos::DebugCLIInfoMaker;
+    pos::debugCliInfoMaker = new pos::CLIInfo;
     rq.SetMaxThreads(MAX_NUM_CONCURRENT_CLIENTS + 1);
     builder.SetResourceQuota(rq);
     // Listen on the given address without any authentication mechanism.

@@ -85,7 +85,7 @@ class DumpSharedModule : public DebugInfoQueue<T>
 public:
     DumpSharedModule(std::string moduleName, bool defaultEnable);
     ~DumpSharedModule(void) override;
-    std::unordered_map<uint64_t, DumpObjectPtr<T>> dumpMap;
+    std::unordered_map<uint64_t, DumpObject<T>> dumpMap;
     int Add(T t, bool lock_enable = true);
     int Delete(T t, bool lock_enable = true);
 };

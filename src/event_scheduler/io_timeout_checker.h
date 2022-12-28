@@ -58,7 +58,7 @@ struct PendingIo
     std::atomic<std::uint64_t> oldestIdx;
 };
 
-class DebugIoTimeoutChecker : public DebugInfoInstance
+class IoTimeoutCheckerDebugInfo : public DebugInfoInstance
 {
 public:
     class TimeoutInfo
@@ -70,7 +70,7 @@ public:
     uint64_t currentIdx;
 };
 
-class IoTimeoutChecker : public DebugIoTimeoutChecker, public DebugInfoMaker<DebugIoTimeoutChecker>
+class IoTimeoutChecker : public DebugInfoMaker<IoTimeoutCheckerDebugInfo>
 {
 public:
     IoTimeoutChecker(void);
@@ -88,7 +88,7 @@ public:
     void MoveCurrentIdx(uint64_t pendingTime);
 
     uint64_t GetCurrentRoughTime(void);
-    virtual void MakeDebugInfo(DebugIoTimeoutChecker& obj) final;
+    virtual void MakeDebugInfo(IoTimeoutCheckerDebugInfo& obj) final;
 
 private:
 
@@ -100,8 +100,6 @@ private:
 
     PendingIo pendingIoCnt[CallbackType::Total_CallbackType_Cnt];
     TelemetryPublisher* telemetryPublisher;
-    DebugIoTimeoutChecker debugIoTimeoutChecker;
-    DebugInfoQueue<DebugIoTimeoutChecker> debugIoTimeoutCheckerQueue;
 };
 
 using IoTimeoutCheckerSingleton = Singleton<IoTimeoutChecker>;

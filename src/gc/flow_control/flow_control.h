@@ -74,7 +74,7 @@ class IArrayInfo;
 class PartitionLogicalSize;
 class TokenDistributer;
 
-class DebugFlowControl : public DebugInfoInstance
+class FlowControlDebugInfo : public DebugInfoInstance
 {
 public:
     int bucket[FlowControlType::MAX_FLOW_CONTROL_TYPE];
@@ -96,7 +96,7 @@ public:
     uint32_t arrayId = 0;
 };
 
-class FlowControl : public IMountSequence, public DebugInfoMaker<DebugFlowControl>
+class FlowControl : public IMountSequence, public DebugInfoMaker<FlowControlDebugInfo>
 {
 public:
     explicit FlowControl(IArrayInfo* arrayInfo);
@@ -117,7 +117,7 @@ public:
     virtual void ReturnToken(FlowControlType type, int token);
     virtual void InitDistributer(void);
     virtual void Reset(void);
-    virtual void MakeDebugInfo(DebugFlowControl& obj) final;
+    virtual void MakeDebugInfo(FlowControlDebugInfo& obj) final;
 
 private:
     bool _RefillToken(FlowControlType type);
@@ -163,9 +163,5 @@ private:
     FlowControlService* flowControlService = nullptr;
     TokenDistributer* tokenDistributer = nullptr;
     FlowControlConfiguration* flowControlConfiguration = nullptr;
-
-    // Debug Information
-    DebugFlowControl debugFlowControl;
-    DebugInfoQueue<DebugFlowControl> flowControlQueue;
 };
 } // namespace pos

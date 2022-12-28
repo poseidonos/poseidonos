@@ -65,15 +65,17 @@ public:
     DebugInfoMaker(void);
     virtual ~DebugInfoMaker(void);
     virtual void MakeDebugInfo(T& obj) = 0;
-    virtual void RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue, bool asyncLogging = false);
     void SetTimer(uint64_t inputTimerUsec);
     virtual void AddDebugInfo(uint64_t userSpecific = 0);
+    virtual void RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging = false, uint64_t inputTimerUsec = 0, bool enabled = true);
 private:
-    uint64_t timerUsec = 2 * 1000ULL * 1000ULL; // 1sec
+    static const uint64_t DEFAULT_TIMER_VALUE = 2 * 1000ULL * 1000ULL; // 2 sec
+    std::atomic<uint64_t> timerUsec;
     void _DebugInfoThread(void);
-    T* debugInfoObject;
-    DebugInfoQueue<T>* debugInfoQueue;
+    T debugInfoObject;
+    DebugInfoQueue<T> debugInfoQueue;
     std::atomic<bool> run;
+    std::atomic<bool> registered;
     std::thread* debugInfoThread;
     static const uint64_t TIMER_TRIGGERED = 0xFFFFCCCC;
 };

@@ -56,9 +56,7 @@ currentIdx(0)
     }
     telemetryPublisher = new TelemetryPublisher("PublishPendingIo");
     TelemetryClientSingleton::Instance()->RegisterPublisher(telemetryPublisher);
-    debugIoTimeoutChecker.RegisterDebugInfoInstance("Callback_Timeout");
-    debugIoTimeoutCheckerQueue.RegisterDebugInfoQueue("History_Callback_Timeout", 10000, true);
-    RegisterDebugInfoMaker(&debugIoTimeoutChecker, &debugIoTimeoutCheckerQueue, false);
+    RegisterDebugInfo("Callback_Timeout", 10000);
 }
 
 IoTimeoutChecker::~IoTimeoutChecker(void)
@@ -216,7 +214,7 @@ IoTimeoutChecker::GetCurrentRoughTime(void)
 }
 
 void
-IoTimeoutChecker::MakeDebugInfo(DebugIoTimeoutChecker& obj)
+IoTimeoutChecker::MakeDebugInfo(IoTimeoutCheckerDebugInfo& obj)
 {
     int index = 0;
     for (index = 0; index < Total_CallbackType_Cnt; index++)

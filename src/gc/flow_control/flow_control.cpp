@@ -72,9 +72,7 @@ FlowControl::FlowControl(IArrayInfo* arrayInfo,
   tokenDistributer(inputTokenDistributer),
   flowControlConfiguration(inputFlowControlConfiguration)
 {
-    debugFlowControl.RegisterDebugInfoInstance("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()));
-    flowControlQueue.RegisterDebugInfoQueue("History_GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
-    RegisterDebugInfoMaker(&debugFlowControl, &flowControlQueue, true);
+    RegisterDebugInfo("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
 }
 
 FlowControl::~FlowControl(void)
@@ -94,7 +92,7 @@ FlowControl::~FlowControl(void)
 }
 
 void
-FlowControl::MakeDebugInfo(DebugFlowControl& obj)
+FlowControl::MakeDebugInfo(FlowControlDebugInfo& obj)
 {
     obj.bucket[FlowControlType::USER] = bucket[FlowControlType::USER].load();
     obj.bucket[FlowControlType::GC] = bucket[FlowControlType::GC].load();

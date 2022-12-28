@@ -118,7 +118,7 @@ private:
         {"reactor", "\"0\""},
         {"udd_io_worker", "\"1\""},
         {"event_scheduler", "\"2\""},
-        {"event_worker", "\"3-5\""},
+        {"event_worker", "\"3\""},
         {"general_usage", "\"6\""},
         {"qos", "\"7\""},
         {"meta_scheduler", "\"8\""},

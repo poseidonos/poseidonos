@@ -31,7 +31,9 @@
  */
 
 #include "debug_info_maker.h"
+#include "debug_info_maker.hpp"
 #include "debug_info_queue.h"
+#include "debug_info_queue.hpp"
 #include <cassert>
 #include <unordered_map>
 

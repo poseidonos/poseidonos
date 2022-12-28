@@ -75,9 +75,7 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
   arrayService(arrayService)
 {
     pthread_rwlock_init(&stateLock, nullptr);
-    debugArray.RegisterDebugInfoInstance("Array_Info_Array" + std::to_string(GetIndex()));
-    debugArrayQueue.RegisterDebugInfoQueue("History_Array_Info_Array" + std::to_string(GetIndex()), 1000, true);
-    RegisterDebugInfoMaker(&debugArray, &debugArrayQueue, false);
+    RegisterDebugInfo("Array_" + std::to_string(GetIndex()), 100);
 }
 
 Array::~Array(void)
@@ -90,7 +88,7 @@ Array::~Array(void)
 }
 
 void
-Array::MakeDebugInfo(DebugArray& obj)
+Array::MakeDebugInfo(ArrayDebugInfo& obj)
 {
     obj.arrayInfo = Serialize();
     obj.state = GetState().ToString();

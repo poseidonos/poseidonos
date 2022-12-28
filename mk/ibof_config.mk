@@ -31,10 +31,7 @@ export CONFIG_FE_QOS?=n
 export CONFIG_LIBRARY_BUILD?=n
 
 #Build PoseidonOS with -FPIC option
-export CONFIG_FPIC?=n
-
-# Build with Address Sanitizer enabled
-export CONFIG_ASAN?=n
+export CONFIG_FPIC?=y
 
 # Build with Replicator enabled
 export CONFIG_REPLICATOR?=n

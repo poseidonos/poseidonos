@@ -55,14 +55,14 @@ using namespace std;
 
 namespace pos
 {
-class DebugPartition : public DebugInfoInstance
+class ParitionDebugInfo : public DebugInfoInstance
 {
 public:
     PartitionLogicalSize logicalSize;
     PartitionPhysicalSize physicalSize;
     PartitionType type;
 };
-class Partition : public ITranslator, public DebugInfoMaker<DebugPartition>
+class Partition : public ITranslator, public DebugInfoMaker<ParitionDebugInfo>
 {
 public:
     Partition(vector<ArrayDevice*> d, PartitionType type);
@@ -78,7 +78,7 @@ public:
     uint64_t GetLastLba() { return physicalSize.lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }
     virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
-    virtual void MakeDebugInfo(DebugPartition& obj) final;
+    virtual void MakeDebugInfo(ParitionDebugInfo& obj) final;
 
 protected:
     bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);
@@ -87,8 +87,6 @@ protected:
     PartitionPhysicalSize physicalSize;
     vector<ArrayDevice*> devs;
     PartitionType type;
-    DebugPartition debugPartition;
-    DebugInfoQueue<DebugPartition> partitionQueue;;
 };
 
 using Partitions = array<Partition*, PartitionType::TYPE_COUNT>;

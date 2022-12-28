@@ -164,7 +164,7 @@ DumpSharedModule<T, moduleNumber>::Add(T t, bool lock_enable)
 
         if (dumpMap.find(key) == dumpMap.end())
         {
-            DumpObjectPtr<T> dumpObj(t, 0);
+            DumpObject<T> dumpObj(t, 0);
             dumpMap[key] = dumpObj;
         }
 

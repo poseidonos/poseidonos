@@ -65,7 +65,7 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
 {
 }
 
-void Copier::MakeDebugInfo(DebugCopier& obj)
+void Copier::MakeDebugInfo(CopierDebugInfo& obj)
 {
     obj.arrayId = array->GetIndex();
     obj.userDataMaxStripes = userDataMaxStripes;
@@ -102,10 +102,7 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
     SetEventType(BackendEvent_GC);
-
-    debugCopier.RegisterDebugInfoInstance("GC_Copier_Array" + std::to_string(array->GetIndex()));
-    copierQueue.RegisterDebugInfoQueue("History_GC_Copier_Array" + std::to_string(array->GetIndex()), 1000, true);
-    RegisterDebugInfoMaker(&debugCopier, &copierQueue, false);
+    RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000);
 }
 
 Copier::~Copier(void)

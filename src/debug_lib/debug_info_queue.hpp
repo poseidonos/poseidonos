@@ -71,27 +71,6 @@ DumpObject<T>::~DumpObject()
 }
 
 template<typename T>
-DumpObjectPtr<T>::DumpObjectPtr(void)
-: buffer{},
-  userSpecificData(0)
-{
-    memset(&date, 0x00, sizeof(date));
-}
-
-template<typename T>
-DumpObjectPtr<T>::DumpObjectPtr(T& t, uint64_t userSpecific)
-: buffer(t),
-  userSpecificData(userSpecific)
-{
-    gettimeofday(&date, NULL);
-}
-
-template<typename T>
-DumpObjectPtr<T>::~DumpObjectPtr()
-{
-}
-
-template<typename T>
 DebugInfoQueue<T>::DebugInfoQueue()
 {
     isEnabled = false;

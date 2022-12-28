@@ -59,18 +59,6 @@ public:
     struct timeval date; // 8 byte
 };
 
-template<typename T>
-class DumpObjectPtr
-{
-public:
-    DumpObjectPtr(void);
-    DumpObjectPtr(T& t, uint64_t userSpecific);
-    ~DumpObjectPtr(void);
-    T buffer;
-    uint64_t userSpecificData;
-    struct timeval date; // 8 byte
-};
-
 class DebugInfoQueueInstance
 {
 public:

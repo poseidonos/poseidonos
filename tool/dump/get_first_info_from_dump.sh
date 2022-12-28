@@ -2,6 +2,7 @@
 #decompress dump file
 
 PID=`ps -ef | egrep "*/poseidonos$" | awk '{print $2}'`
+
 cd $(dirname $(realpath $0))
 cd ../../
 CURR_PATH=`pwd`
@@ -11,12 +12,16 @@ CORE_DIR="/etc/pos/core/"
 
 rm -rf attach_or_load.gdb
 if [ -z $PID ];then
-    echo "There are no alive poseidonos process found in the system"
-    PID="$CORE_DIR"${IBOFOS_CORE//"/"/"!"}
-    if [ ! -f $PID ];then
-        PID="$CORE_DIR""poseidonos.core"
+    if [ ! -z $1 ];then
+        PID="$1"
+    else
+        echo "There are no alive poseidonos process found in the system"
+        PID="$CORE_DIR"${IBOFOS_CORE//"/"/"!"}
+        if [ ! -f $PID ];then
+            PID="$CORE_DIR""poseidonos.core"
+        fi
+        echo $PID
     fi
-    echo $PID
     echo "core ""$PID" > attach_or_load.gdb
 else
     echo "attach ""$PID" > attach_or_load.gdb

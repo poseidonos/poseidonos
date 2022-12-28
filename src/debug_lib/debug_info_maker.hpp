@@ -42,6 +42,7 @@ template<typename T>
 DebugInfoMaker<T>::DebugInfoMaker(void)
 {
     run = false;
+    timerUsec = DEFAULT_TIMER_VALUE;
     debugInfoThread = new std::thread(&DebugInfoMaker<T>::_DebugInfoThread, this);
 }
 
@@ -58,22 +59,28 @@ DebugInfoMaker<T>::~DebugInfoMaker(void)
 
 template<typename T>
 void
-DebugInfoMaker<T>::RegisterDebugInfoMaker(T* obj, DebugInfoQueue<T>* queue, bool asyncLogging)
+DebugInfoMaker<T>::RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging, uint64_t inputTimerUsec, bool enabled )
 {
+    if (inputTimerUsec != 0)
+    {
+        timerUsec = inputTimerUsec;
+    }
+    debugInfoQueue.RegisterDebugInfoQueue("History_" + name, entryCount, enabled);
+    debugInfoObject.RegisterDebugInfoInstance(name);
     if (asyncLogging)
     {
         run = true;
     }
-    debugInfoObject = obj;
-    debugInfoQueue = queue;
+    registered = true;
 }
 
 template<typename T>
 void
 DebugInfoMaker<T>::AddDebugInfo(uint64_t userSpecific)
 {
-    MakeDebugInfo(*debugInfoObject);
-    debugInfoQueue->AddDebugInfo(*debugInfoObject, userSpecific);
+    assert(registered == true);
+    MakeDebugInfo(debugInfoObject);
+    debugInfoQueue.AddDebugInfo(debugInfoObject, userSpecific);
 }
 
 template<typename T>

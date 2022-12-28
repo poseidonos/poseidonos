@@ -71,7 +71,7 @@ class IAbrControl;
 class IStateControl;
 class TelemetryPublishser;
 
-class DebugArray : public DebugInfoInstance
+class ArrayDebugInfo : public DebugInfoInstance
 {
 public:
     std::string state;
@@ -79,7 +79,7 @@ public:
     uint32_t rebuildProgress;
     bool isWTEnabled;
 };
-class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker, public DebugInfoMaker<DebugArray>
+class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker, public DebugInfoMaker<ArrayDebugInfo>
 {
     friend class ParityLocationWbtCommand;
     friend class GcWbtCommand;
@@ -105,7 +105,7 @@ public:
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual string Serialize(void);
-    void MakeDebugInfo(DebugArray& obj);
+    void MakeDebugInfo(ArrayDebugInfo& obj);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;

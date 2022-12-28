@@ -62,7 +62,7 @@ enum CopierStateType
 class StripeCopySubmission;
 class ReverseMapLoadCompletion;
 
-class DebugCopier : public DebugInfoInstance
+class CopierDebugInfo : public DebugInfoInstance
 {
 public:
     uint32_t userDataMaxStripes;
@@ -78,7 +78,7 @@ public:
     uint32_t numFreeSegment;
 };
 
-class Copier : public Event, public DebugInfoMaker<DebugCopier>
+class Copier : public Event, public DebugInfoMaker<CopierDebugInfo>
 {
 public:
     explicit Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArrayInfo* array);
@@ -90,7 +90,7 @@ public:
 
     virtual ~Copier(void);
     virtual bool Execute(void);
-    virtual void MakeDebugInfo(DebugCopier& obj) final;
+    virtual void MakeDebugInfo(CopierDebugInfo& obj) final;
 
     virtual void
     Stop(void)
@@ -177,8 +177,6 @@ private:
 
     CallbackSmartPtr stripeCopySubmissionPtr;
     CallbackSmartPtr reverseMapLoadCompletionPtr;
-    DebugCopier debugCopier;
-    DebugInfoQueue<DebugCopier> copierQueue;;
 };
 
 } // namespace pos
