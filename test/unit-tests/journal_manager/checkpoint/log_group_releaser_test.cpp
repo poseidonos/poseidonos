@@ -16,6 +16,29 @@ using ::testing::Return;
 
 namespace pos
 {
+class LogGroupReleaserSpy : public LogGroupReleaser
+{
+public:
+    using LogGroupReleaser::LogGroupReleaser;
+
+    void SetLogGroupReadyToCheckpoint(int logGroupId, uint32_t seqNum)
+    {
+        logGroups[logGroupId].Reset();
+        logGroups[logGroupId].SetWaiting(seqNum);
+        logGroups[logGroupId].SetReleasing();
+
+        nextLogGroupId = logGroupId;
+    }
+    LogGroupFooter _CreateLogGroupFooter(int logGroupId)
+    {
+        return LogGroupReleaser::_CreateLogGroupFooter(logGroupId);
+    }
+    LogGroupFooter _CreateLogGroupFooterForReset(int logGroupId, LogGroupFooter& prevFooter)
+    {
+        return LogGroupReleaser::_CreateLogGroupFooterForReset(logGroupId, prevFooter);
+    }
+};
+
 TEST(LogGroupReleaser, Init_testIfExecutedSuccessfully)
 {
     // Given
@@ -190,5 +213,60 @@ TEST(LogGroupReleaser, LogGroupResetCompleted_testIfNextCheckpointIsNotStartedWh
     // Then: Flushing log group id is updated but no full log groups exist
     EXPECT_EQ(releaser.GetFlushingLogGroupId(), 1);
     EXPECT_EQ(releaser.GetFullLogGroups().empty(), true);
+}
+
+TEST(LogGroupReleaser, CreateCheckpointSubmissionEvent_testFooterValue)
+{
+    // Given
+    NiceMock<MockJournalConfiguration> config;
+    NiceMock<MockIContextManager> contextManager;
+    NiceMock<MockCheckpointManager> checkpointManager;
+    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
+    NiceMock<MockEventScheduler> eventScheduler;
+
+    ON_CALL(config, GetNumLogGroups).WillByDefault(Return(2));
+
+    LogGroupReleaserSpy releaser;
+    releaser.Init(&config, &notifier, nullptr, &checkpointManager,
+        nullptr, &contextManager, &eventScheduler);
+
+    int logGroupId = 0;
+    EXPECT_CALL(contextManager, GetStoredContextVersion(SEGMENT_CTX)).WillOnce(Return(3)).WillOnce(Return(4));
+
+    // When 1. log group 0 is ready to flush with seqNum = 0
+    {
+        uint32_t seqNum = 0;
+        releaser.SetLogGroupReadyToCheckpoint(logGroupId, seqNum);
+
+        LogGroupFooter footer = releaser._CreateLogGroupFooter(logGroupId);
+        LogGroupFooter footerAfterFlush = releaser._CreateLogGroupFooterForReset(logGroupId, footer);
+
+        // Then
+        EXPECT_EQ(footer.lastCheckpointedSeginfoVersion, 3);
+        EXPECT_EQ(footer.resetedSequenceNumber, UINT32_MAX);
+        EXPECT_EQ(footer.isReseted, false);
+
+        EXPECT_EQ(footerAfterFlush.lastCheckpointedSeginfoVersion, 3);
+        EXPECT_EQ(footerAfterFlush.resetedSequenceNumber, seqNum);
+        EXPECT_EQ(footerAfterFlush.isReseted, true);
+    }
+
+    // When 2. log group 0 is ready to flush with seqNum = 2
+    {
+        uint32_t seqNum = 2;
+        releaser.SetLogGroupReadyToCheckpoint(logGroupId, seqNum);
+
+        LogGroupFooter footer = releaser._CreateLogGroupFooter(logGroupId);
+        LogGroupFooter footerAfterFlush = releaser._CreateLogGroupFooterForReset(logGroupId, footer);
+
+        // Then
+        EXPECT_EQ(footer.lastCheckpointedSeginfoVersion, 4);
+        EXPECT_EQ(footer.resetedSequenceNumber, 0); // previous sequence number was 0
+        EXPECT_EQ(footer.isReseted, false);
+
+        EXPECT_EQ(footerAfterFlush.lastCheckpointedSeginfoVersion, 4);
+        EXPECT_EQ(footerAfterFlush.resetedSequenceNumber, seqNum);
+        EXPECT_EQ(footerAfterFlush.isReseted, true);
+    }
 }
 } // namespace pos

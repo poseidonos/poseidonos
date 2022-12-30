@@ -1,5 +1,7 @@
 #include "src/cli/grpc_cli_server.h"
 
+#include <google/protobuf/util/json_util.h>
+
 #include <iostream>
 #include <memory>
 #include <string>
@@ -913,8 +915,15 @@ class PosCliServiceImpl final : public PosCli::Service
 void
 _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf::Message* reply)
 {
+    std::string reqJson = "";
+    std::string replyJson = "";
+    google::protobuf::util::JsonOptions printOptions;
+    printOptions.always_print_primitive_fields = true;
+    MessageToJsonString(*request, &reqJson, printOptions);
+    MessageToJsonString(*reply, &replyJson, printOptions);
+
     POS_TRACE_TRACE(EID(CLI_TIMEOUT_OR_CANCELLED), "request: {}, reply: {}",
-        request->ShortDebugString(), reply->ShortDebugString());
+        reqJson, replyJson);
 }
 
 void
@@ -928,9 +937,14 @@ _LogCliRequest(const google::protobuf::Message* request, std::string command)
 void
 _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, std::string command)
 {
+    std::string replyJson = "";
+    google::protobuf::util::JsonOptions printOptions;
+    printOptions.always_print_primitive_fields = true;
+    MessageToJsonString(*reply, &replyJson, printOptions);
+
     logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
-        reply->ShortDebugString(), status.error_code(), status.error_details(), status.error_message());
+        replyJson, status.error_code(), status.error_details(), status.error_message());
     logger()->SetCommand("");
 }
 

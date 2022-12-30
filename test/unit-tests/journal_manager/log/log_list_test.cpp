@@ -23,7 +23,7 @@ TEST(LogList, Reset_testIfLogsAreDeleted)
     for (int count = 0; count < 10; count++)
     {
         NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
-        list.AddLog(log);
+        list.AddLog(0, log);
     }
 
     list.Reset();
@@ -34,7 +34,7 @@ TEST(LogList, AddLog_testIfLogIsAddedSuccessfully)
 {
     LogList list;
     NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
-    list.AddLog(log);
+    list.AddLog(0, log);
 
     EXPECT_EQ(list.GetLogs().size(), 1);
     EXPECT_EQ(list.GetLogs().front(), log);

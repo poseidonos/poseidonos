@@ -40,6 +40,7 @@ namespace pos
 enum class ReplayTaskId
 {
     READ_LOG_BUFFER,
+    FILTER_LOGS,
     REPLAY_LOGS,
     REPLAY_VOLUME_DELETION,
     FLUSH_METADATA,

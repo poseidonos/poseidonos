@@ -73,7 +73,7 @@ WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, int numVolumes_, IReve
 }
 
 WBStripeManager::WBStripeManager(TelemetryPublisher* tp_, AllocatorAddressInfo* info, AllocatorCtx* allocCtx_, std::string arrayName, int arrayId)
-: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, allocCtx_, info, new StripeLoadStatus(), arrayName, arrayId)
+: WBStripeManager(tp_, MAX_VOLUME_COUNT, nullptr, nullptr, nullptr, allocCtx_, info, nullptr, arrayName, arrayId)
 {
 }
 // LCOV_EXCL_START
@@ -100,6 +100,10 @@ WBStripeManager::Init(void)
     if (eventScheduler == nullptr)
     {
         eventScheduler = EventSchedulerSingleton::Instance();
+    }
+    if (stripeLoadStatus == nullptr)
+    {
+        stripeLoadStatus = new StripeLoadStatus();
     }
     uint32_t totalNvmStripes = addrInfo->GetnumWbStripes();
     uint32_t chunksPerStripe = addrInfo->GetchunksPerStripe();
