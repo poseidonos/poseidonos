@@ -3,7 +3,7 @@
 # Change `author1` to your shortname.
 author1:
   name:              PoseidonOS
-  email:             jh34.hong@gmail.com
+  email:             poseidonos@samsung.com
 
   # Used at the bottom of each page and at the top of the `about` layout
   # Markdown enabled, can use multiple paragraphs (enabled by `|`)
@@ -22,7 +22,7 @@ author1:
   # Rearrange to change the order in which they appear
   social:
     github:           poseidonos
-    email:            jh34.hong@gmail.com
+    email:            poseidonos@samsung.com
     # rss:             https://<url>/feed.xml
     # facebook:        <username>
     # google:          <number>
