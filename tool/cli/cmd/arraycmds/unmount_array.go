@@ -57,7 +57,7 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendUnmountArray(req)
+		res, gRpcErr := grpcmgr.SendUnmountArray(req, cmd.Flags().Changed("timeout"))
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr

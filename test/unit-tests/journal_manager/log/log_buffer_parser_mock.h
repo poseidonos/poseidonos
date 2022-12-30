@@ -10,7 +10,7 @@ class MockLogBufferParser : public LogBufferParser
 {
 public:
     using LogBufferParser::LogBufferParser;
-    MOCK_METHOD(int, GetLogs, (void* buffer, uint64_t bufferSize, LogList& logs), (override));
+    MOCK_METHOD(int, GetLogs, (void* buffer, int logGroupId, uint64_t bufferSize, LogList& logs), (override));
 };
 
 } // namespace pos

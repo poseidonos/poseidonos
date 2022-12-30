@@ -49,7 +49,6 @@ namespace pos
 {
 class IVSAMap;
 class IStripeMap;
-class IContextManager;
 class IContextReplayer;
 class ISegmentCtx;
 class IArrayInfo;
@@ -64,7 +63,6 @@ public:
     ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
         IVSAMap* vsaMap, IStripeMap* stripeMap,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
-        IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
         ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes);
     virtual ~ReplayLogs(void);
@@ -91,7 +89,6 @@ private:
     IStripeMap* stripeMap;
     ISegmentCtx* segmentCtx;
     IWBStripeAllocator* wbStripeAllocator;
-    IContextManager* contextManager;
     IContextReplayer* contextReplayer;
     IArrayInfo* arrayInfo;
 

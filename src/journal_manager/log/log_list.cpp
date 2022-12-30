@@ -53,7 +53,7 @@ LogList::Reset(void)
     logs.clear();
 }
 void
-LogList::AddLog(LogHandlerInterface* log)
+LogList::AddLog(int logGroupId, LogHandlerInterface* log)
 {
     logs.push_back(log);
 }
@@ -65,13 +65,7 @@ LogList::IsEmpty(void)
 }
 
 void
-LogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
-{
-    // do nothing
-}
-
-void
-LogList::EraseReplayLogGroup(uint32_t seqNum)
+LogList::SetLogGroupFooter(int logGroupId, LogGroupFooter footer)
 {
     // do nothing
 }

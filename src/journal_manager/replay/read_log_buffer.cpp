@@ -84,8 +84,7 @@ ReadLogBuffer::GetNumSubTasks(void)
 int
 ReadLogBuffer::Start(void)
 {
-    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
-    POS_TRACE_DEBUG(eventId, "[ReplayTask] Read log buffer started");
+    POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS), "[ReplayTask] Read log buffer started");
 
     int result = 0;
     int numLogGroups = config->GetNumLogGroups();
@@ -102,7 +101,7 @@ ReadLogBuffer::Start(void)
             break;
         }
 
-        result = parser->GetLogs(logGroupBuffer, groupSize, logList);
+        result = parser->GetLogs(logGroupBuffer, groupId, groupSize, logList);
         if (result != 0)
         {
             break;
@@ -112,17 +111,7 @@ ReadLogBuffer::Start(void)
 
     if (result == 0)
     {
-        parser->PrintFoundLogTypes();
-        if (logList.IsEmpty() == true)
-        {
-            int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STOPPED));
-            std::ostringstream os;
-            os << "No logs to replay. Stop replaying";
-
-            POS_TRACE_INFO(eventId, os.str());
-            POS_TRACE_DEBUG_IN_MEMORY(ModuleInDebugLogDump::JOURNAL, eventId, os.str());
-            result = eventId;
-        }
+        logList.PrintLogStatistics();
     }
     return result;
 }
@@ -136,7 +125,7 @@ ReadLogBuffer::GetId(void)
 int
 ReadLogBuffer::GetWeight(void)
 {
-    return 50;
+    return 40;
 }
 
 } // namespace pos

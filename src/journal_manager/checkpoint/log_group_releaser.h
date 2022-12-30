@@ -79,7 +79,8 @@ protected:
     virtual void _FlushNextLogGroup(void);
     virtual void _TriggerCheckpoint(void);
 
-    void _CreateFlushingLogGroupFooter(LogGroupFooter& footer, uint64_t& footerOffset);
+    LogGroupFooter _CreateLogGroupFooter(int logGroupId);
+    LogGroupFooter _CreateLogGroupFooterForReset(int logGroupId, LogGroupFooter& prevFooter);
 
     EventSmartPtr _CreateCheckpointSubmissionEvent(void);
 

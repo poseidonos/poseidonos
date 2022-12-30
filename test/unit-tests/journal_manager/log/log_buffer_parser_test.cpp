@@ -58,11 +58,11 @@ TEST(LogBufferParser, GetLogs_testIfBlockWriteDoneLogIsParsed)
     NiceMock<MockLogList> logList;
 
     // Then
-    EXPECT_CALL(logList, AddLog(EqLog(buffer)));
+    EXPECT_CALL(logList, AddLog(0, EqLog(buffer)));
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(buffer, bufferSize, logList);
+    parser.GetLogs(buffer, 0, bufferSize, logList);
 
     free(buffer);
 }
@@ -87,11 +87,11 @@ TEST(LogBufferParser, GetLogs_testIfStripeMapUpdatedLogIsParsed)
     NiceMock<MockLogList> logList;
 
     // Then
-    EXPECT_CALL(logList, AddLog(EqLog(buffer)));
+    EXPECT_CALL(logList, AddLog(0, EqLog(buffer)));
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(buffer, bufferSize, logList);
+    parser.GetLogs(buffer, 0, bufferSize, logList);
 
     free(buffer);
 }
@@ -123,11 +123,11 @@ TEST(LogBufferParser, GetLogs_testIfGcBlockWriteDoneLogIsParsed)
     NiceMock<MockLogList> logList;
 
     // Then
-    EXPECT_CALL(logList, AddLog(EqLog(buffer)));
+    EXPECT_CALL(logList, AddLog(0, EqLog(buffer)));
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(buffer, bufferSize, logList);
+    parser.GetLogs(buffer, 0, bufferSize, logList);
 
     free(buffer);
 }
@@ -150,11 +150,11 @@ TEST(LogBufferParser, GetLogs_testIfGcStripeFlushedLogIsParsed)
     NiceMock<MockLogList> logList;
 
     // Then
-    EXPECT_CALL(logList, AddLog(EqLog(buffer)));
+    EXPECT_CALL(logList, AddLog(0, EqLog(buffer)));
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(buffer, bufferSize, logList);
+    parser.GetLogs(buffer, 0, bufferSize, logList);
 
     free(buffer);
 }
@@ -174,11 +174,11 @@ TEST(LogBufferParser, GetLogs_testIfVolumeDeletedLogIsParsed)
     NiceMock<MockLogList> logList;
 
     // Then
-    EXPECT_CALL(logList, AddLog(EqLog(buffer)));
+    EXPECT_CALL(logList, AddLog(0, EqLog(buffer)));
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(buffer, bufferSize, logList);
+    parser.GetLogs(buffer, 0, bufferSize, logList);
 
     free(buffer);
 }
@@ -210,14 +210,14 @@ TEST(LogBufferParser, GetLogs_testIfLogsAreParsed)
         char* targetBuffer = (char*)logBuffer + currentOffset;
         memcpy(targetBuffer, &log, sizeof(log));
 
-        EXPECT_CALL(logList, AddLog(EqLog(targetBuffer)));
+        EXPECT_CALL(logList, AddLog(0, EqLog(targetBuffer)));
 
         currentOffset += sizeof(BlockWriteDoneLog);
     }
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(logBuffer, logBufferSize, logList);
+    parser.GetLogs(logBuffer, 0, logBufferSize, logList);
 
     free(logBuffer);
 }
@@ -249,7 +249,7 @@ TEST(LogBufferParser, GetLogs_testIfLogsAndLogBufferFooterAreParsed)
         char* targetBuffer = (char*)logBuffer + currentOffset;
         memcpy(targetBuffer, &log, sizeof(log));
 
-        EXPECT_CALL(logList, AddLog(EqLog(targetBuffer)));
+        EXPECT_CALL(logList, AddLog(0, EqLog(targetBuffer)));
 
         currentOffset += sizeof(BlockWriteDoneLog);
     }
@@ -265,59 +265,8 @@ TEST(LogBufferParser, GetLogs_testIfLogsAndLogBufferFooterAreParsed)
 
     // When
     LogBufferParser parser;
-    parser.GetLogs(logBuffer, logBufferSize, logList);
+    parser.GetLogs(logBuffer, 0, logBufferSize, logList);
 
-    free(logBuffer);
-}
-
-TEST(LogBufferParser, GetLogs_testIfSeveralSequenceNumberSeen)
-{
-    // Given
-    uint64_t logBufferSize = sizeof(BlockWriteDoneLog) * 10 + sizeof(LogGroupFooter);
-    void* logBuffer = malloc(logBufferSize);
-
-    NiceMock<MockLogList> logList;
-
-    uint64_t currentOffset = 0;
-    for (int count = 0; count < 5; count++)
-    {
-        BlockWriteDoneLog log;
-        log.type = LogType::BLOCK_WRITE_DONE;
-        log.seqNum = count;
-        log.volId = 1;
-        log.startRba = currentOffset;
-        log.numBlks = 0;
-        log.startVsa = {
-            .stripeId = 0,
-            .offset = 0};
-        log.wbIndex = 0;
-        log.writeBufferStripeAddress = {
-            .stripeLoc = IN_WRITE_BUFFER_AREA,
-            .stripeId = 0};
-
-        char* targetBuffer = (char*)logBuffer + currentOffset;
-        memcpy(targetBuffer, &log, sizeof(log));
-
-        EXPECT_CALL(logList, AddLog(EqLog(targetBuffer)));
-
-        currentOffset += sizeof(BlockWriteDoneLog);
-    }
-
-    LogGroupFooter footer;
-    footer.lastCheckpointedSeginfoVersion = 13;
-    footer.isReseted = true;
-    footer.resetedSequenceNumber = 0;
-
-    char* targetBuffer = (char*)logBuffer + currentOffset;
-    memcpy(targetBuffer, &footer, sizeof(LogGroupFooter));
-
-    // When
-    LogBufferParser parser;
-    int result = parser.GetLogs(logBuffer, logBufferSize, logList);
-
-    // Then: LogBufferParser will return the error code
-    int expect = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND)) * -1;
-    EXPECT_EQ(result, expect);
     free(logBuffer);
 }
 
@@ -341,7 +290,7 @@ TEST(LogBufferParser, GetLogs_testIfSeveralOldSequenceNumber)
         memcpy(targetBuffer, &log, sizeof(log));
 
         log.seqNum = LOG_VALID_MARK;
-        EXPECT_CALL(logList, AddLog(SoftEqLog((targetBuffer))));
+        EXPECT_CALL(logList, AddLog(0, SoftEqLog(targetBuffer)));
         currentOffset += (sizeof(struct Log) - sizeof(log.seqNum));
     }
 
@@ -354,7 +303,7 @@ TEST(LogBufferParser, GetLogs_testIfSeveralOldSequenceNumber)
         char* targetBuffer = (char*)logBuffer + currentOffset;
         memcpy(targetBuffer, &log, sizeof(log));
 
-        EXPECT_CALL(logList, AddLog(SoftEqLog(targetBuffer)));
+        EXPECT_CALL(logList, AddLog(0, SoftEqLog(targetBuffer)));
 
         currentOffset += sizeof(BlockWriteDoneLog);
     }
@@ -367,11 +316,11 @@ TEST(LogBufferParser, GetLogs_testIfSeveralOldSequenceNumber)
     memcpy(targetBuffer, &footer, sizeof(LogGroupFooter));
 
     // Then: Invalid logs will be deleted
-    EXPECT_CALL(logList, EraseReplayLogGroup(resetedSequenceNumber));
+    EXPECT_CALL(logList, SetLogGroupFooter(0, footer));
 
     // When
     LogBufferParser parser;
-    int result = parser.GetLogs(logBuffer, logBufferSize, logList);
+    int result = parser.GetLogs(logBuffer, 0, logBufferSize, logList);
 
     // Then: LogBufferParser will return the success code
     int expect = 0;
@@ -396,7 +345,7 @@ TEST(LogBufferParser, DISABLED_GetLogs_testWithRealDump)
 
     // When
     LogBufferParser parser;
-    int result = parser.GetLogs(logBuffer, logBufferSize, logList);
+    int result = parser.GetLogs(logBuffer, 0, logBufferSize, logList);
 
     // Then: LogBufferParser will return the success code
     int expect = 0;

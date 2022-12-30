@@ -166,7 +166,7 @@ RocksDBLogBufferIntegrationTest::_ParseLogBuffer(int groupId, LogList& groupLogs
     EXPECT_TRUE(journalRocks->ReadLogBuffer(groupId, buffer) == 0);
 
     LogBufferParser parser;
-    int result = parser.GetLogs(buffer, LOG_GROUP_SIZE, groupLogs);
+    int result = parser.GetLogs(buffer, groupId, LOG_GROUP_SIZE, groupLogs);
 
     free(buffer);
     return result;

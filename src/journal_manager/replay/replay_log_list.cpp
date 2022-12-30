@@ -50,7 +50,11 @@ ReplayLogList::~ReplayLogList(void)
 {
     for (auto logGroup : logGroups)
     {
-        logGroup.second.logs.clear();
+        for (auto seqNumGroup : logGroup)
+        {
+            seqNumGroup.second.logs.clear();
+        }
+        logGroup.clear();
     }
     logGroups.clear();
 
@@ -62,7 +66,20 @@ ReplayLogList::~ReplayLogList(void)
 }
 
 void
-ReplayLogList::AddLog(LogHandlerInterface* log)
+ReplayLogList::Init(int numLogGroups)
+{
+    logGroups.resize(numLogGroups);
+
+    // Invalid log group footer will be used, when log group footer was never written
+    LogGroupFooter invalidFooter;
+    invalidFooter.isReseted = false;
+    invalidFooter.lastCheckpointedSeginfoVersion = UINT32_MAX;
+    invalidFooter.resetedSequenceNumber = UINT32_MAX;
+    footers.resize(numLogGroups, invalidFooter);
+}
+
+void
+ReplayLogList::AddLog(int logGroupId, LogHandlerInterface* log)
 {
     ReplayLog replayLog = {
         .time = _GetTime(),
@@ -74,9 +91,16 @@ ReplayLogList::AddLog(LogHandlerInterface* log)
     }
     else
     {
-        logGroups[log->GetSeqNum()].logs.push_back(replayLog);
-        logGroups[log->GetSeqNum()].seqNum = log->GetSeqNum();
-        logGroups[log->GetSeqNum()].isFooterValid = false;
+        uint32_t seqNum = log->GetSeqNum();
+
+        if (logGroups[logGroupId].find(seqNum) == logGroups[logGroupId].end())
+        {
+            ReplayLogGroup logGroup(seqNum);
+            logGroups[logGroupId].emplace(seqNum, logGroup);
+        }
+
+        logGroups[logGroupId][seqNum].logs.push_back(replayLog);
+        logGroups[logGroupId][seqNum].logsFoundPerType[(int)(log->GetType())]++;
     }
 }
 
@@ -89,45 +113,140 @@ ReplayLogList::_GetTime(void)
 bool
 ReplayLogList::IsEmpty(void)
 {
-    return (logGroups.size() == 0);
+    for (auto logGroup: logGroups)
+    {
+        if (logGroup.size() != 0)
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 void
-ReplayLogList::SetLogGroupFooter(uint32_t seqNum, LogGroupFooter footer)
+ReplayLogList::SetLogGroupFooter(int logGroupId, LogGroupFooter footer)
 {
-    logGroups[seqNum].footer = footer;
-    logGroups[seqNum].isFooterValid = true;
+    footers[logGroupId] = footer;
+
+    POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
+        "Footer found, logGroupId:{}, lastCheckpointedSeginfoVersion:{}, isReseted:{}, resetedSequenceNumber:{}",
+        logGroupId, footer.lastCheckpointedSeginfoVersion, footer.isReseted ? "true" : "false", footer.resetedSequenceNumber);
+}
+
+LogGroupFooter
+ReplayLogList::GetLogGroupFooter(int logGroupId)
+{
+    return footers[logGroupId];
 }
 
 void
-ReplayLogList::EraseReplayLogGroup(uint32_t seqNum)
+ReplayLogList::PrintLogStatistics(void)
 {
-    for (auto it = logGroups.cbegin(); it != logGroups.cend();)
+    for (int id = 0; id < (int)logGroups.size(); id++)
+    {
+        for (auto seqNumGroup : logGroups[id])
+        {
+            uint32_t sequenceNumber = seqNumGroup.first;
+            auto logsFoundPerType = seqNumGroup.second.logsFoundPerType;
+
+            int numBlockMapUpdatedLogs = logsFoundPerType[(int)LogType::BLOCK_WRITE_DONE];
+            int numStripeMapUpdatedLogs = logsFoundPerType[(int)LogType::STRIPE_MAP_UPDATED];
+            int numGcStripeFlushedLogs = logsFoundPerType[(int)LogType::GC_STRIPE_FLUSHED];
+            int numVolumeDeletedLogs = logsFoundPerType[(int)LogType::VOLUME_DELETED];
+            POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
+                "Logs found: logGroupId:{}, SeqNum: {}, total: {}, block_map: {}, stripe_map: {}, gc_stripes: {}, volumes_deleted: {}",
+                id, sequenceNumber, seqNumGroup.second.logs.size(), numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
+        }
+    }
+}
+
+int
+ReplayLogList::EraseReplayLogGroup(int logGroupId, uint32_t seqNum)
+{
+    POS_TRACE_INFO(EID(JOURNAL_LOG_GROUP_FOOTER_FOUND),
+        "Log Group Reset by footer found. Logs with SeqNumber ({}) or less will be removed",
+        seqNum);
+
+    for (auto it = logGroups[logGroupId].cbegin(); it != logGroups[logGroupId].cend();)
     {
         // TODO (cheolho.kang): It should be refactored later to erase replay logs with invalid sequence numbers using LogBufferParser.logs 
         if (it->first <= seqNum || it->first == LOG_VALID_MARK)
         {
-            int event = static_cast<int>(EID(JOURNAL_INVALID_LOG_FOUND));
-            POS_TRACE_INFO(event, "Erasing Replay Log Group for SeqNum {} with {} entries", it->first, it->second.logs.size());
+            int event = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
+            POS_TRACE_INFO(event, "Erasing logs, logGroupId:{}, seqNum:{}, numLogsErased:{}", logGroupId, it->first, it->second.logs.size());
             for (ReplayLog replayLog : it->second.logs)
             {
                 delete replayLog.log;
             }
-            logGroups.erase(it++);
+            logGroups[logGroupId].erase(it++);
         }
         else
         {
             it++;
         }
     }
+
+    if (logGroups[logGroupId].size() > 1)
+    {
+        std::string seqNumList = "";
+        for (auto it = logGroups[logGroupId].cbegin(); it != logGroups[logGroupId].cend(); it++)
+        {
+            seqNumList += (std::to_string(it->first) + ", ");
+        }
+        POS_TRACE_ERROR(EID(JOURNAL_INVALID_LOG_FOUND),
+            "Several sequence numbers are found in single log group, logGroupId:{}, resetedSequenceNumber:{}, seqNumsSeen:{}",
+            logGroupId, footers[logGroupId].resetedSequenceNumber, seqNumList);
+        return ERRID(JOURNAL_INVALID_LOG_FOUND);
+    }
+
+    return EID(SUCCESS);
 }
 
-ReplayLogGroup
+void
+ReplayLogList::SetSegInfoFlushed(int logGroupId)
+{
+    assert(logGroups[logGroupId].size() <= 1);
+
+    if (logGroups[logGroupId].size() == 1)
+    {
+        auto replayLogGroup = logGroups[logGroupId].begin()->second;
+        POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS), "SetSegInfoFlushed, id:{}, numLogs:{}", logGroupId, replayLogGroup.logs.size());
+
+        for (auto it = replayLogGroup.logs.begin(); it != replayLogGroup.logs.end(); it++)
+        {
+            it->segInfoFlushed = true;
+        }
+    }
+}
+
+std::vector<ReplayLog>
 ReplayLogList::PopReplayLogGroup(void)
 {
-    ReplayLogGroup logGroup = logGroups.begin()->second;
-    logGroups.erase(logGroups.begin());
-    return logGroup;
+    SeqNumGroup logGroupsBySeqNum;
+    for (int id = 0; id < (int)logGroups.size(); id++)
+    {
+        assert(logGroups[id].size() <= 1);
+
+        if (logGroups[id].size() == 1)
+        {
+            auto replayLogGroup = logGroups[id].begin()->second;
+            logGroupsBySeqNum.emplace(replayLogGroup.seqNum, replayLogGroup);
+        }
+    }
+
+    std::vector<ReplayLog> returnLogs;
+    for (auto logGroup : logGroupsBySeqNum)
+    {
+        auto seqNum = logGroup.first;
+        auto replayLogGroup = logGroup.second;
+
+        POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
+            "Adding logs to replay, seqNum:{}, numLogs:{}", seqNum, replayLogGroup.logs.size());
+
+        returnLogs.insert(returnLogs.end(), replayLogGroup.logs.begin(), replayLogGroup.logs.end());
+    }
+
+    return returnLogs;
 }
 
 std::vector<ReplayLog>&

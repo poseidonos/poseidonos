@@ -45,14 +45,11 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
-#include "src/allocator/i_context_manager.h"
-
 namespace pos
 {
 ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
     IVSAMap* vsaMap, IStripeMap* stripeMap,
     ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
-    IContextManager* contextManager,
     IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
     ReplayProgressReporter* reporter, PendingStripeList& pendingWbStripes)
 : ReplayTask(reporter),
@@ -62,7 +59,6 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
   stripeMap(stripeMap),
   segmentCtx(segmentCtx),
   wbStripeAllocator(wbStripeAllocator),
-  contextManager(contextManager),
   contextReplayer(ctxReplayer),
   arrayInfo(arrayInfo)
 {
@@ -156,30 +152,7 @@ int
 ReplayLogs::_ReplayFinishedStripes(void)
 {
     replayLogs.clear();
-
-    while (logList.IsEmpty() == false)
-    {
-        ReplayLogGroup logGroup = logList.PopReplayLogGroup();
-
-        if (logGroup.isFooterValid == true)
-        {
-            uint64_t currentSegInfoVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
-            if (logGroup.footer.lastCheckpointedSeginfoVersion < currentSegInfoVersion)
-            {
-                // Checkpoint started, allocator context is stored, but checkpoint is not completed
-                for (auto it = logGroup.logs.begin(); it != logGroup.logs.end(); it++)
-                {
-                    it->segInfoFlushed = true;
-                }
-
-                POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
-                    "Segment context is flushed, skip replaying seginfo (last_ver_in_footer:{}, current:{}",
-                    logGroup.footer.lastCheckpointedSeginfoVersion, currentSegInfoVersion);
-            }
-        }
-
-        replayLogs.insert(replayLogs.end(), logGroup.logs.begin(), logGroup.logs.end());
-    }
+    replayLogs = logList.PopReplayLogGroup();
 
     POS_TRACE_TRACE(EID(JOURNAL_REPLAY_STATUS),
         "Start replaying logs, numLogs:{}", replayLogs.size());

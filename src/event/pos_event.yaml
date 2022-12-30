@@ -2277,6 +2277,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2604
+    Name: RAID_BUFFER_POOL_ALLOCATED
+    Severity:
+    Description: Buffer pool for RAID is allocated
+    Cause:
+    Solution:
+  -
     Id: 2701
     Name: REBUILD_STOPPED_OTHER_DEVS_DETACHMENT
     Severity:
@@ -4589,10 +4596,24 @@ Root:
     Solution:
   -
     Id: 3437
+    Name: GC_FORCE_FLUSH_TIMER_DISPOSE
+    Severity:
+    Description: The GC force flush timer is disposed.
+    Cause: The volume has been deleted.
+    Solution:
+  -
+    Id: 3438
     Name: GC_STRIPE_FORCIBLY_FLUSHED
     Severity:
     Description: The GC stripe forcibly flushed because the timer expired.
     Cause:
+    Solution:
+  -
+    Id: 3439
+    Name: GC_FORCE_FLUSH_REJECTED
+    Severity:
+    Description: The GC stripe force flush cannot be performed
+    Cause: The target volume to perform force flush is invalid
     Solution:
   -
     Id: 3440

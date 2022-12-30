@@ -55,6 +55,9 @@ int
 ReplayVolumeDeletion::Start(void)
 {
     int result = 0;
+
+    POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS), "[ReplayTask] Replay volume deletion started");
+
     uint64_t storedContextVersion = contextManager->GetStoredContextVersion(SEGMENT_CTX);
     std::vector<DeletedVolume> deletedVolumes = deleteChecker->GetDeletedVolumes();
     for (auto vol : deletedVolumes)
