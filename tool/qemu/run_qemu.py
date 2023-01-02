@@ -18,13 +18,12 @@ import lib
 #################################################################
 use_local_server = False
 HOME_DIR = os.path.expanduser('~')
-vm_img = f"pos_{platform.machine()}_ubuntu1804.qcow2"
+vm_path = f"{HOME_DIR}/virtual/qemu-ubuntu"
 iso_path = "ubuntu-18.04.6-server-arm64.iso"   # Need to change the path to real location
-virtual_dir = f"{HOME_DIR}/virtual"
-qemu_dir = f"{virtual_dir}/qemu-ubuntu"
-device_dir_name = "devices"
-image_dir_name = "image"
+virtual_image_name = f"pos_{platform.machine()}_ubuntu1804.qcow2"
+virtual_image_path = ""
 virtual_image_size = "128G"
+virtual_device_path = ""
 nvme_device_prefix = "nvme"
 nvme_device_size = "20G"        # Required minimum size from POS
 num_device = 5
@@ -48,17 +47,15 @@ def install_qemu():
         subprocess.call("cd qemu; make -j ; make install", shell=True)
 
 
-def make_qemu_image(vm_dir):
-    image_dir = vm_dir + "/" + image_dir_name
-
-    if not os.path.exists(image_dir):
-        os.makedirs(image_dir)
+def make_qemu_image():
+    if not os.path.exists(virtual_image_path):
+        os.makedirs(virtual_image_path)
         lib.subproc.sync_run(
-            f"qemu-img create -f qcow2 {image_dir}/{vm_img} {virtual_image_size}")
+            f"qemu-img create -f qcow2 {virtual_image_path}/{virtual_image_name} {virtual_image_size}")
         qemu_command = ""
         if platform.system() == "Darwin" and platform.machine() == "arm64":
             if use_local_server:
-                subprocess.call(f"scp 10.1.1.12:/psdData/util/pos_aarch64_ubuntu_1804_server.qcow2 {image_dir}/{vm_img}", shell=True)
+                subprocess.call(f"scp 10.1.1.12:/psdData/util/pos_aarch64_ubuntu_1804_server.qcow2 {virtual_image_path}/{virtual_image_name}", shell=True)
             else:
                 if not os.path.exists(iso_path):
                     subprocess.call(f"eval curl -LO 'https://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.6-server-arm64.iso'", shell=True)
@@ -71,11 +68,10 @@ def make_qemu_image(vm_dir):
                 qemu_command += f"-m {total_memory_gb_size}G "
                 qemu_command += f"-bios QEMU_EFI.fd "
                 qemu_command += "-device qemu-xhci "
-                qemu_command += f"-drive file={image_dir}/{vm_img},if=virtio,cache=writethrough "
+                qemu_command += f"-drive file={virtual_image_path}/{virtual_image_name},if=virtio,cache=writethrough "
                 qemu_command += f"-drive file={iso_path},id=cdrom,if=none,media=cdrom "
                 qemu_command += "-device virtio-scsi-device -device scsi-cd,drive=cdrom "
                 qemu_command += "-M virt"
-                subprocess.call(qemu_command, shell=True)
         elif platform.machine() == "x86_64":
             if not os.path.exists(iso_path):
                 subprocess.call(
@@ -96,26 +92,22 @@ def make_qemu_image(vm_dir):
                 qemu_command += "-drive if=pflash,format=raw,readonly=yes,file=/usr/share/OVMF/OVMF_CODE.fd "
                 qemu_command += "-drive if=pflash,format=raw,file=/usr/share/OVMF/OVMF_VARS.fd "
             qemu_command += "-device qemu-xhci "
-            qemu_command += f"-drive if=virtio,file={image_dir}/{vm_img},cache=writethrough "
+            qemu_command += f"-drive if=virtio,file={virtual_image_path}/{virtual_image_name},cache=writethrough "
             qemu_command += "-net user,hostfwd=tcp::60022-:22 "
             qemu_command += "-net nic,model=virtio "
-            qemu_command += "-cdrom {iso_path}"
-            subprocess.call(qemu_command, shell=True)
+            qemu_command += f"-cdrom {iso_path}"
+
+        subprocess.call(qemu_command, shell=True)
 
 
-def make_device_image(vm_dir):
-    device_dir = vm_dir + "/" + device_dir_name
-    if not os.path.exists(device_dir):
-        os.makedirs(device_dir)
+def make_device_image():
+    if not os.path.exists(virtual_device_path):
+        os.makedirs(virtual_device_path)
         for index in range(num_device):
-            lib.subproc.sync_run(
-                f"qemu-img create {device_dir}/{nvme_device_prefix}.{index}.raw {nvme_device_size}")
+            lib.subproc.sync_run(f"qemu-img create {virtual_device_path}/{nvme_device_prefix}.{index}.raw {nvme_device_size}")
 
 
-def start_qemu(vm_dir):
-    dest_device = vm_dir + "/" + device_dir_name
-    dest_image = vm_dir + "/" + image_dir_name
-
+def start_qemu():
     host_mac_address = ':'.join(re.findall('..', '%012x' % getnode())[0:-1])
     host_mac_address += ":%0.2X" % args.id
 
@@ -148,11 +140,11 @@ def start_qemu(vm_dir):
         qemu_command += f"-object memory-backend-ram,id=ram-node{index},size={numa_mem_gb_size:.0f}G "
         qemu_command += f"-numa node,memdev=ram-node{index},cpus={index * num_core_per_numa:.0f}-{index + num_core_per_numa - 1:.0f},nodeid={index} "
 
-    qemu_command += f"-drive file={dest_image}/{vm_img},if=virtio,cache=writethrough "
+    qemu_command += f"-drive file={virtual_image_path}/{virtual_image_name},if=virtio,cache=writethrough "
     qemu_command += "-object rng-random,id=objrng0,filename=/dev/urandom "
     qemu_command += "-device qemu-xhci "
     for index in range(0, num_device):
-        qemu_command += f"-drive file={dest_device}/{nvme_device_prefix}.{index}.raw,if=none,id=nvme-ctrl-{nvme_device_prefix}{index},format=raw -device nvme,serial=pos{nvme_device_prefix}{index},drive=nvme-ctrl-{nvme_device_prefix}{index} "
+        qemu_command += f"-drive file={virtual_device_path}/{nvme_device_prefix}.{index}.raw,if=none,id=nvme-ctrl-{nvme_device_prefix}{index},format=raw -device nvme,serial=pos{nvme_device_prefix}{index},drive=nvme-ctrl-{nvme_device_prefix}{index} "
 
     if platform.system() == "Darwin" and platform.machine() == "arm64":
         qemu_command += "-M virt"
@@ -168,16 +160,24 @@ def check_platform():
         exit()
 
 
-def prepare_precondition():
+def prepare_precondition(args):
     check_platform()
     if platform.system() == "Darwin" and platform.machine() == "x86_64":
         if not os.path.exists(f"{POS_ROOT}/tool/qemu/usr"):
             subprocess.call("brew install rpm", shell=True)
             lib.subproc.sync_run("rpm2cpio < edk2-ovmf-20210527gite1999b264f1f-2.fc35.noarch.rpm | cpio -id")
 
-    if not os.path.exists(qemu_dir):
-        os.makedirs(qemu_dir)
-        lib.printer.green(f"The new directory is created. ({qemu_dir})")
+    global vm_path
+    global virtual_device_path
+    global virtual_image_path
+    vm_path = vm_path + "/" + "vm" + str(args.id)
+    virtual_device_path = vm_path + "/devices"
+    virtual_image_path = vm_path + "/image"
+
+    if not os.path.exists(vm_path):
+        os.makedirs(vm_path)
+        lib.printer.green(f"The new directory is created. ({vm_path})")
+
     lib.subproc.set_print_log(print_log)
 
 
@@ -199,12 +199,12 @@ def parse_arguments(args):
 if __name__ == "__main__":
     args = parse_arguments(sys.argv)
 
-    prepare_precondition()
+    prepare_precondition(args)
     if (args.need_install_qemu is True):
         install_qemu()
     if (args.need_make_qemu_image is True):
-        make_qemu_image((qemu_dir + "/" + "vm" + str(args.id)))
+        make_qemu_image()
     if (args.need_create_nvme_device is True):
-        make_device_image((qemu_dir + "/" + "vm" + str(args.id)))
+        make_device_image()
 
-    start_qemu((qemu_dir + "/" + "vm" + str(args.id)))
+    start_qemu()
