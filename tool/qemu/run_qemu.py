@@ -7,6 +7,7 @@ import argparse
 import subprocess
 import sys
 import os
+import getpass
 POS_ROOT = os.path.dirname(os.path.abspath(__file__)) + "/../.."
 
 if not os.path.exists(f"{POS_ROOT}/tool/arion/lib"):
@@ -57,7 +58,10 @@ def make_qemu_image():
         qemu_command = ""
         if platform.system() == "Darwin" and platform.machine() == "arm64":
             if use_local_server:
-                subprocess.call(f"scp 10.1.1.12:/psdData/util/pos_aarch64_ubuntu_1804_server.qcow2 {virtual_image_path}/{virtual_image_name}", shell=True)
+                local_address = input("Please enter local service server address: ")
+                password = getpass.getpass("Please enter server password: ")
+                lib.printer.yellow(f"Downloading QEMU Image from local server. (Destination: {virtual_image_path}/{virtual_image_name})")
+                subprocess.call(f"sshpass -p {password} scp -r root@{local_address}:/psdData/util/pos_aarch64_ubuntu_1804_server.qcow2 {virtual_image_path}/{virtual_image_name}", shell=True)
             else:
                 if not os.path.exists(iso_path):
                     subprocess.call(f"eval curl -LO 'https://cdimage.ubuntu.com/releases/18.04/release/ubuntu-18.04.6-server-arm64.iso'", shell=True)
@@ -157,7 +161,7 @@ def start_qemu():
 
 
 def check_platform():
-    if not ((platform.system() == "Darwin" and platform.machine() == "arm64") or (platform.system() == "Darwin" and platform.machine() == "x86_64") or (platform.system() == "linux" and platform.machine() == "x86_64")):
+    if not ((platform.system() == "Darwin" and platform.machine() == "arm64") or (platform.system() == "Darwin" and platform.machine() == "x86_64") or (platform.system() == "Linux" and platform.machine() == "x86_64")):
         lib.printer.red(f"Not support platform. Current OS: {platform.system()}, CPU: {platform.machine()}")
         exit()
 
