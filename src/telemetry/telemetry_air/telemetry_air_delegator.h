@@ -121,6 +121,8 @@ private:
 
         {"CNT_PendingIO", "", true, "count", TEL80000_DEVICE_PENDING_IO_COUNT, POSMetricTypes::MT_GAUGE},
 
+        {"UTIL_REACTOR", "", true, "usage", TEL100010_REACTOR_UTILIZATION, POSMetricTypes::MT_GAUGE},
+
         {"Feqos_Global_BW_Throttling", "", true, "qd_avg", TEL120000_FEQOS_GLOBAL_BW, POSMetricTypes::MT_GAUGE},
         {"Feqos_Dynamic_BW_Throttling", "", true, "qd_avg", TEL120001_FEQOS_DYNAMIC_BW, POSMetricTypes::MT_GAUGE, CustomLabel::ArrayIdVolumeId},
         {"Feqos_Global_Iops_Throttling", "", true, "qd_avg", TEL120002_FEQOS_GLOBAL_IOPS, POSMetricTypes::MT_GAUGE},
