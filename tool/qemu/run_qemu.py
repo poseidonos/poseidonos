@@ -41,9 +41,11 @@ def install_qemu():
     if platform.system() == "Darwin":
         subprocess.call("brew install ninja pkgconfig glib pixman qemu", shell=True)
     elif platform.system() == "Linux":
-        subprocess.call("sudo apt install -y libvirt-clients libpixman-1-dev libglib2.0-dev qemu-kvm tigervnc-viewer sshpass uml-utilities ovmf", shell=True)
+        subprocess.call("sudo apt update", shell=True)
+        subprocess.call("sudo apt install -y libvirt-clients libpixman-1-dev libglib2.0-dev qemu-kvm tigervnc-viewer sshpass uml-utilities ovmf python3-pip meson", shell=True)
+        subprocess.call("sudo pip3 install ninja", shell=True)
         subprocess.call("git clone -b v7.1.0 https://github.com/qemu/qemu.git", shell=True)
-        subprocess.call("cd qemu; ./configure", shell=True)
+        subprocess.call("cd qemu; ./configure --with-git-submodules=update", shell=True)
         subprocess.call("cd qemu; make -j ; make install", shell=True)
 
 

@@ -16,7 +16,7 @@ In this lists, the following environments are checked:
 - qemu
 - enabled virtualization (KVM)
 - [Ubuntu 18.04 iso](https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso)
-- [vde_vmnet](https://github.com/lima-vm/vde_vmnet) >= v0.6.0: Only for Mac. 
+- [vde_vmnet](https://github.com/lima-vm/vde_vmnet) >= v0.6.0: This is a framework to use a virtual network accessible by a host on Apple Silicon Mac.
 - 128GB + 5 * 20GB stoage is required minimum space for virtual OS disk and virtual nvme devices. But you can configurate these sizes.
 - 14GB DRAM is required minimum size for PoseidonOS.
 
@@ -35,7 +35,7 @@ Run QEMU script
 
 - `-d`: (Optional) Enable the option to create the virtual nvme block device
 
-## How to Install vde_vmnet (for Mac)
+## How to Install vde_vmnet (for Apple Silicon Mac)
 ```bash
 # Install vde_vmnet.
 brew install automake autoconf libtool
