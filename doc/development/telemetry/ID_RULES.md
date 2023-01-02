@@ -110,6 +110,8 @@ Resource monitoring ID Range : 100000 ~ 100099
 
 100000 Available host memory size
 
+100010 reactor utilization
+
 ---
 
 ## **Disk**

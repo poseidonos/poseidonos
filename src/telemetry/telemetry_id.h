@@ -146,6 +146,7 @@ static const std::string TEL90005_GC_STRIPE_COUNT_MAP_UPDATE_COMPLETED  = "gc_st
 static const std::string TEL90006_GC_STRIPE_COUNT_FORCE_FLUSH_REQUESTED  = "gc_stripe_count_force_flush_requested";
 
 static const std::string TEL100000_RESOURCE_CHECKER_AVAILABLE_MEMORY = "available_memory_size";
+static const std::string TEL100010_REACTOR_UTILIZATION = "reactor_utilization";
 
 static const std::string TEL110000_MEDIA_ERROR_COUNT_LOWER = "soft_media_error_lower";
 static const std::string TEL110001_MEDIA_ERROR_COUNT_UPPER = "soft_media_error_upper";
