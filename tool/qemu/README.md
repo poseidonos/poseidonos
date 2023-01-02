@@ -13,10 +13,11 @@ In this lists, the following environments are checked:
 | OS  | MacOS 12.5 | Windows 11 + WSL Ubuntu |
 
 ## Requirements
-- qemu
+- QEMU 7.1.0 (We checked only this version)
 - enabled virtualization (KVM)
 - [Ubuntu 18.04 iso](https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso)
 - [vde_vmnet](https://github.com/lima-vm/vde_vmnet) >= v0.6.0: This is a framework to use a virtual network accessible by a host on Apple Silicon Mac.
+- edk2-ovmf: OVMF(Open Virtual Machine Firmware) is required to enable UEFI support for Intel MacOS.
 - 128GB + 5 * 20GB stoage is required minimum space for virtual OS disk and virtual nvme devices. But you can configurate these sizes.
 - 14GB DRAM is required minimum size for PoseidonOS.
 
