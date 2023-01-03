@@ -226,7 +226,7 @@ WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
     bool isWTEnabled = volumeManager->IsWriteThroughEnabled();
-    bool isWriteBypassEnabled = arrayInfo->GetNeedWriteBypass();
+    bool isWriteBypassEnabled = volumeManager->GetNeedWriteBypass();
 
     if (isWriteBypassEnabled && isRead == false)
     {

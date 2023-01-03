@@ -102,6 +102,7 @@ public:
     VolumeBase* GetVolume(int volId) override;
     std::string GetArrayName(void) override;
     bool IsWriteThroughEnabled(void) override;
+    bool GetNeedWriteBypass(void) override;
 
     void StateChanged(StateContext* prev, StateContext* next) override;
 
