@@ -7,46 +7,52 @@ custom gdb command for utilizing debugging.
 source posgdb.py
 posgdb [command] [subcommand]
 
-1) posgdb singletonInfo
-   show debug info and simple report
+1) posgdb debug info
+   show current debug info
 
-2) posgdb pending io
+2) posgdb debug history
+   show current debug info history
+
+3) posgdb singleton info
+   show singleton info and simple report
+
+4) posgdb pending io
    show pending ios for every thread and devices
    check device io
 
-3) posgdb pending ubio
+5) posgdb pending ubio
    show pending ubio when debug option is on.
 
-4) posgdb pending iocontext
+6) posgdb pending iocontext
    show pending io context when debug option is on.
 
-5) posgdb callback [address]
+7) posgdb callback [address]
    show callback and its callee recursively
 
-6) posgdb pending callback
+8) posgdb pending callback
    show pending callback when debug option is on.
 
-7) posgdb dumpbuffer [address]
+9) posgdb dumpbuffer [address]
    show object buffer queue obtained by dump module
 
-8) posgdb log memory
+10) posgdb log memory
    in memory (dump) log
 
-9) posgdb pending object [enum type name]
+11) posgdb pending object [enum type name]
    show object buffer of "dumpSharedPtr"
    ex ) posgdb pending object IO_CONTEXT
 
-10) posgdb backend io
+12) posgdb backend io
    summary of backend io
 
-11) posgdb volume io
+13) posgdb volume io
    summary of volume io
 
-12) posgdb volume info
+14) posgdb volume info
    Indicates relation between (spdk bdev, subsystem) <-> (Array, volume Id)
 
-13) posgdb rba info [array_id] [volume_id] [rba(4k unit)]
+15) posgdb rba info [array_id] [volume_id] [rba(4k unit)]
    see rba's stripe id and location
 
-14) posgdb make report
+16) posgdb make report
    make initial analysis report based on current core dump information.

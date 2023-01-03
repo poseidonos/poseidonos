@@ -98,6 +98,13 @@ DebugInfoQueue<T>::RegisterDebugInfoQueue(std::string moduleName, uint32_t num, 
 }
 
 template<typename T>
+void
+DebugInfoQueue<T>::DeRegisterDebugInfoQueue(std::string moduleName)
+{
+    DumpManagerSingleton::Instance()->DeRegisterDump(moduleName, this);
+}
+
+template<typename T>
 DebugInfoQueue<T>::~DebugInfoQueue()
 {
 }

@@ -92,7 +92,10 @@ Array::MakeDebugInfo(ArrayDebugInfo& obj)
 {
     obj.arrayInfo = Serialize();
     obj.state = GetState().ToString();
-    obj.rebuildProgress = rebuilder->GetRebuildProgress(name_);
+    if (rebuilder != nullptr)
+    {
+        obj.rebuildProgress = rebuilder->GetRebuildProgress(name_);
+    }
     obj.isWTEnabled = isWTEnabled;
 }
 int
@@ -644,7 +647,11 @@ Array::GetUniqueId(void)
 ArrayStateType
 Array::GetState(void)
 {
-    return state->GetState();
+    if (state != nullptr)
+    {
+        return state->GetState();
+    }
+    return ArrayStateType(ArrayStateEnum::NOT_EXIST);
 }
 
 StateContext*
@@ -656,7 +663,6 @@ Array::GetStateCtx(void)
 uint32_t
 Array::GetRebuildingProgress(void)
 {
-    AddDebugInfo();
     return rebuilder->GetRebuildProgress(name_);
 }
 
@@ -859,6 +865,10 @@ string
 Array::Serialize(void)
 {
     vector<string> arrayinfo;
+    if (ptnMgr == nullptr)
+    {
+        return "";
+    }
     arrayinfo.push_back("name:" + name_);
     arrayinfo.push_back("index:" + to_string(index_));
     arrayinfo.push_back("uuid:" + to_string(uniqueId));

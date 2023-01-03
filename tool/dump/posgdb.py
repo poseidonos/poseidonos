@@ -53,7 +53,7 @@ class PosGdbCmd(gdb.Command):
 
         gdb_lib.switch_to_pos_stack()
 
-        if(args == 'singletonInfo'):
+        if(args == 'singleton info'):
             self.show_singleton_info()
 
         elif(args == 'debug info'):

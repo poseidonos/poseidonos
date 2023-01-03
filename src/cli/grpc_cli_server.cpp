@@ -21,6 +21,7 @@ class CLIDebugMessage
 public:
     std::string sendReceive;
     std::string message;
+    uint32_t errorCode;
 };
 class CLIDebugInfo : public DebugInfoInstance
 {
@@ -43,6 +44,16 @@ public:
     {
         obj.info.sendReceive = info.sendReceive;
         obj.info.message = info.message;
+        obj.info.errorCode = info.errorCode;
+    }
+    virtual DebugInfoOkay
+    IsOkay(CLIDebugInfo& obj) final
+    {
+        if (obj.info.errorCode != 0)
+        {
+            return DebugInfoOkay::FAIL;
+        }
+        return DebugInfoOkay::PASS;
     }
 };
 CLIInfo* debugCliInfoMaker;
@@ -63,7 +74,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -81,7 +92,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -99,7 +110,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -117,7 +128,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -135,7 +146,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -153,7 +164,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -171,7 +182,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -189,7 +200,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -207,7 +218,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -225,7 +236,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -243,7 +254,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -261,7 +272,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -279,7 +290,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -297,7 +308,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -315,7 +326,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -333,7 +344,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -351,7 +362,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -382,7 +393,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -400,7 +411,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -418,7 +429,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -436,7 +447,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -454,7 +465,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -472,7 +483,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -490,7 +501,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -508,7 +519,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -526,7 +537,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -544,7 +555,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -562,7 +573,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -580,7 +591,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -598,7 +609,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -616,7 +627,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -634,7 +645,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -652,7 +663,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -670,7 +681,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -688,7 +699,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -706,7 +717,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -724,7 +735,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -742,7 +753,7 @@ class PosCliServiceImpl final : public PosCli::Service
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
 
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -759,7 +770,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -776,7 +787,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -793,7 +804,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -810,7 +821,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -827,7 +838,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -841,7 +852,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -856,7 +867,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -870,7 +881,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -883,7 +894,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -896,7 +907,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -913,7 +924,7 @@ class PosCliServiceImpl final : public PosCli::Service
             _LogGrpcTimeout(request, reply);
             return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
         }
-        _LogCliResponse(reply, status, request->command());
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
 
         return status;
     }
@@ -929,7 +940,7 @@ class PosCliServiceImpl final : public PosCli::Service
       _LogGrpcTimeout(request, reply);
       return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
-    _LogCliResponse(reply, status);
+    _LogCliResponse(reply, status, reply->result().status().code());
 
     return status;
   }
@@ -945,7 +956,7 @@ class PosCliServiceImpl final : public PosCli::Service
       _LogGrpcTimeout(request, reply);
       return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
     }
-    _LogCliResponse(reply, status);
+    _LogCliResponse(reply, status, reply->result().status().code());
 
     return status;
   }
@@ -970,6 +981,7 @@ _LogCliRequest(const google::protobuf::Message* request, std::string command)
 {
     pos::debugCliInfoMaker->info.sendReceive = "ReceiveCLI";
     pos::debugCliInfoMaker->info.message = request->ShortDebugString();
+    pos::debugCliInfoMaker->info.errorCode = grpc::StatusCode::OK;
     pos::debugCliInfoMaker->AddDebugInfo();
     logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
@@ -977,7 +989,7 @@ _LogCliRequest(const google::protobuf::Message* request, std::string command)
 }
 
 void
-_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, std::string command)
+_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, uint32_t jsonStatusCode, std::string command)
 {
 
     std::string replyJson = "";
@@ -986,7 +998,8 @@ _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status statu
     MessageToJsonString(*reply, &replyJson, printOptions);
     pos::debugCliInfoMaker->info.sendReceive = "SendCLI";
     pos::debugCliInfoMaker->info.message = reply->ShortDebugString();
-    pos::debugCliInfoMaker->AddDebugInfo(status.error_code());
+    pos::debugCliInfoMaker->info.errorCode = jsonStatusCode;
+    pos::debugCliInfoMaker->AddDebugInfo();
 
     logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",

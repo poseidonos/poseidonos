@@ -42,18 +42,24 @@ namespace pos
 {
 
 class DebugInfoQueueInstance;
-using CopyFunc = void (*)(void*, void *);
-#define MAX_DEBUG_INFO_MODULE_NUM (1024)
 
-static const uint32_t INVALID_UINT32 = 0xFFFFFFFF;
-static const uint8_t INVALID_UINT8 = 0xFF;
+enum class DebugInfoOkay
+{
+    PASS,
+    WARNING,
+    FAIL,
+    MAX_STATUS
+};
 
 class DebugInfoInstance
 {
 public:
     DebugInfoInstance(void);
     virtual ~DebugInfoInstance(void);
-    void RegisterDebugInfoInstance(std::string str);
+    virtual void RegisterDebugInfoInstance(std::string str);
+    virtual void DeRegisterDebugInfoInstance(std::string str);
+    DebugInfoOkay instanceOkay;
+    DebugInfoOkay summaryOkay;
 private:
     static std::mutex registeringMutex;
 };
@@ -64,19 +70,24 @@ class DebugInfoMaker
 public:
     DebugInfoMaker(void);
     virtual ~DebugInfoMaker(void);
-    virtual void MakeDebugInfo(T& obj) = 0;
     void SetTimer(uint64_t inputTimerUsec);
     virtual void AddDebugInfo(uint64_t userSpecific = 0);
     virtual void RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging = false, uint64_t inputTimerUsec = 0, bool enabled = true);
+    virtual void DeRegisterDebugInfo(std::string name);
+protected:
+    virtual void MakeDebugInfo(T& obj) = 0;
+    virtual DebugInfoOkay IsOkay(T& obj);
 private:
     static const uint64_t DEFAULT_TIMER_VALUE = 2 * 1000ULL * 1000ULL; // 2 sec
     std::atomic<uint64_t> timerUsec;
     void _DebugInfoThread(void);
     T debugInfoObject;
     DebugInfoQueue<T> debugInfoQueue;
+    DebugInfoQueue<T> debugInfoQueueForError;
     std::atomic<bool> run;
     std::atomic<bool> registered;
     std::thread* debugInfoThread;
+    std::string infoName;
     static const uint64_t TIMER_TRIGGERED = 0xFFFFCCCC;
 };
 

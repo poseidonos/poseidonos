@@ -43,6 +43,8 @@ DebugInfoMaker<T>::DebugInfoMaker(void)
 {
     run = false;
     timerUsec = DEFAULT_TIMER_VALUE;
+    registered = false;
+    infoName = "";
     debugInfoThread = new std::thread(&DebugInfoMaker<T>::_DebugInfoThread, this);
 }
 
@@ -55,23 +57,46 @@ DebugInfoMaker<T>::~DebugInfoMaker(void)
         debugInfoThread->join();
     }
     delete debugInfoThread;
+    DeRegisterDebugInfo(infoName);
 }
 
 template<typename T>
 void
-DebugInfoMaker<T>::RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging, uint64_t inputTimerUsec, bool enabled )
+DebugInfoMaker<T>::RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging, uint64_t inputTimerUsec, bool enabled)
 {
     if (inputTimerUsec != 0)
     {
         timerUsec = inputTimerUsec;
     }
     debugInfoQueue.RegisterDebugInfoQueue("History_" + name, entryCount, enabled);
+    debugInfoQueueForError.RegisterDebugInfoQueue("History_" + name + "_Error", entryCount, enabled);
     debugInfoObject.RegisterDebugInfoInstance(name);
     if (asyncLogging)
     {
         run = true;
     }
     registered = true;
+    infoName = name;
+}
+
+template<typename T>
+void
+DebugInfoMaker<T>::DeRegisterDebugInfo(std::string name)
+{
+    if (registered == true)
+    {
+        debugInfoQueue.DeRegisterDebugInfoQueue("History_" + name);
+        debugInfoQueueForError.DeRegisterDebugInfoQueue("History_" + name + "_Error");
+        debugInfoObject.DeRegisterDebugInfoInstance(name);
+        registered = false;
+    }
+}
+
+template<typename T>
+DebugInfoOkay 
+DebugInfoMaker<T>::IsOkay(T& obj)
+{
+    return DebugInfoOkay::PASS;
 }
 
 template<typename T>
@@ -80,6 +105,15 @@ DebugInfoMaker<T>::AddDebugInfo(uint64_t userSpecific)
 {
     assert(registered == true);
     MakeDebugInfo(debugInfoObject);
+    debugInfoObject.instanceOkay = IsOkay(debugInfoObject);
+    if ((int)(debugInfoObject.summaryOkay) < (int)(debugInfoObject.instanceOkay))
+    {
+        debugInfoObject.summaryOkay = debugInfoObject.instanceOkay;
+    }
+    if (debugInfoObject.instanceOkay != DebugInfoOkay::PASS)
+    {
+        debugInfoQueueForError.AddDebugInfo(debugInfoObject, userSpecific);    
+    }
     debugInfoQueue.AddDebugInfo(debugInfoObject, userSpecific);
 }
 

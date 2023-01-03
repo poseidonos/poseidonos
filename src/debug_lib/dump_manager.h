@@ -53,6 +53,7 @@ public:
     DumpManager(void);
     ~DumpManager(void);
     int RegisterDump(string moduleName, DebugInfoQueueInstance* dumpModule);
+    int DeRegisterDump(string moduleName, DebugInfoQueueInstance* dumpModule);
     int SetEnableModuleByCLI(string moduleStr, bool enable);
 
 private:

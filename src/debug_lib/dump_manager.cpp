@@ -55,6 +55,18 @@ DumpManager::RegisterDump(std::string moduleName, DebugInfoQueueInstance* regist
 }
 
 int
+DumpManager::DeRegisterDump(std::string moduleName, DebugInfoQueueInstance* registeredDumpModule)
+{
+    std::lock_guard<std::mutex> guard(dumpManagerMutex);
+    if (dumpModules.find(moduleName) != dumpModules.end())
+    {
+        usedMemorySize -= registeredDumpModule->GetPoolSize();
+        dumpModules.erase(moduleName);
+    }
+    return 0;
+}
+
+int
 DumpManager::SetEnableModuleByCLI(string moduleName, bool enable)
 {
     std::lock_guard<std::mutex> guard(dumpManagerMutex);

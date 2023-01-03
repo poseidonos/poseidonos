@@ -102,7 +102,14 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     userDataMaxBlks = udSize->blksPerStripe * userDataMaxStripes;
     blocksPerChunk = udSize->blksPerChunk;
     SetEventType(BackendEvent_GC);
-    RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000);
+    if (array != nullptr)
+    {
+        RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000);
+    }
+    else
+    {
+        RegisterDebugInfo("Copier", 10000);
+    }
 }
 
 Copier::~Copier(void)

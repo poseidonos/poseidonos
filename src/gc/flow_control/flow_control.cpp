@@ -72,7 +72,14 @@ FlowControl::FlowControl(IArrayInfo* arrayInfo,
   tokenDistributer(inputTokenDistributer),
   flowControlConfiguration(inputFlowControlConfiguration)
 {
-    RegisterDebugInfo("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
+    if (arrayInfo != nullptr)
+    {
+        RegisterDebugInfo("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
+    }
+    else
+    {
+        RegisterDebugInfo("GC_FlowControl", 10000, true);
+    }
 }
 
 FlowControl::~FlowControl(void)
@@ -108,7 +115,10 @@ FlowControl::MakeDebugInfo(FlowControlDebugInfo& obj)
     obj.targetSegment = targetSegment;
     obj.urgentSegment = urgentSegment;
     obj.forceResetTimeout = forceResetTimeout;
-    obj.arrayId = arrayInfo->GetIndex();
+    if (arrayInfo != nullptr)
+    {
+        obj.arrayId = arrayInfo->GetIndex();
+    }
 }
 
 int

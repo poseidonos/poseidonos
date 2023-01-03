@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(singleton_info_ut singleton_info_test.cpp)
+POS_ADD_UNIT_TEST(singleton_info_updater_ut singleton_info_updater_test.cpp)

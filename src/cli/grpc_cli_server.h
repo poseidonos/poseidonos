@@ -26,6 +26,6 @@ RunGrpcServer();
 void
 _LogCliRequest(const google::protobuf::Message* request, std::string command = "");
 void
-_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, std::string command = "");
+_LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, uint32_t jsonStatusCode, std::string command = "");
 void
 _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf::Message* reply);

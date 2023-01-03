@@ -45,6 +45,8 @@ std::mutex DebugInfoInstance::registeringMutex;
 
 DebugInfoInstance::DebugInfoInstance(void)
 {
+    instanceOkay = DebugInfoOkay::PASS;
+    summaryOkay = DebugInfoOkay::PASS;
 }
 
 DebugInfoInstance::~DebugInfoInstance(void)
@@ -56,5 +58,15 @@ DebugInfoInstance::RegisterDebugInfoInstance(std::string str)
 {
     std::lock_guard<std::mutex> lock(registeringMutex);
     debugInfo[str] = this;
+}
+
+void
+DebugInfoInstance::DeRegisterDebugInfoInstance(std::string str)
+{
+    std::lock_guard<std::mutex> lock(registeringMutex);
+    if (debugInfo.find(str) != debugInfo.end())
+    {
+        debugInfo.erase(str);
+    }
 }
 }

@@ -79,6 +79,7 @@ public:
     std::mutex dumpQueueLock;
     int AddDebugInfo(T& t, uint64_t userSpecific, bool lock_enable = true);
     void RegisterDebugInfoQueue(std::string moduleName, uint32_t num, bool enable);
+    void DeRegisterDebugInfoQueue(std::string moduleName);
     virtual void SetEnable(bool enable);
     virtual bool IsEnable(void);
     virtual uint64_t GetPoolSize(void);

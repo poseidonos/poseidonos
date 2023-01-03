@@ -163,12 +163,12 @@ TEST(Array, Load_testIfDoneSuccessfully)
     EXPECT_CALL(*mockPtnMgr, CreatePartitions).WillOnce(Return(0));                      // partition creation will be successful
     EXPECT_CALL(*mockPtnMgr, GetRaidState).WillRepeatedly(Return(RaidState::NORMAL));   // raid state will be normal
     EXPECT_CALL(*mockArrDevMgr, Export).WillOnce(ReturnRef(emptyArrayDeviceSet)); // devMgr_ will be able to invoked once
-    EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(2);
-    EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(1);
-    EXPECT_CALL(*mockState, GetSysState).Times(1);
-    EXPECT_CALL(*mockArrDevMgr, ExportToName).Times(1);
-    EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(3);
-    EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(3);
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(4);
+    EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(2);
+    EXPECT_CALL(*mockState, GetSysState).Times(2);
+    EXPECT_CALL(*mockArrDevMgr, ExportToName).Times(2);
+    EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(6);
+    EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(6);
     // When: array is loaded
     int actual = array.Load();
 
@@ -855,13 +855,13 @@ TEST(Array, MountDone_testIfResumeRebuildEventIsSent)
     EXPECT_CALL(*mockArrayDevice, GetUblock).WillRepeatedly(Return(mockUblockSharedPtr));
     EXPECT_CALL(*mockArrayDeviceManager, ExportToMeta).Times(1);
     EXPECT_CALL(mockAbrControl, SaveAbr).WillOnce(Return(0));
-    EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(4);
-    EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(1);
-    EXPECT_CALL(*mockState, GetSysState).Times(1);
+    EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(6);
+    EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(2);
+    EXPECT_CALL(*mockState, GetSysState).Times(2);
     EXPECT_CALL(*mockState, IsRebuildable).WillOnce(Return(true));
-    EXPECT_CALL(*mockArrayDeviceManager, ExportToName).Times(1);
-    EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(3);
-    EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(3);
+    EXPECT_CALL(*mockArrayDeviceManager, ExportToName).Times(2);
+    EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(6);
+    EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(6);
 
     Array array("mock", NULL, &mockAbrControl, mockArrayDeviceManager, NULL, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
 
@@ -941,7 +941,7 @@ TEST(Array, GetRebuildingProgress_testIfArrayNameIsPassedInProperly)
     // Given
     string arrayName = "mock-array";
     MockArrayRebuilder mockArrayRebuilder(NULL);
-    int expectedProgress = 121212;
+    int expectedProgress = 0;
     EXPECT_CALL(mockArrayRebuilder, GetRebuildProgress(arrayName)).WillOnce(Return(expectedProgress));
 
     Array array(arrayName, &mockArrayRebuilder, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
