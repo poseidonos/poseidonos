@@ -33,8 +33,10 @@
 #ifndef VOLUME_META_INTF_H_
 #define VOLUME_META_INTF_H_
 
+#include <memory>
 #include <string>
 
+#include "src/metafs/metafs_file_intf.h"
 #include "src/volume/volume_list.h"
 
 namespace pos
@@ -42,8 +44,15 @@ namespace pos
 class VolumeMetaIntf
 {
 public:
-    static int LoadVolumes(VolumeList& volList, std::string arrayName, int arrayID);
-    static int SaveVolumes(VolumeList& volList, std::string arrayName, int arrayID);
+    // test file is used by ut
+    static int LoadVolumes(VolumeList& volList, const std::string& arrayName,
+        const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile = nullptr);
+    // test file is used by ut
+    static int SaveVolumes(VolumeList& volList, const std::string& arrayName,
+        const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile = nullptr);
+
+private:
+    static int _CloseFile(unique_ptr<MetaFsFileIntf> file);
 };
 } // namespace pos
 
