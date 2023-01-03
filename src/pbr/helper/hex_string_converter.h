@@ -32,38 +32,43 @@
 
 #pragma once
 
-#include <time.h>
 #include <string>
-#include <chrono>
+#include <iomanip>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+using namespace std;
+
+inline uint32_t
+hexString_to_uint32(string hexString)
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+    uint32_t ret;
+    stringstream ss;
+    ss << hex << hexString;
+    ss >> ret;
+    return ret;
 }
 
-inline std::string
-TimeToString(time_t time)
+inline string
+uint32_to_hexString(uint32_t value)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    stringstream ss;
+    ss << hex << value;
+    return ss.str();
 }
 
 inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+hexString_to_uint64(string hexString)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    uint64_t ret;
+    stringstream ss;
+    ss << hex << hexString;
+    ss >> ret;
+    return ret;
+}
+
+inline string
+uint64_to_hexString(uint64_t value)
+{
+    stringstream ss;
+    ss << hex << value;
+    return ss.str();
 }

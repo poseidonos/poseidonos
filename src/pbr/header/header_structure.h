@@ -30,40 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <cstdint>
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
-
-inline std::string
-TimeToString(time_t time)
+namespace structure
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+namespace header
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+// WARNING: DO NOT CHANGE FOR COMPATIBILITY
+static const uint8_t START_LBA = 0;
+static const uint8_t LENGTH = 64;
+static const uint8_t SIGNATURE_OFFSET = 0x0;
+static const uint8_t SIGNATURE_LENGTH = 8;
+static const uint8_t REVISION_OFFSET = 0x8;
+static const uint8_t REVISION_LENGTH = 4;
+static const uint8_t CHECKSUM_OFFSET = 0xc;
+static const uint8_t CHECKSUM_LENGTH = 4;
+} // namespace header
+} // namespace structure
+} // namespace pbr

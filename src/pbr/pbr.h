@@ -32,38 +32,26 @@
 
 #pragma once
 
-#include <time.h>
+#include "src/pbr/interface/i_pbr.h"
+#include "src/pbr/dto/ate_data.h"
+#include "src/include/smart_ptr_type.h"
+
+#include <vector>
 #include <string>
-#include <chrono>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+using namespace std;
 
-inline std::string
-TimeToString(time_t time)
+namespace pbr
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+class Pbr : public IPbr
+{
+public:
+    virtual ~Pbr(void) {};
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+protected:
+    virtual int Load(vector<AteData*>& out, vector<string> fileList) override;
+    virtual int Load(vector<AteData*>& out, vector<pos::UblockSharedPtr> devs) override;
+    virtual int Reset(vector<string> fileList) override;
+    virtual int Reset(vector<pos::UblockSharedPtr> devs) override;
+};
+} // namespace pbr

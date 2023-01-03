@@ -61,6 +61,14 @@ SUBDIRS = allocator \
         metafs/msc \
         metafs/mvm \
         metafs/storage \
+        pbr \
+        pbr/checker \
+        pbr/content \
+        pbr/content/revision \
+        pbr/header \
+        pbr/io \
+        pbr/load \
+        pbr/update \
         logger \
         meta_file_intf \
         rocksdb_log_buffer \
@@ -71,7 +79,6 @@ SUBDIRS = allocator \
         helper/json \
         helper/rpc \
         helper/string \
-        helper/time \
         sys_info \
         qos \
 	singleton_info \

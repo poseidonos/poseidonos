@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(content_revision_0_ut content_revision_0_test.cpp)

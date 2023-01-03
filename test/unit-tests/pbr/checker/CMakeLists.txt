@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(header_checker_ut header_checker_test.cpp)
+POS_ADD_UNIT_TEST(crc32_ut crc32_test.cpp)
+POS_ADD_UNIT_TEST(content_checker_ut content_checker_test.cpp)

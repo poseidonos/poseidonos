@@ -32,38 +32,13 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "i_pbr_selector.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
-
-inline std::string
-TimeToString(time_t time)
+class PbrSelector : public IPbrSelector
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+protected:
+    virtual int Select(vector<AteData*>& candidates) override;
+};
+} // namespace pbr

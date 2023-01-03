@@ -32,38 +32,19 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "src/pbr/dto/ate_data.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+class IContentSerializer
+{
+public:
+    virtual ~IContentSerializer() {};
+    virtual int Serialize(char* rawDataOut, AteData* ateData) = 0;
+    virtual int Deserialize(AteData* out, char* rawData) = 0;
+    virtual uint32_t GetRevision(void) = 0;
+    virtual uint32_t GetContentSize(void) = 0;
+    virtual uint64_t GetContentStartLba(void) = 0;
+};
 
-inline std::string
-TimeToString(time_t time)
-{
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+} // namespace pbr

@@ -32,38 +32,29 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "header_element.h"
+#include "i_header_writer.h"
+#include "i_header_serializer.h"
+#include "src/pbr/io/i_pbr_writer.h"
+#include "src/pbr/checker/i_header_checker.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
 
-inline std::string
-TimeToString(time_t time)
-{
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+using namespace std;
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+namespace pbr
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
+class HeaderWriter : public IHeaderWriter
+{
+public:
+    HeaderWriter(void);
+    virtual ~HeaderWriter(void);
+    HeaderWriter(IPbrWriter* writer, IHeaderChecker* checker, IHeaderSerializer* serializer);
+    virtual int Write(HeaderElement* pHeader, pos::UblockSharedPtr dev) override;
+    virtual int Write(HeaderElement* pHeader, string filePath) override;
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+private:
+    IPbrWriter* writer = nullptr;
+    IHeaderChecker* checker = nullptr;
+    IHeaderSerializer* serializer = nullptr;
+};
+} // namespace pbr

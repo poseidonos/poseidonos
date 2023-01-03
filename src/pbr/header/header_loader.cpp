@@ -30,40 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "header_loader.h"
+#include "header_structure.h"
+#include "src/pbr/io/pbr_reader.h"
+#include "src/pbr/checker/header_checker.h"
+#include "header_serializer.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+HeaderLoader::HeaderLoader(void)
+: HeaderLoader(new PbrReader(), new HeaderChecker(), new HeaderSerializer())
+{
 }
 
-inline std::string
-TimeToString(time_t time)
+HeaderLoader::HeaderLoader(IPbrReader* reader, IHeaderChecker* checker, IHeaderSerializer* serializer)
+: reader(reader),
+  checker(checker),
+  serializer(serializer)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+HeaderLoader::~HeaderLoader()
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    delete serializer;
+    delete checker;
+    delete reader;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+int
+HeaderLoader::Load(HeaderElement* pHeaderOut, pos::UblockSharedPtr dev)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    uint64_t startLba = pbr::structure::header::START_LBA;
+    uint32_t length = pbr::structure::header::LENGTH;
+
+    char* rawData = new char[length];
+    int ret = reader->Read(dev, rawData, startLba, length);
+    if (ret == 0)
+    {
+        ret = serializer->Deserialize(rawData, length, pHeaderOut);
+        if (ret == 0)
+        {
+            bool verified = checker->Check(pHeaderOut);
+            if (verified == false)
+            {
+                ret = 1000;
+            }
+        }
+    }
+    delete rawData;
+    return ret;
 }
+
+int
+HeaderLoader::Load(HeaderElement* pHeaderOut, string filePath)
+{
+    int ret = 0;
+    return ret;
+}
+} // namespace pbr

@@ -30,40 +30,48 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pbr_reader.h"
+#include "src/device/base/ublock_device.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include <fstream>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+using namespace std;
+
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+int
+PbrReader::Read(pos::UblockSharedPtr dev, char* dataOut, uint64_t startLba, uint32_t length)
+{
+    uint32_t sectorSize = 512;
+    uint32_t sectorCnt = length / sectorSize;
+    if (length % sectorSize > 0)
+    {
+        sectorCnt++;
+    }
+    pos::UbioSmartPtr bio(new pos::Ubio(dataOut, sectorCnt, 0));
+    bio->dir = pos::UbioDir::Read;
+    bio->SetLba(startLba);
+    bio->SetUblock(dev);
+    pos::IODispatcherSingleton::Instance()->Submit(bio, true);
+    return 0;
 }
 
-inline std::string
-TimeToString(time_t time)
+int
+PbrReader::Read(string filePath, char* dataOut, uint64_t startOffset, uint32_t length)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
+    int ret = 0;
+    ifstream f(filePath, ios::in | ios::ate);
+    if (!f)
+    {
+        return -1;
+    }
+    else
+    {
+        f.seekg(startOffset, ios::beg);
+        f.read(dataOut, length);
+    }
+    f.close();
+    return ret;
 }
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+} // namespace pbr

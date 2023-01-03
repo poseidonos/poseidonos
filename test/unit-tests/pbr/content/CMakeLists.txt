@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(content_loader_ut content_loader_test.cpp)
+POS_ADD_UNIT_TEST(content_writer_ut content_writer_test.cpp)
+POS_ADD_UNIT_TEST(content_serializer_factory_ut content_serializer_factory_test.cpp)

@@ -30,40 +30,63 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pbr_updater.h"
+#include "src/pbr/header/header_writer.h"
+#include "src/pbr/content/content_writer.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+PbrUpdater::PbrUpdater(uint32_t revision, vector<pos::UblockSharedPtr> devs)
+: PbrUpdater(new HeaderWriter(), new ContentWriter(revision), revision, devs)
+{
 }
 
-inline std::string
-TimeToString(time_t time)
+PbrUpdater::PbrUpdater(IHeaderWriter* headerWriter, IContentWriter* contentWriter,
+    uint32_t revision, vector<pos::UblockSharedPtr> devs)
+: headerWriter(headerWriter),
+  contentWriter(contentWriter),
+  revision(revision),
+  devs(devs)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+PbrUpdater::~PbrUpdater(void)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    delete contentWriter;
+    delete headerWriter;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+int
+PbrUpdater::Update(AteData* ateData)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    HeaderElement header{"PBR", revision, 0};
+    for (auto dev : devs)
+    {
+        int ret = headerWriter->Write(&header, dev);
+        if (ret == 0)
+        {
+            ret = contentWriter->Write(ateData, dev);
+        }
+        if (ret != 0)
+        {
+            return ret;
+        }
+    }
+    return 0;
 }
+
+int
+PbrUpdater::Clear(void)
+{
+    for (auto dev : devs)
+    {
+        HeaderElement header {"", 0, 0};
+        int ret = headerWriter->Write(&header, dev);
+        if (ret != 0)
+        {
+            return ret;
+        }
+    }
+    return 0;
+}
+} // namespace pbr

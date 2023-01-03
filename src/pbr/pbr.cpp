@@ -30,40 +30,44 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pbr.h"
+#include "revision.h"
+#include "src/pbr/load/pbr_loader.h"
+#include "src/pbr/load/pbr_file_loader.h"
+#include "src/pbr/update/pbr_updater.h"
+#include "src/pbr/update/pbr_file_updater.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+int
+Pbr::Load(vector<AteData*>& out, vector<string> fileList)
+{
+    IPbrLoader* loader = new PbrFileLoader(fileList);
+    int ret = loader->Load(out);
+    return ret;
 }
 
-inline std::string
-TimeToString(time_t time)
+int
+Pbr::Load(vector<AteData*>& out, vector<pos::UblockSharedPtr> devs)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
+    IPbrLoader* loader = new PbrLoader(devs);
+    int ret = loader->Load(out);
+    return ret;
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+int
+Pbr::Reset(vector<string> fileList)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    IPbrUpdater* updater = new PbrFileUpdater(REVISION, fileList);
+    int ret = updater->Clear();
+    return ret;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+int
+Pbr::Reset(vector<pos::UblockSharedPtr> devs)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    IPbrUpdater* updater = new PbrUpdater(REVISION, devs);
+    int ret = updater->Clear();
+    return ret;
 }
+} // namespace pbr

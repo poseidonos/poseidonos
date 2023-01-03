@@ -30,40 +30,68 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "header_writer.h"
+#include "header_structure.h"
+#include "header_serializer.h"
+#include "src/pbr/checker/header_checker.h"
+#include "src/pbr/io/pbr_writer.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+HeaderWriter::HeaderWriter(void)
+: HeaderWriter(new PbrWriter(), new HeaderChecker(), new HeaderSerializer())
+{
 }
 
-inline std::string
-TimeToString(time_t time)
+HeaderWriter::HeaderWriter(IPbrWriter* writer, IHeaderChecker* checker, IHeaderSerializer* serializer)
+: writer(writer),
+  checker(checker),
+  serializer(serializer)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+HeaderWriter::~HeaderWriter(void)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    delete serializer;
+    delete checker;
+    delete writer;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+int
+HeaderWriter::Write(HeaderElement* pHeader, pos::UblockSharedPtr dev)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    int ret = checker->UpdateChecksum(pHeader);
+    if (ret == 0)
+    {
+        uint64_t startLba = pbr::structure::header::START_LBA;
+        uint32_t length = pbr::structure::header::LENGTH;
+        char* rawData = new char[length];
+        int ret = serializer->Serialize(pHeader, rawData, length);
+        if (ret == 0)
+        {
+            writer->Write(dev, rawData, startLba, length);
+        }
+        delete rawData;
+    }
+    return ret;
 }
+
+int
+HeaderWriter::Write(HeaderElement* pHeader, string filePath)
+{
+    int ret = checker->UpdateChecksum(pHeader);
+    if (ret == 0)
+    {
+        uint64_t startLba = pbr::structure::header::START_LBA;
+        uint32_t length = pbr::structure::header::LENGTH;
+        char* rawData = new char[length] {'\0',};
+        int ret = serializer->Serialize(pHeader, rawData, length);
+        if (ret == 0)
+        {
+            writer->Write(filePath, rawData, startLba, length);
+        }
+        delete rawData;
+    }
+    return ret;
+}
+} // namespace pbr

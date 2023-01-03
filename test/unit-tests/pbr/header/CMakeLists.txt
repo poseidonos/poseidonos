@@ -1,0 +1,3 @@
+POS_ADD_UNIT_TEST(header_writer_ut header_writer_test.cpp)
+POS_ADD_UNIT_TEST(header_loader_ut header_loader_test.cpp)
+POS_ADD_UNIT_TEST(header_serializer_ut header_serializer_test.cpp)

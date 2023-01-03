@@ -30,40 +30,48 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pbr_writer.h"
+#include "src/device/base/ublock_device.h"
+#include "src/io_scheduler/io_dispatcher.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include <fstream>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+using namespace std;
+
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+
+int
+PbrWriter::Write(pos::UblockSharedPtr dev, char* data, uint64_t startLba, uint32_t length)
+{
+    uint32_t sectorSize = 512;
+    uint32_t sectorCnt = length / sectorSize;
+    if (length % sectorSize > 0)
+    {
+        sectorCnt++;
+    }
+    pos::UbioSmartPtr bio(new pos::Ubio(data, sectorCnt, 0));
+    bio->dir = pos::UbioDir::Write;
+    bio->SetLba(startLba);
+    bio->SetUblock(dev);
+    pos::IODispatcherSingleton::Instance()->Submit(bio, true);
+    return 0;
 }
 
-inline std::string
-TimeToString(time_t time)
+int PbrWriter::Write(string filePath, char* data, uint64_t startOffset, uint32_t length)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+    fstream file;
+    file.open(filePath, ios_base::out | ios_base::in);
+    if(file.is_open() == false)
+    {
+        file.open(filePath, ios_base::out);
+        file.close();
+    }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    ofstream f(filePath, ios::in | ios::ate);
+    f.seekp(startOffset, ios::beg);
+    f.write(data, length);
+    f.close();
+    return 0;
 }
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+} // namespace pbr

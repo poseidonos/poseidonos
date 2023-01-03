@@ -1,3 +1,4 @@
+
 /*
  *   BSD LICENSE
  *   Copyright (c) 2021 Samsung Electronics Corporation
@@ -32,38 +33,22 @@
 
 #pragma once
 
-#include <time.h>
+#include "src/pbr/dto/ate_data.h"
+#include "src/pbr/header/header_element.h"
+#include "src/include/smart_ptr_type.h"
+
 #include <string>
-#include <chrono>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+using namespace std;
 
-inline std::string
-TimeToString(time_t time)
+namespace pbr
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+class UblockSharedPtr;
+class IContentLoader
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+public:
+    virtual ~IContentLoader() {};
+    virtual int Load(AteData* out, pos::UblockSharedPtr dev) = 0;
+    virtual int Load(AteData* out, string filePath) = 0;
+};
+} // namespace pbr

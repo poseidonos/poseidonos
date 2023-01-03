@@ -32,38 +32,32 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "src/pbr/interface/i_pbr_updater.h"
+#include "src/pbr/header/i_header_writer.h"
+#include "src/pbr/content/i_content_writer.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+#include <vector>
 
-inline std::string
-TimeToString(time_t time)
-{
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+using namespace std;
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+namespace pbr
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
+class PbrFileUpdater : public IPbrUpdater
+{
+public:
+    PbrFileUpdater(uint32_t revision, vector<string> fileList);
+    PbrFileUpdater(IHeaderWriter* headerWriter, IContentWriter* contentWriter,
+        uint32_t revision, vector<string> fileList);
+    virtual ~PbrFileUpdater();
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+protected:
+    virtual int Update(AteData* ateData) override;
+    virtual int Clear(void) override;
+
+private:
+    IHeaderWriter* headerWriter = nullptr;
+    IContentWriter* contentWriter = nullptr;
+    uint32_t revision;
+    vector<string> fileList;
+};
+} // namespace pbr

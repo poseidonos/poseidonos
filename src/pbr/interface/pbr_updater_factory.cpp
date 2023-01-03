@@ -30,40 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pbr_updater_factory.h"
+#include "src/pbr/update/pbr_updater.h"
+#include "src/pbr/update/pbr_file_updater.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+IPbrUpdater*
+PbrUpdaterFactory::GetPbrUpdater(vector<pos::UblockSharedPtr> devs)
+{
+    return new PbrUpdater(REVISION, devs);
 }
 
-inline std::string
-TimeToString(time_t time)
+IPbrUpdater*
+PbrUpdaterFactory::GetPbrUpdater(vector<string> fileList)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
+    return new PbrFileUpdater(REVISION, fileList);
 }
-
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+} // namespace pbr

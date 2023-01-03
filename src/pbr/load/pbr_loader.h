@@ -32,38 +32,30 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "i_pbr_loader.h"
+#include "i_pbr_selector.h"
+#include "src/pbr/header/i_header_loader.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+#include <vector>
 
-inline std::string
-TimeToString(time_t time)
-{
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+using namespace std;
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+namespace pbr
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
+class PbrLoader : public IPbrLoader
+{
+public:
+    PbrLoader(vector<pos::UblockSharedPtr> devs);
+    PbrLoader(IHeaderLoader* headerLoader, IPbrSelector* pbrSelector,
+        vector<pos::UblockSharedPtr> devs);
+    virtual ~PbrLoader(void);
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+protected:
+    virtual int Load(vector<AteData*>& out) override;
+
+private:
+    IHeaderLoader* headerLoader = nullptr;
+    IPbrSelector* pbrSelector = nullptr;
+    vector<pos::UblockSharedPtr> devs;
+};
+} // namespace pbr

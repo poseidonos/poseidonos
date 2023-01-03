@@ -30,40 +30,66 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pbr_loader.h"
+#include "src/pbr/header/header_loader.h"
+#include "src/pbr/load/pbr_selector.h"
+#include "src/pbr/content/content_loader.h"
+#include "src/pbr/content/content_serializer_factory.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+PbrLoader::PbrLoader(vector<pos::UblockSharedPtr> devs)
+: PbrLoader(new HeaderLoader(), new PbrSelector(), devs)
+{
 }
 
-inline std::string
-TimeToString(time_t time)
+PbrLoader::PbrLoader(IHeaderLoader* headerLoader, IPbrSelector* pbrSelector,
+    vector<pos::UblockSharedPtr> devs)
+: headerLoader(headerLoader),
+  pbrSelector(pbrSelector),
+  devs(devs)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+PbrLoader::~PbrLoader(void)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    for (auto dev : devs)
+    {
+        dev = nullptr;
+    }
+    devs.clear();
+    delete pbrSelector;
+    delete headerLoader;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+int
+PbrLoader::Load(vector<AteData*>& out)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    int ret = 0;
+    for (auto dev : devs)
+    {
+        HeaderElement header;
+        ret = headerLoader->Load(&header, dev);
+        if (ret == 0)
+        {
+            AteData* ateData = new AteData();
+            ContentSerializerFactory factory;
+            ContentLoader contentLoader(factory.GetSerializer(header.revision));
+            ret = contentLoader.Load(ateData, dev);
+            if (ret == 0)
+            {
+                out.push_back(ateData);
+            }
+            else
+            {
+                delete ateData;
+            }
+        }
+    }
+    if (ret == 0)
+    {
+        ret = pbrSelector->Select(out);
+    }
+    return ret;
 }
+} // namespace pbr

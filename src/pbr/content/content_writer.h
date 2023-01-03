@@ -32,38 +32,27 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "i_content_writer.h"
+#include "i_content_serializer.h"
+#include "src/pbr/io/i_pbr_writer.h"
+#include "src/pbr/checker/i_content_checker.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+using namespace std;
 
-inline std::string
-TimeToString(time_t time)
+namespace pbr
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+class ContentWriter : public IContentWriter
+{
+public:
+    ContentWriter(uint32_t revision);
+    ContentWriter(IPbrWriter* writer, IContentChecker* checker, uint32_t revision);
+    virtual ~ContentWriter(void);
+    virtual int Write(AteData* content, pos::UblockSharedPtr dev) override;
+    virtual int Write(AteData* content, string filePath) override;
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+private:
+    IPbrWriter* writer = nullptr;
+    IContentChecker* checker = nullptr;
+    IContentSerializer* serializer = nullptr;
+};
+} // namespace pbr

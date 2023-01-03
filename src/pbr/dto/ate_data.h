@@ -32,38 +32,48 @@
 
 #pragma once
 
-#include <time.h>
 #include <string>
-#include <chrono>
+#include <vector>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+using namespace std;
 
-inline std::string
-TimeToString(time_t time)
+namespace pbr
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+const string ADE_SIGNATURE = "ADE";
+const string PTE_SIGNATURE = "PTE";
+const string ATE_SIGNATURE = "ATE";
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+class AdeData
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
+public:
+    string signature = ADE_SIGNATURE;
+    uint32_t devIndex;
+    string devTypeGuid;
+    string devStateGuid;
+    string devSn;
+};
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+class PteData
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+public:
+    string signature = PTE_SIGNATURE;
+    string partTypeGuid;
+    string raidTypeGuid;
+    uint64_t startLba;
+    uint64_t lastLba;
+};
+
+class AteData
+{
+public:
+    string signature = ATE_SIGNATURE;
+    uint32_t checksum;
+    string nodeUuid;
+    string arrayUuid;
+    string arrayName;
+    uint64_t createdDateTime;
+    uint64_t lastUpdatedDateTime;
+    vector<AdeData*> adeList;
+    vector<PteData*> pteList;
+};
+} // namespace pos

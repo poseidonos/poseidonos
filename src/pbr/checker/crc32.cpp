@@ -30,28 +30,18 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "time_helper.h"
+#include "crc32.h"
 
-
-
-namespace Time
+namespace pbr
 {
-string
-GetCurrentTimeStr(string format, int bufSize)
+Crc32::~Crc32()
 {
-    time_t currentTime = time(0);
-    return ToString(currentTime, format, bufSize);
+
 }
 
-string
-ToString(time_t time, string format, int bufSize)
+uint32_t
+Crc32::Make(char* data, uint32_t length)
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+    return 0;
 }
-}
+} // namespace pbr

@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(pbr_reader_ut pbr_reader_test.cpp)
+POS_ADD_UNIT_TEST(pbr_writer_ut pbr_writer_test.cpp)

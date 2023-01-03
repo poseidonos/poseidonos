@@ -30,40 +30,46 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "content_checker.h"
+#include "crc32.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+ContentChecker::ContentChecker(void)
+: ContentChecker(new Crc32())
+{
 }
 
-inline std::string
-TimeToString(time_t time)
+ContentChecker::ContentChecker(IChecksum* chksum)
+: chksum(chksum)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+ContentChecker::~ContentChecker()
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    delete chksum;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+bool
+ContentChecker::Check(AteData* ateData)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    uint32_t checksum = _MakeChecksum(ateData);
+    return checksum == ateData->checksum;
 }
+
+int
+ContentChecker::UpdateChecksum(AteData* ateData)
+{
+    uint32_t checksum = _MakeChecksum(ateData);
+    ateData->checksum = checksum;
+    return 0;
+}
+
+uint32_t
+ContentChecker::_MakeChecksum(AteData* ateData)
+{
+    //chksum->Make(data, length);
+    return 0;
+}
+
+} // namespace pbr

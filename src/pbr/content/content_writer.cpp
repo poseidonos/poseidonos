@@ -30,40 +30,70 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "content_writer.h"
+#include "i_content_serializer.h"
+#include "content_serializer_factory.h"
+#include "src/pbr/checker/content_checker.h"
+#include "src/pbr/io/pbr_writer.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
-
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+namespace pbr
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+ContentWriter::ContentWriter(uint32_t revision)
+: ContentWriter(new PbrWriter(), new ContentChecker(), revision)
+{
 }
 
-inline std::string
-TimeToString(time_t time)
+ContentWriter::ContentWriter(IPbrWriter* writer, IContentChecker* checker, uint32_t revision)
+: writer(writer),
+  checker(checker)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
+    ContentSerializerFactory factory;
+    serializer = factory.GetSerializer(revision);
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+ContentWriter::~ContentWriter(void)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    delete serializer;
+    delete checker;
+    delete writer;
 }
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
+int
+ContentWriter::Write(AteData* content, const pos::UblockSharedPtr dev)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    int ret = checker->UpdateChecksum(content);
+    if (ret == 0)
+    {
+        uint32_t length = serializer->GetContentSize();
+        char* rawData = new char[length];
+        int ret = serializer->Serialize(rawData, content);
+        if (ret == 0)
+        {
+            uint64_t startLba = serializer->GetContentStartLba();
+            writer->Write(dev, rawData, startLba, length);
+        }
+        delete rawData;
+    }
+    return ret;
 }
+
+int
+ContentWriter::Write(AteData* content, string filePath)
+{
+    int ret = checker->UpdateChecksum(content);
+    if (ret == 0)
+    {
+        uint32_t length = serializer->GetContentSize();
+        char* rawData = new char[length] {'\0', };
+        int ret = serializer->Serialize(rawData, content);
+        if (ret == 0)
+        {
+            uint64_t startOffset = serializer->GetContentStartLba();
+            writer->Write(filePath, rawData, startOffset, length);
+        }
+        delete rawData;
+    }
+    return ret;
+}
+
+} // namespace pbr

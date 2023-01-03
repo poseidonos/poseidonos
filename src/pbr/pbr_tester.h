@@ -32,38 +32,33 @@
 
 #pragma once
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include "pbr.h"
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+#include <vector>
 
-inline std::string
-TimeToString(time_t time)
-{
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+using namespace std;
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+namespace pbr
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
+class PbrTester
+{
+public:
+    PbrTester(void);
+    int Create(void);
+    int Update(void);
 
-inline uint64_t
-_GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+private:
+    void _Create(uint32_t adeCnt, uint32_t pteCnt);
+    vector<AteData*> _Load(void);
+    bool _Verify(string expectedArrayName, string expectedArrayUuid);
+
+    void _AddAde(AteData* ateData, uint32_t adeCnt);
+    void _AddPte(AteData* ateData, uint32_t pteCnt);
+    vector<string> fileList;
+    string nodeuuid = "node-uuid";
+    string arrayuuid = "array-uuid1";
+    string arrayname = "POSArray1";
+    string newArrayuuid = "array-uuid2";
+    string newArrayname = "POSArray2";
+};
+} // namespace pbr
