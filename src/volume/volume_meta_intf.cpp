@@ -73,17 +73,16 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
-    char* rBuf = (char*)malloc(fileSize);
-    memset(rBuf, 0, fileSize);
+    auto rBuf = _GetBuffer(fileSize);
+    memset(rBuf.get(), 0, fileSize);
 
-    rc = file->IssueIO(MetaFsIoOpcode::Read, 0, file->GetFileSize(), rBuf);
+    rc = file->IssueIO(MetaFsIoOpcode::Read, 0, file->GetFileSize(), rBuf.get());
     if (EID(SUCCESS) != rc)
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_READ_FAILED),
             "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
         _CloseFile(move(file));
-        free(rBuf);
         return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
     }
 
@@ -93,13 +92,13 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         return rc;
     }
 
-    string contents = rBuf;
+    string contents = rBuf.get();
     if (contents != "")
     {
         try
         {
             rapidjson::Document doc;
-            doc.Parse<0>(rBuf);
+            doc.Parse<0>(rBuf.get());
             if (doc.HasMember("volumes"))
             {
                 for (rapidjson::SizeType i = 0; i < doc["volumes"].Size(); i++)
@@ -132,7 +131,6 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         }
     }
 
-    free(rBuf);
     return EID(SUCCESS);
 }
 
@@ -211,12 +209,11 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
         return EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW);
     }
 
-    char* wBuf = (char*)malloc(fileSize);
-    memset(wBuf, 0, fileSize);
-    strncpy(wBuf, contents.c_str(), contentsSize);
+    auto wBuf = _GetBuffer(fileSize);
+    memset(wBuf.get(), 0, fileSize);
+    strncpy(wBuf.get(), contents.c_str(), contentsSize);
 
-    rc = file->IssueIO(MetaFsIoOpcode::Write, 0, file->GetFileSize(), wBuf);
-    free(wBuf);
+    rc = file->IssueIO(MetaFsIoOpcode::Write, 0, file->GetFileSize(), wBuf.get());
 
     if (EID(SUCCESS) != rc)
     {
