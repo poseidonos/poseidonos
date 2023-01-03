@@ -118,4 +118,15 @@ ArrayInfoMock::IsWriteThroughEnabled(void)
 {
     return false;
 }
+
+void
+ArrayInfoMock::SetNeedWriteBypass(bool value)
+{
+}
+
+bool
+ArrayInfoMock::GetNeedWriteBypass(void)
+{
+    return false;
+}
 } // namespace pos

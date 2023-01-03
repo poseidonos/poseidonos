@@ -722,4 +722,10 @@ VolumeManager::IsWriteThroughEnabled(void)
     return wtEnabled;
 }
 
+bool
+VolumeManager::GetNeedWriteBypass(void)
+{
+    return arrayInfo->GetNeedWriteBypass();
+}
+
 } // namespace pos

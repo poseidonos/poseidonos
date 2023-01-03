@@ -27,6 +27,7 @@ public:
     MOCK_METHOD(VolumeBase*, GetVolume, (int volId), (override));
     MOCK_METHOD(std::string, GetArrayName, (), (override));
     MOCK_METHOD(bool, IsWriteThroughEnabled, (), (override));
+    MOCK_METHOD(bool, GetNeedWriteBypass, (), (override));
     MOCK_METHOD(int, CancelVolumeReplay, (int volId), (override));
 };
 

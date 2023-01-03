@@ -62,6 +62,7 @@ public:
 
     virtual std::string GetArrayName(void) = 0;
     virtual bool IsWriteThroughEnabled(void) = 0;
+    virtual bool GetNeedWriteBypass(void) = 0;
 
     virtual int CheckVolumeValidity(std::string name) = 0;
     virtual int CheckVolumeValidity(int volId) = 0;

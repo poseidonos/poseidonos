@@ -31,6 +31,8 @@ public:
     virtual string GetCreateDatetime(void);
     virtual string GetUpdateDatetime(void);
     virtual bool IsWriteThroughEnabled(void);
+    virtual void SetNeedWriteBypass(bool value);
+    virtual bool GetNeedWriteBypass(void);
 #ifdef _ADMIN_ENABLED
     virtual IArrayDevMgr*
     GetArrayManager(void)

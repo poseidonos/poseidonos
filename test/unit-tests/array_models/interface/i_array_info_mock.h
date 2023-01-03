@@ -26,6 +26,8 @@ public:
     MOCK_METHOD(uint32_t, GetRebuildingProgress, (), (override));
     MOCK_METHOD(IArrayDevMgr*, GetArrayManager, (), (override));
     MOCK_METHOD(bool, IsWriteThroughEnabled, (), (override));
+    MOCK_METHOD(void, SetNeedWriteBypass, (bool value), (override));
+    MOCK_METHOD(bool, GetNeedWriteBypass, (), (override));
 };
 
 } // namespace pos
