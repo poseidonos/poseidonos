@@ -36,14 +36,14 @@
 
 namespace pos
 {
-
 class SetWriteBypassWbtCommand : public WbtCommand
 {
 public:
     SetWriteBypassWbtCommand(void);
     virtual ~SetWriteBypassWbtCommand(void);
 
-    int Execute(Args &argv, JsonElement &elem) override;
+    int Execute(Args& argv, JsonElement& elem) override;
+
 private:
 };
 

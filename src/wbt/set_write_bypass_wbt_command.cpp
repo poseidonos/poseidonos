@@ -31,14 +31,15 @@
  */
 
 #include "src/wbt/set_write_bypass_wbt_command.h"
-#include "src/array_mgmt/array_manager.h"
 
 #include <string>
+
+#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
 SetWriteBypassWbtCommand::SetWriteBypassWbtCommand(void)
-:   WbtCommand(SET_WRITE_BYPASS, "set_write_bypass")
+: WbtCommand(SET_WRITE_BYPASS, "set_write_bypass")
 {
 }
 // LCOV_EXCL_START
@@ -47,12 +48,22 @@ SetWriteBypassWbtCommand::~SetWriteBypassWbtCommand(void)
 }
 // LCOV_EXCL_STOP
 int
-SetWriteBypassWbtCommand::Execute(Args &argv, JsonElement &elem)
+SetWriteBypassWbtCommand::Execute(Args& argv, JsonElement& elem)
 {
     std::string arrayName = argv["array"].get<std::string>();
     std::string value = argv["value"].get<std::string>();
     uint32_t numValue = std::stoul(value);
-    ArrayMgr()->GetInfo(arrayName)->arrayInfo->SetNeedWriteBypass(numValue);
+    ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
+    if (info == nullptr)
+    {
+        int event = EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
+        POS_TRACE_WARN(event, "ArrayName is wrong. arrayName:{}", arrayName);
+    }
+    else
+    {
+        IArrayInfo* array = info->arrayInfo;
+        array->SetNeedWriteBypass(numValue);
+    }
     return 0;
 }
 } // namespace pos
