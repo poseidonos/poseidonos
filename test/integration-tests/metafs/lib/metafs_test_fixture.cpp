@@ -35,6 +35,7 @@
 #include <string>
 
 #include "src/metafs/include/metafs_service.h"
+#include "src/metafs/mai/meta_file_context_handler.h"
 #include "src/metafs/mim/metafs_io_scheduler_factory.h"
 
 using ::testing::_;
@@ -73,11 +74,22 @@ MetaFsTestFixture::MetaFsTestFixture(void)
     {
         ArrayComponents* comp = new ArrayComponents;
 
+        std::shared_ptr<MetaStorageInfo> info = std::make_shared<MetaStorageInfo>();
+        MetaStorageInfoList mediaInfoList;
+        mediaInfoList.push_back(info);
+
         _SetArrayInfo(comp, arrayId);
         comp->tpForMetafs = new NiceMock<MockTelemetryPublisher>;
         comp->storage = new TestMetaStorageSubsystem(arrayId);
         comp->mgmt = new MetaFsManagementApi(arrayId, comp->storage);
-        comp->ctrl = new MetaFsFileControlApi(arrayId, comp->storage, comp->mgmt);
+        comp->mgmt->InitializeSystem(arrayId, &mediaInfoList);
+
+        auto volMgr = new MetaVolumeManager(arrayId, comp->storage, comp->tpForMetafs);
+        auto bitmap = new BitMap(MetaFsConfig::MAX_VOLUME_CNT);
+        auto fileCtxHandler = std::make_unique<MetaFileContextHandler>(arrayId, comp->storage, volMgr);
+        comp->ctrl = new MetaFsFileControlApi(arrayId, false, comp->storage, comp->mgmt, volMgr,
+            bitmap, std::move(fileCtxHandler), comp->tpForMetafs);
+        comp->ctrl->Initialize(comp->mgmt->GetEpochSignature());
         comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs,
             concurrentMetaFsTimeInterval, false);
         comp->wbt = new MetaFsWBTApi(arrayId, comp->ctrl);

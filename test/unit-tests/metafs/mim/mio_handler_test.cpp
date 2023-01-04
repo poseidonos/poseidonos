@@ -122,7 +122,7 @@ public:
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayInfo->GetIndex());
 
         mgmt = new MockMetaFsManagementApi(arrayInfo->GetIndex(), mss);
-        ctrl = new MockMetaFsFileControlApi(arrayInfo->GetIndex(), mss, mgmt);
+        ctrl = new MockMetaFsFileControlApi();
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
         io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp, concurrentMetaFsTimeInterval, false);
 

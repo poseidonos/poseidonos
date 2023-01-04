@@ -42,7 +42,7 @@ public:
     MetaFsManagerBase(void);
     virtual ~MetaFsManagerBase(void);
 
-    POS_EVENT_ID HandleNewRequest(MetaFsRequestBase& reqMsg);
+    virtual POS_EVENT_ID HandleNewRequest(MetaFsRequestBase& reqMsg);
 
     virtual POS_EVENT_ID CheckReqSanity(MetaFsRequestBase& reqMsg) = 0;
     virtual POS_EVENT_ID ProcessNewReq(MetaFsRequestBase& reqMsg) = 0;
