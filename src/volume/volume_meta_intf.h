@@ -41,14 +41,6 @@
 
 namespace pos
 {
-struct BufferDeleter
-{
-    void operator()(char* const ptr) const
-    {
-        free(ptr);
-    }
-};
-
 class VolumeMetaIntf
 {
 public:
@@ -61,10 +53,9 @@ public:
 
 private:
     static int _CloseFile(unique_ptr<MetaFsFileIntf> file);
-    static std::unique_ptr<char, BufferDeleter> _GetBuffer(uint32_t size)
+    static std::unique_ptr<char[]> _AllocateBuffer(uint32_t size)
     {
-        std::unique_ptr<char, BufferDeleter> buf((char*)malloc(size));
-        return buf;
+        return std::unique_ptr<char[]>(new char[size]);
     }
 };
 } // namespace pos
