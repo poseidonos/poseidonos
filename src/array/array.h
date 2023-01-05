@@ -172,8 +172,8 @@ private:
     string targetAddress = "";
 
     bool needWriteBypass = false;
-    DebugArray debugArray;
-    DebugInfoQueue<DebugArray> debugArrayQueue;
+    ArrayDebugInfo debugArray;
+    DebugInfoQueue<ArrayDebugInfo> debugArrayQueue;
 };
 } // namespace pos
 #endif // ARRAY_H_
