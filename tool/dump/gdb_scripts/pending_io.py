@@ -50,7 +50,7 @@ def show_dev_context(ublock_addr):
 def show_pending_io():
 
     output = gdb.execute(
-        'p pos::debugInfo->deviceManager->devices', to_string=True)
+        'p pos::singletonInfo->deviceManager->devices', to_string=True)
     output_list = output.split('\n')
     index = 0
     for output_elem in output_list:

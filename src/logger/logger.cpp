@@ -110,7 +110,7 @@ Logger::Logger(void)
     {
         std::string str = "Logger";
         str += to_string(i);
-        dumpModule[i] = new DumpModule<DumpBuffer>(str, MAX_LOGGER_DUMP_SIZE / AVG_LINE, true);
+        dumpModule[i] = new DebugInfoQueue<DumpBuffer>(str, MAX_LOGGER_DUMP_SIZE / AVG_LINE, true);
     }
 
     logger = std::make_shared<spdlog::logger>("pos_logger", begin(sinks), end(sinks));

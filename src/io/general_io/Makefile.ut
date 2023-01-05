@@ -5,8 +5,8 @@ UT_OBJDIR_REL=obj_output
 UT_OBJDIR=$(abspath $(UT_OBJDIR_REL))
 
 UT_TARGET_FILE =	$(IBOF_DIR)src/array/device/array_device.cpp \
-				$(IBOF_DIR)src/dump/dump_manager.cpp \
-				$(IBOF_DIR)src/dump/dump_shared_ptr.cpp \
+				$(IBOF_DIR)src/debug_lib/dump_manager.cpp \
+				$(IBOF_DIR)src/debug_lib/dump_shared_ptr.cpp \
 				$(IBOF_DIR)src/io/general_io/buffer_entry.cpp \
 				$(IBOF_DIR)src/io/general_io/device_io.cpp \
 				$(IBOF_DIR)src/io/general_io/io_submit_handler.cpp \

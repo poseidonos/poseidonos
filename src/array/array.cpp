@@ -75,6 +75,7 @@ Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr,
   arrayService(arrayService)
 {
     pthread_rwlock_init(&stateLock, nullptr);
+    RegisterDebugInfo("Array_" + std::to_string(GetIndex()), 100);
 }
 
 Array::~Array(void)
@@ -86,6 +87,17 @@ Array::~Array(void)
     delete devMgr_;
 }
 
+void
+Array::MakeDebugInfo(ArrayDebugInfo& obj)
+{
+    obj.arrayInfo = Serialize();
+    obj.state = GetState().ToString();
+    if (rebuilder != nullptr)
+    {
+        obj.rebuildProgress = rebuilder->GetRebuildProgress(name_);
+    }
+    obj.isWTEnabled = isWTEnabled;
+}
 int
 Array::Load(void)
 {
@@ -108,6 +120,7 @@ Array::Load(void)
     {
         POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_LOADED), "{}", Serialize());
     }
+    AddDebugInfo();
     return ret;
 }
 
@@ -225,6 +238,7 @@ Array::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
     state->SetCreate();
     pthread_rwlock_unlock(&stateLock);
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_CREATED), "{}", Serialize());
+    AddDebugInfo();
     return 0;
 
 error:
@@ -570,6 +584,7 @@ Array::Rebuild(void)
     bool forceRebuild = true;
     InvokeRebuild(targets, isResume, forceRebuild);
     pthread_rwlock_unlock(&stateLock);
+    AddDebugInfo();
     return 0;
 }
 
@@ -632,7 +647,11 @@ Array::GetUniqueId(void)
 ArrayStateType
 Array::GetState(void)
 {
-    return state->GetState();
+    if (state != nullptr)
+    {
+        return state->GetState();
+    }
+    return ArrayStateType(ArrayStateEnum::NOT_EXIST);
 }
 
 StateContext*
@@ -789,7 +808,6 @@ Array::DetachDevice(UblockSharedPtr uBlock)
             break;
         }
     }
-
     return eventId;
 }
 
@@ -814,6 +832,7 @@ Array::MountDone(void)
 {
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_MOUNTED), "{}", Serialize());
     vector<IArrayDevice*> suspendedTargets = devMgr_->GetRebuilding();
+    AddDebugInfo();
     if (suspendedTargets.size() > 0 && state->IsRebuildable())
     {
         POS_TRACE_INFO(EID(INVOKE_RESUME_REBUILD), "array_name:{}, targetCnt:{}",
@@ -846,6 +865,10 @@ string
 Array::Serialize(void)
 {
     vector<string> arrayinfo;
+    if (ptnMgr == nullptr)
+    {
+        return "";
+    }
     arrayinfo.push_back("name:" + name_);
     arrayinfo.push_back("index:" + to_string(index_));
     arrayinfo.push_back("uuid:" + to_string(uniqueId));
@@ -962,6 +985,7 @@ void
 Array::_DetachSpare(ArrayDevice* target)
 {
     UblockSharedPtr uBlock = target->GetUblock();
+    AddDebugInfo();
     if (uBlock == nullptr)
     {
         return;
@@ -1027,6 +1051,7 @@ Array::_DetachData(ArrayDevice* target)
         bool isResume = false;
         InvokeRebuild(targets, isResume);
     }
+    AddDebugInfo();
 }
 
 void

@@ -16,7 +16,7 @@ def get_in_memory_log():
     index = 0
     for logger_module in logger_list:
         output = gdb.execute(
-            "p (pos::debugInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index), to_string=True)
+            "p (pos::singletonInfo->logger->dumpModule[%d]->dumpQueue)\n" % (index), to_string=True)
         output_list = output.split('\n')
         output_string_list = output_string_list + output_list
         index = index + 1

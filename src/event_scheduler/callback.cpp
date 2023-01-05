@@ -34,10 +34,10 @@
 
 #include <air/Air.h>
 
-#include "src/dump/dump_buffer.h"
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
-#include "src/dump/dump_shared_ptr.h"
+#include "src/debug_lib/dump_buffer.h"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
+#include "src/debug_lib/dump_shared_ptr.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/backend_event.h"
 #include "src/include/branch_prediction.h"
@@ -56,8 +56,8 @@ uint64_t Callback::timeoutNs = Callback::DEFAULT_TIMEOUT_NS;
 static const char* DUMP_NAME = "Callback_Error";
 static const bool DEFAULT_DUMP_ON = true;
 
-DumpModule<DumpBuffer> dumpCallbackError(DUMP_NAME,
-    DumpModule<DumpBuffer>::MAX_ENTRIES_FOR_CALLBACK_ERROR,
+DebugInfoQueue<DumpBuffer> dumpCallbackError(DUMP_NAME,
+    DebugInfoQueue<DumpBuffer>::MAX_ENTRIES_FOR_CALLBACK_ERROR,
     DEFAULT_DUMP_ON);
 
 Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg, EventScheduler* eventSchedulerArg)
@@ -106,7 +106,7 @@ Callback::~Callback(void)
     if (unlikely(executed == false))
     {
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
-        dumpCallbackError.AddDump(buffer, 0);
+        dumpCallbackError.AddDebugInfo(buffer, 0);
     }
 
     if (unlikely(errorCount > 0))
@@ -118,7 +118,7 @@ Callback::~Callback(void)
             static_cast<uint32_t>(type),
             static_cast<uint32_t>(_GetMostCriticalError()));
         DumpBuffer buffer(this, sizeof(Callback), &dumpCallbackError);
-        dumpCallbackError.AddDump(buffer, 0);
+        dumpCallbackError.AddDebugInfo(buffer, 0);
     }
     if (DumpSharedModuleInstanceEnable::debugLevelEnable && timeoutChecker != nullptr)
     {

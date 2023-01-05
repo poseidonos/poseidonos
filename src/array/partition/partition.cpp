@@ -43,6 +43,7 @@ Partition::Partition(vector<ArrayDevice*> d, PartitionType type)
 : devs(d),
   type(type)
 {
+    RegisterDebugInfo("Partition_Type_" + PARTITION_TYPE_STR[type], 1, true);
 }
 
 // LCOV_EXCL_START
@@ -50,6 +51,14 @@ Partition::~Partition(void)
 {
 }
 // LCOV_EXCL_STOP
+
+void
+Partition::MakeDebugInfo(ParitionDebugInfo& obj)
+{
+    obj.logicalSize = logicalSize;
+    obj.physicalSize = physicalSize;
+    obj.type = type;
+}
 
 int
 Partition::FindDevice(IArrayDevice* target)

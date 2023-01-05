@@ -37,7 +37,7 @@
 #include <thread>
 
 #include "mk/ibof_config.h"
-#include "src/debug/debug_info.h"
+#include "src/singleton_info/singleton_info.h"
 #include "src/master_context/config_manager.h"
 #include "src/master_context/version_provider.h"
 #include "src/trace/trace_exporter.h"

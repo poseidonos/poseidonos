@@ -53,7 +53,8 @@ const char* AffinityViewer::Cpu::ROLE_DESCRIPTIONS[ROLE_COUNT] =
         "MetaIO",
         "QOS",
         "AIR",
-        "EventReactor"};
+        "EventReactor",
+        "Debug"};
 
 AffinityViewer::Socket::Socket(void)
 : id(0),
@@ -259,6 +260,14 @@ AffinityViewer::Numa::_RegisterEventReactorCpu(void)
 }
 
 void
+AffinityViewer::Numa::_RegisterDebugCpu(void)
+{
+    cpu_set_t debugCpu =
+        affinityManager.GetCpuSet(CoreType::DEBUG);
+    _RegisterCpuSetRole(debugCpu, DEBUG);
+}
+
+void
 AffinityViewer::Numa::RegisterEveryCpuRole(void)
 {
     _RegisterReactorCpu();
@@ -271,6 +280,7 @@ AffinityViewer::Numa::RegisterEveryCpuRole(void)
     _RegisterQoSCpu();
     _RegisterAirCpu();
     _RegisterEventReactorCpu();
+    _RegisterDebugCpu();
 }
 
 void

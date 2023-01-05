@@ -41,8 +41,8 @@
 #include "src/event_scheduler/io_timeout_checker.h"
 #include "src/include/io_error_type.h"
 #include "src/include/smart_ptr_type.h"
-#include "src/dump/dump_shared_ptr.h"
-#include "src/dump/dump_shared_ptr.hpp"
+#include "src/debug_lib/dump_shared_ptr.h"
+#include "src/debug_lib/dump_shared_ptr.hpp"
 #include "src/lib/bitmap.h"
 
 namespace pos

@@ -38,7 +38,7 @@ def show_metafs_mbr(metafsPtr):
         print(result)
 
 def print_metafs_config(configName):
-    config = gdb.execute('p pos::debugInfo.metaFsService.configManager.' + configName, to_string=True)
+    config = gdb.execute('p pos::singletonInfo.metaFsService.configManager.' + configName, to_string=True)
     config = config.split('=')
     print(configName + ": " + config[1].strip())
 
@@ -53,7 +53,7 @@ def show_metafs_config():
 
 
 def get_metafs_ptr_list():
-    metafsList = gdb.execute('p pos::debugInfo->metaFsService->fileSystems', to_string=True)
+    metafsList = gdb.execute('p pos::singletonInfo->metaFsService->fileSystems', to_string=True)
     metafsList = metafsList.split('\n')
     metafsPtrList = []
 
@@ -71,7 +71,7 @@ def get_metafs_ptr_list():
 
 
 def show_array_list():
-    arrayList = gdb.execute('p pos::debugInfo->metaFsService->arrayNameToId', to_string=True)
+    arrayList = gdb.execute('p pos::singletonInfo->metaFsService->arrayNameToId', to_string=True)
     arrayList = arrayList.split('\n')
     count = 0
     # unordered_map

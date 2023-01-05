@@ -68,7 +68,7 @@ else
         xz -T0 -d "$DUMP_EXTRACT_PATH"".xz"
     fi
     if [ "$2" = "dumplog" ]; then
-        echo "set solib-absolute-prefix ""$ROOT_PATH""$DUMP_EXTRACT_PATH" > load.gdb
+        echo "set solib-absolute-prefix ""$ROOT_PATH"/"$DUMP_EXTRACT_PATH" > load.gdb
         echo "core ""$DUMP_EXTRACT_PATH" >> load.gdb
         cat ../get_first_info_from_dump.gdb >> load.gdb
         sed -i 's/posgdb.py/..\/posgdb.py/g' load.gdb

@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "src/dump/dump_shared_ptr.h"
+#include "src/debug_lib/dump_shared_ptr.h"
 #include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/mapper/include/mapper_const.h"

@@ -7,7 +7,7 @@ custom gdb command for utilizing debugging.
 source debug_meta.py
 meta [command] [subcommand]
 
-1) meta debuginfo
+1) meta singletonInfo
    show some info for debugging
 
 2) meta status

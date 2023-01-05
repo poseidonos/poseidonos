@@ -13,23 +13,23 @@ def summary_backend_io():
     print("================================")
     print("         Backend IOs            ")
     print("================================")
-    pending_io = gdb.parse_and_eval("debugInfo->flushCount->pendingFlush.pendingCount._M_i")
+    pending_io = gdb.parse_and_eval("singletonInfo->flushCount->pendingFlush.pendingCount._M_i")
     print("Flushed pending IO : %s" % (str(pending_io)))
-    pending_io = gdb.parse_and_eval("debugInfo->flushCount->callbackNotCalledCount.pendingCount._M_i")
+    pending_io = gdb.parse_and_eval("singletonInfo->flushCount->callbackNotCalledCount.pendingCount._M_i")
     print("Callback execute not called : %s" % (str(pending_io)))
 
-    pending_io = gdb.parse_and_eval("debugInfo->ioSubmitHandlerCount->pendingWrite.pendingCount._M_i")
+    pending_io = gdb.parse_and_eval("singletonInfo->ioSubmitHandlerCount->pendingWrite.pendingCount._M_i")
     print("IOSubmitHandler Pending Write : %s" % (str(pending_io)))
 
-    pending_io = gdb.parse_and_eval("debugInfo->ioSubmitHandlerCount->pendingRead.pendingCount._M_i")
+    pending_io = gdb.parse_and_eval("singletonInfo->ioSubmitHandlerCount->pendingRead.pendingCount._M_i")
     print("IOSubmitHandler Pending Read : %s" % (str(pending_io)))
 
-    pending_io = gdb.parse_and_eval("debugInfo->ioSubmitHandlerCount->pendingByteIo.pendingCount._M_i")
+    pending_io = gdb.parse_and_eval("singletonInfo->ioSubmitHandlerCount->pendingByteIo.pendingCount._M_i")
     print("IOSubmitHandler Pending ByteIo : %s" % (str(pending_io)))
 
 
 def summary_io_worker():
-    output = gdb.execute("p pos::debugInfo->ioDispatcher->ioWorkerMap", to_string=True)
+    output = gdb.execute("p pos::singletonInfo->ioDispatcher->ioWorkerMap", to_string=True)
     outputlines = output.split('\n')
 
     print("================================")

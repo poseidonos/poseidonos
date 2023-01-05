@@ -1,0 +1,134 @@
+1. Overview 
+
+    1) In current source code, test code needs to be added.
+
+    2) Anaylzing bug or fault may not be done only one time.
+
+    3) If I/O issue incurrs, we need to know "common things" to analyze information.
+
+ 
+
+2. Problem statement 
+
+  I  adopt the problems that is incurred frequently.
+
+     - Data Miscompare
+
+     - Command timeout
+
+     - Error Completion
+
+   I will add the code for debugging "Data Miscompare" and "Command timeout" problems.
+
+   This module will adopt approach not like log for event, but like "dump" for object.
+
+ 
+
+3. Goal 
+
+  "not log, but dump"
+
+  "several dump for specific location and specific object" 
+
+  "able to be expand to other module"
+
+  "Dump option can be configurable in run-time with simple user API" 
+
+
+4. API
+
+
+(1) Constructor of DebugInfoQueue (Registration)
+
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+               #include "src/debug_lib/debug_info_queue.h"
+
+               #include "src/debug_lib/debug_info_queue.hpp"
+
+               DebugInfoQueue <Ubio> dumpUbio ("Read_Ubio_Handler", 10, defaultEnable)
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+
+(2) Add Dump
+
+        -case 1: general case. just save the object of class 
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+              {
+
+              ..........
+
+               dumpUbio.AddDebugInfo(ubio)
+
+              ........
+
+              }
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+       - case 2 : void pointer or payload
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+              DebugInfoQueue <DumpBuffer> dumpUbio (module, submodule, 10, defaultEnable)          // register DebugInfoQueue
+
+         
+
+            {
+
+             .......
+
+               DumpBuffer dumpbuffer (ptr, size,dumpMemDump);
+
+               dumpMemDump.AddDebugInfo(dumpbuffer);
+
+             ........
+
+              }
+
+--------------------------------------------------------------------------------------------------------------------------------------  
+
+
+(3) check dump 
+
+You can use check dump script (gdb.sh)
+
+./gdb.sh [process id or core file name] [option] [param...]
+
+option 1 : enable the dump
+---------------------------------------------------
+./gdb.sh [process id] enable [module varible name]
+example # ./gdb.sh 24500 enable dumpMemDump
+---------------------------------------------------
+
+option 2 : disable the dump
+---------------------------------------------------
+./gdb.sh [process id] disable [module varible name]
+example # ./gdb.sh 24500 disable dumpMemDump
+---------------------------------------------------
+
+option 3 : show the dump object
+
+---------------------------------------------------
+./gdb.sh [process id or core file name] object [module varible name]
+example # ./gdb.sh 24500 object dumpMemDump
+---------------------------------------------------
+
+option 4 : see the raw buffer
+---------------------------------------------------
+./gdb.sh [process id or core file name] enable [base addr] [size]
+example # ./gdb.sh 24500 buffer 0xffffff40 512
+---------------------------------------------------
+
+option 5 : get the core dump
+---------------------------------------------------
+./gdb.sh [process id] coredump
+---------------------------------------------------
+
+    
+

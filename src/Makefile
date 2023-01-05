@@ -73,9 +73,9 @@ SUBDIRS = allocator \
         helper/string \
         helper/time \
         sys_info \
-        dump \
         qos \
-        debug \
+	singleton_info \
+        debug_lib \
         wbt \
         admin \
         resource_manager \

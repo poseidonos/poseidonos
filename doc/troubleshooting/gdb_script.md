@@ -35,8 +35,8 @@ You can also execute gdb with "load_dump.sh"
 
 ## posgdb Commands
 
-1) posgdb debuginfo
-   - show debug info and entry point for global objects.
+1) posgdb singletonInfo
+   - show singleton info and entry point for global objects.
 </br>
 2) posgdb pending io
    - show pending ios for every thread and devices

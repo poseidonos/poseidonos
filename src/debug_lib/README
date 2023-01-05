@@ -1,0 +1,63 @@
+# Debug Info Maker
+
+ - Get summarized information for each class
+ - Utilize useful information from each class
+ - Add history periodically or synchronously
+
+## Quick Start For Debug Info Maker
+
+
+1) Make summarized class for debugging. This class shall inherit DebugInfoInstance
+
+class CopierDebugInfo : public DebugInfoInstance
+{
+public:
+    uint32_t userDataMaxStripes;
+    uint32_t userDataMaxBlks;
+    uint32_t blocksPerChunk;
+    SegmentId victimId;
+    SegmentId targetId;
+    StripeId victimStripeId;
+    uint32_t invalidBlkCnt;
+    uint32_t copyDoneCnt;
+    CopierStateType copybackState;
+    uint32_t arrayId;
+    uint32_t numFreeSegment;
+};
+
+
+2) Original Class "Copier" inherit summarized class "CopierDebugInfo"
+
+class Copier : public DebugInfoMaker<CopierDebugInfo>
+{
+    virtual MakeDebugInfo (CopierDebugInfo &obj);
+}
+
+
+3) Implement MakeDebugInfo as you want
+
+void Copier::MakeDebugInfo(CopierDebugInfo& obj)
+{
+    obj.arrayId = array->GetIndex();
+    obj.userDataMaxStripes = userDataMaxStripes;
+    obj.userDataMaxBlks = userDataMaxBlks;
+    obj.blocksPerChunk = blocksPerChunk;
+    obj.victimId = victimId;
+    obj.targetId = targetId;
+    .....
+}
+
+4) Register once. (Constructor of original class is recommended)
+
+RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000, true);
+
+first param : name
+second param : number of history queue's entries
+third param : periodical logging (true / false)
+fourth param : period for logging (unit : us)
+fifth param : enabled / disabled
+
+
+5) Add some logging point in original class's method
+
+AddDebugInfo(); 
