@@ -1,22 +1,24 @@
 Poseidon Quick EMUlator(QEMU) Script
 =====
-QEMU/KVM offers powerful emulating features, including the ability to create many kinds of NVMe block device for your VMs. These can also provide a Non-Uniform Memory Access (NUMA) environment based on Xeon Processor. However, a common problem with QEMU/KVM is how it deals with various options.
+PoseidonOS has a few requirements to be able to function properly, such as the minimum number of NVMe devices and the NUMA affinity setting, which used to make it hard to run in certain user environments.
 
-PoseidonOS has some server requirements to run (several NVMe devices, NUMA etc.,). Since it is not easy to setup the environment in a general PC. So we're gonna to provide a script that can make setup virtual server easily.
+QEMU/KVM offers powerful emulating features, including the ability to create many kinds of NVMe block device for your VMs. These can also provide Non-Uniform Memory Access (NUMA) environment. However, a common problem with QEMU/KVM is in the complexity of dealing with various options.
+
+So, we are going to provide a script that helps to easily set up a virtual server for PoseidonOS to run on various environments.
 
 ## Environments
-In this lists, the following environments are checked:
+We have confirmed that the script works for the environments in the following list:
 
-|  |  Set 1  |  Set 2  |
-| ------ | ------- | ------- |
-| CPU  | M1 Pro | Intel i7-9700 |
-| OS  | MacOS 12.5 | Windows 11 + WSL Ubuntu |
+|  |  Set 1  |  Set 2  | Set 3 |
+| ------ | ------- | ------- | ------- |
+| CPU  | M1 Pro | Intel i7-9700 | AMD ryzen 5600x |
+| OS  | MacOS 12.5 | Windows 11 + WSL Ubuntu | Windows 11 + WSL Ubuntu |
 
 ## Requirements
 - QEMU 7.1.0 (We checked only this version)
 - enabled virtualization (KVM)
 - [Ubuntu 18.04 iso](https://releases.ubuntu.com/18.04/ubuntu-18.04.6-live-server-amd64.iso)
-- [vde_vmnet](https://github.com/lima-vm/vde_vmnet) >= v0.6.0: This is a framework to use a virtual network accessible by a host on Apple Silicon Mac.
+- [vde_vmnet](https://github.com/lima-vm/vde_vmnet) >= v0.6.0: This is a framework to use a virtual network accessible by a host on Apple Silicon Mac. Here is the [guide](#how-to-install-vde_vmnet-only-for-apple-silicon-mac) to install.
 - edk2-ovmf: OVMF(Open Virtual Machine Firmware) is required to enable UEFI support for Intel MacOS.
 - 128GB + 5 * 20GB stoage is required minimum space for virtual OS disk and virtual nvme devices. But you can configurate these sizes.
 - 14GB DRAM is required minimum size for PoseidonOS.
@@ -36,7 +38,7 @@ Run QEMU script
 
 - `-d`: (Optional) Enable the option to create the virtual nvme block device
 
-## How to Install vde_vmnet (for Apple Silicon Mac)
+## How to Install vde_vmnet (only for Apple Silicon Mac)
 ```bash
 # Install vde_vmnet.
 brew install automake autoconf libtool
