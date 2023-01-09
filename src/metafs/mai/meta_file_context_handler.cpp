@@ -48,8 +48,7 @@ MetaFileContextHandler::MetaFileContextHandler(const int arrayId,
   volMgr_(volMgr)
 {
     usedCtxBitmap_ = std::make_unique<BitMap>(MAX_VOLUME_CNT);
-    nameMapByfd_ = std::make_unique<MetaVolTypeAndFdToFileName>();
-    idxMapByName_ = std::make_unique<MetaVolTypeAndFileNameToIndex>();
+    nameAndIndex_ = std::make_unique<VolTypeAndFdToNameAndIndex>();
     ctxList_ = std::make_unique<std::vector<MetaFileContext>>(MAX_VOLUME_CNT);
 
     usedCtxBitmap_->ResetBitmap();
@@ -70,13 +69,10 @@ MetaFileContextHandler::GetFileContext(const FileDescriptorType fd, const MetaVo
 {
     SPIN_LOCK_GUARD_IN_SCOPE(iLock_);
 
-    auto it = nameMapByfd_->find(make_pair(type, fd));
-
-    if (it != nameMapByfd_->end())
+    auto result = nameAndIndex_->find(make_pair(type, fd));
+    if (result != nameAndIndex_->end())
     {
-        auto result = idxMapByName_->find(make_pair(type, it->second));
-        assert(result != idxMapByName_->end());
-        return &ctxList_->at(result->second);
+        return &ctxList_->at(result->second.second);
     }
 
     return nullptr;
@@ -90,15 +86,11 @@ MetaFileContextHandler::RemoveFileContext(const FileDescriptorType fd, const Met
     {
         SPIN_LOCK_GUARD_IN_SCOPE(iLock_);
 
-        auto it1 = nameMapByfd_->find(make_pair(type, fd));
-        if (it1 != nameMapByfd_->end())
+        auto result = nameAndIndex_->find(make_pair(type, fd));
+        if (result != nameAndIndex_->end())
         {
-            std::string fileName = it1->second;
-            auto it2 = idxMapByName_->find(make_pair(type, fileName));
-            index = it2->second;
-
-            nameMapByfd_->erase(it1);
-            idxMapByName_->erase(it2);
+            index = result->second.second;
+            nameAndIndex_->erase(result);
             usedCtxBitmap_->ClearBit(index);
             ctxList_->at(index).Reset();
         }
@@ -118,7 +110,7 @@ MetaFileContextHandler::AddFileContext(std::string& fileName,
         SPIN_LOCK_GUARD_IN_SCOPE(iLock_);
 
         auto key = make_pair(type, fd);
-        if (nameMapByfd_->find(make_pair(type, fd)) != nameMapByfd_->end())
+        if (nameAndIndex_->find(make_pair(type, fd)) != nameAndIndex_->end())
         {
             POS_TRACE_ERROR(EID(MFS_FILE_INFO_IS_ALREADY_IN_FILE_CONTEXT),
                 "fileName:{}, fd:{}, volumeType:{}",
@@ -135,9 +127,9 @@ MetaFileContextHandler::AddFileContext(std::string& fileName,
             assert(false);
         }
 
+        auto value = make_pair(fileName, index);
+        nameAndIndex_->insert({key, value});
         usedCtxBitmap_->SetBit(index);
-        nameMapByfd_->insert({key, fileName});
-        idxMapByName_->insert({make_pair(type, fileName), index});
     }
 
     // TODO (munseop.lim): use unique_ptr

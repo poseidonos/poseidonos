@@ -113,8 +113,9 @@ TEST_F(MetaFileContextHandlerFixture, AddFileContext_testIfThereIsNoError)
     handler->AddFileContext(fileName, FD, VOLUME_TYPE);
 
     EXPECT_EQ(handler->GetBitMap()->FindFirstSet(0), FD);
-    EXPECT_EQ(handler->GetNameMap()->find(make_pair(VOLUME_TYPE, FD))->second, fileName);
-    EXPECT_EQ(handler->GetIndexMap()->find(make_pair(VOLUME_TYPE, fileName))->second, 0);
+    auto fileNameAndIndex = handler->GetNameAndIndexMap()->find({VOLUME_TYPE, FD});
+    EXPECT_EQ(fileNameAndIndex->second.first, fileName);
+    EXPECT_EQ(fileNameAndIndex->second.second, 0);
 }
 
 TEST_F(MetaFileContextHandlerFixture, GetFileContext_testIfThereIsNoContextToMatch)
@@ -173,9 +174,9 @@ TEST_F(MetaFileContextHandlerFixture, TryRemoveFileContext_testIfThereIsNoError)
 
     uint64_t expectedValue = MetaFsConfig::MAX_VOLUME_CNT;
     EXPECT_EQ(handler->GetBitMap()->FindFirstSet(0), expectedValue);
-    std::unique_ptr<MetaVolTypeAndFdToFileName> nameMap = handler->GetNameMap();
-    EXPECT_EQ(nameMap->find(make_pair(VOLUME_TYPE, FD)), nameMap->end());
-    std::unique_ptr<MetaVolTypeAndFileNameToIndex> indexMap = handler->GetIndexMap();
-    EXPECT_EQ(indexMap->find(make_pair(VOLUME_TYPE, fileName)), indexMap->end());
+
+    auto map = handler->GetNameAndIndexMap();
+    auto result = map->find({VOLUME_TYPE, FD});
+    EXPECT_EQ(result, map->end());
 }
 } // namespace pos

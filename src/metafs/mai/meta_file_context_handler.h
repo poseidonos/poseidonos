@@ -46,10 +46,10 @@
 
 namespace pos
 {
-using MetaVolTypeAndFdToFileName = std::unordered_map<
-    std::pair<MetaVolumeType, FileDescriptorType>, std::string, PairHash>;
-using MetaVolTypeAndFileNameToIndex = std::unordered_map<
-    std::pair<MetaVolumeType, std::string>, uint32_t, PairHash>;
+using MetaVolTypeAndFd = std::pair<MetaVolumeType, FileDescriptorType>;
+using FileNameAndIndex = std::pair<std::string, uint32_t>;
+using VolTypeAndFdToNameAndIndex = std::unordered_map<
+    MetaVolTypeAndFd, FileNameAndIndex, PairHash>;
 
 class MetaStorageSubsystem;
 class MetaVolumeManager;
@@ -76,14 +76,9 @@ public:
         return std::move(usedCtxBitmap_);
     }
     // for test
-    std::unique_ptr<MetaVolTypeAndFdToFileName> GetNameMap(void)
+    std::unique_ptr<VolTypeAndFdToNameAndIndex> GetNameAndIndexMap(void)
     {
-        return std::move(nameMapByfd_);
-    }
-    // for test
-    std::unique_ptr<MetaVolTypeAndFileNameToIndex> GetIndexMap(void)
-    {
-        return std::move(idxMapByName_);
+        return std::move(nameAndIndex_);
     }
     // for test
     std::unique_ptr<std::vector<MetaFileContext>> GetFileContextList(void)
@@ -96,10 +91,7 @@ private:
     MetaFileInodeInfo* _GetFileInode(std::string& fileName, const MetaVolumeType type);
 
     std::unique_ptr<BitMap> usedCtxBitmap_;
-    // (pair<MetaVolumeType, fd>, fileName)
-    std::unique_ptr<MetaVolTypeAndFdToFileName> nameMapByfd_;
-    // (pair<MetaVolumeType, fileName>, file index)
-    std::unique_ptr<MetaVolTypeAndFileNameToIndex> idxMapByName_;
+    std::unique_ptr<VolTypeAndFdToNameAndIndex> nameAndIndex_;
     std::unique_ptr<std::vector<MetaFileContext>> ctxList_;
 
     const uint32_t MAX_VOLUME_CNT = MetaFsConfig::MAX_VOLUME_CNT;
