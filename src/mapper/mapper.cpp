@@ -763,7 +763,7 @@ Mapper::_GetMpageSize(void)
     if (metaFs != nullptr)
     {
         MetaFilePropertySet prop(MetaFileType::Map);
-        mpageSize = metaFs->EstimateAlignedFileIOSize(prop, MetaVolumeType::SsdVolume);
+        mpageSize = metaFs->EstimateAlignedFileIOSize(prop);
     }
     return mpageSize;
 }
