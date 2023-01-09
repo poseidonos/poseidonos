@@ -46,9 +46,9 @@
 
 namespace pos
 {
-using MapToFindFileNameUsingMetaVolumeTypeAndFd = std::unordered_map<
+using MetaVolTypeAndFdToFileName = std::unordered_map<
     std::pair<MetaVolumeType, FileDescriptorType>, std::string, PairHash>;
-using MapToFindIndexUsingMetaVolumeTypeAndFileName = std::unordered_map<
+using MetaVolTypeAndFileNameToIndex = std::unordered_map<
     std::pair<MetaVolumeType, std::string>, uint32_t, PairHash>;
 
 class MetaStorageSubsystem;
@@ -65,7 +65,7 @@ public:
     virtual void Initialize(const uint64_t signature);
     virtual MetaFileContext* GetFileContext(const FileDescriptorType fd,
         const MetaVolumeType type);
-    virtual void TryRemoveFileContext(const FileDescriptorType fd,
+    virtual void RemoveFileContext(const FileDescriptorType fd,
         const MetaVolumeType type);
     virtual void AddFileContext(std::string& fileName,
         const FileDescriptorType fd, const MetaVolumeType type);
@@ -73,15 +73,15 @@ public:
     // for test
     std::unique_ptr<BitMap> GetBitMap(void)
     {
-        return std::move(bitmap_);
+        return std::move(usedCtxBitmap_);
     }
     // for test
-    std::unique_ptr<MapToFindFileNameUsingMetaVolumeTypeAndFd> GetNameMap(void)
+    std::unique_ptr<MetaVolTypeAndFdToFileName> GetNameMap(void)
     {
         return std::move(nameMapByfd_);
     }
     // for test
-    std::unique_ptr<MapToFindIndexUsingMetaVolumeTypeAndFileName> GetIndexMap(void)
+    std::unique_ptr<MetaVolTypeAndFileNameToIndex> GetIndexMap(void)
     {
         return std::move(idxMapByName_);
     }
@@ -95,11 +95,11 @@ private:
     void _UpdateFileContext(const uint32_t index, MetaFileInodeInfo* info);
     MetaFileInodeInfo* _GetFileInode(std::string& fileName, const MetaVolumeType type);
 
-    std::unique_ptr<BitMap> bitmap_;
+    std::unique_ptr<BitMap> usedCtxBitmap_;
     // (pair<MetaVolumeType, fd>, fileName)
-    std::unique_ptr<MapToFindFileNameUsingMetaVolumeTypeAndFd> nameMapByfd_;
+    std::unique_ptr<MetaVolTypeAndFdToFileName> nameMapByfd_;
     // (pair<MetaVolumeType, fileName>, file index)
-    std::unique_ptr<MapToFindIndexUsingMetaVolumeTypeAndFileName> idxMapByName_;
+    std::unique_ptr<MetaVolTypeAndFileNameToIndex> idxMapByName_;
     std::unique_ptr<std::vector<MetaFileContext>> ctxList_;
 
     const uint32_t MAX_VOLUME_CNT = MetaFsConfig::MAX_VOLUME_CNT;

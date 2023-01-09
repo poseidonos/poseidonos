@@ -85,10 +85,9 @@ MetaFsTestFixture::MetaFsTestFixture(void)
         comp->mgmt->InitializeSystem(arrayId, &mediaInfoList);
 
         auto volMgr = new MetaVolumeManager(arrayId, comp->storage, comp->tpForMetafs);
-        auto bitmap = new BitMap(MetaFsConfig::MAX_VOLUME_CNT);
         auto fileCtxHandler = std::make_unique<MetaFileContextHandler>(arrayId, comp->storage, volMgr);
         comp->ctrl = new MetaFsFileControlApi(arrayId, false, comp->storage, comp->mgmt, volMgr,
-            bitmap, std::move(fileCtxHandler), comp->tpForMetafs);
+            std::move(fileCtxHandler), comp->tpForMetafs);
         comp->ctrl->Initialize(comp->mgmt->GetEpochSignature());
         comp->io = new MetaFsIoApi(arrayId, comp->ctrl, comp->storage, comp->tpForMetafs,
             concurrentMetaFsTimeInterval, false);

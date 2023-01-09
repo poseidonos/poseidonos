@@ -14,7 +14,7 @@ public:
     using MetaFileContextHandler::MetaFileContextHandler;
     MOCK_METHOD(void, Initialize, (const uint64_t signature));
     MOCK_METHOD(MetaFileContext*, GetFileContext, (const FileDescriptorType fd, const MetaVolumeType type));
-    MOCK_METHOD(void, TryRemoveFileContext, (const FileDescriptorType fd, const MetaVolumeType type));
+    MOCK_METHOD(void, RemoveFileContext, (const FileDescriptorType fd, const MetaVolumeType type));
     MOCK_METHOD(void, AddFileContext, (std::string& fileName, const FileDescriptorType fd, const MetaVolumeType type));
 };
 

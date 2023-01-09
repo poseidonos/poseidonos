@@ -37,7 +37,6 @@
 #include <string>
 #include <vector>
 
-#include "test/unit-tests/lib/bitmap_mock.h"
 #include "test/unit-tests/metafs/mai/meta_file_context_handler_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
 #include "test/unit-tests/metafs/mvm/meta_volume_manager_mock.h"
@@ -65,11 +64,10 @@ public:
         storage = new NiceMock<MockMetaStorageSubsystem>(ARRAY_ID);
         mgmt = new NiceMock<MockMetaFsManagementApi>(ARRAY_ID, storage);
         volMgr = new NiceMock<MockMetaVolumeManager>(ARRAY_ID, storage);
-        bitmap = new NiceMock<MockBitMap>(100);
         handler = std::make_unique<NiceMock<MockMetaFileContextHandler>>(0, nullptr, nullptr);
         ON_CALL(*handler, AddFileContext).WillByDefault(Return());
 
-        api = new MetaFsFileControlApi(ARRAY_ID, true, storage, mgmt, volMgr, bitmap, std::move(handler), nullptr);
+        api = new MetaFsFileControlApi(ARRAY_ID, true, storage, mgmt, volMgr, std::move(handler), nullptr);
     }
 
     virtual void TearDown(void)
@@ -84,7 +82,6 @@ protected:
     NiceMock<MockMetaStorageSubsystem>* storage;
     NiceMock<MockMetaFsManagementApi>* mgmt;
     NiceMock<MockMetaVolumeManager>* volMgr;
-    NiceMock<MockBitMap>* bitmap;
     std::unique_ptr<NiceMock<MockMetaFileContextHandler>> handler;
 
     const int ARRAY_ID = 0;

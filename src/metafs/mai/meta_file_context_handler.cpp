@@ -47,12 +47,12 @@ MetaFileContextHandler::MetaFileContextHandler(const int arrayId,
   storage_(storage),
   volMgr_(volMgr)
 {
-    bitmap_ = std::make_unique<BitMap>(MAX_VOLUME_CNT);
-    nameMapByfd_ = std::make_unique<MapToFindFileNameUsingMetaVolumeTypeAndFd>();
-    idxMapByName_ = std::make_unique<MapToFindIndexUsingMetaVolumeTypeAndFileName>();
+    usedCtxBitmap_ = std::make_unique<BitMap>(MAX_VOLUME_CNT);
+    nameMapByfd_ = std::make_unique<MetaVolTypeAndFdToFileName>();
+    idxMapByName_ = std::make_unique<MetaVolTypeAndFileNameToIndex>();
     ctxList_ = std::make_unique<std::vector<MetaFileContext>>(MAX_VOLUME_CNT);
 
-    bitmap_->ResetBitmap();
+    usedCtxBitmap_->ResetBitmap();
 }
 
 MetaFileContextHandler::~MetaFileContextHandler(void)
@@ -83,7 +83,7 @@ MetaFileContextHandler::GetFileContext(const FileDescriptorType fd, const MetaVo
 }
 
 void
-MetaFileContextHandler::TryRemoveFileContext(const FileDescriptorType fd, const MetaVolumeType type)
+MetaFileContextHandler::RemoveFileContext(const FileDescriptorType fd, const MetaVolumeType type)
 {
     uint32_t index = 0;
 
@@ -99,11 +99,10 @@ MetaFileContextHandler::TryRemoveFileContext(const FileDescriptorType fd, const 
 
             nameMapByfd_->erase(it1);
             idxMapByName_->erase(it2);
-            bitmap_->ClearBit(index);
+            usedCtxBitmap_->ClearBit(index);
+            ctxList_->at(index).Reset();
         }
     }
-
-    ctxList_->at(index).Reset();
 
     POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
         "FileContext is deallocated index:{}, arrayId:{}", index, arrayId_);
@@ -128,7 +127,7 @@ MetaFileContextHandler::AddFileContext(std::string& fileName,
         }
 
         // get the position
-        index = bitmap_->FindFirstZero();
+        index = usedCtxBitmap_->FindFirstZero();
         if (index >= MetaFsConfig::MAX_VOLUME_CNT)
         {
             POS_TRACE_ERROR(EID(MFS_NEED_MORE_CONTEXT_SLOT),
@@ -136,7 +135,7 @@ MetaFileContextHandler::AddFileContext(std::string& fileName,
             assert(false);
         }
 
-        bitmap_->SetBit(index);
+        usedCtxBitmap_->SetBit(index);
         nameMapByfd_->insert({key, fileName});
         idxMapByName_->insert({make_pair(type, fileName), index});
     }
@@ -153,6 +152,7 @@ MetaFileContextHandler::AddFileContext(std::string& fileName,
 void
 MetaFileContextHandler::_UpdateFileContext(const uint32_t index, MetaFileInodeInfo* info)
 {
+    assert(info);
     MetaFileContext* context = &ctxList_->at(index);
     context->Reset();
     context->isActivated = info->data.field.inUse;

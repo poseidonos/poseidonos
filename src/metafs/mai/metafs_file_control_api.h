@@ -62,7 +62,7 @@ public:
     /* for test */
     MetaFsFileControlApi(void);
     MetaFsFileControlApi(const int arrayId, const bool isNormal, MetaStorageSubsystem* storage,
-        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr, BitMap* bitmap,
+        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr,
         std::unique_ptr<MetaFileContextHandler> handler, TelemetryPublisher* tp);
     virtual ~MetaFsFileControlApi(void);
 

@@ -39,15 +39,14 @@ namespace pos
 {
 /* for test */
 MetaFsFileControlApi::MetaFsFileControlApi(void)
-: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr, nullptr,
+: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr,
     nullptr, nullptr)
 {
 }
 
 MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, const bool isNormal,
     MetaStorageSubsystem* storage, MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr,
-    BitMap* bitmap, std::unique_ptr<MetaFileContextHandler> handler,
-    TelemetryPublisher* tp)
+    std::unique_ptr<MetaFileContextHandler> handler, TelemetryPublisher* tp)
 : arrayId(arrayId),
   isNormal(isNormal),
   storage(storage),
@@ -88,7 +87,7 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
 void
 MetaFsFileControlApi::Initialize(const uint64_t signature)
 {
-    assert(fileContext.get() != nullptr);
+    assert(fileContext);
     fileContext->Initialize(signature);
 }
 
@@ -151,7 +150,7 @@ MetaFsFileControlApi::Close(uint32_t fd, MetaVolumeType volumeType)
 
     rc = volMgr->HandleNewRequest(reqMsg); // validity check &  MetaVolumeManager::HandleCloseFileReq()
 
-    fileContext->TryRemoveFileContext(fd, reqMsg.volType);
+    fileContext->RemoveFileContext(fd, reqMsg.volType);
 
     return rc;
 }

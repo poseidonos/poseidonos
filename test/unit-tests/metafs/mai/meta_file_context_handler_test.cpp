@@ -78,6 +78,7 @@ public:
         MetaFileInodeInfo* inode = new MetaFileInodeInfo;
         memcpy(inode->data.field.fileName, fileName.c_str(), fileName.length());
         inode->data.field.extentCnt = 1;
+        inode->data.field.fileByteSize = EXPECT_FILE_BYTE_SIZE;
         return inode;
     }
 
@@ -98,6 +99,9 @@ protected:
     const uint64_t SIGNATURE = 0x12345678;
     const FileDescriptorType FD = 0;
     const MetaVolumeType VOLUME_TYPE = MetaVolumeType::SsdVolume;
+
+    const MetaFileType EXPECT_FILE_TYPE = MetaFileType::SpecialPurposeMap;
+    const FileSizeType EXPECT_FILE_BYTE_SIZE = 4096;
 };
 
 TEST_F(MetaFileContextHandlerFixture, AddFileContext_testIfThereIsNoError)
@@ -118,6 +122,21 @@ TEST_F(MetaFileContextHandlerFixture, GetFileContext_testIfThereIsNoContextToMat
     EXPECT_EQ(handler->GetFileContext(FD, VOLUME_TYPE), nullptr);
 }
 
+TEST_F(MetaFileContextHandlerFixture, GetFileContext_testIfExpectedContextWillBeReturned)
+{
+    MetaFileInodeInfo* inode = GetInode();
+
+    SetExpectedCallToVolumeManager(inode);
+
+    handler->AddFileContext(fileName, FD, VOLUME_TYPE);
+
+    MetaFileContext* ctx = handler->GetFileContext(FD, VOLUME_TYPE);
+    ASSERT_NE(ctx, nullptr);
+    EXPECT_EQ(ctx->fileType, MetaFileType::SpecialPurposeMap);
+    EXPECT_EQ(ctx->sizeInByte, EXPECT_FILE_BYTE_SIZE);
+    EXPECT_EQ(ctx->signature, SIGNATURE);
+}
+
 TEST_F(MetaFileContextHandlerFixture, GetFileContext_testIfThereIsContextButNotMatchedToTheVolumeType)
 {
     MetaFileInodeInfo* inode = GetInode();
@@ -126,6 +145,7 @@ TEST_F(MetaFileContextHandlerFixture, GetFileContext_testIfThereIsContextButNotM
 
     handler->AddFileContext(fileName, FD, VOLUME_TYPE);
 
+    EXPECT_NE(handler->GetFileContext(FD, VOLUME_TYPE), nullptr);
     EXPECT_EQ(handler->GetFileContext(FD, MetaVolumeType::JournalVolume), nullptr);
 }
 
@@ -137,6 +157,7 @@ TEST_F(MetaFileContextHandlerFixture, GetFileContext_testIfThereIsContextButNotM
 
     handler->AddFileContext(fileName, FD, VOLUME_TYPE);
 
+    EXPECT_NE(handler->GetFileContext(FD, VOLUME_TYPE), nullptr);
     EXPECT_EQ(handler->GetFileContext(1, VOLUME_TYPE), nullptr);
 }
 
@@ -148,13 +169,13 @@ TEST_F(MetaFileContextHandlerFixture, TryRemoveFileContext_testIfThereIsNoError)
 
     handler->AddFileContext(fileName, FD, VOLUME_TYPE);
 
-    handler->TryRemoveFileContext(FD, VOLUME_TYPE);
+    handler->RemoveFileContext(FD, VOLUME_TYPE);
 
     uint64_t expectedValue = MetaFsConfig::MAX_VOLUME_CNT;
     EXPECT_EQ(handler->GetBitMap()->FindFirstSet(0), expectedValue);
-    std::unique_ptr<MapToFindFileNameUsingMetaVolumeTypeAndFd> nameMap = handler->GetNameMap();
+    std::unique_ptr<MetaVolTypeAndFdToFileName> nameMap = handler->GetNameMap();
     EXPECT_EQ(nameMap->find(make_pair(VOLUME_TYPE, FD)), nameMap->end());
-    std::unique_ptr<MapToFindIndexUsingMetaVolumeTypeAndFileName> indexMap = handler->GetIndexMap();
+    std::unique_ptr<MetaVolTypeAndFileNameToIndex> indexMap = handler->GetIndexMap();
     EXPECT_EQ(indexMap->find(make_pair(VOLUME_TYPE, fileName)), indexMap->end());
 }
 } // namespace pos

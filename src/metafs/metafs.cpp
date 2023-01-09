@@ -88,7 +88,7 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded)
     auto volMgr = new MetaVolumeManager(arrayId_, metaStorage_, telemetryPublisher_);
     auto fileCtxHandler = std::make_unique<MetaFileContextHandler>(arrayId_, metaStorage_, volMgr);
     ctrl = new MetaFsFileControlApi(arrayId_, false, metaStorage_, mgmt, volMgr,
-        new BitMap(MetaFsConfig::MAX_VOLUME_CNT), std::move(fileCtxHandler), telemetryPublisher_);
+        std::move(fileCtxHandler), telemetryPublisher_);
     io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval, supportNuma);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
