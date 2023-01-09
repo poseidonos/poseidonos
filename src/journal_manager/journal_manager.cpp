@@ -252,7 +252,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
-    IVolumeInfoManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+    IVolumeInfoManager* volumeManager, MetaFs* metaFs,
     EventScheduler* eventScheduler, TelemetryClient* tc)
 {
     int result = 0;
@@ -263,7 +263,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         {
             journalingStatus.Set(JOURNAL_INIT);
 
-            result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
+            result = _InitConfigAndPrepareLogBuffer(metaFs);
             if (result < 0)
             {
                 return result;
@@ -298,7 +298,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 }
 
 int
-JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
+JournalManager::_InitConfigAndPrepareLogBuffer(MetaFs* metaFs)
 {
     int result = 0;
 
@@ -316,13 +316,13 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
         {
             return result;
         }
-        config->SetLogBufferSize(loadedLogBufferSize, metaFsCtrl);
+        config->SetLogBufferSize(loadedLogBufferSize, metaFs);
 
         journalingStatus.Set(WAITING_TO_BE_REPLAYED);
     }
     else
     {
-        result = config->SetLogBufferSize(0, metaFsCtrl);
+        result = config->SetLogBufferSize(0, metaFs);
         if (result == 0)
         {
             result = logBuffer->Create(config->GetLogBufferSize());

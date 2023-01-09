@@ -40,7 +40,7 @@
 
 namespace pos
 {
-class MetaFsFileControlApi;
+class MetaFs;
 class ConfigManager;
 
 class JournalConfiguration
@@ -51,7 +51,7 @@ public:
     virtual ~JournalConfiguration(void);
 
     virtual void Init(bool isWriteThroughEnabled);
-    virtual int SetLogBufferSize(uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl);
+    virtual int SetLogBufferSize(uint64_t loadedLogBufferSize, MetaFs* metaFs);
 
     // Can be called before initialized
     virtual bool IsEnabled(void);
@@ -102,7 +102,7 @@ private:
     bool _IsRocksdbEnabled(void);
     std::string _GetRocksdbPath(void);
 
-    void _ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl);
+    void _ReadMetaFsConfiguration(MetaFs* metaFs);
 
     bool areReplayWbStripesInUserArea;
     bool debugEnabled;

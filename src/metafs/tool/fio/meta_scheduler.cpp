@@ -115,11 +115,11 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     POS_EVENT_ID rc_io;
     assert(fd != INT_MAX);
 
-    MetaFsIoOpcode opcode = (io->ioType == IO_TYPE::READ) ? MetaFsIoOpcode::Read : MetaFsIoOpcode::Write;
-    uint32_t alignedIOSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    uint64_t soffset = ((io->offset / alignedIOSize) * alignedIOSize);
-    uint32_t reactor = pos::EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
-    int arrayId = io->array_id;
+    const MetaFsIoOpcode opcode = (io->ioType == IO_TYPE::READ) ? MetaFsIoOpcode::Read : MetaFsIoOpcode::Write;
+    const uint32_t alignedIOSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
+    const uint64_t soffset = ((io->offset / alignedIOSize) * alignedIOSize);
+    const uint32_t reactor = pos::EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
+    const int arrayId = io->array_id;
     MetaFsAioCbCxt* aiocb = new MetaFioAIOCxt(opcode, fd, arrayId, soffset, alignedIOSize, io->iov->iov_base,
         AsEntryPointParam1(&MetaIOScheduler::HandleIOCallback, &metaioScheduler),
         io, reactor);
@@ -127,14 +127,14 @@ MetaIoHandler::MetaFsIOSubmitHandler(struct pos_io* io, int fd)
     // only for test
     if (nullptr != metaFs)
     {
-        rc_io = metaFs->io->SubmitIO(aiocb);
+        rc_io = metaFs->GetIoApi()->SubmitIO(aiocb);
 
         if (nullptr != aiocb)
             delete aiocb;
     }
     else
     {
-        rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->io->SubmitIO(aiocb);
+        rc_io = MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)->GetIoApi()->SubmitIO(aiocb);
     }
     g_meta_outstandingCmd++;
 

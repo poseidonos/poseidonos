@@ -67,7 +67,7 @@ WbtMetafsCmdHandler::DumpFilesList(Args argv)
         return RESULT_FAILURE;
 
     if ((nullptr == metaFs) ||
-        (!metaFs->wbt->GetMetaFileList(result, volumeType)))
+        (!metaFs->GetWbtApi()->GetMetaFileList(result, volumeType)))
     {
         return RESULT_FAILURE;
     }
@@ -121,7 +121,7 @@ WbtMetafsCmdHandler::CreateFile(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSizeBytes, fileProperty, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Create(fileName, fileSizeBytes, fileProperty, volumeType);
     if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
@@ -151,7 +151,7 @@ WbtMetafsCmdHandler::OpenFile(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Open(fileName, fd, volumeType);
     if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
@@ -179,7 +179,7 @@ WbtMetafsCmdHandler::CloseFile(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Close(fd, volumeType);
     if (rc != EID(SUCCESS))
         return RESULT_FAILURE;
 
@@ -228,7 +228,7 @@ WbtMetafsCmdHandler::ReadFile(Args argv)
 
     memset(buffer, 0, byteSize);
 
-    POS_EVENT_ID rc = metaFs->io->Read(fd, byteOffset, byteSize, (void*)buffer, storage);
+    POS_EVENT_ID rc = metaFs->GetIoApi()->Read(fd, byteOffset, byteSize, (void*)buffer, storage);
     if (rc != EID(SUCCESS) || _WriteBufferInFile(outFile, buffer, byteSize) != RESULT_SUCCESS)
     {
         retVal = false;
@@ -280,7 +280,7 @@ WbtMetafsCmdHandler::WriteFile(Args argv)
 
     if (_ReadFileInBuffer(inFile, &buffer, byteSize) == RESULT_SUCCESS)
     {
-        rc = metaFs->io->Write(fd, byteOffset, byteSize, buffer, storage);
+        rc = metaFs->GetIoApi()->Write(fd, byteOffset, byteSize, buffer, storage);
     }
     else
     {
@@ -318,7 +318,7 @@ WbtMetafsCmdHandler::GetFileSize(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    size_t fileSize = metaFs->ctrl->GetFileSize(fd, volumeType);
+    size_t fileSize = metaFs->GetCtrlApi()->GetFileSize(fd, volumeType);
     if (fileSize == 0)
         return RESULT_FAILURE;
 
@@ -346,7 +346,7 @@ WbtMetafsCmdHandler::GetAlignedFileIOSize(Args argv)
     if (nullptr == metaFs)
         return RESULT_FAILURE;
 
-    size_t fileSize = metaFs->ctrl->GetAlignedFileIOSize(fd, volumeType);
+    size_t fileSize = metaFs->GetCtrlApi()->GetAlignedFileIOSize(fd, volumeType);
     if (fileSize == 0)
         return RESULT_FAILURE;
 
@@ -380,7 +380,7 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
     if (type >= (int)MetaVolumeType::Max)
         return RESULT_FAILURE;
 
-    if (false == metaFs->wbt->GetMetaFileInode(metaFile, result, volumeType))
+    if (false == metaFs->GetWbtApi()->GetMetaFileInode(metaFile, result, volumeType))
     {
         return RESULT_FAILURE;
     }

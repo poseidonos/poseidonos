@@ -99,7 +99,11 @@ public:
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayId);
         config = new NiceMock<MockMetaFsConfigManager>(nullptr);
 
-        metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
+        metaFs = new NiceMock<MockMetaFs>(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
+        ON_CALL(*metaFs, GetMgmtApi).WillByDefault(Return(mgmt));
+        ON_CALL(*metaFs, GetCtrlApi).WillByDefault(Return(ctrl));
+        ON_CALL(*metaFs, GetIoApi).WillByDefault(Return(io));
+        ON_CALL(*metaFs, GetWbtApi).WillByDefault(Return(wbt));
 
         metaFile = new MetaFsFileIntfTester(fileName, arrayId, metaFs, config);
     }
@@ -111,7 +115,7 @@ public:
     }
 
 protected:
-    MockMetaFs* metaFs;
+    NiceMock<MockMetaFs>* metaFs;
     NiceMock<MockIArrayInfo>* arrayInfo;
     NiceMock<MockMetaFsManagementApi>* mgmt;
     NiceMock<MockMetaFsFileControlApi>* ctrl;

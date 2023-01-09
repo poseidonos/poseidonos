@@ -41,7 +41,7 @@ namespace pos
 class Mapper;
 class Allocator;
 class JournalManager;
-class MetaFsFileControlApi;
+class MetaFs;
 
 class MetaUpdater;
 class SegmentContextUpdater;
@@ -53,7 +53,7 @@ class Metadata : public IMountSequence
 {
 public:
     Metadata(IArrayInfo* info, IStateControl* state);
-    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaFsFileControlApi* metaFsCtrl, MetaService* service);
+    Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator, JournalManager* jouranl, MetaFs* metaFs, MetaService* service);
     virtual ~Metadata(void);
 
     virtual int Init(void) override;
@@ -70,7 +70,7 @@ private:
     Mapper* mapper;
     Allocator* allocator;
     JournalManager* journal;
-    MetaFsFileControlApi* metaFsCtrl;
+    MetaFs* metaFs;
     MetaVolumeEventHandler* volumeEventHandler;
     MetaService* metaService;
 
