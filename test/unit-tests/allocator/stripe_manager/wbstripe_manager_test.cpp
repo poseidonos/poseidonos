@@ -110,7 +110,10 @@ WBStripeManagerTestFixture::_SetAllocatorAddressInfo(void)
 
 TEST_F(WBStripeManagerTestFixture, FreeWBStripeId_TestSimpleCaller)
 {
-    EXPECT_CALL(allocatorCtx, ReleaseWbStripe).Times(1);
+    EXPECT_CALL(allocatorCtx, ReleaseWbStripe).WillOnce([&](StripeId stripeId) {
+        // wbStripeArray should be cleared at this point
+        EXPECT_EQ(wbStripeManager->GetStripe(stripeId), nullptr);
+    });
 
     StripeId wbLsid = 0;
 
