@@ -154,11 +154,14 @@ void
 WBStripeManager::FreeWBStripeId(StripeId wblsid)
 {
     assert(!IsUnMapStripe(wblsid));
-    allocCtx->ReleaseWbStripe(wblsid);
-    QosManagerSingleton::Instance()->DecreaseUsedStripeCnt(arrayName);
 
     assert(wbStripeArray[wblsid] != nullptr);
     wbStripeArray[wblsid] = nullptr;
+
+    // THIS SHOULD BE EXECUTED AFTER UPDATING wbStripeArray
+    allocCtx->ReleaseWbStripe(wblsid);
+
+    QosManagerSingleton::Instance()->DecreaseUsedStripeCnt(arrayName);
 }
 
 int
