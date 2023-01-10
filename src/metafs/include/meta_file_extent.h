@@ -79,7 +79,7 @@ public:
         return startLpn > a->startLpn;
     }
 
-    MetaLpnType GetStartLpn(void)
+    MetaLpnType GetStartLpn(void) const
     {
         return startLpn;
     }

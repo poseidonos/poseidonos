@@ -42,6 +42,7 @@ class MockMetaFsFileControlApi : public MetaFsFileControlApi
 {
 public:
     using MetaFsFileControlApi::MetaFsFileControlApi;
+    MOCK_METHOD(void, Initialize, (const uint64_t signature));
     MOCK_METHOD(POS_EVENT_ID, Create,
         (std::string & fileName, uint64_t fileByteSize,
             MetaFilePropertySet prop, MetaVolumeType volumeType),

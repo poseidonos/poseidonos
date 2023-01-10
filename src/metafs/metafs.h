@@ -52,6 +52,7 @@
 namespace pos
 {
 class MetaFsConfigManager;
+class MetaFileContextHandler;
 
 class MetaFs : public IMountSequence
 {

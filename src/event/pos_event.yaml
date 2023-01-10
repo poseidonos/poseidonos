@@ -5657,6 +5657,13 @@ Root:
     Description: opcode is not expected value
     Cause:
     Solution:
+  -
+    Id: 4100
+    Name: MFS_FILE_INFO_IS_ALREADY_IN_FILE_CONTEXT
+    Severity:
+    Description:
+    Cause:
+    Solution:
 
   -
     Id: 4500

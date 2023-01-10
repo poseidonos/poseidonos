@@ -8,6 +8,7 @@ include $(abspath $(MFS_TOP_DIR)/../../mk)/ibof_config.mk
 
 SRCS += \
 	metafs_management_api.cpp \
+	meta_file_context_handler.cpp \
 	metafs_file_control_api.cpp \
 	metafs_io_api.cpp \
 	metafs_wbt_api.cpp \
