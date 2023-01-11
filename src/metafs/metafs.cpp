@@ -48,8 +48,8 @@ namespace pos
 {
 MetaFs::MetaFs(void)
 : mgmt(nullptr),
-  io(nullptr),
   ctrl(nullptr),
+  io(nullptr),
   wbt(nullptr),
   concurrentMetaFsTimeInterval(nullptr),
   isNpor_(false),
@@ -99,8 +99,8 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded, MetaFsManagementApi* 
     MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
     MetaStorageSubsystem* metaStorage_, TelemetryPublisher* tp)
 : mgmt(mgmt),
-  io(io),
   ctrl(ctrl),
+  io(io),
   wbt(wbt),
   isNpor_(false),
   isLoaded_(isLoaded),
@@ -312,9 +312,15 @@ MetaFs::GetTheLastValidStripeId(void)
 }
 
 int
-MetaFs::EstimateAlignedFileIOSize(MetaFilePropertySet& prop)
+MetaFs::EstimateAlignedFileIOSize(MetaFilePropertySet& prop, MetaVolumeType volumeType)
 {
-    return ctrl->EstimateAlignedFileIOSize(prop);
+    return ctrl->EstimateAlignedFileIOSize(prop, volumeType);
+}
+
+size_t
+MetaFs::GetAvailableSpace(MetaFilePropertySet& prop, MetaVolumeType volumeType)
+{
+    return ctrl->GetAvailableSpace(prop, volumeType);
 }
 
 bool

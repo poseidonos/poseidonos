@@ -83,9 +83,9 @@ public:
     virtual size_t GetAlignedFileIOSize(int fd,
         MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
-        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType);
     virtual size_t GetAvailableSpace(MetaFilePropertySet& prop,
-        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType);
     virtual size_t GetMaxMetaLpn(MetaVolumeType type);
     virtual void SetStatus(bool isNormal);
     virtual MetaFileContext* GetFileInfo(FileDescriptorType fd, MetaVolumeType type);

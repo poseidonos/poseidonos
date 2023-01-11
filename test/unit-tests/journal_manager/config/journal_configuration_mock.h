@@ -11,7 +11,7 @@ class MockJournalConfiguration : public JournalConfiguration
 public:
     using JournalConfiguration::JournalConfiguration;
     MOCK_METHOD(void, Init, (bool isWriteThroughEnabled), (override));
-    MOCK_METHOD(int, SetLogBufferSize, (uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl), (override));
+    MOCK_METHOD(int, SetLogBufferSize, (uint64_t loadedLogBufferSize, MetaFs* metaFs), (override));
     MOCK_METHOD(bool, IsEnabled, (), (override));
     MOCK_METHOD(bool, IsDebugEnabled, (), (override));
     MOCK_METHOD(bool, AreReplayWbStripesInUserArea, (), (override));

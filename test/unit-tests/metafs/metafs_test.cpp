@@ -105,6 +105,7 @@ protected:
 
     PartitionLogicalSize ptnSize;
     MetaFsStorageIoInfoList mediaInfoList;
+    MetaFilePropertySet prop;
     string fileName = "TestFile";
     uint64_t fileSize = 100;
     int arrayId = 0;
@@ -187,5 +188,39 @@ TEST_F(MetaFsFixture, CheckTheLastStripeId)
     EXPECT_CALL(*mss, TranslateAddress(_, _)).WillOnce(Return(addr));
 
     EXPECT_EQ(metaFs->GetTheLastValidStripeId(), 1);
+}
+
+TEST_F(MetaFsFixture, EstimateAlignedFileIOSize_testIfAlignedIoSizeWillBeReturned)
+{
+    const int EXPECT_SIZE = 4096;
+    EXPECT_CALL(*ctrl, EstimateAlignedFileIOSize).WillOnce(Return(EXPECT_SIZE));
+    EXPECT_EQ(metaFs->EstimateAlignedFileIOSize(prop), EXPECT_SIZE);
+}
+
+TEST_F(MetaFsFixture, GetAvailableSpace_testIfAvailableSpaceInByteWillBeReturned)
+{
+    const size_t EXPECT_SIZE_IN_BYTE = 4096 * 1000;
+    EXPECT_CALL(*ctrl, GetAvailableSpace).WillOnce(Return(EXPECT_SIZE_IN_BYTE));
+    EXPECT_EQ(metaFs->GetAvailableSpace(prop), EXPECT_SIZE_IN_BYTE);
+}
+
+TEST_F(MetaFsFixture, GetMgmtApi_testIfMetaFsManagementApiWillBeReturned)
+{
+    EXPECT_EQ(metaFs->GetMgmtApi(), mgmt);
+}
+
+TEST_F(MetaFsFixture, GetCtrlApi_testIfMetaFsFileControlApiWillBeReturned)
+{
+    EXPECT_EQ(metaFs->GetCtrlApi(), ctrl);
+}
+
+TEST_F(MetaFsFixture, GetIoApi_testIfMetaFsIoApiWillBeReturned)
+{
+    EXPECT_EQ(metaFs->GetIoApi(), io);
+}
+
+TEST_F(MetaFsFixture, GetWbtApi_testIfMetaFsWBTApiWillBeReturned)
+{
+    EXPECT_EQ(metaFs->GetWbtApi(), wbt);
 }
 } // namespace pos

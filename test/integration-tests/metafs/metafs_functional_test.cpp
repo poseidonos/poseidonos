@@ -100,11 +100,11 @@ TEST(MetaFsFunctionalTest, testIfMetaFsCanRepeatMountAndUnmount)
 
             for (auto& info : metaFs.files[arrayId])
             {
-                rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+                rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                     info.second.fileSize, info.second.prop, info.first);
                 ASSERT_EQ(rc_mgmt, EID(SUCCESS));
-                ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
-                ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+                ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+                ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
             }
 
             // unmount array
@@ -128,11 +128,11 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesCanBeCreated)
 
         for (auto& info : metaFs.files[arrayId])
         {
-            rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+            rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                 info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
         }
 
         // unmount array
@@ -154,15 +154,15 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesCannotBeCreatedDueToDuplicatedFileName
 
         for (auto& info : metaFs.files[arrayId])
         {
-            rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+            rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                 info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, EID(SUCCESS));
-            rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+            rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                 info.second.fileSize, info.second.prop, info.first);
             // then
             EXPECT_NE(rc_mgmt, EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
         }
 
         // unmount array
@@ -184,13 +184,13 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesWillNotOpenTwice)
 
         for (auto& info : metaFs.files[arrayId])
         {
-            rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+            rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                 info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
             // then
-            EXPECT_NE(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+            EXPECT_NE(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
         }
 
         // unmount array
@@ -212,13 +212,13 @@ TEST(MetaFsFunctionalTest, testIfMetaFilesWillNotCloseTwice)
 
         for (auto& info : metaFs.files[arrayId])
         {
-            rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+            rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                 info.second.fileSize, info.second.prop, info.first);
             ASSERT_EQ(rc_mgmt, EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
-            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+            ASSERT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
             // then
-            EXPECT_NE(metaFs.GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+            EXPECT_NE(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
         }
 
         // unmount array
@@ -239,12 +239,12 @@ TEST(MetaFsFunctionalTest, testIfMetaFsDeliversTheChunkSize)
 
     // when
     ASSERT_EQ(0, metaFs.GetMetaFs(arrayId)->Init());
-    rc_mgmt = metaFs.GetMetaFs(arrayId)->ctrl->Create(metaFs.files[arrayId][volumeType].fileName,
+    rc_mgmt = metaFs.GetMetaFs(arrayId)->GetCtrlApi()->Create(metaFs.files[arrayId][volumeType].fileName,
                 metaFs.files[arrayId][volumeType].fileSize, metaFs.files[arrayId][volumeType].prop, volumeType);
     ASSERT_EQ(rc_mgmt, EID(SUCCESS));
 
     // then
-    EXPECT_EQ(metaFs.GetMetaFs(arrayId)->ctrl->GetAlignedFileIOSize(metaFs.files[arrayId][volumeType].fd, volumeType), chunkSize);
+    EXPECT_EQ(metaFs.GetMetaFs(arrayId)->GetCtrlApi()->GetAlignedFileIOSize(metaFs.files[arrayId][volumeType].fd, volumeType), chunkSize);
 
     metaFs.GetMetaFs(arrayId)->Dispose();
 }

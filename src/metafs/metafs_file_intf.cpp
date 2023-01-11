@@ -75,7 +75,7 @@ int
 MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
-    POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer, storageType);
+    POS_EVENT_ID rc = metaFs->GetIoApi()->Read(fd, fileOffset, length, buffer, storageType);
 
     if (EID(SUCCESS) != rc)
         return ERRID(MFS_FILE_READ_FAILED);
@@ -87,7 +87,7 @@ int
 MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
-    POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer, storageType);
+    POS_EVENT_ID rc = metaFs->GetIoApi()->Write(fd, fileOffset, length, buffer, storageType);
 
     if (EID(SUCCESS) != rc)
         return ERRID(MFS_FILE_WRITE_FAILED);
@@ -112,7 +112,7 @@ MetaFsFileIntf::_GetBaseLpn(MetaVolumeType type)
 {
     if (UINT64_MAX == baseLpn)
     {
-        MetaFileContext* ctx = metaFs->ctrl->GetFileInfo(fd, type);
+        MetaFileContext* ctx = metaFs->GetCtrlApi()->GetFileInfo(fd, type);
 
         assert(nullptr != ctx);
         assert(ctx->extentsCount != 0);
@@ -176,7 +176,7 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     }
     else
     {
-        rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
+        rc = metaFs->GetIoApi()->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
     }
 
     if (EID(SUCCESS) != rc)
@@ -208,7 +208,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 int
 MetaFsFileIntf::Create(uint64_t fileSize)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Create(fileName, fileSize, fileProperty, volumeType);
     if (EID(SUCCESS) != rc)
     {
         return -(int)rc;
@@ -222,7 +222,7 @@ MetaFsFileIntf::Create(uint64_t fileSize)
 int
 MetaFsFileIntf::Open(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Open(fileName, fd, volumeType);
 
     if (EID(SUCCESS) != rc)
     {
@@ -235,7 +235,7 @@ MetaFsFileIntf::Open(void)
 int
 MetaFsFileIntf::Close(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Close(fd, volumeType);
 
     if (EID(SUCCESS) != rc)
     {
@@ -248,7 +248,7 @@ MetaFsFileIntf::Close(void)
 bool
 MetaFsFileIntf::DoesFileExist(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->CheckFileExist(fileName, volumeType);
 
     return (EID(SUCCESS) == rc);
 }
@@ -256,7 +256,7 @@ MetaFsFileIntf::DoesFileExist(void)
 int
 MetaFsFileIntf::Delete(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Delete(fileName, volumeType);
 
     if (EID(SUCCESS) != rc)
     {
@@ -269,6 +269,6 @@ MetaFsFileIntf::Delete(void)
 uint64_t
 MetaFsFileIntf::GetFileSize(void)
 {
-    return metaFs->ctrl->GetFileSize(fd, volumeType);
+    return metaFs->GetCtrlApi()->GetFileSize(fd, volumeType);
 }
 } // namespace pos
