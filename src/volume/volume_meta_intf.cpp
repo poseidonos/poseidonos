@@ -33,6 +33,7 @@
 #include "src/volume/volume_meta_intf.h"
 
 #include <rapidjson/document.h>
+#include <atomic>
 #include <string>
 #include "src/metafs/include/metafs_service.h"
 #include "src/helper/json/json_helper.h"
@@ -44,19 +45,19 @@ using namespace std;
 
 namespace pos
 {
+const std::string VolumeMetaIntf::FILE_NAME = "vbr";
+
 int
 VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
     const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile)
 {
-    string volFile = "vbr";
-    uint32_t fileSize = 256 * 1024; // 256KB
     unique_ptr<MetaFsFileIntf> file = move(testFile);
-    if (nullptr == file)
+    if (!file)
     {
-        file = make_unique<MetaFsFileIntf>(volFile, arrayID, MetaFileType::General);
+        file = make_unique<MetaFsFileIntf>(FILE_NAME, arrayID, MetaFileType::General);
     }
 
-    if (false == file->DoesFileExist())
+    if (!file->DoesFileExist())
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED),
             "array_name: {}, array_id: {}",
@@ -73,17 +74,16 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
-    auto rBuf = _AllocateBuffer(fileSize);
-    memset(rBuf.get(), 0, fileSize);
+    auto rBuf = _AllocateBuffer(FILE_SIZE);
+    memset(rBuf.get(), 0, FILE_SIZE);
 
-    rc = file->IssueIO(MetaFsIoOpcode::Read, 0, file->GetFileSize(), rBuf.get());
+    rc = _ReadMetaFile(file.get(), (char*)rBuf.get());
     if (EID(SUCCESS) != rc)
     {
-        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_READ_FAILED),
-            "error: {}, array_name: {}, array_id: {}",
+        POS_TRACE_ERROR(rc, "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
         _CloseFile(move(file));
-        return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
+        return rc;
     }
 
     rc = _CloseFile(move(file));
@@ -92,43 +92,9 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         return rc;
     }
 
-    string contents = rBuf.get();
-    if (contents != "")
+    if (!string(rBuf.get()).empty())
     {
-        try
-        {
-            rapidjson::Document doc;
-            doc.Parse<0>(rBuf.get());
-            if (doc.HasMember("volumes"))
-            {
-                for (rapidjson::SizeType i = 0; i < doc["volumes"].Size(); i++)
-                {
-                    int id = doc["volumes"][i]["id"].GetInt();
-                    string name = doc["volumes"][i]["name"].GetString();
-                    string uuid = doc["volumes"][i]["uuid"].GetString();
-                    uint64_t total = doc["volumes"][i]["total"].GetUint64();
-                    uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
-                    uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
-                    uint64_t miniops = doc["volumes"][i]["miniops"].GetUint64();
-                    uint64_t minbw = doc["volumes"][i]["minbw"].GetUint64();
-                    uint32_t nsid = doc["volumes"][i]["nsid"].GetUint();
-                    DataAttribute dataAttribute = ((DataAttribute)doc["volumes"][i]["dataattribute"].GetInt());
-                    ReplicationRole volumeRole = ((ReplicationRole)doc["volumes"][i]["role"].GetInt());
-
-                    VolumeBase* volume = new Volume(arrayID, arrayName, dataAttribute, uuid,
-                                name, total, nsid,
-                                maxiops, miniops, maxbw, minbw,
-                                volumeRole);
-                    volList.Add(volume, id);
-                }
-            }
-        }
-        catch (const exception& e)
-        {
-            POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN),
-                "reason: {}, array_name: {}", e.what(), arrayName);
-            return EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN);
-        }
+        return _FillVolumeList(volList, arrayName, arrayID, rBuf.get());
     }
 
     return EID(SUCCESS);
@@ -138,53 +104,16 @@ int
 VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
     const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile)
 {
-    string volFile = "vbr";
-    uint32_t fileSize = 256 * 1024; // 256KB
     string contents = "";
     unique_ptr<MetaFsFileIntf> file = move(testFile);
     if (nullptr == file)
     {
-        file = make_unique<MetaFsFileIntf>(volFile, arrayID, MetaFileType::General);
-    }
-
-    int vol_cnt = volList.Count();
-    if (vol_cnt > 0)
-    {
-        JsonElement root("");
-        JsonArray array("volumes");
-
-        int idx = -1;
-        while (true)
-        {
-            VolumeBase* vol = volList.Next(idx);
-            if (vol == nullptr)
-            {
-                break;
-            }
-            if (vol->IsValid() == true)
-            {
-                JsonElement elem("");
-                elem.SetAttribute(JsonAttribute("name", "\"" + vol->GetVolumeName() + "\""));
-                elem.SetAttribute(JsonAttribute("uuid", "\"" + vol->GetUuid() + "\""));
-                elem.SetAttribute(JsonAttribute("id", to_string(vol->ID)));
-                elem.SetAttribute(JsonAttribute("total", to_string(vol->GetTotalSize())));
-                elem.SetAttribute(JsonAttribute("maxiops", to_string(vol->GetMaxIOPS())));
-                elem.SetAttribute(JsonAttribute("maxbw", to_string(vol->GetMaxBW())));
-                elem.SetAttribute(JsonAttribute("miniops", to_string(vol->GetMinIOPS())));
-                elem.SetAttribute(JsonAttribute("minbw", to_string(vol->GetMinBW())));
-                elem.SetAttribute(JsonAttribute("nsid", to_string(vol->GetNsid())));
-                elem.SetAttribute(JsonAttribute("dataattribute", to_string(vol->GetDataAttribute())));
-                elem.SetAttribute(JsonAttribute("role", to_string(vol->GetReplicationRole())));                
-                array.AddElement(elem);
-            }
-        }
-        root.SetArray(array);
-        contents = root.ToJson();
+        file = make_unique<MetaFsFileIntf>(FILE_NAME, arrayID, MetaFileType::General);
     }
 
     if (false == file->DoesFileExist())
     {
-        if (EID(SUCCESS) != file->Create(fileSize))
+        if (EID(SUCCESS) != file->Create(FILE_SIZE))
         {
             POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CREATION_FAILED),
                 "array_name: {}", arrayName);
@@ -201,27 +130,25 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
         return EID(VOL_UNABLE_TO_SAVE_OPEN_FAILED);
     }
 
-    uint32_t contentsSize = contents.size();
-    if (contentsSize >= fileSize)
+    contents = _CreateJsonFrom(volList);
+    if (contents.size() >= FILE_SIZE)
     {
         POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW),
             "array_name: {}", arrayName);
         return EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW);
     }
 
-    auto wBuf = _AllocateBuffer(fileSize);
-    memset(wBuf.get(), 0, fileSize);
-    strncpy(wBuf.get(), contents.c_str(), contentsSize);
+    auto wBuf = _AllocateBuffer(FILE_SIZE);
+    memset(wBuf.get(), 0, FILE_SIZE);
+    strncpy(wBuf.get(), contents.c_str(), contents.size());
 
-    rc = file->IssueIO(MetaFsIoOpcode::Write, 0, file->GetFileSize(), wBuf.get());
-
+    rc = _WriteBuffer(file.get(), (char*)wBuf.get());
     if (EID(SUCCESS) != rc)
     {
-        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED),
-            "error: {}, array_name: {}, array_id: {}",
+        POS_TRACE_ERROR(rc, "error: {}, array_name: {}, array_id: {}",
             rc, arrayName, arrayID);
         _CloseFile(move(file));
-        return EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
+        return rc;
     }
 
     rc = _CloseFile(move(file));
@@ -232,6 +159,157 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
 
     POS_TRACE_DEBUG(EID(SUCCESS), "SaveVolumes succeed");
     return EID(SUCCESS);
+}
+
+POS_EVENT_ID
+VolumeMetaIntf::_FillVolumeList(VolumeList& volList, const std::string& arrayName,
+    const int arrayID,const char *str)
+{
+    try
+    {
+        rapidjson::Document doc;
+        doc.Parse<0>(str);
+        if (doc.HasMember("volumes"))
+        {
+            for (rapidjson::SizeType i = 0; i < doc["volumes"].Size(); i++)
+            {
+                int id = doc["volumes"][i]["id"].GetInt();
+                string name = doc["volumes"][i]["name"].GetString();
+                string uuid = doc["volumes"][i]["uuid"].GetString();
+                uint64_t total = doc["volumes"][i]["total"].GetUint64();
+                uint64_t maxiops = doc["volumes"][i]["maxiops"].GetUint64();
+                uint64_t maxbw = doc["volumes"][i]["maxbw"].GetUint64();
+                uint64_t miniops = doc["volumes"][i]["miniops"].GetUint64();
+                uint64_t minbw = doc["volumes"][i]["minbw"].GetUint64();
+                uint32_t nsid = doc["volumes"][i]["nsid"].GetUint();
+                DataAttribute dataAttribute = ((DataAttribute)doc["volumes"][i]["dataattribute"].GetInt());
+                ReplicationRole volumeRole = ((ReplicationRole)doc["volumes"][i]["role"].GetInt());
+
+                VolumeBase* volume = new Volume(arrayID, arrayName, dataAttribute, uuid,
+                            name, total, nsid,
+                            maxiops, miniops, maxbw, minbw,
+                            volumeRole);
+                volList.Add(volume, id);
+            }
+        }
+    }
+    catch (const exception& e)
+    {
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN),
+            "reason: {}, array_name: {}", e.what(), arrayName);
+        return EID(VOL_UNABLE_TO_LOAD_CONTENT_BROKEN);
+    }
+    return EID(SUCCESS);
+}
+
+std::string
+VolumeMetaIntf::_CreateJsonFrom(VolumeList& volList)
+{
+    if (0 == volList.Count())
+    {
+        return "";
+    }
+
+    JsonElement root("");
+    JsonArray array("volumes");
+
+    int idx = -1;
+    while (true)
+    {
+        VolumeBase* vol = volList.Next(idx);
+        if (vol == nullptr)
+        {
+            break;
+        }
+        if (vol->IsValid() == true)
+        {
+            JsonElement elem("");
+            elem.SetAttribute(JsonAttribute("name", "\"" + vol->GetVolumeName() + "\""));
+            elem.SetAttribute(JsonAttribute("uuid", "\"" + vol->GetUuid() + "\""));
+            elem.SetAttribute(JsonAttribute("id", to_string(vol->ID)));
+            elem.SetAttribute(JsonAttribute("total", to_string(vol->GetTotalSize())));
+            elem.SetAttribute(JsonAttribute("maxiops", to_string(vol->GetMaxIOPS())));
+            elem.SetAttribute(JsonAttribute("maxbw", to_string(vol->GetMaxBW())));
+            elem.SetAttribute(JsonAttribute("miniops", to_string(vol->GetMinIOPS())));
+            elem.SetAttribute(JsonAttribute("minbw", to_string(vol->GetMinBW())));
+            elem.SetAttribute(JsonAttribute("nsid", to_string(vol->GetNsid())));
+            elem.SetAttribute(JsonAttribute("dataattribute", to_string(vol->GetDataAttribute())));
+            elem.SetAttribute(JsonAttribute("role", to_string(vol->GetReplicationRole())));
+            array.AddElement(elem);
+        }
+    }
+    root.SetArray(array);
+    return root.ToJson();
+}
+
+
+int
+VolumeMetaIntf::_ReadMetaFile(MetaFsFileIntf* file, char* buf)
+{
+    std::atomic<bool> readDone;
+    int readResult = 0;
+
+    AsyncMetaFileIoCtx* writeRequest = new AsyncMetaFileIoCtx();
+    writeRequest->SetIoInfo(MetaFsIoOpcode::Read, 0, FILE_SIZE, buf);
+    writeRequest->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
+    writeRequest->SetCallback([&](auto arg) {
+            readDone = true;
+            readResult = arg->GetError();
+            delete arg;
+        });
+
+    int rc = file->AsyncIO(writeRequest);
+    if (EID(SUCCESS) != rc)
+    {
+        return rc;
+    }
+
+    while (!readDone)
+    {
+        usleep(1);
+    }
+
+    if (readResult)
+    {
+        return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
+    }
+
+    return rc;
+}
+
+int
+VolumeMetaIntf::_WriteBuffer(MetaFsFileIntf* file, char* buf)
+{
+    std::atomic<bool> writeDone;
+    int writeResult = 0;
+
+    AsyncMetaFileIoCtx* writeRequest = new AsyncMetaFileIoCtx();
+    writeRequest->SetIoInfo(MetaFsIoOpcode::Write, 0, FILE_SIZE, buf);
+    writeRequest->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
+    writeRequest->SetCallback([&](auto arg) {
+            writeDone = true;
+            writeResult = arg->GetError();
+            delete arg;
+        });
+
+    int rc = file->AsyncIO(writeRequest);
+
+    if (EID(SUCCESS) != rc)
+    {
+        return rc;
+    }
+
+    while (!writeDone)
+    {
+        usleep(1);
+    }
+
+    if (writeResult)
+    {
+        return EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
+    }
+
+    return rc;
 }
 
 int

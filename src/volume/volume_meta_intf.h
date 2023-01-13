@@ -52,11 +52,19 @@ public:
         const int arrayID, std::unique_ptr<MetaFsFileIntf> testFile = nullptr);
 
 private:
+    static POS_EVENT_ID _FillVolumeList(VolumeList& volList, const std::string& arrayName,
+        const int arrayID,const char *str);
+    static std::string _CreateJsonFrom(VolumeList& volList);
+    static int _ReadMetaFile(MetaFsFileIntf* file, char* buf);
+    static int _WriteBuffer(MetaFsFileIntf* file, char* buf);
     static int _CloseFile(unique_ptr<MetaFsFileIntf> file);
     static std::unique_ptr<char[]> _AllocateBuffer(uint32_t size)
     {
         return std::unique_ptr<char[]>(new char[size]);
     }
+
+    static const std::string FILE_NAME;
+    static const uint32_t FILE_SIZE = 256 * 1024; // 256KB
 };
 } // namespace pos
 
