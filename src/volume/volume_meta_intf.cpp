@@ -246,7 +246,7 @@ VolumeMetaIntf::_CreateJsonFrom(VolumeList& volList)
 int
 VolumeMetaIntf::_ReadMetaFile(MetaFsFileIntf* file, char* buf)
 {
-    std::atomic<bool> readDone;
+    std::atomic<bool> readDone{false};
     int readResult = 0;
 
     AsyncMetaFileIoCtx* writeRequest = new AsyncMetaFileIoCtx();
@@ -280,7 +280,7 @@ VolumeMetaIntf::_ReadMetaFile(MetaFsFileIntf* file, char* buf)
 int
 VolumeMetaIntf::_WriteBuffer(MetaFsFileIntf* file, char* buf)
 {
-    std::atomic<bool> writeDone;
+    std::atomic<bool> writeDone{false};
     int writeResult = 0;
 
     AsyncMetaFileIoCtx* writeRequest = new AsyncMetaFileIoCtx();
