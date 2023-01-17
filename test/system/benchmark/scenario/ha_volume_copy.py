@@ -30,7 +30,7 @@ def play(tgts, inits, scenario, timestamp, data):
                 test_case["name"] = f"{test_case_num:02d}_{bs}_{rw}"
                 test_case["bs"] = bs
                 test_case["rw"] = rw
-                test_case["io_size"] = "30m"
+                test_case["io_size"] = "100%"
                 test_case["verify"] = "pattern"
                 test_case["verify_pattern"] = pattern
                 test_case_num += 1
