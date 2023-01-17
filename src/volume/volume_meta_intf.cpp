@@ -77,11 +77,12 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
     auto rBuf = _AllocateBuffer(FILE_SIZE);
     memset(rBuf.get(), 0, FILE_SIZE);
 
-    rc = _ReadMetaFile(file.get(), (char*)rBuf.get());
+    rc = _IssueIoAndWait(MetaFsIoOpcode::Read, file.get(), (char*)rBuf.get());
     if (EID(SUCCESS) != rc)
     {
-        POS_TRACE_ERROR(rc, "error: {}, array_name: {}, array_id: {}",
-            rc, arrayName, arrayID);
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_LOAD_READ_FAILED),
+            "array_name:{}, array_id:{}, error_code:{}",
+            arrayName, arrayID, rc);
         _CloseFile(move(file));
         return rc;
     }
@@ -142,11 +143,12 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
     memset(wBuf.get(), 0, FILE_SIZE);
     strncpy(wBuf.get(), contents.c_str(), contents.size());
 
-    rc = _WriteBuffer(file.get(), (char*)wBuf.get());
+    rc = _IssueIoAndWait(MetaFsIoOpcode::Write, file.get(), (char*)wBuf.get());
     if (EID(SUCCESS) != rc)
     {
-        POS_TRACE_ERROR(rc, "error: {}, array_name: {}, array_id: {}",
-            rc, arrayName, arrayID);
+        POS_TRACE_ERROR(EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED),
+            "array_name:{}, array_id:{}, error_code:{}",
+            arrayName, arrayID, rc);
         _CloseFile(move(file));
         return rc;
     }
@@ -244,72 +246,25 @@ VolumeMetaIntf::_CreateJsonFrom(VolumeList& volList)
 
 
 int
-VolumeMetaIntf::_ReadMetaFile(MetaFsFileIntf* file, char* buf)
+VolumeMetaIntf::_IssueIoAndWait(const MetaFsIoOpcode opCode, MetaFsFileIntf* file,
+    char* buf)
 {
-    std::atomic<bool> readDone{false};
-    int readResult = 0;
+    std::atomic<bool> isDone{false};
+    int ioResult = 0;
+    auto request = _CreateIoRequest(opCode, file, buf, isDone, ioResult);
 
-    AsyncMetaFileIoCtx* writeRequest = new AsyncMetaFileIoCtx();
-    writeRequest->SetIoInfo(MetaFsIoOpcode::Read, 0, FILE_SIZE, buf);
-    writeRequest->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
-    writeRequest->SetCallback([&](auto arg) {
-            readDone = true;
-            readResult = arg->GetError();
-            delete arg;
-        });
-
-    int rc = file->AsyncIO(writeRequest);
+    int rc = file->AsyncIO(request);
     if (EID(SUCCESS) != rc)
     {
         return rc;
     }
 
-    while (!readDone)
+    while (!isDone)
     {
         usleep(1);
     }
 
-    if (readResult)
-    {
-        return EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
-    }
-
-    return rc;
-}
-
-int
-VolumeMetaIntf::_WriteBuffer(MetaFsFileIntf* file, char* buf)
-{
-    std::atomic<bool> writeDone{false};
-    int writeResult = 0;
-
-    AsyncMetaFileIoCtx* writeRequest = new AsyncMetaFileIoCtx();
-    writeRequest->SetIoInfo(MetaFsIoOpcode::Write, 0, FILE_SIZE, buf);
-    writeRequest->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
-    writeRequest->SetCallback([&](auto arg) {
-            writeDone = true;
-            writeResult = arg->GetError();
-            delete arg;
-        });
-
-    int rc = file->AsyncIO(writeRequest);
-
-    if (EID(SUCCESS) != rc)
-    {
-        return rc;
-    }
-
-    while (!writeDone)
-    {
-        usleep(1);
-    }
-
-    if (writeResult)
-    {
-        return EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
-    }
-
-    return rc;
+    return ioResult;
 }
 
 int
@@ -331,5 +286,20 @@ VolumeMetaIntf::_CloseFile(unique_ptr<MetaFsFileIntf> file)
     }
 
     return EID(SUCCESS);
+}
+
+AsyncMetaFileIoCtx*
+VolumeMetaIntf::_CreateIoRequest(const MetaFsIoOpcode opCode,
+    MetaFsFileIntf* file, char* buf, std::atomic<bool>& doneFlag, int& ioResult)
+{
+    AsyncMetaFileIoCtx* request = new AsyncMetaFileIoCtx();
+    request->SetIoInfo(opCode, 0, FILE_SIZE, buf);
+    request->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
+    request->SetCallback([&](auto arg) {
+            doneFlag = true;
+            ioResult = arg->GetError();
+            delete arg;
+        });
+    return request;
 }
 } // namespace pos
