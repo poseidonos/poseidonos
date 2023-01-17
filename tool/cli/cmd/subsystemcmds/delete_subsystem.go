@@ -3,7 +3,7 @@ package subsystemcmds
 import (
 	"os"
 
-	pb "cli/api"
+	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"

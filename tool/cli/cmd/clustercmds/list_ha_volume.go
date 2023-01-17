@@ -1,7 +1,7 @@
 package clustercmds
 
 import (
-	pb "cli/api"
+	pb "kouros/api"
 	"fmt"
 	"log"
 

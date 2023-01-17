@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"log"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"

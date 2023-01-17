@@ -6,10 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"kouros"
+	"kouros/pos"
 	"pnconnector/src/log"
 	"time"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"google.golang.org/grpc"
 )
@@ -22,6 +24,27 @@ const (
 	unmountArrayCmdTimeout uint32 = 1800
 	mountArrayCmdTimeout   uint32 = 600
 )
+
+func GetPOSManager() (pos.POSManager, error) {
+	posMngr, err := kouros.NewPOSManager(pos.GRPC)
+	if err != nil {
+		return nil, err
+	}
+
+	nodeName := globals.NodeName
+	gRpcServerAddress := globals.GrpcServerAddress
+
+	if nodeName != "" {
+		var err error
+		gRpcServerAddress, err = GetIpv4(nodeName)
+		if err != nil {
+			return nil, errors.New("an error occured while getting the ipv4 address of a node: " + err.Error())
+		}
+	}
+
+	posMngr.Init("cli", gRpcServerAddress)
+	return posMngr, err
+}
 
 func dialToCliServer() (*grpc.ClientConn, error) {
 	nodeName := globals.NodeName
@@ -699,94 +722,6 @@ func SendApplyLogFilter(req *pb.ApplyLogFilterRequest) (*pb.ApplyLogFilterRespon
 	return res, err
 }
 
-func SendCreateDevice(req *pb.CreateDeviceRequest) (*pb.CreateDeviceResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.CreateDevice(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendScanDevice(req *pb.ScanDeviceRequest) (*pb.ScanDeviceResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.ScanDevice(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendListDevice(req *pb.ListDeviceRequest) (*pb.ListDeviceResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.ListDevice(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendGetSmartLog(req *pb.GetSmartLogRequest) (*pb.GetSmartLogResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.GetSmartLog(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
 func SendCreateSubsystem(req *pb.CreateSubsystemRequest) (*pb.CreateSubsystemResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
@@ -1114,24 +1049,24 @@ func SendQosResetVolumePolicy(req *pb.QosResetVolumePolicyRequest) (*pb.QosReset
 }
 
 func SendVolumeRename(req *pb.VolumeRenameRequest) (*pb.VolumeRenameResponse, error) {
-    conn, err := dialToCliServer()
-    if err != nil {
-        log.Error(err)
-        errToReturn := errors.New(dialErrorMsg)
-        return nil, errToReturn
-    }
-    defer conn.Close()
+	conn, err := dialToCliServer()
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
 
-    c := pb.NewPosCliClient(conn)
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-    defer cancel()
-    res, err := c.VolumeRename(ctx, req)
-    if err != nil {
-        log.Error("error: ", err.Error())
-        return nil, err
-    }
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+	res, err := c.VolumeRename(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
 
-    return res, err
+	return res, err
 
 }
 
@@ -1158,24 +1093,24 @@ func SendListWBT(req *pb.ListWBTRequest) (*pb.ListWBTResponse, error) {
 }
 
 func SendListQOSPolicy(req *pb.ListQOSPolicyRequest) (*pb.ListQOSPolicyResponse, error) {
-    conn, err := dialToCliServer()
-    if err != nil {
-        log.Error(err)
-        errToReturn := errors.New(dialErrorMsg)
-        return nil, errToReturn
-    }
-    defer conn.Close()
+	conn, err := dialToCliServer()
+	if err != nil {
+		log.Error(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
 
-    c := pb.NewPosCliClient(conn)
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-    defer cancel()
-    res, err := c.ListQOSPolicy(ctx, req)
-    if err != nil {
-        log.Error("error: ", err.Error())
-        return nil, err
-    }
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
+	defer cancel()
+	res, err := c.ListQOSPolicy(ctx, req)
+	if err != nil {
+		log.Error("error: ", err.Error())
+		return nil, err
+	}
 
-    return res, err
+	return res, err
 }
 
 func SendWBT(req *pb.WBTRequest) (*pb.WBTResponse, error) {
