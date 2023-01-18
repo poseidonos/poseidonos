@@ -30,22 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "src/array/device/array_device_list.h"
-#include "src/device/device_manager.h"
-
-#include <tuple>
+#include "write_bypass.h"
 
 using namespace std;
 
 namespace pos
 {
-class ArrayDevice;
-class IArrayDevMgr
+unordered_set<string> WriteByPass::bypassArrays;
+void WriteByPass::SetBypass(string arrayUuid, bool value)
 {
-public:
-    explicit IArrayDevMgr(DeviceManager* sysDevMgr);
-    virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(UblockSharedPtr uBlock) = 0;
-};
+    if (value == true)
+    {
+        bypassArrays.insert(arrayUuid);
+    }
+    else
+    {
+        bypassArrays.erase(arrayUuid);
+    }
+}
+bool WriteByPass::GetBypass(string arrayUuid)
+{
+    if (bypassArrays.find(arrayUuid) != bypassArrays.end())
+    {
+        return true;
+    }
+    return false;
+}
 } // namespace pos

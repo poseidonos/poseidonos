@@ -43,6 +43,7 @@
 #include "src/metadata/gc_map_update.h"
 #include "src/metadata/meta_event_factory.h"
 #include "src/metadata/stripe_map_update.h"
+#include "src/wbt/write_bypass/write_bypass.h"
 
 namespace pos
 {
@@ -71,7 +72,7 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
         metaEventFactory->CreateBlockMapUpdateEvent(volumeIo);
     blockMapUpdate->SetCallee(callback);
 
-    if (journal->IsEnabled() == true && arrayInfo->GetNeedWriteBypass() == false)
+    if (journal->IsEnabled() == true && WriteByPass::GetBypass(to_string(arrayInfo->GetUniqueId())) == false)
     {
         result = journalWriter->AddBlockMapUpdatedLog(volumeIo, blockMapUpdate);
     }

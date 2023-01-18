@@ -30,12 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
 
-#include "i_array_device_manager.h"
+#include <string>
+#include <unordered_set>
+
+using namespace std;
 
 namespace pos
 {
-IArrayDevMgr::IArrayDevMgr(DeviceManager* sysDevMgr)
+class WriteByPass
 {
-}
+public:
+    static void SetBypass(string arrayUuid, bool value);
+    static bool GetBypass(string arrayUuid);
+private:
+    static unordered_set<string> bypassArrays;
+};
 } // namespace pos

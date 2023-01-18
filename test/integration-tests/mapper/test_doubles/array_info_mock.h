@@ -58,9 +58,7 @@ public:
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
     virtual bool IsWriteThroughEnabled(void) override;
-#ifdef _ADMIN_ENABLED
-    IArrayDevMgr* GetArrayManager(void) override { return nullptr; }
-#endif
+    vector<IArrayDevice*> GetArrayDevices(void) override;
 
 private:
     PartitionLogicalSize* pls;

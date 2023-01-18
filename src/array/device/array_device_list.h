@@ -46,14 +46,6 @@ namespace pos
 {
 using ArrayDeviceSet = DeviceSet<ArrayDevice*>;
 
-enum class ArrayDeviceType
-{
-    NONE = 0,
-    NVM,
-    DATA,
-    SPARE
-};
-
 class ArrayDeviceList
 {
 public:

@@ -10,7 +10,6 @@
 #include "test/unit-tests/admin/smart_log_mgr_mock.h"
 #include "test/unit-tests/admin/smart_log_page_handler_mock.h"
 #include "test/unit-tests/array/device/array_device_manager_mock.h"
-#include "test/unit-tests/array/device/i_array_device_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/device/i_dev_info_mock.h"
 #include "test/unit-tests/device/i_io_dispatcher_mock.h"
@@ -27,7 +26,6 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Heap_Nine_Args)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
     NiceMock<MockSmartLogMgr> smartLogMgr;
     uint32_t originCore = 0;
 
@@ -42,7 +40,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Heap_Nine_Args)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
-    AdminCommandHandler* adminCommandHandler = new AdminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr);
+    AdminCommandHandler* adminCommandHandler = new AdminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher);
     delete req;
     delete bioPos;
     delete adminCommandHandler;
@@ -52,7 +50,6 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Heap_eight_Args)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
     uint32_t originCore = 0;
 
     struct spdk_nvmf_request* req = new struct spdk_nvmf_request();
@@ -66,7 +63,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Heap_eight_Args)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
-    AdminCommandHandler* adminCommandHandler = new AdminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr);
+    AdminCommandHandler* adminCommandHandler = new AdminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher);
     delete req;
     delete bioPos;
     delete adminCommandHandler;
@@ -77,7 +74,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Stack_eight_Args)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     uint32_t originCore = 0;
 
     struct spdk_nvmf_request* req = new struct spdk_nvmf_request();
@@ -91,7 +88,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Stack_eight_Args)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher);
     delete req;
     delete bioPos;
 }
@@ -101,7 +98,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Stack_Nine_args)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     NiceMock<MockSmartLogMgr> smartLogMgr;
     uint32_t originCore = 0;
 
@@ -116,7 +113,7 @@ TEST(AdminCommandHandler, AdminCommandHandler_Constructor_Stack_Nine_args)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &smartLogMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher,&smartLogMgr);
     delete req;
     delete bioPos;
 }
@@ -126,7 +123,7 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledFalse)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
     uint32_t originCore = 0;
 
@@ -145,7 +142,7 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledFalse)
 
     ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(false));
 
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &mockSmartLogMgr);
 
     bool expected = true, actual;
     actual = adminCommandHandler.Execute();
@@ -158,7 +155,7 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledTrue)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
     NiceMock<MockEventScheduler> mockEventScheduler;
     ON_CALL(mockEventScheduler, EnqueueEvent(_)).WillByDefault(Return());
@@ -177,7 +174,7 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledTrue)
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
     ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(true));
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr, &mockEventScheduler);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &mockSmartLogMgr, &mockEventScheduler);
 
     bool expected = true, actual;
     actual = adminCommandHandler.Execute();
@@ -190,7 +187,7 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledTrue_ExecuteReturnFalse)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
     ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(true));
     uint32_t originCore = 0;
@@ -206,11 +203,11 @@ TEST(AdminCommandHandler, Execute_Run_SmartEnabledTrue_ExecuteReturnFalse)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &mockSmartLogMgr);
 
     ON_CALL(mockSmartLogMgr, GetSmartLogEnabled()).WillByDefault(Return(true));
 
-    NiceMock<MockSmartLogPageHandler> mockSmartLogPageHandler(&req->cmd->nvme_cmd, &ibofIo, req->data, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr);
+    NiceMock<MockSmartLogPageHandler> mockSmartLogPageHandler(&req->cmd->nvme_cmd, &ibofIo, req->data, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &mockSmartLogMgr);
     ON_CALL(mockSmartLogPageHandler, Execute()).WillByDefault(Return(false));
 
     bool expected = true, actual;
@@ -223,7 +220,7 @@ TEST(AdminCommandHandler, Execute_Run_OtherLid)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
     uint32_t originCore = 0;
 
@@ -240,7 +237,7 @@ TEST(AdminCommandHandler, Execute_Run_OtherLid)
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
 
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &mockSmartLogMgr);
 
     bool expected = true, actual;
     actual = adminCommandHandler.Execute();
@@ -253,7 +250,7 @@ TEST(AdminCommandHandler, Execute_Run_OtherIoType)
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockIDevInfo> devInfo;
     NiceMock<MockIIODispatcher> ioDispatcher;
-    NiceMock<MockIArrayDevMgr> arrayDevMgr(NULL);
+
     NiceMock<MockSmartLogMgr> mockSmartLogMgr;
     uint32_t originCore = 0;
 
@@ -267,7 +264,7 @@ TEST(AdminCommandHandler, Execute_Run_OtherIoType)
     bioPos->internal.caller_ctx = (void*)req;
     ibofIo.context = (void*)bioPos;
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
-    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &arrayDevMgr, &mockSmartLogMgr);
+    AdminCommandHandler adminCommandHandler(&ibofIo, originCore, callback, &arrayInfo, &devInfo, &ioDispatcher, &mockSmartLogMgr);
 
     bool expected = true, actual;
     actual = adminCommandHandler.Execute();

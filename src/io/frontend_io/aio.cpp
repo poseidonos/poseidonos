@@ -372,8 +372,7 @@ AIO::SubmitAsyncAdmin(pos_io& io, IArrayInfo* arrayInfo)
     CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext, originCore));
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
-    IArrayDevMgr* arrayDevMgr = arrayInfo->GetArrayManager();
-    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, arrayInfo, devmgr, ioDispatcher, arrayDevMgr));
+    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, arrayInfo, devmgr, ioDispatcher));
     EventSchedulerSingleton::Instance()->EnqueueEvent(event);
     return;
 }

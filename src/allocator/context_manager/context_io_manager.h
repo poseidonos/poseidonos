@@ -37,6 +37,7 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
 {

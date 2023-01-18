@@ -47,7 +47,6 @@ namespace pos
 {
 ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName)
 :
-    IArrayDevMgr(sysDevMgr),
     sysDevMgr_(sysDevMgr),
     arrayName_(arrayName)
 {
@@ -298,6 +297,28 @@ ArrayDeviceManager::RemoveSpare(string devName)
         return eventId;
     }
     return devs_->RemoveSpare(dev);
+}
+
+vector<ArrayDevice*>
+ArrayDeviceManager::GetDevs(void)
+{
+    vector<ArrayDevice*> ret;
+
+    auto devs = devs_->GetDevs();
+    for (auto dev : devs.data)
+    {
+        ret.push_back(dev);
+    }
+    for (auto dev : devs.spares)
+    {
+        ret.push_back(dev);
+    }
+    for (auto dev : devs.nvm)
+    {
+        ret.push_back(dev);
+    }
+
+    return ret;
 }
 
 int

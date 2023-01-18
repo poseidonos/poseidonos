@@ -36,7 +36,6 @@ namespace pos
 {
 ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName)
 :
-    IArrayDevMgr(sysDevMgr),
     sysDevMgr_(sysDevMgr),
     arrayName_(arrayName)
 {
