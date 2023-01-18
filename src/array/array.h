@@ -100,7 +100,7 @@ public:
     virtual int RemoveSpare(string devName);
     virtual int ReplaceDevice(string devName);
     virtual int Rebuild(void);
-    virtual int DetachDevice(UblockSharedPtr uBlock);
+    virtual int DetachDevice(IArrayDevice* dev);
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual string Serialize(void);
@@ -137,8 +137,8 @@ private:
     int _Flush(void);
     int _Flush(ArrayMeta& meta);
     void _RebuildDone(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildResult result);
-    void _DetachSpare(ArrayDevice* target);
-    void _DetachData(ArrayDevice* target);
+    void _DetachSpare(IArrayDevice* target);
+    void _DetachData(IArrayDevice* target);
     int _RegisterService(void);
     void _UnregisterService(void);
     bool _CanAddSpare(void);

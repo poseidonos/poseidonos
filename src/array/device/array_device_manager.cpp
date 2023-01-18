@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "array_device_api.h"
 #include "src/device/base/ublock_device.h"
 #include "src/device/device_manager.h"
 #include "src/include/array_config.h"
@@ -90,7 +91,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
-        ret = devs_->AddData((new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, dataIndex, ArrayDeviceType::DATA)));
+        ret = devs_->AddSsd((new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, dataIndex, ArrayDeviceType::DATA)));
         if (ret != 0)
         {
             return ret;
@@ -107,7 +108,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
-        ret = devs_->AddSpare(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
+        ret = devs_->AddSsd(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
         if (ret != 0)
         {
             return ret;
@@ -159,11 +160,12 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
 
             dev = new ArrayDevice(uBlock, meta.state, dataIndex, ArrayDeviceType::DATA);
         }
-        devs_->AddData(dev);
+        devs_->AddSsd(dev);
         dataIndex++;
     }
 
-    ret = _CheckActiveSsdsCount(devs_->GetDevs().data);
+    ret = _CheckActiveSsdsCount(ArrayDeviceApi::ExtractDevicesByType(
+        ArrayDeviceType::DATA, devs_->GetDevs()));
     if (0 != ret)
     {
         return ret;
@@ -175,7 +177,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
         if (nullptr != uBlock)
         {
-            devs_->AddSpare(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
+            devs_->AddSsd(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
         }
     }
 
@@ -202,7 +204,8 @@ ArrayDeviceManager::AddSpare(string devName)
         return eid;
     }
 
-    uint64_t baseCapa = _GetBaseCapacity(devs_->GetDevs().data);
+    uint64_t baseCapa = _GetBaseCapacity(
+        ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::DATA, devs_->GetDevs()));
     if (baseCapa > spare->GetSize())
     {
         int eid = EID(ADD_SPARE_CAPACITY_IS_TOO_SMALL);
@@ -210,7 +213,7 @@ ArrayDeviceManager::AddSpare(string devName)
         return eid;
     }
 
-    return devs_->AddSpare(new ArrayDevice(spare, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
+    return devs_->AddSsd(new ArrayDevice(spare, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
 }
 
 void
@@ -219,78 +222,11 @@ ArrayDeviceManager::Clear(void)
     devs_->Clear();
 }
 
-DeviceSet<DeviceMeta>
-ArrayDeviceManager::ExportToMeta(void)
-{
-    DeviceSet<ArrayDevice*> _d = devs_->GetDevs();
-    DeviceSet<DeviceMeta> metaSet;
-    if (_d.nvm.size() > 0)
-    {
-        string sn = _d.nvm.at(0)->GetUblock()->GetSN();
-        DeviceMeta nvmMeta(sn, _d.nvm.at(0)->GetState());
-        metaSet.nvm.push_back(nvmMeta);
-    }
-
-    for (ArrayDevice* dev : _d.data)
-    {
-        DeviceMeta deviceMeta;
-        deviceMeta.state = dev->GetState();
-        if (ArrayDeviceState::FAULT == deviceMeta.state)
-        {
-            deviceMeta.uid = "";
-        }
-        else
-        {
-            if (dev->GetUblock() != nullptr)
-            {
-                deviceMeta.uid = dev->GetUblock()->GetSN();
-            }
-            else
-            {
-                POS_TRACE_WARN(EID(UPDATE_ABR_DEBUG_MSG),
-                    "Array device on array {} is not fault state and its state is {}. but there is no ublock.",
-                    arrayName_, deviceMeta.state);
-                deviceMeta.uid = "";
-                deviceMeta.state = ArrayDeviceState::FAULT;
-            }
-        }
-        metaSet.data.push_back(deviceMeta);
-    }
-    for (ArrayDevice* dev : _d.spares)
-    {
-        DeviceMeta deviceMeta(dev->GetUblock()->GetSN(), dev->GetState());
-        metaSet.spares.push_back(deviceMeta);
-    }
-
-    return metaSet;
-}
-
-DeviceSet<string>
-ArrayDeviceManager::ExportToName(void)
-{
-    if (devs_ == nullptr)
-    {
-        return DeviceSet<string>();
-    }
-
-    return devs_->ExportNames();
-}
-
-DeviceSet<ArrayDevice*>&
-ArrayDeviceManager::Export(void)
-{
-    return devs_->GetDevs();
-}
-
 int
 ArrayDeviceManager::RemoveSpare(string devName)
 {
-    ArrayDeviceType devType;
-    ArrayDevice* dev = nullptr;
-    DevName name(devName);
-    UblockSharedPtr uBlock = sysDevMgr_->GetDev(name);
-    tie(dev, devType) = this->GetDev(uBlock);
-    if (dev == nullptr)
+    ArrayDevice* dev = ArrayDeviceApi::FindDevByName(devName, devs_->GetDevs());
+    if (dev == nullptr || (dev != nullptr && dev->GetType() != ArrayDeviceType::SPARE))
     {
         int eventId = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
         POS_TRACE_WARN(eventId, "devName:{}", devName);
@@ -299,122 +235,84 @@ ArrayDeviceManager::RemoveSpare(string devName)
     return devs_->RemoveSpare(dev);
 }
 
-vector<ArrayDevice*>
-ArrayDeviceManager::GetDevs(void)
-{
-    vector<ArrayDevice*> ret;
-
-    auto devs = devs_->GetDevs();
-    for (auto dev : devs.data)
-    {
-        ret.push_back(dev);
-    }
-    for (auto dev : devs.spares)
-    {
-        ret.push_back(dev);
-    }
-    for (auto dev : devs.nvm)
-    {
-        ret.push_back(dev);
-    }
-
-    return ret;
-}
-
 int
 ArrayDeviceManager::ReplaceWithSpare(ArrayDevice* target, ArrayDevice*& swapOut)
 {
     return devs_->SpareToData(target, swapOut);
 }
 
-vector<IArrayDevice*>
-ArrayDeviceManager::GetFaulty(void)
+vector<ArrayDevice*>
+ArrayDeviceManager::GetDevs(void)
 {
-    vector<IArrayDevice*> devs;
-    for (ArrayDevice* dev : devs_->GetDevs().data)
-    {
-        if (ArrayDeviceState::FAULT == dev->GetState())
-        {
-            devs.push_back(dev);
-        }
-    }
-    return devs;
+    return devs_->GetDevs();
 }
 
-vector<IArrayDevice*>
+vector<ArrayDevice*>
+ArrayDeviceManager::GetFaulty(void)
+{
+    auto faultDevs = ArrayDeviceApi::ExtractDevicesByState(ArrayDeviceState::FAULT,
+        ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::DATA, devs_->GetDevs()));
+    return faultDevs;
+}
+
+vector<ArrayDevice*>
 ArrayDeviceManager::GetRebuilding(void)
 {
-    vector<IArrayDevice*> devs;
-    for (ArrayDevice* dev : devs_->GetDevs().data)
-    {
-        if (ArrayDeviceState::REBUILD == dev->GetState())
-        {
-            devs.push_back(dev);
-        }
-    }
-    return devs;
+    return ArrayDeviceApi::ExtractDevicesByState(ArrayDeviceState::REBUILD,
+        ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::DATA, devs_->GetDevs()));
 }
 
 vector<ArrayDevice*>
 ArrayDeviceManager::GetDataDevices(void)
 {
-    return devs_->GetDevs().data;
+    return ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::DATA, devs_->GetDevs());
 }
 
 vector<ArrayDevice*>
 ArrayDeviceManager::GetSpareDevices(void)
 {
-    return devs_->GetDevs().spares;
+    return ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::SPARE, devs_->GetDevs());
 }
 
 vector<ArrayDevice*>
 ArrayDeviceManager::GetAvailableSpareDevices(void)
 {
-    return Enumerable::Where(devs_->GetDevs().spares,
-            [](auto d) { return d->GetState() == ArrayDeviceState::NORMAL; });
+    return ArrayDeviceApi::ExtractDevicesByState(ArrayDeviceState::NORMAL,
+        ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::SPARE, devs_->GetDevs()));
 }
 
 int
-ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devs)
+ArrayDeviceManager::_CheckConstraints(ArrayDeviceList* devList)
 {
-    ArrayDeviceSet devSet = devs->GetDevs();
-    int ret = _CheckActiveSsdsCount(devSet.data);
+    auto devs = devList->GetDevs();
+    auto dataDevs = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::DATA, devs);
+    auto spareDevs = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::SPARE, devs);
+    auto nvms = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::NVM, devs);
+    int ret = _CheckActiveSsdsCount(dataDevs);
     if (0 != ret)
     {
         return ret;
     }
-    if (devSet.nvm.size() == 1)
-    {
-        ret = _CheckNvmCapacity(devSet);
-        if (0 != ret)
-        {
-            return ret;
-        }
-    }
-    else
-    {
-        return EID(UNABLE_TO_SET_NVM_NO_OR_NULL);
-    }
 
-    ret = _CheckSsdsCapacity(devSet);
-    return ret;
-}
-
-int
-ArrayDeviceManager::_CheckNvmCapacity(const DeviceSet<ArrayDevice*>& devSet)
-{
-    ArrayDevice* nvm = devSet.nvm.at(0);
-    uint32_t logicalChunkCount = devSet.data.size() - ArrayConfig::PARITY_COUNT;
-    uint64_t minNvmSize = _ComputeMinNvmCapacity(logicalChunkCount);
-
-    if (nvm->GetUblock()->GetSize() < minNvmSize)
+    uint64_t baseCapa = _GetBaseCapacity(dataDevs);
+    if (baseCapa < ArrayConfig::MINIMUM_SSD_SIZE_BYTE)
     {
-        int eventId = EID(UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN);
-        POS_TRACE_WARN(eventId, "currCapa:{}, minCapa:{}", nvm->GetUblock()->GetSize(), minNvmSize);
+        int eventId = EID(CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN);
+        POS_TRACE_ERROR(eventId, "size(byte): {}", baseCapa);
         return eventId;
     }
 
-    return 0;
+    if (spareDevs.size() > 0)
+    {
+        uint64_t minSpareCapa = _GetBaseCapacity(spareDevs);
+        if (minSpareCapa < baseCapa)
+        {
+            int eventId = EID(CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA);
+            POS_TRACE_ERROR(eventId, "minData:{}, minSpare:{}", baseCapa, minSpareCapa);
+            return eventId;
+        }
+    }
+    return ret;
 }
 
 int
@@ -432,98 +330,6 @@ ArrayDeviceManager::_CheckActiveSsdsCount(const vector<ArrayDevice*>& devs)
     }
     POS_TRACE_WARN(errorId, "num of active SSDs: {}", devs.size());
     return errorId;
-}
-
-
-uint64_t
-ArrayDeviceManager::_ComputeMinNvmCapacity(const uint32_t logicalChunkCount)
-{
-    uint64_t writeBufferStripeSize = 0;
-    writeBufferStripeSize = static_cast<uint64_t>(logicalChunkCount) *
-        ArrayConfig::BLOCK_SIZE_BYTE * ArrayConfig::BLOCKS_PER_CHUNK;
-    uint64_t writeBufferStripeCount = 0;
-    writeBufferStripeCount =
-        MAX_VOLUME_COUNT   // in volume_list.h
-        + MAX_VOLUME_COUNT // for GC stripe
-        + 1;               // for Rebuild
-    uint64_t minSize = 0;
-    minSize =
-        ArrayConfig::META_NVM_SIZE + (writeBufferStripeSize * writeBufferStripeCount);
-    return minSize;
-}
-
-int
-ArrayDeviceManager::_CheckSsdsCapacity(const ArrayDeviceSet& devSet)
-{
-    uint64_t baseCapa = _GetBaseCapacity(devSet.data);
-
-    if (baseCapa < ArrayConfig::MINIMUM_SSD_SIZE_BYTE)
-    {
-        int eventId = EID(CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN);
-        POS_TRACE_ERROR(eventId, "size(byte): {}", baseCapa);
-        return eventId;
-    }
-
-    if (devSet.spares.size() > 0)
-    {
-        uint64_t minSpareCapa = _GetBaseCapacity(devSet.spares);
-        if (minSpareCapa < baseCapa)
-        {
-            int eventId = EID(CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA);
-            POS_TRACE_ERROR(eventId, "minData:{}, minSpare:{}", baseCapa, minSpareCapa);
-            return eventId;
-        }
-    }
-
-    return 0;
-}
-
-tuple<ArrayDevice*, ArrayDeviceType>
-ArrayDeviceManager::GetDev(UblockSharedPtr uBlock)
-{
-    if (uBlock == nullptr)
-    {
-        return make_tuple(nullptr, ArrayDeviceType::NONE);
-    }
-    DeviceSet<ArrayDevice*> _d = devs_->GetDevs();
-    for (ArrayDevice* dev : _d.nvm)
-    {
-        if (dev->GetUblock() == uBlock)
-        {
-            return make_tuple(dev, ArrayDeviceType::NVM);
-        }
-    }
-    for (ArrayDevice* dev : _d.data)
-    {
-        if (dev->GetUblock() == uBlock)
-        {
-            return make_tuple(dev, ArrayDeviceType::DATA);
-        }
-    }
-    for (ArrayDevice* dev : _d.spares)
-    {
-        if (dev->GetUblock() == uBlock)
-        {
-            return make_tuple(dev, ArrayDeviceType::SPARE);
-        }
-    }
-    return make_tuple(nullptr, ArrayDeviceType::NONE);
-}
-
-tuple<ArrayDevice*, ArrayDeviceType>
-ArrayDeviceManager::GetDevBySn(string devSn)
-{
-    DevUid sn(devSn);
-    UblockSharedPtr dev = sysDevMgr_->GetDev(sn);
-    return GetDev(dev);
-}
-
-tuple<ArrayDevice*, ArrayDeviceType>
-ArrayDeviceManager::GetDevByName(string devName)
-{
-    DevName name(devName);
-    UblockSharedPtr dev = sysDevMgr_->GetDev(name);
-    return GetDev(dev);
 }
 
 uint64_t

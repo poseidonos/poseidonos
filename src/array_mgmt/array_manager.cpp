@@ -258,22 +258,27 @@ ArrayManager::_ExecuteOrHandleErrors(std::function<int(ArrayComponents*)> f, str
 int
 ArrayManager::DeviceDetached(UblockSharedPtr dev)
 {
-    pthread_rwlock_rdlock(&arrayListLock);
-    ArrayComponents* array = _FindArrayWithDevSN(dev->GetSN());
     int ret = 0;
-    if (array != nullptr)
+    pthread_rwlock_rdlock(&arrayListLock);
+    string devSn = dev->GetSN();
+    for (auto it = arrayList.begin(); it != arrayList.end(); it++)
     {
-        ret = array->GetArray()->DetachDevice(dev);
+        Array* array = it->second->GetArray();
+        IArrayDevice* arrayDev = array->FindDevice(devSn);
+        if (arrayDev != nullptr)
+        {
+            ret = array->DetachDevice(arrayDev);
+            pthread_rwlock_unlock(&arrayListLock);
+            return ret;
+        }
     }
-    else
-    {
-        POS_TRACE_WARN(EID(ARRAY_EVENT_DEV_DETACHED),
-            "SSD is detached-There is no array to which {} ({}) belongs",
-            dev->GetName(), dev->GetSN());
-        deviceManager->RemoveDevice(dev);
-    }
+
+    POS_TRACE_WARN(EID(ARRAY_EVENT_DEV_DETACHED),
+        "SSD is detached-There is no array to which {} ({}) belongs",
+        dev->GetName(), dev->GetSN());
+    ret = deviceManager->RemoveDevice(dev);
     pthread_rwlock_unlock(&arrayListLock);
-    return ret; // this function will be void type when device lock is removed
+    return ret;
 }
 
 void
@@ -463,21 +468,6 @@ ArrayManager::_FindArray(string name)
     }
 
     return it->second;
-}
-
-ArrayComponents*
-ArrayManager::_FindArrayWithDevSN(string devSN)
-{
-    string arrayName = abrManager->FindArrayWithDeviceSN(devSN);
-    if (arrayName == "")
-    {
-        int eventId = EID(ARRAY_MGR_NO_ARRAY_OWNING_REQ_DEV);
-        POS_TRACE_INFO(eventId, "There is no array that owns device '{}'", devSN);
-        return nullptr;
-    }
-    ArrayComponents* array = _FindArray(arrayName);
-
-    return array;
 }
 
 bool

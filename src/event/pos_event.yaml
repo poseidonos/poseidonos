@@ -1942,11 +1942,11 @@ Root:
     Solution:
   -
     Id: 2554
-    Name: ARRAY_SSD_NOT_FOUND
+    Name: ARRAY_DEVICE_TYPE_NOT_MATCHED
     Severity:
-    Description: Failed to configure an array.
-    Cause: SSD of the requested name could not be found
-    Solution: Please check SSD name and try again
+    Description: Failed to add a device to array.
+    Cause: Internal logic error
+    Solution:
   -
     Id: 2555
     Name: ARRAY_NVM_NOT_FOUND

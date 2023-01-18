@@ -1,2 +1,3 @@
 POS_ADD_UNIT_TEST(array_device_list_ut array_device_list_test.cpp)
 POS_ADD_UNIT_TEST(array_device_ut array_device_test.cpp)
+POS_ADD_UNIT_TEST(array_device_api_ut array_device_api_test.cpp)

@@ -56,20 +56,14 @@ public:
     virtual ~ArrayDeviceManager(void);
     virtual int ImportByName(DeviceSet<string> nameSet);
     virtual int Import(DeviceSet<DeviceMeta> metaSet);
-    virtual DeviceSet<ArrayDevice*>& Export(void);
-    virtual DeviceSet<string> ExportToName(void);
-    virtual DeviceSet<DeviceMeta> ExportToMeta(void);
     virtual void Clear(void);
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
     virtual int ReplaceWithSpare(ArrayDevice* target, ArrayDevice*& swapOut);
 
     virtual vector<ArrayDevice*> GetDevs(void);
-    virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(UblockSharedPtr uBlock);
-    virtual tuple<ArrayDevice*, ArrayDeviceType> GetDevBySn(string devSn);
-    virtual tuple<ArrayDevice*, ArrayDeviceType> GetDevByName(string devName);
-    virtual vector<IArrayDevice*> GetFaulty(void);
-    virtual vector<IArrayDevice*> GetRebuilding(void);
+    virtual vector<ArrayDevice*> GetFaulty(void);
+    virtual vector<ArrayDevice*> GetRebuilding(void);
     virtual vector<ArrayDevice*> GetDataDevices(void);
     virtual vector<ArrayDevice*> GetSpareDevices(void);
     virtual vector<ArrayDevice*> GetAvailableSpareDevices(void);
@@ -78,11 +72,8 @@ public:
     void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
 
 private:
-    int _CheckConstraints(ArrayDeviceList* devs);
-    int _CheckSsdsCapacity(const ArrayDeviceSet& devSet);
-    int _CheckNvmCapacity(const ArrayDeviceSet& devSet);
+    int _CheckConstraints(ArrayDeviceList* devList);
     int _CheckActiveSsdsCount(const vector<ArrayDevice*>& devs);
-    uint64_t _ComputeMinNvmCapacity(const uint32_t logicalChunkCount);
     uint64_t _GetBaseCapacity(const vector<ArrayDevice*>& devs);
 
     ArrayDeviceList* devs_ = nullptr;
