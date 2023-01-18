@@ -7,7 +7,7 @@ import (
 	"cli/cmd/otelmgr"
 	"fmt"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 )

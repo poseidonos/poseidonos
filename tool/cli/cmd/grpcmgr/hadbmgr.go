@@ -1,7 +1,7 @@
 package grpcmgr
 
 import (
-	pb "cli/api"
+	pb "kouros/api"
 	"cli/cmd/globals"
 	sql "database/sql"
 	"errors"

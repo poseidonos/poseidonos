@@ -9,7 +9,7 @@ import (
 	"pnconnector/src/log"
 	"time"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"google.golang.org/grpc"
 )
