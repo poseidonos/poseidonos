@@ -30,40 +30,43 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#define UUID_IMPLEMENTATION
+#include "uuid.h"
+#include "uuid_helper.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include <algorithm>
+#include <fstream>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+string UuidHelper::NewUuid(void)
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+    uuid uid;
+    uuid4_generate(&uid);
+    return _UuidToString(&uid);
 }
 
-inline std::string
-TimeToString(time_t time)
+string UuidHelper::RemoveHyphen(string hyphendUuid)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
+    string uuid = hyphendUuid;
+    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
+    return uuid;
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+string UuidHelper::GetNodeUuid(void)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
+    const string uuidPath = "/sys/class/dmi/id/product_uuid";
+    ifstream inputFile(uuidPath, ifstream::in);
+    if (false == inputFile.is_open())
+    {
+        return string("");
+    }
+
+    string uuid;
+    inputFile >> uuid;
+    inputFile.close();
+    return uuid;
 }
 
-inline uint64_t
-GetCurrentSecondsAsEpoch(void)
+string UuidHelper::_UuidToString(uuid* uid)
 {
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    return UUID_TO_STRING(uid);
 }

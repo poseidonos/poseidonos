@@ -72,6 +72,7 @@ SUBDIRS = allocator \
         helper/rpc \
         helper/string \
         helper/time \
+        helper/uuid \
         sys_info \
         qos \
 	singleton_info \
