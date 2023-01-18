@@ -145,10 +145,15 @@ template<typename S/*Source*/, typename F/*Sort by*/>
 auto Minimum(S&& s, F f)
 {
     using type_t = std::decay_t<decltype(*std::begin(s))>;
-    type_t ret = *std::begin(s);
+    type_t ret = nullptr;
+
     for (auto&& i : s)
     {
-        if (f(ret) > f(i))
+        if (ret == nullptr)
+        {
+            ret = i;
+        }
+        else if (f(ret) > f(i))
         {
             ret = i;
         }
@@ -160,16 +165,20 @@ template<typename S/*Source*/, typename F/*Sort by*/>
 auto Maximum(S&& s, F f)
 {
     using type_t = std::decay_t<decltype(*std::begin(s))>;
-    type_t ret = *std::begin(s);
+    type_t ret = nullptr;
+
     for (auto&& i : s)
     {
-        if (f(ret) < f(i))
+        if (ret == nullptr)
+        {
+            ret = i;
+        }
+        else if (f(ret) < f(i))
         {
             ret = i;
         }
     }
     return ret;
 }
-
 
 } // namespace Enumerable

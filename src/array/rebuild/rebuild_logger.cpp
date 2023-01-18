@@ -84,12 +84,12 @@ void RebuildLogger::WriteLog(void)
         ofile << "=======Rebuild Result=======" << endl;
         ofile << "Name: " << array <<endl;
         ofile << "Type: " << type <<endl;
-        ofile << "Start: " << Time::ToString(chrono::system_clock::to_time_t(start)) << endl;
+        ofile << "Start: " << TimeToString(chrono::system_clock::to_time_t(start)) << endl;
         for (auto it : partStart)
         {
-            ofile << it.first << " rebuild starts: " << Time::ToString(chrono::system_clock::to_time_t(it.second)) <<endl;
+            ofile << it.first << " rebuild starts: " << TimeToString(chrono::system_clock::to_time_t(it.second)) <<endl;
         }
-        ofile << "End: " << Time::ToString(chrono::system_clock::to_time_t(end)) <<endl;
+        ofile << "End: " << TimeToString(chrono::system_clock::to_time_t(end)) <<endl;
         ofile << "Duration: " << duration.count() << " (s)"  <<endl;
         ofile << "Result: " << rebuildResult <<endl;
         ofile << "Number of rebuilt segments: " << rebuiltSegCnt <<endl;

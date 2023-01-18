@@ -77,6 +77,19 @@ TEST(Query, Query_testWhere)
     ASSERT_EQ(2, personNameisfoo.size());
 }
 
+TEST(Query, Query_testWhereWhenInputEmptyContainer)
+{
+    // Given
+    std::vector<Person*> empty;
+
+    // When
+    auto&& emptyResult = Enumerable::Where(empty,
+        [](auto p) { return p->GetName() == "foo"; });
+
+    // Then
+    ASSERT_EQ(0, emptyResult.size());
+}
+
 TEST(Query, Query_testFirst)
 {
     // Given
@@ -107,6 +120,19 @@ TEST(Query, Query_testFirstNoResult)
 
     // Then
     ASSERT_EQ(nullptr, personNameistom);
+}
+
+TEST(Query, Query_testFirstWhenInputEmptyContainer)
+{
+    // Given
+    std::vector<Person*> empty;
+
+    // When
+    auto&& nullPerson = Enumerable::First(empty,
+        [](auto p) { return p->GetName() == "tom"; });
+
+    // Then
+    ASSERT_EQ(nullptr, nullPerson);
 }
 
 TEST(Query, Query_testJoin)
@@ -164,6 +190,19 @@ TEST(Query, Query_testMinimum)
     ASSERT_EQ(minVal, personNameisbar->GetID());
 }
 
+TEST(Query, Query_testMinimumWhenInputEmptyContainer)
+{
+    // Given
+    std::vector<Person*> empty;
+
+    // When
+    auto&& nullPerson = Enumerable::Minimum(empty,
+        [](auto p) { return p->GetID(); });
+
+    // Then
+    ASSERT_EQ(nullptr, nullPerson);
+}
+
 TEST(Query, Query_testMaximum)
 {
     // Given
@@ -179,6 +218,19 @@ TEST(Query, Query_testMaximum)
 
     // Then
     ASSERT_EQ(maxVal, personNameisbar->GetID());
+}
+
+TEST(Query, Query_testMaximumWhenInputEmptyContainer)
+{
+    // Given
+    std::vector<Person*> empty;
+
+    // When
+    auto&& nullPerson = Enumerable::Maximum(empty,
+        [](auto p) { return p->GetID(); });
+
+    // Then
+    ASSERT_EQ(nullptr, nullPerson);
 }
 
 TEST(Query, Query_testSelectWhere)

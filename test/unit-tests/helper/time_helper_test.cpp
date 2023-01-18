@@ -9,10 +9,10 @@ using ::testing::Return;
 TEST(TimeHelper, GetCurrentTimeStr_testIfCurrentTimeShouldBeANotEmptyString)
 {
     // Given
-    string currTime = "";
+    std::string currTime = "";
 
     // When
-    currTime = Time::GetCurrentTimeStr("%Y-%m-%d %X %z", 32);
+    currTime = GetCurrentTimeStr("%Y-%m-%d %X %z", 32);
 
     // Then
     ASSERT_NE("", currTime);
