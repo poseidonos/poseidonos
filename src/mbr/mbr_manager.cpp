@@ -49,6 +49,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
+#include "src/helper/uuid/uuid_helper.h"
 #include "version_provider.h"
 
 using namespace std::placeholders;
@@ -57,7 +58,7 @@ namespace pos
 MbrManager::MbrManager(void)
 : MbrManager(
       new DataProtect(),
-      _GetSystemUuid(),
+      UuidHelper::GetNodeUuid(),
       bind(&MbrManager::_DiskIo, this, _1, _2),
       bind(&MbrManager::_IterateReadFromDevices, this, _1, _2),
       DeviceManagerSingleton::Instance(),
@@ -455,25 +456,6 @@ MbrManager::_GetLatestDataList(list<void*> mems, list<void*>* latestMems)
     return EID(SUCCESS);
 }
 
-string
-MbrManager::_GetSystemUuid(void)
-{
-    const string uuidPath = "/sys/class/dmi/id/product_uuid";
-    ifstream inputFile(uuidPath, ifstream::in);
-
-    if (false == inputFile.is_open())
-    {
-        POS_TRACE_ERROR(EID(MBR_GET_SYSTEM_UUID_FAILED),
-            "mbr get system uuid failed");
-        return string("");
-    }
-
-    string uuid;
-    inputFile >> uuid;
-    inputFile.close();
-    return uuid;
-}
-
 int
 MbrManager::CreateAbr(ArrayMeta& meta)
 {
@@ -527,9 +509,9 @@ MbrManager::CreateAbr(ArrayMeta& meta)
             CopyData(systeminfo.arrayInfo[tempArrayIndex].arrayName,
                 meta.arrayName, ARRAY_NAME_SIZE);
             CopyData(systeminfo.arrayInfo[tempArrayIndex].createDatetime,
-                Time::GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
+                GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
             CopyData(systeminfo.arrayInfo[tempArrayIndex].updateDatetime,
-                Time::GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
+                GetCurrentTimeStr("%Y-%m-%d %X %z", DATE_SIZE), DATE_SIZE);
             systeminfo.arrayInfo[tempArrayIndex].uniqueId = meta.unique_id;
             pthread_rwlock_unlock(&mbrLock);
             meta.id = tempArrayIndex;
