@@ -15,6 +15,7 @@
 #include "test/unit-tests/state/state_manager_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
+#include "test/unit-tests/array/device/array_device_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -364,11 +365,12 @@ TEST(ArrayManager, DeviceDetached_testIfTargetArrayCalls)
     auto mockArrayComp = BuildMockArrayComponents(existingArray);
     auto mockAbrMgr = BuildMockAbrManager();
     auto mockArray = BuildMockArray(existingArray);
-    EXPECT_CALL(*mockAbrMgr, FindArrayWithDeviceSN).WillOnce(Return(existingArray));
+    auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
+    MockArrayDevice mockArrayDev(mockUBlockSharedPtr);
     EXPECT_CALL(*mockArrayComp, GetArray).WillOnce(Return(mockArray.get()));
+    EXPECT_CALL(*mockArray, FindDevice).WillOnce(Return(&mockArrayDev));
     EXPECT_CALL(*mockArray, DetachDevice).WillOnce(Return(EID(SUCCESS)));
 
-    auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), nullptr, nullptr, nullptr);
     auto arrayMap = BuildArrayComponentsMap(existingArray, mockArrayComp.get());
     arrayMgr->SetArrayComponentMap(arrayMap);
@@ -387,7 +389,6 @@ TEST(ArrayManager, DeviceDetached_testIfZeroIsReturnedWhenNoArrayFoundForGivenSe
     MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
     MockDeviceManager mockDevMgr(&mockAffinityMgr);
     auto mockAbrMgr = BuildMockAbrManager();
-    EXPECT_CALL(*mockAbrMgr, FindArrayWithDeviceSN).WillOnce(Return(""));
     auto mockUBlockSharedPtr = BuildMockUBlockDevice("mock-ublock", "sn");
     auto arrayMgr = new ArrayManager(nullptr, mockAbrMgr.get(), &mockDevMgr, nullptr, nullptr);
 
