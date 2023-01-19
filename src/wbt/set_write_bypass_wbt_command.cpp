@@ -31,10 +31,11 @@
  */
 
 #include "src/wbt/set_write_bypass_wbt_command.h"
+#include "src/wbt/write_bypass/write_bypass.h"
+#include "src/array_mgmt/array_manager.h"
 
 #include <string>
 
-#include "src/array_mgmt/array_manager.h"
 
 namespace pos
 {
@@ -61,8 +62,7 @@ SetWriteBypassWbtCommand::Execute(Args& argv, JsonElement& elem)
     }
     else
     {
-        IArrayInfo* array = info->arrayInfo;
-        array->SetNeedWriteBypass(numValue);
+        WriteByPass::SetBypass(to_string(info->arrayInfo->GetUniqueId()), numValue);
     }
     return 0;
 }

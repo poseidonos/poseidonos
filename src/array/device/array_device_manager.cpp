@@ -47,7 +47,6 @@ namespace pos
 {
 ArrayDeviceManager::ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName)
 :
-    IArrayDevMgr(sysDevMgr),
     sysDevMgr_(sysDevMgr),
     arrayName_(arrayName)
 {
@@ -74,7 +73,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
-        ret = devs_->SetNvm(new ArrayDevice(uBlock));
+        ret = devs_->SetNvm(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::NVM));
         if (ret != 0)
         {
             return ret;
@@ -91,7 +90,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
-        ret = devs_->AddData((new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, dataIndex)));
+        ret = devs_->AddData((new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, dataIndex, ArrayDeviceType::DATA)));
         if (ret != 0)
         {
             return ret;
@@ -108,7 +107,7 @@ ArrayDeviceManager::ImportByName(DeviceSet<string> nameSet)
             POS_TRACE_WARN(eventId, "devName: {}", devName);
             return eventId;
         }
-        ret = devs_->AddSpare(new ArrayDevice(uBlock));
+        ret = devs_->AddSpare(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
         if (ret != 0)
         {
             return ret;
@@ -132,7 +131,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
             POS_TRACE_WARN(eventId, "devUid: {}", meta.uid);
             return eventId;
         }
-        devs_->SetNvm(new ArrayDevice(uBlock));
+        devs_->SetNvm(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::NVM));
     }
 
     uint32_t dataIndex = 0;
@@ -143,7 +142,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
 
         if (ArrayDeviceState::FAULT == meta.state)
         {
-            dev = new ArrayDevice(nullptr, ArrayDeviceState::FAULT, dataIndex);
+            dev = new ArrayDevice(nullptr, ArrayDeviceState::FAULT, dataIndex, ArrayDeviceType::DATA);
         }
         else
         {
@@ -158,7 +157,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
                     "Rebuilding device found {}", meta.uid);
             }
 
-            dev = new ArrayDevice(uBlock, meta.state, dataIndex);
+            dev = new ArrayDevice(uBlock, meta.state, dataIndex, ArrayDeviceType::DATA);
         }
         devs_->AddData(dev);
         dataIndex++;
@@ -176,7 +175,7 @@ ArrayDeviceManager::Import(DeviceSet<DeviceMeta> metaSet)
         UblockSharedPtr uBlock = sysDevMgr_->GetDev(uid);
         if (nullptr != uBlock)
         {
-            devs_->AddSpare(new ArrayDevice(uBlock));
+            devs_->AddSpare(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
         }
     }
 
@@ -211,7 +210,7 @@ ArrayDeviceManager::AddSpare(string devName)
         return eid;
     }
 
-    return devs_->AddSpare(new ArrayDevice(spare));
+    return devs_->AddSpare(new ArrayDevice(spare, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
 }
 
 void
@@ -298,6 +297,28 @@ ArrayDeviceManager::RemoveSpare(string devName)
         return eventId;
     }
     return devs_->RemoveSpare(dev);
+}
+
+vector<ArrayDevice*>
+ArrayDeviceManager::GetDevs(void)
+{
+    vector<ArrayDevice*> ret;
+
+    auto devs = devs_->GetDevs();
+    for (auto dev : devs.data)
+    {
+        ret.push_back(dev);
+    }
+    for (auto dev : devs.spares)
+    {
+        ret.push_back(dev);
+    }
+    for (auto dev : devs.nvm)
+    {
+        ret.push_back(dev);
+    }
+
+    return ret;
 }
 
 int

@@ -6,6 +6,7 @@
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_log_list_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_progress_reporter_mock.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;

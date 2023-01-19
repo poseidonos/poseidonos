@@ -57,7 +57,6 @@
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
 #include "src/array/service/array_service_layer.h"
-#include "src/array/device/i_array_device_manager.h"
 #include "src/array/array_metrics_publisher.h"
 
 using namespace std;
@@ -119,8 +118,8 @@ public:
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
-    IArrayDevMgr* GetArrayManager(void) override;
     bool IsWriteThroughEnabled(void) override;
+    vector<IArrayDevice*> GetArrayDevices(void) override;
     int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual void InvokeRebuild(vector<IArrayDevice*> targets, bool isResume, bool force = false);
@@ -129,15 +128,7 @@ public:
     virtual void DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt);
     virtual void SetPreferences(bool isWT);
     virtual void SetTargetAddress(string targetAddress);
-    virtual string GetTargetAddress();
-    void SetNeedWriteBypass(bool value)
-    {
-        needWriteBypass = value;
-    }
-    bool GetNeedWriteBypass()
-    {
-        return needWriteBypass;
-    }
+    virtual string GetTargetAddress(void);
 
 private:
     int _LoadImpl(void);
@@ -171,7 +162,6 @@ private:
     bool isWTEnabled = false;
     string targetAddress = "";
 
-    bool needWriteBypass = false;
     ArrayDebugInfo debugArray;
     DebugInfoQueue<ArrayDebugInfo> debugArrayQueue;
 };

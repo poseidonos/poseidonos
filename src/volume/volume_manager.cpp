@@ -57,6 +57,7 @@
 #include "src/volume/volume_replicate_property_updater.h"
 #include "src/volume/volume_qos_updater.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/wbt/write_bypass/write_bypass.h"
 
 namespace pos
 {
@@ -725,7 +726,7 @@ VolumeManager::IsWriteThroughEnabled(void)
 bool
 VolumeManager::GetNeedWriteBypass(void)
 {
-    return arrayInfo->GetNeedWriteBypass();
+    return WriteByPass::GetBypass(to_string(arrayInfo->GetUniqueId()));
 }
 
 } // namespace pos

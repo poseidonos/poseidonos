@@ -24,10 +24,8 @@ public:
     MOCK_METHOD(ArrayStateType, GetState, (), (override));
     MOCK_METHOD(StateContext*, GetStateCtx, (), (override));
     MOCK_METHOD(uint32_t, GetRebuildingProgress, (), (override));
-    MOCK_METHOD(IArrayDevMgr*, GetArrayManager, (), (override));
     MOCK_METHOD(bool, IsWriteThroughEnabled, (), (override));
-    MOCK_METHOD(void, SetNeedWriteBypass, (bool value), (override));
-    MOCK_METHOD(bool, GetNeedWriteBypass, (), (override));
+    MOCK_METHOD(vector<IArrayDevice*>, GetArrayDevices, (), (override));
 };
 
 } // namespace pos

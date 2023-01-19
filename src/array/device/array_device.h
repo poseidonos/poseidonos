@@ -46,18 +46,18 @@ class ArrayDevice : public IArrayDevice
 public:
     ArrayDevice(UblockSharedPtr uBlock,
         ArrayDeviceState state = ArrayDeviceState::NORMAL,
-        uint32_t dataIndex = 0);
+        uint32_t dataIndex = 0, ArrayDeviceType type = ArrayDeviceType::DATA);
     ~ArrayDevice(void) override;
-
-    ArrayDeviceState GetState(void) override;
-    void SetState(ArrayDeviceState state) override;
-
-    UblockSharedPtr GetUblock(void) override;
-    UBlockDevice* GetUblockPtr(void) override;
-    void SetUblock(UblockSharedPtr uBlock) override;
     string GetName(void) override;
     string GetSerial(void) override;
-    uint32_t GetDataIndex(void) { return dataIndex; }
+    uint32_t GetDataIndex(void) override;
+    uint64_t GetSize(void) override;
+    ArrayDeviceType GetType(void) override;
+    ArrayDeviceState GetState(void) override;
+    UblockSharedPtr GetUblock(void) override;
+    UBlockDevice* GetUblockPtr(void) override;
+    void SetState(ArrayDeviceState state) override;
+    void SetUblock(UblockSharedPtr uBlock) override;
     string PrevUblockInfo() { return prevUblockInfo; }
 
 private:
@@ -66,6 +66,7 @@ private:
     UblockSharedPtr uBlock;
     ArrayDeviceState state;
     uint32_t dataIndex;
+    ArrayDeviceType type;
 };
 
 } // namespace pos

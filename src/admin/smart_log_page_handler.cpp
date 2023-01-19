@@ -48,7 +48,7 @@ namespace pos
 {
 SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, void* smartLogPageData, uint32_t originCore,
     CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr, EventScheduler* eventSchedulerArg)
+    IIODispatcher* dispatcher, SmartLogMgr* smartLogMgr, EventScheduler* eventSchedulerArg)
 : cmd(cmd),
   io(io),
   smartLogPageData(smartLogPageData),
@@ -58,7 +58,6 @@ SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, 
   arrayInfo(info),
   devInfo(devInfo),
   dispatcher(dispatcher),
-  arrayDevMgr(arrayDevMgr),
   smartLogMgr(smartLogMgr),
   eventScheduler(eventSchedulerArg)
 {
@@ -78,7 +77,7 @@ SmartLogPageHandler::Execute(void)
         return true;
     }
     struct spdk_nvme_health_information_page* smartLogPage = (struct spdk_nvme_health_information_page*)smartLogPageData;
-    EventSmartPtr diskMgr(new DiskQueryManager(cmd, smartLogPage, io, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr, smartLogMgr));
+    EventSmartPtr diskMgr(new DiskQueryManager(cmd, smartLogPage, io, originCore, callback, arrayInfo, devInfo, dispatcher, smartLogMgr));
     bool result = diskMgr->Execute();
     if (result == false)
         eventScheduler->EnqueueEvent(diskMgr);

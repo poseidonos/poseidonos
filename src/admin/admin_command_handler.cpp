@@ -46,14 +46,13 @@
 
 namespace pos
 {
-AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr)
+AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo, IIODispatcher* dispatcher)
 : io(posIo),
   originCore(originCore),
   callback(callback),
   arrayInfo(info),
   devInfo(devInfo),
-  dispatcher(dispatcher),
-  arrayDevMgr(arrayDevMgr)
+  dispatcher(dispatcher)
 {
     smartLogMgr = SmartLogMgrSingleton::Instance();
     eventScheduler = EventSchedulerSingleton::Instance();
@@ -70,14 +69,13 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
 
 AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
     CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr, EventScheduler* eventSchedulerArg)
+    IIODispatcher* dispatcher, SmartLogMgr* smartLogMgr, EventScheduler* eventSchedulerArg)
 : io(posIo),
   originCore(originCore),
   callback(callback),
   arrayInfo(info),
   devInfo(devInfo),
   dispatcher(dispatcher),
-  arrayDevMgr(arrayDevMgr),
   smartLogMgr(smartLogMgr),
   eventScheduler(eventSchedulerArg)
 {
@@ -110,7 +108,7 @@ AdminCommandHandler::Execute(void)
             {
                 if (smartLogMgr->GetSmartLogEnabled() == true)
                 {
-                    EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, arrayDevMgr, smartLogMgr));
+                    EventSmartPtr event(new SmartLogPageHandler(cmd, io, req->data, originCore, callback, arrayInfo, devInfo, dispatcher, smartLogMgr));
                     bool result = event->Execute();
                     if (result == false)
                         eventScheduler->EnqueueEvent(event);

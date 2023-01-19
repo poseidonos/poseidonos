@@ -8,8 +8,8 @@
 #include "src/state/state_manager.h"
 #include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
-#include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/state/state_manager_mock.h"
+#include "test/unit-tests/include/i_array_device_mock.h"
 
 using namespace pos;
 using namespace std;
