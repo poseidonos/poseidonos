@@ -31,6 +31,7 @@
  */
 
 #include "write_bypass.h"
+#include "src/logger/logger.h"
 
 using namespace std;
 
@@ -39,6 +40,7 @@ namespace pos
 unordered_set<string> WriteByPass::bypassArrays;
 void WriteByPass::SetBypass(string arrayUuid, bool value)
 {
+    POS_TRACE_INFO(EID(WBT_WRITE_BYPASS), "value:{}", value);
     if (value == true)
     {
         bypassArrays.insert(arrayUuid);
