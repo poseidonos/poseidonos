@@ -43,10 +43,12 @@
 namespace pos
 {
 ArrayDevice::ArrayDevice(UblockSharedPtr uBlock,
-    ArrayDeviceState state, uint32_t dataIndex)
+    ArrayDeviceState state, uint32_t dataIndex,
+    ArrayDeviceType type)
 : uBlock(uBlock),
   state(state),
-  dataIndex(dataIndex)
+  dataIndex(dataIndex),
+  type(type)
 {
 }
 
@@ -93,6 +95,22 @@ ArrayDevice::GetSerial(void)
     return uBlock->GetSN();
 }
 
+uint64_t
+ArrayDevice::GetSize(void)
+{
+    if (uBlock == nullptr)
+    {
+        return 0;
+    }
+    return uBlock->GetSize();
+}
+
+ArrayDeviceType
+ArrayDevice::GetType(void)
+{
+    return type;
+}
+
 ArrayDeviceState
 ArrayDevice::GetState(void)
 {
@@ -114,6 +132,12 @@ ArrayDevice::SetState(ArrayDeviceState input)
             "Array device [" + devName + "]'s state is changed from {} to {} (0=normal, 1=fault, 2=rebuild)", state, input);
         state = input;
     }
+}
+
+uint32_t
+ArrayDevice::GetDataIndex(void) 
+{
+    return dataIndex; 
 }
 
 void

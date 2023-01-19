@@ -128,4 +128,11 @@ MockArrayInfo::GetRebuildingProgress(void)
     return 0;
 }
 
+vector<IArrayDevice*>
+MockArrayInfo::GetArrayDevices(void)
+{
+    vector<IArrayDevice*> ret;
+    return ret;
+}
+
 }   // namespace pos

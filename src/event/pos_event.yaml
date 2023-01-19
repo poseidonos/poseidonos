@@ -2874,6 +2874,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2994
+    Name: WBT_WRITE_BYPASS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
     Id: 2995
     Name: WBT_LIST_FETCH_ERROR
     Severity:

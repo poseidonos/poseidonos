@@ -6,6 +6,7 @@
 #include "test/unit-tests/allocator/context_manager/i_allocator_file_io_client_mock.h"
 #include "test/unit-tests/meta_file_intf/async_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;

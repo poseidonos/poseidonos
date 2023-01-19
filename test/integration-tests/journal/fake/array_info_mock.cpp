@@ -119,14 +119,9 @@ ArrayInfoMock::IsWriteThroughEnabled(void)
     return false;
 }
 
-void
-ArrayInfoMock::SetNeedWriteBypass(bool value)
+vector<IArrayDevice*>
+ArrayInfoMock::GetArrayDevices(void)
 {
-}
-
-bool
-ArrayInfoMock::GetNeedWriteBypass(void)
-{
-    return false;
+    return {};
 }
 } // namespace pos

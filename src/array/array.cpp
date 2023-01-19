@@ -666,16 +666,23 @@ Array::GetRebuildingProgress(void)
     return rebuilder->GetRebuildProgress(name_);
 }
 
-IArrayDevMgr*
-Array::GetArrayManager(void)
-{
-    return devMgr_;
-}
-
 bool
 Array::IsWriteThroughEnabled(void)
 {
     return isWTEnabled;
+}
+
+vector<IArrayDevice*>
+Array::GetArrayDevices(void)
+{
+    auto devs = devMgr_->GetDevs();
+    vector<IArrayDevice*> ret;
+    for (auto dev : devs)
+    {
+        IArrayDevice* iDev = dev;
+        ret.push_back(iDev);
+    }
+    return ret;
 }
 
 int
@@ -1285,7 +1292,7 @@ Array::SetTargetAddress(string targetAddress)
 }
 
 string
-Array::GetTargetAddress()
+Array::GetTargetAddress(void)
 {
     return targetAddress;
 }
