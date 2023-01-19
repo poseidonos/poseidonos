@@ -42,7 +42,6 @@
 #include "src/array/meta/device_meta.h"
 #include "src/array_models/dto/device_set.h"
 #include "src/device/device_identifier.h"
-#include "src/array/device/i_array_device_manager.h"
 using namespace std;
 
 namespace pos
@@ -50,7 +49,7 @@ namespace pos
 class DeviceManager;
 class DeviceMeta;
 
-class ArrayDeviceManager : public IArrayDevMgr
+class ArrayDeviceManager
 {
 public:
     ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName);
@@ -65,6 +64,7 @@ public:
     virtual int RemoveSpare(string devName);
     virtual int ReplaceWithSpare(ArrayDevice* target, ArrayDevice*& swapOut);
 
+    virtual vector<ArrayDevice*> GetDevs(void);
     virtual tuple<ArrayDevice*, ArrayDeviceType> GetDev(UblockSharedPtr uBlock);
     virtual tuple<ArrayDevice*, ArrayDeviceType> GetDevBySn(string devSn);
     virtual tuple<ArrayDevice*, ArrayDeviceType> GetDevByName(string devName);

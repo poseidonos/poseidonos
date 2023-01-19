@@ -10,7 +10,6 @@
 #include "test/unit-tests/array/service/io_translator/i_io_translator_mock.h"
 #include "test/unit-tests/array_mgmt/interface/i_array_mgmt_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"

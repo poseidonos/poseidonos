@@ -242,7 +242,6 @@ TEST(AIO, DISABLED_AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     bio.internal.caller_ctx = &nvmfRequest;
     posIo.context = &bio;
 
-    ON_CALL(*mockArrayInfo, GetArrayManager()).WillByDefault(Return(nullptr));
     EventSchedulerSingleton::Instance()->DequeueEvents();
 
     aio.SubmitAsyncAdmin(posIo, mockArrayInfo);

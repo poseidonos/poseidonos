@@ -77,6 +77,7 @@ SUBDIRS = allocator \
 	singleton_info \
         debug_lib \
         wbt \
+        wbt/write_bypass \
         admin \
         resource_manager \
 	telemetry \

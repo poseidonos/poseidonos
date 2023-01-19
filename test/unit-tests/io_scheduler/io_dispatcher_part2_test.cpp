@@ -53,7 +53,6 @@
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/event_scheduler/event_factory_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
-#include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/io_scheduler/io_worker_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
 

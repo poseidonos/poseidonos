@@ -44,6 +44,7 @@
 #include "src/device/unvme/unvme_ssd.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/logger/logger.h"
+#include "src/device/device_manager.h"
 
 using namespace std;
 

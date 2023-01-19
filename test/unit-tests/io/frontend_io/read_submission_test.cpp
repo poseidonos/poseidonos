@@ -21,13 +21,13 @@
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/device/base/device_driver_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
-#include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/io/general_io/merger_mock.h"
 #include "test/unit-tests/io/general_io/translator_mock.h"
 #include "test/unit-tests/lib/block_alignment_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
+#include "test/unit-tests/include/i_array_device_mock.h"
 
 using namespace pos;
 using namespace std;

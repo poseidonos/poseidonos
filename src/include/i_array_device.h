@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/include/array_device_state.h"
+#include "src/array/device/array_device_type.h"
 #include "src/include/smart_ptr_type.h"
 
 #include <string>
@@ -48,15 +49,15 @@ public:
     {
     }
 // LCOV_EXCL_STOP
-
-    virtual ArrayDeviceState GetState(void) = 0;
-    virtual void SetState(ArrayDeviceState state) = 0;
-
-    virtual UblockSharedPtr GetUblock(void) = 0;
-    virtual UBlockDevice* GetUblockPtr(void) = 0;
-    virtual void SetUblock(UblockSharedPtr uBlock) = 0;
     virtual std::string GetName(void) = 0;
     virtual std::string GetSerial(void) = 0;
     virtual uint32_t GetDataIndex(void) = 0;
+    virtual uint64_t GetSize(void) = 0;
+    virtual ArrayDeviceType GetType(void) = 0;
+    virtual ArrayDeviceState GetState(void) = 0;
+    virtual UblockSharedPtr GetUblock(void) = 0;
+    virtual UBlockDevice* GetUblockPtr(void) = 0;
+    virtual void SetState(ArrayDeviceState state) = 0;
+    virtual void SetUblock(UblockSharedPtr uBlock) = 0;
 };
 } // namespace pos
