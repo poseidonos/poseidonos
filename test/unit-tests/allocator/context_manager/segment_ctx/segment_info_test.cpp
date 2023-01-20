@@ -18,7 +18,7 @@ TEST(SegmentInfo, SegmentInfo_Constructor)
 
 TEST(SegmentInfo, SetValidBlockCount_TestSimpleSetter)
 {
-    SegmentInfo segInfos;
+    SegmentInfo segInfos(0,0,SegmentState::FREE);
 
     segInfos.SetValidBlockCount(5);
     EXPECT_EQ(segInfos.GetValidBlockCount(), 5);
@@ -32,11 +32,12 @@ TEST(SegmentInfo, SetValidBlockCount_TestSimpleSetter)
 
 TEST(SegmentInfo, IncreaseValidBlockCount_TestIncreaseValue)
 {
-    SegmentInfo segInfos;
+    SegmentInfo segInfos(0,0,SegmentState::FREE);
 
     EXPECT_EQ(segInfos.IncreaseValidBlockCount(5), 5);
     EXPECT_EQ(segInfos.IncreaseValidBlockCount(3), 8);
     EXPECT_EQ(segInfos.IncreaseValidBlockCount(10), 18);
+
 }
 
 TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToNonZero)
@@ -82,7 +83,7 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenNvramState)
 TEST(SegmentInfo, SetOccupiedStripeCount_TestSimpleSetter)
 {
     // given
-    SegmentInfo segInfos;
+    SegmentInfo segInfos(0,0,SegmentState::FREE);
     // when
     segInfos.SetOccupiedStripeCount(3);
     // then
@@ -93,7 +94,7 @@ TEST(SegmentInfo, SetOccupiedStripeCount_TestSimpleSetter)
 TEST(SegmentInfo, IncreaseOccupiedStripeCount_TestIncreaseValue)
 {
     // given
-    SegmentInfo segInfos;
+    SegmentInfo segInfos(0,0,SegmentState::FREE);
     // when, then
     EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 1);
     EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 2);
@@ -105,7 +106,7 @@ TEST(SegmentInfo, IncreaseOccupiedStripeCount_TestIncreaseValue)
 TEST(SegmentInfo, MoveToNvramState_testIfStateChanged)
 {
     // given
-    SegmentInfo segInfos;
+    SegmentInfo segInfos(0,0,SegmentState::FREE);
     // when
     segInfos.MoveToNvramState();
     // then

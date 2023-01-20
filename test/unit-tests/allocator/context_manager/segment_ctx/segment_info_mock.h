@@ -23,6 +23,8 @@ public:
     MOCK_METHOD(bool, MoveToSsdStateOrFreeStateIfItBecomesEmpty, (), (override));
     MOCK_METHOD(bool, MoveToVictimState, (), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCountIfSsdState, (), (override));
+    MOCK_METHOD(void, InitSegmentInfoData, (uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState), (override));
+    MOCK_METHOD(void, DisposeSegmentInfoData, (), (override));
 };
 
 } // namespace pos

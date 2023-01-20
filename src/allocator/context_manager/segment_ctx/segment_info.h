@@ -51,6 +51,14 @@ enum SegmentState : int
     NUM_STATES,
 };
 
+struct SegmentInfoData
+{
+    std::atomic<uint32_t> validBlockCount;
+    std::atomic<uint32_t> occupiedStripeCount;
+    SegmentState state;
+    //DO NOT ADD ANY METHODS HERE TO SUPPORT BACKWARD COMPATIBILITY
+};
+
 class SegmentInfo
 {
 public:
@@ -76,14 +84,15 @@ public:
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
 
+    virtual void InitSegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState);
+    virtual void DisposeSegmentInfoData(void);
+
+    SegmentInfoData* data;
 private:
     void _MoveToFreeState(void);
 
-    std::atomic<uint32_t> validBlockCount;
-    std::atomic<uint32_t> occupiedStripeCount;
-
     std::mutex seglock;
-    SegmentState state;
+
 };
 
 } // namespace pos
