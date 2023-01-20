@@ -22,7 +22,6 @@ public:
     MOCK_METHOD(void, AddDebugInfo, (uint64_t userSpecific), (override));
     MOCK_METHOD(void, RegisterDebugInfo, (std::string name, uint32_t entryCount, bool asyncLogging, uint64_t inputTimerUsec, bool enabled), (override));
     MOCK_METHOD(void, DeRegisterDebugInfo, (std::string name), (override));
-    MOCK_METHOD(DebugInfoOkay, IsOkay, (T& obj), (override));
 };
 
 } // namespace pos

@@ -19,7 +19,7 @@ def show_debug_info():
             print ("##############")
             print (line.split('"')[1])
             print ("##############")
-            address = line.split()[-1].rstrip("\n").rstrip(",")
+            address = line.split()[2].rstrip("\n").rstrip(",")
             output = gdb.execute("p *(DebugInfoInstance *)" + address , to_string=True)
             lines2 = output.split('\n')
             member = False
@@ -27,7 +27,7 @@ def show_debug_info():
                 if ("Okay" in line_elem):
                     print(line_elem)
                     continue
-                if ("members" in line_elem):
+                if ("members of pos" in line_elem):
                     member = True
                 if (member == False):
                     continue
@@ -57,7 +57,7 @@ def show_debug_info_history():
             f_write.write("##############\n")
             f_write.write(line.split('"')[1] + '\n')
             f_write.write("##############\n")
-            address = line.split()[-1].rstrip("\n").rstrip(",")
+            address = line.split()[2].rstrip("\n").rstrip(",")
             output = gdb.execute("p ((DebugInfoQueueInstance *)" + address + ")->dumpQueue", to_string=True)
             lines2 = output.split('\n')
             tmp_str = ""
@@ -72,7 +72,7 @@ def show_debug_info_history():
                         tmp_str = tmp_str + line_elem
                     if (line_split == True):
                         tmp_str = tmp_str + '\n'
-                if ("members" in line_elem):
+                if ("members of pos" in line_elem):
                     member = True
                 if ("tv_sec = " in line_elem):
                     tv_sec = int(line_elem.split()[2].rstrip(","))
@@ -113,7 +113,7 @@ def show_debug_info_error_history():
             f_write.write("##############\n")
             f_write.write(line.split('"')[1] + '\n')
             f_write.write("##############\n")
-            address = line.split()[-1].rstrip("\n").rstrip(",")
+            address = line.split()[2].rstrip("\n").rstrip(",")
             output = gdb.execute("p ((DebugInfoQueueInstance *)" + address + ")->dumpQueue", to_string=True)
             lines2 = output.split('\n')
             tmp_str = ""
@@ -128,7 +128,7 @@ def show_debug_info_error_history():
                         tmp_str = tmp_str + line_elem
                     if (line_split == True):
                         tmp_str = tmp_str + '\n'
-                if ("members" in line_elem):
+                if ("members of pos" in line_elem):
                     member = True
                 if ("tv_sec = " in line_elem):
                     tv_sec = int(line_elem.split()[2].rstrip(","))

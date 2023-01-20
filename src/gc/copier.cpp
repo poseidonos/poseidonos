@@ -104,11 +104,11 @@ Copier::Copier(SegmentId victimId, SegmentId targetId, GcStatus* gcStatus, IArra
     SetEventType(BackendEvent_GC);
     if (array != nullptr)
     {
-        RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000);
+        RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000, false);
     }
     else
     {
-        RegisterDebugInfo("Copier", 10000);
+        RegisterDebugInfo("Copier", 10000, false);
     }
 }
 

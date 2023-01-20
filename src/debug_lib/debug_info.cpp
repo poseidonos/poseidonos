@@ -35,19 +35,31 @@
 #include "debug_info_queue.h"
 #include "debug_info_queue.hpp"
 #include <cassert>
-#include <unordered_map>
+#include <map>
+#include <mutex>
+#include <string>
 
 namespace pos
 {
 
 std::map<std::string, DebugInfoInstance*> debugInfo;
 std::mutex DebugInfoInstance::registeringMutex;
+Document debugInfoDoc(kObjectType);
+Document::AllocatorType& debugInfoAllocator = debugInfoDoc.GetAllocator();
+
 
 DebugInfoInstance::DebugInfoInstance(void)
 {
     instanceOkay = DebugInfoOkay::PASS;
     summaryOkay = DebugInfoOkay::PASS;
 }
+
+DebugInfoInstance::DebugInfoInstance(const DebugInfoInstance& debugInfoInstance)
+: instanceOkay(debugInfoInstance.instanceOkay),
+summaryOkay(debugInfoInstance.summaryOkay)
+{
+}
+
 
 DebugInfoInstance::~DebugInfoInstance(void)
 {
@@ -69,4 +81,11 @@ DebugInfoInstance::DeRegisterDebugInfoInstance(std::string str)
         debugInfo.erase(str);
     }
 }
+
+DebugInfoOkay
+DebugInfoInstance::IsOkay(void)
+{
+    return DebugInfoOkay::PASS;
+}
+
 }

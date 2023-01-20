@@ -32,6 +32,9 @@
 #pragma once
 #include <cassert>
 #include <unistd.h>
+#include <fstream>
+#include <iostream>
+#include <queue>
 
 #include "debug_info_maker.h"
 #include "debug_info_queue.h"
@@ -46,6 +49,21 @@ DebugInfoMaker<T>::DebugInfoMaker(void)
     registered = false;
     infoName = "";
     debugInfoThread = new std::thread(&DebugInfoMaker<T>::_DebugInfoThread, this);
+    debugInfoObject = new T;
+    isOwner = true;
+}
+
+template<typename T>
+DebugInfoMaker<T>::DebugInfoMaker(T* t, std::string name, uint32_t entryCount, bool asyncLogging, uint64_t inputTimerUsec, bool enabled)
+{
+    run = false;
+    timerUsec = DEFAULT_TIMER_VALUE;
+    registered = false;
+    infoName = "";
+    debugInfoThread = new std::thread(&DebugInfoMaker<T>::_DebugInfoThread, this);
+    debugInfoObject = t;
+    isOwner = false;
+    RegisterDebugInfo(name, entryCount, asyncLogging, inputTimerUsec, enabled);
 }
 
 template<typename T>
@@ -56,27 +74,39 @@ DebugInfoMaker<T>::~DebugInfoMaker(void)
     {
         debugInfoThread->join();
     }
-    delete debugInfoThread;
     DeRegisterDebugInfo(infoName);
+    if (isOwner == true)
+    {
+        delete debugInfoObject;
+    }
+    delete debugInfoThread;
 }
 
 template<typename T>
 void
 DebugInfoMaker<T>::RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging, uint64_t inputTimerUsec, bool enabled)
 {
-    if (inputTimerUsec != 0)
+    if (registered == false)
     {
-        timerUsec = inputTimerUsec;
+        if (inputTimerUsec != 0)
+        {
+            timerUsec = inputTimerUsec;
+        }
+        debugInfoQueue.RegisterDebugInfoQueue("History_" + name, entryCount, enabled);
+        debugInfoQueueForError.RegisterDebugInfoQueue("History_" + name + "_Error", entryCount, enabled);
+        debugInfoConcurrentQueue.RegisterDebugInfoQueue("History_" + name + "_Error", entryCount, enabled);
+        debugInfoObject->RegisterDebugInfoInstance(name);
+        if (asyncLogging)
+        {
+            run = true;
+        }
+        registered = true;
+        infoName = name;
     }
-    debugInfoQueue.RegisterDebugInfoQueue("History_" + name, entryCount, enabled);
-    debugInfoQueueForError.RegisterDebugInfoQueue("History_" + name + "_Error", entryCount, enabled);
-    debugInfoObject.RegisterDebugInfoInstance(name);
-    if (asyncLogging)
+    else
     {
-        run = true;
+        assert(0);
     }
-    registered = true;
-    infoName = name;
 }
 
 template<typename T>
@@ -87,16 +117,9 @@ DebugInfoMaker<T>::DeRegisterDebugInfo(std::string name)
     {
         debugInfoQueue.DeRegisterDebugInfoQueue("History_" + name);
         debugInfoQueueForError.DeRegisterDebugInfoQueue("History_" + name + "_Error");
-        debugInfoObject.DeRegisterDebugInfoInstance(name);
+        debugInfoObject->DeRegisterDebugInfoInstance(name);
         registered = false;
     }
-}
-
-template<typename T>
-DebugInfoOkay 
-DebugInfoMaker<T>::IsOkay(T& obj)
-{
-    return DebugInfoOkay::PASS;
 }
 
 template<typename T>
@@ -104,17 +127,25 @@ void
 DebugInfoMaker<T>::AddDebugInfo(uint64_t userSpecific)
 {
     assert(registered == true);
-    MakeDebugInfo(debugInfoObject);
-    debugInfoObject.instanceOkay = IsOkay(debugInfoObject);
-    if ((int)(debugInfoObject.summaryOkay) < (int)(debugInfoObject.instanceOkay))
+    // Source make debug info
+    MakeDebugInfo(*debugInfoObject);
+    debugInfoObject->instanceOkay = debugInfoObject->IsOkay();
+    if ((int)(debugInfoObject->summaryOkay) < (int)(debugInfoObject->instanceOkay))
     {
-        debugInfoObject.summaryOkay = debugInfoObject.instanceOkay;
+        debugInfoObject->summaryOkay = debugInfoObject->instanceOkay;
     }
-    if (debugInfoObject.instanceOkay != DebugInfoOkay::PASS)
+    if (debugInfoObject->instanceOkay != DebugInfoOkay::PASS)
     {
-        debugInfoQueueForError.AddDebugInfo(debugInfoObject, userSpecific);    
+        debugInfoQueueForError.AddDebugInfo(*debugInfoObject, userSpecific);    
     }
-    debugInfoQueue.AddDebugInfo(debugInfoObject, userSpecific);
+    debugInfoQueue.AddDebugInfo(*debugInfoObject, userSpecific);
+    bool flushNeeded = false;
+    debugInfoConcurrentQueue.AddDebugInfo(*debugInfoObject, userSpecific, flushNeeded);
+    if (flushNeeded == true)
+    {
+        // We will add next revision
+        // _Flush();
+    }
 }
 
 template<typename T>
@@ -137,4 +168,100 @@ DebugInfoMaker<T>::_DebugInfoThread(void)
     }
 }
 
+template<typename T>
+bool 
+DebugInfoMaker<T>::_AppendToFile(const std::string& filename, const rapidjson::Document& document)
+{
+    FILE* fp = nullptr;
+    // create file if it doesn't exist
+    fp = fopen(filename.c_str(), "r"); 
+    if (fp == nullptr)
+    {
+        fp = fopen(filename.c_str(), "w");
+        if (fp == nullptr)
+        {
+            return false;
+        }
+        fputs("[]", fp);
+        fclose(fp);
+    }
+
+    // add the document to the file
+    fp = fopen(filename.c_str(), "rb+"); 
+    if (fp != NULL)
+    {
+        // check if first is [
+        std::fseek(fp, 0, SEEK_SET);
+        if (getc(fp) != '[')
+        {
+            std::fclose(fp);
+            return false;
+        }
+
+        // is array empty?
+        bool isEmpty = false;
+        if (getc(fp) == ']')
+            isEmpty = true;
+
+        // check if last is ]
+        std::fseek(fp, -1, SEEK_END);
+        if (getc(fp) != ']')
+        {
+            std::fclose(fp);
+            return false;
+        }
+
+        // replace ] by ,
+        fseek(fp, -1, SEEK_END);
+        if (!isEmpty)
+            fputc(',', fp);
+
+        // append the document
+        const uint64_t MAX_BUFFER_SIZE_BYTES = 65536;
+        char writeBuffer[MAX_BUFFER_SIZE_BYTES];
+
+        FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+        Writer<FileWriteStream> writer(os);
+        document.Accept(writer);
+
+        // close the array
+        std::fputc(']', fp);
+        fclose(fp);
+        return true;
+    }
+    return false;
 }
+
+template<typename T>
+void
+DebugInfoMaker<T>::_Flush(void)
+{
+    // This phase should be serialized
+    // DumpObject contains timestamp and userspecific data.
+    DumpObject<T> dumpObject;
+    while(debugInfoConcurrentQueue.PopDebugInfo(&dumpObject) == true)
+    {
+        Document debugInfoDoc(kObjectType);
+        Document::AllocatorType& debugInfoAllocator = debugInfoDoc.GetAllocator();
+        if (dumpObject.buffer.Serialize(debugInfoDoc) == false)
+        {
+            continue;
+        }
+        else
+        {
+            struct timeval& tv = dumpObject.date;
+            time_t timer;
+            struct tm *nowtm;
+            char tmbuf[64], buf[64];
+
+            timer = tv.tv_sec;
+            nowtm = localtime(&timer);
+            strftime(tmbuf, sizeof(tmbuf), "%Y-%m-%d %H:%M:%S", nowtm);
+            snprintf(buf, sizeof(buf), "%s.%06ld", tmbuf, tv.tv_usec);
+            debugInfoDoc.AddMember("timestamp", rapidjson::StringRef(buf), debugInfoAllocator);
+        }
+        _AppendToFile("why.json", debugInfoDoc);
+    }
+}
+
+} // namespace pos
