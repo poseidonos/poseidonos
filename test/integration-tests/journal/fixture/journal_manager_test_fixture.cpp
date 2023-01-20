@@ -7,8 +7,8 @@
 
 using ::testing::AtLeast;
 using ::testing::NiceMock;
-using ::testing::StrictMock;
 using ::testing::Return;
+using ::testing::StrictMock;
 
 namespace pos
 {
@@ -28,7 +28,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
-    writeTester = new LogWriteTestFixture(testMapper, arrayInfo, journal, testInfo);
+    writeTester = new LogWriteTestFixture(testMapper, testAllocator, arrayInfo, journal, testInfo);
     replayTester = new ReplayTestFixture(testMapper, testAllocator, testInfo);
 }
 
@@ -69,9 +69,12 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
 {
     journal->ResetJournalConfiguration(config);
     journal->DeleteLogBuffer();
-
     if (journal->IsEnabled() == true)
     {
+        if (config->IsVscEnabled() == true)
+        {
+            journal->ResetVersionedSegmentContext();
+        }
         journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
     }
 
@@ -92,6 +95,19 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
 {
     JournalConfigurationBuilder configurationBuilder(testInfo);
 
+    delete journal;
+
+    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
+    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, GetLogFileName());
+    journal->ResetJournalConfiguration(configurationBuilder.Build());
+    writeTester->UpdateJournal(journal);
+
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+}
+
+void
+JournalManagerTestFixture::SimulateSPORWithoutRecovery(JournalConfigurationBuilder& configurationBuilder)
+{
     delete journal;
 
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;

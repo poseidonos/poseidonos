@@ -7,6 +7,7 @@
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log/log_buffer_parser.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
@@ -241,6 +242,25 @@ IJournalStatusProvider*
 JournalManagerSpy::GetStatusProvider(void)
 {
     return statusProvider;
+}
+
+LogGroupReleaser*
+JournalManagerSpy::GetLogGroupReleaser(void)
+{
+    return logGroupReleaser;
+}
+
+void
+JournalManagerSpy::ResetVersionedSegmentContext(void)
+{
+    delete versionedSegCtx;
+    versionedSegCtx = _CreateVersionedSegmentCtx();
+}
+
+IVersionedSegmentContext*
+JournalManagerSpy::GetVersionedSegmentContext(void)
+{
+    return versionedSegCtx;
 }
 
 } // namespace pos

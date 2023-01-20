@@ -119,6 +119,31 @@ ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe)
 }
 
 void
+ReplayTestFixture::ExpectReplayFullStripeWithoutReplaySegmentContex(StripeTestFixture stripe)
+{
+    BlockMapList blksToWrite = stripe.GetBlockMapList();
+    {
+        InSequence s;
+
+        ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
+        ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
+        EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(), stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
+    }
+
+    for (auto blk : blksToWrite)
+    {
+        BlkAddr rba = std::get<0>(blk);
+        VirtualBlks blks = std::get<1>(blk);
+
+        for (uint32_t offset = 0; offset < blks.numBlks; offset++)
+        {
+            VirtualBlks blk = _GetBlock(blks, offset);
+            EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsWithSyncOpen(stripe.GetVolumeId(), rba + offset, blk));
+        }
+    }
+}
+
+void
 ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
 {
     BlockMapList writtenVsas = stripe.GetBlockMapList();

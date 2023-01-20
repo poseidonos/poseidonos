@@ -18,6 +18,7 @@ class IVolumeEventHandler;
 class IJournalStatusProvider;
 class TelemetryPublisher;
 class TelemetryClient;
+class IVersionedSegmentContext;
 
 class JournalManagerSpy : public JournalManager
 {
@@ -46,6 +47,9 @@ public:
     uint64_t GetNextOffset(void);
     IJournalWriter* GetJournalWriter(void);
     IJournalStatusProvider* GetStatusProvider(void);
+    LogGroupReleaser* GetLogGroupReleaser(void);
+    void ResetVersionedSegmentContext(void);
+    IVersionedSegmentContext* GetVersionedSegmentContext(void);
 
 private:
     int _GetLogsFromBuffer(LogList& logList);

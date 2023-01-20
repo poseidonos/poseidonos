@@ -17,6 +17,7 @@ class IContextManagerMock : public IContextManager
 public:
     using IContextManager::IContextManager;
     MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, int logGroupId), (override));
+    MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
 
     virtual void UpdateOccupiedStripeCount(StripeId lsid) {}
     virtual SegmentId AllocateFreeSegment(void) { return 0; }
@@ -28,7 +29,6 @@ public:
     virtual bool NeedRebuildAgain(void) { return true; }
     virtual uint32_t GetRebuildTargetSegmentCount(void) { return 0; }
     virtual int GetGcThreshold(GcMode mode) { return 0; }
-    virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     virtual SegmentCtx* GetSegmentCtx(void) { return nullptr; }
     virtual GcCtx* GetGcCtx(void) { return nullptr; }
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx) { return; }

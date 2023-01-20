@@ -1,11 +1,9 @@
 #pragma once
 
-#include "test/integration-tests/journal/utils/test_info.h"
-
-#include "test/integration-tests/journal/fake/mapper_mock.h"
-#include "test/integration-tests/journal/fake/allocator_mock.h"
-
 #include "src/include/address_type.h"
+#include "test/integration-tests/journal/fake/allocator_mock.h"
+#include "test/integration-tests/journal/fake/mapper_mock.h"
+#include "test/integration-tests/journal/utils/test_info.h"
 
 namespace pos
 {
@@ -25,6 +23,7 @@ public:
 
     void ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe);
     void ExpectReplayFullStripe(StripeTestFixture stripe);
+    void ExpectReplayFullStripeWithoutReplaySegmentContex(StripeTestFixture stripe);
 
     void ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, StripeTestFixture stripe);
     void ExpectReplayFlushedActiveStripe(void);

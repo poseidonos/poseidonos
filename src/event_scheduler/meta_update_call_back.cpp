@@ -34,6 +34,13 @@
 
 namespace pos
 {
+
+// For IT
+MetaUpdateCallback::MetaUpdateCallback(void)
+: MetaUpdateCallback(false, nullptr)
+{
+}
+
 MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
     CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg,
     EventScheduler* eventSchedulerArg)

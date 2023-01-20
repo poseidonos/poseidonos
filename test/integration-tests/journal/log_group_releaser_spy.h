@@ -67,6 +67,12 @@ public:
         return (_IsFlushInProgress() == false);
     }
 
+    void
+    ForceCompleteCheckpoint(void)
+    {
+        logGroups[0].Reset();
+    }
+
 protected:
     virtual void
     _FlushNextLogGroup(void) override

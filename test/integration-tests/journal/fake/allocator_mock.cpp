@@ -11,6 +11,7 @@ AllocatorMock::AllocatorMock(IArrayInfo* info)
     segmentCtxMock = new StrictMock<MockISegmentCtx>();
     contextManagerMock = new StrictMock<IContextManagerMock>();
     contextReplayerMock = new StrictMock<IContextReplayerMock>();
+    addrInfoMock = new StrictMock<MockAllocatorAddressInfo>();
 }
 
 AllocatorMock::~AllocatorMock(void)
@@ -19,6 +20,7 @@ AllocatorMock::~AllocatorMock(void)
     delete wbStripeAllocatorMock;
     delete contextManagerMock;
     delete contextReplayerMock;
+    delete addrInfoMock;
 }
 
 IWBStripeAllocator*
@@ -68,4 +70,5 @@ AllocatorMock::GetIContextReplayerMock(void)
 {
     return contextReplayerMock;
 }
+
 } // namespace pos

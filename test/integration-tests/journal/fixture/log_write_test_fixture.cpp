@@ -1,6 +1,7 @@
 #include "test/integration-tests/journal/fixture/log_write_test_fixture.h"
 
 #include "test/integration-tests/journal/fake/test_journal_write_completion.h"
+#include "test/integration-tests/journal/fake/test_journal_write_completion_with_meta_update.h"
 #include "test/integration-tests/journal/utils/used_offset_calculator.h"
 #include "test/unit-tests/allocator/stripe/stripe_mock.h"
 
@@ -9,12 +10,13 @@ namespace pos
 using ::testing::NiceMock;
 using ::testing::Return;
 
-LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, ArrayInfoMock* _array,
+LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, AllocatorMock* _allocator, ArrayInfoMock* _array,
     JournalManagerSpy* _journal, TestInfo* _testInfo)
 {
     Reset();
 
     mapper = _mapper;
+    allocator = _allocator;
     array = _array;
     journal = _journal;
     testInfo = _testInfo;
@@ -100,7 +102,10 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
     volumeIo->SetLsidEntry(stripeAddr);
 
     IJournalWriter* writer = journal->GetJournalWriter();
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
+
+    // 추가한 IT 검증만을 위한 임시 코드
+    EventSmartPtr event(new TestJournalWriteCompletionWithMetaUpdate(&testingLogs, journal->GetVersionedSegmentContext(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
+    // EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
     int result = writer->AddBlockMapUpdatedLog(volumeIo, event);
     if (result == 0)
     {
@@ -127,7 +132,15 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
     ON_CALL(stripe, GetUserLsid).WillByDefault(Return(newAddr.stripeId));
 
     IJournalWriter* writer = journal->GetJournalWriter();
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
+
+    VirtualBlks blks = {
+        .startVsa = {
+            .stripeId = newAddr.stripeId,
+            .offset = 0,
+        },
+        .numBlks = 0};
+    EventSmartPtr event(new TestJournalWriteCompletionWithMetaUpdate(&testingLogs, journal->GetVersionedSegmentContext(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
+    // EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
     int result = writer->AddStripeMapUpdatedLog(&stripe, oldAddr, event);
     if (result == 0)
     {

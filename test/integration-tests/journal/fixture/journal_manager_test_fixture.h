@@ -26,6 +26,7 @@ public:
     void InitializeJournal(void);
     void InitializeJournal(JournalConfigurationSpy* config);
     void SimulateSPORWithoutRecovery(void);
+    void SimulateSPORWithoutRecovery(JournalConfigurationBuilder& configurationBuilder);
     void SimulateSPORWithoutRecovery(JournalConfigurationSpy* config);
     void SimulateRocksDBSPORWithoutRecovery(void);
     void SetTriggerCheckpoint(bool isCheckpointEnabled);

@@ -119,6 +119,7 @@ LogGroupReleaser::_FlushNextLogGroup(void)
         }
     }
 }
+
 bool
 LogGroupReleaser::_IsFlushInProgress(void)
 {

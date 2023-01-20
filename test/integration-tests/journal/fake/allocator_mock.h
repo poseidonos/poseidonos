@@ -4,6 +4,7 @@
 #include "i_context_manager_mock.h"
 #include "i_context_replayer_mock.h"
 #include "src/allocator/allocator.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "wbstripe_allocator_mock.h"
 
@@ -32,6 +33,7 @@ private:
     MockISegmentCtx* segmentCtxMock;
     IContextManagerMock* contextManagerMock;
     IContextReplayerMock* contextReplayerMock;
+    MockAllocatorAddressInfo* addrInfoMock;
 };
 
 } // namespace pos

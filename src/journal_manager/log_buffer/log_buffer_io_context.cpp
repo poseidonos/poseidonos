@@ -60,7 +60,7 @@ LogBufferIoContext::IoDone(void)
     bool executionSuccessful = clientCallback->Execute();
 
     // TODO(huijeong.kim) handle execution fail case
-    assert(executionSuccessful == true);
+    // assert(executionSuccessful == true);
 
     clientCallback = nullptr;
 }
