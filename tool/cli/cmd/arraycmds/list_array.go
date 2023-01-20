@@ -1,17 +1,17 @@
 package arraycmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-//TODO(mj): function for --detail flag needs to be implemented.
+// TODO(mj): function for --detail flag needs to be implemented.
 var ListArrayCmd = &cobra.Command{
 	Use:   "list [flags]",
 	Short: "List arrays of PoseidonOS or display information of an array.",
@@ -52,11 +52,18 @@ Example 2 (listing a specific array):
 
 func executeArrayInfoCmd(command string) error {
 
-	req, buildErr := buildArrayInfoReq(command)
+	reqParam, buildErr := buildArrayInfoReqParam(command)
 	if buildErr != nil {
 		fmt.Printf("failed to build request: %v", buildErr)
 		return buildErr
 	}
+
+	posMgr, err := grpcmgr.GetPOSManager()
+	if err != nil {
+		fmt.Printf("failed to connect to POS: %v", err)
+		return err
+	}
+	res, req, gRpcErr := posMgr.ArrayInfo(reqParam)
 
 	reqJson, err := protojson.MarshalOptions{
 		EmitUnpopulated: true,
@@ -67,7 +74,6 @@ func executeArrayInfoCmd(command string) error {
 	}
 	displaymgr.PrintRequest(string(reqJson))
 
-	res, gRpcErr := grpcmgr.SendArrayInfo(req)
 	if gRpcErr != nil {
 		globals.PrintErrMsg(gRpcErr)
 		return gRpcErr
@@ -83,11 +89,13 @@ func executeArrayInfoCmd(command string) error {
 }
 
 func executeListArrayCmd(command string) error {
-	req, buildErr := buildListArrayReq(command)
-	if buildErr != nil {
-		fmt.Printf("failed to build request: %v", buildErr)
-		return buildErr
+
+	posMgr, err := grpcmgr.GetPOSManager()
+	if err != nil {
+		fmt.Printf("failed to connect to POS: %v", err)
+		return err
 	}
+	res, req, gRpcErr := posMgr.ListArray()
 
 	reqJson, err := protojson.MarshalOptions{
 		EmitUnpopulated: true,
@@ -98,7 +106,6 @@ func executeListArrayCmd(command string) error {
 	}
 	displaymgr.PrintRequest(string(reqJson))
 
-	res, gRpcErr := grpcmgr.SendListArray(req)
 	if gRpcErr != nil {
 		globals.PrintErrMsg(gRpcErr)
 		return gRpcErr
@@ -113,19 +120,10 @@ func executeListArrayCmd(command string) error {
 	return nil
 }
 
-func buildListArrayReq(command string) (*pb.ListArrayRequest, error) {
-	uuid := globals.GenerateUUID()
-	req := &pb.ListArrayRequest{Command: command, Rid: uuid, Requestor: "cli"}
-
-	return req, nil
-}
-
-func buildArrayInfoReq(command string) (*pb.ArrayInfoRequest, error) {
-	uuid := globals.GenerateUUID()
+func buildArrayInfoReqParam(command string) (*pb.ArrayInfoRequest_Param, error) {
 	param := &pb.ArrayInfoRequest_Param{Name: list_array_arrayName}
-	req := &pb.ArrayInfoRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
