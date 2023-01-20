@@ -13,9 +13,9 @@ GOPATH=$(${GO} env | grep GOPATH | awk -F"\"" '{print $2}')
 GOROOT=$(${GO} env | grep GOROOT | awk -F"\"" '{print $2}')
 export PATH=${PATH}:${GOROOT}/bin:${GOPATH}/bin
 
-mkdir -p api
-protoc --go_out=api --go_opt=paths=source_relative \
-    --go-grpc_out=api --go-grpc_opt=paths=source_relative \
+mkdir -p ../kouros/api
+protoc --go_out=../kouros/api --go_opt=paths=source_relative \
+    --go-grpc_out=../kouros/api --go-grpc_opt=paths=source_relative \
     -I $ROOT_DIR/../../proto cli.proto
 
 # Build CLI binary

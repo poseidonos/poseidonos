@@ -1,7 +1,7 @@
 package displaymgr
 
 import (
-	pb "cli/api"
+	pb "kouros/api"
 	"cli/cmd/globals"
 	"cli/cmd/messages"
 	"code.cloudfoundry.org/bytefmt"

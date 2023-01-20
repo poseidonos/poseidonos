@@ -4,7 +4,7 @@ import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"github.com/spf13/cobra"
-    pb "cli/api"
+    pb "kouros/api"
     "cli/cmd/grpcmgr"
     "google.golang.org/protobuf/encoding/protojson"
     "fmt"

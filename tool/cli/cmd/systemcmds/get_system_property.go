@@ -6,7 +6,7 @@ import (
 	"cli/cmd/grpcmgr"
 	"fmt"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 )
