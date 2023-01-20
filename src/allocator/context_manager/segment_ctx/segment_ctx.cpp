@@ -354,7 +354,7 @@ SegmentCtx::GetSectionAddr(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            ret = (char*)segmentInfos;
+            ret = (char*)segmentInfos->data;
             break;
         }
     }
@@ -374,7 +374,7 @@ SegmentCtx::GetSectionSize(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfo);
+            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfoData);
             break;
         }
     }

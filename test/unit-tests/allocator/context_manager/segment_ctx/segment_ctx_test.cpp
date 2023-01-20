@@ -460,7 +460,7 @@ TEST_F(SegmentCtxTestFixture, GetSectionAddr_TestSimpleGetter)
     char* buf = segCtx->GetSectionAddr(SC_HEADER);
 
     buf = segCtx->GetSectionAddr(SC_SEGMENT_INFO);
-    EXPECT_EQ(reinterpret_cast<char*>(&segInfos), buf);
+    EXPECT_EQ(reinterpret_cast<char*>(segCtx->GetSegmentInfos()->data), buf);
 }
 
 TEST_F(SegmentCtxTestFixture, GetSectionSize_TestSimpleGetter)
@@ -475,7 +475,7 @@ TEST_F(SegmentCtxTestFixture, GetSectionSize_TestSimpleGetter)
 
     // when 2.
     ret = segCtx->GetSectionSize(SC_SEGMENT_INFO);
-    EXPECT_EQ(10 * sizeof(SegmentInfo), ret);
+    EXPECT_EQ(10 * sizeof(SegmentInfoData), ret);
 }
 
 TEST_F(SegmentCtxTestFixture, GetStoredVersion_TestSimpleGetter)

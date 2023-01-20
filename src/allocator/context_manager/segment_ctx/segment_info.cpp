@@ -47,48 +47,48 @@ SegmentInfo::SegmentInfo(void)
 
 // Constructor for UT to inject precondition values
 SegmentInfo::SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
-: validBlockCount(blkCount),
-  occupiedStripeCount(stripeCount),
-  state(segmentState)
+: data(nullptr)
 {
+    InitSegmentInfoData(blkCount, stripeCount, segmentState);
 }
 
 SegmentInfo::~SegmentInfo(void)
 {
+    DisposeSegmentInfoData();
 }
 
 uint32_t
 SegmentInfo::GetValidBlockCount(void)
 {
-    return validBlockCount;
+    return data->validBlockCount;
 }
 
 void
 SegmentInfo::SetValidBlockCount(int cnt)
 {
     // for wbt
-    validBlockCount = cnt;
+    data->validBlockCount = cnt;
 }
 
 uint32_t
 SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 {
-    return validBlockCount.fetch_add(inc) + inc;
+    return data->validBlockCount.fetch_add(inc) + inc;
 }
 
 std::pair<bool, SegmentState>
 SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    int32_t decreased = validBlockCount.fetch_sub(dec) - dec;
+    int32_t decreased = data->validBlockCount.fetch_sub(dec) - dec;
 
     if (decreased == 0)
     {
         if (true == allowVictimSegRelease)
         {
-            if (state == SegmentState::VICTIM || state == SegmentState::SSD)
+            if (data->state == SegmentState::VICTIM || data->state == SegmentState::SSD)
             {
-                std::pair<bool, SegmentState> result = {true, state};
+                std::pair<bool, SegmentState> result = {true, data->state};
                 _MoveToFreeState();
 
                 return result;
@@ -96,9 +96,9 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
         }
         else
         {
-            if (state == SegmentState::SSD)
+            if (data->state == SegmentState::SSD)
             {
-                std::pair<bool, SegmentState> result = {true, state};
+                std::pair<bool, SegmentState> result = {true, data->state};
                 _MoveToFreeState();
 
                 return result;
@@ -112,64 +112,64 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
         return {false, SegmentState::ERROR};
     }
 
-    return {false, state};
+    return {false, data->state};
 }
 
 void
 SegmentInfo::SetOccupiedStripeCount(uint32_t cnt)
 {
-    occupiedStripeCount = cnt;
+    data->occupiedStripeCount = cnt;
 }
 
 uint32_t
 SegmentInfo::GetOccupiedStripeCount(void)
 {
-    return occupiedStripeCount;
+    return data->occupiedStripeCount;
 }
 
 uint32_t
 SegmentInfo::IncreaseOccupiedStripeCount(void)
 {
     // ++ is equivalent to fetch_add(1) + 1
-    return ++occupiedStripeCount;
+    return ++(data->occupiedStripeCount);
 }
 
 void
 SegmentInfo::SetState(SegmentState newState)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    state = newState;
+    data->state = newState;
 }
 
 SegmentState
 SegmentInfo::GetState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    return state;
+    return data->state;
 }
 
 void
 SegmentInfo::_MoveToFreeState(void)
 {
-    occupiedStripeCount = 0;
-    validBlockCount = 0;
+    data->occupiedStripeCount = 0;
+    data->validBlockCount = 0;
 
-    state = SegmentState::FREE;
+    data->state = SegmentState::FREE;
 }
 
 void
 SegmentInfo::MoveToNvramState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    if (state != SegmentState::FREE)
+    if (data->state != SegmentState::FREE)
     {
         POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
             "Failed to move to NVRAM state. Segment state {} valid count {} occupied stripe count {}",
-            state, validBlockCount, occupiedStripeCount);
+            data->state, data->validBlockCount, data->occupiedStripeCount);
         assert(false);
     }
 
-    state = SegmentState::NVRAM;
+    data->state = SegmentState::NVRAM;
 }
 
 bool
@@ -177,7 +177,7 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
 
-    if (validBlockCount == 0)
+    if (data->validBlockCount == 0)
     {
         _MoveToFreeState();
 
@@ -185,7 +185,7 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
     }
     else
     {
-        state = SegmentState::SSD;
+        data->state = SegmentState::SSD;
         return false;
     }
 }
@@ -194,15 +194,15 @@ bool
 SegmentInfo::MoveToVictimState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    if (state != SegmentState::SSD)
+    if (data->state != SegmentState::SSD)
     {
         POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
-            "Cannot move to victim state as it's not SSD state, state: {}", state);
+            "Cannot move to victim state as it's not SSD state, state: {}", data->state);
         return false;
     }
     else
     {
-        state = SegmentState::VICTIM;
+        data->state = SegmentState::VICTIM;
 
         return true;
     }
@@ -212,13 +212,33 @@ uint32_t
 SegmentInfo::GetValidBlockCountIfSsdState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    if (state != SegmentState::SSD)
+    if (data->state != SegmentState::SSD)
     {
         return UINT32_MAX;
     }
     else
     {
-        return validBlockCount;
+        return data->validBlockCount;
+    }
+}
+
+void
+SegmentInfo::InitSegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
+{
+    if(nullptr == data){
+        data = new SegmentInfoData();
+    }
+    data->validBlockCount = blkCount;
+    data->occupiedStripeCount = stripeCount;
+    data->state = segmentState;
+}
+
+void
+SegmentInfo::DisposeSegmentInfoData()
+{
+    if(nullptr != data){
+        delete data;
+        data = nullptr;
     }
 }
 

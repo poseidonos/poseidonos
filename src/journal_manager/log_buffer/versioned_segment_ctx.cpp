@@ -82,7 +82,7 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     config = journalConfiguration;
 
     numSegments = numSegments_;
-    segmentInfos = new SegmentInfo[numSegments]();
+    segmentInfos = new SegmentInfo[numSegments];
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
         if (nullptr != loadedSegmentInfo)
@@ -91,8 +91,7 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
                            segId, loadedSegmentInfo[segId].GetValidBlockCount(),
                            loadedSegmentInfo[segId].GetOccupiedStripeCount(),
                            loadedSegmentInfo[segId].GetState());
-
-            memcpy(segmentInfos, loadedSegmentInfo, sizeof(SegmentInfo) * numSegments);
+            memcpy(segmentInfos[segId].data, loadedSegmentInfo[segId].data, sizeof(SegmentInfoData));
         }
     }
 }
