@@ -27,20 +27,20 @@ index 5f552fe81..a75d9f366 100644
 @@ -32,6 +32,9 @@
  #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  #
- 
+
 + # Build config POS
 +CONFIG_POS=n
 +
  # Installation prefix
  CONFIG_PREFIX="/usr/local"
- 
+
 @@ -104,7 +107,7 @@ CONFIG_WPDK_DIR=
- 
+
  # Build SPDK FIO plugin. Requires CONFIG_FIO_SOURCE_DIR set to a valid
  # fio source code directory.
 -CONFIG_FIO_PLUGIN=n
 +CONFIG_FIO_PLUGIN=y
- 
+
  # This directory should contain the source code directory for fio
  # which is required for building the SPDK FIO plugin.
 diff --git configure configure
@@ -70,10 +70,10 @@ index e37eeeb7b..b1fcc135c 100644
 -		spdk_env_fini();
 -	}
  }
- 
+
  /* This function enables addition of SPDK parameters to the fio config
 @@ -1752,6 +1748,10 @@ static void fio_init fio_spdk_register(void)
- 
+
  static void fio_exit fio_spdk_unregister(void)
  {
 +	if (g_spdk_env_initialized) {
@@ -82,7 +82,7 @@ index e37eeeb7b..b1fcc135c 100644
 +
  	unregister_ioengine(&ioengine);
  }
- 
+
 diff --git include/spdk/bdev_module.h include/spdk/bdev_module.h
 index 85d94aa7b..a73bc1bca 100644
 --- include/spdk/bdev_module.h
@@ -90,15 +90,15 @@ index 85d94aa7b..a73bc1bca 100644
 @@ -569,6 +569,9 @@ struct spdk_bdev_io {
  	/** The block device that this I/O belongs to. */
  	struct spdk_bdev *bdev;
- 
+
 +	/** Unique ID per thread */
 +	uint64_t uid_per_thread;
 +
  	/** Enumerated value representing the I/O type. */
  	uint8_t type;
- 
+
 diff --git include/spdk/nvme.h include/spdk/nvme.h
-index e0e2f3998..7c0ad3800 100644
+index e0e2f3998..68646b4f9 100644
 --- include/spdk/nvme.h
 +++ include/spdk/nvme.h
 @@ -452,6 +452,7 @@ struct spdk_nvme_transport_id {
@@ -107,23 +107,33 @@ index e0e2f3998..7c0ad3800 100644
  	int priority;
 +	uint64_t traddr_int;
  };
- 
+
  /**
 @@ -1181,6 +1182,8 @@ int spdk_nvme_ctrlr_reset_subsystem(struct spdk_nvme_ctrlr *ctrlr);
   */
  void spdk_nvme_ctrlr_fail(struct spdk_nvme_ctrlr *ctrlr);
- 
+
 +void spdk_nvme_ctrlr_fail_and_remove(struct spdk_nvme_ctrlr *ctrlr);
 +
  /**
   * This function returns the failed status of a given controller.
   *
+@@ -3022,6 +3025,9 @@ typedef int (*spdk_nvme_req_next_sge_cb)(void *cb_arg, void **address, uint32_t
+ int spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair, void *payload,
+ 			   uint64_t lba, uint32_t lba_count, spdk_nvme_cmd_cb cb_fn,
+ 			   void *cb_arg, uint32_t io_flags);
++int spdk_nvme_ns_cmd_write_with_stream_id(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair, void *payload,
++               uint64_t lba, uint32_t lba_count, spdk_nvme_cmd_cb cb_fn,
++               void *cb_arg, uint32_t io_flags, uint16_t stream_id);
+
+ /**
+  * Submit a write I/O to the specified NVMe namespace.
 diff --git include/spdk/nvme_spec.h include/spdk/nvme_spec.h
-index de379318e..c289a376c 100644
+index de379318e..9f301d30c 100644
 --- include/spdk/nvme_spec.h
 +++ include/spdk/nvme_spec.h
 @@ -2848,7 +2848,14 @@ enum spdk_nvme_log_page {
- 
+
  	/* 0xC0-0xFF - vendor specific */
  	SPDK_NVME_LOG_VENDOR_SPECIFIC_START	= 0xc0,
 -	SPDK_NVME_LOG_VENDOR_SPECIFIC_END	= 0xff,
@@ -136,12 +146,12 @@ index de379318e..c289a376c 100644
 +
 +	SPDK_NVME_LOG_VENDOR_SPECIFIC_END = 0xff,
  };
- 
+
  #define spdk_nvme_log_page_is_vendor_specific(lid) ((lid) >= SPDK_NVME_LOG_VENDOR_SPECIFIC_START)
 @@ -3021,6 +3028,142 @@ struct spdk_nvme_sanitize_status_log_page {
  };
  SPDK_STATIC_ASSERT(sizeof(struct spdk_nvme_sanitize_status_log_page) == 512, "Incorrect size");
- 
+
 +/**
 + * Cloud Attribute Log Page (OCP Spec 1.0a)
 + */
@@ -281,6 +291,15 @@ index de379318e..c289a376c 100644
  /**
   * Asynchronous Event Type
   */
+@@ -3474,6 +3617,8 @@ struct spdk_nvme_zns_zone_report {
+ SPDK_STATIC_ASSERT(sizeof(struct spdk_nvme_zns_zone_report) == 64, "Incorrect size");
+
+ /* Directives field */
++#define NVME_MAIN_STREAM_ID 0
++
+ enum spdk_nvme_directive_type {
+ 	SPDK_NVME_DIRECTIVE_TYPE_IDENTIFY = 0x0,
+ 	SPDK_NVME_DIRECTIVE_TYPE_STREAMS = 0x1,
 diff --git include/spdk/nvmf_transport.h include/spdk/nvmf_transport.h
 index ea93c14f3..7e07cd980 100644
 --- include/spdk/nvmf_transport.h
@@ -288,15 +307,15 @@ index ea93c14f3..7e07cd980 100644
 @@ -181,6 +181,7 @@ struct spdk_nvmf_poll_group {
  	spdk_nvmf_poll_group_destroy_done_fn		destroy_cb_fn;
  	void						*destroy_cb_arg;
- 
+
 +	uint32_t core;
  	TAILQ_ENTRY(spdk_nvmf_poll_group)		link;
  };
- 
+
 @@ -419,6 +420,8 @@ int spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req);
   */
  void spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair);
- 
+
 +void spdk_nvmf_tgt_new_qpair_with_nqn(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair, int hint);
 +
  /**
@@ -744,7 +763,7 @@ index 841b1cf5c..ba32baf42 100644
 @@ -47,7 +47,7 @@
  extern "C" {
  #endif
- 
+
 -#define MAX_EVENTS_PER_POLL 32
 +#define MAX_EVENTS_PER_POLL 1025
  #define DEFAULT_SOCK_PRIORITY 0
@@ -757,7 +776,7 @@ index c8b671123..b64e5084e 100644
 @@ -461,17 +461,20 @@ accel_engine_create_cb(void *io_device, void *ctx_buf)
  	accel_ch->sw_engine_ch = g_sw_accel_engine->get_io_channel();
  	assert(accel_ch->sw_engine_ch != NULL);
- 
+
 +	accel_ch->engine_ch = NULL;
 +
  	if (g_hw_accel_engine != NULL) {
@@ -777,24 +796,24 @@ index c8b671123..b64e5084e 100644
 -
  	return 0;
  }
- 
+
 diff --git lib/bdev/bdev.c lib/bdev/bdev.c
 index 0cd6b8b4e..4e136d539 100644
 --- lib/bdev/bdev.c
 +++ lib/bdev/bdev.c
 @@ -6466,7 +6466,7 @@ spdk_bdev_set_qos_rate_limits(struct spdk_bdev *bdev, uint64_t *limits,
  	bool				disable_rate_limit = true;
- 
+
  	for (i = 0; i < SPDK_BDEV_QOS_NUM_RATE_LIMIT_TYPES; i++) {
 -		if (limits[i] == SPDK_BDEV_QOS_LIMIT_NOT_DEFINED) {
 +		if (limits[i] >= SPDK_BDEV_QOS_LIMIT_NOT_DEFINED) {
  			continue;
  		}
- 
+
 @@ -6482,13 +6482,20 @@ spdk_bdev_set_qos_rate_limits(struct spdk_bdev *bdev, uint64_t *limits,
  			min_limit_per_sec = SPDK_BDEV_QOS_MIN_BYTES_PER_SEC;
  		}
- 
+
 +		if (limits[i] < min_limit_per_sec && limits[i] > 0) {
 +			limits[i] = 0;
 +			disable_rate_limit = true;
@@ -812,21 +831,21 @@ index 0cd6b8b4e..4e136d539 100644
  		}
 +
  	}
- 
+
  	ctx = calloc(1, sizeof(*ctx));
 diff --git lib/event/Makefile lib/event/Makefile
 index 6cbdab07b..2e91a844b 100644
 --- lib/event/Makefile
 +++ lib/event/Makefile
 @@ -41,7 +41,7 @@ CFLAGS += $(ENV_CFLAGS)
- 
+
  LIBNAME = event
  C_SRCS = app.c reactor.c log_rpc.c \
 -	 app_rpc.c scheduler_static.c
 +	 app_rpc.c scheduler_static.c pos_app.c
- 
+
  SPDK_MAP_FILE = $(abspath $(CURDIR)/spdk_event.map)
- 
+
 diff --git lib/event/app.c lib/event/app.c
 index b626b1c69..5dea285c5 100644
 --- lib/event/app.c
@@ -836,7 +855,7 @@ index b626b1c69..5dea285c5 100644
  #include "spdk/rpc.h"
  #include "spdk/util.h"
 +#include "spdk/pos_app.h"
- 
+
  #define SPDK_APP_DEFAULT_LOG_LEVEL		SPDK_LOG_NOTICE
  #define SPDK_APP_DEFAULT_LOG_PRINT_LEVEL	SPDK_LOG_INFO
 @@ -573,10 +574,10 @@ spdk_app_start(struct spdk_app_opts *opts_user, spdk_msg_fn start_fn,
@@ -849,7 +868,7 @@ index b626b1c69..5dea285c5 100644
  	}
 +	spdk_app_set_rlimit(opts->enable_coredump);
  #endif
- 
+
  	memset(&g_spdk_app, 0, sizeof(g_spdk_app));
 diff --git lib/event/pos_app.c lib/event/pos_app.c
 new file mode 100644
@@ -921,7 +940,7 @@ index 0e1b1e9a9..9df0623f2 100644
 @@ -44,6 +44,8 @@
  #include "spdk/string.h"
  #include "spdk/fd_group.h"
- 
+
 +#include <air/Air_c.h>
 +
  #ifdef __linux__
@@ -930,10 +949,10 @@ index 0e1b1e9a9..9df0623f2 100644
 @@ -53,7 +55,7 @@
  #include <pthread_np.h>
  #endif
- 
+
 -#define SPDK_EVENT_BATCH_SIZE		8
 +#define SPDK_EVENT_BATCH_SIZE		64
- 
+
  static struct spdk_reactor *g_reactors;
  static uint32_t g_reactor_count;
 @@ -939,6 +941,9 @@ reactor_run(void *arg)
@@ -943,13 +962,13 @@ index 0e1b1e9a9..9df0623f2 100644
 +	uint32_t		lcore = reactor->lcore;
 +	uint64_t		prev_busy_tsc = 0xFFFFFFFFFFFFFFFF;
 +	uint64_t		prev_idle_tsc = 0xFFFFFFFFFFFFFFFF;
- 
+
  	SPDK_NOTICELOG("Reactor started on core %u\n", reactor->lcore);
- 
+
 @@ -974,6 +979,19 @@ reactor_run(void *arg)
  			_reactors_scheduler_gather_metrics(NULL, NULL);
  		}
- 
+
 +		if (reactor->busy_tsc > prev_busy_tsc)
 +		{
 +			uint64_t busy_tsc = reactor->busy_tsc - prev_busy_tsc;
@@ -996,7 +1015,7 @@ index 38a1de024..ebd16a24b 100644
 -	ctx->shutdown_timeout_ms = spdk_max(ctx->shutdown_timeout_ms, 10000);
 +	ctx->shutdown_timeout_ms = spdk_max(ctx->shutdown_timeout_ms, max_shutdown_timeout_max);
  	NVME_CTRLR_DEBUGLOG(ctrlr, "shutdown timeout = %" PRIu32 " ms\n", ctx->shutdown_timeout_ms);
- 
+
  	ctx->shutdown_start_tsc = spdk_get_ticks();
 diff --git lib/nvme/nvme_ctrlr_cmd.c lib/nvme/nvme_ctrlr_cmd.c
 index c9512052b..2bf9a3c41 100644
@@ -1027,6 +1046,278 @@ index 7a27eaca3..d8cfb1b70 100644
  		.contig_or_cb_arg = (contig_), \
  		.md = (md_), \
  	}
+diff --git lib/nvme/nvme_ns_cmd.c lib/nvme/nvme_ns_cmd.c
+index 6004e7719..6d5b4ec05 100644
+--- lib/nvme/nvme_ns_cmd.c
++++ lib/nvme/nvme_ns_cmd.c
+@@ -40,7 +40,7 @@ static inline struct nvme_request *_nvme_ns_cmd_rw(struct spdk_nvme_ns *ns,
+ 		const struct nvme_payload *payload, uint32_t payload_offset, uint32_t md_offset,
+ 		uint64_t lba, uint32_t lba_count, spdk_nvme_cmd_cb cb_fn,
+ 		void *cb_arg, uint32_t opc, uint32_t io_flags,
+-		uint16_t apptag_mask, uint16_t apptag, bool check_sgl, int *rc);
++		uint16_t apptag_mask, uint16_t apptag, bool check_sgl, int *rc, uint16_t stream_id);
+
+ static bool
+ nvme_ns_check_request_length(uint32_t lba_count, uint32_t sectors_per_max_io,
+@@ -109,7 +109,7 @@ _nvme_add_child_request(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 	struct nvme_request	*child;
+
+ 	child = _nvme_ns_cmd_rw(ns, qpair, payload, payload_offset, md_offset, lba, lba_count, cb_fn,
+-				cb_arg, opc, io_flags, apptag_mask, apptag, check_sgl, rc);
++				cb_arg, opc, io_flags, apptag_mask, apptag, check_sgl, rc, NVME_MAIN_STREAM_ID);
+ 	if (child == NULL) {
+ 		nvme_request_free_children(parent);
+ 		nvme_free_request(parent);
+@@ -170,7 +170,7 @@ _is_io_flags_valid(uint32_t io_flags)
+ static void
+ _nvme_ns_cmd_setup_request(struct spdk_nvme_ns *ns, struct nvme_request *req,
+ 			   uint32_t opc, uint64_t lba, uint32_t lba_count,
+-			   uint32_t io_flags, uint16_t apptag_mask, uint16_t apptag)
++			   uint32_t io_flags, uint16_t apptag_mask, uint16_t apptag, uint16_t stream_id)
+ {
+ 	struct spdk_nvme_cmd	*cmd;
+
+@@ -196,6 +196,10 @@ _nvme_ns_cmd_setup_request(struct spdk_nvme_ns *ns, struct nvme_request *req,
+ 	cmd->cdw12 = lba_count - 1;
+ 	cmd->cdw12 |= (io_flags & SPDK_NVME_IO_FLAGS_CDW12_MASK);
+
++	if (io_flags & SPDK_NVME_IO_FLAGS_STREAMS_DIRECTIVE) {
++		cmd->cdw13 = ((uint32_t)stream_id) << 16;
++	}
++
+ 	cmd->cdw15 = apptag_mask;
+ 	cmd->cdw15 = (cmd->cdw15 << 16 | apptag);
+ }
+@@ -317,7 +321,7 @@ _nvme_ns_cmd_split_request_prp(struct spdk_nvme_ns *ns,
+
+ 	if (child_length == req->payload_size) {
+ 		/* No splitting was required, so setup the whole payload as one request. */
+-		_nvme_ns_cmd_setup_request(ns, req, opc, lba, lba_count, io_flags, apptag_mask, apptag);
++		_nvme_ns_cmd_setup_request(ns, req, opc, lba, lba_count, io_flags, apptag_mask, apptag, NVME_MAIN_STREAM_ID);
+ 	}
+
+ 	return req;
+@@ -402,7 +406,7 @@ _nvme_ns_cmd_split_request_sgl(struct spdk_nvme_ns *ns,
+
+ 	if (child_length == req->payload_size) {
+ 		/* No splitting was required, so setup the whole payload as one request. */
+-		_nvme_ns_cmd_setup_request(ns, req, opc, lba, lba_count, io_flags, apptag_mask, apptag);
++		_nvme_ns_cmd_setup_request(ns, req, opc, lba, lba_count, io_flags, apptag_mask, apptag, NVME_MAIN_STREAM_ID);
+ 	}
+
+ 	return req;
+@@ -412,7 +416,7 @@ static inline struct nvme_request *
+ _nvme_ns_cmd_rw(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 		const struct nvme_payload *payload, uint32_t payload_offset, uint32_t md_offset,
+ 		uint64_t lba, uint32_t lba_count, spdk_nvme_cmd_cb cb_fn, void *cb_arg, uint32_t opc,
+-		uint32_t io_flags, uint16_t apptag_mask, uint16_t apptag, bool check_sgl, int *rc)
++		uint32_t io_flags, uint16_t apptag_mask, uint16_t apptag, bool check_sgl, int *rc, uint16_t stream_id)
+ {
+ 	struct nvme_request	*req;
+ 	uint32_t		sector_size = _nvme_get_host_buffer_sector_size(ns, io_flags);
+@@ -473,7 +477,7 @@ _nvme_ns_cmd_rw(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 		}
+ 	}
+
+-	_nvme_ns_cmd_setup_request(ns, req, opc, lba, lba_count, io_flags, apptag_mask, apptag);
++	_nvme_ns_cmd_setup_request(ns, req, opc, lba, lba_count, io_flags, apptag_mask, apptag, stream_id);
+ 	return req;
+ }
+
+@@ -496,7 +500,7 @@ spdk_nvme_ns_cmd_compare(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg,
+ 			      SPDK_NVME_OPC_COMPARE,
+ 			      io_flags, 0,
+-			      0, false, &rc);
++			      0, false, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -529,7 +533,7 @@ spdk_nvme_ns_cmd_compare_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg,
+ 			      SPDK_NVME_OPC_COMPARE,
+ 			      io_flags,
+-			      apptag_mask, apptag, false, &rc);
++			      apptag_mask, apptag, false, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -564,7 +568,7 @@ spdk_nvme_ns_cmd_comparev(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg,
+ 			      SPDK_NVME_OPC_COMPARE,
+-			      io_flags, 0, 0, true, &rc);
++			      io_flags, 0, 0, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -599,7 +603,7 @@ spdk_nvme_ns_cmd_comparev_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpai
+ 	payload = NVME_PAYLOAD_SGL(reset_sgl_fn, next_sge_fn, cb_arg, metadata);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg,
+-			      SPDK_NVME_OPC_COMPARE, io_flags, apptag_mask, apptag, true, &rc);
++			      SPDK_NVME_OPC_COMPARE, io_flags, apptag_mask, apptag, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -629,7 +633,7 @@ spdk_nvme_ns_cmd_read(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair, vo
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
+ 			      io_flags, 0,
+-			      0, false, &rc);
++			      0, false, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -660,7 +664,7 @@ spdk_nvme_ns_cmd_read_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *q
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
+ 			      io_flags,
+-			      apptag_mask, apptag, false, &rc);
++			      apptag_mask, apptag, false, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -694,7 +698,7 @@ spdk_nvme_ns_cmd_readv(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 	payload = NVME_PAYLOAD_SGL(reset_sgl_fn, next_sge_fn, cb_arg, NULL);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
+-			      io_flags, 0, 0, true, &rc);
++			      io_flags, 0, 0, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -729,7 +733,7 @@ spdk_nvme_ns_cmd_readv_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *
+ 	payload = NVME_PAYLOAD_SGL(reset_sgl_fn, next_sge_fn, cb_arg, metadata);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
+-			      io_flags, apptag_mask, apptag, true, &rc);
++			      io_flags, apptag_mask, apptag, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -766,11 +770,11 @@ spdk_nvme_ns_cmd_readv_ext(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpai
+ 		payload.opts = opts;
+ 		payload.md = opts->metadata;
+ 		req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
+-				      opts->io_flags, opts->apptag_mask, opts->apptag, true, &rc);
++				      opts->io_flags, opts->apptag_mask, opts->apptag, true, &rc, NVME_MAIN_STREAM_ID);
+
+ 	} else {
+ 		req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_READ,
+-				      0, 0, 0, true, &rc);
++				      0, 0, 0, true, &rc, NVME_MAIN_STREAM_ID);
+ 	}
+
+ 	if (req != NULL) {
+@@ -785,10 +789,10 @@ spdk_nvme_ns_cmd_readv_ext(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpai
+ }
+
+ int
+-spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
++_spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 		       void *buffer, uint64_t lba,
+ 		       uint32_t lba_count, spdk_nvme_cmd_cb cb_fn, void *cb_arg,
+-		       uint32_t io_flags)
++		       uint32_t io_flags, uint16_t stream_id)
+ {
+ 	struct nvme_request *req;
+ 	struct nvme_payload payload;
+@@ -801,7 +805,7 @@ spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 	payload = NVME_PAYLOAD_CONTIG(buffer, NULL);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
+-			      io_flags, 0, 0, false, &rc);
++			      io_flags, 0, 0, false, &rc, stream_id);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -813,6 +817,26 @@ spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 	}
+ }
+
++int
++spdk_nvme_ns_cmd_write(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
++               void *buffer, uint64_t lba,
++               uint32_t lba_count, spdk_nvme_cmd_cb cb_fn, void *cb_arg,
++               uint32_t io_flags)
++{
++    return _spdk_nvme_ns_cmd_write(ns, qpair, buffer, lba, lba_count,
++                cb_fn, cb_arg, io_flags, NVME_MAIN_STREAM_ID);
++}
++
++int
++spdk_nvme_ns_cmd_write_with_stream_id(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
++               void *buffer, uint64_t lba,
++               uint32_t lba_count, spdk_nvme_cmd_cb cb_fn, void *cb_arg,
++               uint32_t io_flags, uint16_t stream_id)
++{
++    return _spdk_nvme_ns_cmd_write(ns, qpair, buffer, lba, lba_count,
++                cb_fn, cb_arg, io_flags, stream_id);
++}
++
+ static int
+ nvme_ns_cmd_check_zone_append(struct spdk_nvme_ns *ns, uint32_t lba_count, uint32_t io_flags)
+ {
+@@ -856,7 +880,7 @@ nvme_ns_cmd_zone_append_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, zslba, lba_count, cb_fn, cb_arg,
+ 			      SPDK_NVME_OPC_ZONE_APPEND,
+-			      io_flags, apptag_mask, apptag, false, &rc);
++			      io_flags, apptag_mask, apptag, false, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		/*
+ 		 * Zone append commands cannot be split (num_children has to be 0).
+@@ -909,7 +933,7 @@ nvme_ns_cmd_zone_appendv_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, zslba, lba_count, cb_fn, cb_arg,
+ 			      SPDK_NVME_OPC_ZONE_APPEND,
+-			      io_flags, apptag_mask, apptag, true, &rc);
++			      io_flags, apptag_mask, apptag, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		/*
+ 		 * Zone append commands cannot be split (num_children has to be 0).
+@@ -955,7 +979,7 @@ spdk_nvme_ns_cmd_write_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *
+ 	payload = NVME_PAYLOAD_CONTIG(buffer, metadata);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
+-			      io_flags, apptag_mask, apptag, false, &rc);
++			      io_flags, apptag_mask, apptag, false, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -989,7 +1013,7 @@ spdk_nvme_ns_cmd_writev(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpair,
+ 	payload = NVME_PAYLOAD_SGL(reset_sgl_fn, next_sge_fn, cb_arg, NULL);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
+-			      io_flags, 0, 0, true, &rc);
++			      io_flags, 0, 0, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -1024,7 +1048,7 @@ spdk_nvme_ns_cmd_writev_with_md(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair
+ 	payload = NVME_PAYLOAD_SGL(reset_sgl_fn, next_sge_fn, cb_arg, metadata);
+
+ 	req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
+-			      io_flags, apptag_mask, apptag, true, &rc);
++			      io_flags, apptag_mask, apptag, true, &rc, NVME_MAIN_STREAM_ID);
+ 	if (req != NULL) {
+ 		return nvme_qpair_submit_request(qpair, req);
+ 	} else {
+@@ -1061,11 +1085,11 @@ spdk_nvme_ns_cmd_writev_ext(struct spdk_nvme_ns *ns, struct spdk_nvme_qpair *qpa
+ 		payload.opts = opts;
+ 		payload.md = opts->metadata;
+ 		req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
+-				      opts->io_flags, opts->apptag_mask, opts->apptag, true, &rc);
++				      opts->io_flags, opts->apptag_mask, opts->apptag, true, &rc, NVME_MAIN_STREAM_ID);
+
+ 	} else {
+ 		req = _nvme_ns_cmd_rw(ns, qpair, &payload, 0, 0, lba, lba_count, cb_fn, cb_arg, SPDK_NVME_OPC_WRITE,
+-				      0, 0, 0, true, &rc);
++				      0, 0, 0, true, &rc, NVME_MAIN_STREAM_ID);
+ 	}
+
+ 	if (req != NULL) {
 diff --git lib/nvme/nvme_pcie_common.c lib/nvme/nvme_pcie_common.c
 index a6b368164..75da78301 100644
 --- lib/nvme/nvme_pcie_common.c
@@ -1034,12 +1325,12 @@ index a6b368164..75da78301 100644
 @@ -905,7 +905,7 @@ nvme_pcie_qpair_process_completions(struct spdk_nvme_qpair *qpair, uint32_t max_
  	while (1) {
  		cpl = &pqpair->cpl[pqpair->cq_head];
- 
+
 -		if (!next_is_valid && cpl->status.p != pqpair->flags.phase) {
 +		if (cpl->status.p != pqpair->flags.phase) {
  			break;
  		}
- 
+
 @@ -997,7 +997,6 @@ nvme_pcie_qpair_process_completions(struct spdk_nvme_qpair *qpair, uint32_t max_
  		}
  		pqpair->flags.has_pending_vtophys_failures = 0;
@@ -1047,9 +1338,9 @@ index a6b368164..75da78301 100644
 -
  	return num_completions;
  }
- 
+
 @@ -1704,7 +1703,6 @@ exit:
- 
+
  	return rc;
  }
 -
@@ -1062,11 +1353,11 @@ index fdf512f69..faa3d8704 100644
 +++ lib/nvmf/Makefile
 @@ -38,7 +38,7 @@ SO_VER := 11
  SO_MINOR := 0
- 
+
  C_SRCS = ctrlr.c ctrlr_discovery.c ctrlr_bdev.c \
 -	 subsystem.c nvmf.c nvmf_rpc.c transport.c tcp.c
 +	 subsystem.c nvmf.c nvmf_rpc.c transport.c tcp.c pos_nvmf.c
- 
+
  C_SRCS-$(CONFIG_RDMA) += rdma.c
  LIBNAME = nvmf
 diff --git lib/nvmf/ctrlr.c lib/nvmf/ctrlr.c
@@ -1086,13 +1377,13 @@ index 2f23b2f78..bad1f949b 100644
  #define KAS_TIME_UNIT_IN_MS 100
  #define KAS_DEFAULT_VALUE (MIN_KEEP_ALIVE_TIMEOUT_IN_MS / KAS_TIME_UNIT_IN_MS)
 +#define ADMIN_QID (0)
- 
+
  #define NVMF_CC_RESET_SHN_TIMEOUT_IN_MS	10000
- 
+
 @@ -332,6 +334,28 @@ nvmf_ctrlr_cdata_init(struct spdk_nvmf_transport *transport, struct spdk_nvmf_su
  	}
  }
- 
+
 +static uint64_t
 +encode_traddr(const char* traddr_str, const char* traddr_port)
 +{
@@ -1124,12 +1415,12 @@ index 2f23b2f78..bad1f949b 100644
  		}
 +		ctrlr->listener->trid->traddr_int = encode_traddr(ctrlr->listener->trid->traddr, ctrlr->listener->trid->trsvcid);
  	}
- 
+
  	req->qpair->ctrlr = ctrlr;
 @@ -544,7 +569,15 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
  	  */
  	qpair->ctrlr = NULL;
- 
+
 +	/* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
 +	if (!spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
 +		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
@@ -1144,7 +1435,7 @@ index 2f23b2f78..bad1f949b 100644
  		SPDK_NVMF_INVALID_CONNECT_CMD(rsp, qid);
 @@ -587,6 +620,8 @@ nvmf_ctrlr_add_io_qpair(void *ctx)
  	}
- 
+
  	ctrlr_add_qpair_and_update_rsp(qpair, ctrlr, rsp);
 +
 +	spdk_nvmf_update_reactor_subsystem_mapping(qpair);
@@ -1154,7 +1445,7 @@ index 2f23b2f78..bad1f949b 100644
 @@ -619,6 +654,14 @@ _nvmf_ctrlr_add_io_qpair(void *ctx)
  		return;
  	}
- 
+
 +	/* if admin queue is destroyed, we handle same as ctrlr->in_destruct */
 +	if (ctrlr->admin_qpair == NULL || !spdk_bit_array_get(ctrlr->qpair_mask, ADMIN_QID)) {
 +		SPDK_ERRLOG("Got I/O connect while admin qpair was being destroyed.\n");
@@ -1169,27 +1460,27 @@ index 2f23b2f78..bad1f949b 100644
 @@ -828,7 +871,7 @@ spdk_nvmf_ctrlr_connect(struct spdk_nvmf_request *req)
  		goto out;
  	}
- 
+
 -	sgroup->mgmt_io_outstanding++;
 +	spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(req, sgroup);
  	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
- 
+
  	status = _nvmf_ctrlr_connect(req);
 @@ -1994,7 +2037,6 @@ nvmf_ctrlr_async_event_request(struct spdk_nvmf_request *req)
  	/* AER cmd is an exception */
  	sgroup = &req->qpair->group->sgroups[ctrlr->subsys->id];
  	assert(sgroup != NULL);
 -	sgroup->mgmt_io_outstanding--;
- 
+
  	/* Four asynchronous events are supported for now */
  	if (ctrlr->nr_aer_reqs >= NVMF_MAX_ASYNC_EVENTS) {
 @@ -4193,7 +4235,7 @@ spdk_nvmf_request_exec_fabrics(struct spdk_nvmf_request *req)
  	}
- 
+
  	assert(sgroup != NULL);
 -	sgroup->mgmt_io_outstanding++;
 +	spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(req, sgroup);
- 
+
  	/* Place the request on the outstanding list so we can keep track of it */
  	TAILQ_INSERT_TAIL(&qpair->outstanding, req, link);
 @@ -4229,7 +4271,7 @@ static bool nvmf_check_subsystem_active(struct spdk_nvmf_request *req)
@@ -1200,23 +1491,23 @@ index 2f23b2f78..bad1f949b 100644
 +			spdk_nvmf_subsystem_poll_group_increase_mgmt_io_outstanding(req, sgroup);
  		} else {
  			nsid = req->cmd->nvme_cmd.nsid;
- 
+
 diff --git lib/nvmf/ctrlr_bdev.c lib/nvmf/ctrlr_bdev.c
 index 91d940c20..c8fd49081 100644
 --- lib/nvmf/ctrlr_bdev.c
 +++ lib/nvmf/ctrlr_bdev.c
 @@ -49,6 +49,7 @@
  #include "spdk/util.h"
- 
+
  #include "spdk/log.h"
 +#include <air/Air_c.h>
- 
+
  static bool
  nvmf_subsystem_bdev_io_type_supported(struct spdk_nvmf_subsystem *subsystem,
 @@ -316,6 +317,10 @@ nvmf_bdev_ctrlr_read_cmd(struct spdk_bdev *bdev, struct spdk_bdev_desc *desc,
- 
+
  	assert(!spdk_nvmf_request_using_zcopy(req));
- 
+
 +	struct spdk_nvmf_ctrlr* ctrlr = req->qpair->ctrlr;
 +	if (spdk_likely(ctrlr != NULL && ctrlr->listener != NULL)) {
 +		AIRLOG(PERF_PORT, eAIR_read, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
@@ -1226,13 +1517,13 @@ index 91d940c20..c8fd49081 100644
  	if (spdk_unlikely(rc)) {
 @@ -361,6 +366,10 @@ nvmf_bdev_ctrlr_write_cmd(struct spdk_bdev *bdev, struct spdk_bdev_desc *desc,
  	}
- 
+
  	assert(!spdk_nvmf_request_using_zcopy(req));
 +	struct spdk_nvmf_ctrlr* ctrlr = req->qpair->ctrlr;
 +	if (spdk_likely(ctrlr != NULL && ctrlr->listener != NULL)) {
 +		AIRLOG(PERF_PORT, eAIR_write, ctrlr->listener->trid->traddr_int, num_blocks * block_size);
 +	}
- 
+
  	rc = spdk_bdev_writev_blocks(desc, ch, req->iov, req->iovcnt, start_lba, num_blocks,
  				     nvmf_bdev_ctrlr_complete_cmd, req);
 diff --git lib/nvmf/nvmf.c lib/nvmf/nvmf.c
@@ -1249,7 +1540,7 @@ index 28c552f3e..7ad44ab8a 100644
  #include "spdk/string.h"
  #include "spdk/log.h"
 @@ -843,24 +845,41 @@ _nvmf_poll_group_add(void *_ctx)
- 
+
  void
  spdk_nvmf_tgt_new_qpair(struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair)
 +{
@@ -1268,7 +1559,7 @@ index 28c552f3e..7ad44ab8a 100644
  	struct spdk_nvmf_poll_group *group;
  	struct nvmf_new_qpair_ctx *ctx;
 +	group = spdk_nvmf_get_numa_aware_poll_group(tgt, numa);
- 
+
 -	group = spdk_nvmf_get_optimal_poll_group(qpair);
  	if (group == NULL) {
 -		if (tgt->next_poll_group == NULL) {
@@ -1318,7 +1609,7 @@ index e5842b03f..1ad89d7db 100644
  #define NVMF_MAX_CNTLID 0xFFEF
 +#define M_INVALID_SUBSYSTEM (0)
 +#define M_VALID_SUBSYSTEM (1)
- 
+
  enum spdk_nvmf_subsystem_state {
  	SPDK_NVMF_SUBSYSTEM_INACTIVE = 0,
 @@ -424,6 +426,8 @@ void nvmf_subsystem_remove_all_listeners(struct spdk_nvmf_subsystem *subsystem,
@@ -1622,7 +1913,7 @@ index 819638725..573a968d8 100644
  	struct spdk_nvmf_rdma_recv	*rdma_recv;
 @@ -3815,7 +3816,7 @@ nvmf_rdma_poller_poll(struct spdk_nvmf_rdma_transport *rtransport,
  	uint64_t poll_tsc = spdk_get_ticks();
- 
+
  	/* Poll for completing operations. */
 -	reaped = ibv_poll_cq(rpoller->cq, 32, wc);
 +	reaped = ibv_poll_cq(rpoller->cq, NUM_POLL_ENTRIES, wc);
@@ -1636,7 +1927,7 @@ index 29cbef097..07110bb8c 100644
 @@ -502,7 +502,7 @@ nvmf_subsystem_get_intermediate_state(enum spdk_nvmf_subsystem_state current_sta
  	}
  }
- 
+
 -static int
 +int
  nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
@@ -1649,10 +1940,10 @@ index 29cbef097..07110bb8c 100644
 -	assert(actual_old_state == expected_old_state);
  	return actual_old_state - expected_old_state;
  }
- 
+
 @@ -1600,7 +1599,9 @@ spdk_nvmf_subsystem_add_ns_ext(struct spdk_nvmf_subsystem *subsystem, const char
  	int rc;
- 
+
  	if (!(subsystem->state == SPDK_NVMF_SUBSYSTEM_INACTIVE ||
 -	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSED)) {
 +	      subsystem->state == SPDK_NVMF_SUBSYSTEM_PAUSED ||
@@ -1660,23 +1951,23 @@ index 29cbef097..07110bb8c 100644
 +		SPDK_ERRLOG("invalid subsystem state : %d\n", subsystem->state);
  		return 0;
  	}
- 
+
 diff --git lib/nvmf/tcp.c lib/nvmf/tcp.c
 index 96ecf1b65..18287c4f4 100644
 --- lib/nvmf/tcp.c
 +++ lib/nvmf/tcp.c
 @@ -51,6 +51,7 @@
  #include "nvmf_internal.h"
- 
+
  #include "spdk_internal/trace_defs.h"
 +#include <numa.h>
- 
+
  #define NVMF_TCP_MAX_ACCEPT_SOCK_ONE_TIME 16
  #define SPDK_NVMF_TCP_DEFAULT_MAX_SOCK_PRIORITY 16
 @@ -1147,7 +1148,13 @@ nvmf_tcp_handle_connect(struct spdk_nvmf_transport *transport,
  		return;
  	}
- 
+
 -	spdk_nvmf_tgt_new_qpair(transport->tgt, &tqpair->qpair);
 +	int numa_count_in_system = numa_num_configured_nodes();
 +	int numa = -1;
@@ -1686,7 +1977,7 @@ index 96ecf1b65..18287c4f4 100644
 +	}
 +	spdk_nvmf_tgt_new_qpair_with_nqn(transport->tgt, &tqpair->qpair, numa);
  }
- 
+
  static uint32_t
 diff --git lib/thread/Makefile lib/thread/Makefile
 index 484833409..6dc542dec 100644
@@ -1695,11 +1986,11 @@ index 484833409..6dc542dec 100644
 @@ -37,7 +37,7 @@ include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
  SO_VER := 6
  SO_MINOR := 1
- 
+
 -C_SRCS = thread.c
 +C_SRCS = thread.c pos_thread.c
  LIBNAME = thread
- 
+
  SPDK_MAP_FILE = $(abspath $(CURDIR)/spdk_thread.map)
 diff --git lib/thread/pos_thread.c lib/thread/pos_thread.c
 new file mode 100644
@@ -1789,7 +2080,7 @@ index 0fdf68146..48438dc23 100644
 @@ -53,7 +53,7 @@
  #include <sys/eventfd.h>
  #endif
- 
+
 -#define SPDK_MSG_BATCH_SIZE		8
 +#define SPDK_MSG_BATCH_SIZE		64
  #define SPDK_MAX_DEVICE_NAME_LEN	256
@@ -1806,7 +2097,7 @@ index 0fdf68146..48438dc23 100644
  		}
  	}
 @@ -1235,7 +1236,8 @@ spdk_thread_send_msg(const struct spdk_thread *thread, spdk_msg_fn fn, void *ctx
- 
+
  	rc = spdk_ring_enqueue(thread->messages, (void **)&msg, 1, NULL);
  	if (rc != 1) {
 -		SPDK_ERRLOG("msg could not be enqueued\n");
@@ -1822,7 +2113,7 @@ index a4fd0cdd8..dd1851fe8 100644
 @@ -92,6 +92,13 @@ else
  COMMON_CFLAGS += -march=$(TARGET_ARCHITECTURE)
  endif
- 
+
 +ifeq ($(TARGET_MACHINE),x86_64)
 +# Don't use AVX-512 instructions in SPDK code - it breaks Valgrind for
 +# some cases where compiler decides to hyper-optimize a relatively
@@ -1835,19 +2126,19 @@ index a4fd0cdd8..dd1851fe8 100644
  endif
 @@ -265,8 +272,8 @@ endif
  include $(CONFIG_ENV)/env.mk
- 
+
  ifeq ($(CONFIG_ASAN),y)
 -COMMON_CFLAGS += -fsanitize=address
 -LDFLAGS += -fsanitize=address
 +COMMON_CFLAGS += -fno-omit-frame-pointer -fsanitize=address
 +LDFLAGS += -fno-omit-frame-pointer -fsanitize=address
  endif
- 
+
  ifeq ($(CONFIG_UBSAN),y)
 @@ -316,6 +323,16 @@ ifeq ($(OS).$(CC_TYPE),Windows.gcc)
  SYS_LIBS += -l:libssp.a
  endif
- 
+
 +ifeq ($(CONFIG_POS),y)
 +ifneq ($(CONFIG_ASAN),y)
 +SYS_LIBS += -ltcmalloc
@@ -1859,7 +2150,7 @@ index a4fd0cdd8..dd1851fe8 100644
 +COMMON_CFLAGS += -I$(SPDK_ROOT_DIR)/../air
 +
  MAKEFLAGS += --no-print-directory
- 
+
  C_SRCS += $(C_SRCS-y)
 diff --git mk/spdk.lib_deps.mk mk/spdk.lib_deps.mk
 index ce18568c2..2a6258fe1 100644
@@ -1868,7 +2159,7 @@ index ce18568c2..2a6258fe1 100644
 @@ -83,7 +83,7 @@ DEPDIRS-net := log util $(JSON_LIBS)
  DEPDIRS-notify := log util $(JSON_LIBS)
  DEPDIRS-trace := log util $(JSON_LIBS)
- 
+
 -DEPDIRS-bdev := log util thread $(JSON_LIBS) notify trace
 +DEPDIRS-bdev := log util thread conf $(JSON_LIBS) notify trace
  DEPDIRS-blobfs := log thread blob trace
@@ -1881,13 +2172,13 @@ index b944ea62b..7ee3a3a81 100644
 @@ -105,6 +105,10 @@ BLOCKDEV_MODULES_LIST += bdev_pmem
  BLOCKDEV_MODULES_PRIVATE_LIBS += -lpmemblk -lpmem
  endif
- 
+
 +ifeq ($(CONFIG_POS),y)
 +BLOCKDEV_MODULES_LIST += bdev_pos
 +endif
 +
  SOCK_MODULES_LIST = sock_posix
- 
+
  ifeq ($(OS), Linux)
 diff --git module/accel/ioat/Makefile module/accel/ioat/Makefile
 index 3f3d735e3..e85b66d9b 100644
@@ -1895,46 +2186,46 @@ index 3f3d735e3..e85b66d9b 100644
 +++ module/accel/ioat/Makefile
 @@ -38,7 +38,7 @@ SO_VER := 3
  SO_MINOR := 0
- 
+
  LIBNAME = accel_ioat
 -C_SRCS = accel_engine_ioat.c accel_engine_ioat_rpc.c
 +C_SRCS = accel_engine_ioat.c accel_engine_ioat_rpc.c pos_accel_engine_ioat.c
- 
+
  SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/mk/spdk_blank.map
- 
+
 diff --git module/accel/ioat/accel_engine_ioat.c module/accel/ioat/accel_engine_ioat.c
 index 9acfb3c92..0b10ae54f 100644
 --- module/accel/ioat/accel_engine_ioat.c
 +++ module/accel/ioat/accel_engine_ioat.c
 @@ -32,6 +32,7 @@
   */
- 
+
  #include "accel_engine_ioat.h"
 +#include "pos_accel_engine_ioat.h"
- 
+
  #include "spdk/stdinc.h"
- 
+
 @@ -43,7 +44,7 @@
  #include "spdk/thread.h"
  #include "spdk/ioat.h"
- 
+
 -static bool g_ioat_enable = false;
 +bool g_ioat_enable = false;
  static bool g_ioat_initialized = false;
- 
+
  struct ioat_device {
 @@ -95,7 +96,6 @@ ioat_free_device(struct ioat_device *dev)
  	pthread_mutex_unlock(&g_ioat_mutex);
  }
- 
+
 -static int accel_engine_ioat_init(void);
  static void accel_engine_ioat_exit(void *ctx);
- 
+
  static size_t
 @@ -124,8 +124,6 @@ ioat_poll(void *arg)
  	       SPDK_POLLER_IDLE;
  }
- 
+
 -static struct spdk_io_channel *ioat_get_io_channel(void);
 -
  static uint64_t
@@ -1943,7 +2234,7 @@ index 9acfb3c92..0b10ae54f 100644
 @@ -202,7 +200,7 @@ ioat_destroy_cb(void *io_device, void *ctx_buf)
  	spdk_poller_unregister(&ch->poller);
  }
- 
+
 -static struct spdk_io_channel *
 +struct spdk_io_channel *
  ioat_get_io_channel(void)
@@ -1952,23 +2243,23 @@ index 9acfb3c92..0b10ae54f 100644
 @@ -235,6 +233,8 @@ probe_cb(void *cb_ctx, struct spdk_pci_device *pci_dev)
  		return false;
  	}
- 
+
 +	add_ioat_per_numa(pci_dev->socket_id);
 +
  	return true;
  }
- 
+
 @@ -253,13 +253,14 @@ attach_cb(void *cb_ctx, struct spdk_pci_device *pci_dev, struct spdk_ioat_chan *
  	TAILQ_INSERT_TAIL(&g_devices, dev, tailq);
  }
- 
+
 +__attribute__((used))
  void
  accel_engine_ioat_enable_probe(void)
  {
  	g_ioat_enable = true;
  }
- 
+
 -static int
 +int
  accel_engine_ioat_init(void)
@@ -1976,7 +2267,7 @@ index 9acfb3c92..0b10ae54f 100644
  	if (!g_ioat_enable) {
 @@ -277,7 +278,7 @@ accel_engine_ioat_init(void)
  	}
- 
+
  	g_ioat_initialized = true;
 -	SPDK_NOTICELOG("Accel engine updated to use IOAT engine.\n");
 +
@@ -1988,13 +2279,13 @@ index 050502d18..cda5c32b6 100644
 --- module/accel/ioat/accel_engine_ioat.h
 +++ module/accel/ioat/accel_engine_ioat.h
 @@ -38,6 +38,8 @@
- 
+
  #define IOAT_MAX_CHANNELS	64
- 
+
 +int accel_engine_ioat_init(void);
  void accel_engine_ioat_enable_probe(void);
 +struct spdk_io_channel * ioat_get_io_channel(void);
- 
+
  #endif /* SPDK_ACCEL_ENGINE_IOAT_H */
 diff --git module/accel/ioat/pos_accel_engine_ioat.c module/accel/ioat/pos_accel_engine_ioat.c
 new file mode 100644
@@ -2158,7 +2449,7 @@ index bbf33fdfe..9b7f254c9 100644
  DIRS-$(CONFIG_PMDK) += pmem
 +DIRS-$(CONFIG_POS) += pos
  endif
- 
+
  DIRS-$(CONFIG_RBD) += rbd
 diff --git module/bdev/gpt/vbdev_gpt.c module/bdev/gpt/vbdev_gpt.c
 index c10c85aa3..243a21d8a 100644
@@ -2166,11 +2457,11 @@ index c10c85aa3..243a21d8a 100644
 +++ module/bdev/gpt/vbdev_gpt.c
 @@ -59,7 +59,7 @@ static struct spdk_bdev_module gpt_if = {
  	.examine_disk = vbdev_gpt_examine,
- 
+
  };
 -SPDK_BDEV_MODULE_REGISTER(gpt, &gpt_if)
 +//SPDK_BDEV_MODULE_REGISTER(gpt, &gpt_if)
- 
+
  /* Base block device gpt context */
  struct gpt_base {
 diff --git module/bdev/malloc/Makefile module/bdev/malloc/Makefile
@@ -2180,11 +2471,11 @@ index 4db73241a..982ccd965 100644
 @@ -37,7 +37,7 @@ include $(SPDK_ROOT_DIR)/mk/spdk.common.mk
  SO_VER := 3
  SO_MINOR := 0
- 
+
 -C_SRCS = bdev_malloc.c bdev_malloc_rpc.c
 +C_SRCS = bdev_malloc.c bdev_malloc_rpc.c pos_bdev_malloc.c
  LIBNAME = bdev_malloc
- 
+
  SPDK_MAP_FILE = $(SPDK_ROOT_DIR)/mk/spdk_blank.map
 diff --git module/bdev/malloc/bdev_malloc.c module/bdev/malloc/bdev_malloc.c
 index 5c457740e..acb525805 100644
@@ -2192,7 +2483,7 @@ index 5c457740e..acb525805 100644
 +++ module/bdev/malloc/bdev_malloc.c
 @@ -35,6 +35,7 @@
  #include "spdk/stdinc.h"
- 
+
  #include "bdev_malloc.h"
 +#include "pos_bdev_malloc.h"
  #include "spdk/bdev.h"
@@ -2201,7 +2492,7 @@ index 5c457740e..acb525805 100644
 @@ -47,12 +48,6 @@
  #include "spdk/bdev_module.h"
  #include "spdk/log.h"
- 
+
 -struct malloc_disk {
 -	struct spdk_bdev		disk;
 -	void				*malloc_buf;
@@ -2212,16 +2503,16 @@ index 5c457740e..acb525805 100644
  	int				num_outstanding;
  	enum spdk_bdev_io_status	status;
 @@ -114,7 +109,7 @@ static struct spdk_bdev_module malloc_if = {
- 
+
  SPDK_BDEV_MODULE_REGISTER(malloc, &malloc_if)
- 
+
 -static void
 +void
  malloc_disk_free(struct malloc_disk *malloc_disk)
  {
  	if (!malloc_disk) {
 @@ -389,7 +384,7 @@ static const struct spdk_bdev_fn_table malloc_fn_table = {
- 
+
  int
  create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
 -		   uint64_t num_blocks, uint32_t block_size, uint32_t optimal_io_boundary)
@@ -2251,14 +2542,14 @@ index 5c457740e..acb525805 100644
 @@ -460,6 +456,11 @@ create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_
  		return rc;
  	}
- 
+
 +	rc = backup_disk_info_for_restore(mdisk);
 +	if (rc != 0) {
 +		return rc;
 +	}
 +
  	*bdev = &(mdisk->disk);
- 
+
  	TAILQ_INSERT_TAIL(&g_malloc_disks, mdisk, link);
 diff --git module/bdev/malloc/bdev_malloc.h module/bdev/malloc/bdev_malloc.h
 index 054cf3e3c..6456071bd 100644
@@ -2266,10 +2557,10 @@ index 054cf3e3c..6456071bd 100644
 +++ module/bdev/malloc/bdev_malloc.h
 @@ -36,13 +36,21 @@
  #define SPDK_BDEV_MALLOC_H
- 
+
  #include "spdk/stdinc.h"
 +#include "spdk/bdev_module.h"
- 
+
 -#include "spdk/bdev.h"
 +struct malloc_disk {
 +	struct spdk_bdev		disk;
@@ -2277,17 +2568,17 @@ index 054cf3e3c..6456071bd 100644
 +	TAILQ_ENTRY(malloc_disk)	link;
 +	uint32_t numa;
 +};
- 
+
  typedef void (*spdk_delete_malloc_complete)(void *cb_arg, int bdeverrno);
- 
+
 +void malloc_disk_free(struct malloc_disk *malloc_disk);
 +
  int create_malloc_disk(struct spdk_bdev **bdev, const char *name, const struct spdk_uuid *uuid,
 -		       uint64_t num_blocks, uint32_t block_size, uint32_t optimal_io_boundary);
 +		       uint64_t num_blocks, uint32_t block_size, uint32_t optimal_io_boundary, uint32_t numa);
- 
+
  void delete_malloc_disk(struct spdk_bdev *bdev, spdk_delete_malloc_complete cb_fn, void *cb_arg);
- 
+
 diff --git module/bdev/malloc/bdev_malloc_rpc.c module/bdev/malloc/bdev_malloc_rpc.c
 index bfa1e7d1b..35bb2077b 100644
 --- module/bdev/malloc/bdev_malloc_rpc.c
@@ -2298,7 +2589,7 @@ index bfa1e7d1b..35bb2077b 100644
  	uint32_t optimal_io_boundary;
 +	uint32_t numa;
  };
- 
+
  static void
 @@ -60,6 +61,7 @@ static const struct spdk_json_object_decoder rpc_construct_malloc_decoders[] = {
  	{"num_blocks", offsetof(struct rpc_construct_malloc, num_blocks), spdk_json_decode_uint64},
@@ -2306,11 +2597,11 @@ index bfa1e7d1b..35bb2077b 100644
  	{"optimal_io_boundary", offsetof(struct rpc_construct_malloc, optimal_io_boundary), spdk_json_decode_uint32, true},
 +	{"numa", offsetof(struct rpc_construct_malloc, numa), spdk_json_decode_uint32, true},
  };
- 
+
  static void
 @@ -98,7 +100,7 @@ rpc_bdev_malloc_create(struct spdk_jsonrpc_request *request,
  	}
- 
+
  	rc = create_malloc_disk(&bdev, req.name, uuid, req.num_blocks, req.block_size,
 -				req.optimal_io_boundary);
 +				req.optimal_io_boundary, req.numa);
@@ -3851,19 +4142,19 @@ index 4e6541e96..cab4aa177 100644
 --- module/event/subsystems/nvmf/event_nvmf.h
 +++ module/event/subsystems/nvmf/event_nvmf.h
 @@ -45,6 +45,7 @@
- 
+
  struct spdk_nvmf_admin_passthru_conf {
  	bool identify_ctrlr;
 +	bool get_smart_log_page;
  };
- 
+
  struct spdk_nvmf_tgt_conf {
 diff --git module/event/subsystems/nvmf/nvmf_tgt.c module/event/subsystems/nvmf/nvmf_tgt.c
 index b6573a237..0f1a8e119 100644
 --- module/event/subsystems/nvmf/nvmf_tgt.c
 +++ module/event/subsystems/nvmf/nvmf_tgt.c
 @@ -36,9 +36,11 @@
- 
+
  #include "spdk/bdev.h"
  #include "spdk/thread.h"
 +#include "spdk/pos_thread.h"
@@ -3872,39 +4163,39 @@ index b6573a237..0f1a8e119 100644
  #include "spdk/nvmf_cmd.h"
 +#include "spdk/nvmf_transport.h"
  #include "spdk_internal/usdt.h"
- 
+
  enum nvmf_tgt_state {
 @@ -62,7 +64,8 @@ struct nvmf_tgt_poll_group {
  };
- 
+
  struct spdk_nvmf_tgt_conf g_spdk_nvmf_tgt_conf = {
 -	.admin_passthru.identify_ctrlr = false
 +	.admin_passthru.identify_ctrlr = false,
 +	.admin_passthru.get_smart_log_page = true
  };
- 
+
  struct spdk_cpuset *g_poll_groups_mask = NULL;
 @@ -126,7 +129,7 @@ nvmf_tgt_destroy_poll_group_done(void *cb_arg, int status)
  	free(pg);
- 
+
  	spdk_thread_send_msg(g_tgt_fini_thread, _nvmf_tgt_destroy_poll_group_done, NULL);
 -
 +	clear_thread_to_reactor();
  	spdk_thread_exit(spdk_get_thread());
  }
- 
+
 @@ -202,6 +205,9 @@ nvmf_tgt_create_poll_group(void *ctx)
- 
+
  	pg->thread = spdk_get_thread();
  	pg->group = spdk_nvmf_poll_group_create(g_spdk_nvmf_tgt);
 +	uint32_t core = spdk_env_get_current_core();
 +	pg->group->core = core;
 +	set_tls_thread_to_reactor(core, spdk_get_thread());
- 
+
  	spdk_thread_send_msg(g_tgt_init_thread, nvmf_tgt_create_poll_group_done, pg);
  }
 @@ -224,7 +230,6 @@ nvmf_tgt_create_poll_groups(void)
- 
+
  		thread = spdk_thread_create(thread_name, g_poll_groups_mask);
  		assert(thread != NULL);
 -
@@ -3939,7 +4230,7 @@ index b6573a237..0f1a8e119 100644
 +	if (rc) {
 +		return -1;
 +	}
- 
+
 +	if (!spdk_bdev_io_type_supported(bdev, SPDK_BDEV_IO_TYPE_NVME_ADMIN)) {
 +		return -1;
 +	}
@@ -3966,7 +4257,7 @@ index ab034142b..3f3358a7a 100755
 @@ -463,6 +463,32 @@ if __name__ == "__main__":
      p.add_argument('name', help='uring bdev name')
      p.set_defaults(func=bdev_uring_delete)
- 
+
 +
 +    def bdev_pos_create(args):
 +        print(rpc.bdev.bdev_pos_create(args.client,
@@ -4003,7 +4294,7 @@ index 64b6482b7..ad3b19a42 100644
 @@ -286,6 +286,37 @@ def bdev_null_create(client, num_blocks, block_size, name, uuid=None, md_size=No
          params['dif_is_head_of_md'] = dif_is_head_of_md
      return client.call('bdev_null_create', params)
- 
+
 +@deprecated_alias('construct_pos_bdev')
 +def bdev_pos_create(client, volume_id, volume_size_mb, volume_type_in_memory, name=None, uuid=None):
 +    """Construct a bdev supporting Pos volume.
@@ -4035,38 +4326,51 @@ index 64b6482b7..ad3b19a42 100644
 +    """
 +    params = {'name': name}
 +    return client.call('bdev_pos_delete', params)
- 
+
  @deprecated_alias('delete_null_bdev')
  def bdev_null_delete(client, name):
+diff --git test/unit/lib/nvme/nvme_ns_cmd.c/nvme_ns_cmd_ut.c test/unit/lib/nvme/nvme_ns_cmd.c/nvme_ns_cmd_ut.c
+index b82f7adfb..873ccb378 100644
+--- test/unit/lib/nvme/nvme_ns_cmd.c/nvme_ns_cmd_ut.c
++++ test/unit/lib/nvme/nvme_ns_cmd.c/nvme_ns_cmd_ut.c
+@@ -2036,7 +2036,7 @@ test_nvme_ns_cmd_setup_request(void)
+ 	ns.flags = SPDK_NVME_NS_DPS_PI_SUPPORTED;
+
+ 	_nvme_ns_cmd_setup_request(&ns, &req, SPDK_NVME_OPC_READ,
+-				   1024, 256, SPDK_NVME_IO_FLAGS_PRACT, 1, 1);
++				   1024, 256, SPDK_NVME_IO_FLAGS_PRACT, 1, 1, 0);
+ 	CU_ASSERT(req.cmd.cdw10 == 1024);
+ 	CU_ASSERT(req.cmd.opc == SPDK_NVME_OPC_READ);
+ 	CU_ASSERT(req.cmd.nsid == 1);
 diff --git test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
 index 5e53b7a82..2b20b405c 100644
 --- test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
 +++ test/unit/lib/nvmf/ctrlr.c/ctrlr_ut.c
 @@ -40,6 +40,7 @@
- 
+
  #include "common/lib/ut_multithread.c"
  #include "nvmf/ctrlr.c"
 +#include "nvmf/pos_nvmf.c"
- 
+
  SPDK_LOG_REGISTER_COMPONENT(nvmf)
- 
+
 diff --git test/unit/lib/nvmf/tcp.c/tcp_ut.c test/unit/lib/nvmf/tcp.c/tcp_ut.c
 index 9b1cf34ea..029f163ce 100644
 --- test/unit/lib/nvmf/tcp.c/tcp_ut.c
 +++ test/unit/lib/nvmf/tcp.c/tcp_ut.c
 @@ -42,6 +42,7 @@
  #include "common/lib/test_sock.c"
- 
+
  #include "nvmf/ctrlr.c"
 +#include "nvmf/pos_nvmf.c"
  #include "nvmf/tcp.c"
- 
+
  #define UT_IPV4_ADDR "192.168.0.1"
 @@ -226,6 +227,7 @@ DEFINE_STUB_V(spdk_nvme_trid_populate_transport, (struct spdk_nvme_transport_id
  DEFINE_STUB_V(spdk_nvmf_transport_register, (const struct spdk_nvmf_transport_ops *ops));
- 
+
  DEFINE_STUB_V(spdk_nvmf_tgt_new_qpair, (struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair));
 +DEFINE_STUB_V(spdk_nvmf_tgt_new_qpair_with_nqn, (struct spdk_nvmf_tgt *tgt, struct spdk_nvmf_qpair *qpair, int numa));
- 
+
  DEFINE_STUB_V(nvmf_transport_qpair_abort_request,
  	      (struct spdk_nvmf_qpair *qpair, struct spdk_nvmf_request *req));
