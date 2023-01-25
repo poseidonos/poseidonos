@@ -30,41 +30,41 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "src/include/pos_event_id.h"
-#include "src/lib/system_timeout_checker.h"
 #include "src/gc/flow_control/flow_control.h"
-#include "src/gc/flow_control/flow_control_service.h"
-#include "src/gc/flow_control/flow_control_configuration.h"
-#include "src/gc/flow_control/token_distributer.h"
-#include "src/gc/flow_control/linear_distributer.h"
-#include "src/gc/flow_control/state_distributer.h"
-#include "src/allocator/i_context_manager.h"
-#include "src/allocator_service/allocator_service.h"
-#include "src/array_models/interface/i_array_info.h"
-#include "src/logger/logger.h"
-#include "src/array_models/dto/partition_logical_size.h"
+
 #include "assert.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/i_context_manager.h"
+#include "src/allocator_service/allocator_service.h"
+#include "src/array_models/dto/partition_logical_size.h"
+#include "src/array_models/interface/i_array_info.h"
+#include "src/gc/flow_control/flow_control_configuration.h"
+#include "src/gc/flow_control/flow_control_service.h"
+#include "src/gc/flow_control/linear_distributer.h"
+#include "src/gc/flow_control/state_distributer.h"
+#include "src/gc/flow_control/token_distributer.h"
+#include "src/include/pos_event_id.h"
+#include "src/lib/system_timeout_checker.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-
 FlowControl::FlowControl(IArrayInfo* arrayInfo)
 : FlowControl(arrayInfo,
-            nullptr,
-            new SystemTimeoutChecker(),
-            FlowControlServiceSingleton::Instance(),
-            nullptr,
-            new FlowControlConfiguration(arrayInfo))
+      nullptr,
+      new SystemTimeoutChecker(),
+      FlowControlServiceSingleton::Instance(),
+      nullptr,
+      new FlowControlConfiguration(arrayInfo))
 {
 }
 
 FlowControl::FlowControl(IArrayInfo* arrayInfo,
-                        IContextManager* inputIContextManager,
-                        SystemTimeoutChecker* inputSystemTimeoutChecker,
-                        FlowControlService* inputFlowControlService,
-                        TokenDistributer* inputTokenDistributer,
-                        FlowControlConfiguration* inputFlowControlConfiguration)
+    IContextManager* inputIContextManager,
+    SystemTimeoutChecker* inputSystemTimeoutChecker,
+    FlowControlService* inputFlowControlService,
+    TokenDistributer* inputTokenDistributer,
+    FlowControlConfiguration* inputFlowControlConfiguration)
 : arrayInfo(arrayInfo),
   iContextManager(inputIContextManager),
   systemTimeoutChecker(inputSystemTimeoutChecker),
@@ -209,20 +209,21 @@ FlowControl::GetToken(FlowControlType type, int token)
     {
         return token;
     }
-
     int oldBucket = bucket[type].load();
+    int counterType = type ^ 0x1;
     do
     {
         if (oldBucket <= 0)
         {
             if (refillTokenMutex.try_lock())
             {
-                bool ret = _RefillToken(type);
-                refillTokenMutex.unlock();
-                if (false == ret)
+                if (bucket[counterType] <= 0 || systemTimeoutChecker->CheckTimeout() == true)
                 {
-                    return 0;
+                    _ResetAndRefillToken();
+                    systemTimeoutChecker->SetTimeout(flowControlConfiguration->GetForceResetTimeout());
                 }
+                refillTokenMutex.unlock();
+
                 if (0 >= bucket[type].load())
                 {
                     return 0;
@@ -233,6 +234,17 @@ FlowControl::GetToken(FlowControlType type, int token)
                 return 0;
             }
         }
+
+        if (true == systemTimeoutChecker->CheckTimeout())
+        {
+            if (refillTokenMutex.try_lock())
+            {
+                _ResetAndRefillToken();
+                refillTokenMutex.unlock();
+                systemTimeoutChecker->SetTimeout(flowControlConfiguration->GetForceResetTimeout());
+            }
+        }
+
     } while (!bucket[type].compare_exchange_weak(oldBucket, oldBucket - token));
 
     return token;
@@ -278,6 +290,18 @@ FlowControl::Reset(void)
     bucket[FlowControlType::GC] = 0;
 }
 
+void
+FlowControl::_ResetAndRefillToken()
+{
+    uint32_t userToken;
+    uint32_t gcToken;
+
+    Reset();
+    std::tie(userToken, gcToken) = _DistributeToken();
+    AddDebugInfo();
+    bucket[FlowControlType::USER].fetch_add(userToken);
+    bucket[FlowControlType::GC].fetch_add(gcToken);
+}
 bool
 FlowControl::_RefillToken(FlowControlType type)
 {
@@ -302,7 +326,6 @@ FlowControl::_RefillToken(FlowControlType type)
         userToken, gcToken, bucket[FlowControlType::USER], bucket[FlowControlType::GC], arrayId);
     bucket[FlowControlType::USER].fetch_add(userToken);
     bucket[FlowControlType::GC].fetch_add(gcToken);
-
     return true;
 }
 
@@ -310,6 +333,7 @@ bool
 FlowControl::_TryForceResetToken(FlowControlType type)
 {
     int counterType = type ^ 0x1;
+
     if (previousBucket[counterType] != bucket[counterType])
     {
         previousBucket[counterType] = bucket[counterType].load();
@@ -319,7 +343,6 @@ FlowControl::_TryForceResetToken(FlowControlType type)
         }
         return false;
     }
-
     if (false == isForceReset)
     {
         systemTimeoutChecker->SetTimeout(flowControlConfiguration->GetForceResetTimeout());

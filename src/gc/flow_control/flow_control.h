@@ -123,6 +123,7 @@ public:
 
 private:
     bool _RefillToken(FlowControlType type);
+    void _ResetAndRefillToken(void);
     bool _TryForceResetToken(FlowControlType type);
     std::tuple<uint32_t, uint32_t> _DistributeToken(void);
     void _ReadConfig(void);

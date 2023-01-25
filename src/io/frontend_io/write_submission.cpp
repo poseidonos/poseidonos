@@ -122,7 +122,6 @@ WriteSubmission::Execute(void)
         {
             return false;
         }
-
         BlkAddr startRba = blockAlignment.GetHeadBlock();
         bool ownershipAcquired = rbaStateManager->BulkAcquireOwnership(volumeId,
             startRba, blockCount);
