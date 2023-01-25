@@ -9,6 +9,8 @@ import (
 	"pnconnector/src/log"
 	"time"
 
+    "kouros"
+    "kouros/pos"
 	pb "kouros/api"
 
 	"google.golang.org/grpc"
@@ -22,6 +24,27 @@ const (
 	unmountArrayCmdTimeout uint32 = 1800
 	mountArrayCmdTimeout   uint32 = 600
 )
+
+func GetPOSManager() (pos.POSManager, error) {
+    posMngr, err := kouros.NewPOSManager(pos.GRPC)
+    if err != nil {
+        return nil, err
+    }
+
+    nodeName := globals.NodeName
+    gRpcServerAddress := globals.GrpcServerAddress
+
+    if nodeName != "" {
+        var err error
+        gRpcServerAddress, err = GetIpv4(nodeName)
+        if err != nil {
+            return nil, errors.New("an error occured while getting the ipv4 address of a node: " + err.Error())
+        }
+    }
+
+    posMngr.Init("cli", gRpcServerAddress)
+    return posMngr, err
+}
 
 func dialToCliServer() (*grpc.ClientConn, error) {
 	nodeName := globals.NodeName
@@ -523,28 +546,6 @@ func SendUnmountArray(req *pb.UnmountArrayRequest, isTimeoutSpecified bool) (*pb
 	return res, err
 }
 
-func SendArrayInfo(req *pb.ArrayInfoRequest) (*pb.ArrayInfoResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.ArrayInfo(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
 func SendRebuildArray(req *pb.RebuildArrayRequest) (*pb.RebuildArrayResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
@@ -559,28 +560,6 @@ func SendRebuildArray(req *pb.RebuildArrayRequest) (*pb.RebuildArrayResponse, er
 	defer cancel()
 
 	res, err := c.RebuildArray(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendListArray(req *pb.ListArrayRequest) (*pb.ListArrayResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.ListArray(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err
