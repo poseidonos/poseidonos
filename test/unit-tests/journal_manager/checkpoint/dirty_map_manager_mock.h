@@ -17,7 +17,7 @@ public:
     MOCK_METHOD(MapList, GetDirtyList, (int logGroupId), (override));
     MOCK_METHOD(MapList, GetTotalDirtyList, (), (override));
     MOCK_METHOD(void, DeleteDirtyList, (int volumeId), (override));
-    MOCK_METHOD(void, LogFilled, (int logGroupId, MapList& dirty), (override));
+    MOCK_METHOD(void, LogFilled, (int logGroupId, const MapList& dirty), (override));
     MOCK_METHOD(void, LogBufferReseted, (int logGroupId), (override));
 };
 

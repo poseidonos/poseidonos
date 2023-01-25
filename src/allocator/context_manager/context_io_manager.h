@@ -37,6 +37,7 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/include/allocator_const.h"
+#include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
 {
@@ -60,7 +61,7 @@ public:
         AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo);
     virtual ~ContextIoManager(void);
 
-    virtual void Init(void);
+    virtual int Init(void);
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync,

@@ -37,7 +37,7 @@
 #include "src/meta_file_intf/async_context.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/metafs/include/meta_volume_type.h"
-#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_property.h"
 
 namespace pos
 {
@@ -55,6 +55,7 @@ public:
     virtual uint64_t GetFileSize(void) = 0;
 
     virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) = 0;
+    virtual FnCheckMetaFileIoDone GetIoDoneCheckFunc(void) = 0;
     virtual int CheckIoDoneStatus(void* data) = 0;
 
     virtual int Open(void);

@@ -39,6 +39,7 @@
 #include "src/include/partition_type.h"
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/log/metafs_log.h"
+#include "src/metafs/mai/meta_file_context_handler.h"
 #include "src/metafs/storage/pstore/mss_on_disk.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/metafs/config/metafs_config_manager.h"
@@ -47,8 +48,8 @@ namespace pos
 {
 MetaFs::MetaFs(void)
 : mgmt(nullptr),
-  io(nullptr),
   ctrl(nullptr),
+  io(nullptr),
   wbt(nullptr),
   concurrentMetaFsTimeInterval(nullptr),
   isNpor_(false),
@@ -84,7 +85,10 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded)
     bool supportNuma = configMgr_->IsSupportingNumaDedicatedScheduling();
 
     mgmt = new MetaFsManagementApi(arrayId_, metaStorage_);
-    ctrl = new MetaFsFileControlApi(arrayId_, metaStorage_, mgmt, telemetryPublisher_);
+    auto volMgr = new MetaVolumeManager(arrayId_, metaStorage_, telemetryPublisher_);
+    auto fileCtxHandler = std::make_unique<MetaFileContextHandler>(arrayId_, metaStorage_, volMgr);
+    ctrl = new MetaFsFileControlApi(arrayId_, false, metaStorage_, mgmt, volMgr,
+        std::move(fileCtxHandler), telemetryPublisher_);
     io = new MetaFsIoApi(arrayId_, ctrl, metaStorage_, telemetryPublisher_, concurrentMetaFsTimeInterval, supportNuma);
     wbt = new MetaFsWBTApi(arrayId_, ctrl);
 
@@ -95,8 +99,8 @@ MetaFs::MetaFs(IArrayInfo* arrayInfo, const bool isLoaded, MetaFsManagementApi* 
     MetaFsFileControlApi* ctrl, MetaFsIoApi* io, MetaFsWBTApi* wbt,
     MetaStorageSubsystem* metaStorage_, TelemetryPublisher* tp)
 : mgmt(mgmt),
-  io(io),
   ctrl(ctrl),
+  io(io),
   wbt(wbt),
   isNpor_(false),
   isLoaded_(isLoaded),
@@ -308,9 +312,15 @@ MetaFs::GetTheLastValidStripeId(void)
 }
 
 int
-MetaFs::EstimateAlignedFileIOSize(MetaFilePropertySet& prop)
+MetaFs::EstimateAlignedFileIOSize(MetaFilePropertySet& prop, MetaVolumeType volumeType)
 {
-    return ctrl->EstimateAlignedFileIOSize(prop);
+    return ctrl->EstimateAlignedFileIOSize(prop, volumeType);
+}
+
+size_t
+MetaFs::GetAvailableSpace(MetaFilePropertySet& prop, MetaVolumeType volumeType)
+{
+    return ctrl->GetAvailableSpace(prop, volumeType);
 }
 
 bool
@@ -336,6 +346,7 @@ MetaFs::_Initialize(void)
 
     if (EID(SUCCESS) != mgmt->InitializeSystem(arrayId_, &infoList))
         return false;
+    ctrl->Initialize(mgmt->GetEpochSignature());
     return true;
 }
 

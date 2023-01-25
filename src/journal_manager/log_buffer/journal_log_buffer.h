@@ -45,8 +45,7 @@ namespace pos
 {
 class LogWriteContext;
 class LogBufferIoContext;
-class LogGroupResetContext;
-class LogWriteContextFactory;
+class LogBufferIoContextFactory;
 class TelemetryPublisher;
 
 class JournalLogBuffer : public IJournalLogBuffer
@@ -56,7 +55,7 @@ public:
     explicit JournalLogBuffer(MetaFileIntf* metaFile);
     virtual ~JournalLogBuffer(void);
 
-    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+    virtual int Init(JournalConfiguration* journalConfiguration, LogBufferIoContextFactory* logWriteContextFactory,
         int arrayId, TelemetryPublisher* tp) override;
     virtual void InitDataBuffer(void) override;
     virtual void Dispose(void) override;
@@ -65,13 +64,13 @@ public:
     virtual int Open(uint64_t& logBufferSize) override;
 
     virtual int ReadLogBuffer(int groupId, void* buffer) override;
-    virtual int WriteLog(LogWriteContext* context) override;
+    virtual int WriteLog(LogWriteContext* context, uint64_t offset, FnCompleteMetaFileIo func) override;
 
     virtual int SyncResetAll(void) override;
     virtual int AsyncReset(int id, EventSmartPtr callbackEvent) override;
 
-    virtual int InternalIo(LogBufferIoContext* context) override;
-    virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx) override;
+    virtual int WriteLogGroupFooter(uint64_t offset, LogGroupFooter footer,
+        int logGroupId, EventSmartPtr callback) override;
 
     int Delete(void) override; // TODO(huijeong.kim): move to tester code
 
@@ -95,6 +94,9 @@ public:
     }
 
 private:
+    int _InternalIo(LogBufferIoContext* context);
+    void _InternalIoDone(AsyncMetaFileIoCtx* context);
+
     void _LoadBufferSize(void);
     void _LogBufferReadDone(AsyncMetaFileIoCtx* ctx);
 
@@ -106,7 +108,7 @@ private:
     }
 
     JournalConfiguration* config;
-    LogWriteContextFactory* logFactory;
+    LogBufferIoContextFactory* ioContextFactory;
     std::atomic<int> numInitializedLogGroup;
     std::atomic<bool> logBufferReadDone;
     MetaFileIntf* logFile;
@@ -115,5 +117,7 @@ private:
 
     TelemetryPublisher* telemetryPublisher;
     bool rocksDbEnabled;
+    int logbufferReadResult;
+    int arrayId;
 };
 } // namespace pos

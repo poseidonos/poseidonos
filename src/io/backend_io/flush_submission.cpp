@@ -53,7 +53,7 @@
 
 namespace pos
 {
-FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnabled)
+FlushSubmission::FlushSubmission(StripeSmartPtr inputStripe, int arrayId, bool isWTEnabled)
 : FlushSubmission(inputStripe,
       IIOSubmitHandler::GetInstance(), arrayId,
       ArrayMgr()->GetInfo(arrayId) != nullptr ? ArrayMgr()->GetInfo(arrayId)->arrayInfo : nullptr,
@@ -61,7 +61,7 @@ FlushSubmission::FlushSubmission(Stripe* inputStripe, int arrayId, bool isWTEnab
 {
 }
 
-FlushSubmission::FlushSubmission(Stripe* inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
+FlushSubmission::FlushSubmission(StripeSmartPtr inputStripe, IIOSubmitHandler* ioSubmitHandler, int arrayId,
     IArrayInfo* arrayInfo, IIOTranslator* translator, bool isWTEnabled)
 : Callback(false, CallbackType_FlushSubmission),
   stripe(inputStripe),

@@ -75,7 +75,7 @@ int
 MetaFsFileIntf::_Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
-    POS_EVENT_ID rc = metaFs->io->Read(fd, fileOffset, length, buffer, storageType);
+    POS_EVENT_ID rc = metaFs->GetIoApi()->Read(fd, fileOffset, length, buffer, storageType);
 
     if (EID(SUCCESS) != rc)
         return ERRID(MFS_FILE_READ_FAILED);
@@ -87,7 +87,7 @@ int
 MetaFsFileIntf::_Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer)
 {
     MetaStorageType storageType = MetaFileUtil::ConvertToMediaType(volumeType);
-    POS_EVENT_ID rc = metaFs->io->Write(fd, fileOffset, length, buffer, storageType);
+    POS_EVENT_ID rc = metaFs->GetIoApi()->Write(fd, fileOffset, length, buffer, storageType);
 
     if (EID(SUCCESS) != rc)
         return ERRID(MFS_FILE_WRITE_FAILED);
@@ -112,7 +112,7 @@ MetaFsFileIntf::_GetBaseLpn(MetaVolumeType type)
 {
     if (UINT64_MAX == baseLpn)
     {
-        MetaFileContext* ctx = metaFs->ctrl->GetFileInfo(fd, type);
+        MetaFileContext* ctx = metaFs->GetCtrlApi()->GetFileInfo(fd, type);
 
         assert(nullptr != ctx);
         assert(ctx->extentsCount != 0);
@@ -141,27 +141,29 @@ MetaFsFileIntf::_CalculateByteAddress(uint64_t pageNumber, uint64_t offset,
 int
 MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
 {
+    assert(ctx->IsReadyToUse() == true);
+
     POS_EVENT_ID rc = EID(SUCCESS);
 
     if (BYTE_ACCESS_ENABLED &&
-        ctx->opcode == MetaFsIoOpcode::Write &&
+        ctx->GetOpcode() == MetaFsIoOpcode::Write &&
         volumeType == MetaVolumeType::NvRamVolume &&
-        ctx->length < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
+        ctx->GetLength() < MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE)
     {
         MetaLpnType pageNumber = _GetBaseLpn(MetaVolumeType::NvRamVolume) +
-            (ctx->fileOffset / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
+            (ctx->GetFileOffset() / MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
         pageNumber = pageNumber * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES /
             ArrayConfig::BLOCK_SIZE_BYTE;
 
         pos::LogicalByteAddr byteAddr = _CalculateByteAddress(pageNumber,
-            ctx->fileOffset % MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
-            ctx->length);
+            ctx->GetFileOffset() % MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE,
+            ctx->GetLength());
 
         CallbackSmartPtr callback(new NvramIoCompletion(ctx));
 
         IOSubmitHandlerStatus ioStatus =
             IIOSubmitHandler::GetInstance()->SubmitAsyncByteIO(
-                IODirection::WRITE, (void*)ctx->buffer, byteAddr,
+                IODirection::WRITE, (void*)ctx->GetBuffer(), byteAddr,
                 PartitionType::META_NVM, callback, arrayId);
 
         if (IOSubmitHandlerStatus::SUCCESS != ioStatus)
@@ -174,16 +176,19 @@ MetaFsFileIntf::AsyncIO(AsyncMetaFileIoCtx* ctx)
     }
     else
     {
-        ctx->ioDoneCheckCallback =
-            std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
-
-        rc = metaFs->io->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
+        rc = metaFs->GetIoApi()->SubmitIO(new MetaFsAioCbCxt(ctx, arrayId), MetaFileUtil::ConvertToMediaType(volumeType));
     }
 
     if (EID(SUCCESS) != rc)
         return -(int)rc;
 
     return EID(SUCCESS);
+}
+
+FnCheckMetaFileIoDone
+MetaFsFileIntf::GetIoDoneCheckFunc(void)
+{
+    return std::bind(&MetaFsFileIntf::CheckIoDoneStatus, this, std::placeholders::_1);
 }
 
 int
@@ -193,7 +198,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
     MetaFsAioCbCxt* asyncCtx = reinterpret_cast<MetaFsAioCbCxt*>(data);
     if (asyncCtx->CheckIOError())
     {
-        error = ERRID(MFS_IO_FAILED_DUE_TO_ERROR);
+        error = asyncCtx->GetErrorStatus();
     }
 
     delete asyncCtx;
@@ -203,7 +208,7 @@ MetaFsFileIntf::CheckIoDoneStatus(void* data)
 int
 MetaFsFileIntf::Create(uint64_t fileSize)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Create(fileName, fileSize, fileProperty, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Create(fileName, fileSize, fileProperty, volumeType);
     if (EID(SUCCESS) != rc)
     {
         return -(int)rc;
@@ -217,7 +222,7 @@ MetaFsFileIntf::Create(uint64_t fileSize)
 int
 MetaFsFileIntf::Open(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Open(fileName, fd, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Open(fileName, fd, volumeType);
 
     if (EID(SUCCESS) != rc)
     {
@@ -230,7 +235,7 @@ MetaFsFileIntf::Open(void)
 int
 MetaFsFileIntf::Close(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Close(fd, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Close(fd, volumeType);
 
     if (EID(SUCCESS) != rc)
     {
@@ -243,7 +248,7 @@ MetaFsFileIntf::Close(void)
 bool
 MetaFsFileIntf::DoesFileExist(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->CheckFileExist(fileName, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->CheckFileExist(fileName, volumeType);
 
     return (EID(SUCCESS) == rc);
 }
@@ -251,7 +256,7 @@ MetaFsFileIntf::DoesFileExist(void)
 int
 MetaFsFileIntf::Delete(void)
 {
-    POS_EVENT_ID rc = metaFs->ctrl->Delete(fileName, volumeType);
+    POS_EVENT_ID rc = metaFs->GetCtrlApi()->Delete(fileName, volumeType);
 
     if (EID(SUCCESS) != rc)
     {
@@ -264,6 +269,6 @@ MetaFsFileIntf::Delete(void)
 uint64_t
 MetaFsFileIntf::GetFileSize(void)
 {
-    return metaFs->ctrl->GetFileSize(fd, volumeType);
+    return metaFs->GetCtrlApi()->GetFileSize(fd, volumeType);
 }
 } // namespace pos

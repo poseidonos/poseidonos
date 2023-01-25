@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -32,33 +32,31 @@
 
 #include "src/journal_manager/log_buffer/log_write_context.h"
 
-#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/event_scheduler/meta_update_call_back.h"
+#include "src/journal_manager/log/log_handler.h"
 
 namespace pos
 {
 LogWriteContext::LogWriteContext(void)
-: LogBufferIoContext(INVALID_GROUP_ID, nullptr),
-  logFilledNotifier(nullptr),
-  log(nullptr)
+: log(nullptr),
+  logGroupId(INVALID_GROUP_ID),
+  callback(nullptr)
 {
 }
 
-LogWriteContext::LogWriteContext(EventSmartPtr callback, LogBufferWriteDoneNotifier* notifie)
-: LogBufferIoContext(INVALID_GROUP_ID, callback),
-  logFilledNotifier(notifie),
-  log(nullptr)
+LogWriteContext::LogWriteContext(LogHandlerInterface* inputLog, EventSmartPtr inputCallback)
+: LogWriteContext()
 {
+    log = inputLog;
+    callback = inputCallback;
 }
 
-LogWriteContext::LogWriteContext(LogHandlerInterface* log, EventSmartPtr callback,
-    LogBufferWriteDoneNotifier* notifier)
-: LogBufferIoContext(INVALID_GROUP_ID, callback),
-  logFilledNotifier(notifier),
-  log(log)
+LogWriteContext::LogWriteContext(LogHandlerInterface* inputLog, MapList inputMapList, EventSmartPtr inputCallback)
+: LogWriteContext()
 {
-    this->opcode = MetaFsIoOpcode::Write;
-    this->length = log->GetSize();
-    this->buffer = log->GetData();
+    log = inputLog;
+    dirtyMap = inputMapList;
+    callback = inputCallback;
 }
 
 LogWriteContext::~LogWriteContext(void)
@@ -66,10 +64,30 @@ LogWriteContext::~LogWriteContext(void)
     delete log;
 }
 
-LogHandlerInterface*
-LogWriteContext::GetLog(void)
+void
+LogWriteContext::SetLogAllocated(int id, uint64_t seqNum)
 {
-    return log;
+    this->logGroupId = id;
+    this->log->SetSeqNum(seqNum);
+
+    MetaUpdateCallback* metaUpdateCb = dynamic_cast<MetaUpdateCallback*>(callback.get());
+
+    if (nullptr != metaUpdateCb)
+    {
+        metaUpdateCb->SetLogGroupId(logGroupId);
+    }
+    else
+    {
+        // log writes that not use MetaUpdateCallback will be skipped intentionally.
+        // metaUpdateCb is nullable by design since certain callback (e.g. VolumeDeletedLogWriteCallback)
+        // may not want to use VersionedSegmentContext feature (hence, not inheriting MetaUpdateCallback)
+    }
+}
+
+const MapList&
+LogWriteContext::GetDirtyMapList(void)
+{
+    return dirtyMap;
 }
 
 int
@@ -78,22 +96,28 @@ LogWriteContext::GetLogGroupId(void)
     return logGroupId;
 }
 
-void
-LogWriteContext::SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum)
+uint64_t
+LogWriteContext::GetLogSize(void)
 {
-    this->fileOffset = offset;
-    this->logGroupId = groupId;
-
-    log->SetSeqNum(seqNum);
+    return log->GetSize();
 }
 
-void
-LogWriteContext::IoDone(void)
+char*
+LogWriteContext::GetBuffer(void)
 {
-    MapList emptyDirtyList;
-    logFilledNotifier->NotifyLogFilled(GetLogGroupId(), emptyDirtyList);
+    return log->GetData();
+}
 
-    LogBufferIoContext::IoDone();
+EventSmartPtr
+LogWriteContext::GetCallback(void)
+{
+    return callback;
+}
+
+LogHandlerInterface*
+LogWriteContext::GetLog(void)
+{
+    return log;
 }
 
 } // namespace pos

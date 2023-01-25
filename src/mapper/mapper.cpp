@@ -440,22 +440,26 @@ Mapper::VolumeCreated(int volId, uint64_t volSizeByte)
 {
     POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VolumeCreate] CREATE_VOLUME Volume:{}, size:{} arrayId:{}", volId, volSizeByte, arrayId);
     assert(volSizeByte > 0);
+
     VolState state = volState[volId].GetState();
     if (state != VolState::NOT_EXIST)
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] Volume:{} arrayId:{} already exist, state:{}", volId, addrInfo->GetArrayId(), volState[volId].GetState());
         return EID(VOL_EVENT_FAIL);
     }
+
     if (vsaMapManager->CreateVsaMapContent(nullptr, volId, volSizeByte, false) != 0)
     {
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeCreate] failed to create vsaMap VolumeId:{} arrayId:{}", volId, addrInfo->GetArrayId());
         return EID(VOL_EVENT_FAIL);
     }
+
     vsaMapManager->WaitVolumePendingIoDone(volId);
     volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
     volState[volId].SetSize(volSizeByte);
     vsaMapManager->EnableVsaMapInternalAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeCreate] VolumeId:{} arrayId:{} JUST_CREATED >> BG_MOUNTED", volId, arrayId);
+
     return EID(VOL_EVENT_OK);
 }
 
@@ -474,14 +478,17 @@ Mapper::VolumeMounted(int volId, uint64_t volSizeByte)
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeMount] failed to load VolumeId:{} arrayId:{}", volId, arrayId);
         return EID(VOL_EVENT_FAIL);
     }
+
     volState[volId].SetState(VolState::FOREGROUND_MOUNTED);
     vsaMapManager->WaitVolumePendingIoDone(volId);
     ++numMountedVol;
+
     POSMetricValue v;
     v.gauge = numMountedVol;
     tp->PublishData(TEL33006_MAP_MOUNTED_VOL_CNT, v, MT_GAUGE);
     vsaMapManager->EnableVsaMapAccess(volId);
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeMount] VolumeId:{} arrayId:{} was FG_MOUNTED @VolumeMounted", volId, arrayId);
+
     return EID(VOL_EVENT_OK);
 }
 
@@ -490,10 +497,12 @@ Mapper::VolumeLoaded(int volId, uint64_t volSizeByte)
 {
     POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VolumeLoaded] LOAD VOLUME Volume:{} size:{} arrayId:{}", volId, volSizeByte, arrayId);
     assert(volSizeByte > 0);
+
     if (volState[volId].GetState() == VolState::VOLUME_DELETING)
     {
         return EID(VOL_EVENT_FAIL);
     }
+
     volState[volId].SetState(VolState::EXIST_UNLOADED);
     volState[volId].SetSize(volSizeByte);
     vsaMapManager->EnableVsaMapInternalAccess(volId);
@@ -512,6 +521,7 @@ Mapper::VolumeUnmounted(int volId, bool flushMapRequired)
         POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper VolumeUnmounted] VolumeId:{} arrayId:{} was FG_MOUNTED >> BG_MOUNTED @VolumeUnmounted", volId, arrayId);
         volState[volId].SetState(VolState::BACKGROUND_MOUNTED);
         --numMountedVol;
+
         POSMetricValue v;
         v.gauge = numMountedVol;
         tp->PublishData(TEL33006_MAP_MOUNTED_VOL_CNT, v, MT_GAUGE);
@@ -545,6 +555,7 @@ Mapper::PrepareVolumeDelete(int volId)
         POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VolumeDeleted] failed to Deleted VolumeId:{} arrayId:{} state:{}", volId, arrayId, state);
         return ERRID(MAPPER_FAILED);
     }
+
     POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} arrayId:{}", volId, arrayId);
     vsaMapManager->DisableVsaMapInternalAccess(volId);
     vsaMapManager->WaitVolumePendingIoDone(volId);
@@ -562,7 +573,7 @@ Mapper::PrepareVolumeDelete(int volId)
 
     if (vsaMapManager->NeedToDeleteFile(volId) == false)
     {
-        POS_TRACE_INFO(EID(MAPPER_SUCCESS), "[Mapper VolumeDeleted] VolumeId:{} arrayId:{} Volume VSA File does not exist", volId, arrayId);
+        POS_TRACE_INFO(EID(FILE_NOT_EXIST), "[Mapper VolumeDeleted] VolumeId:{} arrayId:{} Volume VSA File does not exist", volId, arrayId);
     }
     else
     {

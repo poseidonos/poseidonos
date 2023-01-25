@@ -47,11 +47,16 @@
 #include "src/array_models/interface/i_array_info.h"
 #include "src/array_models/interface/i_mount_sequence.h"
 #include "src/bio/ubio.h"
+
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
+
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
 #include "src/include/array_config.h"
 #include "src/array/service/array_service_layer.h"
-#include "src/array/device/i_array_device_manager.h"
 #include "src/array/array_metrics_publisher.h"
 
 using namespace std;
@@ -65,7 +70,15 @@ class IAbrControl;
 class IStateControl;
 class TelemetryPublishser;
 
-class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker
+class ArrayDebugInfo : public DebugInfoInstance
+{
+public:
+    std::string state;
+    std::string arrayInfo;
+    uint32_t rebuildProgress;
+    bool isWTEnabled;
+};
+class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker, public DebugInfoMaker<ArrayDebugInfo>
 {
     friend class ParityLocationWbtCommand;
     friend class GcWbtCommand;
@@ -91,6 +104,7 @@ public:
     virtual void MountDone(void);
     virtual int CheckUnmountable(void);
     virtual string Serialize(void);
+    void MakeDebugInfo(ArrayDebugInfo& obj);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
     DeviceSet<string> GetDevNames(void) override;
@@ -104,8 +118,8 @@ public:
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
-    IArrayDevMgr* GetArrayManager(void) override;
     bool IsWriteThroughEnabled(void) override;
+    vector<IArrayDevice*> GetArrayDevices(void) override;
     int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual void InvokeRebuild(vector<IArrayDevice*> targets, bool isResume, bool force = false);
@@ -114,7 +128,7 @@ public:
     virtual void DoRebuildAsync(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildTypeEnum rt);
     virtual void SetPreferences(bool isWT);
     virtual void SetTargetAddress(string targetAddress);
-    virtual string GetTargetAddress();
+    virtual string GetTargetAddress(void);
 
 private:
     int _LoadImpl(void);
@@ -147,6 +161,9 @@ private:
     id_t uniqueId = 0;
     bool isWTEnabled = false;
     string targetAddress = "";
+
+    ArrayDebugInfo debugArray;
+    DebugInfoQueue<ArrayDebugInfo> debugArrayQueue;
 };
 } // namespace pos
 #endif // ARRAY_H_

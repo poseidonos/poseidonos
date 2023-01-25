@@ -8,7 +8,7 @@
 #include <test/unit-tests/utils/mock_builder.h>
 #include <test/unit-tests/mapper/i_vsamap_mock.h>
 
-#include <test/unit-tests/allocator/stripe/stripe_mock.h>
+#include <test/unit-tests/allocator/stripe_manager/stripe_mock.h>
 #include <test/unit-tests/io/general_io/rba_state_manager_mock.h>
 #include <test/unit-tests/gc/gc_map_update_request_mock.h>
 

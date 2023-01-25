@@ -56,7 +56,7 @@ public:
       nbytes(nbytes),
       buf(buf),
       callback(func),
-      rc(EID(MFS_END)),
+      rc(EID(SUCCESS)),
       tagId(0)
     {
         callbackCount = 0;
@@ -70,20 +70,20 @@ public:
       nbytes(0),
       buf(buf),
       callback(func),
-      rc(EID(MFS_END)),
+      rc(EID(SUCCESS)),
       tagId(0)
     {
     }
 
     MetaFsAioCbCxt(AsyncMetaFileIoCtx* ctx, int arrayId)
-    : opcode(ctx->opcode),
-      fd(ctx->fd),
+    : opcode(ctx->GetOpcode()),
+      fd(ctx->GetFd()),
       arrayId(arrayId),
-      soffset(ctx->fileOffset),
-      nbytes(ctx->length),
-      buf((void*)ctx->buffer),
+      soffset(ctx->GetFileOffset()),
+      nbytes(ctx->GetLength()),
+      buf((void*)ctx->GetBuffer()),
       callback(AsEntryPointParam1(&AsyncMetaFileIoCtx::HandleIoComplete, ctx)),
-      rc(EID(MFS_END)),
+      rc(EID(SUCCESS)),
       tagId(0)
     {
         callbackCount = 0;
@@ -117,16 +117,17 @@ public:
         // need more error handling
         if (err.first != 0)
         {
-            rc = EID(MFS_IO_FAILED_DUE_TO_ERROR);
+            rc = err.first;
         }
         else if (err.second == true)
         {
             rc = EID(MFS_IO_FAILED_DUE_TO_STOP_STATE);
         }
-        else
-        {
-            rc = EID(SUCCESS);
-        }
+    }
+
+    POS_EVENT_ID GetErrorStatus(void)
+    {
+        return rc;
     }
 
     void InvokeCallback(void)

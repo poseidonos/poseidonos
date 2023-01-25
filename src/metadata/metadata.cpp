@@ -54,18 +54,18 @@ Metadata::Metadata(IArrayInfo* info, IStateControl* state)
       new Mapper(info, nullptr),
       new Allocator(info, state),
       new JournalManager(info, state),
-      MetaFsServiceSingleton::Instance()->GetMetaFs(info->GetIndex())->ctrl,
+      MetaFsServiceSingleton::Instance()->GetMetaFs(info->GetIndex()),
       MetaServiceSingleton::Instance())
 {
 }
 
 Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
-    JournalManager* journal, MetaFsFileControlApi* metaFsCtrl, MetaService* service)
+    JournalManager* journal, MetaFs* metaFs, MetaService* service)
 : arrayInfo(info),
   mapper(mapper),
   allocator(allocator),
   journal(journal),
-  metaFsCtrl(metaFsCtrl),
+  metaFs(metaFs),
   volumeEventHandler(nullptr),
   metaService(service),
   metaUpdater(nullptr),
@@ -154,7 +154,8 @@ Metadata::Init(void)
     result = mapper->Init();
     if (result != 0)
     {
-        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Mapper, array {}", arrayName);
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Mapper, array {} error {}",
+            arrayName, result);
         return result;
     }
 
@@ -162,7 +163,8 @@ Metadata::Init(void)
     result = allocator->Init();
     if (result != 0)
     {
-        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Allocator, array {}", arrayName);
+        POS_TRACE_ERROR(eventId, "[Metadata Error!!] Failed to Init Allocator, array {}, error {}",
+            arrayName, result);
         return result;
     }
 
@@ -185,7 +187,7 @@ Metadata::Init(void)
         allocator->GetIContextManager(),
         allocator->GetIContextReplayer(),
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayInfo->GetIndex()),
-        metaFsCtrl,
+        metaFs,
         EventSchedulerSingleton::Instance(),
         TelemetryClientSingleton::Instance());
 

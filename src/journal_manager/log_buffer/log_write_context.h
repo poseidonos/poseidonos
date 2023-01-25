@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -33,52 +33,40 @@
 #pragma once
 
 #include "src/include/smart_ptr_type.h"
-#include "src/journal_manager/log/log_handler.h"
-#include "src/journal_manager/log_buffer/log_buffer_io_context.h"
-#include "src/metafs/common/metafs_stopwatch.h"
+#include "src/mapper/include/mapper_const.h"
+#include "src/mapper/include/mpage_info.h"
 
 namespace pos
 {
-class LogBufferWriteDoneNotifier;
+class LogHandlerInterface;
 
-enum class LogStage
-{
-    Issue,
-    Complete,
-    Count
-};
-
-class LogWriteContext : public LogBufferIoContext
+class LogWriteContext
 {
 public:
     LogWriteContext(void);
-    // For UT
-    LogWriteContext(EventSmartPtr callback, LogBufferWriteDoneNotifier* notifie);
-
-    LogWriteContext(LogHandlerInterface* log, EventSmartPtr callbackEvent, LogBufferWriteDoneNotifier* notifier);
+    LogWriteContext(LogHandlerInterface* inputLog, EventSmartPtr callbackEvent);
+    LogWriteContext(LogHandlerInterface* inputLog, MapList inputMapList, EventSmartPtr callbackEvent);
     virtual ~LogWriteContext(void);
 
-    // This two methods are for log write statistics
-    virtual LogHandlerInterface* GetLog(void);
+    virtual void SetLogAllocated(int logGroupId, uint64_t sequenceNumber);
+
+    virtual const MapList& GetDirtyMapList(void);
     virtual int GetLogGroupId(void);
 
-    virtual void SetBufferAllocated(uint64_t offset, int groupId, uint32_t seqNum);
+    virtual uint64_t GetLogSize(void);
+    virtual char* GetBuffer(void);
+    virtual EventSmartPtr GetCallback(void);
 
-    virtual void IoDone(void) override;
-
-    // For UT
-    inline LogBufferWriteDoneNotifier*
-    GetLogBufferWriteDoneNotifier(void)
-    {
-        return logFilledNotifier;
-    }
-    MetaFsStopwatch<LogStage> stopwatch;
-
-protected:
-    LogBufferWriteDoneNotifier* logFilledNotifier;
+    virtual LogHandlerInterface* GetLog(void);
 
 private:
     LogHandlerInterface* log;
+    MapList dirtyMap;
+
+    int logGroupId;
+    EventSmartPtr callback;
+
+    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
 };
 
 } // namespace pos

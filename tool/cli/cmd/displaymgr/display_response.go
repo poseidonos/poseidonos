@@ -1,19 +1,18 @@
 package displaymgr
 
 import (
-	pb "cli/api"
+	pb "kouros/api"
 	"cli/cmd/globals"
 	"cli/cmd/messages"
+	"code.cloudfoundry.org/bytefmt"
 	"encoding/json"
 	"fmt"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/reflect/protoreflect"
 	"os"
 	"pnconnector/src/util"
 	"strconv"
 	"text/tabwriter"
-
-	"code.cloudfoundry.org/bytefmt"
-	"google.golang.org/protobuf/encoding/protojson"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
 
 func toByte(displayUnit bool, size uint64) string {
@@ -37,6 +36,57 @@ func PrintProtoResponse(command string, res protoreflect.ProtoMessage) error {
 	resJson := string(resByte)
 	PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 
+	return nil
+}
+
+func PrintWBTResponse(command string, res protoreflect.ProtoMessage) error {
+	grpcRes := res.(*pb.WBTResponse)
+	grpcStatus := grpcRes.GetResult().GetStatus()
+	status := messages.Status{
+		CODE:        int(grpcStatus.GetCode()),
+		EVENTNAME:   grpcStatus.GetEventName(),
+		DESCRIPTION: grpcStatus.GetDescription(),
+		CAUSE:       grpcStatus.GetCause(),
+		SOLUTION:    grpcStatus.GetSolution(),
+	}
+
+	if isFailed(*grpcStatus) && !globals.IsJSONRes {
+		printEventInfo(status.CODE, status.EVENTNAME,
+			status.DESCRIPTION, status.CAUSE,
+			status.SOLUTION)
+		return nil
+	}
+
+	wbtdata := grpcRes.GetResult().GetData().GetTestdata()
+	var dataString string
+	var dataMap map[string]interface{}
+	if len(wbtdata) > 7 {
+		dataString = wbtdata[7:]
+	}
+	if !globals.IsJSONRes {
+		fmt.Println(dataString)
+		return nil
+	}
+	json.Unmarshal([]byte(dataString), &dataMap)
+	cliRes := messages.Response{
+		COMMAND: command,
+		RID:     grpcRes.GetRid(),
+		RESULT: messages.Result{
+			STATUS: status,
+		},
+		INFO: messages.Info{
+			VERSION: grpcRes.GetInfo().GetVersion(),
+		},
+	}
+	if dataMap != nil {
+		cliRes.RESULT.DATA = dataMap
+	}
+	jsonRes, err := json.Marshal(&cliRes)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	printResInJSON(string(jsonRes))
 	return nil
 }
 
@@ -196,15 +246,13 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		w.Flush()
 
 	case "LISTVOLUME":
-		res := messages.ListVolumeResponse{}
+		res := &pb.ListVolumeResponse{}
 		json.Unmarshal([]byte(resJson), &res)
-
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
-
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
 		// Header
@@ -236,48 +284,47 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"---------")
 
 		// Data
-		for _, volume := range res.RESULT.DATA.VOLUMELIST {
+		for _, volume := range res.GetResult().GetData().GetVolumes() {
 			fmt.Fprintln(w,
-				volume.VOLUMENAME+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.INDEX)+"\t"+
-					globals.FieldSeparator+volume.UUID+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, volume.TOTAL)+"\t"+
-					globals.FieldSeparator+toByte(displayUnit, volume.REMAIN)+"\t"+
-					globals.FieldSeparator+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10)+"\t"+
-					globals.FieldSeparator+volume.STATUS+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MAXIOPS)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MAXBW)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MINIOPS)+"\t"+
-					globals.FieldSeparator+strconv.Itoa(volume.MINBW))
+				volume.GetName()+"\t"+
+					globals.FieldSeparator+strconv.Itoa(int(volume.GetIndex()))+"\t"+
+					globals.FieldSeparator+volume.GetUuid()+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, volume.GetTotal())+"\t"+
+					globals.FieldSeparator+toByte(displayUnit, volume.GetRemain())+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(100-(volume.GetRemain()*100/volume.GetTotal()), 10)+"\t"+
+					globals.FieldSeparator+volume.GetStatus()+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMaxiops(), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMaxbw(), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMiniops(), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatUint(volume.GetMinbw(), 10))
 		}
 		w.Flush()
 
 	case "VOLUMEINFO":
-		res := messages.VolumeInfoResponse{}
+		res := &pb.VolumeInfoResponse{}
 		json.Unmarshal([]byte(resJson), &res)
 
-		if res.RESULT.STATUS.CODE != globals.CliServerSuccessCode {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.CAUSE, res.RESULT.STATUS.SOLUTION)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
 			return
 		}
-
-		volume := res.RESULT.DATA
+		volume := res.GetResult().GetData()
 
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
 
-		fmt.Fprintln(w, "UUID\t: "+volume.UUID)
-		fmt.Fprintln(w, "Name\t: "+volume.VOLUMENAME)
-		fmt.Fprintln(w, "TotalCapacity\t: "+toByte(displayUnit, volume.TOTAL))
-		fmt.Fprintln(w, "RemainingCapacity\t: "+toByte(displayUnit, volume.REMAIN))
-		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(100-(volume.REMAIN*100/volume.TOTAL), 10))
-		fmt.Fprintln(w, "Status\t: "+volume.STATUS)
-		fmt.Fprintln(w, "MaximumIOPS\t: "+strconv.Itoa(volume.MAXIOPS))
-		fmt.Fprintln(w, "MaximumBandwidth\t: "+strconv.Itoa(volume.MAXBW))
-		fmt.Fprintln(w, "MinimumIOPS\t: "+strconv.Itoa(volume.MINIOPS))
-		fmt.Fprintln(w, "MinimumBandwidth\t: "+strconv.Itoa(volume.MINBW))
-		fmt.Fprintln(w, "SubNQN\t: "+volume.SUBNQN)
-		fmt.Fprintln(w, "Array\t: "+volume.ARRAYNAME)
+		fmt.Fprintln(w, "UUID\t: "+volume.GetUuid())
+		fmt.Fprintln(w, "Name\t: "+volume.GetName())
+		fmt.Fprintln(w, "TotalCapacity\t: "+toByte(displayUnit, volume.GetTotal()))
+		fmt.Fprintln(w, "RemainingCapacity\t: "+toByte(displayUnit, volume.GetRemain()))
+		fmt.Fprintln(w, "Used%\t: "+strconv.FormatUint(100-(volume.GetRemain()*100/volume.GetTotal()), 10))
+		fmt.Fprintln(w, "Status\t: "+volume.GetStatus())
+		fmt.Fprintln(w, "MaximumIOPS\t: "+strconv.FormatUint(volume.GetMaxiops(), 10))
+		fmt.Fprintln(w, "MaximumBandwidth\t: "+strconv.FormatUint(volume.GetMaxbw(), 10))
+		fmt.Fprintln(w, "MinimumIOPS\t: "+strconv.FormatUint(volume.GetMiniops(), 10))
+		fmt.Fprintln(w, "MinimumBandwidth\t: "+strconv.FormatUint(volume.GetMinbw(), 10))
+		fmt.Fprintln(w, "SubNQN\t: "+volume.GetSubnqn())
+		fmt.Fprintln(w, "Array\t: "+volume.GetArrayname())
 
 		fmt.Fprintln(w, "")
 
@@ -429,33 +476,34 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		}
 
 	case "LISTQOSPOLICIES":
-		res := messages.ListQosResponse{}
-		json.Unmarshal([]byte(resJson), &res)
-
-		if globals.CliServerSuccessCode != res.RESULT.STATUS.CODE {
-			printEventInfo(res.RESULT.STATUS.CODE, res.RESULT.STATUS.EVENTNAME,
-				res.RESULT.STATUS.DESCRIPTION, res.RESULT.STATUS.SOLUTION, res.RESULT.STATUS.CAUSE)
-		} else {
-			for _, array := range res.RESULT.DATA.QOSARRAYNAME {
-				fmt.Println("Array Name: " + array.ARRNAME)
-				fmt.Println("")
-			}
-			for _, rebuild := range res.RESULT.DATA.REBUILDPOLICY {
-				fmt.Println("Rebuild Impact: " + rebuild.IMPACT)
-			}
-			for _, volume := range res.RESULT.DATA.VOLUMEQOSLIST {
-
-				fmt.Println("Name: " + volume.VOLUMENAME)
-				fmt.Println("ID: ", volume.VOLUMEID)
-				fmt.Println("Minimum Iops: ", volume.MINIOPS)
-				fmt.Println("Maximum Iops: ", volume.MAXIOPS)
-				fmt.Println("Minimum Bw: ", volume.MINBW)
-				fmt.Println("Maximum Bw: ", volume.MAXBW)
-				fmt.Println("Minimum Bw Guarantee: " + volume.MINBWGUARANTEE)
-				fmt.Println("Minimum IOPS Guarantee: " + volume.MINIOPSGUARANTEE)
+		res := &pb.ListQOSPolicyResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+		for _, qosResult := range res.GetResult().GetData().GetQosresult() {
+			for _, array := range qosResult.GetArrayName() {
+				fmt.Println("Array Name: " + array.ArrayName)
 			}
 			fmt.Println("")
+			for _, rebuild := range qosResult.GetRebuildPolicy() {
+				fmt.Println("Rebuild Impact: " + rebuild.Rebuild)
+			}
+			for _, volume := range qosResult.GetVolumePolicies() {
+				fmt.Println("Name: " + volume.Name)
+				fmt.Println("ID: ", volume.Id)
+				fmt.Println("Minimum Iops: ", volume.Miniops)
+				fmt.Println("Maximum Iops: ", volume.Maxiops)
+				fmt.Println("Minimum Bw: ", volume.Minbw)
+				fmt.Println("Maximum Bw: ", volume.Maxbw)
+				fmt.Println("Minimum Bw Guarantee: " + volume.MinBwGuarantee)
+				fmt.Println("Minimum IOPS Guarantee: " + volume.MinIopsGuarantee)
+			}
+
 		}
+		fmt.Println("")
 
 	case "LISTSUBSYSTEM":
 		res := &pb.ListSubsystemResponse{}
@@ -743,6 +791,23 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		}
 
 		fmt.Println("PoseidonOS termination has been requested. PoseidonOS will be terminated soon.")
+
+	case "LISTWBT":
+		res := &pb.ListWBTResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		for _, test := range res.GetResult().GetData().GetTestlist() {
+			fmt.Fprintln(w, test.GetTestname())
+		}
+		w.Flush()
 
 	default:
 		res := messages.Response{}

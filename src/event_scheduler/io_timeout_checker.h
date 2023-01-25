@@ -36,6 +36,11 @@
 #include "src/event_scheduler/callback_type.h"
 #include "src/event_scheduler/publish_pending_io.h"
 
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
+
 #include <vector>
 
 namespace pos
@@ -43,6 +48,7 @@ namespace pos
 
 const uint32_t CHECK_RESOLUTION_RANGE = 36000; // 1 hour
 const uint32_t TIMER_RESOLUTION_MS = 100;       // 100 ms
+const uint32_t ONE_SEC_IN_MS = 1000;       // 1 s
 const uint32_t CHECK_TIMEOUT_THRESHOLD = 30;    // 3s
 class TelemetryPublisher;
 
@@ -52,7 +58,19 @@ struct PendingIo
     std::atomic<std::uint64_t> oldestIdx;
 };
 
-class IoTimeoutChecker
+class IoTimeoutCheckerDebugInfo : public DebugInfoInstance
+{
+public:
+    class TimeoutInfo
+    {
+    public:
+        CallbackType callbackType;
+        float ioDelaySec;
+    } timeoutInfo[Total_CallbackType_Cnt];
+    uint64_t currentIdx;
+};
+
+class IoTimeoutChecker : public DebugInfoMaker<IoTimeoutCheckerDebugInfo>
 {
 public:
     IoTimeoutChecker(void);
@@ -70,6 +88,7 @@ public:
     void MoveCurrentIdx(uint64_t pendingTime);
 
     uint64_t GetCurrentRoughTime(void);
+    virtual void MakeDebugInfo(IoTimeoutCheckerDebugInfo& obj) final;
 
 private:
 

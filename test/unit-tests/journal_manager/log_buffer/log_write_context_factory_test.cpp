@@ -8,12 +8,10 @@
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
-#include "src/journal_manager/log_buffer/log_group_reset_context.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "src/journal_manager/log_buffer/map_update_log_write_context.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
 
 using testing::NiceMock;
 using testing::Return;
@@ -27,26 +25,18 @@ TEST(LogWriteContextFactory, Init_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
 
     // When
-    logWriteContextFactory.Init(&config, &notifier, &sequencer);
-
-    // Then
-    EXPECT_EQ(&notifier, logWriteContextFactory.GetLogBufferWriteDoneNotifier());
-    EXPECT_EQ(&sequencer, logWriteContextFactory.GetCallbackSequenceController());
+    logWriteContextFactory.Init(&config);
 }
 
 TEST(LogWriteContextFactory, CreateBlockMapLogWriteContext_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier, &sequencer);
+    logWriteContextFactory.Init(&config);
 
     // When
     EventSmartPtr callbackEvent;
@@ -79,21 +69,16 @@ TEST(LogWriteContextFactory, CreateBlockMapLogWriteContext_testIfExecutedSuccess
     MapList expectDirtyMap;
     expectDirtyMap.emplace(volumeId);
 
-    EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
-
-    EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
-    EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
+    EXPECT_EQ(expectDirtyMap, logWriteContext->GetDirtyMapList());
+    EXPECT_EQ(callbackEvent, logWriteContext->GetCallback());
 }
 
 TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier, &sequencer);
+    logWriteContextFactory.Init(&config);
 
     // When
     StripeId vsid = 100;
@@ -101,11 +86,11 @@ TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSucces
     StripeAddr oldAddr = {
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = wbLsid};
-    NiceMock<MockStripe> stripe;
-    EXPECT_CALL(stripe, GetUserLsid).WillOnce(Return(vsid));
-    EXPECT_CALL(stripe, GetVsid).WillOnce(Return(vsid));
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
+    EXPECT_CALL(*stripe, GetUserLsid).WillOnce(Return(vsid));
+    EXPECT_CALL(*stripe, GetVsid).WillOnce(Return(vsid));
     EventSmartPtr callbackEvent;
-    LogWriteContext* logWriteContext = logWriteContextFactory.CreateStripeMapLogWriteContext(&stripe, oldAddr, callbackEvent);
+    LogWriteContext* logWriteContext = logWriteContextFactory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callbackEvent);
 
     // Then
     StripeAddr newAddr = {
@@ -118,11 +103,9 @@ TEST(LogWriteContextFactory, CreateStripeMapLogWriteContext_testIfExecutedSucces
 
     MapList expectDirtyMap;
     expectDirtyMap.emplace(STRIPE_MAP_ID);
-    EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
+    EXPECT_EQ(expectDirtyMap, logWriteContext->GetDirtyMapList());
 
-    EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
-    EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
+    EXPECT_EQ(callbackEvent, logWriteContext->GetCallback());
 }
 
 TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallLogs)
@@ -132,7 +115,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
     ON_CALL(config, GetMetaPageSize).WillByDefault(Return(MAX_LOG_SIZE));
 
     LogWriteContextFactory factory;
-    factory.Init(&config, nullptr, nullptr);
+    factory.Init(&config);
 
     GcStripeMapUpdateList mapUpdates;
     mapUpdates.volumeId = 10;
@@ -154,11 +137,15 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
     // When
     auto createdContexts = factory.CreateGcBlockMapLogWriteContexts(mapUpdates, nullptr);
 
+    auto context = createdContexts.front();
+    // AsyncMetaIoContext is updated when log buffer offset allocated
+    context->SetLogAllocated(0, 0);
+
     // Then
     EXPECT_EQ(createdContexts.size(), 1);
-    EXPECT_TRUE(createdContexts.front()->GetLength() < MAX_LOG_SIZE);
+    EXPECT_TRUE(createdContexts.front()->GetLogSize() < MAX_LOG_SIZE);
 
-    GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(createdContexts.front()->buffer);
+    GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(createdContexts.front()->GetBuffer());
     EXPECT_EQ(log.volId, mapUpdates.volumeId);
     EXPECT_EQ(log.vsid, mapUpdates.vsid);
     EXPECT_EQ(log.numBlockMaps, numBlocks);
@@ -171,7 +158,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testCreatingSmallL
                 .stripeId = 1023,
                 .offset = index}};
         GcBlockMapUpdate actual = *reinterpret_cast<GcBlockMapUpdate*>
-            (createdContexts.front()->buffer + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
+            (createdContexts.front()->GetBuffer() + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
 
         EXPECT_EQ(expected.rba, actual.rba);
         EXPECT_EQ(expected.vsa, actual.vsa);
@@ -185,7 +172,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
     ON_CALL(config, GetMetaPageSize).WillByDefault(Return(MAX_LOG_SIZE));
 
     LogWriteContextFactory factory;
-    factory.Init(&config, nullptr, nullptr);
+    factory.Init(&config);
 
     GcStripeMapUpdateList mapUpdates;
     mapUpdates.volumeId = 10;
@@ -211,9 +198,12 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
     uint64_t numBlockMaps = 0;
     for (auto context : createdContexts)
     {
-        EXPECT_TRUE(context->GetLength() < MAX_LOG_SIZE);
+        // AsyncMetaIoContext is updated when log buffer offset allocated
+        context->SetLogAllocated(0, 0);
 
-        GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(context->buffer);
+        EXPECT_TRUE(context->GetLogSize() < MAX_LOG_SIZE);
+
+        GcBlockWriteDoneLog log = *reinterpret_cast<GcBlockWriteDoneLog*>(context->GetBuffer());
         EXPECT_EQ(log.volId, mapUpdates.volumeId);
         EXPECT_EQ(log.vsid, mapUpdates.vsid);
 
@@ -225,7 +215,7 @@ TEST(LogWriteContextFactory, CreateGcBlockMapLogWriteContexts_testIfLogsAreSplii
                     .stripeId = 1023,
                     .offset = numBlockMaps + index}};
             GcBlockMapUpdate actual = *reinterpret_cast<GcBlockMapUpdate*>
-                (context->buffer + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
+                (context->GetBuffer() + sizeof(GcBlockWriteDoneLog) + sizeof(GcBlockMapUpdate) * index);
 
             EXPECT_EQ(expected.rba, actual.rba);
             EXPECT_EQ(expected.vsa, actual.vsa);
@@ -240,10 +230,8 @@ TEST(LogWriteContextFactory, CreateGcStripeFlushedLogWriteContext_testIfExecuted
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier, &sequencer);
+    logWriteContextFactory.Init(&config);
 
     // When
     int volumeId = 1;
@@ -266,20 +254,16 @@ TEST(LogWriteContextFactory, CreateGcStripeFlushedLogWriteContext_testIfExecuted
     MapList expectDirtyMap;
     expectDirtyMap.emplace(volumeId);
     expectDirtyMap.emplace(STRIPE_MAP_ID);
-    EXPECT_EQ(expectDirtyMap, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetDirtyList());
-    EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(&sequencer, dynamic_cast<MapUpdateLogWriteContext*>(logWriteContext)->GetCallbackSequenceController());
-    EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
+    EXPECT_EQ(expectDirtyMap, logWriteContext->GetDirtyMapList());
+    EXPECT_EQ(callbackEvent, logWriteContext->GetCallback());
 }
 
 TEST(LogWriteContextFactory, CreateVolumeDeletedLogWriteContext_testIfExecutedSuccessfully)
 {
     // Given
     NiceMock<MockJournalConfiguration> config;
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(&config, &notifier, &sequencer);
+    logWriteContextFactory.Init(&config);
 
     // When
     int volumeId = 1;
@@ -293,29 +277,7 @@ TEST(LogWriteContextFactory, CreateVolumeDeletedLogWriteContext_testIfExecutedSu
     EXPECT_TRUE(actualLog != nullptr);
     EXPECT_EQ(expectLog, *actualLog);
 
-    EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(&notifier, dynamic_cast<LogWriteContext*>(logWriteContext)->GetLogBufferWriteDoneNotifier());
+    EXPECT_EQ(callbackEvent, logWriteContext->GetCallback());
 }
 
-TEST(LogWriteContextFactory, CreateLogGroupResetContext_testIfExecutedSuccessfully)
-{
-    // Given
-    LogWriteContextFactory logWriteContextFactory;
-
-    // When
-    uint64_t offset = 0;
-    int logGroupId = 1;
-    uint64_t groupSize = 512;
-    EventSmartPtr callbackEvent;
-    char* initializedDataBuffer = new char[groupSize];
-    memset(initializedDataBuffer, 0xFF, groupSize);
-    LogGroupResetContext* logWriteContext = logWriteContextFactory.CreateLogGroupResetContext(offset, logGroupId, groupSize, callbackEvent, initializedDataBuffer);
-
-    // Then
-    EXPECT_EQ(logGroupId, logWriteContext->GetLogGroupId());
-    EXPECT_EQ(callbackEvent, dynamic_cast<LogBufferIoContext*>(logWriteContext)->GetClientCallback());
-    EXPECT_EQ(offset, logWriteContext->fileOffset);
-    EXPECT_EQ(groupSize, logWriteContext->GetLength());
-    EXPECT_EQ(initializedDataBuffer, logWriteContext->buffer);
-}
 } // namespace pos

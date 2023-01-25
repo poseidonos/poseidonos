@@ -37,6 +37,7 @@
 
 #include "src/metafs/common/meta_file_util.h"
 #include "src/metafs/log/metafs_log.h"
+#include "src/metafs/mvm/volume/meta_file_inode.h"
 
 namespace pos
 {

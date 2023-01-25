@@ -41,15 +41,15 @@ cd script/
 sudo ./build_ibofos.sh
 ```
 
-### 2.1. Install POS (Optional)
+### 2.1. Install POS
 
 Execute $make install as follows.
 ```
 sudo make install
 ```
-This will install POS to your system, including registering POS and CLI binaries to your environment variables, creating related files (e.g., configuration, telemetry, event, ...), and generating man pages for CLI. 
+This will install POS to your system, including registering POS and CLI binaries to your environment variables, creating related files (e.g., configuration, telemetry, event, ...), and generating man pages for CLI.
 
-If you have done this step earlier, you can omit this step. 
+If you have done this step earlier, you can omit this step.
 
 ## Run POS
 
@@ -259,7 +259,7 @@ root@R2U14-PSD-3:/poseidonos/script# fdisk -l | grep nvme
 
 ### Step 2. Create Write Buffer within DRAM
 Using the device create command, create a write buffer in DRAM. A POS array will use it.
- 
+
 The following command will create *uram0*, a write buffer with a total size of 4096MB and a block size of 512B. The command will request an SPDK server to create an SPDK block device called *malloc bdev*, a userspace ramdisk.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device create --device-name uram0 --device-type uram --num-blocks 8388608 --block-size 512
@@ -270,7 +270,7 @@ root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device create --device-name u
 
 
 ### Step 3. Check POS version
-You can check the version of POS using the system info command. 
+You can check the version of POS using the system info command.
 ```bash
 # The actual output may differ by env where the command is executed.
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli system info
@@ -284,13 +284,13 @@ root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device list
 Name           |SerialNumber(SN)    |Address        |Class         |MN                         |NUMA   |Size
 -------------- |------------------- |-------------- |------------- |-------------------------- |------ |------------------
 ```
- 
+
 Let's scan devices using the device scan command.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device scan
 ```
- 
-Now you can see the list of NVMe and uram devices in the system. 
+
+Now you can see the list of NVMe and uram devices in the system.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli device list --unit
 Name           |SerialNumber(SN)     |Address        |Class         |MN                                       |NUMA    |Size
@@ -337,7 +337,7 @@ We will explore creating a POS array, a storage pool in POS.
 Create a POS array using the array create command. The array create command requires the following parameters:
  - The name of a device to be used as the write buffer (--buffer).
  - The comma-separated list of the data (--data-devs) and spare (--spare) devices. Only SSD devices must be used.
- - The name of POS array must follow the naming convention rule. It is described in **[Device and Array](doc/concepts/device_and_array.md)** in detail. 
+ - The name of POS array must follow the naming convention rule. It is described in **[Device and Array](doc/concepts/device_and_array.md)** in detail.
  - The RAID type for the POS array (--raid).
 
 ```bash
@@ -407,7 +407,7 @@ unvme-ns-31 SPARE
 ```
 
 
-### Step 6. Mount POS Array 
+### Step 6. Mount POS Array
 You can create a POS volume from the POS array created in the previous step. However, you need to mount the array first. Let's check out the status of the POS array.
 
 The array list command will display the status of POS arrays. You can see POSArray is being **Unmounted**.
@@ -417,12 +417,12 @@ Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
 ----- |---------- |---------------------     |---------------------     |----------
 0     |POSArray   |2021-09-10 16:25:04 +0900 |2021-09-10 16:25:04 +0900 |Unmounted
 ```
- 
+
 Mount POSArray using the array mount command. It may take some time.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array mount --array-name POSArray
 ```
- 
+
 Check out the status of POSArray has changed to **Mounted**.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list
@@ -431,7 +431,7 @@ Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
 0     |POSArray   |2021-09-10 16:25:04 +0900 |2021-09-10 16:33:34 +0900 |Mounted
 ```
 
-Let's execute the array list command with POSArray. Once POSArray is mounted, you can see that its state has changed from OFFLINE to NORMAL, which indicates that the array is ready to create POS volumes. 
+Let's execute the array list command with POSArray. Once POSArray is mounted, you can see that its state has changed from OFFLINE to NORMAL, which indicates that the array is ready to create POS volumes.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list --array-name POSArray --unit
 Array : POSArray
@@ -483,7 +483,7 @@ unvme-ns-31 SPARE
 ```
 
 ### Step 7. Configure NVM Subsystems for NVMe Over Fabric Target
-Now POSArray is ready to create a POS volume. Before creating a POS volume, we will create and configure an NVM subsystem first. The NVM subsystem will allow us to expose the POS volume to initiators over the network. 
+Now POSArray is ready to create a POS volume. Before creating a POS volume, we will create and configure an NVM subsystem first. The NVM subsystem will allow us to expose the POS volume to initiators over the network.
 
 #### Create NVMe-oF Subsystem
 Create an NVMe-oF subsystem using the subsystem create command.
@@ -497,8 +497,8 @@ root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem create-transport --
 ```
 
 #### Add NVMe-oF Subsystem Listener
-The subsystem add-listener command binds an NVM subsystem to a socket address. This allows the NVM subsystem to listen on a TCP port to serve incoming NVMe-oF requests. 
- 
+The subsystem add-listener command binds an NVM subsystem to a socket address. This allows the NVM subsystem to listen on a TCP port to serve incoming NVMe-oF requests.
+
 Check the available network interfaces using *ifconfig*.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ifconfig
@@ -520,12 +520,12 @@ lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
         TX packets 235840  bytes 16797914 (16.7 MB)
         TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
 ```
- 
+
 Execute the add-listener command with the IP address and the port number of one of the available NICs (e.g., ens21f0).
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli subsystem add-listener -q nqn.2019-04.ibof:subsystem1 -t tcp -i 10.1.2.14 -p 1158
 ```
-In the above example, the NVM subsystem "nqn.2019-04.ibof:subsystem1" has been configured to listen on socket address "10.1.2.14:1158" using TCP. If you omit this step, POS wouldn't be able to mount POS volumes. 
+In the above example, the NVM subsystem "nqn.2019-04.ibof:subsystem1" has been configured to listen on socket address "10.1.2.14:1158" using TCP. If you omit this step, POS wouldn't be able to mount POS volumes.
 
 #### Retrieve NVM subsystem information
 At this point, you should be able to retrieve the configured NVM subsystem as in the following:
@@ -539,7 +539,7 @@ nqn.2019-04.ibof:subsystem1           |NVMe        |1            |IBOF0000000000
 
 ### Step 8. Create POS Volume
 
-In this step, we will create a POS volume, a logical entry point from the target side IO, which will be shown as a namespace in an NVM subsystem. A POS volume is wrapped as a ***bdev*** and can be attached to an NVM subsystem. ***bdev*** is a block device abstraction offered by the SPDK library. 
+In this step, we will create a POS volume, a logical entry point from the target side IO, which will be shown as a namespace in an NVM subsystem. A POS volume is wrapped as a ***bdev*** and can be attached to an NVM subsystem. ***bdev*** is a block device abstraction offered by the SPDK library.
 
 #### Create a volume
 
@@ -560,13 +560,13 @@ vol1      |0     |50T                          |0B                           |0 
 
 ### Step 9. Mount POS Volume
 
-We need to mount a POS volume to perform IO operations on it. After mounted, the POS volume will be attached to an NVM subsystem as a block device (bdev). Also, it will be seen as an NVM namespace. 
+We need to mount a POS volume to perform IO operations on it. After mounted, the POS volume will be attached to an NVM subsystem as a block device (bdev). Also, it will be seen as an NVM namespace.
 
 Mount the volume using the volume mount command.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume mount --volume-name vol1 --array-name POSArray
 ```
- 
+
 Check if the status and the remaning capacity of the volume have changed to "Mounted" and 50 TB, respectively.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
@@ -574,7 +574,7 @@ Name      |ID    |TotalCapacity                |RemainingCapacity            |Re
 --------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
 vol1      |0     |50T                          |50T                          |100        |Mounted    |0                |0
 ```
-- Note: the RemainingCapacity of a newly created volume is set to the TotalCapacity when the volume is mounted for the first time. 
+- Note: the RemainingCapacity of a newly created volume is set to the TotalCapacity when the volume is mounted for the first time.
   Once every block of the volume is touched/written, the RemainingCapacity would remain at 0 until the volume gets deleted.
   The RemainingCapacity captures the internal state of block mappings and should not be interpreted as user's file system free space.
 
@@ -617,8 +617,8 @@ WARNING: After unmounting volume vol1 in array POSArray, the progressing I/Os ma
 
 Are you sure you want to unmount volume vol1? (y/n):y
 ```
- 
- 
+
+
 Check if the volume status is now "Unmounted".
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
@@ -637,14 +637,14 @@ WARNING: After deleting volume vol1, you cannot recover the data of volume vol1 
 Are you sure you want to delete volume vol1? (y/n):y
 ```
 
- 
+
 Make sure that the volume list command does not display "vol1".
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli volume list --array-name POSArray --unit
 Name      |ID    |TotalCapacity                |RemainingCapacity            |Remaining% |Status     |MaximumIOPS      |MaximumBandwith
 --------- |----- |---------------------------- |---------------------------- |---------  |---------- |---------------- |----------------
 ```
-POS volume can be deleted only when it is in the Unmounted state. 
+POS volume can be deleted only when it is in the Unmounted state.
 
 ### Step 12. Unmount POS Array
 Unmount the array.
@@ -655,8 +655,8 @@ In addition, progressing I/Os may fail if any.
 
 Are you sure you want to unmount array POSArray? (y/n):y
 ```
- 
- 
+
+
 Make sure that the status of POSArray is now "Unmounted".
 ```bash
 Index |Name       |DatetimeCreated           |DatetimeUpdated           |Status
@@ -672,8 +672,8 @@ WARNING: After deleting array POSArray, you cannot recover the data of the volum
 
 Are you sure you want to delete array POSArray? (y/n):y
 ```
- 
- 
+
+
 Make sure that the array list command does not display POSArray.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ./poseidonos-cli array list
@@ -691,7 +691,7 @@ WARNING: Stopping POS will affect the progressing I/Os.
 Are you sure you want to stop POS? (y/n):y
 ```
 
- 
+
 Check if the process of POS has been terminated using the command below.
 ```bash
 root@R2U14-PSD-3:/poseidonos/bin# ps -ef | grep poseidon | grep -v grep

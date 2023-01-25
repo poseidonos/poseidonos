@@ -4,9 +4,6 @@
 
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "src/array_models/interface/i_array_info.h"
-#ifdef _ADMIN_ENABLED
-#include "src/array/device/i_array_device_manager.h"
-#endif
 
 namespace pos
 {
@@ -31,13 +28,7 @@ public:
     virtual string GetCreateDatetime(void);
     virtual string GetUpdateDatetime(void);
     virtual bool IsWriteThroughEnabled(void);
-#ifdef _ADMIN_ENABLED
-    virtual IArrayDevMgr*
-    GetArrayManager(void)
-    {
-        return nullptr;
-    }
-#endif
+    virtual vector<IArrayDevice*> GetArrayDevices(void);
 
 private:
     PartitionLogicalSize* userSizeInfo;

@@ -39,18 +39,16 @@
 
 namespace pos
 {
-class Stripe;
-
 class StripeMapUpdate : public MetaUpdateCallback
 {
 public:
-    StripeMapUpdate(Stripe* stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx_);
+    StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx_);
     virtual ~StripeMapUpdate(void);
 
 private:
     virtual bool _DoSpecificJob(void) override;
 
-    Stripe* stripe;
+    StripeSmartPtr stripe;
     IStripeMap* stripeMap;
 };
 } // namespace pos

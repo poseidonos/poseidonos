@@ -52,6 +52,7 @@
 namespace pos
 {
 class MetaFsConfigManager;
+class MetaFileContextHandler;
 
 class MetaFs : public IMountSequence
 {
@@ -80,12 +81,27 @@ public:
     {
         return fileDescriptorAllocator;
     }
-    virtual int EstimateAlignedFileIOSize(MetaFilePropertySet& prop);
+    virtual int EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+    virtual size_t GetAvailableSpace(MetaFilePropertySet& prop,
+        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
 
-    MetaFsManagementApi* mgmt;
-    MetaFsIoApi* io;
-    MetaFsFileControlApi* ctrl;
-    MetaFsWBTApi* wbt;
+    virtual MetaFsManagementApi* GetMgmtApi(void)
+    {
+        return mgmt;
+    }
+    virtual MetaFsFileControlApi* GetCtrlApi(void)
+    {
+        return ctrl;
+    }
+    virtual MetaFsIoApi* GetIoApi(void)
+    {
+        return io;
+    }
+    virtual MetaFsWBTApi* GetWbtApi(void)
+    {
+        return wbt;
+    }
 
 private:
     bool _Initialize(void);
@@ -98,6 +114,11 @@ private:
     void _RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList& mediaList);
     std::shared_ptr<MetaStorageInfo> _MakeMetaStorageMediaInfo(PartitionType ptnType);
     MaxMetaLpnMapPerMetaStorage _MakeLpnMap(void) const;
+
+    MetaFsManagementApi* mgmt;
+    MetaFsFileControlApi* ctrl;
+    MetaFsIoApi* io;
+    MetaFsWBTApi* wbt;
 
     ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval;
     bool isNpor_;

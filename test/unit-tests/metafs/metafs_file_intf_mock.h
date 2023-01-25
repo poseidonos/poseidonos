@@ -48,6 +48,7 @@ public:
     MOCK_METHOD(bool, DoesFileExist, (), (override));
     MOCK_METHOD(int, Delete, (), (override));
     MOCK_METHOD(uint64_t, GetFileSize, (), (override));
+    MOCK_METHOD(int, IssueIO, (MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer));
     MOCK_METHOD(int, AsyncIO, (AsyncMetaFileIoCtx * ctx), (override));
     MOCK_METHOD(int, CheckIoDoneStatus, (void* data), (override));
     MOCK_METHOD(int, Open, (), (override));

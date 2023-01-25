@@ -47,6 +47,12 @@ GrpcHealth::Check(
 {
     response->set_status(pos_rpc::HealthCheckResponse::ServingStatus::HealthCheckResponse_ServingStatus_SERVING);
 
+    // TODO (cheolho.kang): Add code to wait when the grpc server is disconnected
+    /*
+    while (!context->IsCancelled())
+    {
+    }
+    */
     return ::grpc::Status::OK;
 }
 } // namespace pos

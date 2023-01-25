@@ -38,25 +38,39 @@
 namespace pos
 {
 AsyncMetaFileIoCtx::AsyncMetaFileIoCtx(void)
-: opcode(MetaFsIoOpcode::Write),
+: error(0),
+  opcode(MetaFsIoOpcode::Write),
   fd(-1),
   fileOffset(0),
   length(0),
   buffer(nullptr),
   callback(nullptr),
-  error(0),
-  ioDoneCheckCallback(nullptr),
-  vsid(0)
+  ioDoneCheckFunc(nullptr),
+  fileInfoUpdated(false),
+  ioInfoUpdated(false),
+  callbackUpdated(false)
 {
 }
 
 void
 AsyncMetaFileIoCtx::HandleIoComplete(void* data)
 {
-    if (ioDoneCheckCallback)
-        error = ioDoneCheckCallback(data);
+    if (ioDoneCheckFunc)
+        error = ioDoneCheckFunc(data);
     if (callback)
         callback(this);
+}
+
+char*
+AsyncMetaFileIoCtx::GetBuffer(void)
+{
+    return buffer;
+}
+
+FnCompleteMetaFileIo
+AsyncMetaFileIoCtx::GetCallback(void)
+{
+    return callback;
 }
 
 int
@@ -71,6 +85,24 @@ AsyncMetaFileIoCtx::GetLength(void) const
     return length;
 }
 
+MetaFsIoOpcode
+AsyncMetaFileIoCtx::GetOpcode(void) const
+{
+    return opcode;
+}
+
+int
+AsyncMetaFileIoCtx::GetFd(void) const
+{
+    return fd;
+}
+
+uint64_t
+AsyncMetaFileIoCtx::GetFileOffset(void) const
+{
+    return fileOffset;
+}
+
 std::string
 AsyncMetaFileIoCtx::ToString(void) const
 {
@@ -82,9 +114,44 @@ AsyncMetaFileIoCtx::ToString(void) const
     oss << "buffer:" << ((buffer == nullptr) ? "nullptr" : "0x" + (boost::format("%x") % (uint64_t)(uint64_t*)buffer).str()) << ", ";
     oss << "callback:" << ((callback == nullptr) ? "nullptr" : "not nullptr") << ", ";
     oss << "error:" << error << ", ";
-    oss << "ioDoneCheckCallback:" << ((ioDoneCheckCallback == nullptr) ? "nullptr" : "not nullptr") << ", ";
-    oss << "vsid:" << vsid;
+    oss << "ioDoneCheckCallback:" << ((ioDoneCheckFunc == nullptr) ? "nullptr" : "not nullptr") << ", ";
 
     return oss.str();
 }
+
+void
+AsyncMetaFileIoCtx::SetFileInfo(int fd_, FnCheckMetaFileIoDone ioDoneCallback_)
+{
+    this->fd = fd_;
+    this->ioDoneCheckFunc = ioDoneCallback_;
+
+    fileInfoUpdated = true;
+}
+
+void
+AsyncMetaFileIoCtx::SetIoInfo(MetaFsIoOpcode opcode_, uint64_t fileOffset_,
+    uint64_t length_, char* buffer_)
+{
+    this->opcode = opcode_;
+    this->fileOffset = fileOffset_;
+    this->length = length_;
+    this->buffer = buffer_;
+
+    ioInfoUpdated = true;
+}
+
+void
+AsyncMetaFileIoCtx::SetCallback(FnCompleteMetaFileIo callback_)
+{
+    this->callback = callback_;
+
+    callbackUpdated = true;
+}
+
+bool
+AsyncMetaFileIoCtx::IsReadyToUse(void) const
+{
+    return (fileInfoUpdated == true && ioInfoUpdated == true && callbackUpdated == true);
+}
+
 } // namespace pos

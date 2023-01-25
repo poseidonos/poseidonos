@@ -6,51 +6,48 @@
 #include "src/allocator/context_manager/context_io_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
-#include "src/include/address_type.h"
-#include "src/meta_file_intf/mock_file_intf.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-
-#include "test/integration-tests/allocator/allocator_it_common.h"
+#include "src/include/address_type.h"
+#include "src/journal_manager/journal_manager.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
+#include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/allocator/address/allocator_address_info_tester.h"
+#include "test/integration-tests/allocator/allocator_it_common.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_file_io_mock.h"
 #include "test/unit-tests/allocator/context_manager/block_allocation_status_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_io_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_replayer_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
-#include "test/unit-tests/event_scheduler/event_mock.h"
-#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
-#include "test/unit-tests/lib/bitmap_mock.h"
-#include "test/unit-tests/meta_file_intf/async_context_mock.h"
-#include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
-#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
-#include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
-
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
+#include "test/unit-tests/event_scheduler/event_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_manager_mock.h"
+#include "test/unit-tests/journal_manager/checkpoint/checkpoint_meta_flush_completed_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/log_group_releaser_mock.h"
-
+#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/journal_writer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/i_journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_buffer_io_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_event_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_volume_event_handler_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_handler_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
-
+#include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
+#include "test/unit-tests/lib/bitmap_mock.h"
+#include "test/unit-tests/meta_file_intf/async_context_mock.h"
+#include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
-#include "src/journal_manager/journal_manager.h"
-#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
-#include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
-#include "test/unit-tests/journal_manager/checkpoint/checkpoint_meta_flush_completed_mock.h"
 
 using namespace ::testing;
 using testing::NiceMock;
@@ -95,6 +92,7 @@ protected:
     NiceMock<MockLogWriteHandler>* logWriteHandler;
     NiceMock<MockJournalWriter>* journalWriter;
     NiceMock<MockLogWriteContextFactory>* logWriteContextFactory;
+    NiceMock<MockLogBufferIoContextFactory>* logBufferIoContextFactory;
     NiceMock<MockJournalEventFactory>* journalEventFactory;
     NiceMock<MockJournalVolumeEventHandler>* volumeEventHandler;
     NiceMock<MockIJournalLogBuffer>* logBuffer;
@@ -142,6 +140,7 @@ ContextManagerIntegrationTest::SetUp(void)
     logWriteHandler = new NiceMock<MockLogWriteHandler>;
     journalWriter = new NiceMock<MockJournalWriter>;
     logWriteContextFactory = new NiceMock<MockLogWriteContextFactory>;
+    logBufferIoContextFactory = new NiceMock<MockLogBufferIoContextFactory>;
     journalEventFactory = new NiceMock<MockJournalEventFactory>;
     volumeEventHandler = new NiceMock<MockJournalVolumeEventHandler>;
     logBuffer = new NiceMock<MockIJournalLogBuffer>;
@@ -170,7 +169,7 @@ ContextManagerIntegrationTest::SetUp(void)
     segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, arrayId, segInfosForSegCtx);
 
     journal = new JournalManager(config, statusProvider,
-        logWriteContextFactory, journalEventFactory, logWriteHandler,
+        logWriteContextFactory, logBufferIoContextFactory, journalEventFactory, logWriteHandler,
         volumeEventHandler, journalWriter,
         logBuffer, bufferAllocator, logGroupReleaser, checkpointManager,
         nullptr, dirtyMapManager, logFilledNotifier,
@@ -366,10 +365,11 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
 
     // Expects flushing allocator contexts to wait for rebuild context flush done
     AsyncMetaFileIoCtx* allocCtxFlush = new AsyncMetaFileIoCtx();
-    allocCtxFlush->buffer = (char*)(new CtxHeader());
-    ((CtxHeader*)(allocCtxFlush->buffer))->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    auto allocCtxHeader = new CtxHeader();
+    allocCtxHeader->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    allocCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, 0, (char*)allocCtxHeader);
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             std::thread allocCtxFlushCallback([&]
             {
@@ -385,10 +385,11 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
             return 0;
         });
     AsyncMetaFileIoCtx* segCtxFlush = new AsyncMetaFileIoCtx();
-    segCtxFlush->buffer = (char*)(new CtxHeader());
-    ((CtxHeader*)(segCtxFlush->buffer))->sig = SegmentCtx::SIG_SEGMENT_CTX;
+    auto segCtxHeader = new CtxHeader();
+    segCtxHeader->sig = SegmentCtx::SIG_SEGMENT_CTX;
+    segCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)segCtxHeader);
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             std::thread segCtxFlushCallback([&]
             {
@@ -410,10 +411,11 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
     // Test set-up for testing FlushRebuildContext
     // Expects flushing segment context to be completed right away
     AsyncMetaFileIoCtx* rebuildCtxFlush = new AsyncMetaFileIoCtx();
-    rebuildCtxFlush->buffer = (char*)(new CtxHeader());
-    ((CtxHeader*)(rebuildCtxFlush->buffer))->sig = RebuildCtx::SIG_REBUILD_CTX;
+    auto rebuildCtxHeader = new CtxHeader();
+    rebuildCtxHeader->sig = RebuildCtx::SIG_REBUILD_CTX;
+    rebuildCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)rebuildCtxHeader);
     EXPECT_CALL(*rebuildCtxIo, Flush)
-        .WillOnce([&](AllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
         {
             callback();
 

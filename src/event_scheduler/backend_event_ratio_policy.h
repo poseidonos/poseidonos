@@ -42,7 +42,7 @@ namespace pos
 class BackendEventRatioPolicy : public BackendPolicy
 {
 public:
-    BackendEventRatioPolicy(QosManager* qosManager, std::vector<EventWorker*>* workerarray, uint32_t workerCount, uint32_t ioWorkerCount = 1);
+    BackendEventRatioPolicy(QosManager* qosManager, std::vector<EventWorker*>* workerArray, uint32_t workerCount, uint32_t ioWorkerCount = 1);
     ~BackendEventRatioPolicy();
     virtual void EnqueueEvent(EventSmartPtr input);
     virtual std::queue<EventSmartPtr> DequeueEvents(void);

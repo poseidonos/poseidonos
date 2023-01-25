@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	pb "cli/api"
+	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var StopSystemCmd = &cobra.Command{
@@ -25,9 +24,9 @@ Syntax:
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		if stop_system_isForced == false {
-			conf := displaymgr.AskConfirmation(
-				"WARNING: This may affect the I/O operations in progress!!!\n" +
-					"Do you really want to stop PoseidonOS?")
+			confMsg := "WARNING: This may affect the I/O operations in progress!!!\n" +
+				"Do you really want to stop PoseidonOS?"
+			conf := displaymgr.AskConfirmation(confMsg)
 			if conf == false {
 				os.Exit(0)
 			}
@@ -41,14 +40,11 @@ Syntax:
 			return buildErr
 		}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
-		if err != nil {
-			fmt.Printf("failed to marshal the protobuf request: %v", err)
-			return err
+		printReqErr := displaymgr.PrintProtoReqJson(req)
+		if printReqErr != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", printReqErr)
+			return printReqErr
 		}
-		displaymgr.PrintRequest(string(reqJson))
 
 		res, gRpcErr := grpcmgr.SendStopSystem(req)
 		if gRpcErr != nil {
@@ -56,10 +52,10 @@ Syntax:
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
-		if printErr != nil {
-			fmt.Printf("failed to print the response: %v", printErr)
-			return printErr
+		printResErr := displaymgr.PrintProtoResponse(command, res)
+		if printResErr != nil {
+			fmt.Printf("failed to print the response: %v", printResErr)
+			return printResErr
 		}
 
 		return nil

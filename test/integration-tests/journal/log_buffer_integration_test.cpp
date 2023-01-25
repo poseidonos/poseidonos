@@ -13,7 +13,7 @@
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/utils/test_info.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 
 namespace pos
 {
@@ -39,13 +39,14 @@ JournalLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetLogGroupSize).WillByDefault(Return(LOG_GROUP_SIZE));
 
     // TODO(huijeong.kim) This injected modules should be deleted
-    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
+    contextFactory.Init(&config);
+    ioContextFactory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
 
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), 0, MetaFileType::Journal));
     logBuffer->Delete();
 
     _PrepareLogBuffer();
-    logBuffer->Init(&config, &factory, 0, nullptr);
+    logBuffer->Init(&config, &ioContextFactory, 0, nullptr);
     logBuffer->SyncResetAll();
 }
 
@@ -69,7 +70,7 @@ JournalLogBufferIntegrationTest::SimulateSPOR(void)
     delete logBuffer;
     logBuffer = new JournalLogBuffer(new MockFileIntf(GetLogFileName(), 0, MetaFileType::Journal));
     _PrepareLogBuffer();
-    logBuffer->Init(&config, &factory, 0, nullptr);
+    logBuffer->Init(&config, &ioContextFactory, 0, nullptr);
 }
 
 int
@@ -105,9 +106,7 @@ JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateBlockMapLogWriteContext(volumeIo, callback);
-    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
+        contextFactory.CreateBlockMapLogWriteContext(volumeIo, callback);
     return context;
 }
 
@@ -122,9 +121,7 @@ JournalLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateStripeMapLogWriteContext(stripe, oldAddr, callback);
-    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
+        contextFactory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callback);
 
     return context;
 }
@@ -150,9 +147,7 @@ JournalLogBufferIntegrationTest::_CreateContextForGcBlockWriteDoneLog(void)
 
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
-        factory.CreateGcBlockMapLogWriteContext(mapUpdates, callback);
-    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
+        contextFactory.CreateGcBlockMapLogWriteContext(mapUpdates, callback);
 
     return context;
 }
@@ -178,9 +173,7 @@ JournalLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
 
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
-        factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, callback);
-    context->SetInternalCallback(std::bind(&JournalLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
+        contextFactory.CreateGcStripeFlushedLogWriteContext(mapUpdates, callback);
 
     return context;
 }
@@ -271,36 +264,39 @@ TEST_F(JournalLogBufferIntegrationTest, ParseLogBuffer_testIfAllLogsAreParsed)
 
     uint64_t offset = 0;
 
+    auto callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1);
+
     // Write block write done log
     LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     // Write stripe map updated log
     context = _CreateContextForStripeMapUpdatedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     // Write gc block write done log
     context = _CreateContextForGcBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     // Write gc stripe flushed log
     context = _CreateContextForGcStripeFlushedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(logBuffer->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     _WaitForLogWriteDone(addedLogs.size());
@@ -317,14 +313,17 @@ TEST_F(JournalLogBufferIntegrationTest, ParseLogBuffer)
 {
     POS_TRACE_DEBUG(9999, "JournalLogBufferIntegrationTest::ParseLogBuffer");
 
+    auto callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1);
+
     uint64_t offset = 0;
     while (offset + sizeof(BlockWriteDoneLog) < LOG_GROUP_SIZE)
     {
         LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-        context->SetBufferAllocated(offset, 0, 0);
-        EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+        context->SetLogAllocated(0, 0);
+        EXPECT_TRUE(logBuffer->WriteLog(context, offset, callback) == 0);
 
-        offset += context->GetLength();
+        offset += context->GetLogSize();
         _AddToList(context);
     }
 
@@ -346,14 +345,17 @@ TEST_F(JournalLogBufferIntegrationTest, WriteInvalidLogType)
     BlockWriteDoneLogHandler* blockLog =
         dynamic_cast<BlockWriteDoneLogHandler*>(context->GetLog());
 
+    auto callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1);
+
     if (blockLog != nullptr)
     {
         Log* log = reinterpret_cast<Log*>(blockLog->GetData());
         int* typePtr = reinterpret_cast<int*>(&(log->type));
         *typePtr = -1;
 
-        context->SetBufferAllocated(0, 0, 0);
-        EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+        context->SetLogAllocated(0, 0);
+        EXPECT_TRUE(logBuffer->WriteLog(context, 0, callback) == 0);
 
         _WaitForLogWriteDone(1);
 
@@ -378,14 +380,17 @@ TEST_F(JournalLogBufferIntegrationTest, WriteWithoutMark)
     BlockWriteDoneLogHandler* blockLog =
         dynamic_cast<BlockWriteDoneLogHandler*>(context->GetLog());
 
+    auto callback = std::bind(&JournalLogBufferIntegrationTest::WriteDone,
+        this, std::placeholders::_1);
+
     if (blockLog != nullptr)
     {
         Log* log = reinterpret_cast<Log*>(blockLog->GetData());
         int* markPtr = reinterpret_cast<int*>(&(log->mark));
         *markPtr = 0;
 
-        context->SetBufferAllocated(0, 0, 0);
-        EXPECT_TRUE(logBuffer->WriteLog(context) == 0);
+        context->SetLogAllocated(0, 0);
+        EXPECT_TRUE(logBuffer->WriteLog(context, 0, callback) == 0);
 
         _WaitForLogWriteDone(1);
 

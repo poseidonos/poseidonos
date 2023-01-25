@@ -15,8 +15,7 @@
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
-#include "test/integration-tests/journal/utils/test_info.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 
 namespace pos
 {
@@ -49,9 +48,10 @@ RocksDBLogBufferIntegrationTest::SetUp(void)
     ON_CALL(config, GetNumLogGroups).WillByDefault(Return(NUM_LOG_GROUPS));
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
 
-    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
+    factory.Init(&config);
+    ioContextFactory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
     journalRocks = new RocksDBLogBuffer(GetLogDirName());
-    journalRocks->Init(&config, &factory, 0, nullptr);
+    journalRocks->Init(&config, &ioContextFactory, 0, nullptr);
 
     uint64_t logBufferSize = LOG_BUFFER_SIZE;
     journalRocks->Create(logBufferSize);
@@ -90,8 +90,6 @@ RocksDBLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 
     LogWriteContext* context =
         factory.CreateBlockMapLogWriteContext(volumeIo, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
     return context;
 }
 
@@ -106,9 +104,7 @@ RocksDBLogBufferIntegrationTest::_CreateContextForStripeMapUpdatedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
 
     LogWriteContext* context =
-        factory.CreateStripeMapLogWriteContext(stripe, oldAddr, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
+        factory.CreateStripeMapLogWriteContext(StripeSmartPtr(stripe), oldAddr, callback);
     return context;
 }
 
@@ -134,8 +130,6 @@ RocksDBLogBufferIntegrationTest::_CreateContextForGcBlockWriteDoneLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcBlockMapLogWriteContext(mapUpdates, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
     return context;
 }
 
@@ -161,8 +155,6 @@ RocksDBLogBufferIntegrationTest::_CreateContextForGcStripeFlushedLog(void)
     EventSmartPtr callback(new LogBufferWriteDone());
     LogWriteContext* context =
         factory.CreateGcStripeFlushedLogWriteContext(mapUpdates, callback);
-    context->SetInternalCallback(std::bind(&RocksDBLogBufferIntegrationTest::WriteDone,
-        this, std::placeholders::_1));
     return context;
 }
 
@@ -281,7 +273,7 @@ RocksDBLogBufferIntegrationTest::SimulateSPOR(void)
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
 
     journalRocks = new RocksDBLogBuffer(SPORDirName);
-    journalRocks->Init(&config, &factory, 0, nullptr);
+    journalRocks->Init(&config, &ioContextFactory, 0, nullptr);
     _PrepareLogBuffer();
 }
 
@@ -290,8 +282,7 @@ TEST_F(RocksDBLogBufferIntegrationTest, CreateAndClose)
     // Given : array name and When JournalRocks opened
     RocksDBLogBuffer journalRocks("OpenAndClose");
     ON_CALL(config, GetRocksdbPath).WillByDefault(Return(rocksdbPath));
-    factory.Init(&config, new LogBufferWriteDoneNotifier(), new CallbackSequenceController());
-    journalRocks.Init(&config, &factory, 0, nullptr);
+    journalRocks.Init(&config, &ioContextFactory, 0, nullptr);
 
     uint64_t logBufferSize = LOG_BUFFER_SIZE;
     int createStatus = journalRocks.Create(logBufferSize);
@@ -315,36 +306,38 @@ TEST_F(RocksDBLogBufferIntegrationTest, WriteAndVerify)
 {
     uint64_t offset = 0;
 
+    auto callback = std::bind(&RocksDBLogBufferIntegrationTest::WriteDone, this, std::placeholders::_1);
+
     // Write block write done log
     LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     // Write stripe map updated log
     context = _CreateContextForStripeMapUpdatedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     // Write gc block write done log
     context = _CreateContextForGcBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     // Write gc stripe flushed log
     context = _CreateContextForGcStripeFlushedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
     _AddToList(context);
 
     EXPECT_EQ(4, addedLogs.size());
@@ -361,13 +354,15 @@ TEST_F(RocksDBLogBufferIntegrationTest, WriteAndVerify)
 TEST_F(RocksDBLogBufferIntegrationTest, ParseLogBuffer)
 {
     uint64_t offset = 0;
+    auto callback = std::bind(&RocksDBLogBufferIntegrationTest::WriteDone, this, std::placeholders::_1);
+
     while (offset + sizeof(BlockWriteDoneLog) < LOG_GROUP_SIZE)
     {
         LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-        context->SetBufferAllocated(offset, 0, 0);
-        EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+        context->SetLogAllocated(0, 0);
+        EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-        offset += context->GetLength();
+        offset += context->GetLogSize();
         _AddToList(context);
     }
 
@@ -384,14 +379,17 @@ TEST_F(RocksDBLogBufferIntegrationTest, WriteInvalidLogType)
     LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
     BlockWriteDoneLogHandler* blockLog =
         dynamic_cast<BlockWriteDoneLogHandler*>(context->GetLog());
+
+    auto callback = std::bind(&RocksDBLogBufferIntegrationTest::WriteDone, this, std::placeholders::_1);
+
     if (blockLog != nullptr)
     {
         Log* log = reinterpret_cast<Log*>(blockLog->GetData());
         int* typePtr = reinterpret_cast<int*>(&(log->type));
         *typePtr = -1;
 
-        context->SetBufferAllocated(0, 0, 0);
-        EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+        context->SetLogAllocated(0, 0);
+        EXPECT_TRUE(journalRocks->WriteLog(context, 0, callback) == 0);
 
         LogList groupLogs;
         EXPECT_TRUE(_ParseLogBuffer(0, groupLogs) != 0);
@@ -412,14 +410,15 @@ TEST_F(RocksDBLogBufferIntegrationTest, WriteWithoutMark)
     BlockWriteDoneLogHandler* blockLog =
         dynamic_cast<BlockWriteDoneLogHandler*>(context->GetLog());
 
+    auto callback = std::bind(&RocksDBLogBufferIntegrationTest::WriteDone, this, std::placeholders::_1);
     if (blockLog != nullptr)
     {
         Log* log = reinterpret_cast<Log*>(blockLog->GetData());
         int* markPtr = reinterpret_cast<int*>(&(log->mark));
         *markPtr = 0;
 
-        context->SetBufferAllocated(0, 0, 0);
-        EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+        context->SetLogAllocated(0, 0);
+        EXPECT_TRUE(journalRocks->WriteLog(context, 0, callback) == 0);
 
         LogList groupLogs;
         EXPECT_TRUE(_ParseLogBuffer(0, groupLogs) == 0);
@@ -438,40 +437,43 @@ TEST_F(RocksDBLogBufferIntegrationTest, ResetByGroupId)
 {
     // Given : add logs (4 logs have logGroupId 0 , 1 log has logGroupId 1)
     uint64_t offset = 0;
+
+    auto callback = std::bind(&RocksDBLogBufferIntegrationTest::WriteDone, this, std::placeholders::_1);
+
     // Write block write done log, group 0
     LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write stripe map updated log, group 0
     context = _CreateContextForStripeMapUpdatedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write gc block write done log, group 0
     context = _CreateContextForGcBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write gc stripe flushed log, group 0
     context = _CreateContextForGcStripeFlushedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write block write done log, group 1
     context = _CreateContextForBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 1, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(1, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // When : remove logs of groupId 0
     EventSmartPtr callbackEvent(new LogGroupResetCompletedEvent(journalRocks, 0));
@@ -497,40 +499,43 @@ TEST_F(RocksDBLogBufferIntegrationTest, ResetAllLogs)
 {
     // Given : add logs (4 logs have logGroupId 0 , 1 log has logGroupId 1)
     uint64_t offset = 0;
+
+    auto callback = std::bind(&RocksDBLogBufferIntegrationTest::WriteDone, this, std::placeholders::_1);
+
     // Write block write done log, group 0
     LogWriteContext* context = _CreateContextForBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write stripe map updated log, group 0
     context = _CreateContextForStripeMapUpdatedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write gc block write done log, group 0
     context = _CreateContextForGcBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write gc stripe flushed log, group 0
     context = _CreateContextForGcStripeFlushedLog();
-    context->SetBufferAllocated(offset, 0, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(0, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // Write block write done log, group 1
     context = _CreateContextForBlockWriteDoneLog();
-    context->SetBufferAllocated(offset, 1, 0);
-    EXPECT_TRUE(journalRocks->WriteLog(context) == 0);
+    context->SetLogAllocated(1, 0);
+    EXPECT_TRUE(journalRocks->WriteLog(context, offset, callback) == 0);
 
-    offset += context->GetLength();
+    offset += context->GetLogSize();
 
     // When : remove logs of all groups (0,1)
     journalRocks->SyncResetAll();

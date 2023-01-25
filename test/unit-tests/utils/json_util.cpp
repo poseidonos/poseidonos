@@ -47,11 +47,11 @@ VolumeListToString(std::vector<pos::Volume*> volumes)
     for (auto& v : volumes)
     {
         JsonElement elem("");
-        elem.SetAttribute(JsonAttribute("name", "\"" + v->GetName() + "\""));
+        elem.SetAttribute(JsonAttribute("name", "\"" + v->GetVolumeName() + "\""));
         elem.SetAttribute(JsonAttribute("id", std::to_string(v->ID)));
-        elem.SetAttribute(JsonAttribute("total", std::to_string(v->TotalSize())));
-        elem.SetAttribute(JsonAttribute("maxiops", std::to_string(v->MaxIOPS())));
-        elem.SetAttribute(JsonAttribute("maxbw", std::to_string(v->MaxBW())));
+        elem.SetAttribute(JsonAttribute("total", std::to_string(v->GetTotalSize())));
+        elem.SetAttribute(JsonAttribute("maxiops", std::to_string(v->GetMaxIOPS())));
+        elem.SetAttribute(JsonAttribute("maxbw", std::to_string(v->GetMaxBW())));
         jsonArray.AddElement(elem);
     }
     root.SetArray(jsonArray);

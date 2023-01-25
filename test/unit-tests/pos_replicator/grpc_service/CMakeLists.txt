@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(grpc_replication_controller_ut grpc_replication_controller_test.cpp)
+POS_ADD_UNIT_TEST(grpc_pos_management_ut grpc_pos_management_test.cpp)
+POS_ADD_UNIT_TEST(grpc_health_ut grpc_health_test.cpp)
+POS_ADD_UNIT_TEST(grpc_pos_io_ut grpc_pos_io_test.cpp)

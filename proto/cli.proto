@@ -60,6 +60,12 @@ service PosCli {
 	rpc StopRebuilding (StopRebuildingRequest) returns (StopRebuildingResponse);
 	rpc UpdateEventWrr (UpdateEventWrrRequest) returns (UpdateEventWrrResponse);
 
+	rpc DumpMemorySnapshot (DumpMemorySnapshotRequest) returns (DumpMemorySnapshotResponse) {
+		option (google.api.http) = {
+      		get: "/v1/dump_memory_snapshot"
+    	};
+	}
+
 	// Array Commands
 	rpc AddSpare (AddSpareRequest) returns (AddSpareResponse) {
 		option (google.api.http) = {
@@ -217,11 +223,24 @@ service PosCli {
     	};
 	}
 
+    // Volume Commands
 	rpc CreateVolume (CreateVolumeRequest) returns (CreateVolumeResponse) {
 		option (google.api.http) = {
       		post: "/v1/createvolume"
     	};
 	}
+
+	rpc QosCreateVolumePolicy (QosCreateVolumePolicyRequest) returns (QosCreateVolumePolicyResponse) {
+		option (google.api.http) = {
+			post: "/v1/createqospolicy"
+		};
+	}
+
+    rpc QosResetVolumePolicy (QosResetVolumePolicyRequest) returns (QosResetVolumePolicyResponse) {
+        option (google.api.http) = {
+            post: "/v1/resetqospolicy"
+        };
+    }
 
 	rpc DeleteVolume (DeleteVolumeRequest) returns (DeleteVolumeResponse) {
 		option (google.api.http) = {
@@ -241,11 +260,47 @@ service PosCli {
     	};
 	}
 
+    rpc ListVolume (ListVolumeRequest) returns (ListVolumeResponse) {
+        option (google.api.http) = {
+            post: "/v1/listvolume"
+        };
+    }
+
 	rpc SetVolumeProperty (SetVolumePropertyRequest) returns (SetVolumePropertyResponse) {
 		option (google.api.http) = {
       		post: "/v1/setvolumeproperty"
     	};
 	}
+
+    rpc VolumeInfo (VolumeInfoRequest) returns (VolumeInfoResponse) {
+        option (google.api.http) = {
+            post: "/v1/volumeinfo"
+         };
+    }
+
+    rpc VolumeRename (VolumeRenameRequest) returns (VolumeRenameResponse) {
+        option (google.api.http) = {
+            post: "/v1/volumerename"
+         };
+    }
+
+    rpc ListQOSPolicy (ListQOSPolicyRequest) returns (ListQOSPolicyResponse) {
+        option (google.api.http) = {
+            post: "/v1/listqospolicy"
+         };
+    }
+
+    rpc ListWBT (ListWBTRequest) returns (ListWBTResponse) {
+        option (google.api.http) = {
+            post: "/v1/listwbt"
+        };
+    }
+
+    rpc WBT (WBTRequest) returns (WBTResponse) {
+        option (google.api.http) = {
+            post: "/v1/wbt"
+        };
+    }
 }
 
 message Status {
@@ -254,11 +309,18 @@ message Status {
 	optional string description = 3;
 	optional string cause = 4;
 	optional string solution = 5;
+	optional string message = 6; 
 }
 
 
 message PosInfo {
 	string version = 1;
+}
+
+message StartSystemRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
 }
 
 message SystemInfoRequest {
@@ -447,6 +509,26 @@ message ResetMbrRequest {
 }
 
 message ResetMbrResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message DumpMemorySnapshotRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string path = 1;
+	}
+	Param param = 4;
+}
+
+message DumpMemorySnapshotResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {
@@ -1251,8 +1333,11 @@ message CreateVolumeRequest {
 		uint64 size = 3;
 		uint64 maxiops = 4;
 		uint64 maxbw = 5;
-		bool iswalvol = 6;
+		bool isWalVol = 6;
 		string uuid = 7;
+		int32 nsid = 8;
+		bool isPrimary = 9;
+		bool isAnaNonoptimized = 10;
 	}
 	Param param = 4;
 }
@@ -1360,4 +1445,237 @@ message SetVolumePropertyResponse {
 	}
 	Result result = 3;
 	PosInfo info = 4;
+}
+
+message Volume {
+    string name = 1;
+    int32    index = 2;
+    uint64   total = 3;
+    uint64   remain = 4;
+    string   status = 5;
+    uint64   maxiops = 6;
+    uint64   maxbw = 7;
+    uint64   miniops = 8;
+    uint64   minbw = 9;
+    string   subnqn = 10;
+    string   uuid = 11;
+    string   arrayname = 12;
+}
+
+message ListVolumeRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+    message Param {
+            string array = 1;
+    }
+    Param param = 4;
+}
+
+message ListVolumeResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+        Status status = 1;
+        message VolumeList {
+            repeated Volume volumes = 1;
+        }
+        VolumeList data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
+message QosVolumeNameParam {
+    string volumeName = 1;
+}
+
+message QosCreateVolumePolicyRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string array = 1;
+		repeated QosVolumeNameParam vol = 2;
+		int64 minbw = 3;
+		int64 miniops = 4;
+		int64 maxbw = 5;
+		int64 maxiops = 6;
+	}
+	Param param = 4;
+}
+
+message QosCreateVolumePolicyResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message QosResetVolumePolicyRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+    message Param {
+        string array = 1;
+        repeated QosVolumeNameParam vol = 2;
+    }
+    Param param = 4;
+}
+
+
+message VolumeInfoRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+    message Param {
+            string array = 1;
+            string volume = 2;
+    }
+    Param param = 4;
+}
+
+message QosResetVolumePolicyResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+        Status status = 1;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
+message VolumeInfoResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+        Status status = 1;
+        Volume data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
+message VolumeRenameRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+    message Param {
+            string array = 1;
+            string name = 2;
+            string newname = 3;
+    }
+    Param param = 4;
+}
+
+message VolumeRenameResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+        Status status = 1;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
+message ListWBTRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+}
+
+message WBTTest {
+    string testname = 1;
+}
+
+message ListWBTResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+		Status status = 1;
+		message Tests {
+			repeated WBTTest testlist = 1;
+		}
+		Tests data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
+message ListQOSPolicyRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+    message Param {
+        string array = 1;
+        message Volume {
+            string volumeName = 1;
+        }
+        repeated Volume vol = 2;
+    }
+    Param param = 4;
+}
+
+message QOSResult {
+    message Arrays {
+        string ArrayName = 1;
+    }
+    repeated Arrays arrayName = 1;
+    message RebuildPolicy {
+        string rebuild = 1;
+    }
+    repeated RebuildPolicy rebuildPolicy = 2;
+    message VolumePolicies {
+        int32 id = 1;
+        string maxbw = 2;
+        string maxiops = 3;
+        string miniops = 4;
+        string minbw =  5;
+        string min_bw_guarantee = 6;
+        string min_iops_guarantee = 7;
+        string name = 8;
+    }
+    repeated VolumePolicies volumePolicies = 3;
+}
+
+message ListQOSPolicyResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+        Status status = 1;
+        message ListQOSResult {
+            repeated QOSResult qosresult = 1;
+        }
+        ListQOSResult data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
+}
+
+message WBTRequest {
+    string command = 1;
+    string rid = 2;
+    string requestor = 3;
+	message Param {
+		string testname = 1;
+		map<string, string> argv = 2;
+	}
+	Param param = 4;
+}
+
+message WBTResponse {
+    string command = 1;
+    string rid = 2;
+    message Result {
+		Status status = 1;
+		message TestData {
+			string testdata = 1;
+		}
+        TestData data = 2;
+    }
+    Result result = 3;
+    PosInfo info = 4;
 }

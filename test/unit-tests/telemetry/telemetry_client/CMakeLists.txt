@@ -1,6 +1,7 @@
 POS_ADD_UNIT_TEST(grpc_global_publisher_ut grpc_global_publisher_test.cpp)
 POS_ADD_UNIT_TEST(i_global_publisher_ut i_global_publisher_test.cpp)
 POS_ADD_UNIT_TEST(telemetry_publisher_ut telemetry_publisher_test.cpp)
+POS_ADD_UNIT_TEST(easy_telemetry_publisher_ut easy_telemetry_publisher_test.cpp)
 POS_ADD_UNIT_TEST(telemetry_client_ut telemetry_client_test.cpp)
 POS_ADD_UNIT_TEST(telemetry_metrics_ut telemetry_metrics_test.cpp)
 POS_ADD_UNIT_TEST(telemetry_data_pool_ut telemetry_data_pool_test.cpp)

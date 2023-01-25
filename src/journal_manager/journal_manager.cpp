@@ -48,7 +48,9 @@
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 #include "src/journal_manager/log_buffer/callback_sequence_controller.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_buffer/log_write_io_context.h"
 #include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_event_factory.h"
@@ -57,9 +59,10 @@
 #include "src/journal_manager/replay/replay_handler.h"
 #include "src/journal_manager/status/journal_status_provider.h"
 #include "src/logger/logger.h"
+#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
+#include "src/telemetry/telemetry_client/easy_telemetry_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
-#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 
 namespace pos
 {
@@ -68,7 +71,7 @@ JournalManager::JournalManager(void)
   config(nullptr),
   statusProvider(nullptr),
   logBuffer(nullptr),
-  logFactory(nullptr),
+  logWriteContextFactory(nullptr),
   eventFactory(nullptr),
   logWriteHandler(nullptr),
   volumeEventHandler(nullptr),
@@ -90,7 +93,8 @@ JournalManager::JournalManager(void)
 // Constructor for injecting dependencies in unit tests
 JournalManager::JournalManager(JournalConfiguration* configuration,
     JournalStatusProvider* journalStatusProvider,
-    LogWriteContextFactory* logWriteContextFactory,
+    LogWriteContextFactory* logWriteFactory,
+    LogBufferIoContextFactory* logBufferIoFactory,
     JournalEventFactory* journalEventFactory,
     LogWriteHandler* writeHandler,
     JournalVolumeEventHandler* journalVolumeEventHandler,
@@ -111,7 +115,8 @@ JournalManager::JournalManager(JournalConfiguration* configuration,
     config = configuration;
     statusProvider = journalStatusProvider;
 
-    logFactory = logWriteContextFactory;
+    logWriteContextFactory = logWriteFactory;
+    logBufferIoContextFactory = logBufferIoFactory;
     eventFactory = journalEventFactory;
 
     logWriteHandler = writeHandler;
@@ -162,6 +167,7 @@ JournalManager::JournalManager(TelemetryPublisher* tp, IArrayInfo* info, IStateC
 : JournalManager(new JournalConfiguration(),
       new JournalStatusProvider(),
       new LogWriteContextFactory(),
+      new LogBufferIoContextFactory(),
       new JournalEventFactory(),
       new LogWriteHandler(),
       new JournalVolumeEventHandler(),
@@ -218,7 +224,8 @@ JournalManager::~JournalManager(void)
     delete journalWriter;
     delete volumeEventHandler;
     delete logWriteHandler;
-    delete logFactory;
+    delete logWriteContextFactory;
+    delete logBufferIoContextFactory;
     delete eventFactory;
 
     delete checkpointManager;
@@ -245,7 +252,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
     IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
     IWBStripeAllocator* wbStripeAllocator,
     IContextManager* ctxManager, IContextReplayer* ctxReplayer,
-    IVolumeInfoManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+    IVolumeInfoManager* volumeManager, MetaFs* metaFs,
     EventScheduler* eventScheduler, TelemetryClient* tc)
 {
     int result = 0;
@@ -256,7 +263,7 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         {
             journalingStatus.Set(JOURNAL_INIT);
 
-            result = _InitConfigAndPrepareLogBuffer(metaFsCtrl);
+            result = _InitConfigAndPrepareLogBuffer(metaFs);
             if (result < 0)
             {
                 return result;
@@ -277,11 +284,11 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
         }
 
         isInitialized = true;
-        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZE), "Journal manager for array {} is initialized", arrayInfo->GetName());
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Journal manager for array {} is initialized", arrayInfo->GetName());
     }
     else
     {
-        POS_TRACE_WARN(EID(JOURNAL_MANAGER_INITIALIZE),
+        POS_TRACE_WARN(EID(JOURNAL_MANAGER_INITIALIZED),
             "Journal manager for array {} is already initialized, so skip Init(). \
             Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
             arrayInfo->GetName());
@@ -291,13 +298,13 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
 }
 
 int
-JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
+JournalManager::_InitConfigAndPrepareLogBuffer(MetaFs* metaFs)
 {
     int result = 0;
 
     // TODO (meta) : Move init sequence to proper location
     config->Init(arrayInfo->IsWriteThroughEnabled());
-    logBuffer->Init(config, logFactory, arrayInfo->GetIndex(), telemetryPublisher);
+    logBuffer->Init(config, logBufferIoContextFactory, arrayInfo->GetIndex(), telemetryPublisher);
 
     bool logBufferExist = logBuffer->DoesLogFileExist();
     if (logBufferExist == true)
@@ -309,13 +316,13 @@ JournalManager::_InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl)
         {
             return result;
         }
-        config->SetLogBufferSize(loadedLogBufferSize, metaFsCtrl);
+        config->SetLogBufferSize(loadedLogBufferSize, metaFs);
 
         journalingStatus.Set(WAITING_TO_BE_REPLAYED);
     }
     else
     {
-        result = config->SetLogBufferSize(0, metaFsCtrl);
+        result = config->SetLogBufferSize(0, metaFs);
         if (result == 0)
         {
             result = logBuffer->Create(config->GetLogBufferSize());
@@ -489,7 +496,8 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     }
     versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
 
-    logFactory->Init(config, logFilledNotifier, sequenceController);
+    logWriteContextFactory->Init(config);
+    logBufferIoContextFactory->Init(config, logFilledNotifier, sequenceController);
     eventFactory->Init(eventScheduler, logWriteHandler);
 
     // Note that bufferAllocator should be notified after dirtyMapManager,
@@ -501,11 +509,11 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     logGroupReleaser->Init(config, logFilledNotifier, logBuffer,
         checkpointManager, mapFlush, contextManager, eventScheduler);
 
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, telemetryPublisher,
-        new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
-    volumeEventHandler->Init(logFactory, checkpointManager, dirtyMapManager, logWriteHandler,
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, EasyTelemetryPublisherSingleton::Instance(),
+        arrayInfo->GetIndex(), new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
+    volumeEventHandler->Init(logWriteContextFactory, checkpointManager, dirtyMapManager, logWriteHandler,
         config, contextManager, eventScheduler);
-    journalWriter->Init(logWriteHandler, logFactory, eventFactory, &journalingStatus, eventScheduler);
+    journalWriter->Init(logWriteHandler, logWriteContextFactory, eventFactory, &journalingStatus, eventScheduler);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager, telemetryPublisher);

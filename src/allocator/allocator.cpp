@@ -41,6 +41,7 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/i_context_manager.h"
+#include "src/allocator/stripe_manager/stripe_manager.h"
 #include "src/allocator_service/allocator_service.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/master_context/config_manager.h"
@@ -48,17 +49,18 @@
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/sys_event/volume_event_publisher.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
 namespace pos
 {
 Allocator::Allocator(TelemetryPublisher* tp_, AllocatorAddressInfo* addrInfo_, ContextManager* contextManager_, BlockManager* blockManager_,
-    WBStripeManager* wbStripeManager_, IArrayInfo* info_, IStateControl* iState_)
+    WBStripeManager* wbStripeManager_, StripeManager* stripeManager_, IArrayInfo* info_, IStateControl* iState_)
 : addrInfo(addrInfo_),
   contextManager(contextManager_),
   blockManager(blockManager_),
   wbStripeManager(wbStripeManager_),
+  stripeManager(stripeManager_),
   isInitialized(false),
   iArrayInfo(info_),
   iStateControl(iState_),
@@ -68,7 +70,7 @@ Allocator::Allocator(TelemetryPublisher* tp_, AllocatorAddressInfo* addrInfo_, C
 }
 
 Allocator::Allocator(IArrayInfo* info, IStateControl* iState)
-: Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
+: Allocator(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, info, iState)
 {
     _CreateSubmodules();
     _SetGCThreshold();
@@ -84,6 +86,8 @@ Allocator::~Allocator(void)
 int
 Allocator::Init(void)
 {
+    int ret = EID(SUCCESS);
+
     if (isInitialized == false)
     {
         if (tp != nullptr)
@@ -91,9 +95,17 @@ Allocator::Init(void)
             TelemetryClientSingleton::Instance()->RegisterPublisher(tp);
         }
         addrInfo->Init(iArrayInfo);
-        contextManager->Init();
-        blockManager->Init(wbStripeManager);
+        ret = contextManager->Init();
+        if (ret != EID(SUCCESS))
+        {
+            POS_TRACE_ERROR(EID(CONTEXT_MANAGER_FAILED_TO_INIT),
+                "Context Manager of array {} has been failed to initialize, error {}",
+                iArrayInfo->GetName(), ret);
+            return ret;
+        }
+        blockManager->Init(stripeManager);
         wbStripeManager->Init();
+        stripeManager->Init(wbStripeManager);
 
         _RegisterToAllocatorService();
         isInitialized = true;
@@ -108,7 +120,8 @@ Allocator::Init(void)
             Init() is designed to be idempotent, but needs developer's further attention when called multiple times",
             iArrayInfo->GetName());
     }
-    return 0;
+
+    return ret;
 }
 
 void
@@ -482,9 +495,6 @@ Allocator::GetBitmapLayout(std::string fname)
 void
 Allocator::FlushAllUserdataWBT(void)
 {
-    std::vector<Stripe*> stripesToFlush;
-    std::vector<StripeId> vsidToCheckFlushDone;
-
     blockManager->TurnOffBlkAllocation();
     wbStripeManager->FlushAllWbStripes();
     blockManager->TurnOnBlkAllocation();
@@ -499,7 +509,8 @@ Allocator::_CreateSubmodules(void)
     tp->AddDefaultLabel("array_name", arrName);
     contextManager = new ContextManager(tp, addrInfo, iArrayInfo->GetIndex());
     blockManager = new BlockManager(tp, addrInfo, contextManager, iArrayInfo->GetIndex());
-    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager, blockManager, arrayName, iArrayInfo->GetIndex());
+    wbStripeManager = new WBStripeManager(tp, addrInfo, contextManager->GetAllocatorCtx(), arrayName, iArrayInfo->GetIndex());
+    stripeManager = new StripeManager(contextManager, addrInfo, iArrayInfo->GetIndex());
 }
 
 void
@@ -560,6 +571,11 @@ Allocator::_SetGCThreshold(void)
 void
 Allocator::_DeleteSubmodules(void)
 {
+    if (stripeManager != nullptr)
+    {
+        delete stripeManager;
+        stripeManager = nullptr;
+    }
     if (wbStripeManager != nullptr)
     {
         delete wbStripeManager;

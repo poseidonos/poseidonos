@@ -10,7 +10,7 @@ import gdb_lib
 import core_dump_lib
 
 
-debug_info_str = "pos::debugInfo"
+debug_info_str = "pos::singletonInfo"
 arrayManager_str = "arrayManager"
 arrayList_str = "arrayList"
 arrayNodeCount_str = "._M_t._M_impl._M_node_count"
@@ -66,7 +66,7 @@ def make_report():
         gdb.execute(cmd)
 
         print("\n================ Partition Info ================")
-        # (*(pos::DebugInfo *) 0x430ef00)->volumeService->items[0]->arrayInfo->ptnMgr->partitions._M_elems[0]
+        # (*(pos::singletonInfo *) 0x430ef00)->volumeService->items[0]->arrayInfo->ptnMgr->partitions._M_elems[0]
         cmd = gdb_lib.advance_ptr(debug_info_str, "volumeService")
         volumeServiceAddr = gdb.parse_and_eval(cmd)
         print("    cmd info: p *%s" % cmd)

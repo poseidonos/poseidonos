@@ -161,7 +161,7 @@ AllocatorFileIo::LoadContext(void)
     char* buf = new char[fileSize]();
 
     int ret = _Load(buf);
-    if (ret != 1) // case for creating new file
+    if (ret != EID(SUCCEED_TO_OPEN_WITHOUT_CREATION)) // case for creating new file
     {
         delete[] buf;
     }
@@ -171,59 +171,82 @@ AllocatorFileIo::LoadContext(void)
 int
 AllocatorFileIo::_Load(char* buf)
 {
+    int ret = EID(SUCCESS);
+
     if (file->DoesFileExist() == false)
     {
-        int ret = file->Create(fileSize);
+        ret = file->Create(fileSize);
         if (ret == 0)
         {
-            file->Open();
-            return 0;
+            ret = file->Open();
+            if (EID(SUCCESS) == ret)
+            {
+                ret = EID(SUCCEED_TO_OPEN_WITH_CREATION);
+            }
+            else
+            {
+                POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
+                    "Failed to open file:{}, size:{}, error:{}",
+                    client->GetFilename(), fileSize, ret);
+            }
         }
         else
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
-                "[AllocatorFileIo] Failed to create file:{}, size:{}",
-                client->GetFilename(), fileSize);
-            return -1;
+                "Failed to create file:{}, size:{}, error:{}",
+                client->GetFilename(), fileSize, ret);
         }
     }
     else
     {
-        file->Open();
+        ret = file->Open();
+        if (EID(SUCCESS) != ret)
+        {
+            POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
+                "Failed to open file:{}, size:{}, error:{}",
+                client->GetFilename(), fileSize, ret);
+            return ret;
+        }
 
         numFilesReading++;
 
-        MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_LoadCompletedThenCB, this, std::placeholders::_1);
-        AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Read,
-            file->GetFd(), 0, fileSize, buf, callback);
-        int ret = file->AsyncIO(request);
-        if (ret == 0)
+        FnCompleteMetaFileIo callback = std::bind(&AllocatorFileIo::_LoadCompletedThenCB, this, std::placeholders::_1);
+        AsyncMetaFileIoCtx* request = new AsyncMetaFileIoCtx();
+        request->SetIoInfo(MetaFsIoOpcode::Read, 0, fileSize, buf);
+        request->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
+        request->SetCallback(callback);
+
+        ret = file->AsyncIO(request);
+        if (ret == EID(SUCCESS))
         {
-            return 1;
+            ret = EID(SUCCEED_TO_OPEN_WITHOUT_CREATION);
         }
         else
         {
             numFilesReading--;
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR),
-                "[AllocatorFileIo] Failed to issue load:{}, fname:{}, size:{}",
-                ret, client->GetFilename(), fileSize);
+                "Failed to issue load:{}, fname:{}, size:{}, error:{}",
+                ret, client->GetFilename(), fileSize, ret);
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), request->ToString());
             delete request;
-            return -1;
         }
     }
+
+    return ret;
 }
 
 void
 AllocatorFileIo::_LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
-    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
+    char* buffer = ctx->GetBuffer();
+
+    CtxHeader* header = reinterpret_cast<CtxHeader*>(buffer);
     assert(header->sig == client->GetSignature());
 
-    _AfterLoad(ctx->buffer);
+    _AfterLoad(buffer);
     POS_TRACE_INFO(EID(ALLOCATOR_META_ASYNCLOAD), "[AllocatorLoad] Async allocator file:{} load done!", owner);
 
-    delete[] ctx->buffer;
+    delete[] buffer;
     delete ctx;
 }
 
@@ -238,7 +261,7 @@ AllocatorFileIo::_AfterLoad(char* buffer)
 }
 
 int
-AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf)
+AllocatorFileIo::Flush(FnAllocatorCtxIoCompletion clientCallback, int dstSectionId, char* externalBuf)
 {
     char* buf = new char[fileSize]();
     _PrepareBuffer(buf);
@@ -251,21 +274,22 @@ AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId
     }
 
     numFilesFlushing++;
-    MetaIoCbPtr callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);
-    AllocatorIoCtx* request = new AllocatorIoCtx(MetaFsIoOpcode::Write,
-        file->GetFd(), 0, fileSize, buf, callback, clientCallback);
+    FnCompleteMetaFileIo callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);
+    AsyncMetaFileIoCtx* request = new AllocatorIoCtx(clientCallback);
+    request->SetIoInfo(MetaFsIoOpcode::Write, 0, fileSize, buf);
+    request->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
+    request->SetCallback(callback);
+
     int ret = file->AsyncIO(request);
-    if (ret != 0)
+    if (ret != EID(SUCCESS))
     {
         numFilesFlushing--;
         POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO),
-            "[AllocatorFileIo] Failed to issue store:{}, fname:{}", ret, client->GetFilename());
+            "Failed to issue store:{}, fname:{}", ret, client->GetFilename());
         POS_TRACE_ERROR(EID(FAILED_TO_ISSUE_ASYNC_METAIO), request->ToString());
 
         delete request;
         delete[] buf;
-
-        ret = -1;
     }
     return ret;
 }
@@ -273,7 +297,9 @@ AllocatorFileIo::Flush(AllocatorCtxIoCompletion clientCallback, int dstSectionId
 void
 AllocatorFileIo::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
 {
-    CtxHeader* header = reinterpret_cast<CtxHeader*>(ctx->buffer);
+    char* buffer = ctx->GetBuffer();
+
+    CtxHeader* header = reinterpret_cast<CtxHeader*>(buffer);
     assert(header->sig == client->GetSignature());
 
     _AfterFlush(ctx);
@@ -281,9 +307,9 @@ AllocatorFileIo::_FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx)
         "sig:{}, version:{}", header->sig, header->ctxVersion);
 
     AllocatorIoCtx* ioContext = reinterpret_cast<AllocatorIoCtx*>(ctx);
-    ioContext->clientCallback();
+    (ioContext->GetAllocatorClientCallback())();
 
-    delete[] ctx->buffer;
+    delete[] buffer;
     delete ctx;
 }
 
@@ -293,7 +319,7 @@ AllocatorFileIo::_AfterFlush(AsyncMetaFileIoCtx* ctx)
     int result = numFilesFlushing.fetch_sub(1) - 1;
     assert(result >= 0);
 
-    client->FinalizeIo(ctx);
+    client->FinalizeIo(ctx->GetBuffer());
 }
 
 void

@@ -33,11 +33,12 @@
 #pragma once
 
 #include <atomic>
+#include <vector>
 
 #include "../log/waiting_log_list.h"
 #include "../log_buffer/buffer_write_done_notifier.h"
-#include "src/meta_file_intf/async_context.h"
 #include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
+#include "src/meta_file_intf/async_context.h"
 #include "src/metafs/lib/concurrent_metafs_time_interval.h"
 
 namespace pos
@@ -47,7 +48,8 @@ class LogWriteContext;
 class IJournalLogBuffer;
 class JournalConfiguration;
 class LogWriteStatistics;
-class TelemetryPublisher;
+class EasyTelemetryPublisher;
+class LogWriteIoContext;
 
 class LogWriteHandler : public LogBufferWriteDoneEvent
 {
@@ -57,34 +59,36 @@ public:
     virtual ~LogWriteHandler(void);
 
     virtual void Init(BufferOffsetAllocator* allocator, IJournalLogBuffer* buffer,
-        JournalConfiguration* config, TelemetryPublisher* telemetryPublisher,
-        ConcurrentMetaFsTimeInterval* timeInterval = nullptr);
+        JournalConfiguration* config, EasyTelemetryPublisher* telemetryPublisher,
+        const int arrayId, ConcurrentMetaFsTimeInterval* timeInterval = nullptr);
     virtual void Dispose(void);
 
     virtual int AddLog(LogWriteContext* context);
     virtual void AddLogToWaitingList(LogWriteContext* context);
     void LogWriteDone(AsyncMetaFileIoCtx* ctx);
 
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
 private:
     void _StartWaitingIos(void);
-    void _PublishPeriodicMetrics(LogWriteContext* context);
+    void _PublishPeriodicMetrics(LogWriteIoContext* context);
 
     IJournalLogBuffer* logBuffer;
     BufferOffsetAllocator* bufferAllocator;
+    int numLogGroups;
 
     LogWriteStatistics* logWriteStats;
     WaitingLogList* waitingList;
 
-    std::atomic<uint64_t> numIosRequested;
-    std::atomic<uint64_t> numIosCompleted;
+    std::vector<std::atomic<uint64_t>>* numIosRequested;
+    std::vector<std::atomic<uint64_t>>* numIosCompleted;
 
-    TelemetryPublisher* telemetryPublisher;
+    EasyTelemetryPublisher* easyTp;
     ConcurrentMetaFsTimeInterval* interval;
     std::atomic<uint64_t> sumOfTimeSpentPerInterval;
     std::atomic<uint64_t> doneCountPerInterval;
+    int arrayId;
 };
 
 } // namespace pos

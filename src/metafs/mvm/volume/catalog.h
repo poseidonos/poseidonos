@@ -34,7 +34,6 @@
 
 #include "meta_region_map_info.h"
 #include "meta_vol_basic_info.h"
-#include "mf_inode.h"
 #include "on_volume_meta_region.h"
 #include "os_header.h"
 

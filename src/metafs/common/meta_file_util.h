@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2022 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@
 #include "meta_volume_type.h"
 #include "metafs_type.h"
 #include "src/meta_file_intf/meta_file_include.h"
+#include "src/metafs/include/meta_file_property.h"
 
 namespace pos
 {
@@ -66,12 +67,16 @@ public:
     static std::string ConvertToMediaTypeName(const MetaVolumeType volume);
     static MetaVolumeType ConvertToVolumeType(const MetaStorageType media);
     static uint64_t GetEpochSignature(std::time_t t = std::time(0));
+    static std::string ConvertToFileTypeName(const MetaFileType file);
+    static std::string ConvertToDirectionName(const uint32_t type);
 
     static const std::string UNKNOWN_VOLUME_NAME;
+    static const std::string UNKNOWN_FILE_TYPE_NAME;
 
 private:
     static const MetaFsMediaToVolume MEDIA_TO_VOLUME[(uint32_t)MetaStorageType::Max];
     static const MetaFsVolumeToMedia VOLUME_TO_MEDIA[(uint32_t)MetaVolumeType::Max];
     static const std::unordered_map<MetaVolumeType, std::string> VOLUME_NAME;
+    static const std::unordered_map<MetaFileType, std::string> FILE_TYPE;
 };
 } // namespace pos

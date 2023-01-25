@@ -73,10 +73,11 @@ SUBDIRS = allocator \
         helper/string \
         helper/time \
         sys_info \
-        dump \
         qos \
-        debug \
+	singleton_info \
+        debug_lib \
         wbt \
+        wbt/write_bypass \
         admin \
         resource_manager \
 	telemetry \
@@ -88,6 +89,10 @@ SUBDIRS = allocator \
         resource_checker \
         event \
         trace 
+
+ifeq ($(CONFIG_REPLICATOR), y)
+        SUBDIRS += pos_replicator
+endif
 
 .PHONY: $(SUBDIRS)
 

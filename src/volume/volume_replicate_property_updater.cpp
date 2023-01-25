@@ -52,11 +52,11 @@ VolumeReplicatePropertyUpdater::~VolumeReplicatePropertyUpdater(void)
 
 
 int
-VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationState state)
+VolumeReplicatePropertyUpdater::Do(string name, ReplicationState state)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    VolumeReplicationState originState = vol->GetReplicationState();
+    ReplicationState originState = vol->GetReplicationState();
 
     vol->SetReplicationState(state);
 
@@ -71,13 +71,13 @@ VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationState state)
 }
 
 int
-VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationRoleProperty nodeProperty)
+VolumeReplicatePropertyUpdater::Do(string name, ReplicationRole nodeProperty)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    VolumeReplicationRoleProperty originProperty = vol->GetReplicateRoleProperty();
+    ReplicationRole originProperty = vol->GetReplicationRole();
 
-    vol->SetReplicateRoleProperty(nodeProperty);
+    vol->SetReplicationRole(nodeProperty);
 
     _SetVolumeEventBase(vol);
     _SetVolumeEventPerf(vol);
@@ -95,7 +95,7 @@ VolumeReplicatePropertyUpdater::Do(string name, VolumeReplicationRoleProperty no
     int ret = _SaveVolumes();
     if (ret != EID(SUCCESS))
     {
-        vol->SetReplicateRoleProperty(originProperty);
+        vol->SetReplicationRole(originProperty);
         return ret;
     }
 

@@ -122,10 +122,10 @@ public:
 
             for (auto& info : files[arrayId])
             {
-                rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(info.second.fileName,
+                rc_mgmt = GetMetaFs(arrayId)->GetCtrlApi()->Create(info.second.fileName,
                     info.second.fileSize, info.second.prop, info.first);
                 ASSERT_EQ(rc_mgmt, EID(SUCCESS));
-                ASSERT_EQ(GetMetaFs(arrayId)->ctrl->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
+                ASSERT_EQ(GetMetaFs(arrayId)->GetCtrlApi()->Open(info.second.fileName, info.second.fd, info.first), EID(SUCCESS));
             }
         }
 
@@ -137,7 +137,7 @@ public:
         {
             for (auto& info : files[arrayId])
             {
-                EXPECT_EQ(GetMetaFs(arrayId)->ctrl->Close(info.second.fd, info.first), EID(SUCCESS));
+                EXPECT_EQ(GetMetaFs(arrayId)->GetCtrlApi()->Close(info.second.fd, info.first), EID(SUCCESS));
             }
 
             // unmount array
@@ -187,7 +187,7 @@ public:
             for (size_t i = 0; i < std::min(remainedCount, countPerLpn); ++i)
             {
                 FileSizeType startOffset = (lpn * BYTE_4K) + (i * granularityByteSize);
-                POS_EVENT_ID result = GetMetaFs(arrayId)->io->SubmitIO(
+                POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->SubmitIO(
                     _CreateRequests(arrayId, startOffset, _PopBuffer(arrayId, granularityIndex++)), MetaStorageType::NVRAM);
 
                 if (result != EID(SUCCESS))
@@ -293,7 +293,7 @@ private:
             *(size_t*)buf = arrayId;
             *(size_t*)(buf + sizeof(size_t)) = granularityIndex++;
             FileSizeType startOffset = targetLpn * BYTE_4K + (i * granularityByteSize);
-            POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::NvRamVolume].fd, startOffset, granularityByteSize, buf, MetaStorageType::NVRAM);
+            POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Write(files[arrayId][MetaVolumeType::NvRamVolume].fd, startOffset, granularityByteSize, buf, MetaStorageType::NVRAM);
             if (result != EID(SUCCESS))
             {
                 EXPECT_EQ(result, EID(SUCCESS)) << "write fail code: " << (int)result;
@@ -316,7 +316,7 @@ private:
         }
 
         // read
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::NvRamVolume].fd, targetLpn * BYTE_4K, BYTE_4K, readBuf, MetaStorageType::NVRAM);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Read(files[arrayId][MetaVolumeType::NvRamVolume].fd, targetLpn * BYTE_4K, BYTE_4K, readBuf, MetaStorageType::NVRAM);
         if (result != EID(SUCCESS))
         {
             EXPECT_EQ(result, EID(SUCCESS)) << "read fail code: " << (int)result;

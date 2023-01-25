@@ -46,7 +46,7 @@ public:
     explicit RocksDBLogBuffer(const std::string arrayName);
     virtual ~RocksDBLogBuffer(void);
 
-    virtual int Init(JournalConfiguration* journalConfiguration, LogWriteContextFactory* logWriteContextFactory,
+    virtual int Init(JournalConfiguration* journalConfiguration, LogBufferIoContextFactory* logWriteContextFactory,
         int arrayId, TelemetryPublisher* tp) override;
     virtual void InitDataBuffer(void) override;
     virtual void Dispose(void) override;
@@ -56,13 +56,12 @@ public:
     virtual int Close(void);
 
     virtual int ReadLogBuffer(int groupId, void* buffer) override;
-    virtual int WriteLog(LogWriteContext* context) override;
+    virtual int WriteLog(LogWriteContext* context, uint64_t offset, FnCompleteMetaFileIo func) override;
 
     virtual int SyncResetAll(void) override;
     virtual int AsyncReset(int id, EventSmartPtr callbackEvent) override;
 
-    virtual int InternalIo(LogBufferIoContext* context) override;
-    virtual void InternalIoDone(AsyncMetaFileIoCtx* ctx) override;
+    virtual int WriteLogGroupFooter(uint64_t offset, LogGroupFooter footer, int logGroupId, EventSmartPtr callback) override;
 
     virtual int Delete(void) override;
 
@@ -85,6 +84,8 @@ protected:
     bool isOpened;
 
 private:
+    void _InternalIoDone(AsyncMetaFileIoCtx* ctx);
+
     inline uint64_t
     _GetFileOffset(int groupId, uint64_t offset)
     {
@@ -104,7 +105,7 @@ private:
     }
 
     JournalConfiguration* config;
-    LogWriteContextFactory* logFactory;
+    LogBufferIoContextFactory* ioContextFactory;
     rocksdb::DB* rocksJournal;
     uint64_t logBufferSize;
     std::string arrayName;

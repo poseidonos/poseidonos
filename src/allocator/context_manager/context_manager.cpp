@@ -106,13 +106,17 @@ ContextManager::~ContextManager(void)
     delete contextReplayer;
 }
 
-void
+int
 ContextManager::Init(void)
 {
+    int ret = EID(SUCCESS);
+
     allocatorCtx->Init();
     segmentCtx->Init();
     rebuildCtx->Init();
-    ioManager->Init();
+    ret = ioManager->Init();
+
+    return ret;
 }
 
 void

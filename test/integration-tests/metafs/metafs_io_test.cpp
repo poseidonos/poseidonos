@@ -88,9 +88,9 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_InRot
     {
         *(int*)writeBuf = i + 1;
 
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
         ASSERT_EQ(result, EID(SUCCESS)) << "write fail code: " << (int)result;
-        result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
+        result = GetMetaFs(arrayId)->GetIoApi()->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
         ASSERT_EQ(result, EID(SUCCESS)) << "read fail code: " << (int)result;
 
         ASSERT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
@@ -104,7 +104,7 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
     {
         *(int*)writeBuf = i + 1;
 
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
         ASSERT_EQ(result, EID(SUCCESS)) << "write fail code: " << (int)result;
     }
 
@@ -113,7 +113,7 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
     {
         *(int*)writeBuf = i + 1;
 
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
         ASSERT_EQ(result, EID(SUCCESS)) << "read fail code: " << (int)result;
         ASSERT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
     }
@@ -121,10 +121,10 @@ TEST_F(MetaFsIoTest, testIfTheSameDataCanBeRetrievedByReadAfterWritingData_First
 
 TEST_F(MetaFsIoTest, testIfMetaFsCanRejectTheRequestsDueToOutOfRange)
 {
-    POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, writeBuf);
+    POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, writeBuf);
     ASSERT_EQ(result, EID(MFS_INVALID_PARAMETER));
 
-    result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
+    result = GetMetaFs(arrayId)->GetIoApi()->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, (COUNT_OF_META_LPN_FOR_SSD + 1) * BYTE_4K, BYTE_4K, readBuf);
     EXPECT_EQ(result, EID(MFS_INVALID_PARAMETER));
 }
 
@@ -134,23 +134,23 @@ TEST_F(MetaFsIoTest, testIfPartialSyncIoCanBeWork)
     POS_EVENT_ID rc = EID(SUCCESS);
     FileDescriptorType fd = files[arrayId][MetaVolumeType::SsdVolume].fd;
 
-    rc = GetMetaFs(arrayId)->io->Write(fd, 0, 4, writeBuf, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Write(fd, 0, 4, writeBuf, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
-    rc = GetMetaFs(arrayId)->io->Write(fd, 4, 128, writeBuf + 4, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Write(fd, 4, 128, writeBuf + 4, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
-    rc = GetMetaFs(arrayId)->io->Write(fd, 132, 8, writeBuf + 132, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Write(fd, 132, 8, writeBuf + 132, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
-    rc = GetMetaFs(arrayId)->io->Write(fd, 140, BYTE_4K - 140, writeBuf + 140, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Write(fd, 140, BYTE_4K - 140, writeBuf + 140, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
 
     memset(readBuf, 0, BYTE_4K);
-    rc = GetMetaFs(arrayId)->io->Read(fd, 0, 4, readBuf, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Read(fd, 0, 4, readBuf, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
-    rc = GetMetaFs(arrayId)->io->Read(fd, 4, 128, readBuf + 4, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Read(fd, 4, 128, readBuf + 4, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
-    rc = GetMetaFs(arrayId)->io->Read(fd, 132, 8, readBuf + 132, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Read(fd, 132, 8, readBuf + 132, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
-    rc = GetMetaFs(arrayId)->io->Read(fd, 140, BYTE_4K - 140, readBuf + 140, MetaStorageType::SSD);
+    rc = GetMetaFs(arrayId)->GetIoApi()->Read(fd, 140, BYTE_4K - 140, readBuf + 140, MetaStorageType::SSD);
     EXPECT_EQ(rc, EID(SUCCESS));
 
     EXPECT_TRUE(std::equal(readBuf, readBuf + BYTE_4K, writeBuf)) << *(int*)readBuf;
@@ -164,7 +164,7 @@ TEST_F(MetaFsIoTest, testMetaFsPerformance_SyncWrite)
     stopWatch.StoreTimestamp();
     for (int i = 0; i < TEST_SIZE / BYTE_4K; ++i)
     {
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Write(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, writeBuf);
         ASSERT_EQ(result, EID(SUCCESS)) << "iteration: " << i << ", write fail code: " << (int)result;
     }
     stopWatch.StoreTimestamp();
@@ -185,7 +185,7 @@ TEST_F(MetaFsIoTest, testMetaFsPerformance_AsyncWrite)
     MetaFsAioCbCxt cxt(MetaFsIoOpcode::Write, fd, arrayId, 0, TEST_SIZE, buffer, [&](void* data) { ioDone = true; });
 
     stopWatch.StoreTimestamp();
-    POS_EVENT_ID result = GetMetaFs(arrayId)->io->SubmitIO(&cxt);
+    POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->SubmitIO(&cxt);
     ASSERT_EQ(result, EID(SUCCESS));
     while (!ioDone)
     {
@@ -207,7 +207,7 @@ TEST_F(MetaFsIoTest, testMetaFsPerformance_SyncRead)
     stopWatch.StoreTimestamp();
     for (int i = 0; i < TEST_SIZE / BYTE_4K; ++i)
     {
-        POS_EVENT_ID result = GetMetaFs(arrayId)->io->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
+        POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->Read(files[arrayId][MetaVolumeType::SsdVolume].fd, i * BYTE_4K, BYTE_4K, readBuf);
         ASSERT_EQ(result, EID(SUCCESS)) << "iteration: " << i << ", write fail code: " << (int)result;
     }
     stopWatch.StoreTimestamp();
@@ -228,7 +228,7 @@ TEST_F(MetaFsIoTest, testMetaFsPerformance_AsyncRead)
     MetaFsAioCbCxt cxt(MetaFsIoOpcode::Read, fd, arrayId, 0, TEST_SIZE, buffer, [&](void* data) { ioDone = true; });
 
     stopWatch.StoreTimestamp();
-    POS_EVENT_ID result = GetMetaFs(arrayId)->io->SubmitIO(&cxt);
+    POS_EVENT_ID result = GetMetaFs(arrayId)->GetIoApi()->SubmitIO(&cxt);
     ASSERT_EQ(result, EID(SUCCESS));
     while (!ioDone)
     {

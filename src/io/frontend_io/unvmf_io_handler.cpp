@@ -46,9 +46,11 @@
 #include "src/io/frontend_io/aio.h"
 #include "src/io/frontend_io/aio_submission_adapter.h"
 #include "src/logger/logger.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 #include "src/qos/qos_manager.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_manager.h"
+
 using namespace pos;
 using namespace std;
 
@@ -121,13 +123,11 @@ UNVMfSubmitHandler(struct pos_io* io)
             default:
             {
                 POS_EVENT_ID eventId = EID(BLKHDLR_WRONG_IO_DIRECTION);
-                POS_TRACE_ERROR(eventId, "Wrong IO direction (only read/write types are suppoered)");
+                POS_TRACE_ERROR(eventId, "Wrong IO direction:{} (only read/write types are supported)", io->ioType);
                 throw eventId;
                 break;
             }
         }
-
-        QosManager* qosManager = QosManagerSingleton::Instance();
 
         IVolumeIoManager* volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(io->array_id);
 
@@ -143,6 +143,11 @@ UNVMfSubmitHandler(struct pos_io* io)
         airlog("UserWritePendingCnt", "user", io->volume_id, 1);
         airlog("UserReadPendingCnt", "user", io->volume_id, 1);
 
+#ifdef IBOF_CONFIG_REPLICATOR
+        PosReplicatorManager* replicatorManager = PosReplicatorManagerSingleton::Instance();
+        replicatorManager->HandleHostWrite(volumeIo);
+#else
+        QosManager* qosManager = QosManagerSingleton::Instance();
         if (true == qosManager->IsFeQosEnabled())
         {
             AioSubmissionAdapter aioSubmission;
@@ -152,6 +157,7 @@ UNVMfSubmitHandler(struct pos_io* io)
         {
             aio.SubmitAsyncIO(volumeIo);
         }
+#endif
     }
     catch (...)
     {

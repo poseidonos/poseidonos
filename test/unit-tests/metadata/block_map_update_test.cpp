@@ -4,7 +4,7 @@
 
 #include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/io/general_io/vsa_range_maker_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
@@ -35,7 +35,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     int volumeId = 10;
@@ -65,13 +65,13 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     ON_CALL(*vsaRangeMaker, GetCount).WillByDefault(Return(1));
     ON_CALL(*vsaRangeMaker, GetVsaRange).WillByDefault(ReturnRef(oldVsas));
 
-    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(&stripe));
+    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(StripeSmartPtr(stripe)));
 
     // Then 1. Map should be updated with new vsa
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
 
     // Then 2. Reverse map should be updated
-    EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
+    EXPECT_CALL(*stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).WillOnce(ReturnRef(oldVsas));
@@ -89,7 +89,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     int volumeId = 10;
@@ -112,13 +112,13 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
 
     ON_CALL(*vsaRangeMaker, GetCount).WillByDefault(Return(0));
 
-    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(&stripe));
+    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(StripeSmartPtr(stripe)));
 
     // Then 1. Map should be updated with new vsa
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
 
     // Then 2. Reverse map should be updated
-    EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
+    EXPECT_CALL(*stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should not be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).Times(0);
@@ -138,7 +138,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockISegmentCtx> segmentCtx;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
-    NiceMock<MockStripe> stripe;
+    NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
     int volumeId = 10;
@@ -174,13 +174,13 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
 
     ON_CALL(*vsaRangeMaker, GetCount).WillByDefault(Return(numOldVsaRange));
 
-    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(&stripe));
+    ON_CALL(wbStripeAllocator, GetStripe(lsid.stripeId)).WillByDefault(Return(StripeSmartPtr(stripe)));
 
     // Then 1. Map should be updated with new vsa
     EXPECT_CALL(vsaMap, SetVSAs(volumeId, rba, newVsas));
 
     // Then 2. Reverse map should be updated
-    EXPECT_CALL(stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
+    EXPECT_CALL(*stripe, UpdateReverseMapEntry).Times(newVsas.numBlks);
 
     // Then 3. Old map should not be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).Times(numOldVsaRange).WillOnce(ReturnRef(oldVsas[0])).WillOnce(ReturnRef(oldVsas[1]));

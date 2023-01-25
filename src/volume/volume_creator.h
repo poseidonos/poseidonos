@@ -47,14 +47,15 @@ public:
     ~VolumeCreator(void) override;
 
     int Do(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw, uint64_t minIops,
-        uint64_t minBw, std::string uuid, bool checkWalVolume);
+        uint64_t minBw, std::string uuid, bool checkWalVolume, uint32_t nsid, bool isPrimary);
 
 private:
     void _CheckRequestValidity(string name, uint64_t size);
     void _CheckQosValidity(uint64_t maxIops,
         uint64_t maxBw, uint64_t minIops, uint64_t minBw, std::string volName, uint32_t volId);
     void _CreateVolume(string name, uint64_t size, uint64_t maxIops, uint64_t maxBw,
-            uint64_t minIops, uint64_t minBw, bool checkWalVolume, std::string uuid);
+            uint64_t minIops, uint64_t minBw, bool checkWalVolume, std::string uuid,
+            uint32_t nsid, bool isPrimary);
     void _NotificationVolumeEvent();
     void _SetUuid();
     void _RollbackCreatedVolume(int exceptionEvent);

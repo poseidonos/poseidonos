@@ -45,7 +45,6 @@
 
 namespace pos
 {
-class Stripe;
 class IVSAMap;
 class IStripeMap;
 class IContextManager;

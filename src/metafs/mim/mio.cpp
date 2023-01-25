@@ -157,7 +157,7 @@ Mio::_HandleMpioDone(void* data)
 }
 
 bool
-Mio::IsRead(void)
+Mio::IsRead(void) const
 {
     return originReq->reqType == MetaIoRequestType::Read;
 }
@@ -268,7 +268,7 @@ Mio::_WaitingForFreeMpio(const MpioType ioType, const MetaStorageType type) cons
     if (_IsJournalRequest(type))
     {
         // waiting for free cache space
-        while (mpioAllocator->IsFullyCached())
+        while (mpioAllocator->IsCacheFull())
         {
             mpioDonePoller();
             mpioAllocator->TryReleaseTheOldestCache(true);

@@ -54,21 +54,19 @@
 namespace pos
 {
 class TelemetryPublisher;
+class MetaFileContextHandler;
 
 class MetaFsFileControlApi
 {
 public:
     /* for test */
     MetaFsFileControlApi(void);
-    /* for test */
     MetaFsFileControlApi(const int arrayId, const bool isNormal, MetaStorageSubsystem* storage,
-        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr, BitMap* bitmap,
-        TelemetryPublisher* tp = nullptr);
-    MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
-        MetaFsManagementApi* mgmt, TelemetryPublisher* tp = nullptr,
-        MetaVolumeManager* volMgr = nullptr);
+        MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr,
+        std::unique_ptr<MetaFileContextHandler> handler, TelemetryPublisher* tp);
     virtual ~MetaFsFileControlApi(void);
 
+    virtual void Initialize(const uint64_t signature);
     virtual POS_EVENT_ID Create(std::string& fileName, uint64_t fileByteSize,
         MetaFilePropertySet prop = MetaFilePropertySet(),
         MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
@@ -85,9 +83,9 @@ public:
     virtual size_t GetAlignedFileIOSize(int fd,
         MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
     virtual size_t EstimateAlignedFileIOSize(MetaFilePropertySet& prop,
-        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType);
     virtual size_t GetAvailableSpace(MetaFilePropertySet& prop,
-        MetaVolumeType volumeType = MetaVolumeType::SsdVolume);
+        MetaVolumeType volumeType);
     virtual size_t GetMaxMetaLpn(MetaVolumeType type);
     virtual void SetStatus(bool isNormal);
     virtual MetaFileContext* GetFileInfo(FileDescriptorType fd, MetaVolumeType type);
@@ -106,13 +104,6 @@ public:
     virtual bool OpenVolume(bool isNPOR);
     virtual bool CloseVolume(bool& isNPOR);
 
-protected:
-    MetaFileInodeInfo* _GetFileInode(std::string& fileName,
-        MetaVolumeType type);
-    void _AddFileContext(std::string& fileName, FileDescriptorType fd,
-        MetaVolumeType type);
-    void _RemoveFileContext(FileDescriptorType fd, MetaVolumeType type);
-
 private:
     int arrayId;
     bool isNormal;
@@ -121,12 +112,6 @@ private:
     MetaVolumeManager* volMgr;
     TelemetryPublisher* tp;
 
-    BitMap* bitmap;
-    // (pair<MetaVolumeType, fd>, fileName)
-    std::unordered_map<std::pair<MetaVolumeType, FileDescriptorType>, std::string, PairHash> nameMapByfd;
-    // (pair<MetaVolumeType, fileName>, file index)
-    std::unordered_map<std::pair<MetaVolumeType, std::string>, uint32_t, PairHash> idxMapByName;
-    MetaFileContext cxtList[MetaFsConfig::MAX_VOLUME_CNT];
-    MetaFsSpinLock iLock;
+    std::unique_ptr<MetaFileContextHandler> fileContext;
 };
 } // namespace pos

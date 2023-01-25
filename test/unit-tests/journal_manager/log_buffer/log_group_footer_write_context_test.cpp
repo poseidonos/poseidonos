@@ -1,31 +1,39 @@
+#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+
 #include <gtest/gtest.h>
+
 #include <cstring>
 
-#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "test/unit-tests/event_scheduler/callback_mock.h"
+
+using ::testing::NiceMock;
 
 namespace pos
 {
 TEST(LogGroupFooterWriteContext, LogGroupFooterWriteContext_testIfExecutedSuccessfully)
 {
-    LogGroupFooterWriteContext context(0, nullptr);
+    LogGroupFooter footer;
+    CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
+    LogGroupFooterWriteContext context(0, callback, footer, 0);
 }
 
 TEST(LogGroupFooterWriteContext, SetIoRequest_testIfContextUpdatedCorrectly)
 {
     // Given
-    LogGroupFooterWriteContext context(0, nullptr);
-
-    // When
     LogGroupFooter footer;
     footer.lastCheckpointedSeginfoVersion = 3;
+
+    CallbackSmartPtr callback(new NiceMock<MockCallback>(true, 0));
+
     uint64_t offset = 30;
 
-    context.SetIoRequest(offset, footer);
+    LogGroupFooterWriteContext context(0, callback, footer, offset);
 
     // Then
-    EXPECT_EQ(context.length, sizeof(LogGroupFooter));
-    EXPECT_EQ(context.fileOffset, offset);
-    EXPECT_EQ(std::memcmp((void*)context.buffer, (void*)(&footer), sizeof(LogGroupFooter)), 0);
+    EXPECT_EQ(context.GetLength(), sizeof(LogGroupFooter));
+    EXPECT_EQ(context.GetFileOffset(), offset);
+    EXPECT_EQ(*(LogGroupFooter*)context.GetBuffer(), footer);
+    EXPECT_EQ(std::memcmp((void*)context.GetBuffer(), (void*)(&footer), sizeof(LogGroupFooter)), 0);
 }
 
 } // namespace pos

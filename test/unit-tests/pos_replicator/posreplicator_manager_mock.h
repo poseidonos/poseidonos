@@ -14,11 +14,4 @@ public:
     using PosReplicatorManager::PosReplicatorManager;
 };
 
-class MockPosReplicatorIOCompletion : public PosReplicatorIOCompletion
-{
-public:
-    using PosReplicatorIOCompletion::PosReplicatorIOCompletion;
-    MOCK_METHOD(bool, _DoSpecificJob, (), (override));
-};
-
 } // namespace pos

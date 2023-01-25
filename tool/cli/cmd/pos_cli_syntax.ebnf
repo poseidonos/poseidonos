@@ -172,7 +172,7 @@ CreateVolumeCmd = "create" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
   "--size" , VolumeSize , [ "--maxiops" , IOPS ] ,
   [ "--maxbw" , Bandwidth ] , [ "--wal-volume" ] ,
-  [ "--uuid" , Uuid ] ;
+  [ "--uuid" , Uuid ] , [ "--nsid" , Identifier ] , [ "--primary" ] , [ "--secondary" ] ;
 
 DeleteVolumeCmd = "delete" , ( "--volume-name" | "-v" ) ,
   VolumeName , ( "--array-name" | "-a" ) , ArrayName ,
@@ -344,6 +344,7 @@ DevelCmd = "devel" ,
   | StopRebuildingCmd
   | UpdateEventWrrCmd
   | ResetEventWrrCmd
+  | DumpMemorySnapshotCmd
   ) ;
 
 ResetMbrCmd = "resetmbr" ;
@@ -359,6 +360,8 @@ UpdateEventWrrCmd = "update-event-wrr" , "--name" ,
   ) , "--weight" , ( "1" | "2" | "3" ) ;
 
 ResetEventWrrCmd = "reset-event-wrr" ;
+
+DumpMemorySnapshotCmd = "dump-memory-snapshot" , "--path" , Identifier ;
 
 ClusterCmd = "cluster" ,
   ( ListNodeCmd

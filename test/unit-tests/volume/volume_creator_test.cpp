@@ -45,7 +45,7 @@ TEST(VolumeCreator, Do_wrongName)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(newName, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(newName, size, maxIops, maxBw, minIops, minBw, uuid, false, 0, true);
 
     // Then
     ASSERT_NE(actual, expected);
@@ -71,13 +71,13 @@ TEST(VolumeCreator, Do_SameName)
     // When
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
 
     volumes.Add(vol);
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false, -1, true);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -105,7 +105,7 @@ TEST(VolumeCreator, Do_SetSizeFail)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false, -1, true);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -133,7 +133,7 @@ TEST(VolumeCreator, Do_NotEnoughArraySize)
 
     VolumeCreator volumeCreator(volumes, arrayName, arrayID);
 
-    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false);
+    actual = volumeCreator.Do(name, size, maxIops, maxBw, minIops, minBw, uuid, false, -1, true);
 
     // Then
     ASSERT_EQ(actual, expected);

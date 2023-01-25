@@ -45,8 +45,8 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/device_manager.h"
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/io_completer.h"
@@ -372,8 +372,7 @@ AIO::SubmitAsyncAdmin(pos_io& io, IArrayInfo* arrayInfo)
     CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext, originCore));
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();
     IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
-    IArrayDevMgr* arrayDevMgr = arrayInfo->GetArrayManager();
-    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, arrayInfo, devmgr, ioDispatcher, arrayDevMgr));
+    EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, arrayInfo, devmgr, ioDispatcher));
     EventSchedulerSingleton::Instance()->EnqueueEvent(event);
     return;
 }

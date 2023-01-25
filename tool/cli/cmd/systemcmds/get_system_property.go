@@ -6,10 +6,9 @@ import (
 	"cli/cmd/grpcmgr"
 	"fmt"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 // TODO(mj): Currently, this command only supports REBUILDPERFIMPACT command.
@@ -36,14 +35,11 @@ Example:
 			return buildErr
 		}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
-		if err != nil {
-			fmt.Printf("failed to marshal the protobuf request: %v", err)
-			return err
+		printReqErr := displaymgr.PrintProtoReqJson(req)
+		if printReqErr != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", printReqErr)
+			return printReqErr
 		}
-		displaymgr.PrintRequest(string(reqJson))
 
 		res, gRpcErr := grpcmgr.SendGetSystemProperty(req)
 		if gRpcErr != nil {
@@ -51,10 +47,10 @@ Example:
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
-		if printErr != nil {
-			fmt.Printf("failed to print the response: %v", printErr)
-			return printErr
+		printResErr := displaymgr.PrintProtoResponse(command, res)
+		if printResErr != nil {
+			fmt.Printf("failed to print the response: %v", printResErr)
+			return printResErr
 		}
 
 		return nil

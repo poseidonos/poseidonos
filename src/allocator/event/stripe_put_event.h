@@ -36,22 +36,22 @@
 
 #include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-class Stripe;
 class IWBStripeAllocator;
 
 class StripePutEvent : public Callback
 {
 public:
-    StripePutEvent(IWBStripeAllocator* wbAllocator, Stripe& stripe, StripeId prevLsid);
-    StripePutEvent(Stripe& stripe, StripeId prevLsid, int arrayId);
+    StripePutEvent(IWBStripeAllocator* wbAllocator, StripeSmartPtr stripe, StripeId prevLsid);
+    StripePutEvent(StripeSmartPtr stripe, StripeId prevLsid, int arrayId);
 
 private:
     virtual bool _DoSpecificJob(void) override;
 
-    Stripe& stripe;
+    StripeSmartPtr stripe;
     StripeId prevLsid;
     IWBStripeAllocator* iWBStripeAllocator;
 };

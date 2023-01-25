@@ -35,7 +35,7 @@
 #include <string>
 
 #include "mpio_allocator.h"
-#include "src/metafs/include/mf_property.h"
+#include "src/metafs/include/meta_file_property.h"
 #include "src/metafs/lib/metafs_time_interval.h"
 #include "src/metafs/mim/metafs_io_wrr_q.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -43,6 +43,14 @@
 namespace pos
 {
 class MetaFsConfigManager;
+
+enum class WriteIoType
+{
+    PartialIo = 0,
+    FullIo = 1,
+    Max
+};
+static_assert((int)WriteIoType::Max == 2, "partial and full io");
 
 class MpioHandler
 {
@@ -60,22 +68,26 @@ private:
     void _UpdateMetricsConditionally(Mpio* mpio);
     void _PublishPeriodicMetrics(void);
 
+    static const uint32_t NUM_IO_TYPE = (int)MetaIoRequestType::Max;
+    static const uint32_t NUM_WRITE_IO_TYPE = (int)WriteIoType::Max;
+    static const uint32_t NUM_STORAGE_TYPE = (int)MetaStorageType::Max;
+    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
+
     MetaFsIoWrrQ<Mpio*, MetaFileType>* partialMpioDoneQ;
     MpioAllocator* mpioAllocator;
     int coreId;
     TelemetryPublisher* telemetryPublisher;
-    int64_t sampledTimeSpentProcessingAllStages;
-    int64_t sampledTimeSpentFromWriteToRelease;
-    int64_t sampledTimeSpentFromPushToPop;
-    int64_t totalProcessedMpioCount;
-    int64_t sampledProcessedMpioCount;
+    int64_t sampledTimeSpentProcessingAllStages[NUM_IO_TYPE];
+    int64_t sampledTimeSpentFromWriteToRelease[NUM_IO_TYPE];
+    int64_t sampledTimeSpentFromPushToPop[NUM_IO_TYPE];
+    int64_t sampledProcessedMpioCount[NUM_IO_TYPE];
+    int64_t writeIoTypeCount[NUM_FILE_TYPE][NUM_WRITE_IO_TYPE];
+    int64_t ioCount[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE_TYPE][NUM_IO_TYPE];
     MetaFsTimeInterval metaFsTimeInterval;
     size_t skipCount;
     const size_t SAMPLING_SKIP_COUNT;
 
-    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
-    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
-    int64_t doneCountByStorage[NUM_STORAGE];
+    int64_t doneCountByStorage[NUM_STORAGE_TYPE];
     int64_t doneCountByFileType[NUM_FILE_TYPE];
 };
 } // namespace pos

@@ -11,8 +11,6 @@ class MockMapUpdateLogWriteContext : public MapUpdateLogWriteContext
 public:
     using MapUpdateLogWriteContext::MapUpdateLogWriteContext;
     MOCK_METHOD(void, IoDone, (), (override));
-    MOCK_METHOD(LogHandlerInterface*, GetLog, (), (override));
-    MOCK_METHOD(int, GetLogGroupId, (), (override));
 };
 
 } // namespace pos

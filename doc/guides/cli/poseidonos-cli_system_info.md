@@ -1,11 +1,11 @@
 ## poseidonos-cli system info
 
-Display information of PoseidonOS.
+Display information about PoseidonOS and server hardware.
 
 ### Synopsis
 
 
-Display the information of PoseidonOS.
+Display information about PoseidonOS and server hardware such as BIOS, baseboard, and processors.
 
 Syntax:
 	poseidonos-cli system info

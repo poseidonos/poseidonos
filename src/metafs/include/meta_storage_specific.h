@@ -48,6 +48,7 @@ enum class MetaStorageType
 
     Default = SSD
 };
+static_assert((int)MetaStorageType::Max == 3, "ssd, nvram and journal ssd");
 
 enum class MetaIoUnitEnum
 {

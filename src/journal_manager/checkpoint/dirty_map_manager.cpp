@@ -103,7 +103,7 @@ DirtyMapManager::DeleteDirtyList(int volumeId)
 }
 
 void
-DirtyMapManager::LogFilled(int logGroupId, MapList& dirty)
+DirtyMapManager::LogFilled(int logGroupId, const MapList& dirty)
 {
     pendingDirtyMaps[logGroupId]->Add(dirty);
 }

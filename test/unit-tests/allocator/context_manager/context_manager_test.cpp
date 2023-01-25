@@ -53,7 +53,7 @@ TEST(ContextManager, Init_TestCaseFormatFormat)
     EXPECT_CALL(*ioManager, Init);
 
     // when 1.
-    ctxManager.Init();
+    EXPECT_EQ(EID(SUCCESS), ctxManager.Init());
 }
 
 TEST(ContextManager, Close_TestAllClosed)
@@ -624,19 +624,19 @@ TEST(ContextManager, FlushContexts_testIfCallbackHasNullptr)
     });
 
     ON_CALL(*segmentFileIo, Flush)
-        .WillByDefault([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
         {
             completion();
             return 0;
         });
     ON_CALL(*allocatorFileIo, Flush)
-        .WillByDefault([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
         {
             completion();
             return 0;
         });
     ON_CALL(*rebuildFileIo, Flush)
-        .WillByDefault([&](AllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
         {
             completion();
             return 0;

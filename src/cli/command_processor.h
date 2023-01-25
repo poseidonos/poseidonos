@@ -48,95 +48,117 @@ namespace pos
 class IGCInfo;
 } // namespace pos
 
+using google::protobuf::RepeatedPtrField;
 using grpc::Status;
 using grpc::StatusCode;
-using grpc_cli::PosInfo;
-using grpc_cli::SystemInfoRequest;
-using grpc_cli::SystemInfoResponse;
-using grpc_cli::StopSystemRequest;
-using grpc_cli::StopSystemResponse;
-using grpc_cli::GetSystemPropertyRequest;
-using grpc_cli::GetSystemPropertyResponse;
-using grpc_cli::SetSystemPropertyRequest;
-using grpc_cli::SetSystemPropertyResponse;
-using grpc_cli::StartTelemetryRequest;
-using grpc_cli::StartTelemetryResponse;
-using grpc_cli::SetTelemetryPropertyRequest;
-using grpc_cli::SetTelemetryPropertyResponse;
-using grpc_cli::GetTelemetryPropertyRequest;
-using grpc_cli::GetTelemetryPropertyResponse;
-using grpc_cli::StopTelemetryRequest;
-using grpc_cli::StopTelemetryResponse;
-using grpc_cli::ResetEventWrrRequest;
-using grpc_cli::ResetEventWrrResponse;
-using grpc_cli::ResetMbrRequest;
-using grpc_cli::ResetMbrResponse;
-using grpc_cli::StopRebuildingRequest;
-using grpc_cli::StopRebuildingResponse;
-using grpc_cli::UpdateEventWrrRequest;
-using grpc_cli::UpdateEventWrrResponse;
-using grpc_cli::AddSpareRequest;
-using grpc_cli::AddSpareResponse;
-using grpc_cli::RemoveSpareRequest;
-using grpc_cli::RemoveSpareResponse;
-using grpc_cli::ReplaceArrayDeviceRequest;
-using grpc_cli::ReplaceArrayDeviceResponse;
-using grpc_cli::CreateArrayRequest;
-using grpc_cli::CreateArrayResponse;
-using grpc_cli::AutocreateArrayRequest;
-using grpc_cli::AutocreateArrayResponse;
-using grpc_cli::DeleteArrayRequest;
-using grpc_cli::DeleteArrayResponse;
-using grpc_cli::MountArrayRequest;
-using grpc_cli::MountArrayResponse;
-using grpc_cli::UnmountArrayRequest;
-using grpc_cli::UnmountArrayResponse;
-using grpc_cli::ListArrayRequest;
-using grpc_cli::ListArrayResponse;
-using grpc_cli::ArrayInfoRequest;
-using grpc_cli::ArrayInfoResponse;
-using grpc_cli::RebuildArrayRequest;
-using grpc_cli::RebuildArrayResponse;
-using grpc_cli::SetLogLevelRequest;
-using grpc_cli::SetLogLevelResponse;
-using grpc_cli::SetLogPreferenceRequest;
-using grpc_cli::SetLogPreferenceResponse;
-using grpc_cli::LoggerInfoRequest;
-using grpc_cli::LoggerInfoResponse;
-using grpc_cli::GetLogLevelRequest;
-using grpc_cli::GetLogLevelResponse;
-using grpc_cli::ApplyLogFilterRequest;
-using grpc_cli::ApplyLogFilterResponse;
-using grpc_cli::CreateDeviceRequest;
-using grpc_cli::CreateDeviceResponse;
-using grpc_cli::ScanDeviceRequest;
-using grpc_cli::ScanDeviceResponse;
-using grpc_cli::ListDeviceRequest;
-using grpc_cli::ListDeviceResponse;
-using grpc_cli::GetSmartLogRequest;
-using grpc_cli::GetSmartLogResponse;
-using grpc_cli::CreateSubsystemRequest;
-using grpc_cli::CreateSubsystemResponse;
-using grpc_cli::DeleteSubsystemRequest;
-using grpc_cli::DeleteSubsystemResponse;
 using grpc_cli::AddListenerRequest;
 using grpc_cli::AddListenerResponse;
-using grpc_cli::ListSubsystemRequest;
-using grpc_cli::ListSubsystemResponse;
-using grpc_cli::SubsystemInfoRequest;
-using grpc_cli::SubsystemInfoResponse;
+using grpc_cli::AddSpareRequest;
+using grpc_cli::AddSpareResponse;
+using grpc_cli::ApplyLogFilterRequest;
+using grpc_cli::ApplyLogFilterResponse;
+using grpc_cli::ArrayInfoRequest;
+using grpc_cli::ArrayInfoResponse;
+using grpc_cli::AutocreateArrayRequest;
+using grpc_cli::AutocreateArrayResponse;
+using grpc_cli::CreateArrayRequest;
+using grpc_cli::CreateArrayResponse;
+using grpc_cli::CreateDeviceRequest;
+using grpc_cli::CreateDeviceResponse;
+using grpc_cli::CreateSubsystemRequest;
+using grpc_cli::CreateSubsystemResponse;
 using grpc_cli::CreateTransportRequest;
 using grpc_cli::CreateTransportResponse;
 using grpc_cli::CreateVolumeRequest;
 using grpc_cli::CreateVolumeResponse;
+using grpc_cli::DeleteArrayRequest;
+using grpc_cli::DeleteArrayResponse;
+using grpc_cli::DeleteSubsystemRequest;
+using grpc_cli::DeleteSubsystemResponse;
 using grpc_cli::DeleteVolumeRequest;
 using grpc_cli::DeleteVolumeResponse;
+using grpc_cli::DumpMemorySnapshotRequest;
+using grpc_cli::DumpMemorySnapshotResponse;
+using grpc_cli::GetLogLevelRequest;
+using grpc_cli::GetLogLevelResponse;
+using grpc_cli::GetSmartLogRequest;
+using grpc_cli::GetSmartLogResponse;
+using grpc_cli::GetSystemPropertyRequest;
+using grpc_cli::GetSystemPropertyResponse;
+using grpc_cli::GetTelemetryPropertyRequest;
+using grpc_cli::GetTelemetryPropertyResponse;
+using grpc_cli::ListArrayRequest;
+using grpc_cli::ListArrayResponse;
+using grpc_cli::ListDeviceRequest;
+using grpc_cli::ListDeviceResponse;
+using grpc_cli::ListQOSPolicyRequest;
+using grpc_cli::ListQOSPolicyResponse;
+using grpc_cli::ListSubsystemRequest;
+using grpc_cli::ListSubsystemResponse;
+using grpc_cli::ListVolumeRequest;
+using grpc_cli::ListVolumeResponse;
+using grpc_cli::LoggerInfoRequest;
+using grpc_cli::LoggerInfoResponse;
+using grpc_cli::MountArrayRequest;
+using grpc_cli::MountArrayResponse;
 using grpc_cli::MountVolumeRequest;
 using grpc_cli::MountVolumeResponse;
-using grpc_cli::UnmountVolumeRequest;
-using grpc_cli::UnmountVolumeResponse;
+using grpc_cli::PosInfo;
+using grpc_cli::QosCreateVolumePolicyRequest;
+using grpc_cli::QosCreateVolumePolicyResponse;
+using grpc_cli::QosResetVolumePolicyRequest;
+using grpc_cli::QosResetVolumePolicyResponse;
+using grpc_cli::QosVolumeNameParam;
+using grpc_cli::RebuildArrayRequest;
+using grpc_cli::RebuildArrayResponse;
+using grpc_cli::RemoveSpareRequest;
+using grpc_cli::RemoveSpareResponse;
+using grpc_cli::ReplaceArrayDeviceRequest;
+using grpc_cli::ReplaceArrayDeviceResponse;
+using grpc_cli::ResetEventWrrRequest;
+using grpc_cli::ResetEventWrrResponse;
+using grpc_cli::ResetMbrRequest;
+using grpc_cli::ResetMbrResponse;
+using grpc_cli::ScanDeviceRequest;
+using grpc_cli::ScanDeviceResponse;
+using grpc_cli::SetLogLevelRequest;
+using grpc_cli::SetLogLevelResponse;
+using grpc_cli::SetLogPreferenceRequest;
+using grpc_cli::SetLogPreferenceResponse;
+using grpc_cli::SetSystemPropertyRequest;
+using grpc_cli::SetSystemPropertyResponse;
+using grpc_cli::SetTelemetryPropertyRequest;
+using grpc_cli::SetTelemetryPropertyResponse;
 using grpc_cli::SetVolumePropertyRequest;
 using grpc_cli::SetVolumePropertyResponse;
+using grpc_cli::StartTelemetryRequest;
+using grpc_cli::StartTelemetryResponse;
+using grpc_cli::StopRebuildingRequest;
+using grpc_cli::StopRebuildingResponse;
+using grpc_cli::StopSystemRequest;
+using grpc_cli::StopSystemResponse;
+using grpc_cli::StopTelemetryRequest;
+using grpc_cli::StopTelemetryResponse;
+using grpc_cli::SubsystemInfoRequest;
+using grpc_cli::SubsystemInfoResponse;
+using grpc_cli::SystemInfoRequest;
+using grpc_cli::SystemInfoResponse;
+using grpc_cli::UnmountArrayRequest;
+using grpc_cli::UnmountArrayResponse;
+using grpc_cli::UnmountVolumeRequest;
+using grpc_cli::UnmountVolumeResponse;
+using grpc_cli::UpdateEventWrrRequest;
+using grpc_cli::UpdateEventWrrResponse;
+using grpc_cli::VolumeInfoRequest;
+using grpc_cli::VolumeInfoResponse;
+using grpc_cli::VolumeRenameRequest;
+using grpc_cli::VolumeRenameResponse;
+using grpc_cli::ListWBTRequest;
+using grpc_cli::ListWBTResponse;
+using grpc_cli::WBTRequest;
+using grpc_cli::WBTResponse;
+
+using google::protobuf::RepeatedPtrField;
 
 class CommandProcessor
 {
@@ -144,6 +166,7 @@ public:
     CommandProcessor(void);
     ~CommandProcessor(void);
     void FillHeader(const SystemInfoRequest* request, SystemInfoResponse* reply);
+
 
     // System Commands
     grpc::Status ExecuteSystemInfoCommand(const SystemInfoRequest* request, SystemInfoResponse* reply);
@@ -162,6 +185,7 @@ public:
     grpc::Status ExecuteResetMbrCommand(const ResetMbrRequest* request,ResetMbrResponse* reply);
     grpc::Status ExecuteStopRebuildingCommand(const StopRebuildingRequest* request, StopRebuildingResponse* reply);
     grpc::Status ExecuteUpdateEventWrrCommand(const UpdateEventWrrRequest* request, UpdateEventWrrResponse* reply);
+    grpc::Status ExecuteDumpMemorySnapshotCommand(const DumpMemorySnapshotRequest* request, DumpMemorySnapshotResponse* reply);
 
     // Array Commands
     grpc::Status ExecuteAddSpareCommand(const AddSpareRequest* request, AddSpareResponse* reply);
@@ -203,12 +227,27 @@ public:
     grpc::Status ExecuteMountVolumeCommand(const MountVolumeRequest* request, MountVolumeResponse* reply);
     grpc::Status ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* request, UnmountVolumeResponse* reply);
     grpc::Status ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest* request, SetVolumePropertyResponse* reply);
+    grpc::Status ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply);
+    grpc::Status ExecuteVolumeInfoCommand(const VolumeInfoRequest* request, VolumeInfoResponse* reply);
+    grpc::Status ExecuteVolumeRenameCommand(const VolumeRenameRequest* request, VolumeRenameResponse* reply);
+
+    //QOS Commands
+    grpc::Status ExecuteListQOSPolicyCommand(const ListQOSPolicyRequest* request, ListQOSPolicyResponse* reply);
+
+    // QoS Commands
+    grpc::Status ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolicyRequest* request, QosCreateVolumePolicyResponse* reply);
+    grpc::Status ExecuteQosResetVolumePolicyCommand(const QosResetVolumePolicyRequest* request, QosResetVolumePolicyResponse* reply);
+
+    // WBT Commands
+    grpc::Status ExecuteListWBTCommand(const ListWBTRequest* request, ListWBTResponse* reply);
+    grpc::Status ExecuteWBTCommand(const WBTRequest* request, WBTResponse* reply);
+
 
 private:
     bool _isPosTerminating {false};
     bool _IsPosTerminating(void) { return _isPosTerminating; }
     void _SetPosTerminating(bool input) { _isPosTerminating = input; }
-    void _SetEventStatus(int eventId, grpc_cli::Status *status);
+    void _SetEventStatus(int eventId, grpc_cli::Status *status, std::string message = "");
     void _SetPosInfo(grpc_cli::PosInfo *posInfo);
     std::string _GetRebuildImpactString(uint8_t impact);
     pos::BackendEvent _GetEventId(std::string eventName);
@@ -217,6 +256,11 @@ private:
     void _PrintUint128Hex(uint64_t* v, char* s, size_t n);
     void _PrintUint128Dec(uint64_t* v, char* s, size_t n);
     bool _IsValidIpAddress(const std::string &ipAddress);
+    int _HandleInputVolumes(
+        const std::string arrayName,
+        const RepeatedPtrField<QosVolumeNameParam>& volumes,
+        std::vector<std::string>& volumeNames,
+        std::vector<std::pair<std::string, uint32_t>>& validVolumes);
 
     typedef struct BiosInfo {
         std::string vendor;

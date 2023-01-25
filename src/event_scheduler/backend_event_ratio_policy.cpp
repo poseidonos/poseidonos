@@ -49,7 +49,7 @@ namespace pos
 {
 BackendEventRatioPolicy::BackendEventRatioPolicy(
     QosManager* qosManager,
-    std::vector<EventWorker*>* workerarray, uint32_t workerCount, uint32_t ioWorkerCount)
+    std::vector<EventWorker*>* workerArray, uint32_t workerCount, uint32_t ioWorkerCount)
 : BackendPolicy(qosManager, workerArray, workerCount, ioWorkerCount)
 {
     totalEventCount = MAX_EVENTS_PER_EVENT_WORKER * workerCount;

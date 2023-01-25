@@ -7,29 +7,30 @@ import (
 	"cli/cmd/otelmgr"
 	"fmt"
 
-	pb "cli/api"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var SystemInfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Display information of PoseidonOS.",
+	Short: "Display information about PoseidonOS and server hardware.",
 	Long: `
-Display the information of PoseidonOS.
+Display information about PoseidonOS and server hardware such as BIOS, baseboard, and processors.
 
 Syntax:
 	poseidonos-cli system info
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
+
+		// Start OpenTelemetry trace
 		m := otelmgr.GetOtelManagerInstance()
 		defer m.Shutdown()
 		t := otelmgr.NewTracer()
 		t.SetTrace(m.GetRootContext(), globals.SYSTEM_CMD_APP_NAME, globals.SYSTEM_INFO_FUNC_NAME)
 		defer t.Release()
 
-		var command = "SYSTEMINFO"
+		command := "SYSTEMINFO"
 
 		req, buildErr := buildSystemInfoReq(command)
 		if buildErr != nil {
@@ -38,15 +39,12 @@ Syntax:
 			return buildErr
 		}
 
-		reqJson, err := protojson.MarshalOptions{
-			EmitUnpopulated: true,
-		}.Marshal(req)
-		if err != nil {
-			fmt.Printf("failed to marshal the protobuf request: %v", err)
-			t.RecordError(err)
-			return err
+		printReqErr := displaymgr.PrintProtoReqJson(req)
+		if printReqErr != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", printReqErr)
+			t.RecordError(printReqErr)
+			return printReqErr
 		}
-		displaymgr.PrintRequest(string(reqJson))
 
 		res, gRpcErr := grpcmgr.SendSystemInfo(t.GetContext(), req)
 		if gRpcErr != nil {
@@ -55,11 +53,11 @@ Syntax:
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
-		if printErr != nil {
-			fmt.Printf("failed to print the response: %v", printErr)
-			t.RecordError(printErr)
-			return printErr
+		printResErr := displaymgr.PrintProtoResponse(command, res)
+		if printResErr != nil {
+			fmt.Printf("failed to print the response: %v", printResErr)
+			t.RecordError(printResErr)
+			return printResErr
 		}
 
 		return nil
@@ -74,8 +72,4 @@ func buildSystemInfoReq(command string) (*pb.SystemInfoRequest, error) {
 }
 
 func init() {
-}
-
-func SendSystemInfoCmdSocket() {
-
 }

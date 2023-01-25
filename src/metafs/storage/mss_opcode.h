@@ -38,7 +38,7 @@ enum class MssOpcode
 {
     Write = 0,
     Read,
-
     Trim,
+    Max
 };
 } // namespace pos

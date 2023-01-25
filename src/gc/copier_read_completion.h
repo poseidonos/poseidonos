@@ -58,7 +58,7 @@ public:
 
 private:
     bool _DoSpecificJob(void) override;
-    void _MemCopyValidData(Stripe* stripe, uint32_t offset, BlkInfo blkInfo);
+    void _MemCopyValidData(StripeSmartPtr stripe, uint32_t offset, BlkInfo blkInfo);
     void _MemCopyValidData(GcWriteBuffer* dataBuffer, uint32_t offset, BlkInfo blkInfo);
 
     VictimStripe* victimStripe;

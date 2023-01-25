@@ -1,86 +1,14 @@
 syntax = "proto3";
+
 package replicator_rpc;
 
-enum PosResult {
-    SUCCESS = 0;
-    FAIL = 1;
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-
-service ReplicatorIo {
-    // HA side server
-    rpc CompleteRead(CompleteReadRequest) returns (CompleteReadResponse) {}
-    rpc CompleteWrite(CompleteWriteRequest) returns (CompleteWriteResponse) {}
-    rpc PushHostWrite(PushHostWriteRequest) returns (PushHostWriteResponse) {}
-    rpc PushDirtyLog(PushDirtyLogRequest) returns (PushDirtyLogResponse) {}
-    rpc TransferDirtyLog(TransferDirtyLogRequest) returns (TransferDirtyLogResponse) {}  // for dirty writes during volume sync
-    rpc TransferHostWrite(TransferHostWriteRequest) returns (TransferHostWriteResponse) {} // for wal during live replication
-}
-
-message Chunk {
-    bytes content = 1;  // 4KB data
-}
-
-message CompleteReadRequest {
-    string array_name = 1;
-    string volume_name = 2;
-    uint64 lsn = 3;
-    repeated Chunk data = 4;
-}
-
-message CompleteReadResponse {
-    PosResult result = 1;
-    optional string reason = 2;
-}
-
-message CompleteWriteRequest {
-    string array_name = 1;
-    string volume_name = 2;
-    uint64 lsn = 3;
-}
-
-message CompleteWriteResponse {
-    PosResult result = 1;
-    optional string reason = 2;
-}
-
-message PushHostWriteRequest {
-    string array_name = 1;
-    string volume_name = 2;
-    uint64 rba = 3;
-    uint64 num_blocks = 4;
-    repeated Chunk data = 5;
-}
-
-message PushHostWriteResponse {
-    PosResult result = 1;
-    optional string reason = 2;
-    uint64 lsn = 3;
-}
-
-message PushDirtyLogRequest {
-  string array_name = 1;
-  string volume_name = 2;
-  uint64 rba = 3;
-  uint64 num_blocks = 4;
-}
-
-message PushDirtyLogResponse {
-  bool successful = 1;
-  optional string reason = 2;
-}
-
-message TransferDirtyLogRequest {
-  string array_name = 1;
-  string volume_name = 2;
-  uint64 rba = 3;
-  uint64 num_blocks = 4;
-}
-
-message TransferDirtyLogResponse {
-  bool successful = 1;
-  optional string reason = 2;
+service ReplicatorIoService {
+  rpc PushHostWrite(PushHostWriteRequest) returns (PushHostWriteResponse) {}
+  rpc PushDirtyLog(PushDirtyLogRequest) returns (PushDirtyLogResponse) {}
+  rpc TransferVolumeData(TransferVolumeDataRequest) returns (TransferVolumeDataResponse) {}
+  rpc TransferHostWrite(TransferHostWriteRequest) returns (TransferHostWriteResponse) {}
+  rpc CompleteRead(CompleteReadRequest) returns (CompleteReadResponse) {}
+  rpc CompleteWrite(CompleteWriteRequest) returns (CompleteWriteResponse) {}
 }
 
 message TransferHostWriteRequest {
@@ -88,9 +16,100 @@ message TransferHostWriteRequest {
   string volume_name = 2;
   uint64 rba = 3;
   uint64 num_blocks = 4;
+  uint32 rid = 5;
+  uint64 lsn = 6;
+  repeated Chunk data = 7;
 }
 
 message TransferHostWriteResponse {
   bool successful = 1;
+  optional string reason = 2;
+}
+
+message TransferVolumeDataRequest {
+  string array_name = 1;
+  string volume_name = 2;
+  uint64 rba = 3;
+  uint64 num_blocks = 4;
+  bool is_dirty_log = 5;
+  optional uint64 lsn = 6;
+  repeated Chunk data = 7;
+}
+
+message Chunk {
+  bytes content = 1;
+}
+
+message TransferVolumeDataResponse {
+  bool successful = 1;
+  optional string reason = 2;
+}
+
+message PushHostWriteRequest {
+  string array_name = 1;
+  string volume_name = 2;
+  uint64 rba = 3;
+  uint32 num_blocks = 4;
+  repeated Chunk data = 5;
+}
+
+message PushHostWriteResponse {
+  bool successful = 1;
+  uint64 lsn = 2;
+  optional string reason = 3;
+}
+
+message PushDirtyLogRequest {
+  string array_name = 1;
+  string volume_name = 2;
+  uint64 rba = 3;
+  uint32 num_blocks = 4;
+}
+
+message PushDirtyLogResponse {
+  bool successful = 1;
+  optional string reason = 2;
+}
+
+message CompleteReadRequest {
+  string array_name = 1;
+  string volume_name = 2;
+  uint64 rba = 3;
+  uint64 num_blocks = 4;
+  repeated Chunk data = 5;
+}
+
+message CompleteReadResponse {
+  bool successful = 1;
+  optional string reason = 2;
+}
+
+message CompleteWriteRequest {
+  string array_name = 1;
+  string volume_name = 2;
+  uint64 rba = 3;
+  uint64 num_blocks = 4;
+  optional uint64 lsn = 5;
+}
+
+message CompleteWriteResponse {
+  bool successful = 1;
+  optional string reason = 2;
+}
+
+service Health {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message HealthCheckRequest {
+}
+
+message HealthCheckResponse {
+  enum ServingStatus {
+    UNKNOWN = 0;
+    SERVING = 1;
+    NOT_SERVING = 2;
+  }
+  ServingStatus status = 1;
   optional string reason = 2;
 }

@@ -42,9 +42,9 @@ using ::testing::NiceMock;
 
 namespace pos
 {
-MATCHER_P(EqLogGroupFooterWriteContext, expected, "")
+MATCHER_P(EqLogGroupFooter, expected, "")
 {
-    return (*((LogGroupFooterWriteContext*)arg) == *((LogGroupFooterWriteContext*)expected));
+    return (((LogGroupFooter)arg) == ((LogGroupFooter)expected));
 }
 
 TEST(ResetLogGroup, Execute_testIfLogBufferReseted)
@@ -60,9 +60,7 @@ TEST(ResetLogGroup, Execute_testIfLogBufferReseted)
     ResetLogGroup event(&logBuffer, logGroupId, footer, footerOffset, nullptr);
 
     // When
-    LogGroupFooterWriteContext context(logGroupId, nullptr);
-    context.SetIoRequest(footerOffset, footer);
-    EXPECT_CALL(logBuffer, InternalIo(EqLogGroupFooterWriteContext(&context)));
+    EXPECT_CALL(logBuffer, WriteLogGroupFooter(_, EqLogGroupFooter(footer), _, _));
     bool result = event.Execute();
 
     // Then

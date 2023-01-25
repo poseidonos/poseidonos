@@ -11,6 +11,6 @@ public:
         uint64_t partitionSize, bool isRocksDBEnabled, std::string rocksDBBasePath, bool isVscEnabled);
     virtual ~JournalConfigurationSpy(void);
 
-    virtual int SetLogBufferSize(uint64_t logBufferSize = 0, MetaFsFileControlApi* metaFsCtrl = nullptr) override;
+    virtual int SetLogBufferSize(uint64_t logBufferSize = 0, MetaFs* metaFs = nullptr) override;
 };
 } // namespace pos

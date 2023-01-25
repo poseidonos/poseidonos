@@ -85,10 +85,10 @@ JournalConfiguration::Init(bool isWriteThroughEnabled)
 }
 
 int
-JournalConfiguration::SetLogBufferSize(uint64_t loadedLogBufferSize, MetaFsFileControlApi* metaFsCtrl)
+JournalConfiguration::SetLogBufferSize(uint64_t loadedLogBufferSize, MetaFs* metaFs)
 {
     int result = 0;
-    _ReadMetaFsConfiguration(metaFsCtrl);
+    _ReadMetaFsConfiguration(metaFs);
 
     if (loadedLogBufferSize == 0)
     {
@@ -369,12 +369,12 @@ JournalConfiguration::_GetRocksdbPath(void)
 }
 
 void
-JournalConfiguration::_ReadMetaFsConfiguration(MetaFsFileControlApi* metaFsCtrl)
+JournalConfiguration::_ReadMetaFsConfiguration(MetaFs* metaFs)
 {
     MetaFilePropertySet prop(MetaFileType::Journal);
 
-    metaPageSize = metaFsCtrl->EstimateAlignedFileIOSize(prop, metaVolumeToUse);
-    maxPartitionSize = metaFsCtrl->GetAvailableSpace(prop, metaVolumeToUse);
+    metaPageSize = metaFs->EstimateAlignedFileIOSize(prop, metaVolumeToUse);
+    maxPartitionSize = metaFs->GetAvailableSpace(prop, metaVolumeToUse);
 }
 
 int

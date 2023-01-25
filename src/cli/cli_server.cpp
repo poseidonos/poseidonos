@@ -175,15 +175,14 @@ TryProcessing(char* msg)
     notifyDone = false;
 
     thread t([&msg]()
-    {
+        {
         string res = reqHandler->ProcessCommand(msg);
 
         threadRes = res;
 
         pthread_mutex_unlock(&workmutx);
         cv.notify_one();
-        notifyDone = true;
-    });
+        notifyDone = true; });
 
     t.detach();
 
@@ -404,7 +403,7 @@ CLIServer()
     if (efd < 0)
     {
         POS_TRACE_ERROR(EID(CLI_EPOLL_CREATE_FAILURE),
-        "fd:{}, max_cli_count:{}, efd:{}", sock_fd, MAX_CLI_CNT, efd);
+            "fd:{}, max_cli_count:{}, efd:{}", sock_fd, MAX_CLI_CNT, efd);
         return;
     }
 

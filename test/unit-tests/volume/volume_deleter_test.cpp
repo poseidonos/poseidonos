@@ -65,7 +65,7 @@ TEST(VolumeDeleter, Do_mountedVol)
     // When
     VolumeList volumes;
 
-    VolumeBase* vol = new Volume(arrayName, arrayID, name, size);
+    VolumeBase* vol = new Volume(arrayID, arrayName, DataAttribute::UserData, name, size, 0xFFFF);
     volumes.Add(vol);
     vol->Mount();
 

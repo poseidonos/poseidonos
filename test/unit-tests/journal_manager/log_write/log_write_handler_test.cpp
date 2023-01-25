@@ -1,29 +1,28 @@
 #include "src/journal_manager/log_write/log_write_handler.h"
-#include "src/event_scheduler/meta_update_call_back.h"
-#include "src/event_scheduler/callback.h"
-#include "src/metadata/meta_event_factory.h"
-#include "src/journal_manager/log_buffer/log_write_context_factory.h"
-#include "src/mapper_service/mapper_service.h"
-#include "src/metadata/block_map_update.h"
 
 #include <gtest/gtest.h>
 
+#include "src/event_scheduler/callback.h"
+#include "src/event_scheduler/meta_update_call_back.h"
+#include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/mapper_service/mapper_service.h"
+#include "src/metadata/block_map_update.h"
+#include "src/metadata/meta_event_factory.h"
+#include "test/unit-tests/allocator/i_context_manager_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
+#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log/log_handler_mock.h"
 #include "test/unit-tests/journal_manager/log/waiting_log_list_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/log_write_io_context_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/log_write_statistics_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
-#include "test/unit-tests/allocator/i_context_manager_mock.h"
-#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
-#include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/bio/volume_io_mock.h"
 
 using testing::InSequence;
 using testing::NiceMock;
@@ -61,6 +60,7 @@ public:
         logWriteHandler = new LogWriteHandler(logWriteStats, waitingList);
 
         ON_CALL(*bufferAllocator, GetLogGroupId).WillByDefault(Return(0));
+        ON_CALL(*config, GetNumLogGroups).WillByDefault(Return(2));
     }
 
     virtual void
@@ -102,14 +102,12 @@ TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessf
     ON_CALL(*mockVolumeIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
     ON_CALL(*mockVolumeIo, GetVsa()).WillByDefault(ReturnRef(vsa));
 
-    NiceMock<MockLogBufferWriteDoneNotifier> notifier;
-    NiceMock<MockCallbackSequenceController> sequencer;
     LogWriteContextFactory logWriteContextFactory;
-    logWriteContextFactory.Init(config, &notifier, &sequencer);
+    logWriteContextFactory.Init(config);
 
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
-    int targetLogGroupId = 2;
+    int targetLogGroupId = 1;
     EXPECT_CALL(*bufferAllocator, GetLogGroupId).WillRepeatedly(Return(targetLogGroupId));
 
     int arrayId = 2;
@@ -147,7 +145,7 @@ TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsInitialized)
     EXPECT_CALL(*logWriteStats, Init);
 
     // When: LogWriteHandler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 }
 
 TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsNotInitialized)
@@ -156,13 +154,13 @@ TEST_F(LogWriteHandlerTestFixture, Init_testIfStatsNotInitialized)
     EXPECT_CALL(*config, IsDebugEnabled).WillOnce(Return(false));
 
     // When: LogWriteHandler is initialized without initializing LogWriteStatistics
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 }
 
 TEST_F(LogWriteHandlerTestFixture, AddLog_testIfLogWritten)
 {
     // Given: Log write handler is initialized and context with dummy value is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty and buffer allocation succeeds
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
@@ -180,7 +178,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testIfLogWritten)
 TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithPositiveReturn)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty and buffer allocation does not succeed
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(EID(JOURNAL_LOG_GROUP_FULL)));
@@ -195,7 +193,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithPositiveRetur
 TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithNegativeReturn)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty, log is added and buffer allocation fails and
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(-1 * EID(JOURNAL_INVALID_SIZE_LOG_REQUESTED)));
@@ -210,7 +208,7 @@ TEST_F(LogWriteHandlerTestFixture, AddLog_testBufferAllocFailedWithNegativeRetur
 TEST_F(LogWriteHandlerTestFixture, AddLog_testIfContextCleanedUpWhenWriteLogFailed)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting list is empty, buffer allocation succeed, and write log fails
     EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
@@ -237,12 +235,12 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfCallbackExecuted)
 {
     // Given: Log write handler is initialized, waiting list is empty,
     // LogWriteStatistics update failed
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
     EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(false));
 
     // Then: The written context callback should be called
-    NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
+    NiceMock<MockLogWriteIoContext>* context = new NiceMock<MockLogWriteIoContext>;
     EXPECT_CALL(*context, IoDone);
 
     // When: Log write is done
@@ -255,10 +253,10 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
 {
     // Given: Log write handler is initialized, waiting list is empty, and
     // LogWriteContext is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
     EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(nullptr));
 
-    NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
+    NiceMock<MockLogWriteIoContext>* context = new NiceMock<MockLogWriteIoContext>;
 
     // Then: The completed log should be added to the statistics
     // and context callback should be called in this order
@@ -272,42 +270,13 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfLogWriteStatisticsUpdated)
 
     // When: Log write is done
     logWriteHandler->LogWriteDone(context);
-
-    delete context;
-}
-
-TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfWaitingListIsRestarted)
-{
-    // Given: Log write handler is initialized, and log write context is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
-    NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
-
-    // When: Waiting log list is not empty, and statistics update is failed
-    NiceMock<MockLogWriteContext>* waitingContext = new NiceMock<MockLogWriteContext>;
-    EXPECT_CALL(*waitingList, GetWaitingIo).WillOnce(Return(waitingContext));
-
-    EXPECT_CALL(*logWriteStats, UpdateStatus).WillOnce(Return(false));
-
-    // Then: The context callback should be called
-    EXPECT_CALL(*context, IoDone);
-
-    // Then: The waiting log should be started
-    EXPECT_CALL(*bufferAllocator, AllocateBuffer).WillOnce(Return(0));
-    EXPECT_CALL(*logBuffer, WriteLog).WillOnce(Return(0));
-
-    // When: Log write is done
-    logWriteHandler->LogWriteDone(context);
-
-    // Then: The written context should be deleted by LogWriteHandler
-
-    delete waitingContext;
 }
 
 TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfExcutionSucessWhenIoFails)
 {
     // Given: Log write handler is initialized, and log write context is given
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
-    NiceMock<MockLogWriteContext>* context = new NiceMock<MockLogWriteContext>;
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
+    NiceMock<MockLogWriteIoContext>* context = new NiceMock<MockLogWriteIoContext>;
 
     // When: The context has an error
     EXPECT_CALL(*context, GetError).WillOnce(Return(-1));
@@ -326,7 +295,7 @@ TEST_F(LogWriteHandlerTestFixture, LogWriteDone_testIfExcutionSucessWhenIoFails)
 TEST_F(LogWriteHandlerTestFixture, LogFilled_testIfExecutionSuccess)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Log is filled
     MapList dummyDirty;
@@ -338,7 +307,7 @@ TEST_F(LogWriteHandlerTestFixture, LogFilled_testIfExecutionSuccess)
 TEST_F(LogWriteHandlerTestFixture, LogBufferReseted_testIfWaitingListIsRestarted)
 {
     // Given: Log write handler is initialized
-    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr);
+    logWriteHandler->Init(bufferAllocator, logBuffer, config, nullptr, 0);
 
     // When: Waiting log list is not empty
     NiceMock<MockLogWriteContext>* waitingContext = new NiceMock<MockLogWriteContext>;

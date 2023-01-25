@@ -8,8 +8,8 @@
 #include "src/array/device/array_device.h"
 #include "src/bio/volume_io.h"
 #include "src/device/base/ublock_device.h"
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 #include "src/event_scheduler/callback.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io/frontend_io/read_completion.h"
@@ -21,13 +21,13 @@
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/device/base/device_driver_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
-#include "test/unit-tests/include/i_array_device_mock.h"
 #include "test/unit-tests/io/general_io/merger_mock.h"
 #include "test/unit-tests/io/general_io/translator_mock.h"
 #include "test/unit-tests/lib/block_alignment_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
+#include "test/unit-tests/include/i_array_device_mock.h"
 
 using namespace pos;
 using namespace std;

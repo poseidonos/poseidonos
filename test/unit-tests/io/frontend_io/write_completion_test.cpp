@@ -4,13 +4,14 @@
 #include <gtest/gtest.h>
 
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
-#include "test/unit-tests/allocator/stripe/stripe_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/array_mgmt/interface/i_array_mgmt_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
-#include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
+#include "test/unit-tests/io/general_io/rba_state_manager_mock.h"
 #include "test/unit-tests/mapper/i_reversemap_mock.h"
+#include "test/unit-tests/mapper/reversemap/reverse_map_mock.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using namespace std;
@@ -82,7 +83,7 @@ TEST(WriteCompletion, _DoSpecificJob_NullStripe)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     StripeAddr stripeAddr;
-    Stripe stripe(nullptr, true, 1);
+    Stripe stripe(nullptr, 1);
     VirtualBlkAddr startVsa;
 
     ON_CALL(*mockVolIo, GetLsidEntry()).WillByDefault(ReturnRef(stripeAddr));
@@ -109,7 +110,10 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
     StripeAddr stripeAddr;
     NiceMock<MockIReverseMap> rev;
-    Stripe stripe(&rev, true, 1);
+    NiceMock<MockReverseMapPack>* revMapPack = new NiceMock<MockReverseMapPack>;
+    EXPECT_CALL(rev, AllocReverseMapPack).WillOnce(Return(revMapPack));
+    StripeSmartPtr stripe = StripeSmartPtr(new Stripe(&rev, 1));
+    stripe->Assign(0, 0, 0, 0);
     VirtualBlkAddr startVsa;
     int arrayId = 0;
     ON_CALL(rev, Flush).WillByDefault(Return(0));
@@ -118,7 +122,7 @@ TEST(WriteCompletion, _RequestFlush_DummyStripe)
     ON_CALL(mockVolumeInfoManager, IsWriteThroughEnabled()).WillByDefault(Return(false));
 
     //When: Execute WriteCompletion with dummy stripe
-    ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&stripe));
+    ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(stripe));
 
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();
@@ -136,7 +140,7 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     StripeAddr stripeAddr;
     VirtualBlkAddr startVsa;
     int arrayId = 0;
@@ -145,10 +149,10 @@ TEST(WriteCompletion, _ReqeustFlush_FlushSuccess)
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion causing flush returning success
-    ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
-    ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(0));
-    ON_CALL(mockStripe, IsActiveFlushTarget).WillByDefault(Return(true));
-    ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&mockStripe));
+    ON_CALL(*mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
+    ON_CALL(*mockStripe, Flush(_)).WillByDefault(Return(0));
+    ON_CALL(*mockStripe, IsActiveFlushTarget).WillByDefault(Return(true));
+    ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(StripeSmartPtr(mockStripe)));
     ON_CALL(mockVolumeInfoManager, IsWriteThroughEnabled()).WillByDefault(Return(false));
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();
@@ -166,9 +170,9 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     VolumeIoSmartPtr volIo = VolumeIoSmartPtr(mockVolIo);
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockRBAStateManager> mockRBAStateManager("", 0);
-    NiceMock<MockStripe> mockStripe;
+    NiceMock<MockStripe>* mockStripe = new NiceMock<MockStripe>();
     StripeAddr stripeAddr;
-    Stripe stripe(nullptr, true, 1);
+    Stripe stripe(nullptr, 1);
     VirtualBlkAddr startVsa;
     StripeId stripeId = 1;
     int arrayId = 0;
@@ -177,9 +181,9 @@ TEST(WriteCompletion, _RequestFlush_FlushError)
     ON_CALL(*mockVolIo, GetVsa()).WillByDefault(ReturnRef(startVsa));
 
     //When: Execute WriteCompletion causing flush returning failure
-    ON_CALL(mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
-    ON_CALL(mockStripe, Flush(_)).WillByDefault(Return(-1));
-    ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(&mockStripe));
+    ON_CALL(*mockStripe, DecreseBlksRemaining(_)).WillByDefault(Return(0));
+    ON_CALL(*mockStripe, Flush(_)).WillByDefault(Return(-1));
+    ON_CALL(mockIWBStripeAllocator, GetStripe).WillByDefault(Return(StripeSmartPtr(mockStripe)));
     ON_CALL(mockVolumeInfoManager, IsWriteThroughEnabled()).WillByDefault(Return(false));
     WriteCompletion writeCompletion(volIo, &mockIWBStripeAllocator, false, &mockVolumeInfoManager);
     actual = writeCompletion.Execute();

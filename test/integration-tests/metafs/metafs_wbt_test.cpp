@@ -72,7 +72,7 @@ public:
         // create meta file
         POS_EVENT_ID rc_mgmt;
         MetaFilePropertySet prop;
-        rc_mgmt = GetMetaFs(arrayId)->ctrl->Create(fileName, fileSize, prop, volumeType);
+        rc_mgmt = GetMetaFs(arrayId)->GetCtrlApi()->Create(fileName, fileSize, prop, volumeType);
         EXPECT_EQ(rc_mgmt, EID(SUCCESS));
     }
 
@@ -95,7 +95,7 @@ TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)
     std::vector<pos::MetaFileInfoDumpCxt> fileList;
 
     // positive
-    EXPECT_EQ(true, GetMetaFs(arrayId)->wbt->GetMetaFileList(fileList, MetaVolumeType::SsdVolume));
+    EXPECT_EQ(true, GetMetaFs(arrayId)->GetWbtApi()->GetMetaFileList(fileList, MetaVolumeType::SsdVolume));
 
     EXPECT_EQ(1, fileList.size());
 
@@ -106,7 +106,7 @@ TEST_F(MetaFsWbtIntegrationTest, GetTheListOfMetaFilesInTheArray)
     }
 
     // negative
-    EXPECT_EQ(false, GetMetaFs(arrayId)->wbt->GetMetaFileList(fileList, MetaVolumeType::NvRamVolume));
+    EXPECT_EQ(false, GetMetaFs(arrayId)->GetWbtApi()->GetMetaFileList(fileList, MetaVolumeType::NvRamVolume));
 }
 
 TEST_F(MetaFsWbtIntegrationTest, GetMetaFileInfo)
@@ -114,12 +114,12 @@ TEST_F(MetaFsWbtIntegrationTest, GetMetaFileInfo)
     pos::MetaFileInodeDumpCxt fileInfo;
 
     // positive
-    EXPECT_EQ(true, GetMetaFs(arrayId)->wbt->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::SsdVolume));
+    EXPECT_EQ(true, GetMetaFs(arrayId)->GetWbtApi()->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::SsdVolume));
 
     EXPECT_EQ(fileInfo.inodeInfo.data.field.fileName, fileName);
     EXPECT_EQ(fileInfo.inodeInfo.data.field.fileByteSize, fileSize);
 
     // negative
-    EXPECT_EQ(false, GetMetaFs(arrayId)->wbt->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::NvRamVolume));
+    EXPECT_EQ(false, GetMetaFs(arrayId)->GetWbtApi()->GetMetaFileInode(fileName, fileInfo, MetaVolumeType::NvRamVolume));
 }
 } // namespace pos

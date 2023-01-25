@@ -46,12 +46,23 @@
 #include "src/array/service/io_translator/i_translator.h"
 #include "src/array/partition/i_partition_services.h"
 
+#include "src/debug_lib/debug_info_maker.h"
+#include "src/debug_lib/debug_info_maker.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
+
 using namespace std;
 
 namespace pos
 {
-
-class Partition : public ITranslator
+class ParitionDebugInfo : public DebugInfoInstance
+{
+public:
+    PartitionLogicalSize logicalSize;
+    PartitionPhysicalSize physicalSize;
+    PartitionType type;
+};
+class Partition : public ITranslator, public DebugInfoMaker<ParitionDebugInfo>
 {
 public:
     Partition(vector<ArrayDevice*> d, PartitionType type);
@@ -67,6 +78,7 @@ public:
     uint64_t GetLastLba() { return physicalSize.lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }
     virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
+    virtual void MakeDebugInfo(ParitionDebugInfo& obj) final;
 
 protected:
     bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);

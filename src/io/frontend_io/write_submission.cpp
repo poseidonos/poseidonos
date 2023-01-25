@@ -43,8 +43,8 @@
 #include "src/array/service/array_service_layer.h"
 #include "src/bio/ubio.h"
 #include "src/bio/volume_io.h"
-#include "src/dump/dump_module.h"
-#include "src/dump/dump_module.hpp"
+#include "src/debug_lib/debug_info_queue.h"
+#include "src/debug_lib/debug_info_queue.hpp"
 #include "src/event_scheduler/io_completer.h"
 #include "src/gc/flow_control/flow_control.h"
 #include "src/gc/flow_control/flow_control_service.h"
@@ -226,26 +226,34 @@ WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     bool isRead = (volumeIo->dir == UbioDir::Read);
     bool isWTEnabled = volumeManager->IsWriteThroughEnabled();
+    bool isWriteBypassEnabled = volumeManager->GetNeedWriteBypass();
 
-    if (false == isWTEnabled)
+    if (isWriteBypassEnabled && isRead == false)
     {
-        // If Read for partial write case, handling device failure is necessary.
-        ioDispatcher->Submit(volumeIo, false, isRead);
+        volumeIo->GetCallback()->Execute();
     }
     else
     {
-        if (false == isRead)
+        if (false == isWTEnabled)
         {
-            WriteForParity writeForParity(volumeIo);
-            bool ret = writeForParity.Execute();
-            if (ret == false)
-            {
-                POS_EVENT_ID eventId = EID(WRITE_FOR_PARITY_FAILED);
-                POS_TRACE_ERROR(static_cast<int>(eventId),
-                    "Failed to copy user data to dram for parity");
-            }
+            // If Read for partial write case, handling device failure is necessary.
+            ioDispatcher->Submit(volumeIo, false, isRead);
         }
-        ioDispatcher->Submit(volumeIo, false, true);
+        else
+        {
+            if (false == isRead)
+            {
+                WriteForParity writeForParity(volumeIo);
+                bool ret = writeForParity.Execute();
+                if (ret == false)
+                {
+                    POS_EVENT_ID eventId = EID(WRITE_FOR_PARITY_FAILED);
+                    POS_TRACE_ERROR(static_cast<int>(eventId),
+                        "Failed to copy user data to dram for parity");
+                }
+            }
+            ioDispatcher->Submit(volumeIo, false, true);
+        }
     }
 }
 

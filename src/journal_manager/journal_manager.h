@@ -51,6 +51,7 @@ class JournalConfiguration;
 class JournalLogBuffer;
 
 class LogWriteContextFactory;
+class LogBufferIoContextFactory;
 class JournalEventFactory;
 
 class LogWriteHandler;
@@ -70,8 +71,6 @@ class LogBufferWriteDoneNotifier;
 class CallbackSequenceController;
 class BufferedSegmentContextManager;
 
-class Stripe;
-
 class IVSAMap;
 class IStripeMap;
 class IMapFlush;
@@ -83,7 +82,7 @@ class IContextReplayer;
 class IArrayInfo;
 class IStateControl;
 class IVolumeInfoManager;
-class MetaFsFileControlApi;
+class MetaFs;
 class EventScheduler;
 class TelemetryPublisher;
 class TelemetryClient;
@@ -97,6 +96,7 @@ public:
     JournalManager(JournalConfiguration* config,
         JournalStatusProvider* journalStatusProvider,
         LogWriteContextFactory* logWriteContextFactory,
+        LogBufferIoContextFactory* logBufferIoContextFactory,
         JournalEventFactory* journalEventFactory,
         LogWriteHandler* writeHandler,
         JournalVolumeEventHandler* journalVolumeEventHandler,
@@ -119,7 +119,7 @@ public:
     virtual int Init(IVSAMap* vsaMap, IStripeMap* stripeMap, IMapFlush* mapFlush,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IContextReplayer* contextReplayer,
-        IVolumeInfoManager* volumeManager, MetaFsFileControlApi* metaFsCtrl,
+        IVolumeInfoManager* volumeManager, MetaFs* metaFs,
         EventScheduler* eventScheduler, TelemetryClient* tc);
 
     virtual void Dispose(void);
@@ -149,7 +149,7 @@ protected:
     void _ResetModules(void);
 
     int _Init(void);
-    int _InitConfigAndPrepareLogBuffer(MetaFsFileControlApi* metaFsCtrl);
+    int _InitConfigAndPrepareLogBuffer(MetaFs* metaFs);
 
     int _Reset(void);
     int _DoRecovery(void);
@@ -166,8 +166,10 @@ protected:
 
     IJournalLogBuffer* logBuffer;
 
-    LogWriteContextFactory* logFactory;
+    LogWriteContextFactory* logWriteContextFactory;
+    LogBufferIoContextFactory* logBufferIoContextFactory;
     JournalEventFactory* eventFactory;
+
     LogWriteHandler* logWriteHandler;
     JournalVolumeEventHandler* volumeEventHandler;
     JournalWriter* journalWriter;

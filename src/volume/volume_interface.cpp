@@ -105,15 +105,15 @@ void
 VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops, uint64_t originalMaxBw,
         uint64_t originalMinIops, uint64_t originalMinBw)
 {
-    uint64_t maxIops = volume->MaxIOPS();
-    uint64_t maxBw = volume->MaxBW();
-    uint64_t minIops = volume->MinIOPS();
-    uint64_t minBw = volume->MinBW();
+    uint64_t maxIops = volume->GetMaxIOPS();
+    uint64_t maxBw = volume->GetMaxBW();
+    uint64_t minIops = volume->GetMinIOPS();
+    uint64_t minBw = volume->GetMinBW();
 
     if (maxIops != originalMaxIops)
     {
         POS_TRACE_INFO(EID(SUCCESS),
-            "Max iops is set on volume {} ({}->{})", volume->GetName(),
+            "Max iops is set on volume {} ({}->{})", volume->GetVolumeName(),
             originalMaxIops, maxIops);
     }
 
@@ -121,12 +121,12 @@ VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops
     {
         POS_TRACE_INFO(EID(SUCCESS),
             "Max bandwidth is set on volume {} ({}->{})",
-            volume->GetName(), originalMaxBw, maxBw);
+            volume->GetVolumeName(), originalMaxBw, maxBw);
     }
     if (minIops != originalMinIops)
     {
         POS_TRACE_INFO(EID(SUCCESS),
-            "Min iops is set on volume {} ({}->{})", volume->GetName(),
+            "Min iops is set on volume {} ({}->{})", volume->GetVolumeName(),
             originalMinIops, minIops);
     }
 
@@ -134,7 +134,7 @@ VolumeInterface::_PrintLogVolumeQos(VolumeBase* volume, uint64_t originalMaxIops
     {
         POS_TRACE_INFO(EID(SUCCESS),
             "Min bandwidth is set on volume {} ({}->{})",
-            volume->GetName(), originalMinBw, minBw);
+            volume->GetVolumeName(), originalMinBw, minBw);
     }
 }
 
@@ -148,8 +148,8 @@ void
 VolumeInterface::_SetVolumeEventBase(VolumeBase* volume, std::string subnqn)
 {
     volumeEventBase.volId = volume->ID;
-    volumeEventBase.volName = volume->GetName();
-    volumeEventBase.volSizeByte = volume->TotalSize();
+    volumeEventBase.volName = volume->GetVolumeName();
+    volumeEventBase.volSizeByte = volume->GetTotalSize();
     if (subnqn.empty() == false)
     {
         volumeEventBase.subnqn = subnqn;
@@ -164,8 +164,8 @@ VolumeInterface::_SetVolumeEventBase(VolumeBase* volume, std::string subnqn)
 void
 VolumeInterface::_SetVolumeEventPerf(VolumeBase* volume)
 {
-    volumeEventPerf.maxbw = volume->MaxBW();
-    volumeEventPerf.maxiops = volume->MaxIOPS();
+    volumeEventPerf.maxbw = volume->GetMaxBW();
+    volumeEventPerf.maxiops = volume->GetMaxIOPS();
 }
 
 void

@@ -36,8 +36,8 @@
 #include "src/event_scheduler/event.h"
 #include "src/meta_file_intf/async_context.h"
 
-#include "src/dump/dump_shared_ptr.h"
-#include "src/dump/dump_shared_ptr.hpp"
+#include "src/debug_lib/dump_shared_ptr.h"
+#include "src/debug_lib/dump_shared_ptr.hpp"
 
 namespace pos
 {
@@ -49,9 +49,6 @@ public:
 // LCOV_EXCL_START
     virtual ~LogBufferIoContext(void) = default;
 // LCOV_EXCL_STOP
-
-    virtual void SetInternalCallback(MetaIoCbPtr cb);
-    virtual void SetFile(int fileDescriptor);
 
     virtual void IoDone(void);
 
@@ -70,8 +67,6 @@ public:
 protected:
     int logGroupId;
     EventSmartPtr clientCallback;
-
-    static const uint32_t INVALID_GROUP_ID = UINT32_MAX;
 };
 
 } // namespace pos

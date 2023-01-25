@@ -110,26 +110,28 @@ private:
     MpioDonePollerCb mpioDonePoller;
 
     std::multimap<MetaLpnType, MetaFsIoRequest*> pendingIoRetryQ;
-    static const uint32_t NUM_STORAGE = (int)MetaStorageType::Max;
+    static const uint32_t NUM_STORAGE_TYPE = (int)MetaStorageType::Max;
 
-    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE] = {0};
+    MetaFsIoRangeOverlapChker* ioRangeOverlapChker[MetaFsConfig::MAX_ARRAY_CNT][NUM_STORAGE_TYPE] = {0};
 
     const size_t MIO_POOL_SIZE;
     const size_t MPIO_POOL_SIZE;
     const size_t WRITE_CACHE_CAPACITY;
     int coreId;
 
+    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
+    static const uint32_t NUM_IO_TYPE = (int)MetaIoRequestType::Max;
+
     TelemetryPublisher* telemetryPublisher = nullptr;
-    int64_t sampledTimeSpentProcessingAllStages;
-    int64_t sampledTimeSpentFromIssueToComplete;
-    int64_t totalProcessedMioCount;
-    int64_t sampledProcessedMioCount;
+    int64_t sampledTimeSpentProcessingAllStages[NUM_IO_TYPE];
+    int64_t sampledTimeSpentFromIssueToComplete[NUM_IO_TYPE];
+    int64_t totalProcessedMioCount[NUM_IO_TYPE];
+    int64_t sampledProcessedMioCount[NUM_IO_TYPE];
     MetaFsTimeInterval metaFsTimeInterval;
     size_t skipCount;
     const size_t SAMPLING_SKIP_COUNT;
 
-    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
-    int64_t issueCountByStorage[NUM_STORAGE];
-    int64_t issueCountByFileType[NUM_FILE_TYPE];
+    int64_t issueCountByStorage[NUM_STORAGE_TYPE][NUM_IO_TYPE];
+    int64_t issueCountByFileType[NUM_FILE_TYPE][NUM_IO_TYPE];
 };
 } // namespace pos

@@ -53,6 +53,7 @@ public:
     MOCK_METHOD(MetaLpnType, GetMaxMetaLpn, (MetaVolumeType mediaType));
     MOCK_METHOD(POS_EVENT_ID, CheckReqSanity, (MetaFsRequestBase & reqMsg));
     MOCK_METHOD(POS_EVENT_ID, ProcessNewReq, (MetaFsRequestBase & reqMsg));
+    MOCK_METHOD(POS_EVENT_ID, HandleNewRequest, (MetaFsRequestBase & reqMsg));
     MOCK_METHOD(bool, _IsSiblingModuleReady, ());
     MOCK_METHOD(MetaLpnType, GetTheLastValidLpn, (MetaVolumeType volType));
 };

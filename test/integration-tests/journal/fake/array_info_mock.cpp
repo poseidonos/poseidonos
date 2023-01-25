@@ -118,4 +118,10 @@ ArrayInfoMock::IsWriteThroughEnabled(void)
 {
     return false;
 }
+
+vector<IArrayDevice*>
+ArrayInfoMock::GetArrayDevices(void)
+{
+    return {};
+}
 } // namespace pos

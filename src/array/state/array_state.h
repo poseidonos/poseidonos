@@ -46,6 +46,7 @@
 
 namespace pos
 {
+
 class ArrayState : public IStateObserver, public IArrayStateSubscription
 {
 public:

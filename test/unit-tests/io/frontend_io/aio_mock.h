@@ -25,6 +25,8 @@ class MockAIO : public AIO
 {
 public:
     using AIO::AIO;
+    MOCK_METHOD(void, SubmitAsyncIO, (VolumeIoSmartPtr volIo), (override));
+    MOCK_METHOD(VolumeIoSmartPtr, CreatePosReplicatorVolumeIo, (pos_io & posIo, uint64_t lsn), (override));
 };
 
 } // namespace pos

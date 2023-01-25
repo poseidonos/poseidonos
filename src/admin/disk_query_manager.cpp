@@ -42,13 +42,14 @@
 #include "src/admin/disk_smart_complete_handler.h"
 #include "src/admin/smart_log_mgr.h"
 #include "src/admin/smart_log_update_request.h"
-#include "src/array/device/i_array_device_manager.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/array_models/dto/device_set.h"
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.hpp"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
+#include "src/helper/enumerable/query.h"
+
 namespace pos
 {
 GetLogPageContext::GetLogPageContext(void* data, uint16_t lid)
@@ -59,7 +60,7 @@ GetLogPageContext::GetLogPageContext(void* data, uint16_t lid)
 
 DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_health_information_page* resultPage, pos_io* io,
     uint32_t originCore, CallbackSmartPtr callback, IArrayInfo* info, IDevInfo* devInfo,
-    IIODispatcher* dispatcher, IArrayDevMgr* arrayDevMgr, SmartLogMgr* smartLogMgr)
+    IIODispatcher* dispatcher, SmartLogMgr* smartLogMgr)
 : cmd(cmd),
   resultPage(resultPage),
   io(io),
@@ -68,7 +69,6 @@ DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_h
   arrayInfo(info),
   devInfo(devInfo),
   dispatcher(dispatcher),
-  arrayDevMgr(arrayDevMgr),
   smartLogMgr(smartLogMgr)
 {
 }
@@ -76,29 +76,25 @@ DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_h
 bool
 DiskQueryManager::SendSmartCommandtoDisk(void)
 {
-    vector<UblockSharedPtr> devices;
-    DeviceSet<string> nameSet = arrayInfo->GetDevNames();
-    for (string deviceName : nameSet.data)
-    {
-        DevName name(deviceName);
-        UblockSharedPtr uBlock = devInfo->GetDev(name);
-        devices.push_back(uBlock);
-    }
-
-    if (devices.size() == 0)
+    vector<IArrayDevice*> devs = arrayInfo->GetArrayDevices();
+    devs = Enumerable::Where(devs,
+        [](auto d) { return (
+            (d->GetType() == ArrayDeviceType::DATA || d->GetType() == ArrayDeviceType::SPARE) &&
+            (d->GetUblock() != nullptr)); });
+    if (devs.size() == 0)
     {
         POS_TRACE_ERROR(EID(SMART_LOG_NO_DISK_IN_ARRAY),
             "No Device in Array");
         return true;
     }
+
     CallbackSmartPtr callback(new DiskSmartCompleteHandler(resultPage, io->volume_id, arrayInfo->GetIndex(), originCore, io, cb, smartLogMgr));
-    callback->SetWaitingCount(devices.size());
-    for (size_t i = 0; i < devices.size(); i++)
+    callback->SetWaitingCount(devs.size());
+    for (auto dev : devs)
     {
-        tuple<ArrayDevice*, ArrayDeviceType> devtuple = arrayDevMgr->GetDev(devices[i]);
         PhysicalBlkAddr addr;
         addr.lba = INVALID_LBA;
-        addr.arrayDev = get<0>(devtuple);
+        addr.arrayDev = dev;
         struct spdk_nvme_health_information_page* payload = new struct spdk_nvme_health_information_page();
         uint16_t lid = SPDK_NVME_LOG_HEALTH_INFORMATION;
         GetLogPageContext* smartLogPageContext = new GetLogPageContext(payload, lid);

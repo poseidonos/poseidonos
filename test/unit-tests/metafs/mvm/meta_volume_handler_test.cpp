@@ -184,7 +184,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCanBeCreated)
 {
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace).WillOnce(Return(size + 1));
-    EXPECT_CALL(*container, CreateFile).WillOnce(Return(true));
+    EXPECT_CALL(*container, CreateFile).WillOnce(Return(make_pair<FileDescriptorType, POS_EVENT_ID>(0, EID(SUCCESS))));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         EID(SUCCESS));
@@ -213,7 +213,7 @@ TEST_F(MetaVolumeHandlerFixture, HandleCreateFileReq_testIfTheFileCannotBeCreate
 {
     EXPECT_CALL(*container, IsGivenFileCreated).WillOnce(Return(false));
     EXPECT_CALL(*container, GetAvailableSpace).WillOnce(Return(size + 1));
-    EXPECT_CALL(*container, CreateFile).WillOnce(Return(false));
+    EXPECT_CALL(*container, CreateFile).WillOnce(Return(make_pair<FileDescriptorType, POS_EVENT_ID>(0, EID(MFS_META_SAVE_FAILED))));
 
     EXPECT_EQ(handler->HandleCreateFileReq(volType, msg),
         EID(MFS_FILE_CREATE_FAILED));

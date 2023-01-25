@@ -42,37 +42,63 @@
 #include <thread>
 
 #include "grpc_service/grpc_health.h"
+#include "grpc_service/grpc_pos_io.h"
+#include "grpc_service/grpc_pos_management.h"
+#include "grpc_service/grpc_replication_controller.h"
 #include "src/include/grpc_server_socket_address.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
+#include "src/pos_replicator/posreplicator_manager.h"
 
 namespace pos
 {
-GrpcSubscriber::GrpcSubscriber(ConfigManager* configManager)
+GrpcSubscriber::GrpcSubscriber(PosReplicatorManager* replicatorManager, ConfigManager* configManager)
+: replicatorManager(replicatorManager),
+  haGrpcServer(nullptr)
 {
     std::string address;
     int ret = configManager->GetValue("replicator", "ha_subscriber_address",
         static_cast<void*>(&address), CONFIG_TYPE_STRING);
     if (ret != 0)
     {
-        POS_TRACE_INFO(EID(HA_DEBUG_MSG),
+        POS_TRACE_WARN(EID(HA_DEBUG_MSG),
             "Failed to read grpc subscriber address from config file, Address will be set defined in the \"grpc_server_socket_address.h\"");
         address = GRPC_HA_SUB_SERVER_SOCKET_ADDRESS;
     }
 
     healthChecker = new GrpcHealth();
+    replicationController = new GrpcReplicationController(replicatorManager);
+    posIo = new GrpcPosIo();
+    posManagement = new GrpcPosManagement();
     new std::thread(&GrpcSubscriber::RunServer, this, address);
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Replicator subscriber has been initialized successfully");
 }
 
 GrpcSubscriber::~GrpcSubscriber(void)
 {
-    haGrpcServer->Shutdown();
+    if (haGrpcServer != nullptr)
+    {
+        haGrpcServer->Shutdown();
+    }
     if (healthChecker != nullptr)
     {
         delete healthChecker;
         healthChecker = nullptr;
+    }
+    if (replicationController != nullptr)
+    {
+        delete replicationController;
+        replicationController = nullptr;
+    }
+    if (posIo != nullptr)
+    {
+        delete posIo;
+    }
+    if (posManagement != nullptr)
+    {
+        delete posManagement;
+        posManagement = nullptr;
     }
 
     POS_TRACE_INFO(EID(HA_DEBUG_MSG), "POS GrpcServer has been destructed");
@@ -83,8 +109,11 @@ GrpcSubscriber::RunServer(std::string address)
 {
     ::grpc::ServerBuilder builder;
     builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-    builder.RegisterService(healthChecker);
-    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Registering HealthCheck service and Starting GrpcServer at {}", address);
+    builder.RegisterService(healthChecker)
+        .RegisterService(replicationController)
+        .RegisterService(posIo)
+        .RegisterService(posManagement);
+    POS_TRACE_INFO(EID(HA_DEBUG_MSG), "Registering HealthCheck, ReplicationController, PosIo, PosManagement service and Starting GrpcServer at {}", address);
 
     haGrpcServer = builder.BuildAndStart();
     std::cout << "Grpc Replicator server listening on " << address << std::endl;

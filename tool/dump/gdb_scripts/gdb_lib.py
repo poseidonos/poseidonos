@@ -45,7 +45,7 @@ def show_callback_list(callback_mem):
 
 def check_log_level_debug():
     output = str(gdb.parse_and_eval(
-        "pos::debugInfo->logger->preferences->logLevel"))
+        "pos::singletonInfo->logger->preferences->logLevel"))
     print(output)
     if ("spdlog::level::debug" in output):
         return True

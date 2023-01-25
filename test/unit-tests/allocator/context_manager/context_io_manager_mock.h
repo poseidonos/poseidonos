@@ -10,7 +10,7 @@ class MockContextIoManager : public ContextIoManager
 {
 public:
     using ContextIoManager::ContextIoManager;
-    MOCK_METHOD(void, Init, (), (override));
+    MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, char* externalBuf), (override));
     MOCK_METHOD(void, WaitPendingIo, (IOTYPE type), (override));

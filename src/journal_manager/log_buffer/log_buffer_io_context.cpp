@@ -37,32 +37,24 @@
 namespace pos
 {
 LogBufferIoContext::LogBufferIoContext(int logGroupId, EventSmartPtr clientCallback)
-: logGroupId(logGroupId),
+: AsyncMetaFileIoCtx(),
+  logGroupId(logGroupId),
   clientCallback(clientCallback)
 {
 }
 
 void
-LogBufferIoContext::SetInternalCallback(MetaIoCbPtr cb)
-{
-    this->callback = cb;
-}
-
-void
-LogBufferIoContext::SetFile(int fileDesc)
-{
-    this->fd = fileDesc;
-}
-
-void
 LogBufferIoContext::IoDone(void)
 {
-    bool executionSuccessful = clientCallback->Execute();
+    if (clientCallback != nullptr)
+    {
+        bool executionSuccessful = clientCallback->Execute();
 
-    // TODO(huijeong.kim) handle execution fail case
-    assert(executionSuccessful == true);
+        // TODO(huijeong.kim) handle execution fail case
+        assert(executionSuccessful == true);
 
-    clientCallback = nullptr;
+        clientCallback = nullptr;
+    }
 }
 
 } // namespace pos

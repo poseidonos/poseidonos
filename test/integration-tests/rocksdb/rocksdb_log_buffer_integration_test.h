@@ -6,31 +6,17 @@
 #include "gtest/gtest.h"
 #include "src/event_scheduler/event.h"
 #include "src/journal_manager/log/log_list.h"
-#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
+#include "src/journal_manager/log_buffer/log_buffer_io_context_factory.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
 #include "src/journal_manager/log_buffer/map_update_log_write_context.h"
-#include "test/integration-tests/journal/journal_configuration_spy.h"
-#include "test/integration-tests/journal/utils/test_info.h"
-#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
+#include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
+#include "test/integration-tests/journal/log_buffer_integration_test.h"
 
 namespace pos
 {
 using ::testing::NiceMock;
-class LogBufferWriteDone : public Event
-{
-public:
-    LogBufferWriteDone(void)
-    {
-    }
 
-    bool
-    Execute(void)
-    {
-        return true;
-    }
-};
-
+// TODO Refactoring - LogBufferIntegrationTest + RocksDBLogBufferIntegrationTest
 class RocksDBLogBufferIntegrationTest : public ::testing::Test
 {
 public:
@@ -66,6 +52,7 @@ protected:
     NiceMock<MockJournalConfiguration> config;
 
     LogWriteContextFactory factory;
+    LogBufferIoContextFactory ioContextFactory;
     RocksDBLogBuffer* journalRocks;
 
     std::list<LogHandlerInterface*> addedLogs;

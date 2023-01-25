@@ -46,6 +46,8 @@ public:
     uint32_t NumOfLogFilesForRotation();
     string LogLevel();
     bool IsStrLoggingEnabled();
+    bool IsBurstFilterEnabled();
+    uint32_t GetBurstFilterWindowSize();
 
 private:
     const uint32_t SIZE_MB = 50;
@@ -58,5 +60,6 @@ private:
     // TODO (mj): The default value of STRUCTURED_LOGGING will be
     // TRUE after implementing structured logging functionality.
     const bool ENABLE_STRUCTURED_LOGGING = false;
+    const bool ENABLE_BURST_FILTER = false;
 };
 } // namespace pos_logger

@@ -16,7 +16,7 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(int, AllocateBuffer, (uint32_t logSize, uint64_t& allocatedOffset), (override));
     MOCK_METHOD(void, LogWriteCanceled, (int logGroupId), (override));
-    MOCK_METHOD(void, LogFilled, (int logGroupId, MapList& dirty), (override));
+    MOCK_METHOD(void, LogFilled, (int logGroupId, const MapList& dirty), (override));
     MOCK_METHOD(void, LogBufferReseted, (int logGroupId), (override));
     MOCK_METHOD(LogGroupStatus, GetBufferStatus, (int logGroupId), (override));
     MOCK_METHOD(uint32_t, GetSequenceNumber, (int logGroupId), (override));

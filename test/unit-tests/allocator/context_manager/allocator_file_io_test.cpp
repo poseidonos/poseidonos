@@ -6,6 +6,7 @@
 #include "test/unit-tests/allocator/context_manager/i_allocator_file_io_client_mock.h"
 #include "test/unit-tests/meta_file_intf/async_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+#include "src/include/pos_event_id.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -109,7 +110,7 @@ TEST(AllocatorFileIo, LoadContext_testFileNotExist)
     EXPECT_CALL(file, Open);
 
     int ret = fileManager.LoadContext();
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITH_CREATION));
 }
 
 TEST(AllocatorFileIo, LoadContext_testFileCreationFail)
@@ -135,9 +136,10 @@ TEST(AllocatorFileIo, LoadContext_testFileLoad)
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(file, AsyncIO).WillOnce(Return(0));
+    EXPECT_CALL(file, Open).WillOnce(Return(0));
 
     int ret = fileManager.LoadContext();
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITHOUT_CREATION));
     EXPECT_EQ(fileManager.GetNumFilesReading(), 1);
 }
 
@@ -150,6 +152,7 @@ TEST(AllocatorFileIo, LoadContext_testFileLoadFail)
 
     EXPECT_CALL(file, DoesFileExist).WillOnce(Return(true));
     EXPECT_CALL(file, AsyncIO).WillOnce(Return(-1));
+    EXPECT_CALL(file, Open).WillOnce(Return(0));
 
     int ret = fileManager.LoadContext();
     EXPECT_TRUE(ret < 0);
@@ -179,6 +182,7 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
         EXPECT_CALL(client, GetSectionSize(sectionId)).WillOnce(Return(100));
     }
 
+    EXPECT_CALL(*file, GetIoDoneCheckFunc).WillOnce(Return([](void* ctx) { return 0; }));
     fileManager.Init();
 
     EXPECT_CALL(*file, AsyncIO)
@@ -190,15 +194,14 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
             CtxHeader header = {
                 .sig = 0xAFAFAFAF,
                 .ctxVersion = 0 };
-            memcpy(ctx->buffer, &header, sizeof(header));
+            memcpy(ctx->GetBuffer(), &header, sizeof(header));
 
-            char* ptr = ctx->buffer + sizeof(header);
+            char* ptr = ctx->GetBuffer() + sizeof(header);
             for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
             {
                 memset(ptr + 100 * (sectionId - 1), 'a' + sectionId, 100);
             }
 
-            ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
 
             return 0;
@@ -209,7 +212,7 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
     EXPECT_CALL(client, AfterLoad);
 
     int ret = fileManager.LoadContext();
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITHOUT_CREATION));
 
     EXPECT_EQ(fileManager.GetNumFilesReading(), 0);
 
@@ -260,22 +263,22 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
     EXPECT_CALL(client, FinalizeIo);
     EXPECT_CALL(client, BeforeFlush).Times(1);
 
+    EXPECT_CALL(*file, GetIoDoneCheckFunc).WillOnce(Return([](void* ctx) { return 0; }));
     EXPECT_CALL(*file, AsyncIO)
         .WillOnce([&](AsyncMetaFileIoCtx* ctx)
         {
             EXPECT_EQ(fileManager.GetNumFilesFlushing(), 1);
 
-            EXPECT_EQ(((CtxHeader*)ctx->buffer)->sig, 0xAFAFAFAF);
-            EXPECT_EQ(((CtxHeader*)ctx->buffer)->ctxVersion, 0);
+            EXPECT_EQ(((CtxHeader*)ctx->GetBuffer())->sig, 0xAFAFAFAF);
+            EXPECT_EQ(((CtxHeader*)ctx->GetBuffer())->ctxVersion, 0);
 
-            char* ptr = ctx->buffer + sizeof(CtxHeader);
+            char* ptr = ctx->GetBuffer() + sizeof(CtxHeader);
             for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
             {
                 EXPECT_EQ(*ptr, 'a' + sectionId);
                 ptr += 100;
             }
 
-            ctx->ioDoneCheckCallback = [](void* ctx) { return 0; };
             ctx->HandleIoComplete(ctx);
 
             return 0;

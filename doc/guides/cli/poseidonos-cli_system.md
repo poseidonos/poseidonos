@@ -43,7 +43,7 @@ poseidonos-cli system [flags]
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
 * [poseidonos-cli system get-property](poseidonos-cli_system_get-property.md)	 - Display the property of PoseidonOS.
-* [poseidonos-cli system info](poseidonos-cli_system_info.md)	 - Display information of PoseidonOS.
+* [poseidonos-cli system info](poseidonos-cli_system_info.md)	 - Display information about PoseidonOS and server hardware.
 * [poseidonos-cli system set-property](poseidonos-cli_system_set-property.md)	 - Set the property of PoseidonOS.
 * [poseidonos-cli system start](poseidonos-cli_system_start.md)	 - Start PoseidonOS.
 * [poseidonos-cli system stop](poseidonos-cli_system_stop.md)	 - Stop PoseidonOS.

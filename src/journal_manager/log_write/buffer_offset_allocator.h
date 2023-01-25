@@ -62,7 +62,7 @@ public:
     virtual int AllocateBuffer(uint32_t logSize, uint64_t& allocatedOffset);
     virtual void LogWriteCanceled(int logGroupId);
 
-    virtual void LogFilled(int logGroupId, MapList& dirty) override;
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
 
     uint64_t GetNumLogsAdded(void);
@@ -70,6 +70,7 @@ public:
 
     virtual LogGroupStatus GetBufferStatus(int logGroupId) override;
     virtual uint32_t GetSequenceNumber(int logGroupId) override;
+    virtual uint64_t GetNumLogsFilled(int logGroupId) override;
 
     virtual int GetLogGroupId(uint64_t fileOffset);
 

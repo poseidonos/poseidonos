@@ -22,46 +22,8 @@ message HealthCheckResponse {
 ///////////////////////////////////////////////////////////////////////////////////
 
 service PosManagement {
-    rpc CreateArray (CreateArrayRequest) returns (PosResponse) {}
-    rpc DeleteArray (DeleteArrayRequest) returns (PosResponse) {}
-    rpc CreateVolume (CreateVolumeRequest) returns (PosResponse) {}
-    rpc DeleteVolume (DeleteVolumeRequest) returns (PosResponse) {}
-    rpc MountVolume (MountVolumeRequest) returns (PosResponse) {}
-    rpc UnmountVolume (UnmountVolumeRequest) returns (PosResponse) {}
     rpc UpdateVoluemMeta (UpdateVoluemMetaRequest) returns (PosResponse) {}
-
-    rpc GetArrayList (GetArrayListRequest) returns (ArrayListResponse) {}
     rpc GetVolumeList (GetVolumeListRequest) returns (VolumeListResponse) {}
-}
-
-message CreateArrayRequest {
-    string array_name = 1;
-    uint64 capacity = 2;    // capacity in bytes
-}
-
-message DeleteArrayRequest {
-    string array_name = 1;
-}
-
-message CreateVolumeRequest {
-    string array_name = 1;
-    string volume_name = 2;
-    uint64 capacity = 3;
-}
-
-message DeleteVolumeRequest {
-    string array_name = 1;
-    string volume_name = 2;
-}
-
-message MountVolumeRequest {
-    string array_name = 1;
-    string volume_name = 2;
-}
-
-message UnmountVolumeRequest {
-    string array_name = 1;
-    string volume_name = 2;
 }
 
 message UpdateVoluemMetaRequest {
@@ -76,32 +38,6 @@ enum PosResult {
 message PosResponse {
     PosResult result = 1;
     optional string reason = 2;
-}
-
-message GetArrayListRequest {
-    // nothing
-}
-
-message ArrayInfo {
-    string array_name = 1;
-    uint64 total_capacity = 2; // size in bytes
-    uint64 used_capacity = 3; // size in bytes
-
-    enum ArrayState {
-        OFFLINE = 0;
-        PAUSE = 1;
-        NORMAL = 2;
-        BUSY = 3;
-        STOP = 4;
-        SNAPSHOT = 5;
-    }
-    ArrayState state = 4;
-}
-
-message ArrayListResponse {
-    PosResult result = 1;
-    optional string reason = 2;
-    repeated ArrayInfo infos = 3;
 }
 
 message GetVolumeListRequest {
@@ -133,14 +69,14 @@ service PosIo {
     rpc ReadBlocks(ReadBlocksRequest) returns (ReadBlocksResponse) {}
     rpc WriteBlocks(WriteBlocksRequest) returns (WriteBlocksResponse) {}
     rpc WriteHostBlocks(WriteHostBlocksRequest) returns (WriteHostBlocksResponse) {}
-    //rpc ReadBlocksSync(ReadBlocksSyncRequest) returns (ReadBlocksSyncResponse) {} // FakePOS-only sync API
-    //rpc WriteBlocksSync(WriteBlocksSyncRequest) returns (WriteBlocksSyncResponse) {} // FakePOS-only sync API
-    //rpc WriteHostRequestSync(WriteHostRequestSyncRequest) returns (WriteHostRequestSyncResponse) {} // FakePOS-only sync API
+    rpc ReadBlocksSync(ReadBlocksSyncRequest) returns (ReadBlocksSyncResponse) {} // FakePOS-only sync API
+    rpc WriteBlocksSync(WriteBlocksSyncRequest) returns (WriteBlocksSyncResponse) {} // FakePOS-only sync API
+    rpc WriteHostBlocksSync(WriteHostBlocksSyncRequest) returns (WriteHostBlocksSyncResponse) {} // FakePOS-only sync API
     rpc CompleteHostWrite(CompleteHostWriteRequest) returns (CompleteHostWriteResponse) {}
 }
 
 message Chunk {
-    bytes content = 1;  // 4KB data
+    bytes content = 1;  // 512B data
 }
 
 message ReadBlocksRequest {
@@ -153,7 +89,6 @@ message ReadBlocksRequest {
 message ReadBlocksResponse {
     PosResult result = 1;
     optional string reason = 2;
-    repeated Chunk data = 3;
 }
 
 message WriteBlocksRequest {
@@ -162,7 +97,7 @@ message WriteBlocksRequest {
     uint64 rba = 3;
     uint64 num_blocks = 4;
     uint64 lsn = 5;
-    repeated Chunk data = 6;    
+    repeated Chunk data = 6;
 }
 
 message WriteBlocksResponse {
@@ -170,15 +105,50 @@ message WriteBlocksResponse {
     optional string reason = 2;
 }
 
-message WriteHostBlocksRequest {
+message WriteBlocksSyncRequest {
     string array_name = 1;
     string volume_name = 2;
     uint64 rba = 3;
     uint64 num_blocks = 4;
-    uint64 lsn = 5;
+    repeated Chunk data = 5;
+}
+
+message WriteBlocksSyncResponse {
+    PosResult result = 1;
+    optional string reason = 2;
+}
+
+message ReadBlocksSyncRequest {
+    string array_name = 1;
+    string volume_name = 2;
+    uint64 rba = 3;
+    uint64 num_blocks = 4;
+}
+
+message ReadBlocksSyncResponse {
+    PosResult result = 1;
+    optional string reason = 2;
+    repeated Chunk data = 3;
+}
+
+message WriteHostBlocksRequest {
+    string array_name = 1;
+    string volume_name = 2;
+    uint64 lsn = 3;
 }
 
 message WriteHostBlocksResponse {
+    PosResult result = 1;
+    optional string reason = 2;
+}
+
+message WriteHostBlocksSyncRequest {
+    string array_name = 1;
+    string volume_name = 2;
+    uint64 lsn = 3;
+}
+
+message WriteHostBlocksSyncResponse {
     PosResult result = 1;
     optional string reason = 2;
 }
@@ -196,11 +166,12 @@ message CompleteHostWriteResponse {
 
 ///////////////////////////////////////////////////////////////////////////////////
 
-service PosControl {
+service ReplicationControl {
     rpc StartVolumeSync(StartVolumeSyncRequest) returns (StartVolumeSyncResponse) {}
     rpc FinishVolumeSync(FinishVolumeSyncRequest) returns (FinishVolumeSyncResponse) {}
     rpc SuspendWrite(SuspendWriteRequest) returns (SuspendWriteResponse) {}
     rpc ResumeWrite(ResumeWriteRequest) returns (ResumeWriteResponse) {}
+    rpc ChangeReplicationRole(ChangeReplicationRoleRequest) returns (ChangeReplicationRoleResponse) {}
 }
 
 message StartVolumeSyncRequest {
@@ -217,7 +188,6 @@ message StartVolumeSyncResponse {
 message FinishVolumeSyncRequest {
     string array_name = 1;
     string volume_name = 2;
-    bool is_primary = 3;
 }
 
 message FinishVolumeSyncResponse {
@@ -241,6 +211,17 @@ message ResumeWriteRequest {
 }
 
 message ResumeWriteResponse {
+    PosResult result = 1;
+    optional string reason = 2;
+}
+
+message ChangeReplicationRoleRequest {
+    string array_name = 1;
+    string volume_name = 2;
+    string role = 3;
+}
+
+message ChangeReplicationRoleResponse {
     PosResult result = 1;
     optional string reason = 2;
 }

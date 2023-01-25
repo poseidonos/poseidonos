@@ -43,8 +43,45 @@ using ::testing::Return;
 
 namespace pos
 {
+class MetaIoHandlerFixture : public ::testing::Test
+{
+public:
+    MetaIoHandlerFixture(void)
+    : arrayInfo(nullptr),
+      ioApi(nullptr),
+      metaFs(nullptr)
+    {
+    }
+
+    virtual ~MetaIoHandlerFixture(void)
+    {
+    }
+
+    virtual void SetUp(void)
+    {
+        arrayInfo = new NiceMock<MockIArrayInfo>();
+        ON_CALL(*arrayInfo, GetName).WillByDefault(Return("TestArray"));
+        ON_CALL(*arrayInfo, GetIndex).WillByDefault(Return(0));
+        ioApi = new NiceMock<MockMetaFsIoApi>;
+        ON_CALL(*ioApi, SubmitIO).WillByDefault(Return(EID(SUCCESS)));
+        metaFs = new NiceMock<MockMetaFs>(arrayInfo, false, nullptr, nullptr, ioApi, nullptr, nullptr, nullptr);
+        ON_CALL(*metaFs, GetIoApi).WillByDefault(Return(ioApi));
+    }
+
+    virtual void TearDown(void)
+    {
+        delete arrayInfo;
+        delete metaFs;
+    }
+
+protected:
+    NiceMock<MockMetaFs>* metaFs;
+    NiceMock<MockMetaFsIoApi>* ioApi;
+    NiceMock<MockIArrayInfo>* arrayInfo;
+};
+
 // MetaIoHandler
-TEST(MetaIoHandler, Create_testIfObjectWillBeCreatedCorrectly)
+TEST_F(MetaIoHandlerFixture, Create_testIfObjectWillBeCreatedCorrectly)
 {
     MetaIoHandler handler(1);
 
@@ -52,97 +89,72 @@ TEST(MetaIoHandler, Create_testIfObjectWillBeCreatedCorrectly)
     EXPECT_EQ(MetaIoHandler::fdList[MetaIoHandler::index], 1);
 }
 
-TEST(MetaIoHandler, Submit_testJustCallSubmitHandler)
+TEST_F(MetaIoHandlerFixture, Submit_testJustCallSubmitHandler)
 {
     pos_io* io = new pos_io();
     iovec iov;
     io->iov = &iov;
     io->volume_id = 9;
 
-    NiceMock<MockMetaFs> metaFs;
-    NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
-    metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
-
     MetaIoHandler handler(1);
-    handler.metaFs = &metaFs;
+    handler.metaFs = metaFs;
 
     EXPECT_EQ(handler.MetaFsIOSubmitHandler(io, 1), 0);
 }
 
-TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler0)
+TEST_F(MetaIoHandlerFixture, Submit_testJustCallIOSubmitHandler0)
 {
     pos_io* io = new pos_io();
     iovec iov;
     io->iov = &iov;
     io->volume_id = 9;
 
-    NiceMock<MockMetaFs> metaFs;
-    NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
-    metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
-
     MetaIoHandler handler(1);
-    handler.metaFs = &metaFs;
+    handler.metaFs = metaFs;
 
     EXPECT_EQ(handler.IoSubmitHandler0(io), 0);
 }
 
-TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler1)
+TEST_F(MetaIoHandlerFixture, Submit_testJustCallIOSubmitHandler1)
 {
     pos_io* io = new pos_io();
     iovec iov;
     io->iov = &iov;
     io->volume_id = 9;
 
-    NiceMock<MockMetaFs> metaFs;
-    NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
-    metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
-
     MetaIoHandler handler(1);
-    handler.metaFs = &metaFs;
+    handler.metaFs = metaFs;
 
     EXPECT_EQ(handler.IoSubmitHandler1(io), 0);
 }
 
-TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler2)
+TEST_F(MetaIoHandlerFixture, Submit_testJustCallIOSubmitHandler2)
 {
     pos_io* io = new pos_io();
     iovec iov;
     io->iov = &iov;
     io->volume_id = 9;
 
-    NiceMock<MockMetaFs> metaFs;
-    NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
-    metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
-
     MetaIoHandler handler(1);
-    handler.metaFs = &metaFs;
+    handler.metaFs = metaFs;
 
     EXPECT_EQ(handler.IoSubmitHandler2(io), 0);
 }
 
-TEST(MetaIoHandler, Submit_testJustCallIOSubmitHandler3)
+TEST_F(MetaIoHandlerFixture, Submit_testJustCallIOSubmitHandler3)
 {
     pos_io* io = new pos_io();
     iovec iov;
     io->iov = &iov;
     io->volume_id = 9;
 
-    NiceMock<MockMetaFs> metaFs;
-    NiceMock<MockMetaFsIoApi>* ioApi = new NiceMock<MockMetaFsIoApi>;
-    metaFs.io = ioApi;
-    EXPECT_CALL(*ioApi, SubmitIO).WillOnce(Return(EID(SUCCESS)));
-
     MetaIoHandler handler(1);
-    handler.metaFs = &metaFs;
+    handler.metaFs = metaFs;
 
     EXPECT_EQ(handler.IoSubmitHandler3(io), 0);
 }
 
-TEST(MetaIoHandler, Complete_testJustCallCompleteHandler)
+TEST_F(MetaIoHandlerFixture, Complete_testJustCallCompleteHandler)
 {
     MetaIoHandler handler(1);
 

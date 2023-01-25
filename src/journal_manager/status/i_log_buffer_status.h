@@ -41,6 +41,7 @@ class ILogBufferStatus
 public:
     virtual LogGroupStatus GetBufferStatus(int logGroupId) = 0;
     virtual uint32_t GetSequenceNumber(int logGroupId) = 0;
+    virtual uint64_t GetNumLogsFilled(int logGroupId) = 0;
 };
 
 } // namespace pos

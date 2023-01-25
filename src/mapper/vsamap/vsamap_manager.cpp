@@ -161,7 +161,7 @@ VSAMapManager::CreateVsaMapContent(VSAMapContent* vm, int volId, uint64_t volSiz
                 v.gauge = numWriteIssuedCount;
                 tp->PublishData(TEL33008_MAP_VSA_FLUSH_PENDINGIO_CNT, v, MT_GAUGE);
                 mapFlushState[volId] = MapFlushState::FLUSH_DONE;
-                POS_TRACE_ERROR(EID(MAPPER_FAILED), "[Mapper VSAMap] Failed to Initial Store VSAMap File, arrayId:{}", addrInfo->GetArrayId());
+                POS_TRACE_ERROR(EID(VSAMAP_STORE_FAILURE), "[Mapper VSAMap] Failed to Initial Store VSAMap File, arrayId:{}", addrInfo->GetArrayId());
                 break;
             }
             else

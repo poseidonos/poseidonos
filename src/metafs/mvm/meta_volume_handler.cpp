@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 
+#include "src/metafs/common/meta_file_util.h"
 #include "src/metafs/mvm/volume/inode_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -89,10 +90,10 @@ MetaVolumeHandler::HandleOpenFileReq(const MetaVolumeType volType, MetaFsFileCon
                 *reqMsg.fileName, fd, reqMsg.arrayId, (int)volType);
             break;
         }
-    } while (0);
 
-    _PublishMetricConditionally(TEL40014_METAFS_FILE_OPEN_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc));
+        _PublishMetricConditionally(TEL40014_METAFS_FILE_OPEN_REQUEST, POSMetricTypes::MT_COUNT,
+            reqMsg.arrayId, volType, MetaFileType::MAX, (EID(SUCCESS) == rc), fd);
+    } while (0);
 
     return rc;
 }
@@ -140,7 +141,7 @@ MetaVolumeHandler::HandleCloseFileReq(const MetaVolumeType volType, MetaFsFileCo
     }
 
     _PublishMetricConditionally(TEL40015_METAFS_FILE_CLOSE_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc));
+        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc), reqMsg.fd);
 
     return rc;
 }
@@ -158,11 +159,12 @@ MetaVolumeHandler::HandleCreateFileReq(const MetaVolumeType volType, MetaFsFileC
             break;
         }
 
-        if (volContainer->CreateFile(volType, reqMsg))
+        auto result = volContainer->CreateFile(volType, reqMsg);
+        if (result.second == EID(SUCCESS))
         {
             POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-                "[MetaFile Control] {} file has been created. byteSize: {}, arrayId: {}, volumeType: {}",
-                *reqMsg.fileName, reqMsg.fileByteSize, reqMsg.arrayId, (int)volType);
+                "[MetaFile Control] {} file has been created. byteSize: {}, arrayId: {}, volumeType: {}, fd: {}",
+                *reqMsg.fileName, reqMsg.fileByteSize, reqMsg.arrayId, (int)volType, result.first);
         }
         else
         {
@@ -172,10 +174,10 @@ MetaVolumeHandler::HandleCreateFileReq(const MetaVolumeType volType, MetaFsFileC
                 *reqMsg.fileName, reqMsg.reqType, reqMsg.fd, (int)volType);
             break;
         }
-    } while (0);
 
-    _PublishMetricConditionally(TEL40013_METAFS_FILE_CREATE_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc));
+        _PublishMetricConditionally(TEL40013_METAFS_FILE_CREATE_REQUEST, POSMetricTypes::MT_COUNT,
+            reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc), result.first);
+    } while (0);
 
     return rc;
 }
@@ -221,7 +223,7 @@ MetaVolumeHandler::HandleDeleteFileReq(const MetaVolumeType volType, MetaFsFileC
     } while (0);
 
     _PublishMetricConditionally(TEL40016_METAFS_FILE_DELETE_REQUEST, POSMetricTypes::MT_COUNT,
-        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc));
+        reqMsg.arrayId, volType, reqMsg.fileProperty.type, (EID(SUCCESS) == rc), reqMsg.fd);
 
     return rc;
 }
@@ -381,16 +383,17 @@ void
 MetaVolumeHandler::_PublishMetricConditionally(const std::string& name,
     const POSMetricTypes metricType, const int arrayId,
     const MetaVolumeType volType, const MetaFileType fileType,
-    const bool requestResult)
+    const bool requestResult, const FileDescriptorType fd)
 {
     if (tp)
     {
         POSMetric m(name, metricType);
         m.SetCountValue(1);
         m.AddLabel("array_id", std::to_string(arrayId));
-        m.AddLabel("volume_type", std::to_string((int)volType));
-        m.AddLabel("file_type", std::to_string((int)fileType));
+        m.AddLabel("volume_type", MetaFileUtil::ConvertToMediaTypeName(volType));
+        m.AddLabel("file_type", MetaFileUtil::ConvertToFileTypeName(fileType));
         m.AddLabel("result", requestResult ? "success" : "failed");
+        m.AddLabel("fd", std::to_string(fd));
         tp->PublishMetric(m);
     }
 }

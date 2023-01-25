@@ -199,7 +199,7 @@ BufferOffsetAllocator::LogWriteCanceled(int id)
 }
 
 void
-BufferOffsetAllocator::LogFilled(int id, MapList& dirty)
+BufferOffsetAllocator::LogFilled(int id, const MapList& dirty)
 {
     statusList[id]->LogFilled();
     _TryToSetFull(id);
@@ -240,6 +240,12 @@ uint32_t
 BufferOffsetAllocator::GetSequenceNumber(int logGroupId)
 {
     return statusList[logGroupId]->GetSeqNum();
+}
+
+uint64_t
+BufferOffsetAllocator::GetNumLogsFilled(int logGroupId)
+{
+    return statusList[logGroupId]->GetNumLogsFilled();
 }
 
 int

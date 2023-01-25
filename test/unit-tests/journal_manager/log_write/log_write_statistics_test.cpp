@@ -4,7 +4,6 @@
 
 #include "test/unit-tests/journal_manager/log/log_handler_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/map_update_log_write_context_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -43,7 +42,7 @@ TEST(LogWriteStatistics, UpdateStatus_testIfStatsUpdatedWhenBlockWriteDone)
     LogWriteStatistics stats;
     stats.Init(2);
 
-    NiceMock<MockMapUpdateLogWriteContext> context;
+    NiceMock<MockLogWriteContext> context;
     NiceMock<MockLogHandlerInterface> log;
 
     ON_CALL(context, GetLogGroupId).WillByDefault(Return(0));
@@ -72,7 +71,7 @@ TEST(LogWriteStatistics, UpdateStatus_testIfStatsUpdatedWhenStripeMapUpdated)
     LogWriteStatistics stats;
     stats.Init(2);
 
-    NiceMock<MockMapUpdateLogWriteContext> context;
+    NiceMock<MockLogWriteContext> context;
     NiceMock<MockLogHandlerInterface> log;
 
     ON_CALL(context, GetLogGroupId).WillByDefault(Return(0));
@@ -107,7 +106,7 @@ TEST(LogWriteStatistics, UpdateStatus_testIfStatsUpdatedWhenStripeIsWritten)
     uint64_t offset = 0;
     for (int count = 0; count < 10; count++)
     {
-        NiceMock<MockMapUpdateLogWriteContext> blockWriteContext;
+        NiceMock<MockLogWriteContext> blockWriteContext;
         NiceMock<MockLogHandlerInterface> blockWriteLog;
 
         ON_CALL(blockWriteContext, GetLogGroupId).WillByDefault(Return(0));
@@ -131,7 +130,7 @@ TEST(LogWriteStatistics, UpdateStatus_testIfStatsUpdatedWhenStripeIsWritten)
         offset += logData.numBlks;
     }
 
-    NiceMock<MockMapUpdateLogWriteContext> stripeMapUpdatedContext;
+    NiceMock<MockLogWriteContext> stripeMapUpdatedContext;
     NiceMock<MockLogHandlerInterface> stripeMapLog;
 
     ON_CALL(stripeMapUpdatedContext, GetLogGroupId).WillByDefault(Return(0));

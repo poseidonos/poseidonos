@@ -1,17 +1,15 @@
 package qoscmds
 
 import (
-	"encoding/json"
 	"fmt"
-	"pnconnector/src/log"
 	"strings"
 
+	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"cli/cmd/messages"
-	"cli/cmd/socketmgr"
-
+	"cli/cmd/grpcmgr"
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var ListQosCmd = &cobra.Command{
@@ -27,46 +25,54 @@ Example:
 	poseidonos-cli qos create --volume-name Volume0 --array-name Array0
           `,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 
 		var command = "LISTQOSPOLICIES"
-
-		req := formListQosReq(command)
-		reqJson, err := json.Marshal(req)
-		if err != nil {
-			log.Error("error:", err)
+		req, buildErr := buildListQOSPolicyReq(command)
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
 		}
-
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
+		if err != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		// Do not send request to server and print response when testing request build.
-		if !(globals.IsTestingReqBld) {
-			resJson := socketmgr.SendReqAndReceiveRes(string(reqJson))
-			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
+		res, gRpcErr := grpcmgr.SendListQOSPolicy(req)
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
 		}
+
+		printErr := displaymgr.PrintProtoResponse(command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
+		}
+
+		return nil
+
 	},
 }
 
-func formListQosReq(command string) messages.Request {
-
-	volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
-	var volumeNames []messages.VolumeNameList
-	for _, str := range volumeNameListSlice {
-		var volumeNameList messages.VolumeNameList // Single device name that is splitted
-		volumeNameList.VOLUMENAME = str
-		volumeNames = append(volumeNames, volumeNameList)
-	}
-
-	param := messages.VolumePolicyParam{
-		VOLUMENAME: volumeNames,
-		ARRAYNAME:  listQos_arrayName,
-	}
-
+func buildListQOSPolicyReq(command string) (*pb.ListQOSPolicyRequest, error) {
 	uuid := globals.GenerateUUID()
+	volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
+	var volumeNames []*pb.ListQOSPolicyRequest_Param_Volume
+	for _, str := range volumeNameListSlice {
+		var volumeNameList pb.ListQOSPolicyRequest_Param_Volume // Single device name that is splitted
+		volumeNameList.VolumeName = str
+		volumeNames = append(volumeNames, &volumeNameList)
+	}
 
-	qosListReq := messages.BuildReqWithParam(command, uuid, param)
+	param := &pb.ListQOSPolicyRequest_Param{Array: listQos_arrayName, Vol: volumeNames}
+	req := &pb.ListQOSPolicyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return qosListReq
+	return req, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

@@ -10,7 +10,7 @@ the system seriously. Therefore, this command category must be carefully used
 by developers. 
 
 Syntax: 
-  poseidonos-cli devel [resetmbr|reset-event-wrr|stop-rebuilding|update--event-wrr]
+  poseidonos-cli devel [resetmbr|reset-event-wrr|stop-rebuilding|update-event-wrr|dump-memory-snapshot]
 
 	  
 
@@ -41,6 +41,7 @@ poseidonos-cli devel [flags]
 ### SEE ALSO
 
 * [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
+* [poseidonos-cli devel dump-memory-snapshot](poseidonos-cli_devel_dump-memory-snapshot.md)	 - Dump a memory snapshot of running PoseidonOS.
 * [poseidonos-cli devel reset-event-wrr](poseidonos-cli_devel_reset-event-wrr.md)	 - Reset the wieghts for backend events such as Flush, Rebuild, and GC to the default values.
 * [poseidonos-cli devel resetmbr](poseidonos-cli_devel_resetmbr.md)	 - Reset MBR information of PoseidonOS.
 * [poseidonos-cli devel stop-rebuilding](poseidonos-cli_devel_stop-rebuilding.md)	 - Stop rebulding.

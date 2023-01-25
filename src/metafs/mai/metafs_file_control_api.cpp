@@ -30,60 +30,35 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
-
 #include "metafs_file_control_api.h"
 
 #include "src/metafs/log/metafs_log.h"
+#include "src/metafs/mai/meta_file_context_handler.h"
 
 namespace pos
 {
 /* for test */
 MetaFsFileControlApi::MetaFsFileControlApi(void)
-: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr, nullptr, nullptr)
+: MetaFsFileControlApi(INT32_MAX, false, nullptr, nullptr, nullptr,
+    nullptr, nullptr)
 {
 }
 
-/* for test */
 MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, const bool isNormal,
     MetaStorageSubsystem* storage, MetaFsManagementApi* mgmt, MetaVolumeManager* volMgr,
-    BitMap* bitmap, TelemetryPublisher* tp)
+    std::unique_ptr<MetaFileContextHandler> handler, TelemetryPublisher* tp)
 : arrayId(arrayId),
   isNormal(isNormal),
   storage(storage),
   mgmt(mgmt),
   volMgr(volMgr),
   tp(tp),
-  bitmap(bitmap)
+  fileContext(std::move(handler))
 {
-}
-
-MetaFsFileControlApi::MetaFsFileControlApi(const int arrayId, MetaStorageSubsystem* storage,
-    MetaFsManagementApi* mgmt, TelemetryPublisher* tp, MetaVolumeManager* volMgr)
-: MetaFsFileControlApi(arrayId, false, storage, mgmt, volMgr, new BitMap(MetaFsConfig::MAX_VOLUME_CNT), tp)
-{
-    nameMapByfd.clear();
-    idxMapByName.clear();
-
-    if (!volMgr)
-    {
-        this->volMgr = new MetaVolumeManager(arrayId, storage, tp);
-    }
-
-    if (bitmap)
-    {
-        bitmap->ResetBitmap();
-    }
 }
 
 MetaFsFileControlApi::~MetaFsFileControlApi(void)
 {
-    if (nullptr != bitmap)
-        delete bitmap;
-
-    nameMapByfd.clear();
-    idxMapByName.clear();
-
     delete volMgr;
 }
 
@@ -107,6 +82,13 @@ MetaFsFileControlApi::Create(std::string& fileName, uint64_t fileByteSize,
     rc = volMgr->HandleNewRequest(reqMsg); // validity check & MetaVolumeManager::HandleCreateFileReq()
 
     return rc;
+}
+
+void
+MetaFsFileControlApi::Initialize(const uint64_t signature)
+{
+    assert(fileContext);
+    fileContext->Initialize(signature);
 }
 
 POS_EVENT_ID
@@ -147,7 +129,7 @@ MetaFsFileControlApi::Open(std::string& fileName, int& fd, MetaVolumeType volume
     fd = reqMsg.completionData.openfd;
 
     if (EID(SUCCESS) == rc)
-        _AddFileContext(fileName, fd, reqMsg.volType);
+        fileContext->AddFileContext(fileName, fd, volumeType);
 
     return rc;
 }
@@ -168,7 +150,7 @@ MetaFsFileControlApi::Close(uint32_t fd, MetaVolumeType volumeType)
 
     rc = volMgr->HandleNewRequest(reqMsg); // validity check &  MetaVolumeManager::HandleCloseFileReq()
 
-    _RemoveFileContext(fd, reqMsg.volType);
+    fileContext->RemoveFileContext(fd, reqMsg.volType);
 
     return rc;
 }
@@ -327,21 +309,7 @@ MetaFsFileControlApi::SetStatus(bool isNormal)
 MetaFileContext*
 MetaFsFileControlApi::GetFileInfo(FileDescriptorType fd, MetaVolumeType type)
 {
-    SPIN_LOCK_GUARD_IN_SCOPE(iLock);
-
-    auto it = nameMapByfd.find(make_pair(type, fd));
-
-    // the list already has fd's context
-    if (it != nameMapByfd.end())
-    {
-        auto result = idxMapByName.find(make_pair(type, it->second));
-
-        assert(result != idxMapByName.end());
-
-        return &cxtList[result->second];
-    }
-
-    return nullptr;
+    return fileContext->GetFileContext(fd, type);
 }
 
 std::vector<MetaFileInfoDumpCxt>
@@ -388,108 +356,6 @@ MetaFsFileControlApi::Wbt_GetMetaFileInode(std::string& fileName, MetaVolumeType
     }
 
     return nullptr;
-}
-
-MetaFileInodeInfo*
-MetaFsFileControlApi::_GetFileInode(std::string& fileName, MetaVolumeType type)
-{
-    MetaFsFileControlRequest reqMsg;
-    POS_EVENT_ID rc;
-
-    reqMsg.reqType = MetaFsFileControlType::GetFileInode;
-    reqMsg.fileName = &fileName;
-    reqMsg.arrayId = arrayId;
-    reqMsg.volType = type;
-
-    rc = volMgr->HandleNewRequest(reqMsg); // MetaVolumeManager::_HandleGetFileInodeReq()
-
-    if (EID(SUCCESS) == rc)
-    {
-        MetaFileInodeInfo* fileInodePointer = reqMsg.completionData.inodeInfoPointer;
-
-        return fileInodePointer;
-    }
-
-    return nullptr;
-}
-
-void
-MetaFsFileControlApi::_AddFileContext(std::string& fileName,
-    FileDescriptorType fd, MetaVolumeType type)
-{
-    uint32_t index = 0;
-    MetaFileInodeInfo* info = nullptr;
-
-    {
-        SPIN_LOCK_GUARD_IN_SCOPE(iLock);
-
-        // find first
-        if (nameMapByfd.find(make_pair(type, fd)) != nameMapByfd.end())
-        {
-            return;
-        }
-
-        // get the inode
-        info = _GetFileInode(fileName, type);
-
-        // get the position
-        index = bitmap->FindFirstZero();
-        if (index >= MetaFsConfig::MAX_VOLUME_CNT)
-        {
-            MFS_TRACE_ERROR(EID(MFS_NEED_MORE_CONTEXT_SLOT),
-                "Metafile count={}", index);
-            return;
-        }
-
-        MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-            "FileContext is allocated index={}, arrayId={}", index, arrayId);
-
-        bitmap->SetBit(index);
-        nameMapByfd.insert({make_pair(type, fd), fileName});
-        idxMapByName.insert({make_pair(type, fileName), index});
-    }
-
-    // update
-    MetaFileContext* context = &cxtList[index];
-    context->Reset();
-    context->isActivated = info->data.field.inUse;
-    context->fileType = info->data.field.fileProperty.type;
-    context->storageType = info->data.field.dataLocation;
-    context->sizeInByte = info->data.field.fileByteSize;
-    context->fileBaseLpn = info->data.field.extentMap[0].GetStartLpn();
-    context->chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-    context->extentsCount = info->data.field.extentCnt;
-    context->CopyExtentsFrom(info->data.field.extentMap, context->extentsCount);
-    context->signature = mgmt->GetEpochSignature();
-    context->storage = storage;
-    assert(context->extentsCount != 0);
-
-    delete info;
-}
-
-void
-MetaFsFileControlApi::_RemoveFileContext(FileDescriptorType fd,
-    MetaVolumeType type)
-{
-    SPIN_LOCK_GUARD_IN_SCOPE(iLock);
-
-    auto it1 = nameMapByfd.find(make_pair(type, fd));
-    if (it1 != nameMapByfd.end())
-    {
-        std::string fileName = it1->second;
-
-        auto it2 = idxMapByName.find(make_pair(type, fileName));
-        uint32_t index = it2->second;
-
-        nameMapByfd.erase(it1);
-        idxMapByName.erase(it2);
-        bitmap->ClearBit(index);
-
-        cxtList[index].Reset();
-
-        MFS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-            "FileContext is deallocated index={}, arrayId={}", index, arrayId);
-    }
 }
 
 void

@@ -38,9 +38,9 @@
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/include/array_state_type.h"
 #include "src/include/partition_type.h"
+#include "src/include/i_array_device.h"
 #include "src/state/state_context.h"
 
-#include "src/array/device/i_array_device_manager.h"
 using namespace std;
 
 namespace pos
@@ -60,7 +60,7 @@ public:
     virtual ArrayStateType GetState(void) = 0;
     virtual StateContext* GetStateCtx(void) = 0;
     virtual uint32_t GetRebuildingProgress(void) = 0;
-    virtual IArrayDevMgr* GetArrayManager(void) = 0;
     virtual bool IsWriteThroughEnabled(void) = 0;
+    virtual vector<IArrayDevice*> GetArrayDevices(void) = 0;
 };
 } // namespace pos

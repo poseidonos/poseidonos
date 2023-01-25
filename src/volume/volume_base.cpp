@@ -40,41 +40,33 @@
 
 namespace pos
 {
-VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, uint64_t volSizeByte,
-        VolumeAttribute volumeAttribute)
+
+VolumeBase::VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute,
+            std::string volName, uint64_t volSizeByte, uint32_t nsid,
+            ReplicationRole voluemRole)
+: VolumeAttribute(arrayIdx, arrayName, dataAttribute),
+  StatusProperty(volName, volSizeByte),
+  NetworkProperty(nsid),
+  PerfomanceProperty(0, 0, 0, 0),
+  ReplicationProperty(voluemRole)
 {
-    array = arrayName;
-    arrayId = arrayIdx;
-    name = volName;
-    uuid = "";
-    attribute = volumeAttribute;
-    status = VolumeStatus::Unmounted;
-    replicationState = VolumeReplicationState::StandAloneState;
-    replicationRole = VolumeReplicationRoleProperty::Primary;
-    totalSize = volSizeByte;
     ID = INVALID_VOL_ID;
-    POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} size:{} created", name, totalSize);
+    POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} size:{} created", volName, volSizeByte);
 }
 
-VolumeBase::VolumeBase(std::string arrayName, int arrayIdx, std::string volName, std::string inputUuid, uint64_t volSizeByte,
-        uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw, VolumeAttribute volumeAttribute)
+VolumeBase::VolumeBase(int arrayIdx, std::string arrayName, DataAttribute dataAttribute, std::string inputUuid,
+            std::string volName, uint64_t volSizeByte, uint32_t nsid,
+            uint64_t _maxiops, uint64_t _miniops, uint64_t _maxbw, uint64_t _minbw,
+            ReplicationRole voluemRole)
+: VolumeAttribute(arrayIdx, arrayName, dataAttribute, inputUuid),
+  StatusProperty(volName, volSizeByte),
+  NetworkProperty(nsid),
+  PerfomanceProperty(_maxiops, _miniops, _maxbw, _minbw),
+  ReplicationProperty(voluemRole)
 {
-    array = arrayName;
-    arrayId = arrayIdx;
-    name = volName;
-    uuid = inputUuid;
-    attribute = volumeAttribute;
-    status = VolumeStatus::Unmounted;
-    replicationState = VolumeReplicationState::StandAloneState;
-    replicationRole = VolumeReplicationRoleProperty::Primary;
-    totalSize = volSizeByte;
-    maxiops = _maxiops;
-    maxbw = _maxbw;
-    miniops = _miniops;
-    minbw = _minbw;
     ID = INVALID_VOL_ID;
     POS_TRACE_INFO(EID(CREATE_VOL_DEBUG_MSG), "Volume name:{} uuid:{} size:{} iops:{} bw:{} attribute:{}, (0:User 1:WAL) created",
-        name, uuid, totalSize, maxiops, maxbw, attribute);
+        volName, inputUuid, volSizeByte, _maxiops, _maxbw, dataAttribute);
 }
 
 VolumeBase::~VolumeBase(void)
@@ -85,22 +77,22 @@ int
 VolumeBase::Mount(void)
 {
     int errorCode = EID(SUCCESS);
-    if (VolumeStatus::Mounted != status)
+    if (VolumeMountStatus::Mounted != GetVolumeMountStatus())
     {
         if (ID == INVALID_VOL_ID)
         {
             errorCode = EID(VOL_INTERNAL_INVALID_ID);
-            POS_TRACE_WARN(errorCode, "invalid vol id. vol name : {}", name);
+            POS_TRACE_WARN(errorCode, "invalid vol id. vol name : {}", GetVolumeName());
             return errorCode;
         }
-        status = VolumeStatus::Mounted;
+        SetVolumeMountStatus(VolumeMountStatus::Mounted);
         POS_TRACE_INFO(EID(MOUNT_VOL_DEBUG_MSG),
-            "Volume mounted name: {}", name);
+            "Volume mounted name: {}", GetVolumeName());
     }
     else
     {
         errorCode = EID(MOUNT_VOL_ALREADY_MOUNTED);
-        POS_TRACE_WARN(errorCode, "vol_name: {}", name);
+        POS_TRACE_WARN(errorCode, "vol_name: {}", GetVolumeName());
     }
 
     return errorCode;
@@ -110,16 +102,16 @@ int
 VolumeBase::Unmount(void)
 {
     int errorCode = EID(SUCCESS);
-    if (VolumeStatus::Unmounted != status)
+    if (VolumeMountStatus::Unmounted != GetVolumeMountStatus())
     {
-        status = VolumeStatus::Unmounted;
+        SetVolumeMountStatus(VolumeMountStatus::Unmounted);
         POS_TRACE_INFO(EID(UNMOUNT_VOL_DEBUG_MSG),
-            "Volume unmounted name: {}", name);
+            "Volume unmounted name: {}", GetVolumeName());
     }
     else
     {
         errorCode = EID(UNMOUNT_VOL_ALREADY_UNMOUNTED);
-        POS_TRACE_WARN(errorCode, "vol_name: {}", name);
+        POS_TRACE_WARN(errorCode, "vol_name: {}", GetVolumeName());
     }
 
     return errorCode;
@@ -137,93 +129,17 @@ VolumeBase::UnlockStatus(void)
     statusMutex.unlock();
 }
 
-void
-VolumeBase::SetSubnqn(std::string inputSubNqn)
-{
-    if (subNqn.empty() == false && inputSubNqn.empty() == false)
-    {
-        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
-            "The volume already has set subsystem {}, replace to {}",
-            subNqn, inputSubNqn);
-    }
-    subNqn = inputSubNqn;
-}
-
-void
-VolumeBase::SetUuid(std::string inputUuid)
-{
-    if (uuid.empty() == false)
-    {
-        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
-            "The volume already has set uuid {}", uuid);
-    }
-
-    if (inputUuid.empty() == false)
-    {
-        POS_TRACE_INFO(EID(VOL_DEBUG_MSG),
-            "The volume has set uuid {}", inputUuid);
-    }
-
-    uuid = inputUuid;
-}
-
-void
-VolumeBase::SetMaxIOPS(uint64_t val)
-{
-    if ((val != 0 && val < MIN_IOPS_LIMIT) || val > MAX_IOPS_LIMIT)
-    {
-        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
-    }
-    maxiops = val;
-}
-
-void
-VolumeBase::SetMaxBW(uint64_t val)
-{
-    if ((val != 0 && val < MIN_BW_LIMIT) || val > MAX_BW_LIMIT)
-    {
-        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
-    }
-    maxbw = val;
-}
-
-void
-VolumeBase::SetMinIOPS(uint64_t val)
-{
-    if (val != 0 && val > MAX_IOPS_LIMIT)
-    {
-        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
-    }
-    miniops = val;
-}
-
-void
-VolumeBase::SetMinBW(uint64_t val)
-{
-    if (val != 0 && val > MAX_BW_LIMIT)
-    {
-        throw EID(VOL_REQ_QOS_OUT_OF_RANGE);
-    }
-    minbw = val;
-}
-
-uint64_t
-VolumeBase::TotalSize(void)
-{
-    return totalSize;
-}
-
 uint64_t
 VolumeBase::UsedSize(void)
 {
-    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(array);
+    IVSAMap* iVSAMap = MapperServiceSingleton::Instance()->GetIVSAMap(GetArrayName());
     return iVSAMap->GetNumUsedBlks(ID) * BLOCK_SIZE;
 }
 
 uint64_t
 VolumeBase::RemainingSize(void)
 {
-    uint64_t totalSize = TotalSize();
+    uint64_t totalSize = GetTotalSize();
     uint64_t usedSize = UsedSize();
     if (usedSize > totalSize)
     {

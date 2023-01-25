@@ -7,13 +7,12 @@
 #include "test/unit-tests/allocator/block_manager/block_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
-
-#include "test/unit-tests/allocator/wbstripe_manager/wbstripe_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/stripe_manager_mock.h"
+#include "test/unit-tests/allocator/stripe_manager/wbstripe_manager_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
-
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -43,7 +42,8 @@ TEST(Allocator, Init_TestInitializeOrNot)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // when 1.
     EXPECT_CALL(*addrInfo, Init);
@@ -69,7 +69,8 @@ TEST(Allocator, Dispose_TestDisposeAfterInitOrNot)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     alloc.Init();
     // given 1.
@@ -95,7 +96,8 @@ TEST(Allocator, Shutdown_TestShutdownWithInitializeOrNot)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     alloc.Init();
     // given 1. - Allocator initialized
@@ -123,8 +125,9 @@ TEST(Allocator, SetNormalGcThreshold_TestSimpleSetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
     GcCtx* gc = new GcCtx();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*ctxManager, GetGcCtx).WillOnce(Return(gc));
     // when
@@ -141,8 +144,9 @@ TEST(Allocator, SetUrgentThreshold_TestSimpleSetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
     GcCtx* gc = new GcCtx();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*ctxManager, GetGcCtx).WillOnce(Return(gc));
     // when
@@ -163,8 +167,9 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
 
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // given 1. fail to create file
     EXPECT_CALL(*file, Create).WillOnce(Return(-1));
@@ -245,7 +250,8 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // given 1. fail to appendIo file
     EXPECT_CALL(*file, Open);
@@ -320,7 +326,8 @@ TEST(Allocator, GetBitmapLayout_TestSimplePrinter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // when
     alloc.GetBitmapLayout("aaa");
@@ -339,7 +346,8 @@ TEST(Allocator, GetInstantMetaInfo_TestSimplePrinter)
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0);
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*ctxManager, GetAllocatorCtx).WillOnce(Return(allocCtx));
     EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
@@ -359,7 +367,8 @@ TEST(Allocator, FlushAllUserdataWBT_TestSimpleCaller)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     {
         InSequence s;
@@ -381,7 +390,8 @@ TEST(Allocator, GetIBlockAllocator_TestSimpleGetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // when
     IBlockAllocator* ret = alloc.GetIBlockAllocator();
@@ -398,7 +408,8 @@ TEST(Allocator, GetIWBStripeAllocator_TestSimpleGetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // when
     IWBStripeAllocator* ret = alloc.GetIWBStripeAllocator();
@@ -415,7 +426,8 @@ TEST(Allocator, GetIContextReplayer_TestSimpleGetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*ctxManager, GetContextReplayer);
     // when
@@ -431,7 +443,8 @@ TEST(Allocator, GetIContextManager_TestSimpleGetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // when
     IContextManager* ret = alloc.GetIContextManager();
@@ -448,7 +461,8 @@ TEST(Allocator, GetIAllocatorWbt_TestSimpleGetter)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     // when
     IAllocatorWbt* ret = alloc.GetIAllocatorWbt();
@@ -462,7 +476,8 @@ TEST(Allocator, PreppareRebuild_testSuccessfulPath)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
     EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(0));
@@ -484,7 +499,8 @@ TEST(Allocator, PreppareRebuild_testIfPrepareStoppedWhenTheresNoTargetSegmentsTo
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
     EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(0));
@@ -505,7 +521,8 @@ TEST(Allocator, PreppareRebuild_testWhenFlushOnlineStripeFails)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
     EXPECT_CALL(*wbManager, FlushAllWbStripes).WillOnce(Return(-1));
@@ -525,7 +542,8 @@ TEST(Allocator, PreppareRebuild_testWhenSetNextSsdLsidFails)
     NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>();
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, iArrayInfo, iState);
+    NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
+    Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
     EXPECT_CALL(*blkManager, TurnOffBlkAllocation).Times(1);
     EXPECT_CALL(*ctxManager, MakeRebuildTargetSegmentList).WillOnce(Return(0));
