@@ -93,7 +93,6 @@ private:
     int _VerifySystemUuid(void* mem);
     int _GetVersion(void* mem);
     int _GetLatestDataList(list<void*> mems, list<void*>* latestMems);
-    string _GetSystemUuid(void);
     bool _AllocMem(void);
     int _LoadIndexMap(void);
     string Serialize(void);

@@ -30,28 +30,16 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "time_helper.h"
+#pragma once
 
+#include <string>
 
+using namespace std;
 
-namespace Time
+class UuidHelper
 {
-string
-GetCurrentTimeStr(string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return ToString(currentTime, format, bufSize);
-}
-
-string
-ToString(time_t time, string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
-}
+public:
+    static string GenUuid(void);
+    static void UuidToByte(string uuid, char* out);
+    static string UuidFromByte(char* byteStr);
+};

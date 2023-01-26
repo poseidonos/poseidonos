@@ -5,6 +5,7 @@ SUBDIRS = allocator \
         io_scheduler \
         event_scheduler \
         network \
+        node \
         mapper \
         mapper_service \
         cpu_affinity \
@@ -72,6 +73,7 @@ SUBDIRS = allocator \
         helper/rpc \
         helper/string \
         helper/time \
+        helper/uuid \
         sys_info \
         qos \
 	singleton_info \

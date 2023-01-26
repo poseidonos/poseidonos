@@ -30,40 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "uuid_helper.h"
 
-#include <time.h>
-#include <string>
-#include <chrono>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
+using namespace boost::uuids;
+
+string UuidHelper::GenUuid(void)
 {
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
+    random_generator gen;
+    uuid uid = gen();
+    return boost::uuids::to_string(uid);
 }
 
-inline std::string
-TimeToString(time_t time)
+void UuidHelper::UuidToByte(string uuidStr, char* out)
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
+    string_generator string_gen;
+    uuid uid = string_gen(uuidStr);
+    for (int i = 0; i < 16; i++)
+    {
+        out[i] = uid.data[i];
+    }
 }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
+string UuidHelper::UuidFromByte(char* byteStr)
 {
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+    uuid uid;
+    memcpy(&uid, byteStr, 16);
+    return boost::uuids::to_string(uid);
 }

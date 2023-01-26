@@ -32,38 +32,29 @@
 
 #pragma once
 
-#include <time.h>
 #include <string>
-#include <chrono>
+#include <fstream>
 
-inline std::string
-TimeToString(time_t time, std::string format, int bufSize)
-{
-    struct tm timeStruct;
-    char* timeBuf = new char[bufSize];
-    localtime_r(&time, &timeStruct);
-    strftime(timeBuf, bufSize, format.c_str(), &timeStruct);
-    std::string result(timeBuf);
-    delete[] timeBuf;
-    return result;
-}
+using namespace std;
 
-inline std::string
-TimeToString(time_t time)
+namespace pos
 {
-    return TimeToString(time, "%Y-%m-%d %X %z", 32);
-}
+class NodeInfo
+{
+public:
+    static string GetUuid(void)
+    {
+        const string uuidPath = "/sys/class/dmi/id/product_uuid";
+        ifstream inputFile(uuidPath, ifstream::in);
+        if (false == inputFile.is_open())
+        {
+            return string("");
+        }
 
-inline std::string
-GetCurrentTimeStr(std::string format, int bufSize)
-{
-    time_t currentTime = time(0);
-    return TimeToString(currentTime, format, bufSize);
-}
-
-inline uint64_t
-GetCurrentSecondsAsEpoch(void)
-{
-    using namespace std::chrono;
-    return duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
-}
+        string uuid;
+        inputFile >> uuid;
+        inputFile.close();
+        return uuid;
+    }
+};
+} // namespace pos
