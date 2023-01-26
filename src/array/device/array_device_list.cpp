@@ -31,6 +31,7 @@
  */
 
 #include "array_device_list.h"
+#include "src/array/device/array_device_api.h"
 
 #include <algorithm>
 #include <functional>
@@ -52,120 +53,73 @@ ArrayDeviceList::~ArrayDeviceList()
     delete mtx;
 }
 
-DeviceSet<string>
-ArrayDeviceList::ExportNames()
+vector<ArrayDevice*>
+ArrayDeviceList::GetDevs(void)
 {
-    unique_lock<mutex> lock(*mtx);
-    DeviceSet<string> devices;
-
-    for_each(devSet_.nvm.begin(), devSet_.nvm.end(), [&](ArrayDevice* dev)
-    {
-        devices.nvm.push_back(dev->GetUblock()->GetName());
-    });
-
-    for_each(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev)
-    {
-        if (ArrayDeviceState::FAULT == dev->GetState())
-        {
-            string oldName = "[REMOVED]" + dev->PrevUblockInfo();
-            devices.data.push_back(oldName);
-        }
-        else
-        {
-            devices.data.push_back(dev->GetUblock()->GetName());
-        }
-    });
-
-    for_each(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev)
-    {
-        devices.spares.push_back(dev->GetUblock()->GetName());
-    });
-
-    return devices;
-}
-
-DeviceSet<ArrayDevice*>&
-ArrayDeviceList::GetDevs()
-{
-    return devSet_;
+    return devs;
 }
 
 int
 ArrayDeviceList::SetNvm(ArrayDevice* nvm)
 {
+    if (nvm->GetType() != ArrayDeviceType::NVM)
+    {
+        int eventId = EID(ARRAY_DEVICE_TYPE_NOT_MATCHED);
+        POS_TRACE_WARN(eventId, "type:{}", nvm->GetType());
+        return eventId;
+    }
     unique_lock<mutex> lock(*mtx);
-    if (devSet_.nvm.size() > 0)
+    auto nvms = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::NVM, devs);
+    if (nvms.size() > 0)
     {
         int eventId = EID(UNABLE_TO_SET_NVM_MORE_THAN_ONE);
-        ArrayDevice* dev = devSet_.nvm.front();
-        string oriNvmName = "";
-        if (dev->GetUblock() != nullptr)
-        {
-            oriNvmName = dev->GetUblock()->GetName();
-        }
-        POS_TRACE_WARN(eventId, "currWriteBufferName: {}", oriNvmName);
+        POS_TRACE_WARN(eventId, "");
         return eventId;
     }
 
     if (nvm == nullptr || nvm->GetUblock() == nullptr)
     {
-        int eventId = EID(UNABLE_TO_SET_NO_OR_NULL_NVM);
+        int eventId = EID(UNABLE_TO_SET_NVM_NO_OR_NULL);
         POS_TRACE_WARN(eventId, "");
         return eventId;
     }
-    else if (nvm->GetUblock() != nullptr)
+
+    auto existing = ArrayDeviceApi::FindDevByName(nvm->GetName(), devs);
+    if (existing != nullptr)
     {
-        if (Exists(nvm->GetUblock()->GetName()) != ArrayDeviceType::NONE)
-        {
-            int eventId = EID(UNABLE_TO_SET_NVM_ALREADY_OCCUPIED);
-            POS_TRACE_WARN(eventId, "devName: {}", nvm->GetUblock()->GetName());
-            return eventId;
-        }
-        nvm->GetUblock()->SetClass(DeviceClass::ARRAY);
+        int eventId = EID(UNABLE_TO_SET_NVM_ALREADY_OCCUPIED);
+        POS_TRACE_WARN(eventId, "devName: {}", nvm->GetName());
+        return eventId;
     }
-    devSet_.nvm.push_back(nvm);
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
-        "the device {} added to the Array as NVM",
-        nvm->GetUblock()->GetName());
+    nvm->GetUblock()->SetClass(DeviceClass::ARRAY);
+    
+    devs.push_back(nvm);
     return 0;
 }
 
 int
-ArrayDeviceList::AddData(ArrayDevice* dev)
+ArrayDeviceList::AddSsd(ArrayDevice* dev)
 {
+    if (dev->GetType() != ArrayDeviceType::DATA &&
+        dev->GetType() != ArrayDeviceType::SPARE)
+    {
+        int eventId = EID(ARRAY_DEVICE_TYPE_NOT_MATCHED);
+        POS_TRACE_WARN(eventId, "type:{}", dev->GetType());
+        return eventId;
+    }
     unique_lock<mutex> lock(*mtx);
     if (dev->GetUblock() != nullptr)
     {
-        if (Exists(dev->GetUblock()->GetName()) != ArrayDeviceType::NONE)
+        auto existing = ArrayDeviceApi::FindDevByName(dev->GetName(), devs);
+        if (existing != nullptr)
         {
             int eventId = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
-            POS_TRACE_WARN(eventId, "devName: {}", dev->GetUblock()->GetName());
+            POS_TRACE_WARN(eventId, "devName: {}", dev->GetName());
             return eventId;
         }
         dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     }
-    devSet_.data.push_back(dev);
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
-        "the device added to the Array as DATA");
-    return 0;
-}
-
-int
-ArrayDeviceList::AddSpare(ArrayDevice* dev)
-{
-    unique_lock<mutex> lock(*mtx);
-    ArrayDeviceType existType = Exists(dev->GetUblock()->GetName());
-    if (existType != ArrayDeviceType::NONE)
-    {
-        int eventId = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
-        POS_TRACE_WARN(eventId, "devName: {}",dev->GetUblock()->GetName());
-        return eventId;
-    }
-    dev->GetUblock()->SetClass(DeviceClass::ARRAY);
-    devSet_.spares.push_back(dev);
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
-        "the device {} added to the Array as SPARE",
-        dev->GetUblock()->GetName());
+    devs.push_back(dev);
     return 0;
 }
 
@@ -173,21 +127,22 @@ int
 ArrayDeviceList::RemoveSpare(ArrayDevice* target)
 {
     unique_lock<mutex> lock(*mtx);
-    auto it = FindSpare(target);
-    if (it == devSet_.spares.end())
+    auto it = _FindDev(target);
+    if (it != devs.end())
     {
-        int eventId = EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
-        POS_TRACE_WARN(eventId, "");
-        return eventId;
+        ArrayDevice* dev = *it;
+        if (dev->GetType() == ArrayDeviceType::SPARE)
+        {
+            if (dev->GetUblock() != nullptr)
+            {
+                dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
+            }
+            delete dev;
+            devs.erase(it);
+            return 0;
+        }
     }
-    if ((*it)->GetUblock() != nullptr)
-    {
-        (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
-    }
-    delete target;
-    target = nullptr;
-    devSet_.spares.erase(it);
-    return 0;
+    return EID(REMOVE_DEV_SSD_NAME_NOT_FOUND);
 }
 
 void
@@ -195,7 +150,7 @@ ArrayDeviceList::Clear()
 {
     unique_lock<mutex> lock(*mtx);
 
-    for (ArrayDevice* dev : devSet_.nvm)
+    for (auto dev : devs)
     {
         if (dev->GetUblock() != nullptr)
         {
@@ -203,95 +158,7 @@ ArrayDeviceList::Clear()
         }
         delete dev;
     }
-    devSet_.nvm.clear();
-
-    for (ArrayDevice* dev : devSet_.data)
-    {
-        if (dev->GetUblock() != nullptr)
-        {
-            dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
-        }
-        delete dev;
-    }
-    devSet_.data.clear();
-
-    for (ArrayDevice* dev : devSet_.spares)
-    {
-        if (dev->GetUblock() != nullptr)
-        {
-            dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
-        }
-        delete dev;
-    }
-    devSet_.spares.clear();
-
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG), "Array device list is cleared");
-}
-
-vector<ArrayDevice*>::iterator
-ArrayDeviceList::FindNvm(string devName)
-{
-    auto it = find_if(devSet_.nvm.begin(), devSet_.nvm.end(), [&](ArrayDevice* dev) -> bool {
-        return dev->GetUblock() != nullptr && dev->GetUblock()->GetName() == devName;
-    });
-
-    return it;
-}
-
-vector<ArrayDevice*>::iterator
-ArrayDeviceList::FindData(string devName)
-{
-    auto it = find_if(devSet_.data.begin(), devSet_.data.end(), [&](ArrayDevice* dev) -> bool {
-        return dev->GetUblock() != nullptr && dev->GetUblock()->GetName() == devName;
-    });
-
-    return it;
-}
-
-vector<ArrayDevice*>::iterator
-ArrayDeviceList::FindSpare(string devName)
-{
-    auto it = find_if(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev) -> bool {
-        return dev->GetUblock()->GetName() == devName;
-    });
-
-    return it;
-}
-
-vector<ArrayDevice*>::iterator
-ArrayDeviceList::FindSpare(ArrayDevice* target)
-{
-    if (target == nullptr)
-    {
-        return devSet_.spares.end();
-    }
-
-    auto it = find_if(devSet_.spares.begin(), devSet_.spares.end(), [&](ArrayDevice* dev) -> bool {
-        return dev == target;
-    });
-
-    return it;
-}
-
-ArrayDeviceType
-ArrayDeviceList::Exists(string devName)
-{
-    if (FindNvm(devName) != devSet_.nvm.end())
-    {
-        return ArrayDeviceType::NVM;
-    }
-
-    else if (FindData(devName) != devSet_.data.end())
-    {
-        return ArrayDeviceType::DATA;
-    }
-
-    else if (FindSpare(devName) != devSet_.spares.end())
-    {
-        return ArrayDeviceType::SPARE;
-    }
-
-    return ArrayDeviceType::NONE;
+    devs.clear();
 }
 
 int
@@ -299,10 +166,11 @@ ArrayDeviceList::SpareToData(ArrayDevice* target, ArrayDevice*& swapOut)
 {
     unique_lock<mutex> lock(*mtx);
     int noSpareToReplace = EID(NO_SPARE_SSD_TO_REPLACE);
-    if (devSet_.spares.size() > 0)
+    auto activeSpareDevs = ArrayDeviceApi::ExtractDevicesByState(ArrayDeviceState::NORMAL,
+        ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::SPARE, devs));
+    if (activeSpareDevs.size() > 0)
     {
-        ArrayDevice* spare = Enumerable::First(devSet_.spares,
-            [](auto d) { return d->GetState() == ArrayDeviceState::NORMAL; });
+        ArrayDevice* spare = activeSpareDevs.front();
         if (spare != nullptr)
         {
             UblockSharedPtr newUblock = spare->GetUblock();
@@ -311,8 +179,8 @@ ArrayDeviceList::SpareToData(ArrayDevice* target, ArrayDevice*& swapOut)
                 UblockSharedPtr oldUblock = target->GetUblock();
                 spare->SetUblock(oldUblock);
                 swapOut = spare;
-                auto it = FindSpare(spare);
-                devSet_.spares.erase(it);
+                auto it = _FindDev(spare);
+                devs.erase(it);
                 target->SetUblock(newUblock);
                 POS_TRACE_INFO(EID(ARRAY_EVENT_SSD_REPLACED),
                     "{} is replaced to the spare {}({}), swapout:{}({})",
@@ -326,4 +194,16 @@ ArrayDeviceList::SpareToData(ArrayDevice* target, ArrayDevice*& swapOut)
     return noSpareToReplace;
 }
 
+vector<ArrayDevice*>::iterator
+ArrayDeviceList::_FindDev(ArrayDevice* dev)
+{
+    for (auto it = devs.begin(); it != devs.end(); ++it)
+    {
+        if (dev == *it)
+        {
+            return it;
+        }
+    }
+    return devs.end();
+}
 } // namespace pos

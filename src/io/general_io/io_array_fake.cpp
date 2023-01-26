@@ -79,7 +79,7 @@ Array::GetSizeInfo(PartitionType type)
 }
 
 int
-Array::DetachDevice(UblockSharedPtr uBlock)
+Array::DetachDevice(IArrayDevice* dev)
 {
     return 0;
 }

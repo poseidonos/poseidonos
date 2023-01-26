@@ -1,4 +1,5 @@
 #include "src/array/device/array_device_manager.h"
+#include "src/array/device/array_device_api.h"
 
 #include <gtest/gtest.h>
 
@@ -312,47 +313,6 @@ TEST(ArrayDeviceManager, ImportByName_testIfSpareDeviceIsActuallyNVMDevice)
     arrDevMgr.Clear(); // to avoid the leakage of mocks
 }
 
-TEST(ArrayDeviceManager, ImportByName_testIfNVMDeviceIsTooSmall)
-{
-    // Given
-    MockDeviceManager mockSysDevMgr(nullptr);
-    string mockArrayName = "mockArray";
-    ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
-    DeviceSet<string> nameSet;
-    string nvm1 = "mock-nvm1";
-    string data1 = "mock-data1", data2 = "mock-data2", data3 = "mock-data3";
-    string spare1 = "mock-spare1";
-
-    nameSet.nvm.push_back(nvm1);
-    nameSet.data.push_back(data1);
-    nameSet.data.push_back(data2);
-    nameSet.data.push_back(data3);
-    nameSet.spares.push_back(spare1);
-    DevName nvm1Id(nvm1), data1Id(data1), data2Id(data2), data3Id(data3), spare1Id(spare1);
-
-    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), DeviceType::NVRAM, 0); // minNvmSize when logicalChunkCount is 2
-    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
-    auto data2UblockDevPtr = MockUblockDevice(data2.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
-    auto data3UblockDevPtr = MockUblockDevice(data3.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
-    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), DeviceType::SSD, ArrayConfig::MINIMUM_SSD_SIZE_BYTE);
-
-    EXPECT_CALL(mockSysDevMgr, GetDev) // currently, we don't have a good gtest matcher for DevName, hence I'm just simply chaining the expected result
-        .WillOnce(Return(nvm1UblockDevPtr))
-        .WillOnce(Return(data1UblockDevPtr))
-        .WillOnce(Return(data2UblockDevPtr))
-        .WillOnce(Return(data3UblockDevPtr))
-        .WillOnce(Return(spare1UblockDevPtr));
-
-    SuppressUninterestingCalls({nvm1UblockDevPtr, data1UblockDevPtr, data2UblockDevPtr, data3UblockDevPtr, spare1UblockDevPtr});
-    // When
-    int actual = arrDevMgr.ImportByName(nameSet);
-
-    // Then
-    int expected = EID(UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN);
-    ASSERT_EQ(expected, actual);
-    arrDevMgr.Clear(); // to avoid the leakage of mocks
-}
-
 TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaSetInformation)
 {
     // Used when loading array
@@ -393,7 +353,7 @@ TEST(ArrayDeviceManager, Import_testIfDeviceSetsAreSuccessfullyImportedWithMetaS
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
-    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrayMeta.devs = ArrayDeviceApi::ExportDeviceMeta(arrDevMgr.GetDevs());
     arrDevMgr.Clear();
 
     // When
@@ -440,7 +400,7 @@ TEST(ArrayDeviceManager, Import_testIfNVMDeviceHasNoUblockWithMetaSetInformation
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
-    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrayMeta.devs = ArrayDeviceApi::ExportDeviceMeta(arrDevMgr.GetDevs());
     arrDevMgr.Clear();
 
     // When
@@ -494,7 +454,7 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceIsFaultState)
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
-    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrayMeta.devs = ArrayDeviceApi::ExportDeviceMeta(arrDevMgr.GetDevs());
     for (DeviceMeta meta : arrayMeta.devs.data)
     {
         meta.state = ArrayDeviceState::FAULT;
@@ -549,7 +509,7 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
 
     arrDevMgr.ImportByName(nameSet);
     ArrayMeta arrayMeta;
-    arrayMeta.devs = arrDevMgr.ExportToMeta();
+    arrayMeta.devs = ArrayDeviceApi::ExportDeviceMeta(arrDevMgr.GetDevs());
     arrDevMgr.Clear();
 
     // When
@@ -558,85 +518,6 @@ TEST(ArrayDeviceManager, Import_testIfDataDeviceHasNoUblockWithMetaSetInformatio
     // Then
     ASSERT_EQ(0, actual);
     arrDevMgr.Clear(); // to avoid the leakage of mocks
-}
-
-TEST(ArrayDeviceManager, Export_testIfArrayDevMgrIsQueriedAgainst)
-{
-    // Given
-    MockDeviceManager mockSysDevMgr;
-    ArrayDeviceManager adm(&mockSysDevMgr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    DeviceSet<ArrayDevice*> emptyDevSet;
-
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(emptyDevSet));
-    adm.SetArrayDeviceList(mockArrayDeviceList);
-
-    // When
-    adm.Export();
-
-    // Then: GetDevs is invoked once
-}
-
-TEST(ArrayDeviceManager, ExportToName_testIfEmptyDeviceSetIsReturned)
-{
-    // Given
-    ArrayDeviceManager adm(nullptr, "mockArrayName");
-
-    // When
-    DeviceSet<string> actual = adm.ExportToName();
-
-    // Then
-    ASSERT_EQ(0, actual.data.size());
-    ASSERT_EQ(0, actual.nvm.size());
-    ASSERT_EQ(0, actual.spares.size());
-}
-
-TEST(ArrayDeviceManager, ExportToName_testIfArrayDevListIsQueriedAgainst)
-{
-    // Given
-    ArrayDeviceManager adm(nullptr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    adm.SetArrayDeviceList(mockArrayDeviceList);
-    DeviceSet<string> emptyDevSet;
-    EXPECT_CALL(*mockArrayDeviceList, ExportNames).WillOnce(Return(emptyDevSet));
-
-    // When
-    adm.ExportToName();
-
-    // Then: GetDevs() should be called once
-}
-
-TEST(ArrayDeviceManager, ExportToMeta_testIfDeviceSetIsExtractedFromArrayDevList)
-{
-    // Given
-    ArrayDeviceManager adm(nullptr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    adm.SetArrayDeviceList(mockArrayDeviceList);
-    DeviceSet<ArrayDevice*> deviceSet;
-
-    string nvm1 = "mock-nvm", data1 = "mock-data1", spare1 = "mock-spare1";
-    string nvm1SN = "mock-nvm-sn", data1SN = "mock-data1-sn", spare1SN = "mock-spare1-sn";
-    auto nvm1UblockDevPtr = MockUblockDevice(nvm1.c_str(), nvm1SN);
-    auto data1UblockDevPtr = MockUblockDevice(data1.c_str(), data1SN);
-    auto spare1UblockDevPtr = MockUblockDevice(spare1.c_str(), spare1SN);
-    ArrayDevice nvmDev(nvm1UblockDevPtr), dataDev(data1UblockDevPtr), spareDev(spare1UblockDevPtr);
-    deviceSet.nvm.push_back(&nvmDev);
-    deviceSet.data.push_back(&dataDev);
-    deviceSet.spares.push_back(&spareDev);
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-
-    // When
-    DeviceSet<DeviceMeta> actual = adm.ExportToMeta();
-
-    // Then
-    ASSERT_EQ(1, actual.nvm.size());
-    ASSERT_EQ(nvm1SN, actual.nvm.at(0).uid);
-
-    ASSERT_EQ(1, actual.data.size());
-    ASSERT_EQ(data1SN, actual.data.at(0).uid);
-
-    ASSERT_EQ(1, actual.spares.size());
-    ASSERT_EQ(spare1SN, actual.spares.at(0).uid);
 }
 
 TEST(ArrayDeviceManager, Clear_testIfNullPtrIsHandled)
@@ -683,6 +564,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
 
     // Then
     ASSERT_EQ(EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED), actual);
+    arrDevMgr.Clear();
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
@@ -697,16 +579,18 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
     shared_ptr<MockUBlockDevice> ptrMockUblockDev2 = make_shared<MockUBlockDevice>("mock-dataDev2", EXPECTED_DEV_SIZE, nullptr);
     shared_ptr<MockUBlockDevice> ptrMockUblockDev3 = make_shared<MockUBlockDevice>("mock-dataDev3", EXPECTED_DEV_SIZE, nullptr);
     shared_ptr<MockUBlockDevice> ptrMockSpare = make_shared<MockUBlockDevice>(spareName, SMALLER_DEV_SIZE, nullptr);
-    MockArrayDevice dataDev1(ptrMockUblockDev1), dataDev2(ptrMockUblockDev2), dataDev3(ptrMockUblockDev3);
-    DeviceSet<ArrayDevice*> deviceSet;
-    deviceSet.data.push_back(&dataDev1);
-    deviceSet.data.push_back(&dataDev2);
-    deviceSet.data.push_back(&dataDev3);
+    MockArrayDevice dataDev1(ptrMockUblockDev1, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
+    MockArrayDevice dataDev2(ptrMockUblockDev2, ArrayDeviceState::NORMAL, 1, ArrayDeviceType::DATA);
+    MockArrayDevice dataDev3(ptrMockUblockDev3, ArrayDeviceState::NORMAL, 2, ArrayDeviceType::DATA);
+    vector<ArrayDevice*> deviceSet;
+    deviceSet.push_back(&dataDev1);
+    deviceSet.push_back(&dataDev2);
+    deviceSet.push_back(&dataDev3);
 
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
     EXPECT_CALL(mockSysDevMgr, GetDev).WillRepeatedly(Return(ptrMockSpare));
     EXPECT_CALL(*ptrMockSpare, GetClass).WillOnce(Return(DeviceClass::SYSTEM));
     EXPECT_CALL(*ptrMockSpare, GetSize).WillRepeatedly(Return(SMALLER_DEV_SIZE)); // intentionally passing in smaller capacity
@@ -719,12 +603,16 @@ TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
     EXPECT_CALL(dataDev1, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
     EXPECT_CALL(dataDev2, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
     EXPECT_CALL(dataDev3, GetState).WillRepeatedly(Return(ArrayDeviceState::NORMAL));
+    EXPECT_CALL(dataDev1, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
+    EXPECT_CALL(dataDev2, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
+    EXPECT_CALL(dataDev3, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
 
     // When
     int actual = arrDevMgr.AddSpare(spareName);
 
     // Then
     ASSERT_EQ(EID(ADD_SPARE_CAPACITY_IS_TOO_SMALL), actual);
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
@@ -737,9 +625,9 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
     auto data1 = MockUblockDevice("data1");
     auto spare1 = MockUblockDevice(devName.c_str());
 
-    ArrayDevice data1Dev(data1, ArrayDeviceState::NORMAL);
-    DeviceSet<ArrayDevice*> deviceSet;
-    deviceSet.data.push_back(&data1Dev);
+    ArrayDevice data1Dev(data1, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
+    vector<ArrayDevice*> deviceSet;
+    deviceSet.push_back(&data1Dev);
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
@@ -747,8 +635,8 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
     EXPECT_CALL(*spare1.get(), GetClass).WillOnce(Return(DeviceClass::SYSTEM));
     EXPECT_CALL(*spare1.get(), GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
     EXPECT_CALL(*data1.get(), GetSize).WillRepeatedly(Return(EXPECTED_DEV_SIZE));
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    EXPECT_CALL(*mockArrayDeviceList, AddSpare(_)).WillOnce([](ArrayDevice* dev)
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, AddSsd(_)).WillOnce([](ArrayDevice* dev)
     {
         delete dev; // to avoid leakage
         return 0;
@@ -759,6 +647,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfSpareIsAddedToArrayDeviceList)
 
     // Then
     ASSERT_EQ(0, actual);
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
@@ -769,8 +658,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalFails)
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(nullptr));
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).Times(0);
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).Times(1);
     EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).Times(0);
 
     // When
@@ -787,14 +675,14 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr, "mockArrayName");
 
     auto spare1 = MockUblockDevice("spare1");
-    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
-    DeviceSet<ArrayDevice*> deviceSet;
-    deviceSet.spares.push_back(&spare1Dev);
+    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE);
+    vector<ArrayDevice*> deviceSet;
+    deviceSet.push_back(&spare1Dev);
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*spare1, GetName).WillRepeatedly(Return("spare1"));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
     EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
 
     // When
@@ -802,6 +690,7 @@ TEST(ArrayDeviceManager, RemoveSpare_testIfSpareDeviceRemovalIsSuccessful)
 
     // Then
     ASSERT_EQ(0, actual);
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
@@ -812,21 +701,22 @@ TEST(ArrayDeviceManager, RemoveSpare_testWithPassingArrayDevice)
     ArrayDeviceManager arrDevMgr(&mockSysDevMgr, mockArrayName);
 
     auto spare1 = MockUblockDevice("spare1");
-    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL);
-    DeviceSet<ArrayDevice*> deviceSet;
-    deviceSet.spares.push_back(&spare1Dev);
+    ArrayDevice spare1Dev(spare1, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE);
+    vector<ArrayDevice*> deviceSet;
+    deviceSet.push_back(&spare1Dev);
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
+    EXPECT_CALL(*spare1, GetName).WillRepeatedly(Return("spare1"));
     EXPECT_CALL(*mockArrayDeviceList, RemoveSpare).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    EXPECT_CALL(mockSysDevMgr, GetDev).WillOnce(Return(spare1));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
 
     // When
     int actual = arrDevMgr.RemoveSpare("spare1");
 
     // Then
     ASSERT_EQ(0, actual);
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
@@ -848,141 +738,6 @@ TEST(ArrayDeviceManager, ReplaceWithSpare_testIfArrayDeviceListIsQueriedAgainst)
     ASSERT_EQ(REPLACE_SUCCESS, actual);
 }
 
-TEST(ArrayDeviceManager, GetDev_testIfNullPtrIsHandled)
-{
-    // Given
-    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
-    ArrayDevice* arrDev;
-    ArrayDeviceType arrDevType;
-    UblockSharedPtr uBlock = nullptr;
-
-    // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(uBlock);
-
-    // Then
-    ASSERT_EQ(nullptr, arrDev);
-    ASSERT_EQ(ArrayDeviceType::NONE, arrDevType);
-}
-
-TEST(ArrayDeviceManager, GetDev_testIfGetDevNVMIsHandled)
-{
-    // Given
-    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
-
-    DeviceSet<ArrayDevice*> deviceSet;
-    auto nvmUBlockDev = MockUblockDevice("mock-nvm");
-    ArrayDevice nvmDev(nvmUBlockDev);
-    deviceSet.nvm.push_back(&nvmDev);
-
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    ArrayDevice* arrDev;
-    ArrayDeviceType arrDevType;
-
-    // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(nvmUBlockDev);
-
-    // Then
-    ASSERT_EQ(&nvmDev, arrDev);
-    ASSERT_EQ(ArrayDeviceType::NVM, arrDevType);
-}
-
-TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandled)
-{
-    // Given
-    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
-
-    DeviceSet<ArrayDevice*> deviceSet;
-    auto dataUBlockDev = MockUblockDevice("mock-data");
-    ArrayDevice dataDev(dataUBlockDev);
-    deviceSet.data.push_back(&dataDev);
-
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    ArrayDevice* arrDev;
-    ArrayDeviceType arrDevType;
-
-    // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(dataUBlockDev);
-
-    // Then
-    ASSERT_EQ(&dataDev, arrDev);
-    ASSERT_EQ(ArrayDeviceType::DATA, arrDevType);
-}
-
-TEST(ArrayDeviceManager, GetDev_testIfGetDevSPAREIsHandled)
-{
-    // Given
-    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
-
-    DeviceSet<ArrayDevice*> deviceSet;
-    auto spareUBlockDev = MockUblockDevice("mock-spare");
-    ArrayDevice spareDev(spareUBlockDev);
-    deviceSet.spares.push_back(&spareDev);
-
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    ArrayDevice* arrDev;
-    ArrayDeviceType arrDevType;
-
-    // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(spareUBlockDev);
-
-    // Then
-    ASSERT_EQ(&spareDev, arrDev);
-    ASSERT_EQ(ArrayDeviceType::SPARE, arrDevType);
-}
-
-TEST(ArrayDeviceManager, GetDev_testIfGetDevFailedMatchIsHandled)
-{
-    // Given
-    ArrayDeviceManager arrDevMgr(nullptr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
-
-    auto missingUBlockDev = MockUblockDevice("mock-data-missing");
-    DeviceSet<ArrayDevice*> deviceSet;
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    ArrayDevice* arrDev;
-    ArrayDeviceType arrDevType;
-
-    // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(missingUBlockDev);
-
-    // Then
-    ASSERT_EQ(nullptr, arrDev);
-    ASSERT_EQ(ArrayDeviceType::NONE, arrDevType);
-}
-
-TEST(ArrayDeviceManager, GetDev_testIfGetDevDATAIsHandledWithDeviceSerialNumber)
-{
-    // Given
-    MockDeviceManager* mockSysDevMgr = new MockDeviceManager();
-    ArrayDeviceManager arrDevMgr(mockSysDevMgr, "mockArrayName");
-    MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
-    arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
-
-    DeviceSet<ArrayDevice*> deviceSet;
-    auto dataUBlockDev = MockUblockDevice("mock-data");
-    ArrayDevice dataDev(dataUBlockDev);
-    deviceSet.data.push_back(&dataDev);
-
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
-    ArrayDevice* arrDev;
-    ArrayDeviceType arrDevType;
-
-    // When
-    std::tie(arrDev, arrDevType) = arrDevMgr.GetDev(dataUBlockDev);
-
-    // Then
-    ASSERT_EQ(&dataDev, arrDev);
-    ASSERT_EQ(ArrayDeviceType::DATA, arrDevType);
-    delete mockSysDevMgr;
-}
-
 TEST(ArrayDeviceManager, GetFaulty_testIfFaultyArrayDeviceIsReturned)
 {
     // Given
@@ -990,22 +745,23 @@ TEST(ArrayDeviceManager, GetFaulty_testIfFaultyArrayDeviceIsReturned)
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    DeviceSet<ArrayDevice*> deviceSet;
+    vector<ArrayDevice*> deviceSet;
     auto nonFaultyUBlockDev = MockUblockDevice("mock-data-nonfaulty");
     auto faultyUBlockDev = MockUblockDevice("mock-data-faulty");
     ArrayDevice dataNonFaulty(nonFaultyUBlockDev, ArrayDeviceState::NORMAL);
     ArrayDevice dataFaulty(faultyUBlockDev, ArrayDeviceState::FAULT);
-    deviceSet.data.push_back(&dataNonFaulty);
-    deviceSet.data.push_back(&dataFaulty);
+    deviceSet.push_back(&dataNonFaulty);
+    deviceSet.push_back(&dataFaulty);
 
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
 
     // When
-    vector<IArrayDevice*> actual = arrDevMgr.GetFaulty();
+    vector<ArrayDevice*> actual = arrDevMgr.GetFaulty();
 
     // Then
     ASSERT_TRUE(actual.size() > 0);
     ASSERT_EQ(&dataFaulty, actual.front());
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, GetFaulty_testIfEmptyListIsReturnedWhenThereIsNoFaultyDevice)
@@ -1015,21 +771,22 @@ TEST(ArrayDeviceManager, GetFaulty_testIfEmptyListIsReturnedWhenThereIsNoFaultyD
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    DeviceSet<ArrayDevice*> deviceSet;
+    vector<ArrayDevice*> deviceSet;
     auto nonFaultyUBlockDev1 = MockUblockDevice("mock-data-nonfaulty1");
     auto nonFaultyUBlockDev2 = MockUblockDevice("mock-data-nonfaulty2");
     ArrayDevice dataNonFaulty1(nonFaultyUBlockDev1, ArrayDeviceState::NORMAL);
     ArrayDevice dataNonFaulty2(nonFaultyUBlockDev2, ArrayDeviceState::NORMAL);
-    deviceSet.data.push_back(&dataNonFaulty1);
-    deviceSet.data.push_back(&dataNonFaulty2);
+    deviceSet.push_back(&dataNonFaulty1);
+    deviceSet.push_back(&dataNonFaulty2);
 
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
 
     // When
-    vector<IArrayDevice*> actual = arrDevMgr.GetFaulty();
+    vector<ArrayDevice*> actual = arrDevMgr.GetFaulty();
 
     // Then
     ASSERT_EQ(0, actual.size());
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
@@ -1039,20 +796,21 @@ TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsReturned)
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    DeviceSet<ArrayDevice*> deviceSet;
+    vector<ArrayDevice*> deviceSet;
     auto normalUBlockDev = MockUblockDevice("mock-data-normal");
     auto rebuildUBlockDev = MockUblockDevice("mock-data-rebuild");
     ArrayDevice normalDev(normalUBlockDev, ArrayDeviceState::NORMAL);
     ArrayDevice rebuildDev(rebuildUBlockDev, ArrayDeviceState::REBUILD);
-    deviceSet.data.push_back(&normalDev);
-    deviceSet.data.push_back(&rebuildDev);
+    deviceSet.push_back(&normalDev);
+    deviceSet.push_back(&rebuildDev);
 
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
     // When
-    vector<IArrayDevice*> actual = arrDevMgr.GetRebuilding();
+    vector<ArrayDevice*> actual = arrDevMgr.GetRebuilding();
 
     // Then
     ASSERT_EQ(&rebuildDev, actual.front());
+    deviceSet.clear();
 }
 
 TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsNotRebuildState)
@@ -1063,20 +821,21 @@ TEST(ArrayDeviceManager, GetRebuilding_testIfRebuildDeviceIsNotRebuildState)
     MockArrayDeviceList* mockArrayDeviceList = new MockArrayDeviceList;
     arrDevMgr.SetArrayDeviceList(mockArrayDeviceList);
 
-    DeviceSet<ArrayDevice*> deviceSet;
+    vector<ArrayDevice*> deviceSet;
     auto normalUBlockDev = MockUblockDevice("mock-data-normal");
     auto rebuildUBlockDev = MockUblockDevice("mock-data-rebuild");
     ArrayDevice normalDev(normalUBlockDev, ArrayDeviceState::NORMAL);
     ArrayDevice rebuildDev(rebuildUBlockDev, ArrayDeviceState::NORMAL);
-    deviceSet.data.push_back(&normalDev);
-    deviceSet.data.push_back(&rebuildDev);
+    deviceSet.push_back(&normalDev);
+    deviceSet.push_back(&rebuildDev);
 
-    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(ReturnRef(deviceSet));
+    EXPECT_CALL(*mockArrayDeviceList, GetDevs).WillOnce(Return(deviceSet));
     // When
-    vector<IArrayDevice*> actual = arrDevMgr.GetRebuilding();
+    vector<ArrayDevice*> actual = arrDevMgr.GetRebuilding();
 
     // Then
     ASSERT_EQ(0, actual.size());
+    deviceSet.clear();
 }
 
 } // namespace pos

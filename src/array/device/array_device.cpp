@@ -80,7 +80,7 @@ ArrayDevice::GetName(void)
 {
     if (uBlock == nullptr)
     {
-        return "null";
+        return "";
     }
     return uBlock->GetName();
 }
@@ -90,7 +90,7 @@ ArrayDevice::GetSerial(void)
 {
     if (uBlock == nullptr)
     {
-        return "null";
+        return "";
     }
     return uBlock->GetSN();
 }

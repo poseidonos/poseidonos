@@ -41,6 +41,7 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/device/device_manager.h"
 #include "src/array/partition/stripe_partition.h"
+#include "src/array/device/array_device_api.h"
 
 namespace pos
 {
@@ -92,12 +93,8 @@ ParityLocationWbtCommand::Execute(Args &argv, JsonElement &elem)
         return ret;
     }
 
-    ArrayDeviceType devType;
-    ArrayDevice* arrayDev = nullptr;
-    DevName name(devName);
-    UblockSharedPtr uBlock = DeviceManagerSingleton::Instance()->GetDev(name);
-    tie(arrayDev, devType) = sysArray->devMgr_->GetDev(uBlock);
-    if (arrayDev == nullptr || devType != ArrayDeviceType::DATA)
+    ArrayDevice* arrayDev = ArrayDeviceApi::FindDevByName(devName, sysArray->devMgr_->GetDevs());
+    if (arrayDev == nullptr || arrayDev->GetType() != ArrayDeviceType::DATA)
     {
         out << "device not found" << endl;
         return ret;

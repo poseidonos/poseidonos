@@ -32,34 +32,33 @@
 
 #pragma once
 
-#include <mutex>
 #include <string>
 #include <vector>
 
 #include "array_device.h"
-#include "src/array/meta/array_meta.h"
+#include "src/array/meta/device_meta.h"
+#include "src/array_models/dto/device_set.h"
 
 using namespace std;
 
 namespace pos
 {
-using ArrayDeviceSet = DeviceSet<ArrayDevice*>;
+class DeviceManager;
 
-class ArrayDeviceList
+class ArrayDeviceApi
 {
 public:
-    ArrayDeviceList();
-    virtual ~ArrayDeviceList();
-    virtual int SetNvm(ArrayDevice* nvm);
-    virtual int AddSsd(ArrayDevice* dev);
-    virtual int RemoveSpare(ArrayDevice* target);
-    virtual int SpareToData(ArrayDevice* target, ArrayDevice*& swapOut);
-    virtual void Clear(void);
-    virtual vector<ArrayDevice*> GetDevs(void);
-
-private:
-    vector<ArrayDevice*>::iterator _FindDev(ArrayDevice* dev);
-    mutex* mtx = nullptr;
-    vector<ArrayDevice*> devs;
+    static ArrayDevice* FindDevByName(string devName, const vector<ArrayDevice*>& devs);
+    static ArrayDevice* FindDevBySn(string serialNumber, const vector<ArrayDevice*>& devs);
+    static vector<IArrayDevice*> ConvertToInterface(const vector<ArrayDevice*>& devs);
+    static vector<UblockSharedPtr> ConvertToUblock(const vector<ArrayDevice*>& devs);
+    static vector<ArrayDevice*> ExtractDevicesByState(ArrayDeviceState state, const vector<ArrayDevice*>& devs);
+    static vector<ArrayDevice*> ExtractDevicesByType(ArrayDeviceType type, const vector<ArrayDevice*>& devs);
+    static vector<ArrayDevice*> ExtractDevices(const vector<ArrayDevice*>& devs);
+    static uint64_t GetMinimumCapacity(const vector<ArrayDevice*>& devs);
+    static DeviceSet<DeviceMeta> ExportDeviceMeta(const vector<ArrayDevice*>& devs);
+    static int ImportInspection(const vector<ArrayDevice*>& devs);
 };
+
 } // namespace pos
+
