@@ -11,13 +11,14 @@ TEST(UuidHelper, UuidHelper_GenNewUuidAndVerify)
 {
     // Given
     string newUuid = "";
-    string hyphenRemovedUuid = "";
 
     // When
-    newUuid = UuidHelper::NewUuid();
-    hyphenRemovedUuid = UuidHelper::RemoveHyphen(newUuid);
+    newUuid = UuidHelper::GenUuid();
+    char uuidByte[16];
+    UuidHelper::UuidToByte(newUuid, uuidByte);
+    string convertedUuid = UuidHelper::UuidFromByte(uuidByte);
 
     // Then
     ASSERT_EQ(36, newUuid.length());
-    ASSERT_EQ(32, hyphenRemovedUuid.length());
+    ASSERT_EQ(newUuid, convertedUuid);
 }

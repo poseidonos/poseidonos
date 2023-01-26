@@ -5,6 +5,7 @@ SUBDIRS = allocator \
         io_scheduler \
         event_scheduler \
         network \
+        node \
         mapper \
         mapper_service \
         cpu_affinity \

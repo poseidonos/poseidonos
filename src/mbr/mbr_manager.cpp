@@ -49,7 +49,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
-#include "src/helper/uuid/uuid_helper.h"
+#include "src/node/node_info.h"
 #include "version_provider.h"
 
 using namespace std::placeholders;
@@ -58,7 +58,7 @@ namespace pos
 MbrManager::MbrManager(void)
 : MbrManager(
       new DataProtect(),
-      UuidHelper::GetNodeUuid(),
+      NodeInfo::GetUuid(),
       bind(&MbrManager::_DiskIo, this, _1, _2),
       bind(&MbrManager::_IterateReadFromDevices, this, _1, _2),
       DeviceManagerSingleton::Instance(),

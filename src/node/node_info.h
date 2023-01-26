@@ -33,13 +33,28 @@
 #pragma once
 
 #include <string>
+#include <fstream>
 
 using namespace std;
 
-class UuidHelper
+namespace pos
+{
+class NodeInfo
 {
 public:
-    static string GenUuid(void);
-    static void UuidToByte(string uuid, char* out);
-    static string UuidFromByte(char* byteStr);
+    static string GetUuid(void)
+    {
+        const string uuidPath = "/sys/class/dmi/id/product_uuid";
+        ifstream inputFile(uuidPath, ifstream::in);
+        if (false == inputFile.is_open())
+        {
+            return string("");
+        }
+
+        string uuid;
+        inputFile >> uuid;
+        inputFile.close();
+        return uuid;
+    }
 };
+} // namespace pos

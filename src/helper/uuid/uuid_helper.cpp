@@ -30,43 +30,34 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define UUID_IMPLEMENTATION
-#include "uuid.h"
 #include "uuid_helper.h"
 
-#include <algorithm>
-#include <fstream>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp>
 
-string UuidHelper::NewUuid(void)
+using namespace boost::uuids;
+
+string UuidHelper::GenUuid(void)
+{
+    random_generator gen;
+    uuid uid = gen();
+    return boost::uuids::to_string(uid);
+}
+
+void UuidHelper::UuidToByte(string uuidStr, char* out)
+{
+    string_generator string_gen;
+    uuid uid = string_gen(uuidStr);
+    for (int i = 0; i < 16; i++)
+    {
+        out[i] = uid.data[i];
+    }
+}
+
+string UuidHelper::UuidFromByte(char* byteStr)
 {
     uuid uid;
-    uuid4_generate(&uid);
-    return _UuidToString(&uid);
-}
-
-string UuidHelper::RemoveHyphen(string hyphendUuid)
-{
-    string uuid = hyphendUuid;
-    uuid.erase(std::remove(uuid.begin(), uuid.end(), '-'), uuid.end());
-    return uuid;
-}
-
-string UuidHelper::GetNodeUuid(void)
-{
-    const string uuidPath = "/sys/class/dmi/id/product_uuid";
-    ifstream inputFile(uuidPath, ifstream::in);
-    if (false == inputFile.is_open())
-    {
-        return string("");
-    }
-
-    string uuid;
-    inputFile >> uuid;
-    inputFile.close();
-    return uuid;
-}
-
-string UuidHelper::_UuidToString(uuid* uid)
-{
-    return UUID_TO_STRING(uid);
+    memcpy(&uid, byteStr, 16);
+    return boost::uuids::to_string(uid);
 }
