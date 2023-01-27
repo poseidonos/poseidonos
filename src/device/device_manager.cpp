@@ -43,6 +43,7 @@
 #include "src/spdk_wrapper/nvme.hpp"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_driver.h"
+#include "src/device/directive_cmd.h"
 #include "src/include/branch_prediction.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
@@ -570,6 +571,25 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
     cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
     ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
     dev->WrapupOpenDeviceSpecific();
+
+    DeviceType deviceType = dev->GetType();
+    if (DeviceType::SSD == deviceType)
+    {
+        UnvmeSsdSharedPtr unvmeSsd = static_pointer_cast<UnvmeSsd>(dev);
+        struct spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(unvmeSsd->GetNs());
+        uint64_t flags = spdk_nvme_ctrlr_get_flags(ctrlr);
+        if (SPDK_NVME_CTRLR_DIRECTIVES_SUPPORTED & flags)
+        {
+            DirectiveCmd* directiveCmd = new DirectiveCmd(dev, ctrlr, ioDispatcher);
+            directiveCmd->EnableDirective();
+            directiveCmd->AllocateResources();
+        }
+        else
+        {
+            POS_TRACE_INFO(EID(UNVME_OPERATION_NOT_SUPPORTED),
+                "uNVMe Device does not support Directives: {}", unvmeSsd->GetName());
+        }
+    }
 }
 
 } // namespace pos
