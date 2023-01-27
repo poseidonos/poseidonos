@@ -56,9 +56,9 @@ class StripePartition : public Partition, public IRecover, public RebuildTarget
 public:
     StripePartition(PartitionType type,
                     vector<ArrayDevice *> devs,
-                    RaidTypeEnum raid);
+                    RaidType raid);
     virtual ~StripePartition(void);
-    virtual int Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks);
+    virtual int Create(uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBlks);
     void RegisterService(IPartitionServices* svc) override;
     int Translate(list<PhysicalEntry>& pel, const LogicalEntry& le) override;
     int GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) override;
@@ -70,7 +70,7 @@ public:
     unique_ptr<RebuildContext> GetRebuildCtx(const vector<IArrayDevice*>& fault) override;
     unique_ptr<RebuildContext> GetQuickRebuildCtx(const QuickRebuildPair& rebuildPair) override;
     Method* GetMethod(void) { return method; }
-    RaidTypeEnum GetRaidType(void) override { return raidType; }
+    RaidType GetRaidType(void) override { return raidType; }
 
 protected:
     virtual void _SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPairs& rp);
@@ -86,11 +86,12 @@ private:
 
     list<BufferEntry> _SpliceBuffer(
         list<BufferEntry>& src, uint32_t start, uint32_t remain);
-    int _SetPhysicalAddress(uint64_t startLba, uint32_t segCnt);
+    int _SetPhysicalAddress(uint64_t startLba, uint64_t lastLba);
     void _SetLogicalAddress(void);
     int _SetMethod(uint64_t totalNvmBlks);
+    uint32_t _GetSegmentCount(uint64_t lbaDistance);
     list<PhysicalBlkAddr> _GetRebuildGroup(FtBlkAddr fba, const vector<uint32_t>& abnormals);
-    RaidTypeEnum raidType;
+    RaidType raidType;
     Method* method = nullptr;
     vector<uint32_t> _GetAbnormalDeviceIndex(void);
 };

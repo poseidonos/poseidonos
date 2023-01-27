@@ -40,48 +40,26 @@
 
 namespace pos
 {
-
 int
-PartitionFactory::CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
-    RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions)
-{
-    int ret = _SplitSsdPartitions(data, nvm, metaRaid, dataRaid, partitions);
-    if (ret != 0)
-    {
-        POS_TRACE_WARN(ret, "Failed to split SSD partition");
-    }
-    if (ret == 0 && nvm != nullptr)
-    {
-        ret = _SplitNvmPartitions(nvm, partitions);
-        if (ret != 0)
-        {
-            POS_TRACE_WARN(ret, "Failed to split NVM partition");
-        }
-    }
-
-    return ret;
-}
-
-int
-PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nvm,
-    RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions)
+PartitionFactory::CreateSsdPartitions(vector<ArrayDevice*> devs, uint64_t nvmSizeInByte,
+    RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions)
 {
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Try to split SSD partitions");
     vector<SsdPartitionBuilder*> builders;
     {
         POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
         RaidTypeEnum journalRaid = metaRaid;
-        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nvm);
+        SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nvmSizeInByte);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {
         POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for META_SSD");
-        SsdPartitionOptions option(PartitionType::META_SSD, metaRaid, devs, nvm);
+        SsdPartitionOptions option(PartitionType::META_SSD, metaRaid, devs, nvmSizeInByte);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {
         POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for USER_DATA");
-        SsdPartitionOptions option(PartitionType::USER_DATA, dataRaid, devs, nvm);
+        SsdPartitionOptions option(PartitionType::USER_DATA, dataRaid, devs, nvmSizeInByte);
         builders.push_back(new SsdPartitionBuilder(option));
     }
 
@@ -102,27 +80,28 @@ PartitionFactory::_SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nv
                 delete part;
             }
         }
+        partitions.clear();
     }
 
     for (auto builder : builders)
     {
         delete builder;
     }
+    builders.clear();
 
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "SSD partitions are created");
     return ret;
 }
 
 int
-PartitionFactory::_SplitNvmPartitions(ArrayDevice* nvm, Partitions& partitions)
+PartitionFactory::CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions,
+    uint32_t blksPerStripeOfMetaPart, uint32_t blksPerStripeOfDataPart)
 {
     vector<NvmPartitionBuilder*> builders;
-    uint32_t blksPerChunk = partitions[PartitionType::META_SSD]->GetLogicalSize()->blksPerStripe;
-    NvmPartitionOptions metaOpt(PartitionType::META_NVM, nvm, blksPerChunk);
+    NvmPartitionOptions metaOpt(PartitionType::META_NVM, nvm, blksPerStripeOfMetaPart);
     builders.push_back(new NvmPartitionBuilder(metaOpt));
 
-    blksPerChunk = partitions[PartitionType::USER_DATA]->GetLogicalSize()->blksPerStripe;
-    NvmPartitionOptions wbOpt(PartitionType::WRITE_BUFFER, nvm, blksPerChunk);
+    NvmPartitionOptions wbOpt(PartitionType::WRITE_BUFFER, nvm, blksPerStripeOfDataPart);
     builders.push_back(new NvmPartitionBuilder(wbOpt));
 
     NvmPartitionBuilder* prev = builders.front();

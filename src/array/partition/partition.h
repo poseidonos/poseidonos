@@ -77,12 +77,11 @@ public:
     PartitionType GetType(void) { return type; }
     uint64_t GetLastLba() { return physicalSize.lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }
-    virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
+    virtual RaidType GetRaidType(void) { return RaidTypeEnum::NONE; }
     virtual void MakeDebugInfo(ParitionDebugInfo& obj) final;
 
 protected:
     bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);
-    void _UpdateLastLba(void);
     PartitionLogicalSize logicalSize;
     PartitionPhysicalSize physicalSize;
     vector<ArrayDevice*> devs;

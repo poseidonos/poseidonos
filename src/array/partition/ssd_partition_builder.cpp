@@ -43,26 +43,23 @@ namespace pos
 {
 
 int
-SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
+SsdPartitionBuilder::Build(uint64_t startLba, vector<Partition*>& out)
 {
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {}", option.devices.size());
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Create StripePartition ({})", PARTITION_TYPE_STR[option.partitionType]);
     Partition* base = nullptr;
-    StripePartition* impl = new StripePartition(option.partitionType, option.devices, option.raidType);
-    uint64_t totalNvmBlks = 0;
-    if (option.nvm != nullptr)
-    {
-        totalNvmBlks = option.nvm->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
-    }
-    int ret = impl->Create(startLba, _GetSegmentCount(), totalNvmBlks);
-    base = impl;
+    StripePartition* partition = new StripePartition(option.partitionType, option.devices, option.raidType);
+    uint64_t totalNvmBlks = option.nvmSizeInByte / ArrayConfig::BLOCK_SIZE_BYTE;
+    uint64_t lastLba = _GetLastLba(startLba, _GetSegmentCount());
+    int ret = partition->Create(startLba, lastLba, totalNvmBlks);
+    base = partition;
     if (ret != 0)
     {
         return ret;
     }
     else
     {
-        out[option.partitionType] = base;
+        out.push_back(base);
         if (next != nullptr)
         {
             uint64_t nextLba = base->GetLastLba() + 1;
@@ -71,6 +68,16 @@ SsdPartitionBuilder::Build(uint64_t startLba, Partitions& out)
     }
 
     return 0;
+}
+
+uint64_t
+SsdPartitionBuilder::_GetLastLba(uint64_t startLba, uint32_t segCount)
+{
+     uint64_t lastLba = startLba +
+        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
+        ArrayConfig::BLOCKS_PER_CHUNK * ArrayConfig::STRIPES_PER_SEGMENT *
+        segCount - 1;
+    return lastLba;
 }
 
 uint32_t
@@ -112,8 +119,11 @@ SsdPartitionBuilder::_GetMinCapacity(const vector<ArrayDevice*>& devs)
 
     ArrayDevice* min = Enumerable::Minimum(devList,
         [](auto d) { return d->GetUblock()->GetSize(); });
-
-    return min->GetUblock()->GetSize();
+    if (min != nullptr)
+    {
+        return min->GetSize();
+    }
+    return 0;
 }
 
 uint64_t
@@ -124,8 +134,11 @@ SsdPartitionBuilder::_GetMaxCapacity(const vector<ArrayDevice*>& devs)
 
     ArrayDevice* max = Enumerable::Maximum(devList,
         [](auto d) { return d->GetUblock()->GetSize(); });
-
-    return max->GetUblock()->GetSize();
+    if (max != nullptr)
+    {
+        return max->GetSize();
+    }
+    return 0;
 }
 
 } // namespace pos

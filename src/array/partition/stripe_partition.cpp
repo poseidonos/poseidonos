@@ -55,7 +55,7 @@ namespace pos
 StripePartition::StripePartition(
     PartitionType type,
     vector<ArrayDevice*> devs,
-    RaidTypeEnum raid)
+    RaidType raid)
 : Partition(devs, type),
   RebuildTarget(type == PartitionType::USER_DATA),
   raidType(raid)
@@ -69,27 +69,19 @@ StripePartition::~StripePartition(void)
 }
 
 int
-StripePartition::Create(uint64_t startLba, uint32_t segCnt, uint64_t totalNvmBlks)
+StripePartition::Create(uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBlks)
 {
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Create Partition, RaidType:{}", RaidType(raidType).ToString());
-
     if (raidType == RaidTypeEnum::RAID10 && 0 != devs.size() % 2)
     {
         devs.pop_back();
     }
-    int ret = _SetPhysicalAddress(startLba, segCnt);
-    if (ret != 0)
+    int ret = _SetPhysicalAddress(startLba, lastLba);
+    if (ret == 0)
     {
-        return ret;
+        ret = _SetMethod(totalNvmBlks);
+        _SetLogicalAddress();
     }
-    Partition::_UpdateLastLba();
-    ret = _SetMethod(totalNvmBlks);
-    if (ret != 0)
-    {
-        return ret;
-    }
-    _SetLogicalAddress();
-    return 0;
+    return ret;
 }
 
 void
@@ -105,7 +97,7 @@ StripePartition::RegisterService(IPartitionServices* svc)
     else
     {
         POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target",
-            PARTITION_TYPE_STR[type], RaidType(raidType).ToString());
+            PARTITION_TYPE_STR[type], raidType.ToString());
     }
 }
 
@@ -116,7 +108,7 @@ StripePartition::Translate(list<PhysicalEntry>& pel, const LogicalEntry& le)
     {
         int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during translate. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
-            PARTITION_TYPE_STR[type], RaidType(raidType).ToString(), le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+            PARTITION_TYPE_STR[type], raidType.ToString(), le.addr.stripeId, le.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
 
@@ -133,14 +125,14 @@ StripePartition::GetParityList(list<PhysicalWriteEntry>& parityList, const Logic
     {
         int error = EID(ADDRESS_TRANSLATION_INVALID_LBA);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during making parity. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
-            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+            PARTITION_TYPE_STR[type], raidType.ToString(), src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
     if (src.blkCnt < logicalSize.minWriteBlkCnt)
     {
         int error = EID(ADDRESS_TRANSLATION_INVALID_BLK_CNT);
         POS_TRACE_ERROR(error, "{} partition detects invalid address during making parity 2. raidtype:{}, stripeId:{}, offset:{}, totalStripes:{}, totalBlksPerStripe:{}",
-            PARTITION_TYPE_STR[type], raidType, src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
+            PARTITION_TYPE_STR[type], raidType.ToString(), src.addr.stripeId, src.addr.offset, logicalSize.totalStripes, logicalSize.blksPerStripe);
         return error;
     }
 
@@ -165,17 +157,28 @@ StripePartition::ByteConvert(list<PhysicalByteWriteEntry> &dst,
 }
 
 int
-StripePartition::_SetPhysicalAddress(uint64_t startLba, uint32_t segCnt)
+StripePartition::_SetPhysicalAddress(uint64_t startLba, uint64_t lastLba)
 {
     physicalSize.startLba = startLba;
+    physicalSize.lastLba = lastLba;
     physicalSize.blksPerChunk = ArrayConfig::BLOCKS_PER_CHUNK;
     physicalSize.chunksPerStripe = devs.size();
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
-    physicalSize.totalSegments = segCnt;
-    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "StripePartition::_SetPhysicalAddress, StartLba:{}, RaidType:{}, SegCnt:{}",
-        startLba, RaidType(raidType).ToString(), physicalSize.totalSegments);
+    physicalSize.totalSegments = _GetSegmentCount(lastLba - startLba + 1);
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG),
+        "part_type:{}, start_lba:{}, last_lba:{}, dev_count:{}, segment_count:{}",
+        PARTITION_TYPE_STR[type], startLba, lastLba, physicalSize.chunksPerStripe, physicalSize.totalSegments);
 
     return 0;
+}
+
+uint32_t
+StripePartition::_GetSegmentCount(uint64_t lbaDistance)
+{
+    uint64_t totalBlkCnt = lbaDistance / (uint64_t)ArrayConfig::SECTORS_PER_BLOCK;
+    uint64_t blksPerSegment = ArrayConfig::BLOCKS_PER_CHUNK * ArrayConfig::STRIPES_PER_SEGMENT;
+    uint32_t segmentCnt = totalBlkCnt / blksPerSegment;
+    return segmentCnt;
 }
 
 void
@@ -197,56 +200,53 @@ StripePartition::_SetLogicalAddress(void)
 int
 StripePartition::_SetMethod(uint64_t totalNvmBlks)
 {
-    if (raidType == RaidTypeEnum::RAID0)
+    if (raidType == RaidTypeEnum::NONE)
     {
-        Raid0* raid0 = new Raid0(&physicalSize);
-        method = raid0;
+        method = new RaidNone(&physicalSize);
+    }
+    else if (raidType == RaidTypeEnum::RAID0)
+    {
+        method = new Raid0(&physicalSize);
     }
     else if (raidType == RaidTypeEnum::RAID10)
     {
-        Raid10* raid10 = new Raid10(&physicalSize);
-        method = raid10;
+        method = new Raid10(&physicalSize);
     }
-    else if (raidType == RaidTypeEnum::RAID5)
+    else if (raidType == RaidTypeEnum::RAID5 || 
+        raidType == RaidTypeEnum::RAID6)
     {
-        uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
+        uint64_t blksPerStripe = (uint64_t)physicalSize.blksPerChunk * (uint64_t)physicalSize.chunksPerStripe;
         uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
-        uint64_t maxGcStripes = 2048;
-        uint64_t reqBuffersPerNuma = totalNvmStripes + maxGcStripes;
-        Raid5* raid5 = new Raid5(&physicalSize, reqBuffersPerNuma);
-        bool result = raid5->AllocParityPools(reqBuffersPerNuma);
+        uint64_t reqBuffersPerNuma = totalNvmStripes + ArrayConfig::GC_WRITE_BUFFER_STRIPE_COUNT;
+        uint64_t parityCnt;
+        bool result = false;
+        if (raidType == RaidTypeEnum::RAID5)
+        {
+            parityCnt = 1;
+            Raid5* raid = new Raid5(&physicalSize);
+            method = raid;
+            result = raid->AllocParityPools(reqBuffersPerNuma);
+        }
+        else if (raidType == RaidTypeEnum::RAID6)
+        {
+            parityCnt = 2;
+            Raid6* raid = new Raid6(&physicalSize);
+            method = raid;
+            result = raid->AllocParityPools(reqBuffersPerNuma * parityCnt);
+        }
+
         if (result == false)
         {
-            POS_TRACE_WARN(EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL),
-                "RAID5, buf_count:{}", reqBuffersPerNuma);
+            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
+            POS_TRACE_WARN(eventId,
+                "raid_type:{}, buf_count:{}", raidType.ToString(), reqBuffersPerNuma);
+            return eventId;
         }
-        method = raid5;
-    }
-    else if (raidType == RaidTypeEnum::RAID6)
-    {
-        uint64_t blksPerStripe = static_cast<uint64_t>(physicalSize.blksPerChunk) * physicalSize.chunksPerStripe;
-        uint64_t totalNvmStripes = totalNvmBlks / blksPerStripe;
-        uint64_t maxGcStripes = 2048;
-        uint64_t parityCnt = 2;
-        uint64_t reqBuffersPerNuma = (totalNvmStripes + maxGcStripes) * parityCnt;
-        Raid6* raid6 = new Raid6(&physicalSize, reqBuffersPerNuma);
-        bool result = raid6->AllocParityPools(reqBuffersPerNuma);
-        if (result == false)
-        {
-            POS_TRACE_WARN(EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL),
-                "RAID6, buf_count:{}", reqBuffersPerNuma);
-        }
-        method = raid6;
-    }
-    else if (raidType == RaidTypeEnum::NONE)
-    {
-        RaidNone* raidNone = new RaidNone(&physicalSize);
-        method = raidNone;
     }
     else
     {
         int eventId = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
-        POS_TRACE_WARN(eventId, "raidtype: {} ", RaidType(raidType).ToString());
+        POS_TRACE_WARN(eventId, "raidtype: {} ", raidType.ToString());
         return eventId;
     }
 
@@ -255,7 +255,6 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     {
         int eventId = EID(CREATE_ARRAY_RAID_INVALID_SSD_CNT);
         POS_TRACE_WARN(eventId, "requested num of ssds: {}", numofDevs);
-        delete method;
         return eventId;
     }
     return 0;
@@ -461,7 +460,7 @@ StripePartition::GetRecoverMethod(UbioSmartPtr ubio, RecoverMethod& out)
         else
         {
             int error = EID(RECOVER_REQ_DEV_NOT_FOUND);
-            POS_TRACE_ERROR(error, "Failed to find device {} in {} partition, lba:{}", dev->GetName(), PARTITION_TYPE_STR[type], lba);
+            POS_TRACE_WARN(error, "Failed to find device {} in {} partition, lba:{}", dev->GetName(), PARTITION_TYPE_STR[type], lba);
             return error;
         }
     }
@@ -563,7 +562,7 @@ StripePartition::_SetRebuildPair(const vector<IArrayDevice*>& fault, RebuildPair
     vector<uint32_t> abnormalDeviceIndex = _GetAbnormalDeviceIndex();
     vector<pair<vector<uint32_t>, vector<uint32_t>>> rg =
         method->GetRebuildGroupPairs(rebuildTargetIndexs);
-    POS_TRACE_INFO(EID(REBUILD_PAIR_DEBUG), "SetRebuildPair, count:{}, raidType:{}", rg.size(), GetRaidType());
+    POS_TRACE_INFO(EID(REBUILD_PAIR_DEBUG), "SetRebuildPair, count:{}, raidType:{}", rg.size(), raidType.ToString());
     for (pair<vector<uint32_t>, vector<uint32_t>> group : rg)
     {
         vector<uint32_t> srcs = group.first;
@@ -633,3 +632,4 @@ StripePartition::_GetAbnormalDeviceIndex(void)
 }
 
 } // namespace pos
+

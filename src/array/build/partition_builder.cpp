@@ -30,45 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-const uint64_t SIZE_GB = 1UL * 1024 * 1024 * 1024;
-const uint64_t SIZE_TB = SIZE_GB * 1024;
+#include "partition_builder.h"
+#include "src/helper/enumerable/query.h"
+#include "src/array/partition/stripe_partition.h"
+#include "src/array/partition/nvm_partition.h"
+#include "src/array/partition/partition_factory.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class ArrayConfig
+
+int
+PartitionBuilder::Create(vector<ArrayDevice*>& devs, RaidType metaRaid,
+    RaidType dataRaid, vector<Partition*>& out)
 {
-public:
-    static const uint32_t NVM_DEVICE_COUNT = 1;
-    static const uint64_t MINIMUM_SSD_SIZE_BYTE = 20UL * SIZE_GB;
-    static const uint64_t MINIMUM_NVM_SIZE_BYTE = 2UL * SIZE_GB;
-    static const uint32_t SECTOR_SIZE_BYTE = 512;
-    static const uint32_t BLOCK_SIZE_BYTE = 4096;
-    static const uint32_t SECTORS_PER_BLOCK = 8;
-    static const uint32_t BLOCKS_PER_CHUNK = 64;
-    static const uint64_t STRIPES_PER_SEGMENT = 1024;
-    static const uint64_t SSD_SEGMENT_SIZE_BYTE = BLOCK_SIZE_BYTE * BLOCKS_PER_CHUNK * STRIPES_PER_SEGMENT;
-    static const uint64_t NVM_MBR_SIZE_BYTE = BLOCK_SIZE_BYTE * BLOCKS_PER_CHUNK;
-    static const uint64_t META_NVM_SIZE = 512 * 1024 * 1024; // 512MB
+    if (devs.size() == 0)
+    {
+        // TODO : temporary code to ignore unit-test path
+        return 0;
+    }
+    ArrayDevice* nvm = Enumerable::First(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::NVM; });
+    vector<ArrayDevice*> dataSsds = Enumerable::Where(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::DATA; });
 
-    static const uint64_t MBR_SIZE_BYTE = SSD_SEGMENT_SIZE_BYTE;
-    static const uint64_t SSD_PARTITION_START_LBA =
-        MBR_SIZE_BYTE / SECTOR_SIZE_BYTE;
-    static const uint64_t META_SSD_SIZE_RATIO = 2; // 2% of USER_DATA
+    int ret = PartitionFactory::CreateSsdPartitions(dataSsds, nvm->GetSize(),
+            RaidType(metaRaid), RaidType(dataRaid), out);
+    if (ret == 0)
+    {
+        ret = _CreateNvmPartitions(nvm, out);
+    }
+    return ret;
+}
 
-    static const uint32_t NVM_SEGMENT_SIZE = 1;
-    static const uint32_t JOURNAL_PART_SEGMENT_SIZE = 1;
-    static const uint32_t PARITY_COUNT = 1;
+int
+PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& out)
+{
+    uint32_t blksPerStripeOfMetaPart = 0;
+    uint32_t blksPerStripeOfDataPart = 0;
 
-    static const uint32_t MIN_WRITE_BLOCK_COUNT = 1;
-    static const uint32_t OVER_PROVISIONING_RATIO = 10;
-    static const uint32_t REBUILD_STRIPES_UNIT = STRIPES_PER_SEGMENT;
-    static const uint32_t REBUILD_CHUNK_SIZE_BYTE = BLOCKS_PER_CHUNK * BLOCK_SIZE_BYTE;
-    static const uint32_t MAX_CHUNK_CNT = 32;
+    for (Partition* part : out)
+    {
+        if (part->GetType() == PartitionType::META_SSD)
+        {
+            blksPerStripeOfMetaPart = part->GetLogicalSize()->blksPerStripe;
+        }
+        else if (part->GetType() == PartitionType::USER_DATA)
+        {
+            blksPerStripeOfDataPart = part->GetLogicalSize()->blksPerStripe;
+        }
+    }
 
-    static const uint32_t GC_READ_BUFFER_STRIPE_COUNT = STRIPES_PER_SEGMENT * 2;
-    static const uint32_t GC_WRITE_BUFFER_STRIPE_COUNT = STRIPES_PER_SEGMENT * 2;
-};
+    int ret = PartitionFactory::CreateNvmPartitions(nvm, out,
+        blksPerStripeOfMetaPart, blksPerStripeOfDataPart);
+    return ret;
+}
+
 
 } // namespace pos

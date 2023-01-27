@@ -34,6 +34,7 @@
 
 #include "partition.h"
 #include "partition_formatter.h"
+#include "partition_services.h"
 #include "src/include/raid_type.h"
 
 #include <array>
@@ -51,14 +52,14 @@ class PartitionManager
 public:
     PartitionManager(void);
     virtual ~PartitionManager(void);
+    virtual int Import(vector<Partition*> parts, IPartitionServices* svc);
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
     virtual const PartitionPhysicalSize* GetPhysicalSize(PartitionType type);
-    virtual int CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
-        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc);
     virtual void DeletePartitions(void);
     virtual void FormatPartition(PartitionType type, uint32_t arrayId, IODispatcher* io);
     virtual RaidState GetRaidState(void);
     virtual RaidTypeEnum GetRaidType(PartitionType type);
+    virtual vector<Partition*> GetPartitions(void);
 
 private:
     Partitions partitions;

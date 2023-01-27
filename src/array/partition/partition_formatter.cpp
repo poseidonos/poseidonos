@@ -150,7 +150,7 @@ PartitionFormatter::_CheckTrimValue(uint64_t startLba, uint32_t arrayId,
 
         if (result != 0)
         {
-            POS_TRACE_ERROR(EID(FORMAT_PARTITION_TRIM_FAILED),
+            POS_TRACE_WARN(EID(FORMAT_PARTITION_TRIM_FAILED),
                 "Trim Value is not Zero on {}", devs[i]->GetUblock()->GetName());
             nonZeroResult = 1;
         }

@@ -71,7 +71,7 @@ public:
     {
     }
 
-    int Build(uint64_t startLba, Partitions& out);
+    int Build(uint64_t startLba, vector<Partition*>& out);
     void SetNext(NvmPartitionBuilder* builder) { next = builder; }
 
 private:

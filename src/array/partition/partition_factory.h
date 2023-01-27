@@ -44,13 +44,10 @@ namespace pos
 class PartitionFactory
 {
 public:
-    static int CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
-        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions /* OUT PARAM */);
-
-private:
-    static int _SplitSsdPartitions(vector<ArrayDevice*> devs, ArrayDevice* nvm,
-        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, Partitions& partitions /* OUT PARAM */);
-    static int _SplitNvmPartitions(ArrayDevice* nvm, Partitions& partitions /* OUT PARAM */);
+    static int CreateSsdPartitions(vector<ArrayDevice*> devs, uint64_t nvmSizeInByte,
+        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions /* OUT PARAM */);
+    static int CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions /* OUT PARAM */,
+        uint32_t blksPerStripeOfMetaPart, uint32_t blksPerStripeOfDataPart);
 };
 
 } // namespace pos

@@ -47,12 +47,12 @@ class ArrayDevice;
 class SsdPartitionOptions
 {
 public:
-    SsdPartitionOptions(PartitionType type, RaidTypeEnum raid, vector<ArrayDevice*> devs, ArrayDevice* dev)
+    SsdPartitionOptions(PartitionType type, RaidTypeEnum raid, vector<ArrayDevice*> devs, uint64_t nvmSizeInByte)
     {
         partitionType = type;
         raidType = raid;
         devices = devs;
-        nvm = dev;
+        nvmSizeInByte = nvmSizeInByte;
     }
 
     SsdPartitionOptions(const SsdPartitionOptions& opt)
@@ -60,13 +60,13 @@ public:
         partitionType = opt.partitionType;
         raidType = opt.raidType;
         devices = opt.devices;
-        nvm = opt.nvm;
+        nvmSizeInByte = opt.nvmSizeInByte;
     }
 
     PartitionType partitionType;
     RaidTypeEnum raidType = RaidTypeEnum::NONE;
     vector<ArrayDevice*> devices;
-    ArrayDevice* nvm = nullptr;
+    uint64_t nvmSizeInByte = 0;
 };
 
 class SsdPartitionBuilder
@@ -76,10 +76,11 @@ public:
     : option(opt)
     {
     }
-    int Build(uint64_t startLba, Partitions& out);
+    int Build(uint64_t startLba, vector<Partition*>& out);
     void SetNext(SsdPartitionBuilder* builder) { next = builder; }
 
 private:
+    uint64_t _GetLastLba(uint64_t startLba, uint32_t segCount);
     uint32_t _GetSegmentCount(void);
     SsdPartitionBuilder* next = nullptr;
     SsdPartitionOptions option;

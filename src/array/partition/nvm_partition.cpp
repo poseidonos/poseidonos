@@ -61,7 +61,6 @@ NvmPartition::Create(uint64_t startLba, uint32_t blksPerChunk)
     {
         return ret;
     }
-    Partition::_UpdateLastLba();
     _SetLogicalAddress();
     return ret;
 }
@@ -173,6 +172,10 @@ NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
             startLba, blksPerChunk, physicalSize.stripesPerSegment);
     }
 
+    physicalSize.lastLba = physicalSize.startLba +
+        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
+        physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
+        physicalSize.totalSegments - 1;
     return 0;
 }
 

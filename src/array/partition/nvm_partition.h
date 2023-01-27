@@ -30,8 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NVM_PARTITION_H_
-#define NVM_PARTITION_H_
+#pragma once
 
 #include <vector>
 #include <list>
@@ -63,4 +62,3 @@ private:
 };
 
 } // namespace pos
-#endif // NVM_PARTITION_H_
