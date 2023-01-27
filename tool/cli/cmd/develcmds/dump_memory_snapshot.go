@@ -1,11 +1,11 @@
 package develcmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	pb "kouros/api"
 	"os"
 
 	"github.com/labstack/gommon/log"
@@ -58,7 +58,11 @@ Do you really want to proceed?`
 			if globals.EnableGrpc == false {
 				resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
-				res, err := grpcmgr.SendDumpMemorySnapshotRpc(req)
+				posMgr, err := grpcmgr.GetPOSManager()
+				if err != nil {
+					log.Fatalf("failed to connect to POS: %v", err)
+				}
+				res, req, err := posMgr.DumpMemorySnapshot(param)
 				if err != nil {
 					globals.PrintErrMsg(err)
 					return
@@ -68,6 +72,12 @@ Do you really want to proceed?`
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
 				resJson = string(resByte)
+				reqJson, err = protojson.MarshalOptions{
+					EmitUnpopulated: true,
+				}.Marshal(req)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf request: %v", err)
+				}
 			}
 
 			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
