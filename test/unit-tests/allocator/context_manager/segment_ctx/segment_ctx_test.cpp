@@ -86,7 +86,9 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentListIsRebuilt)
     NiceMock<MockAllocatorAddressInfo> addrInfo;
     SegmentCtxHeader header;
     header.sig = SegmentCtx::SIG_SEGMENT_CTX;
-    SegmentInfo* segInfos = new SegmentInfo[4](0, 0, SegmentState::FREE);
+
+    int numSegInfos = 4;
+    SegmentInfo* segInfos = new SegmentInfo[numSegInfos](0, 0, SegmentState::FREE);
 
     SegmentCtx segCtx(nullptr, &header, segInfos, nullptr, nullptr, &addrInfo, nullptr, 0);
 
@@ -96,21 +98,27 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentListIsRebuilt)
         segCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
     }
 
-    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(4));
-    EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(4);
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(numSegInfos));
+    EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(numSegInfos);
 
+    int dummySize = sizeof(SegmentCtxHeader) + numSegInfos * sizeof(SegmentInfoData);
+    char* dummybuf = new char[dummySize];
     // when
-    segCtx.AfterLoad(nullptr);
+    segCtx.AfterLoad(dummybuf);
 
     delete[] segInfos;
+    delete[] dummybuf;
 }
 
 TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 {
     // given
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
     SegmentCtxHeader* buf = new SegmentCtxHeader();
-    SegmentCtx segCtx(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0);
+    SegmentCtx segCtx(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, nullptr, 0);
     buf->sig = SegmentCtx::SIG_SEGMENT_CTX;
+
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(0));
 
     // when
     segCtx.BeforeFlush((char*)buf);
@@ -460,7 +468,7 @@ TEST_F(SegmentCtxTestFixture, GetSectionAddr_TestSimpleGetter)
     char* buf = segCtx->GetSectionAddr(SC_HEADER);
 
     buf = segCtx->GetSectionAddr(SC_SEGMENT_INFO);
-    EXPECT_EQ(reinterpret_cast<char*>(segCtx->GetSegmentInfos()->data), buf);
+    EXPECT_EQ(nullptr, buf);
 }
 
 TEST_F(SegmentCtxTestFixture, GetSectionSize_TestSimpleGetter)
