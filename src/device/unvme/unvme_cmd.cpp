@@ -35,12 +35,14 @@
 #include "spdk/include/spdk/nvme_spec.h"
 #include "src/admin/disk_query_manager.h"
 #include "src/bio/ubio.h"
+#include "src/device/directive_cmd.h"
 #include "src/include/pos_error_code.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/abort_context.h"
 #include "src/spdk_wrapper/caller/spdk_nvme_caller.h"
 #include "unvme_device_context.h"
 #include "unvme_io_context.h"
+
 namespace pos
 {
 UnvmeCmd::UnvmeCmd(SpdkNvmeCaller* spdkNvmeCaller)
@@ -81,9 +83,49 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
         }
         case UbioDir::Write:
         {
-            ret = spdkNvmeCaller->SpdkNvmeNsCmdWrite(ns, ioqpair, data,
-                startLBA, sectorCount,
-                callbackFunc, static_cast<void*>(ioCtx), 0);
+            uint64_t flags = spdk_nvme_ctrlr_get_flags(spdk_nvme_ns_get_ctrlr(ns));
+
+            if (SPDK_NVME_CTRLR_DIRECTIVES_SUPPORTED & flags)
+            {
+                uint16_t streamId = 0;
+                BackendEvent backendEvent = ioCtx->GetEventType();
+
+                switch (backendEvent)
+                {
+                    case BackendEvent_FrontendIO:
+                    case BackendEvent_Flush:
+                    case BackendEvent_GC:
+                    {
+                        streamId = 0;
+                        break;
+                    }
+                    case BackendEvent_JournalIO:
+                    {
+                        streamId = 1;
+                        break;
+                    }
+                    case BackendEvent_MetaIO:
+                    {
+                        streamId = 2;
+                        break;
+                    }
+                    default:
+                    {
+                        streamId = 3;
+                        break;
+                    }
+                }
+                ret = spdkNvmeCaller->SpdkNvmeNsCmdWriteWithStream(ns, ioqpair, data,
+                    startLBA, sectorCount,
+                    callbackFunc, static_cast<void*>(ioCtx),
+                    SPDK_NVME_IO_FLAGS_STREAMS_DIRECTIVE, streamId);
+            }
+            else
+            {
+                ret = spdkNvmeCaller->SpdkNvmeNsCmdWrite(ns, ioqpair, data,
+                    startLBA, sectorCount,
+                    callbackFunc, static_cast<void*>(ioCtx), 0);
+            }
             break;
         }
         case UbioDir::WriteUncor:
@@ -149,7 +191,13 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
             }
             break;
         }
-
+        case UbioDir::Directive:
+        {
+            deviceContext->IncAdminCommandCount();
+            ioCtx->SetAdminCommand();
+            ret = _RequestDirective(deviceContext, callbackFunc, ioCtx);
+            break;
+        }
         case UbioDir::AdminPassTh:
         {
             deviceContext->IncAdminCommandCount();
@@ -241,6 +289,48 @@ UnvmeCmd::_RequestDeallocate(UnvmeDeviceContext* deviceContext,
     POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
         "Requesting Trimming from {} with block number : {}", startingLBA, NumberOfLogicalBlocks);
     free(rangeDefinition);
+    return returnValue;
+}
+
+int
+UnvmeCmd::_RequestDirective(UnvmeDeviceContext* deviceContext,
+    spdk_nvme_cmd_cb callbackFunc, UnvmeIOContext* ioCtx)
+{
+    int returnValue;
+    const int defaultNsid = 1;
+    void* data = ioCtx->GetBuffer();
+    DirectiveContext* directiveContext = static_cast<DirectiveContext*>(data);
+
+    struct spdk_nvme_ctrlr* ctrlr =
+        spdkNvmeCaller->SpdkNvmeNsGetCtrlr(deviceContext->ns);
+    if(DirectiveCommmand::DIRECTIVE_SEND == directiveContext->cmd)
+    {
+        returnValue = spdkNvmeCaller->SpdkNvmeCtrlrCmdDirectiveSend(ctrlr,
+            defaultNsid,
+            directiveContext->doper,
+            directiveContext->dtype,
+            directiveContext->dspec,
+            directiveContext->payload,
+            directiveContext->payloadSize,
+            directiveContext->cdw12,
+            directiveContext->cdw13,
+            callbackFunc,
+            ioCtx);
+    }
+    else
+    {
+        returnValue = spdkNvmeCaller->SpdkNvmeCtrlrCmdDirectiveReceive(ctrlr,
+            defaultNsid,
+            directiveContext->doper,
+            directiveContext->dtype,
+            directiveContext->dspec,
+            directiveContext->payload,
+            directiveContext->payloadSize,
+            directiveContext->cdw12,
+            directiveContext->cdw13,
+            callbackFunc,
+            ioCtx);
+    }
     return returnValue;
 }
 

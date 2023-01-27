@@ -64,6 +64,10 @@ private:
         spdk_nvme_cmd_cb callbackFunc,
         UnvmeIOContext* ioCtx);
 
+    int _RequestDirective(UnvmeDeviceContext* deviceContext,
+        spdk_nvme_cmd_cb callbackFunc,
+        UnvmeIOContext* ioCtx);
+
     int _RequestAdminPassThu(UnvmeDeviceContext* deviceContext,
         spdk_nvme_cmd_cb callbackFunc,
         UnvmeIOContext* ioContext);
