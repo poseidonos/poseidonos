@@ -303,8 +303,11 @@ SegmentCtx::AfterLoad(char* buf)
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-
     _RebuildSegmentList();
+    for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); i++)
+    {
+       memcpy(segmentInfos[i].data, buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), sizeof(SegmentInfoData));
+    }
 }
 
 void
@@ -332,6 +335,10 @@ void
 SegmentCtx::BeforeFlush(char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
+    for(uint32_t i=0;i<addrInfo->GetnumUserAreaSegments();i++)
+    {
+       memcpy(buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), segmentInfos[i].data, sizeof(SegmentInfoData));
+    }
 }
 
 void
@@ -354,7 +361,8 @@ SegmentCtx::GetSectionAddr(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            ret = (char*)segmentInfos->data;
+            // Save and load SegmentInfoData in SegmentCtx::Beforeflush() and SegmentCtx::AfterLoad(), so nullptr is okay.
+            ret = nullptr;
             break;
         }
     }
@@ -374,6 +382,7 @@ SegmentCtx::GetSectionSize(int section)
         }
         case SC_SEGMENT_INFO:
         {
+            // To calculate size of SegmentCtx exactly, sectionSize of segmentInfo must exist even if sectionAddr of segmentInfo is  nullptr.
             ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfoData);
             break;
         }
