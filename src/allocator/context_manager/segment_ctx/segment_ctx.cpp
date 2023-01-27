@@ -303,11 +303,11 @@ SegmentCtx::AfterLoad(char* buf)
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-    _RebuildSegmentList();
     for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); i++)
     {
        memcpy(segmentInfos[i].data, buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), sizeof(SegmentInfoData));
     }
+    _RebuildSegmentList();
 }
 
 void
