@@ -1,11 +1,11 @@
 package arraycmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -29,15 +29,19 @@ Example:
 
 		var command = "ADDDEVICE"
 
-		req, buildErr := buildAddSpareReq(command)
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+
+		reqParam, buildErr := buildAddSpareReqParam(command)
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
-		if buildErr != nil {
-			fmt.Printf("failed to build request: %v", buildErr)
-			return buildErr
-		}
+
+		res, req, grpcErr := posMgr.AddSpareDevice(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -48,10 +52,9 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendAddSpare(req)
-		if gRpcErr != nil {
-			globals.PrintErrMsg(gRpcErr)
-			return gRpcErr
+		if grpcErr != nil {
+			globals.PrintErrMsg(grpcErr)
+			return grpcErr
 		}
 
 		printErr := displaymgr.PrintProtoResponse(command, res)
@@ -64,16 +67,13 @@ Example:
 	},
 }
 
-func buildAddSpareReq(command string) (*pb.AddSpareRequest, error) {
+func buildAddSpareReqParam(command string) (*pb.AddSpareRequest_Param, error) {
 	param := &pb.AddSpareRequest_Param{Array: add_spare_arrayName}
 	if add_spare_spareDev != "" {
 		param.Spare = append(param.Spare, &pb.AddSpareRequest_SpareDeviceName{DeviceName: add_spare_spareDev})
 	}
 
-	uuid := globals.GenerateUUID()
-	req := &pb.AddSpareRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

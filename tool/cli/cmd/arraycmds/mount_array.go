@@ -1,11 +1,11 @@
 package arraycmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -29,11 +29,22 @@ Example:
 
 		var command = "MOUNTARRAY"
 
-		req, buildErr := buildMountArrayReq(command)
+		reqParam, buildErr := buildMountArrayReqParam(command)
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		if cmd.Flags().Changed("timeout") {
+			posMgr = posMgr.WithTimeout(globals.ReqTimeout)
+		}
+
+		res, req, gRpcErr := posMgr.MountArray(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -44,7 +55,6 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendMountArray(req, cmd.Flags().Changed("timeout"))
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
@@ -60,14 +70,12 @@ Example:
 	},
 }
 
-func buildMountArrayReq(command string) (*pb.MountArrayRequest, error) {
-	uuid := globals.GenerateUUID()
+func buildMountArrayReqParam(command string) (*pb.MountArrayRequest_Param, error) {
 
 	param := &pb.MountArrayRequest_Param{Name: mount_array_arrayName,
 		EnableWriteThrough: &mount_array_enableWriteThrough}
-	req := &pb.MountArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

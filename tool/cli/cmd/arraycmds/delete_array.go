@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -42,13 +42,20 @@ Example:
 		}
 
 		var command = "DELETEARRAY"
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
 
-		req, buildErr := buildDeleteArrayReq(command)
+		reqParam, buildErr := buildDeleteArrayReqParam(command)
+
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
 
+		res, req, gRpcErr := posMgr.DeleteArray(reqParam)
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
 		}.Marshal(req)
@@ -58,7 +65,6 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendDeleteArray(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
@@ -74,13 +80,11 @@ Example:
 	},
 }
 
-func buildDeleteArrayReq(command string) (*pb.DeleteArrayRequest, error) {
-	uuid := globals.GenerateUUID()
+func buildDeleteArrayReqParam(command string) (*pb.DeleteArrayRequest_Param, error) {
 
 	param := &pb.DeleteArrayRequest_Param{Name: delete_array_arrayName}
-	req := &pb.DeleteArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
