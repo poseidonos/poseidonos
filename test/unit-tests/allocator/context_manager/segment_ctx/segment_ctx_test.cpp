@@ -101,8 +101,14 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentListIsRebuilt)
     EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(numSegInfos));
     EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(numSegInfos);
 
+    // initialize dummy buffer and fill out with segmentInfoData
     int dummySize = sizeof(SegmentCtxHeader) + numSegInfos * sizeof(SegmentInfoData);
-    char* dummybuf = new char[dummySize];
+    char* dummybuf = new char[dummySize]();
+    for(int i = 0; i < numSegInfos; ++i)
+    {
+        memcpy(dummybuf + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), &segInfos[i].data, sizeof(SegmentInfoData));
+    }
+    
     // when
     segCtx.AfterLoad(dummybuf);
 

@@ -85,9 +85,8 @@ public:
     virtual uint32_t GetValidBlockCountIfSsdState(void);
 
     virtual void InitSegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState);
-    virtual void DisposeSegmentInfoData(void);
 
-    SegmentInfoData* data;
+    SegmentInfoData data;
 private:
     void _MoveToFreeState(void);
 
