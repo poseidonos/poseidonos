@@ -305,7 +305,7 @@ SegmentCtx::AfterLoad(char* buf)
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
     for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); i++)
     {
-       memcpy(segmentInfos[i].data, buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), sizeof(SegmentInfoData));
+       memcpy(&segmentInfos[i].data, buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), sizeof(SegmentInfoData));
     }
     _RebuildSegmentList();
 }
@@ -337,7 +337,7 @@ SegmentCtx::BeforeFlush(char* buf)
     ctxHeader.ctxVersion = ctxDirtyVersion++;
     for(uint32_t i=0;i<addrInfo->GetnumUserAreaSegments();i++)
     {
-       memcpy(buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), segmentInfos[i].data, sizeof(SegmentInfoData));
+       memcpy(buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), &segmentInfos[i].data, sizeof(SegmentInfoData));
     }
 }
 
