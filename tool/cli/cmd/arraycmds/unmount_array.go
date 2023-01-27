@@ -1,11 +1,11 @@
 package arraycmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	pb "kouros/api"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -40,13 +40,22 @@ Example:
 			}
 		}
 
-		var command = "UNMOUNTARRAY"
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		if cmd.Flags().Changed("timeout") {
+			posMgr = posMgr.WithTimeout(globals.ReqTimeout)
+		}
 
-		req, buildErr := buildUnmountArrayReq(command)
+		reqParam, buildErr := buildUnmountArrayReqParam()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		res, req, gRpcErr := posMgr.UnmountArray(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -57,13 +66,12 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendUnmountArray(req, cmd.Flags().Changed("timeout"))
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -73,12 +81,10 @@ Example:
 	},
 }
 
-func buildUnmountArrayReq(command string) (*pb.UnmountArrayRequest, error) {
-	uuid := globals.GenerateUUID()
+func buildUnmountArrayReqParam() (*pb.UnmountArrayRequest_Param, error) {
 
 	param := &pb.UnmountArrayRequest_Param{Name: unmount_array_arrayName}
-	req := &pb.UnmountArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

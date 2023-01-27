@@ -1,12 +1,12 @@
 package arraycmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"errors"
 	"fmt"
+	pb "kouros/api"
 	"strconv"
 	"strings"
 
@@ -39,11 +39,20 @@ Example 2 (creating an array using RAID6):
 
 		var command = "AUTOCREATEARRAY"
 
-		req, buildErr := buildAutoCreateArrayReq(command)
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+
+		reqParam, buildErr := buildAutoCreateArrayParam(command)
+
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		res, req, gRpcErr := posMgr.AutoCreateArray(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -54,7 +63,6 @@ Example 2 (creating an array using RAID6):
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendAutocreateArray(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
@@ -70,7 +78,7 @@ Example 2 (creating an array using RAID6):
 	},
 }
 
-func buildAutoCreateArrayReq(command string) (*pb.AutocreateArrayRequest, error) {
+func buildAutoCreateArrayParam(command string) (*pb.AutocreateArrayRequest_Param, error) {
 
 	if autocreate_array_isNoRaid == true {
 		if autocreate_array_numDataDevs > maxNumDataDevsNoRaid {
@@ -95,10 +103,7 @@ func buildAutoCreateArrayReq(command string) (*pb.AutocreateArrayRequest, error)
 		param.Buffer = append(param.Buffer, &pb.DeviceNameList{DeviceName: buffer})
 	}
 
-	uuid := globals.GenerateUUID()
-	req := &pb.AutocreateArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

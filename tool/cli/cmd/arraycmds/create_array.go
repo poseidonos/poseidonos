@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -42,11 +42,19 @@ Example 2 (creating an array with RAID6):
 
 		var command = "CREATEARRAY"
 
-		req, buildErr := buildCreateArrayReq(command)
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+
+		reqParam, buildErr := buildCreateArrayReqParam(command)
+
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+		res, req, gRpcErr := posMgr.CreateArray(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -57,7 +65,6 @@ Example 2 (creating an array with RAID6):
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendCreateArray(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
@@ -74,7 +81,7 @@ Example 2 (creating an array with RAID6):
 }
 
 // Build a CreateArrayReq using flag values from commandline and return it
-func buildCreateArrayReq(command string) (*pb.CreateArrayRequest, error) {
+func buildCreateArrayReqParam(command string) (*pb.CreateArrayRequest_Param, error) {
 
 	dataDevs := strings.Split(create_array_dataDevsList, ",")
 	spareDevs := strings.Split(create_array_spareDevsList, ",")
@@ -114,10 +121,7 @@ func buildCreateArrayReq(command string) (*pb.CreateArrayRequest, error) {
 		}
 	}
 
-	uuid := globals.GenerateUUID()
-	req := &pb.CreateArrayRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
