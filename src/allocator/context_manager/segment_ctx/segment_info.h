@@ -56,7 +56,8 @@ struct SegmentInfoData
     std::atomic<uint32_t> validBlockCount;
     std::atomic<uint32_t> occupiedStripeCount;
     SegmentState state;
-    //DO NOT ADD ANY METHODS HERE TO SUPPORT BACKWARD COMPATIBILITY
+    // TODO(sang7.park) : add reserved field here.
+    // DO NOT ADD ANY VIRTUAL METHODS HERE TO SUPPORT BACKWARD COMPATIBILITY
 };
 
 class SegmentInfo
@@ -67,7 +68,7 @@ public:
     ~SegmentInfo(void);
 
     virtual uint32_t GetValidBlockCount(void);
-    virtual void SetValidBlockCount(int cnt);
+    virtual void SetValidBlockCount(uint32_t cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
     virtual std::pair<bool, SegmentState> DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease);
 
@@ -84,12 +85,9 @@ public:
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
 
-    virtual void InitSegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState);
-
     SegmentInfoData data;
 private:
     void _MoveToFreeState(void);
-
     std::mutex seglock;
 
 };

@@ -101,20 +101,81 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentListIsRebuilt)
     EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(numSegInfos));
     EXPECT_CALL(segmentList[SegmentState::FREE], AddToList).Times(numSegInfos);
 
-    // initialize dummy buffer and fill out with segmentInfoData
+    // Initialize dummy buffer with zero.
     int dummySize = sizeof(SegmentCtxHeader) + numSegInfos * sizeof(SegmentInfoData);
-    char* dummybuf = new char[dummySize]();
+    char* dummybuf = new char[dummySize](); // () equals to memset(dummy, 0 ,dummySize).
     for(int i = 0; i < numSegInfos; ++i)
     {
         memcpy(dummybuf + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), &segInfos[i].data, sizeof(SegmentInfoData));
     }
-    
     // when
     segCtx.AfterLoad(dummybuf);
 
     delete[] segInfos;
     delete[] dummybuf;
 }
+
+TEST(SegmentCtx, AfterLoad_testIfSegmentInfoDataIsSuccessfullyUpdatedFromSegmentCtxFile)
+{
+    // Given
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    SegmentCtxHeader header;
+    header.sig = SegmentCtx::SIG_SEGMENT_CTX;
+
+    // Initialize SegmentInfoData in SegmentCtx with initial values (0, 0, SegmentState::FREE).
+    int numSegInfos = 4;
+    SegmentInfo* segInfos = new SegmentInfo[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentCtx segCtx(nullptr, &header, segInfos, nullptr, nullptr, &addrInfo, nullptr, 0);
+
+    NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
+    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
+    {
+        segCtx.SetSegmentList((SegmentState)state, &segmentList[state]);
+    }
+
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(numSegInfos));
+
+    // Assume writtenSegmentInfoDataInFile pointer has segmentInfoData written in SegmentCtx File.
+    // Fill out SegmentInfoData with temporary values for test.
+    SegmentInfo* writtenSegmentInfoDataInFile = new SegmentInfo[numSegInfos];
+    for(int i = 0 ; i < numSegInfos ; ++i)
+    {
+        writtenSegmentInfoDataInFile[i].SetValidBlockCount(i);
+        writtenSegmentInfoDataInFile[i].SetOccupiedStripeCount(i*100);
+        writtenSegmentInfoDataInFile[i].SetState(SegmentState::SSD);
+    }
+
+    // Assume SegmentInfoData is loaded to loadedFromFileBuffer.
+    int loadedDataSize = sizeof(SegmentCtxHeader) + numSegInfos * sizeof(SegmentInfoData);
+    char* loadedSegmentInfoDataFromFile = new char[loadedDataSize](); // () equals to memset(dummy, 0 ,dummySize).
+    /*
+     * SegmentCtx::AfterLoad(char *buf)
+     * (Parameter given buffer)                      | char* buf[File Size of Segment Context File]                                            |
+     * (Expected layout of parameter given buffer)   | SegmentCtxHeader | SegmentInfoData[0] | SegmentInfoData[1] | ... | SegmentInfoData[N-1] |
+     */
+    for(int i = 0; i < numSegInfos; ++i)
+    {
+        memcpy(loadedSegmentInfoDataFromFile + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), &writtenSegmentInfoDataInFile[i].data, sizeof(SegmentInfoData));
+    }
+
+    // When : execute SegmentCtx::AfterLoad() method.
+    segCtx.AfterLoad(loadedSegmentInfoDataFromFile);
+
+
+    // Then, SegmentInfoData is updated correctly.
+    for(int i = 0 ; i< numSegInfos ; ++i)
+    {
+        EXPECT_EQ(segCtx.GetValidBlockCount(i), i);
+        EXPECT_EQ(segCtx.GetOccupiedStripeCount(i), i*100);
+        EXPECT_EQ(segCtx.GetSegmentState(i), SegmentState::SSD);
+    }
+
+
+    delete[] segInfos;
+    delete[] writtenSegmentInfoDataInFile;
+    delete[] loadedSegmentInfoDataFromFile;
+}
+
 
 TEST(SegmentCtx, BeforeFlush_TestSimpleSetter)
 {
