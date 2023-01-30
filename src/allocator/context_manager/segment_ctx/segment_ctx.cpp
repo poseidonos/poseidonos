@@ -303,9 +303,13 @@ SegmentCtx::AfterLoad(char* buf)
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-    for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); i++)
+    /*
+     * (Parameter given buffer)                      | char* buf[File Size of Segment Context File]                                            |
+     * (Expected layout of parameter given buffer)   | SegmentCtxHeader | SegmentInfoData[0] | SegmentInfoData[1] | ... | SegmentInfoData[N-1] |
+     */
+    for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); ++i)
     {
-       memcpy(&segmentInfos[i].data, buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), sizeof(SegmentInfoData));
+       memcpy(&segmentInfos[i].data, buf  + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), sizeof(SegmentInfoData));
     }
     _RebuildSegmentList();
 }
@@ -335,9 +339,13 @@ void
 SegmentCtx::BeforeFlush(char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
-    for(uint32_t i=0;i<addrInfo->GetnumUserAreaSegments();i++)
+    /*
+     * (Parameter given buffer)                      | char* buf[File Size of Segment Context File]                                            |
+     * (Expected layout of parameter given buffer)   | SegmentCtxHeader | SegmentInfoData[0] | SegmentInfoData[1] | ... | SegmentInfoData[N-1] |
+     */
+    for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); ++i)
     {
-       memcpy(buf + i * sizeof(SegmentInfoData) + sizeof(SegmentCtxHeader), &segmentInfos[i].data, sizeof(SegmentInfoData));
+       memcpy(buf + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), &segmentInfos[i].data, sizeof(SegmentInfoData));
     }
 }
 
@@ -361,7 +369,7 @@ SegmentCtx::GetSectionAddr(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            // Save and load SegmentInfoData in SegmentCtx::Beforeflush() and SegmentCtx::AfterLoad(), so nullptr is okay.
+            // NOTE : The caller should be aware that this method may return nullptr. That means Saving and loading SegmentInfoData via SegmentCtx::Beforeflush() and SegmentCtx::AfterLoad() methods.
             ret = nullptr;
             break;
         }

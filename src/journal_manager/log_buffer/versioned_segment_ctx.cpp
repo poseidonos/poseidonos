@@ -91,7 +91,9 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
                            segId, loadedSegmentInfo[segId].GetValidBlockCount(),
                            loadedSegmentInfo[segId].GetOccupiedStripeCount(),
                            loadedSegmentInfo[segId].GetState());
-            memcpy(&segmentInfos[segId].data, &loadedSegmentInfo[segId].data, sizeof(SegmentInfoData));
+            segmentInfos[segId].SetValidBlockCount(loadedSegmentInfo[segId].GetValidBlockCount());
+            segmentInfos[segId].SetOccupiedStripeCount(loadedSegmentInfo[segId].GetOccupiedStripeCount());
+            segmentInfos[segId].SetState(loadedSegmentInfo[segId].GetState());
         }
     }
 }

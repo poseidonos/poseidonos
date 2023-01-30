@@ -48,7 +48,9 @@ SegmentInfo::SegmentInfo(void)
 // Constructor for UT to inject precondition values
 SegmentInfo::SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
 {
-    InitSegmentInfoData(blkCount, stripeCount, segmentState);
+    SetValidBlockCount(blkCount);
+    SetOccupiedStripeCount(stripeCount);
+    SetState(segmentState);
 }
 
 SegmentInfo::~SegmentInfo(void)
@@ -62,7 +64,7 @@ SegmentInfo::GetValidBlockCount(void)
 }
 
 void
-SegmentInfo::SetValidBlockCount(int cnt)
+SegmentInfo::SetValidBlockCount(uint32_t cnt)
 {
     // for wbt
     data.validBlockCount = cnt;
@@ -218,14 +220,6 @@ SegmentInfo::GetValidBlockCountIfSsdState(void)
     {
         return data.validBlockCount;
     }
-}
-
-void
-SegmentInfo::InitSegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
-{
-    data.validBlockCount = blkCount;
-    data.occupiedStripeCount = stripeCount;
-    data.state = segmentState;
 }
 
 } // namespace pos
