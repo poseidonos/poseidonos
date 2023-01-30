@@ -152,14 +152,14 @@ int
 NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
 {
     POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, startLba:{}, blksPerChunk:{}, devsize:{}, devName:{}",
-        startLba, blksPerChunk, devs.size(), devs.front()->GetUblock()->GetName());
+        startLba, blksPerChunk, devs.size(), devs.front()->GetName());
     physicalSize.startLba = startLba;
     physicalSize.blksPerChunk = blksPerChunk;
     physicalSize.chunksPerStripe = ArrayConfig::NVM_DEVICE_COUNT;
     physicalSize.totalSegments = ArrayConfig::NVM_SEGMENT_SIZE;
     if (type == PartitionType::WRITE_BUFFER)
     {
-        physicalSize.stripesPerSegment = (devs.front()->GetUblock()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE -
+        physicalSize.stripesPerSegment = (devs.front()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE -
             DIV_ROUND_UP(physicalSize.startLba, (uint64_t)ArrayConfig::SECTORS_PER_BLOCK)) / blksPerChunk;
         POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, WRITE_BUFFER, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
             startLba, blksPerChunk, physicalSize.stripesPerSegment);

@@ -6,6 +6,8 @@
 
 #include "src/include/i_array_device.h"
 
+using namespace std;
+
 namespace pos
 {
 class MockIArrayDevice : public IArrayDevice

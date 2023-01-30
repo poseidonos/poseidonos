@@ -30,8 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ARRAY_H_
-#define ARRAY_H_
+#pragma once
 
 #include <list>
 #include <string>
@@ -58,6 +57,7 @@
 #include "src/include/array_config.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array/array_metrics_publisher.h"
+#include "src/array/build/array_builder_adapter.h"
 
 using namespace std;
 
@@ -87,13 +87,13 @@ public:
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
     Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
         PartitionManager* ptnMgr, ArrayState* arrayState, PartitionServices* svc, EventScheduler* eventScheduler,
-        ArrayServiceLayer* arrayservice);
+        ArrayServiceLayer* arrayservice, ArrayBuilderAdapter* arrayBuilder = nullptr);
     virtual ~Array(void);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual int Load(void);
-    virtual int Create(DeviceSet<string> nameSet, string metaFt, string dataFt);
+    virtual int Create(const DeviceSet<string>& devs, string metaFt, string dataFt);
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
@@ -132,7 +132,6 @@ public:
 
 private:
     int _LoadImpl(void);
-    int _CreatePartitions(RaidTypeEnum metaRaid, RaidTypeEnum dataRaid);
     void _DeletePartitions(void);
     int _Flush(void);
     int _Flush(ArrayMeta& meta);
@@ -158,6 +157,7 @@ private:
     EventScheduler* eventScheduler = nullptr;
     ArrayServiceLayer* arrayService = nullptr;
     ArrayMetricsPublisher* publisher = nullptr;
+    ArrayBuilderAdapter* arrayBuilder = nullptr;
     id_t uniqueId = 0;
     bool isWTEnabled = false;
     string targetAddress = "";
@@ -166,4 +166,3 @@ private:
     DebugInfoQueue<ArrayDebugInfo> debugArrayQueue;
 };
 } // namespace pos
-#endif // ARRAY_H_

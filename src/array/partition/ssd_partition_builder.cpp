@@ -119,7 +119,7 @@ SsdPartitionBuilder::_GetMinCapacity(const vector<ArrayDevice*>& devs)
         [](auto d) { return d->GetState() != ArrayDeviceState::FAULT; });
 
     ArrayDevice* min = Enumerable::Minimum(devList,
-        [](auto d) { return d->GetUblock()->GetSize(); });
+        [](auto d) { return d->GetSize(); });
     if (min != nullptr)
     {
         return min->GetSize();
@@ -135,7 +135,7 @@ SsdPartitionBuilder::_GetMaxCapacity(const vector<ArrayDevice*>& devs)
         [](auto d) { return d->GetState() != ArrayDeviceState::FAULT; });
 
     ArrayDevice* max = Enumerable::Maximum(devList,
-        [](auto d) { return d->GetUblock()->GetSize(); });
+        [](auto d) { return d->GetSize(); });
     if (max != nullptr)
     {
         return max->GetSize();

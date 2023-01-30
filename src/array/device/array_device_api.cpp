@@ -92,6 +92,14 @@ ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType type,
         [type](auto d) { return d->GetType() == type; });
 }
 
+vector<ArrayDevice*>
+ArrayDeviceApi::ExtractDevicesByTypeAndState(ArrayDeviceType type, ArrayDeviceState state,
+    const vector<ArrayDevice*>& devs)
+{
+    return Enumerable::Where(devs,
+        [type, state](auto d) { return d->GetType() == type && d->GetState() == state; });
+}
+
 uint64_t
 ArrayDeviceApi::GetMinimumCapacity(const vector<ArrayDevice*>& devs)
 {
