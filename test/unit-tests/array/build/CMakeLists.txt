@@ -1,0 +1,4 @@
+POS_ADD_UNIT_TEST(partition_builder_ut partition_builder_test.cpp)
+POS_ADD_UNIT_TEST(array_builder_ut array_builder_test.cpp)
+POS_ADD_UNIT_TEST(device_builder_ut device_builder_test.cpp)
+POS_ADD_UNIT_TEST(array_build_info_ut array_build_info_test.cpp)

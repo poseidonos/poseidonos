@@ -30,52 +30,21 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "array_name_policy.h"
-
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
+#include "array_builder_adapter.h"
 
 namespace pos
 {
-int
-ArrayNamePolicy::CheckArrayName(string name)
+ArrayBuildInfo*
+ArrayBuilderAdapter::Load(const DeviceSet<DeviceMeta>& devs,
+    string metaRaid, string dataRaid)
 {
-    const size_t MIN_LEN = 2;
-    const size_t MAX_LEN = 63;
-    const char SPACE = ' ';
-    const char* ALLOWED_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_- ";
-
-    int ret = EID(SUCCESS);
-    StringChecker checker(name);
-    size_t len = checker.Length();
-    if (len < MIN_LEN)
-    {
-        ret = EID(CREATE_ARRAY_NAME_TOO_SHORT);
-        POS_TRACE_WARN(ret, "name len: {}", len);
-        return ret;
-    }
-    else if (len > MAX_LEN)
-    {
-        ret = EID(CREATE_ARRAY_NAME_TOO_LONG);
-        POS_TRACE_WARN(ret, "name len: {}", len);
-        return ret;
-    }
-
-    if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
-    {
-        ret = EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE);
-        POS_TRACE_WARN(ret, "name: {}", name);
-        return ret;
-    }
-
-    if (checker.OnlyContains(ALLOWED_CHAR) == false)
-    {
-        ret = EID(CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR);
-        POS_TRACE_WARN(ret, "name allowed only: {}", ALLOWED_CHAR);
-        return ret;
-    }
-
-    return ret;
+    return ArrayBuilder::Load(devs, metaRaid, dataRaid);
 }
 
+ArrayBuildInfo*
+ArrayBuilderAdapter::Create(string name, const DeviceSet<string>& devs,
+    string metaRaid, string dataRaid)
+{
+    return ArrayBuilder::Create(name, devs, metaRaid, dataRaid);
+}
 } // namespace pos
