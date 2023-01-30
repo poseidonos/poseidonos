@@ -22,7 +22,6 @@ SUBDIRS = allocator \
         array/build \
         array/device \
         array/ft \
-        array/meta \
         array/partition \
         array/rebuild \
         array/service \
@@ -39,7 +38,8 @@ SUBDIRS = allocator \
         device \
         spdk_wrapper \
         spdk_wrapper/caller \
-        mbr \
+        pbr \
+        pbr/checker \
         bio \
         device/unvme \
         device/uram \
@@ -68,6 +68,7 @@ SUBDIRS = allocator \
         rocksdb_log_buffer \
         journal_manager \
         helper \
+        helper/checksum \
         helper/enumerable \
         helper/file \
         helper/json \

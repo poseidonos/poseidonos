@@ -38,27 +38,34 @@
 #include "src/helper/time/time_helper.h"
 #include "src/array/array_name_policy.h"
 #include "src/logger/logger.h"
+#include "src/include/raid_type.h"
 
 namespace pos
 {
 ArrayBuildInfo*
-ArrayBuilder::Load(const DeviceSet<DeviceMeta>& devs, string metaRaid, string dataRaid)
+ArrayBuilder::Load(pbr::AteData* ateData)
 {
     ArrayBuildInfo* info = new ArrayBuildInfo();
-    info->buildResult = DeviceBuilder::Load(devs, info->devices);
+    info->buildType = ArrayBuildType::LOAD;
+    info->arrayName = ateData->arrayName;
+    info->arrayUuid = ateData->arrayUuid;
+    info->createdDateTime = ateData->createdDateTime;
+    info->lastUpdatedDateTime = ateData->lastUpdatedDateTime;
+    info->buildResult = DeviceBuilder::Load(ateData->adeList, info->devices);
     if (info->buildResult == 0)
     {
         info->buildResult = ArrayDeviceApi::ImportInspection(info->devices);
     }
     if (info->buildResult == 0)
     {
-        info->buildResult = PartitionBuilder::Create(info->devices,
-            RaidType(metaRaid), RaidType(dataRaid), info->partitions);
+        info->buildResult = PartitionBuilder::Load(ateData->pteList, info->devices, info->partitions);
     }
     if (info->buildResult != 0)
     {
         POS_TRACE_WARN(info->buildResult, "");
     }
+    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "array_name:{}, result:{}",
+        info->arrayName, info->buildResult);
     return info;
 }
 
@@ -67,9 +74,37 @@ ArrayBuilder::Create(string name, const DeviceSet<string>& devs,
     string metaRaid, string dataRaid)
 {
     ArrayBuildInfo* info = new ArrayBuildInfo();
+    info->buildType = ArrayBuildType::CREATE;
     info->buildResult = ArrayNamePolicy::CheckArrayName(name);
     if (info->buildResult == 0)
     {
+        RaidType dataRaidType = RaidType(dataRaid);
+        RaidType metaRaidType = RaidType(metaRaid);
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Trying to create array({}), metaFt:{}, dataFt:{}",
+            name, metaRaidType.ToString(), dataRaidType.ToString());
+        if (dataRaidType == RaidTypeEnum::NOT_SUPPORTED ||
+        metaRaidType == RaidTypeEnum::NOT_SUPPORTED)
+        {
+            int ret = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
+            POS_TRACE_WARN(ret, "meta_raid_type: {}, data_raid_type: {}", metaRaid, dataRaid);
+            info->buildResult = ret;
+        }
+        bool canAddSpare = dataRaidType != RaidTypeEnum::NONE &&
+                    dataRaidType != RaidTypeEnum::RAID0;
+        if (canAddSpare == false && devs.spares.size() > 0)
+        {
+            int ret = EID(CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV);
+            POS_TRACE_WARN(ret, "meta_raid_type: {}, data_raid_type: {}", metaRaid, dataRaid);
+            info->buildResult = ret;
+        }
+    }
+    if (info->buildResult == 0)
+    {
+        info->buildType = ArrayBuildType::CREATE;
+        info->arrayName = name;
+        info->arrayUuid = UuidHelper::GenUuid();
+        info->createdDateTime = GetCurrentSecondsAsEpoch();
+        info->lastUpdatedDateTime = info->createdDateTime;
         info->buildResult = DeviceBuilder::Create(devs, info->devices);
         if (info->buildResult == 0)
         {
@@ -84,6 +119,11 @@ ArrayBuilder::Create(string name, const DeviceSet<string>& devs,
     if (info->buildResult != 0)
     {
         POS_TRACE_WARN(info->buildResult, "");
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "array_name:{}, result:{}",
+            info->arrayName, info->buildResult);
     }
     return info;
 }

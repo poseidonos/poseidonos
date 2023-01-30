@@ -42,8 +42,7 @@ class ArrayBuilderAdapter
 {
 public:
     virtual ~ArrayBuilderAdapter() {};
-    virtual ArrayBuildInfo* Load(const DeviceSet<DeviceMeta>& devs,
-        string metaRaid, string dataRaid);
+    virtual ArrayBuildInfo* Load(pbr::AteData* ateData);
     virtual ArrayBuildInfo* Create(string name, const DeviceSet<string>& devs,
         string metaRaid, string dataRaid);
 };

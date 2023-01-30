@@ -1197,6 +1197,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT UnmountArrayResponseDefaultType
 constexpr Array::Array(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : devicelist_()
+  , uniqueid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , name_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , status_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , state_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
@@ -1208,10 +1209,9 @@ constexpr Array::Array(
   , metaraid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , dataraid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , index_(0)
-  , uniqueid_(0)
+  , writethroughenabled_(false)
   , capacity_(PROTOBUF_ULONGLONG(0))
-  , used_(PROTOBUF_ULONGLONG(0))
-  , writethroughenabled_(false){}
+  , used_(PROTOBUF_ULONGLONG(0)){}
 struct ArrayDefaultTypeInternal {
   constexpr ArrayDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -6172,7 +6172,7 @@ const char descriptor_table_protodef_cli_2eproto[] PROTOBUF_SECTION_VARIABLE(pro
   "cli.UnmountArrayResponse.Result\022\037\n\004info\030"
   "\004 \001(\0132\021.grpc_cli.PosInfo\032*\n\006Result\022 \n\006st"
   "atus\030\001 \001(\0132\020.grpc_cli.Status\"\313\002\n\005Array\022\r"
-  "\n\005index\030\001 \001(\005\022\020\n\010uniqueId\030\002 \001(\005\022\014\n\004name\030"
+  "\n\005index\030\001 \001(\005\022\020\n\010uniqueId\030\002 \001(\t\022\014\n\004name\030"
   "\003 \001(\t\022\016\n\006status\030\004 \001(\t\022\r\n\005state\030\005 \001(\t\022\021\n\t"
   "situation\030\006 \001(\t\022\026\n\016createDatetime\030\007 \001(\t\022"
   "\026\n\016updateDatetime\030\010 \001(\t\022\032\n\022rebuildingPro"
@@ -30157,6 +30157,11 @@ Array::Array(const Array& from)
   : ::PROTOBUF_NAMESPACE_ID::Message(),
       devicelist_(from.devicelist_) {
   _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  uniqueid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (!from._internal_uniqueid().empty()) {
+    uniqueid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_uniqueid(), 
+      GetArena());
+  }
   name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (!from._internal_name().empty()) {
     name_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_name(), 
@@ -30208,12 +30213,13 @@ Array::Array(const Array& from)
       GetArena());
   }
   ::memcpy(&index_, &from.index_,
-    static_cast<size_t>(reinterpret_cast<char*>(&writethroughenabled_) -
-    reinterpret_cast<char*>(&index_)) + sizeof(writethroughenabled_));
+    static_cast<size_t>(reinterpret_cast<char*>(&used_) -
+    reinterpret_cast<char*>(&index_)) + sizeof(used_));
   // @@protoc_insertion_point(copy_constructor:grpc_cli.Array)
 }
 
 void Array::SharedCtor() {
+uniqueid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 name_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 status_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 state_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -30226,8 +30232,8 @@ metaraid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlr
 dataraid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 ::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
     reinterpret_cast<char*>(&index_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&writethroughenabled_) -
-    reinterpret_cast<char*>(&index_)) + sizeof(writethroughenabled_));
+    0, static_cast<size_t>(reinterpret_cast<char*>(&used_) -
+    reinterpret_cast<char*>(&index_)) + sizeof(used_));
 }
 
 Array::~Array() {
@@ -30238,6 +30244,7 @@ Array::~Array() {
 
 void Array::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
+  uniqueid_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   name_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   status_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   state_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -30267,6 +30274,7 @@ void Array::Clear() {
   (void) cached_has_bits;
 
   devicelist_.Clear();
+  uniqueid_.ClearToEmpty();
   name_.ClearToEmpty();
   status_.ClearToEmpty();
   state_.ClearToEmpty();
@@ -30278,8 +30286,8 @@ void Array::Clear() {
   metaraid_.ClearToEmpty();
   dataraid_.ClearToEmpty();
   ::memset(&index_, 0, static_cast<size_t>(
-      reinterpret_cast<char*>(&writethroughenabled_) -
-      reinterpret_cast<char*>(&index_)) + sizeof(writethroughenabled_));
+      reinterpret_cast<char*>(&used_) -
+      reinterpret_cast<char*>(&index_)) + sizeof(used_));
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
 
@@ -30297,10 +30305,12 @@ const char* Array::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::inte
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // int32 uniqueId = 2;
+      // string uniqueId = 2;
       case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          uniqueid_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_uniqueid();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          CHK_(::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "grpc_cli.Array.uniqueId"));
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -30461,10 +30471,14 @@ failure:
     target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_index(), target);
   }
 
-  // int32 uniqueId = 2;
-  if (this->uniqueid() != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_uniqueid(), target);
+  // string uniqueId = 2;
+  if (this->uniqueid().size() > 0) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
+      this->_internal_uniqueid().data(), static_cast<int>(this->_internal_uniqueid().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
+      "grpc_cli.Array.uniqueId");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_uniqueid(), target);
   }
 
   // string name = 3;
@@ -30616,6 +30630,13 @@ size_t Array::ByteSizeLong() const {
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
   }
 
+  // string uniqueId = 2;
+  if (this->uniqueid().size() > 0) {
+    total_size += 1 +
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+        this->_internal_uniqueid());
+  }
+
   // string name = 3;
   if (this->name().size() > 0) {
     total_size += 1 +
@@ -30693,11 +30714,9 @@ size_t Array::ByteSizeLong() const {
         this->_internal_index());
   }
 
-  // int32 uniqueId = 2;
-  if (this->uniqueid() != 0) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
-        this->_internal_uniqueid());
+  // bool writeThroughEnabled = 15;
+  if (this->writethroughenabled() != 0) {
+    total_size += 1 + 1;
   }
 
   // uint64 capacity = 10;
@@ -30712,11 +30731,6 @@ size_t Array::ByteSizeLong() const {
     total_size += 1 +
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt64Size(
         this->_internal_used());
-  }
-
-  // bool writeThroughEnabled = 15;
-  if (this->writethroughenabled() != 0) {
-    total_size += 1 + 1;
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -30751,6 +30765,9 @@ void Array::MergeFrom(const Array& from) {
   (void) cached_has_bits;
 
   devicelist_.MergeFrom(from.devicelist_);
+  if (from.uniqueid().size() > 0) {
+    _internal_set_uniqueid(from._internal_uniqueid());
+  }
   if (from.name().size() > 0) {
     _internal_set_name(from._internal_name());
   }
@@ -30784,17 +30801,14 @@ void Array::MergeFrom(const Array& from) {
   if (from.index() != 0) {
     _internal_set_index(from._internal_index());
   }
-  if (from.uniqueid() != 0) {
-    _internal_set_uniqueid(from._internal_uniqueid());
+  if (from.writethroughenabled() != 0) {
+    _internal_set_writethroughenabled(from._internal_writethroughenabled());
   }
   if (from.capacity() != 0) {
     _internal_set_capacity(from._internal_capacity());
   }
   if (from.used() != 0) {
     _internal_set_used(from._internal_used());
-  }
-  if (from.writethroughenabled() != 0) {
-    _internal_set_writethroughenabled(from._internal_writethroughenabled());
   }
 }
 
@@ -30820,6 +30834,7 @@ void Array::InternalSwap(Array* other) {
   using std::swap;
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   devicelist_.InternalSwap(&other->devicelist_);
+  uniqueid_.Swap(&other->uniqueid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   name_.Swap(&other->name_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   status_.Swap(&other->status_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   state_.Swap(&other->state_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
@@ -30831,8 +30846,8 @@ void Array::InternalSwap(Array* other) {
   metaraid_.Swap(&other->metaraid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   dataraid_.Swap(&other->dataraid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(Array, writethroughenabled_)
-      + sizeof(Array::writethroughenabled_)
+      PROTOBUF_FIELD_OFFSET(Array, used_)
+      + sizeof(Array::used_)
       - PROTOBUF_FIELD_OFFSET(Array, index_)>(
           reinterpret_cast<char*>(&index_),
           reinterpret_cast<char*>(&other->index_));

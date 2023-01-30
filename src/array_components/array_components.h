@@ -65,10 +65,9 @@ class ArrayComponents
     friend class GcWbtCommand;
 
 public:
-    ArrayComponents(string name, IArrayRebuilder* rebuilder, IAbrControl* abr);
+    ArrayComponents(string name, IArrayRebuilder* rebuilder);
     ArrayComponents(string arrayName,
         IArrayRebuilder* rebuilder,
-        IAbrControl* abr,
         StateManager* stateMgr,
         IStateControl* state,
         Array* array,
@@ -86,8 +85,7 @@ public:
         ArrayMountSequence* mountSequence = nullptr);
     virtual ~ArrayComponents(void);
     virtual ComponentsInfo* GetInfo(void);
-    virtual int Create(DeviceSet<string> nameSet, string metaFt, string dataFt);
-    virtual int Load(void);
+    virtual int Import(ArrayBuildInfo* buildInfo);
     virtual int Mount(bool isWTEnabled);
     virtual int Unmount(void);
     virtual int Delete(void);
@@ -108,7 +106,6 @@ private:
     // injected from outside
     IStateControl* state = nullptr;
     IArrayRebuilder* arrayRebuilder = nullptr;
-    IAbrControl* iAbr = nullptr;
     StateManager* stateMgr = nullptr;
     Array* array = nullptr;
     FlowControl* flowControl = nullptr;

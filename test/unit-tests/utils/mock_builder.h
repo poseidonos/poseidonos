@@ -41,7 +41,6 @@ class MockAffinityManager;
 class MockUBlockDevice;
 class MockArray;
 class MockArrayComponents;
-class MockAbrManager;
 class MockStateManager;
 class MockTelemetryClient;
 class UBlockDevice;
@@ -56,7 +55,6 @@ std::shared_ptr<MockArray> BuildMockArray(std::string arrayName);
 std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName, Array* array = nullptr);
 std::shared_ptr<MockArrayComponents> BuildMockArrayComponents(std::string arrayName, StateManager* stateManager);
 MockArrayComponents* NewMockArrayComponents(std::string arrayName);
-std::shared_ptr<MockAbrManager> BuildMockAbrManager(void);
 std::shared_ptr<MockTelemetryClient> BuildMockTelemetryClient(void);
 
 // Helpers

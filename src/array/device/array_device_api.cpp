@@ -113,28 +113,6 @@ ArrayDeviceApi::GetMinimumCapacity(const vector<ArrayDevice*>& devs)
     return 0;
 }
 
-DeviceSet<DeviceMeta>
-ArrayDeviceApi::ExportDeviceMeta(const vector<ArrayDevice*>& devs)
-{
-    DeviceSet<DeviceMeta> metaSet;
-    for (auto dev : devs)
-    {
-        if (dev->GetType() == ArrayDeviceType::DATA)
-        {
-            metaSet.data.push_back(DeviceMeta(dev->GetSerial(), dev->GetState()));
-        }
-        else if (dev->GetType() == ArrayDeviceType::SPARE)
-        {
-            metaSet.spares.push_back(DeviceMeta(dev->GetSerial(), dev->GetState()));
-        } 
-        else if (dev->GetType() == ArrayDeviceType::NVM)
-        {
-            metaSet.nvm.push_back(DeviceMeta(dev->GetSerial(), dev->GetState()));
-        }
-    }
-    return metaSet;
-}
-
 int
 ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
 {

@@ -33,8 +33,8 @@
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/array_info_command.h"
 #include "src/cli/cli_event_code.h"
-#include "src/mbr/mbr_info.h"
 #include "src/sys_info/space_info.h"
+#include "src/include/i_array_device.h"
 
 namespace pos_cli
 {
@@ -82,7 +82,7 @@ ArrayInfoCommand::Execute(json& doc, string rid)
     string state = array->GetStateCtx()->ToStateType().ToString();
     string situ = array->GetStateCtx()->GetSituation().ToString();
     data.SetAttribute(JsonAttribute("index", to_string(array->GetIndex())));
-    data.SetAttribute(JsonAttribute("uniqueId", to_string(array->GetUniqueId())));
+    data.SetAttribute(JsonAttribute("uniqueId", array->GetUniqueId()));
     data.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
     data.SetAttribute(JsonAttribute("state", "\"" + state + "\""));
     data.SetAttribute(JsonAttribute("situation", "\"" + situ + "\""));
@@ -100,41 +100,32 @@ ArrayInfoCommand::Execute(json& doc, string rid)
             _GetGCMode(gc, arrayName) + "\""));
     }
 
-    DeviceSet<string> nameSet = array->GetDevNames();
-
-    if (nameSet.nvm.size() == 0 && nameSet.data.size() == 0)
-    {
-        return jFormat.MakeResponse("ARRAYINFO", rid, SUCCESS,
-            arrayName + " information", data, GetPosInfo());
-    }
-
     JsonArray jsonArray("devicelist");
+    for (auto dev : array->GetDevices())
+    {
+        ArrayDeviceType type = dev->GetType();
+        string typeStr = "NONE";
+        if (type == ArrayDeviceType::DATA)
+        {
+            typeStr = "DATA";
+        }
+        else if (type == ArrayDeviceType::SPARE)
+        {
+            typeStr = "SPARE";
+        }
+        else if (type == ArrayDeviceType::NVM)
+        {
+            typeStr = "BUFFER";
+        }
 
-    for (string name : nameSet.nvm)
-    {
         JsonElement elem("");
-        elem.SetAttribute(JsonAttribute("type", "\"BUFFER\""));
-        elem.SetAttribute(JsonAttribute("name", "\"" + name + "\""));
+        elem.SetAttribute(JsonAttribute("type", "\"" + typeStr + "\""));
+        elem.SetAttribute(JsonAttribute("name", "\"" + dev->GetName() + "\""));
         jsonArray.AddElement(elem);
     }
-    for (string name : nameSet.data)
-    {
-        JsonElement elem("");
-        elem.SetAttribute(JsonAttribute("type", "\"DATA\""));
-        elem.SetAttribute(JsonAttribute("name", "\"" + name + "\""));
-        jsonArray.AddElement(elem);
-    }
-    for (string name : nameSet.spares)
-    {
-        JsonElement elem("");
-        elem.SetAttribute(JsonAttribute("type", "\"SPARE\""));
-        elem.SetAttribute(JsonAttribute("name", "\"" + name + "\""));
-        jsonArray.AddElement(elem);
-    }
-
     data.SetArray(jsonArray);
     return jFormat.MakeResponse("ARRAYINFO", rid, SUCCESS,
-        arrayName + " information", data, GetPosInfo());
+            arrayName + " information", data, GetPosInfo());
 }
 
 std::string

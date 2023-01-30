@@ -38,7 +38,6 @@
 #include "src/cli/cli_event_code.h"
 #include "src/cli/request_handler.h"
 #include "src/logger/logger.h"
-#include "src/mbr/mbr_info.h"
 
 namespace pos_cli
 {
@@ -59,49 +58,25 @@ StopPosCommand::Execute(json& doc, string rid)
     JsonFormat jFormat;
     RequestHandler requestHandler;
 
-    int ret = 0;
-    std::vector<ArrayBootRecord> abrList;
-    ret = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
-
-    if (ret == 0)
+    int eventId = ArrayMgr()->Stop();
+    if (eventId == 0)
     {
-        if (!abrList.empty())
+        if (requestHandler.IsExit() == false)
         {
-            int eventId = EID(MBR_ABR_GET_LIST_SUCCESS);
-            POS_TRACE_DEBUG(eventId, "Found {} arrays from abr list", abrList.size());
-            for (const auto& abr : abrList)
-            {
-                ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(abr.arrayName);
-
-                if (CompInfo == nullptr || CompInfo->arrayInfo == nullptr)
-                {
-                    continue;
-                }
-                IArrayInfo* arrayInfo = CompInfo->arrayInfo;
-
-                if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
-                {
-                    eventId = EID(POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS);
-                    POS_TRACE_ERROR(eventId,
-                        "array:{}, state:{}",
-                        abr.arrayName, arrayInfo->GetState().ToString());
-
-                    return jFormat.MakeResponse("STOPPOS", rid, eventId, "", GetPosInfo());
-                }
-            }
+            requestHandler.SetExit(true);
+            return jFormat.MakeResponse("STOPPOS", rid, SUCCESS,
+                "POS will be terminated soon", GetPosInfo());
         }
-    }
-
-    if (requestHandler.IsExit() == false)
-    {
-        requestHandler.SetExit(true);
-        return jFormat.MakeResponse("STOPPOS", rid, SUCCESS,
-            "POS will be terminated soon", GetPosInfo());
+        else
+        {
+            return jFormat.MakeResponse("STOPPOS", rid, SUCCESS,
+                "POS is now terminating", GetPosInfo());
+        }
     }
     else
     {
-        return jFormat.MakeResponse("STOPPOS", rid, SUCCESS,
-            "POS is now terminating", GetPosInfo());
+        POS_TRACE_WARN(eventId, "");
+        return jFormat.MakeResponse("STOPPOS", rid, eventId, "", GetPosInfo());
     }
 }
 }; // namespace pos_cli

@@ -64,6 +64,39 @@ PartitionBuilder::Create(const vector<ArrayDevice*>& devs, RaidType metaRaid,
 }
 
 int
+PartitionBuilder::Load(const vector<pbr::PteData*>& pteList,
+    const vector<ArrayDevice*>& devs, vector<Partition*>& partitions)
+{
+    int ret = 0;
+    ArrayDevice* nvm = Enumerable::First(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::NVM; });
+    vector<ArrayDevice*> dataSsds = Enumerable::Where(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::DATA; });
+
+    if (nvm == nullptr)
+    {
+        return -1;
+    }
+
+    uint64_t totalNvmBlks = nvm->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
+    for (pbr::PteData* pteData : pteList)
+    {
+        PartitionType partType = PartitionType(pteData->partType);
+        RaidType raidType = RaidType(pteData->raidType);
+        StripePartition* partition = new StripePartition(partType,
+            dataSsds, raidType);
+        ret = partition->Create(pteData->startLba, pteData->lastLba, totalNvmBlks);
+        if (ret != 0)
+        {
+            return ret;
+        }
+        partitions.push_back(partition);
+    }
+    ret = _CreateNvmPartitions(nvm, partitions);
+    return ret;
+}
+
+int
 PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions)
 {
     uint32_t blksPerStripeOfMetaPart = 0;

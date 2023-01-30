@@ -48,6 +48,7 @@
 #include "src/rebuild/interface/i_rebuild_notification.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/cli/command_processor.h"
+#include "src/array/build/array_builder_adapter.h"
 
 using namespace std;
 
@@ -58,7 +59,6 @@ class StopRebuildingCommand;
 
 namespace pos
 {
-class AbrManager;
 struct ArrayBootRecord;
 class ArrayManager : public IArrayMgmt, public IDeviceEvent, public IRebuildNotification
 {
@@ -70,33 +70,33 @@ class ArrayManager : public IArrayMgmt, public IDeviceEvent, public IRebuildNoti
 
 public:
     ArrayManager();
-    ArrayManager(ArrayRebuilder* arrayRebuilder, AbrManager* abrManager,
+     ArrayManager(ArrayRebuilder* arrayRebuilder,
         DeviceManager* deviceManager, TelemetryClient* telClient,
-        function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory);
+        function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory,
+        ArrayBuilderAdapter* arrayBuilderAdapter = nullptr);
     virtual ~ArrayManager();
+    virtual int Load(void);
     virtual int Create(string name, DeviceSet<string> devs, string metaFt, string dataFt) override;
     virtual int Delete(string name) override;
     virtual int Mount(string name, bool isWTEnabled) override;
     virtual int Unmount(string name) override;
+    virtual int Stop(void) override;
     virtual int AddDevice(string name, string dev) override;
     virtual int RemoveDevice(string name, string dev) override;
     virtual int ReplaceDevice(string name, string dev) override;
     virtual int Rebuild(string name) override;
     virtual void SetTargetAddress(string name, string targetAddress) override;
-    virtual string GetTargetAddress(string name) override;
+    virtual int GetTargetAddress(string name, string& address /* OUT PARAM */) override;
     virtual ComponentsInfo* GetInfo(string name) override;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) override;
+    virtual vector<const ComponentsInfo*> GetInfo(void) override;
 
     virtual int DeviceDetached(UblockSharedPtr dev) override;
     virtual void DeviceAttached(UblockSharedPtr dev) override;
 
     virtual int PrepareRebuild(string name, bool& resume) override;
     virtual void RebuildDone(string name) override;
-
-    virtual bool AbrExists(string name);
-    virtual int Load(list<string>& failedArrayList);
-    virtual int GetAbrList(vector<ArrayBootRecord>& abrList);
-    virtual int ResetMbr(void);
+    virtual int ResetPbr(void);
 
     // UT helper funcs, not meant for Prod usage
     void SetArrayComponentMap(const map<string, ArrayComponents*>& arrayCompMap);
@@ -105,16 +105,19 @@ public:
 
 private:
     ArrayComponents* _FindArray(string name);
-    int _Load(string name);
+    int _Import(ArrayBuildInfo* arrayBuildInfo);
     int _ExecuteOrHandleErrors(std::function<int(ArrayComponents* array)> f, string name, int eid);
     int _DeleteFaultArray(string arrayName);
+    uint32_t _AllocArrayIndex(string arrayName);
+    void _ReleaseArrayIndex(string arrayName);
+    string arrayIndexMap[ArrayMgmtPolicy::MAX_ARRAY_CNT] {"", };
     map<string, ArrayComponents*> arrayList;
     ArrayRebuilder* arrayRebuilder = nullptr;
-    AbrManager* abrManager = nullptr;
     DeviceManager* deviceManager = nullptr;
     TelemetryClient* telClient = nullptr;
-    function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory = nullptr;
+    function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory = nullptr;
     pthread_rwlock_t arrayListLock;
+    ArrayBuilderAdapter* arrayBuilderAdapter = nullptr;
 };
 // Note that we do not recommend direct access to ArrayManagerSingleton.
 using ArrayManagerSingleton = Singleton<ArrayManager>;

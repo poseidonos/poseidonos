@@ -137,10 +137,10 @@ PartitionManager::GetRaidType(PartitionType type)
     return RaidTypeEnum::NONE;
 }
 
-const vector<const Partition*>
+const vector<Partition*>
 PartitionManager::GetPartitions(void)
 {
-    vector<const Partition*> parts;
+    vector<Partition*> parts;
     for (size_t i = 0; i < partitions.size(); i++)
     {
         if (nullptr != partitions[i])

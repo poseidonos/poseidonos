@@ -61,7 +61,7 @@ ArrayDeviceList::GetDevs()
 int
 ArrayDeviceList::Import(vector<ArrayDevice*> devs)
 {
-    for(auto dev : devs)
+    for (auto dev : devs)
     {
         POS_TRACE_INFO(EID(IMPORT_DEVICE), "type:{}, state:{}, name:{}, serail:{}, index:{}",
             dev->GetType(), dev->GetState(), dev->GetName(), dev->GetSerial(), dev->GetDataIndex());
@@ -116,7 +116,7 @@ ArrayDeviceList::RemoveSsd(ArrayDevice* target)
 }
 
 void
-ArrayDeviceList::Clear()
+ArrayDeviceList::Clear(void)
 {
     unique_lock<mutex> lock(*mtx);
     for (auto dev : devices)

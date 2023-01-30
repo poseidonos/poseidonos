@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/array/partition/partition_factory.h"
+#include "src/pbr/dto/pte_data.h"
 
 using namespace std;
 
@@ -44,6 +45,8 @@ class PartitionBuilder
 {
 public:
     static int Create(const vector<ArrayDevice*>& devs, RaidType metaRaid, RaidType dataRaid,
+        vector<Partition*>& partitions /* OUT PARAM */);
+    static int Load(const vector<pbr::PteData*>& pteList, const vector<ArrayDevice*>& devs,
         vector<Partition*>& partitions /* OUT PARAM */);
 
 private:

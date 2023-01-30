@@ -87,7 +87,7 @@ StripePartition::Create(uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBl
 void
 StripePartition::RegisterService(IPartitionServices* const svc)
 {
-    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
+    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
     svc->AddTranslator(type, this);
     if (method->IsRecoverable() == true)
     {
@@ -96,7 +96,7 @@ StripePartition::RegisterService(IPartitionServices* const svc)
     }
     else
     {
-        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target",
+        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target",
             PARTITION_TYPE_STR[type], raidType.ToString());
     }
 }

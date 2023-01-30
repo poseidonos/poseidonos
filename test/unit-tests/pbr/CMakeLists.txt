@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(fake_pbr_ut fake_pbr_test.cpp)
+POS_ADD_UNIT_TEST(content_serializer_ut content_serializer_test.cpp)

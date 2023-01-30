@@ -133,6 +133,14 @@ for bdf in $(iter_all_pci_class_code 01 08 02); do
 		done
 done
 
+file="file_you_want_to_delete"
+
+DIR=/etc/pos/pbr
+if [ -d "$DIR" ]; then
+    printf '%s\n' "Removing PBR... ($DIR)"
+    rm -rf "$DIR"
+fi
+
 sudo $rootdir/script/setup_env.sh
 
 cd $rootdir

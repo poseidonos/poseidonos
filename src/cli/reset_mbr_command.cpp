@@ -36,7 +36,7 @@
 
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
-#include "src/mbr/mbr_info.h"
+
 namespace pos_cli
 {
 ResetMbrCommand::ResetMbrCommand(void)
@@ -55,7 +55,7 @@ ResetMbrCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
     JsonElement data("data");
-    int result = ArrayManagerSingleton::Instance()->ResetMbr();
+    int result = ArrayManagerSingleton::Instance()->ResetPbr();
 
     if (result != 0)
     {

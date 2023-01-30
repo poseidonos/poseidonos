@@ -16,19 +16,18 @@ public:
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
 
     // Below are stub functions
-    virtual DeviceSet<string> GetDevNames(void);
     virtual string GetName(void);
-    virtual unsigned int GetIndex(void);
+    virtual string GetUniqueId(void);
+    virtual uint32_t GetIndex(void);
+    virtual string GetCreateDatetime(void);
+    virtual string GetUpdateDatetime(void);
     virtual string GetMetaRaidType(void);
     virtual string GetDataRaidType(void);
-    virtual id_t GetUniqueId(void);
     virtual ArrayStateType GetState(void);
     virtual StateContext* GetStateCtx(void);
     virtual uint32_t GetRebuildingProgress(void);
-    virtual string GetCreateDatetime(void);
-    virtual string GetUpdateDatetime(void);
     virtual bool IsWriteThroughEnabled(void);
-    virtual vector<IArrayDevice*> GetArrayDevices(void);
+    virtual vector<IArrayDevice*> GetDevices(ArrayDeviceType type);
 
 private:
     PartitionLogicalSize* userSizeInfo;

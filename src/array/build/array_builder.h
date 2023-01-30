@@ -33,8 +33,8 @@
 #pragma once
 
 #include "array_build_info.h"
-#include "src/array/meta/device_meta.h"
 #include "src/array_models/dto/device_set.h"
+#include "src/pbr/dto/ate_data.h"
 
 using namespace std;
 
@@ -43,8 +43,7 @@ namespace pos
 class ArrayBuilder
 {
 public:
-    static ArrayBuildInfo* Load(const DeviceSet<DeviceMeta>& devs,
-        string metaRaid, string dataRaid);
+    static ArrayBuildInfo* Load(pbr::AteData* ateData);
     static ArrayBuildInfo* Create(string name, const DeviceSet<string>& devs,
         string metaRaid, string dataRaid);
 };

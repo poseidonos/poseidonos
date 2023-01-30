@@ -47,7 +47,7 @@ static ArrayDevice* arrayDevice[IOSubmitHandlerTest::SSD_COUNT];
 
 const int Array::LOCK_ACQUIRE_FAILED = -1;
 
-Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
+Array::Array(string name, IArrayRebuilder* rbdr, IStateControl* iState)
 :   state(nullptr),
     svc(nullptr),
     ptnMgr(nullptr),

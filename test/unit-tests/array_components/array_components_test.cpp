@@ -41,7 +41,7 @@ TEST(ArrayComponents, ArrayComponents_testConstructorWithNullPtrs)
     NiceMock<MockStateManager> mockStateManager;
 
     // When
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager,
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     // Then
@@ -51,8 +51,8 @@ TEST(ArrayComponents, Create_testIfRemoveStateIsInvokedWhenCreationFails)
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     EXPECT_CALL(*mockArray, Create).WillOnce(Return(EID(ARRAY_BROKEN_ERROR)));
@@ -69,10 +69,10 @@ TEST(ArrayComponents, Create_testIfGetStateAndSubscribeIsInvokedWhenCreationSucc
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     NiceMock<MockStateControl> mockStateControl;
     MockVolumeManager* mockVolMgr = new MockVolumeManager(nullptr, &mockStateControl);
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, &mockStateControl, mockArray,
         mockVolMgr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     EXPECT_CALL(*mockArray, Create).WillOnce([=](DeviceSet<string> nameSet, string dataRaidType, unsigned int& arrayIndex)
@@ -94,8 +94,8 @@ TEST(ArrayComponents, Load_testIfLoadFailureIsPropagated)
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     int LOAD_FAILURE = 123;
@@ -113,10 +113,10 @@ TEST(ArrayComponents, Load_testIfSuccessfulLoadSetsMountSequence)
 {
     // Given
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     NiceMock<MockStateControl> mockStateControl;
     MockVolumeManager* mockVolMgr = new MockVolumeManager(nullptr, &mockStateControl);
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, &mockStateControl, mockArray,
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, &mockStateControl, mockArray,
         mockVolMgr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     EXPECT_CALL(*mockArray, Load).WillOnce([=](unsigned int& arrayIndex)
@@ -146,7 +146,7 @@ TEST(ArrayComponents, Mount_testUsingArrayMountSequenceMock)
     EXPECT_CALL(*mockArrayMountSequence, Mount).WillOnce(Return(0));
 
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     EXPECT_CALL(*mockArray, SetPreferences).Times(1);
     EXPECT_CALL(*mockArray, MountDone).Times(1);
     ArrayComponents arrayComponents("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
@@ -171,7 +171,7 @@ TEST(ArrayComponents, Unmount_testUsingArrayMountSequenceMock)
     EXPECT_CALL(*mockArrayMountSequence, Unmount).WillOnce(Return(0));
 
     MockStateManager mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
     ArrayComponents arrayComponents("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr, mockArrayMountSequence);
     // When
@@ -186,8 +186,8 @@ TEST(ArrayComponents, Delete_testIfDeleteResultIsPropagated)
 {
     // Given
     NiceMock<MockStateManager> mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     int DELETE_RESULT = 123;
@@ -209,7 +209,7 @@ TEST(ArrayComponents, PrepareRebuild_testIfGcIsPausedAndResumedAroundAllocatorPr
     MockMetadata* mockMetadata = new MockMetadata;
     MockGarbageCollector* mockGc = new MockGarbageCollector(nullptr, nullptr);
 
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, nullptr,
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, nullptr, nullptr,
         nullptr, mockGc, mockMetadata, nullptr, mockMetaFsFactory, nullptr, nullptr);
     int PREPARE_RESULT = 234; // the actual value does not matter
     StateContext expected("test", SituationEnum::REBUILDING);
@@ -238,7 +238,7 @@ TEST(ArrayComponents, RebuildDone_)
     NiceMock<MockIArrayInfo> mockIArrayInfo;
     MockMetadata* mockMetadata = new MockMetadata;
 
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, nullptr,
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, nullptr, nullptr,
         nullptr, nullptr, mockMetadata, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     std::string ARRAY_NAME = "mock-array";
@@ -255,8 +255,8 @@ TEST(ArrayComponents, GetArray_testGetter)
 {
     // Given
     NiceMock<MockStateManager> mockStateManager;
-    MockArray* mockArray = new MockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-    ArrayComponents arrayComps("mock-array", nullptr, nullptr, &mockStateManager, nullptr, mockArray,
+    MockArray* mockArray = new mockArray("mock-array", nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    ArrayComponents arrayComps("mock-array", nullptr, &mockStateManager, nullptr, mockArray,
         nullptr, nullptr, nullptr, nullptr, mockMetaFsFactory, nullptr, nullptr);
 
     // When

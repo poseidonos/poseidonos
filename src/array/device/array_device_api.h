@@ -36,7 +36,6 @@
 #include <vector>
 
 #include "array_device.h"
-#include "src/array/meta/device_meta.h"
 #include "src/array_models/dto/device_set.h"
 
 using namespace std;
@@ -57,7 +56,6 @@ public:
     static vector<ArrayDevice*> ExtractDevices(const vector<ArrayDevice*>& devs);
     static vector<ArrayDevice*> ExtractDevicesByTypeAndState(ArrayDeviceType type, ArrayDeviceState state, const vector<ArrayDevice*>& devs);
     static uint64_t GetMinimumCapacity(const vector<ArrayDevice*>& devs);
-    static DeviceSet<DeviceMeta> ExportDeviceMeta(const vector<ArrayDevice*>& devs);
     static int ImportInspection(const vector<ArrayDevice*>& devs);
 };
 

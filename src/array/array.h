@@ -38,7 +38,6 @@
 
 #include "src/array/partition/partition_services.h"
 #include "src/array/device/array_device_manager.h"
-#include "src/array/meta/array_meta.h"
 #include "src/array/partition/partition_manager.h"
 #include "src/array/rebuild/i_array_rebuilder.h"
 #include "src/array/service/io_device_checker/i_device_checker.h"
@@ -57,16 +56,16 @@
 #include "src/include/array_config.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array/array_metrics_publisher.h"
-#include "src/array/build/array_builder_adapter.h"
+#include "src/array/build/array_build_info.h"
+#include "src/pbr/dto/ate_data.h"
+#include "src/pbr/pbr_adapter.h"
 
 using namespace std;
 
 namespace pos
 {
 class DeviceManager;
-class MbrManager;
 class UBlockDevice;
-class IAbrControl;
 class IStateControl;
 class TelemetryPublishser;
 
@@ -84,16 +83,15 @@ class Array : public IArrayInfo, public IMountSequence, public IDeviceChecker, p
     friend class GcWbtCommand;
 
 public:
-    Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState);
-    Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
+    Array(string name, IArrayRebuilder* rbdr, IStateControl* iState);
+    Array(string name, IArrayRebuilder* rbdr, ArrayDeviceManager* devMgr, DeviceManager* sysDevMgr,
         PartitionManager* ptnMgr, ArrayState* arrayState, PartitionServices* svc, EventScheduler* eventScheduler,
-        ArrayServiceLayer* arrayservice, ArrayBuilderAdapter* arrayBuilder = nullptr);
+        ArrayServiceLayer* arrayservice, pbr::PbrAdapter* pbrAdapter = nullptr);
     virtual ~Array(void);
+    virtual int Import(ArrayBuildInfo* buildInfo);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
-    virtual int Load(void);
-    virtual int Create(const DeviceSet<string>& devs, string metaFt, string dataFt);
     virtual void Flush(void) override;
     virtual int Delete(void);
     virtual int AddSpare(string devName);
@@ -106,20 +104,20 @@ public:
     virtual string Serialize(void);
     void MakeDebugInfo(ArrayDebugInfo& obj);
 
-    const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
-    DeviceSet<string> GetDevNames(void) override;
     string GetName(void) override;
-    unsigned int GetIndex(void) override;
-    string GetMetaRaidType(void) override;
-    string GetDataRaidType(void) override;
+    string GetUniqueId(void) override;
+    uint32_t GetIndex(void) override;
     string GetCreateDatetime(void) override;
     string GetUpdateDatetime(void) override;
-    id_t GetUniqueId(void) override;
+    string GetMetaRaidType(void) override;
+    string GetDataRaidType(void) override;
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
     bool IsWriteThroughEnabled(void) override;
-    vector<IArrayDevice*> GetArrayDevices(void) override;
+    vector<IArrayDevice*> GetDevices(ArrayDeviceType type) override;
+    const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
+
     int IsRecoverable(IArrayDevice* target, UBlockDevice* uBlock) override;
     IArrayDevice* FindDevice(string devSn) override;
     virtual void InvokeRebuild(vector<IArrayDevice*> targets, bool isResume, bool force = false);
@@ -131,10 +129,10 @@ public:
     virtual string GetTargetAddress(void);
 
 private:
-    int _LoadImpl(void);
     void _DeletePartitions(void);
-    int _Flush(void);
-    int _Flush(ArrayMeta& meta);
+    int _UpdatePbr(void);
+    void _ClearPbr(void);
+    pbr::AteData* _GetAteData(void);
     void _RebuildDone(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildResult result);
     void _DetachSpare(IArrayDevice* target);
     void _DetachData(IArrayDevice* target);
@@ -146,19 +144,21 @@ private:
     PartitionServices* svc = nullptr;
     PartitionManager* ptnMgr = nullptr;
 
-    string name_;
-    unsigned int index_ = 0;
+    string name_ = "";
+    uint32_t index_ = 0;
+    string uuid = "";
+    uint64_t createdDateTime = 0;
+    uint64_t lastUpdatedDateTime = 0;
     pthread_rwlock_t stateLock;
-    ArrayDeviceManager* devMgr_;
+    ArrayDeviceManager* devMgr_ = nullptr;
     DeviceManager* sysDevMgr = nullptr;
     IArrayRebuilder* rebuilder = nullptr;
     static const int LOCK_ACQUIRE_FAILED;
-    IAbrControl* abrControl = nullptr;
     EventScheduler* eventScheduler = nullptr;
     ArrayServiceLayer* arrayService = nullptr;
     ArrayMetricsPublisher* publisher = nullptr;
-    ArrayBuilderAdapter* arrayBuilder = nullptr;
-    id_t uniqueId = 0;
+    pbr::PbrAdapter* pbrAdapter = nullptr;
+
     bool isWTEnabled = false;
     string targetAddress = "";
 

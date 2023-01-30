@@ -16460,6 +16460,7 @@ class Array PROTOBUF_FINAL :
 
   enum : int {
     kDevicelistFieldNumber = 16,
+    kUniqueIdFieldNumber = 2,
     kNameFieldNumber = 3,
     kStatusFieldNumber = 4,
     kStateFieldNumber = 5,
@@ -16471,10 +16472,9 @@ class Array PROTOBUF_FINAL :
     kMetaRaidFieldNumber = 13,
     kDataRaidFieldNumber = 14,
     kIndexFieldNumber = 1,
-    kUniqueIdFieldNumber = 2,
+    kWriteThroughEnabledFieldNumber = 15,
     kCapacityFieldNumber = 10,
     kUsedFieldNumber = 11,
-    kWriteThroughEnabledFieldNumber = 15,
   };
   // repeated .grpc_cli.Device devicelist = 16;
   int devicelist_size() const;
@@ -16493,6 +16493,22 @@ class Array PROTOBUF_FINAL :
   ::grpc_cli::Device* add_devicelist();
   const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Device >&
       devicelist() const;
+
+  // string uniqueId = 2;
+  void clear_uniqueid();
+  const std::string& uniqueid() const;
+  void set_uniqueid(const std::string& value);
+  void set_uniqueid(std::string&& value);
+  void set_uniqueid(const char* value);
+  void set_uniqueid(const char* value, size_t size);
+  std::string* mutable_uniqueid();
+  std::string* release_uniqueid();
+  void set_allocated_uniqueid(std::string* uniqueid);
+  private:
+  const std::string& _internal_uniqueid() const;
+  void _internal_set_uniqueid(const std::string& value);
+  std::string* _internal_mutable_uniqueid();
+  public:
 
   // string name = 3;
   void clear_name();
@@ -16663,13 +16679,13 @@ class Array PROTOBUF_FINAL :
   void _internal_set_index(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // int32 uniqueId = 2;
-  void clear_uniqueid();
-  ::PROTOBUF_NAMESPACE_ID::int32 uniqueid() const;
-  void set_uniqueid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  // bool writeThroughEnabled = 15;
+  void clear_writethroughenabled();
+  bool writethroughenabled() const;
+  void set_writethroughenabled(bool value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::int32 _internal_uniqueid() const;
-  void _internal_set_uniqueid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  bool _internal_writethroughenabled() const;
+  void _internal_set_writethroughenabled(bool value);
   public:
 
   // uint64 capacity = 10;
@@ -16690,15 +16706,6 @@ class Array PROTOBUF_FINAL :
   void _internal_set_used(::PROTOBUF_NAMESPACE_ID::uint64 value);
   public:
 
-  // bool writeThroughEnabled = 15;
-  void clear_writethroughenabled();
-  bool writethroughenabled() const;
-  void set_writethroughenabled(bool value);
-  private:
-  bool _internal_writethroughenabled() const;
-  void _internal_set_writethroughenabled(bool value);
-  public:
-
   // @@protoc_insertion_point(class_scope:grpc_cli.Array)
  private:
   class _Internal;
@@ -16707,6 +16714,7 @@ class Array PROTOBUF_FINAL :
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
   ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Device > devicelist_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uniqueid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr status_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr state_;
@@ -16718,10 +16726,9 @@ class Array PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr metaraid_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr dataraid_;
   ::PROTOBUF_NAMESPACE_ID::int32 index_;
-  ::PROTOBUF_NAMESPACE_ID::int32 uniqueid_;
+  bool writethroughenabled_;
   ::PROTOBUF_NAMESPACE_ID::uint64 capacity_;
   ::PROTOBUF_NAMESPACE_ID::uint64 used_;
-  bool writethroughenabled_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -62420,24 +62427,65 @@ inline void Array::set_index(::PROTOBUF_NAMESPACE_ID::int32 value) {
   // @@protoc_insertion_point(field_set:grpc_cli.Array.index)
 }
 
-// int32 uniqueId = 2;
+// string uniqueId = 2;
 inline void Array::clear_uniqueid() {
-  uniqueid_ = 0;
+  uniqueid_.ClearToEmpty();
 }
-inline ::PROTOBUF_NAMESPACE_ID::int32 Array::_internal_uniqueid() const {
-  return uniqueid_;
-}
-inline ::PROTOBUF_NAMESPACE_ID::int32 Array::uniqueid() const {
+inline const std::string& Array::uniqueid() const {
   // @@protoc_insertion_point(field_get:grpc_cli.Array.uniqueId)
   return _internal_uniqueid();
 }
-inline void Array::_internal_set_uniqueid(::PROTOBUF_NAMESPACE_ID::int32 value) {
-  
-  uniqueid_ = value;
-}
-inline void Array::set_uniqueid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+inline void Array::set_uniqueid(const std::string& value) {
   _internal_set_uniqueid(value);
   // @@protoc_insertion_point(field_set:grpc_cli.Array.uniqueId)
+}
+inline std::string* Array::mutable_uniqueid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Array.uniqueId)
+  return _internal_mutable_uniqueid();
+}
+inline const std::string& Array::_internal_uniqueid() const {
+  return uniqueid_.Get();
+}
+inline void Array::_internal_set_uniqueid(const std::string& value) {
+  
+  uniqueid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Array::set_uniqueid(std::string&& value) {
+  
+  uniqueid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Array.uniqueId)
+}
+inline void Array::set_uniqueid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  uniqueid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Array.uniqueId)
+}
+inline void Array::set_uniqueid(const char* value,
+    size_t size) {
+  
+  uniqueid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Array.uniqueId)
+}
+inline std::string* Array::_internal_mutable_uniqueid() {
+  
+  return uniqueid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Array::release_uniqueid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Array.uniqueId)
+  return uniqueid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Array::set_allocated_uniqueid(std::string* uniqueid) {
+  if (uniqueid != nullptr) {
+    
+  } else {
+    
+  }
+  uniqueid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), uniqueid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Array.uniqueId)
 }
 
 // string name = 3;

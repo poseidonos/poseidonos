@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "src/array/device/array_device.h"
@@ -41,6 +42,12 @@ using namespace std;
 
 namespace pos
 {
+enum class ArrayBuildType
+{
+    CREATE,
+    LOAD
+};
+
 class ArrayBuildInfo
 {
 public:
@@ -59,6 +66,12 @@ public:
     }
     virtual ~ArrayBuildInfo() {};
     int buildResult;
+    ArrayBuildType buildType;
+    string arrayName;
+    string arrayUuid;
+    uint32_t arrayIndex;
+    uint64_t createdDateTime;
+    uint64_t lastUpdatedDateTime;
     vector<ArrayDevice*> devices;
     vector<Partition*> partitions;
 };

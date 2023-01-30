@@ -76,7 +76,7 @@ DiskQueryManager::DiskQueryManager(struct spdk_nvme_cmd* cmd, struct spdk_nvme_h
 bool
 DiskQueryManager::SendSmartCommandtoDisk(void)
 {
-    vector<IArrayDevice*> devs = arrayInfo->GetArrayDevices();
+    vector<IArrayDevice*> devs = arrayInfo->GetDevices();
     devs = Enumerable::Where(devs,
         [](auto d) { return (
             (d->GetType() == ArrayDeviceType::DATA || d->GetType() == ArrayDeviceType::SPARE) &&

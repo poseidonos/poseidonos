@@ -726,7 +726,7 @@ VolumeManager::IsWriteThroughEnabled(void)
 bool
 VolumeManager::GetNeedWriteBypass(void)
 {
-    return WriteByPass::GetBypass(to_string(arrayInfo->GetUniqueId()));
+    return WriteByPass::GetBypass(arrayInfo->GetUniqueId());
 }
 
 } // namespace pos

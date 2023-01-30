@@ -38,7 +38,6 @@
 #include "src/cli/cli_event_code.h"
 #include "src/cli/request_handler.h"
 #include "src/logger/logger.h"
-#include "src/mbr/mbr_info.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/telemetry/telemetry_config/telemetry_config.h"
 

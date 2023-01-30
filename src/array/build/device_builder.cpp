@@ -46,7 +46,7 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
     {
         DevName name(devName);
         UblockSharedPtr ublock = getDev->GetDev(name);
-        if (ublock == nullptr)
+        if (ublock == nullptr || ublock->GetType() != DeviceType::SSD)
         {
             int eid = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
             POS_TRACE_WARN(eid, "ssd_name: {}", devName);
@@ -62,7 +62,7 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
     {
         DevName name(devName);
         UblockSharedPtr ublock = getDev->GetDev(name);
-        if (ublock == nullptr)
+        if (ublock == nullptr || ublock->GetType() != DeviceType::NVRAM)
         {
             int eid = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
             POS_TRACE_WARN(eid, "nvm_name: {}", devName);
@@ -77,7 +77,7 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
     {
         DevName name(devName);
         UblockSharedPtr ublock = getDev->GetDev(name);
-        if (ublock == nullptr)
+        if (ublock == nullptr || ublock->GetType() != DeviceType::SSD)
         {
             int eid = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
             POS_TRACE_WARN(eid, "ssd_name: {}", devName);
@@ -91,59 +91,22 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
 }
 
 int
-DeviceBuilder::Load(const DeviceSet<DeviceMeta>& metaSet,
+DeviceBuilder::Load(const vector<pbr::AdeData*>& adeList,
         vector<ArrayDevice*>& devs, IDevInfo* getDev)
 {
-    uint32_t index = 0;
-    for (DeviceMeta meta : metaSet.data)
+    for (pbr::AdeData* adeData : adeList)
     {
-        ArrayDevice* dev = nullptr;
-        DevUid uid(meta.uid);
-
-        if (ArrayDeviceState::FAULT == meta.state)
+        DevUid uid(adeData->devSn);
+        ArrayDeviceType type = ArrayDeviceType(adeData->devType);
+        ArrayDeviceState state = ArrayDeviceState(adeData->devState);
+        UblockSharedPtr uBlock = nullptr;
+        if (state != ArrayDeviceState::FAULT)
         {
-            dev = new ArrayDevice(nullptr, ArrayDeviceState::FAULT, index, ArrayDeviceType::DATA);
+            uBlock = getDev->GetDev(uid);
         }
-        else
-        {
-            UblockSharedPtr uBlock = getDev->GetDev(uid);
-            if (uBlock == nullptr)
-            {
-                meta.state = ArrayDeviceState::FAULT;
-            }
-            else if (ArrayDeviceState::REBUILD == meta.state)
-            {
-                POS_TRACE_DEBUG(EID(ARRAY_DEV_DEBUG_MSG),
-                    "Rebuilding device found {}", meta.uid);
-            }
-
-            dev = new ArrayDevice(uBlock, meta.state, index, ArrayDeviceType::DATA);
-        }
+        ArrayDevice* dev = new ArrayDevice(uBlock,
+            state, adeData->devIndex, type);
         devs.push_back(dev);
-        index++;
-    }
-
-    for (DeviceMeta meta : metaSet.nvm)
-    {
-        DevUid uid(meta.uid);
-        UblockSharedPtr uBlock = getDev->GetDev(uid);
-        if (nullptr == uBlock)
-        {
-            int eventId = EID(ARRAY_NVM_NOT_FOUND);
-            POS_TRACE_WARN(eventId, "devUid: {}", meta.uid);
-            return eventId;
-        }
-        devs.push_back(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::NVM));
-    }
-
-    for (DeviceMeta meta : metaSet.spares)
-    {
-        DevUid uid(meta.uid);
-        UblockSharedPtr uBlock = getDev->GetDev(uid);
-        if (nullptr != uBlock)
-        {
-            devs.push_back(new ArrayDevice(uBlock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::SPARE));
-        }
     }
     return 0;
 }

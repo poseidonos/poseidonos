@@ -35,7 +35,7 @@
 #include "src/device/device_manager.h"
 #include "src/array/device/array_device.h"
 #include "src/array_models/dto/device_set.h"
-#include "src/array/meta/device_meta.h"
+#include "src/pbr/dto/ade_data.h"
 
 using namespace std;
 
@@ -47,7 +47,7 @@ public:
     static int Create(const DeviceSet<string>& nameSet,
         vector<ArrayDevice*>& devs, /* OUT PARAM */
         IDevInfo* getDev = DeviceManagerSingleton::Instance());
-    static int Load(const DeviceSet<DeviceMeta>& metaSet,
+    static int Load(const vector<pbr::AdeData*>& adeList,
         vector<ArrayDevice*>& devs, /* OUT PARAM */
         IDevInfo* getDev = DeviceManagerSingleton::Instance());
 };

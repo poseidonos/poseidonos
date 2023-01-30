@@ -99,8 +99,7 @@ public:
         memSize = queueDepth * blockSize / ArrayConfig::SECTOR_SIZE_BYTE; // 128k
         mem = pos::Memory<ArrayConfig::SECTOR_SIZE_BYTE>::Alloc(memSize);
         IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo("POSArray");
-        DeviceSet<string> name = info->GetDevNames();
-        devSize = name.data.size();
+        devSize = info->GetDevices(ArrayDeviceType::DATA).size();
         devs = DeviceManagerSingleton::Instance()->GetDevs();
         lba = 0;
         queueDepth *= devSize;
@@ -206,8 +205,7 @@ void
 FlushIO(void* mem, bool write, uint32_t lsid, CallbackSmartPtr callback)
 {
     IArrayInfo* info = ArrayMgr::Instance()->GetArrayInfo("POSArray");
-    DeviceSet<string> name = info->GetDevNames();
-    uint32_t devSize = name.data.size();
+    uint32_t devSize = info->GetDevices(ArrayDeviceType::DATA).size();
     std::list<BufferEntry> bufferList;
     bufferList.clear();
 
