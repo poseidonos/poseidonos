@@ -50,8 +50,6 @@ Syntax:
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJson))
-
 		// Do not send request to server and print response when testing request build.
 		if !(globals.IsTestingReqBld) {
 			var resJson string
@@ -59,7 +57,11 @@ Syntax:
 			if globals.EnableGrpc == false {
 				resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
-				res, err := grpcmgr.SendApplyLogFilter(req)
+				posMgr, err := grpcmgr.GetPOSManager()
+				if err != nil {
+					log.Fatalf("failed to connect to POS: %v", err)
+				}
+				res, req, err := posMgr.ApplyLogFilter()
 				if err != nil {
 					globals.PrintErrMsg(err)
 					return
@@ -69,8 +71,15 @@ Syntax:
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
 				resJson = string(resByte)
+				reqJson, err = protojson.MarshalOptions{
+					EmitUnpopulated: true,
+				}.Marshal(req)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf request: %v", err)
+				}
 			}
 
+			displaymgr.PrintRequest(string(reqJson))
 			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
