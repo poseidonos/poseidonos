@@ -40,22 +40,22 @@ namespace pos
 {
 
 int
-NvmPartitionBuilder::Build(uint64_t startLba, Partitions& out)
+NvmPartitionBuilder::Build(uint64_t startLba, vector<Partition*>& partitions)
 {
     vector<ArrayDevice*> nvm {option.nvm};
     NvmPartition* impl = new NvmPartition(option.partitionType, nvm);
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartitionBuilder::Build, part:{} blksPerChunk:{}",
+    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "part_type:{}, blksPerChunk:{}",
         PARTITION_TYPE_STR[option.partitionType], option.blksPerChunk);
     int ret = impl->Create(startLba, option.blksPerChunk);
     if (ret != 0)
     {
         return ret;
     }
-    out[option.partitionType] = impl;
+    partitions.push_back(impl);
     if (next != nullptr)
     {
         uint64_t nextLba = impl->GetLastLba() + 1;
-        return next->Build(nextLba, out);
+        return next->Build(nextLba, partitions);
     }
     return 0;
 }

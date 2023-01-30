@@ -54,6 +54,7 @@ class RaidType
 public:
     RaidType(void) { val = RaidTypeEnum::NONE; }
     RaidType(RaidTypeEnum t) : val(t) { }
+    RaidType(int t) : val(static_cast<RaidTypeEnum>(t)) { }
     RaidType(string type)
     {
         val = RaidTypeEnum::NOT_SUPPORTED;

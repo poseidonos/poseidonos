@@ -43,9 +43,8 @@
 #include <algorithm>
 namespace pos
 {
-Raid6::Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma)
-: Method(RaidTypeEnum::RAID6),
-  parityBufferCntPerNuma(bufferCntPerNuma)
+Raid6::Raid6(const PartitionPhysicalSize* pSize)
+: Method(RaidTypeEnum::RAID6)
 {
     ftSize_ = {
         .minWriteBlkCnt = 0,
@@ -190,25 +189,21 @@ Raid6::CheckNumofDevsToConfigure(uint32_t numofDevs)
 BufferEntry
 Raid6::_AllocChunk()
 {
-    if (parityPools.size() == 0 && parityBufferCntPerNuma > 0)
+    if (parityPools.size() == 0)
     {
-        POS_TRACE_WARN(EID(RAID_DEBUG_MSG),
-            "Attempt to reallocate ParityPool because it is not allocated during creation, req_buffersPerNuma:{}",
-            parityBufferCntPerNuma);
-        bool ret = AllocParityPools(parityBufferCntPerNuma);
-        if (ret == false)
-        {
-            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
-            POS_TRACE_ERROR(eventId, "required number of buffers:{}", parityBufferCntPerNuma);
-        }
+        POS_TRACE_CRITICAL(EID(RAID_DEBUG_MSG), "No paritypools available");
+        assert(false);
     }
-
+    
     uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
     BufferPool* bufferPool = parityPools.at(numa);
     void* mem = bufferPool->TryGetBuffer();
 
-    // TODO error handling for the case of insufficient free parity buffer
-    assert(nullptr != mem);
+    if (mem == nullptr)
+    {
+        POS_TRACE_CRITICAL(EID(RAID_DEBUG_MSG), "No free buffers available");
+        assert(false);
+    }
 
     BufferEntry buffer(mem, ftSize_.blksPerChunk, true);
     buffer.SetBufferPool(bufferPool);

@@ -268,7 +268,7 @@ CopierMeta::_CreateBufferPool(uint32_t chunkCnt, uint32_t chunkSize)
     BufferInfo info = {
         .owner = typeid(this).name(),
         .size = chunkSize,
-        .count = chunkCnt * ArrayConfig::GC_BUFFER_COUNT * 2
+        .count = chunkCnt * ArrayConfig::GC_READ_BUFFER_STRIPE_COUNT
     };
     gcBufferPool = memoryManager->CreateBufferPool(info);
     assert(gcBufferPool != nullptr);

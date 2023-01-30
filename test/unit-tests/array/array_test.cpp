@@ -124,7 +124,7 @@ TEST(Array, Dispose_testIfDependenciesAreInvoked)
     Array array("mock", NULL, NULL, NULL, NULL, mockPartMgr, mockState, NULL, NULL, mockArrayService);
 
     EXPECT_CALL(*mockPartMgr, DeletePartitions).Times(0);
-    EXPECT_CALL(*mockPartMgr, CreatePartitions).Times(0);
+    EXPECT_CALL(*mockPartMgr, Import).Times(0);
     EXPECT_CALL(*mockState, SetUnmount).Times(1);
     EXPECT_CALL(*mockArrayService, Unregister).Times(1);
 
@@ -160,13 +160,14 @@ TEST(Array, Load_testIfDoneSuccessfully)
     });                                                                           // loading array boot record will be successful
     EXPECT_CALL(*mockArrDevMgr, Import).WillOnce(Return(0));                      // import will be successful
     EXPECT_CALL(*mockState, SetLoad).Times(1);                                    // SetLoad will be invoked once
-    EXPECT_CALL(*mockPtnMgr, CreatePartitions).WillOnce(Return(0));                      // partition creation will be successful
+    EXPECT_CALL(*mockPtnMgr, Import).WillOnce(Return(0));                      // partition creation will be successful
     EXPECT_CALL(*mockPtnMgr, GetRaidState).WillRepeatedly(Return(RaidState::NORMAL));   // raid state will be normal
     EXPECT_CALL(*mockPtnMgr, GetRaidType).Times(4);
     EXPECT_CALL(mockAbrControl, GetCreatedDateTime).Times(2);
     EXPECT_CALL(*mockState, GetSysState).Times(2);
     EXPECT_CALL(*mockPtnMgr, GetPhysicalSize).Times(6);
     EXPECT_CALL(*mockPtnMgr, GetSizeInfo).Times(6);
+    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillRepeatedly(Return(vector<ArrayDevice*>()));
     // When: array is loaded
     int actual = array.Load();
 
@@ -220,7 +221,7 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     });
     EXPECT_CALL(*mockAbrControl, SaveAbr).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, FormatPartition).Times(1);
-    EXPECT_CALL(*mockPtnMgr, CreatePartitions).WillOnce(Return(0));
+    EXPECT_CALL(*mockPtnMgr, Import).WillOnce(Return(0));
     EXPECT_CALL(*mockState, SetCreate).Times(1);
 
     Array array(mockArrayName, NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL);

@@ -49,6 +49,7 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/master_context/config_manager.h"
 #include "src/array/device/array_device_api.h"
+#include "src/array/build/partition_builder.h"
 
 namespace pos
 {
@@ -727,14 +728,13 @@ int
 Array::_CreatePartitions(RaidTypeEnum metaRaid, RaidTypeEnum dataRaid)
 {
     vector<ArrayDevice*> devs = devMgr_->GetDevs();
-    auto nvms = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::NVM, devs);
-    auto dataDevs = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::DATA, devs);
-    ArrayDevice* nvm = nullptr;
-    if (nvms.size() > 0)
+    vector<Partition*> partitions;
+    int ret = PartitionBuilder::Create(devs, metaRaid, dataRaid, partitions);
+    if (ret == 0)
     {
-        nvm = nvms.front();
+        ret = ptnMgr->Import(partitions, svc);;
     }
-    return ptnMgr->CreatePartitions(nvm, dataDevs, metaRaid, dataRaid, svc);
+    return ret;
 }
 
 void
