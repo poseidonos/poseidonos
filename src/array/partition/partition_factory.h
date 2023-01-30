@@ -44,7 +44,7 @@ namespace pos
 class PartitionFactory
 {
 public:
-    static int CreateSsdPartitions(vector<ArrayDevice*> devs, uint64_t nvmSizeInByte,
+    static int CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t nvmSizeInByte,
         RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions /* OUT PARAM */);
     static int CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions /* OUT PARAM */,
         uint32_t blksPerStripeOfMetaPart, uint32_t blksPerStripeOfDataPart);

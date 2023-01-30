@@ -41,8 +41,8 @@ namespace pos
 {
 
 int
-PartitionBuilder::Create(vector<ArrayDevice*>& devs, RaidType metaRaid,
-    RaidType dataRaid, vector<Partition*>& out)
+PartitionBuilder::Create(const vector<ArrayDevice*>& devs, RaidType metaRaid,
+    RaidType dataRaid, vector<Partition*>& partitions)
 {
     if (devs.size() == 0)
     {
@@ -55,21 +55,21 @@ PartitionBuilder::Create(vector<ArrayDevice*>& devs, RaidType metaRaid,
         [](auto d) { return d->GetType() == ArrayDeviceType::DATA; });
 
     int ret = PartitionFactory::CreateSsdPartitions(dataSsds, nvm->GetSize(),
-            RaidType(metaRaid), RaidType(dataRaid), out);
+            metaRaid, dataRaid, partitions);
     if (ret == 0)
     {
-        ret = _CreateNvmPartitions(nvm, out);
+        ret = _CreateNvmPartitions(nvm, partitions);
     }
     return ret;
 }
 
 int
-PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& out)
+PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions)
 {
     uint32_t blksPerStripeOfMetaPart = 0;
     uint32_t blksPerStripeOfDataPart = 0;
 
-    for (Partition* part : out)
+    for (Partition* part : partitions)
     {
         if (part->GetType() == PartitionType::META_SSD)
         {
@@ -81,7 +81,7 @@ PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& out
         }
     }
 
-    int ret = PartitionFactory::CreateNvmPartitions(nvm, out,
+    int ret = PartitionFactory::CreateNvmPartitions(nvm, partitions,
         blksPerStripeOfMetaPart, blksPerStripeOfDataPart);
     return ret;
 }

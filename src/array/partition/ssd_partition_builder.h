@@ -76,7 +76,7 @@ public:
     : option(opt)
     {
     }
-    int Build(uint64_t startLba, vector<Partition*>& out);
+    int Build(uint64_t startLba, vector<Partition*>& partitions /* OUT PARAM */);
     void SetNext(SsdPartitionBuilder* builder) { next = builder; }
 
 private:

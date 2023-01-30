@@ -66,7 +66,7 @@ NvmPartition::Create(uint64_t startLba, uint32_t blksPerChunk)
 }
 
 void
-NvmPartition::RegisterService(IPartitionServices* svc)
+NvmPartition::RegisterService(IPartitionServices* const svc)
 {
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "NvmPartition::RegisterService");
     svc->AddTranslator(type, this);

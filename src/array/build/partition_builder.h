@@ -43,10 +43,12 @@ class Partition;
 class PartitionBuilder
 {
 public:
-    static int Create(vector<ArrayDevice*>& devs, RaidType metaRaid, RaidType dataRaid, vector<Partition*>& out);
+    static int Create(const vector<ArrayDevice*>& devs, RaidType metaRaid, RaidType dataRaid,
+        vector<Partition*>& partitions /* OUT PARAM */);
 
 private:
-    static int _CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& out);
+    static int _CreateNvmPartitions(ArrayDevice* nvm,
+        vector<Partition*>& partitions /* OUT PARAM */);
 };
 
 } // namespace pos

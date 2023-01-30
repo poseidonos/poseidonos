@@ -41,7 +41,7 @@
 namespace pos
 {
 int
-PartitionFactory::CreateSsdPartitions(vector<ArrayDevice*> devs, uint64_t nvmSizeInByte,
+PartitionFactory::CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t nvmSizeInByte,
     RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions)
 {
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Try to split SSD partitions");
@@ -116,7 +116,6 @@ PartitionFactory::CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& part
     {
         POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "NVM partitions are created");
     }
-
     for (auto builder : builders)
     {
         delete builder;

@@ -52,14 +52,14 @@ class PartitionManager
 public:
     PartitionManager(void);
     virtual ~PartitionManager(void);
-    virtual int Import(vector<Partition*> parts, IPartitionServices* svc);
+    virtual int Import(vector<Partition*> parts, IPartitionServices* const svc);
     virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type);
     virtual const PartitionPhysicalSize* GetPhysicalSize(PartitionType type);
     virtual void DeletePartitions(void);
     virtual void FormatPartition(PartitionType type, uint32_t arrayId, IODispatcher* io);
     virtual RaidState GetRaidState(void);
     virtual RaidTypeEnum GetRaidType(PartitionType type);
-    virtual vector<Partition*> GetPartitions(void);
+    virtual const vector<const Partition*> GetPartitions(void);
 
 private:
     Partitions partitions;

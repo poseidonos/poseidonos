@@ -59,7 +59,7 @@ public:
                     RaidType raid);
     virtual ~StripePartition(void);
     virtual int Create(uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBlks);
-    void RegisterService(IPartitionServices* svc) override;
+    void RegisterService(IPartitionServices* const svc) override;
     int Translate(list<PhysicalEntry>& pel, const LogicalEntry& le) override;
     int GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src) override;

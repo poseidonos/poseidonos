@@ -58,7 +58,7 @@ public:
         blksPerChunk = opt.blksPerChunk;
     }
     PartitionType partitionType;
-    ArrayDevice* nvm = nullptr;
+    ArrayDevice* nvm;
     uint32_t blksPerChunk = 0;
 };
 
@@ -71,7 +71,7 @@ public:
     {
     }
 
-    int Build(uint64_t startLba, vector<Partition*>& out);
+    int Build(uint64_t startLba, vector<Partition*>& partitions /* OUT PARAM */);
     void SetNext(NvmPartitionBuilder* builder) { next = builder; }
 
 private:

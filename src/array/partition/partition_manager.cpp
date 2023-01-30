@@ -49,7 +49,7 @@ PartitionManager::~PartitionManager(void)
 }
 
 int
-PartitionManager::Import(vector<Partition*> parts, IPartitionServices* svc)
+PartitionManager::Import(vector<Partition*> parts, IPartitionServices* const svc)
 {
     for (Partition* part : parts)
     {
@@ -137,10 +137,10 @@ PartitionManager::GetRaidType(PartitionType type)
     return RaidTypeEnum::NONE;
 }
 
-vector<Partition*>
+const vector<const Partition*>
 PartitionManager::GetPartitions(void)
 {
-    vector<Partition*> parts;
+    vector<const Partition*> parts;
     for (size_t i = 0; i < partitions.size(); i++)
     {
         if (nullptr != partitions[i])
@@ -148,7 +148,6 @@ PartitionManager::GetPartitions(void)
             parts.push_back(partitions[i]);
         }
     }
-
     return parts;
 }
 } // namespace pos

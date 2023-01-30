@@ -85,7 +85,7 @@ StripePartition::Create(uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBl
 }
 
 void
-StripePartition::RegisterService(IPartitionServices* svc)
+StripePartition::RegisterService(IPartitionServices* const svc)
 {
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
     svc->AddTranslator(type, this);

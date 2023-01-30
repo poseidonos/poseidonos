@@ -43,7 +43,7 @@ namespace pos
 {
 
 int
-SsdPartitionBuilder::Build(uint64_t startLba, vector<Partition*>& out)
+SsdPartitionBuilder::Build(uint64_t startLba, vector<Partition*>& partitions)
 {
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "SsdPartitionBuilder::Build, devCnt: {}", option.devices.size());
     POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Create StripePartition ({})", PARTITION_TYPE_STR[option.partitionType]);
@@ -59,11 +59,11 @@ SsdPartitionBuilder::Build(uint64_t startLba, vector<Partition*>& out)
     }
     else
     {
-        out.push_back(base);
+        partitions.push_back(base);
         if (next != nullptr)
         {
             uint64_t nextLba = base->GetLastLba() + 1;
-            return next->Build(nextLba, out);
+            return next->Build(nextLba, partitions);
         }
     }
 
@@ -92,7 +92,8 @@ SsdPartitionBuilder::_GetSegmentCount(void)
     uint64_t maxCapa = _GetMaxCapacity(option.devices);
     if (baseCapa != maxCapa)
     {
-        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "Partitions are constructed with hetero device sizes, resulting in truncation. max:{}, min:{}",
+        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG),
+            "Partitions are constructed with hetero device sizes, resulting in truncation. max:{}, min:{}",
             maxCapa, baseCapa);
     }
 
@@ -123,6 +124,7 @@ SsdPartitionBuilder::_GetMinCapacity(const vector<ArrayDevice*>& devs)
     {
         return min->GetSize();
     }
+    POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "_GetMinCapacity returns 0");
     return 0;
 }
 
@@ -138,6 +140,7 @@ SsdPartitionBuilder::_GetMaxCapacity(const vector<ArrayDevice*>& devs)
     {
         return max->GetSize();
     }
+    POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "_GetMaxCapacity returns 0");
     return 0;
 }
 

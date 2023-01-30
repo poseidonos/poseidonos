@@ -73,7 +73,7 @@ public:
     bool IsValidLba(uint64_t lba);
     int FindDevice(IArrayDevice* dev);
     virtual RaidState GetRaidState(void) { return RaidState::NORMAL; }
-    virtual void RegisterService(IPartitionServices* svc) {}
+    virtual void RegisterService(IPartitionServices* const svc) {}
     PartitionType GetType(void) { return type; }
     uint64_t GetLastLba() { return physicalSize.lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }

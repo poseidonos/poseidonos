@@ -11,7 +11,7 @@ class MockStripePartition : public StripePartition
 public:
     using StripePartition::StripePartition;
     MOCK_METHOD(int, Create, (uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBlks), (override));
-    MOCK_METHOD(void, RegisterService, (IPartitionServices* svc), (override));
+    MOCK_METHOD(void, RegisterService, (IPartitionServices* const svc), (override));
     MOCK_METHOD(int, Translate, (list<PhysicalEntry>& pel, const LogicalEntry& le), (override));
     MOCK_METHOD(int, GetParityList, (list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src), (override));
     MOCK_METHOD(int, ByteTranslate, (PhysicalByteAddr& dst, const LogicalByteAddr& src), (override));
