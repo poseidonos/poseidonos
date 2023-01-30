@@ -67,7 +67,8 @@ public:
     static const uint32_t REBUILD_CHUNK_SIZE_BYTE = BLOCKS_PER_CHUNK * BLOCK_SIZE_BYTE;
     static const uint32_t MAX_CHUNK_CNT = 32;
 
-    static const uint32_t GC_BUFFER_COUNT = STRIPES_PER_SEGMENT;
+    static const uint32_t GC_READ_BUFFER_STRIPE_COUNT = STRIPES_PER_SEGMENT * 2;
+    static const uint32_t GC_WRITE_BUFFER_STRIPE_COUNT = STRIPES_PER_SEGMENT * 2;
 };
 
 } // namespace pos

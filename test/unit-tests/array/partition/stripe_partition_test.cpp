@@ -35,19 +35,19 @@ TEST(StripePartition, StripePartition_testIfCreateUserDataWithRaid5InitializesPh
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    uint64_t startLba = 1024; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
+
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
-    uint64_t ssdTotalSegments = devSize / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
-    uint64_t mbrSegments = ArrayConfig::MBR_SIZE_BYTE / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
 
     // When
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, ssdTotalSegments - mbrSegments - metaSegments, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
 
     // Then
     uint64_t stripesPerSeg = ArrayConfig::STRIPES_PER_SEGMENT;
@@ -55,10 +55,11 @@ TEST(StripePartition, StripePartition_testIfCreateUserDataWithRaid5InitializesPh
 
     const PartitionPhysicalSize* pPhysicalSize = sPartition.GetPhysicalSize();
     ASSERT_EQ(startLba, pPhysicalSize->startLba);
+    ASSERT_EQ(lastLba, pPhysicalSize->lastLba);
     ASSERT_EQ(blksPerChunk, pPhysicalSize->blksPerChunk);
     ASSERT_EQ(devCnt, pPhysicalSize->chunksPerStripe);
     ASSERT_EQ(stripesPerSeg, pPhysicalSize->stripesPerSegment);
-    ASSERT_EQ(ssdTotalSegments - metaSegments - mbrSegments, pPhysicalSize->totalSegments);
+    ASSERT_EQ(expectedSegCount, pPhysicalSize->totalSegments);
 
     const PartitionLogicalSize* pLogicalSize = sPartition.GetLogicalSize();
     ASSERT_EQ(pPhysicalSize->blksPerChunk, pLogicalSize->blksPerChunk);
@@ -87,18 +88,18 @@ TEST(StripePartition, StripePartition_testIfCreateMetaSsdWithRaid1InitializesPhy
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    uint64_t startLba = 0; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID10;
-    uint64_t ssdTotalSegments = devSize / ArrayConfig::SSD_SEGMENT_SIZE_BYTE;
-    uint64_t metaSegments = DIV_ROUND_UP(ssdTotalSegments * ArrayConfig::META_SSD_SIZE_RATIO, (uint64_t)(100));
 
     // When
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, metaSegments, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
 
     // Then
     uint64_t stripesPerSeg = ArrayConfig::STRIPES_PER_SEGMENT;
@@ -109,7 +110,7 @@ TEST(StripePartition, StripePartition_testIfCreateMetaSsdWithRaid1InitializesPhy
     ASSERT_EQ(blksPerChunk, pPhysicalSize->blksPerChunk);
     ASSERT_EQ(actualDevCnt, pPhysicalSize->chunksPerStripe);
     ASSERT_EQ(stripesPerSeg, pPhysicalSize->stripesPerSegment);
-    ASSERT_EQ(metaSegments , pPhysicalSize->totalSegments);
+    ASSERT_EQ(expectedSegCount , pPhysicalSize->totalSegments);
 
     const PartitionLogicalSize* pLogicalSize = sPartition.GetLogicalSize();
     ASSERT_EQ(pPhysicalSize->blksPerChunk, pLogicalSize->blksPerChunk);
@@ -138,15 +139,17 @@ TEST(StripePartition, Translate_testIfFtBlkAddrIsMappedToPhysicalBlkAddr)
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    uint64_t startLba = 0; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
+
     RaidTypeEnum raid = RaidTypeEnum::RAID10;
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     auto psize = sPartition.GetPhysicalSize();
     auto lsize = sPartition.GetLogicalSize();
     StripeId MAX_BLK_OFFSET = psize->blksPerChunk * psize->chunksPerStripe - 1;
@@ -190,15 +193,17 @@ TEST(StripePartition, GetParityList_testIfParityWithRaid10FillsDestIn)
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    uint64_t startLba = 0; // not interesting
+
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID10;
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     std::list<BufferEntry> buffers;
     LogicalBlkAddr lBlkAddr{
         .stripeId = 5,
@@ -238,15 +243,17 @@ TEST(StripePartition, GetRecoverMethod_testIfValidUbioCanRetrieveRecoverMethodSu
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    uint64_t startLba = 0; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
+
     RaidTypeEnum raid = RaidTypeEnum::RAID10;
     StripePartition sPartition(PartitionType::META_SSD, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
 
     int DATA_BUFFER_UNIT = 13; // just picked up randomly
     UbioSmartPtr ubio = make_shared<Ubio>(nullptr, DATA_BUFFER_UNIT, "mock-array");
@@ -294,17 +301,18 @@ TEST(StripePartition, GetRebuildCtx_testIfRebuildContextIsFilledInWithFaultyDevi
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    ArrayDevice* arrayDevice4 = new ArrayDevice(nullptr, ArrayDeviceState::FAULT); // it seems current GetRebuildCtx() doesn't care about the state.
+    ArrayDevice* arrayDevice4 = new ArrayDevice(nullptr, ArrayDeviceState::FAULT, 0, ArrayDeviceType::DATA); // it seems current GetRebuildCtx() doesn't care about the state.
     devs.push_back(arrayDevice4); // it seems current GetRebuildCtx() doesn't care about the state.
-    uint64_t startLba = 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
 
     // When
     auto rebuildCtx = sPartition.GetRebuildCtx(vector<IArrayDevice*>{arrayDevice4});
@@ -336,15 +344,16 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
-    uint64_t startLba = 1024; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     auto physicalSize = sPartition.GetPhysicalSize();
     MockIODispatcher mockIoDispatcher;
     int cntSubmitIo = 0;
@@ -404,16 +413,17 @@ TEST(StripePartition, ByteTranslate_testFunctionCallForCoverage)
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
 
-    uint64_t startLba = 1024; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     // When
     PhysicalByteAddr dst;
     LogicalByteAddr src;
@@ -443,16 +453,17 @@ TEST(StripePartition, ByteConvert_testFunctionCallForCoverage)
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
 
-    uint64_t startLba = 1024; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     // When
     list<PhysicalByteWriteEntry> dst;
     LogicalByteWriteEntry src;
@@ -481,16 +492,17 @@ TEST(StripePartition, IsByteAccessSupported_testReturnValue)
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
 
-    uint64_t startLba = 1024; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     // When
     bool result = sPartition.IsByteAccessSupported();
     // Then
@@ -517,17 +529,18 @@ TEST(StripePartition, GetRaidState_testIfExtractDeviceStateListFromArrayDeviceLi
             devName, devSize, nullptr);
         EXPECT_CALL(*mockUblock, GetName).WillRepeatedly(Return(devName.c_str()));
         EXPECT_CALL(*mockUblock, GetSize).WillRepeatedly(Return(devSize));
-        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL);
+        ArrayDevice* dev = new ArrayDevice(mockUblock, ArrayDeviceState::NORMAL, 0, ArrayDeviceType::DATA);
         devs.push_back(dev);
     }
     devs[1]->SetState(ArrayDeviceState::FAULT); // to make state as degraded.
 
-    uint64_t startLba = 1024; // not interesting
+    uint64_t startLba = 0;
+    uint64_t lastLba = 1024 * 64 * 8 * 10 - 1;
+    uint32_t expectedSegCount = (lastLba - startLba + 1) / (uint64_t)(1024 * 64 * 8);
     uint32_t totalNvmBlks = 1024 * 1024; // not interesting
-    uint32_t segCnt = 1; // not interesting
     RaidTypeEnum raid = RaidTypeEnum::RAID5;
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
-    sPartition.Create(startLba, segCnt, totalNvmBlks);
+    sPartition.Create(startLba, lastLba, totalNvmBlks);
     // When
     RaidState state = sPartition.GetRaidState();
     // Then

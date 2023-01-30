@@ -19,6 +19,7 @@ SUBDIRS = allocator \
         gc/flow_control \
         gc/force_flush_locker \
         array \
+        array/build \
         array/device \
         array/ft \
         array/meta \

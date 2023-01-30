@@ -116,16 +116,4 @@ Partition::_IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt)
         return false;
     }
 }
-
-void
-Partition::_UpdateLastLba(void)
-{
-    physicalSize.lastLba = physicalSize.startLba +
-        static_cast<uint64_t>(ArrayConfig::SECTORS_PER_BLOCK) *
-        physicalSize.blksPerChunk * physicalSize.stripesPerSegment *
-        physicalSize.totalSegments - 1;
-
-    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "Partition::_UpdateLastLba, lastLba:{}", physicalSize.lastLba);
-}
-
 } // namespace pos

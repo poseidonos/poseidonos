@@ -31,8 +31,7 @@
  */
 
 
-#ifndef RAID6_H_
-#define RAID6_H_
+#pragma once
 
 #include "method.h"
 #include "src/cpu_affinity/affinity_manager.h"
@@ -51,7 +50,7 @@ class BufferPool;
 class Raid6 : public Method
 {
 public:
-    explicit Raid6(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
+    explicit Raid6(const PartitionPhysicalSize* pSize);
     virtual ~Raid6();
     virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
         AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
@@ -79,7 +78,6 @@ private:
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
     MemoryManager* memoryManager = nullptr;
-    uint64_t parityBufferCntPerNuma = 0;
 
     uint32_t chunkSize = 0;
     uint32_t chunkCnt = 0;
@@ -94,4 +92,3 @@ private:
 };
 
 } // namespace pos
-#endif // RAID6_H_

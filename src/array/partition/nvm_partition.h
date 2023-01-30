@@ -30,8 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NVM_PARTITION_H_
-#define NVM_PARTITION_H_
+#pragma once
 
 #include <vector>
 #include <list>
@@ -48,7 +47,7 @@ public:
                  vector<ArrayDevice*> devs);
     virtual ~NvmPartition();
     int Create(uint64_t startLba, uint32_t blksPerChunk);
-    void RegisterService(IPartitionServices* svc) override;
+    void RegisterService(IPartitionServices* const svc) override;
     int Translate(list<PhysicalEntry>& pel, const LogicalEntry& le) override;
     int GetParityList(list<PhysicalWriteEntry>& parity, const LogicalWriteEntry& src) override;
     int ByteTranslate(PhysicalByteAddr& dst, const LogicalByteAddr& src);
@@ -63,4 +62,3 @@ private:
 };
 
 } // namespace pos
-#endif // NVM_PARTITION_H_

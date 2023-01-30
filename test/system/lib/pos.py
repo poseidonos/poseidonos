@@ -10,7 +10,7 @@ import api
 
 POS_ROOT = '../../../'
 LOG_PATH = 'pos.log'
-TR_ADDR = "10.100.11.21"
+TR_ADDR = "127.0.0.1"
 TR_TYPE = 'TCP'
 WT_FILE = os.path.dirname(os.path.realpath(__file__)) + '/WT_ENABLED'
 
