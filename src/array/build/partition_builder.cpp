@@ -30,24 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include "partition.h"
-#include "src/array/device/array_device.h"
-#include <vector>
-
-using namespace std;
+#include "partition_builder.h"
+#include "src/helper/enumerable/query.h"
+#include "src/array/partition/stripe_partition.h"
+#include "src/array/partition/nvm_partition.h"
+#include "src/array/partition/partition_factory.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
 
-class PartitionFactory
+int
+PartitionBuilder::Create(const vector<ArrayDevice*>& devs, RaidType metaRaid,
+    RaidType dataRaid, vector<Partition*>& partitions)
 {
-public:
-    static int CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t nvmSizeInByte,
-        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions /* OUT PARAM */);
-    static int CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions /* OUT PARAM */,
-        uint32_t blksPerStripeOfMetaPart, uint32_t blksPerStripeOfDataPart);
-};
+    if (devs.size() == 0)
+    {
+        // TODO : temporary code to ignore unit-test path
+        return 0;
+    }
+    ArrayDevice* nvm = Enumerable::First(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::NVM; });
+    vector<ArrayDevice*> dataSsds = Enumerable::Where(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::DATA; });
+
+    int ret = PartitionFactory::CreateSsdPartitions(dataSsds, nvm->GetSize(),
+            metaRaid, dataRaid, partitions);
+    if (ret == 0)
+    {
+        ret = _CreateNvmPartitions(nvm, partitions);
+    }
+    return ret;
+}
+
+int
+PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions)
+{
+    uint32_t blksPerStripeOfMetaPart = 0;
+    uint32_t blksPerStripeOfDataPart = 0;
+
+    for (Partition* part : partitions)
+    {
+        if (part->GetType() == PartitionType::META_SSD)
+        {
+            blksPerStripeOfMetaPart = part->GetLogicalSize()->blksPerStripe;
+        }
+        else if (part->GetType() == PartitionType::USER_DATA)
+        {
+            blksPerStripeOfDataPart = part->GetLogicalSize()->blksPerStripe;
+        }
+    }
+
+    int ret = PartitionFactory::CreateNvmPartitions(nvm, partitions,
+        blksPerStripeOfMetaPart, blksPerStripeOfDataPart);
+    return ret;
+}
+
 
 } // namespace pos

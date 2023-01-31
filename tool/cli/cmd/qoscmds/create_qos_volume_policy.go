@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -34,9 +34,13 @@ NOTE:
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var command = "CREATEQOSVOLUMEPOLICY"
-
-		req := formVolumePolicyReq(command)
+		reqParam := formVolumePolicyReqParam()
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.CreateQoSVolumePolicy(reqParam)
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
 		}.Marshal(req)
@@ -45,13 +49,12 @@ NOTE:
 			return err
 		}
 		displaymgr.PrintRequest(string(reqJson))
-		res, gRpcErr := grpcmgr.SendQosCreateVolumePolicy(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -61,7 +64,7 @@ NOTE:
 	},
 }
 
-func formVolumePolicyReq(command string) *pb.QosCreateVolumePolicyRequest {
+func formVolumePolicyReqParam() *pb.QosCreateVolumePolicyRequest_Param {
 
 	volumeNameListSlice := strings.Split(volumePolicy_volumeNameList, ",")
 	var volumeNames []*pb.QosVolumeNameParam
@@ -71,7 +74,6 @@ func formVolumePolicyReq(command string) *pb.QosCreateVolumePolicyRequest {
 		}
 		volumeNames = append(volumeNames, volumeName)
 	}
-	uuid := globals.GenerateUUID()
 	param := &pb.QosCreateVolumePolicyRequest_Param{
 		Array:   volumePolicy_arrayName,
 		Vol:     volumeNames,
@@ -80,14 +82,8 @@ func formVolumePolicyReq(command string) *pb.QosCreateVolumePolicyRequest {
 		Minbw:   int64(volumePolicy_minBandwidth),
 		Maxbw:   int64(volumePolicy_maxBandwidth),
 	}
-	req := &pb.QosCreateVolumePolicyRequest{
-		Command:   command,
-		Rid:       uuid,
-		Requestor: "cli",
-		Param:     param,
-	}
 
-	return req
+	return param
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

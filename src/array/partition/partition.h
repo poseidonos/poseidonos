@@ -73,16 +73,15 @@ public:
     bool IsValidLba(uint64_t lba);
     int FindDevice(IArrayDevice* dev);
     virtual RaidState GetRaidState(void) { return RaidState::NORMAL; }
-    virtual void RegisterService(IPartitionServices* svc) {}
+    virtual void RegisterService(IPartitionServices* const svc) {}
     PartitionType GetType(void) { return type; }
     uint64_t GetLastLba() { return physicalSize.lastLba; }
     const vector<ArrayDevice*> GetDevs(void) { return devs; }
-    virtual RaidTypeEnum GetRaidType(void) { return RaidTypeEnum::NONE; }
+    virtual RaidType GetRaidType(void) { return RaidTypeEnum::NONE; }
     virtual void MakeDebugInfo(ParitionDebugInfo& obj) final;
 
 protected:
     bool _IsValidEntry(StripeId stripeId, BlkOffset offset, uint32_t blkCnt);
-    void _UpdateLastLba(void);
     PartitionLogicalSize logicalSize;
     PartitionPhysicalSize physicalSize;
     vector<ArrayDevice*> devs;

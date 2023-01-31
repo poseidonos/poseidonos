@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
+
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -27,12 +28,17 @@ Example:
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var command = "LISTQOSPOLICIES"
-		req, buildErr := buildListQOSPolicyReq(command)
+		reqParam, buildErr := buildListQOSPolicyReqParam()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.ListQoSVolumePolicy(reqParam)
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
 		}.Marshal(req)
@@ -42,13 +48,12 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendListQOSPolicy(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -59,8 +64,7 @@ Example:
 	},
 }
 
-func buildListQOSPolicyReq(command string) (*pb.ListQOSPolicyRequest, error) {
-	uuid := globals.GenerateUUID()
+func buildListQOSPolicyReqParam() (*pb.ListQOSPolicyRequest_Param, error) {
 	volumeNameListSlice := strings.Split(listQos_volumeNameList, ",")
 	var volumeNames []*pb.ListQOSPolicyRequest_Param_Volume
 	for _, str := range volumeNameListSlice {
@@ -70,9 +74,8 @@ func buildListQOSPolicyReq(command string) (*pb.ListQOSPolicyRequest, error) {
 	}
 
 	param := &pb.ListQOSPolicyRequest_Param{Array: listQos_arrayName, Vol: volumeNames}
-	req := &pb.ListQOSPolicyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

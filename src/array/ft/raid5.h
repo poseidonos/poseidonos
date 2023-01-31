@@ -30,8 +30,7 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef RAID5_H_
-#define RAID5_H_
+#pragma once
 
 #include <list>
 #include <vector>
@@ -50,7 +49,7 @@ class BufferPool;
 class Raid5 : public Method
 {
 public:
-    explicit Raid5(const PartitionPhysicalSize* pSize, uint64_t bufferCntPerNuma);
+    explicit Raid5(const PartitionPhysicalSize* pSize);
     virtual ~Raid5();
     virtual bool AllocParityPools(uint64_t parityBufferCntPerNuma,
         AffinityManager* affMgr = AffinityManagerSingleton::Instance(),
@@ -77,9 +76,7 @@ private:
     vector<BufferPool*> parityPools;
     AffinityManager* affinityManager = nullptr;
     MemoryManager* memoryManager = nullptr;
-    uint64_t parityBufferCntPerNuma = 0;
     RecoverFunc recoverFunc = nullptr;
 };
 
 } // namespace pos
-#endif // RAID5_H_

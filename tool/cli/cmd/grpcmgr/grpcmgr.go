@@ -513,27 +513,6 @@ func SendListVolume(req *pb.ListVolumeRequest) (*pb.ListVolumeResponse, error) {
 	return res, err
 }
 
-func SendQosCreateVolumePolicy(req *pb.QosCreateVolumePolicyRequest) (*pb.QosCreateVolumePolicyResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-	res, err := c.QosCreateVolumePolicy(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
 func SendVolumeInfo(req *pb.VolumeInfoRequest) (*pb.VolumeInfoResponse, error) {
 	conn, err := dialToCliServer()
 	if err != nil {
@@ -547,27 +526,6 @@ func SendVolumeInfo(req *pb.VolumeInfoRequest) (*pb.VolumeInfoResponse, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
 	defer cancel()
 	res, err := c.VolumeInfo(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendQosResetVolumePolicy(req *pb.QosResetVolumePolicyRequest) (*pb.QosResetVolumePolicyResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		log.Error(err)
-		errToReturn := errors.New(dialErrorMsg)
-		return nil, errToReturn
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-	res, err := c.QosResetVolumePolicy(ctx, req)
 	if err != nil {
 		log.Error("error: ", err.Error())
 		return nil, err
@@ -618,27 +576,6 @@ func SendListWBT(req *pb.ListWBTRequest) (*pb.ListWBTResponse, error) {
 	}
 
 	return res, err
-}
-
-func SendListQOSPolicy(req *pb.ListQOSPolicyRequest) (*pb.ListQOSPolicyResponse, error) {
-    conn, err := dialToCliServer()
-    if err != nil {
-        log.Error(err)
-        errToReturn := errors.New(dialErrorMsg)
-        return nil, errToReturn
-    }
-    defer conn.Close()
-
-    c := pb.NewPosCliClient(conn)
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-    defer cancel()
-    res, err := c.ListQOSPolicy(ctx, req)
-    if err != nil {
-        log.Error("error: ", err.Error())
-        return nil, err
-    }
-
-    return res, err
 }
 
 func SendWBT(req *pb.WBTRequest) (*pb.WBTResponse, error) {

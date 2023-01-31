@@ -31,17 +31,8 @@
  */
 
 #include "partition_manager.h"
-#include "partition_factory.h"
-
-#include "src/array/partition/partition_services.h"
-#include "src/array/device/array_device.h"
-#include "src/device/base/ublock_device.h"
-#include "src/include/array_config.h"
 #include "src/logger/logger.h"
-#include "src/helper/enumerable/query.h"
-#include "src/array/partition/partition.h"
 
-#include <functional>
 #include <algorithm>
 
 namespace pos
@@ -55,6 +46,21 @@ PartitionManager::PartitionManager(void)
 PartitionManager::~PartitionManager(void)
 {
     DeletePartitions();
+}
+
+int
+PartitionManager::Import(vector<Partition*> parts, IPartitionServices* const svc)
+{
+    for (Partition* part : parts)
+    {
+        PartitionType partType = part->GetType();
+        auto partSize = part->GetPhysicalSize();
+        partitions[partType] = part;
+        POS_TRACE_INFO(EID(IMPORT_PARTITION), "part_type:{}, start_lba:{}, last_lba:{}, dev_count:{}, seg_count:{}",
+            PARTITION_TYPE_STR[partType], partSize->startLba, partSize->lastLba, partSize->chunksPerStripe, partSize->totalSegments);
+        part->RegisterService(svc);
+    }
+    return 0;
 }
 
 const PartitionLogicalSize*
@@ -83,35 +89,6 @@ PartitionManager::GetPhysicalSize(PartitionType type)
     }
 }
 
-int
-PartitionManager::CreatePartitions(ArrayDevice* nvm, vector<ArrayDevice*> data,
-    RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, IPartitionServices* svc)
-{
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "PartitionManager::CreatePartition, MetaRaid:{}, DataRaid:{}",
-        RaidType(metaRaid).ToString(), RaidType(dataRaid).ToString());
-    Partitions out;
-    out.fill(nullptr);
-    int ret = PartitionFactory::CreatePartitions(nvm, data, metaRaid, dataRaid, out);
-    if (ret == 0)
-    {
-        for (Partition* part : out)
-        {
-            if (part != nullptr)
-            {
-                PartitionType partType = part->GetType();
-                partitions[partType] = part;
-                part->RegisterService(svc);
-            }
-        }
-    }
-    else
-    {
-        POS_TRACE_WARN(ret, "Error occured during the creating partitions");
-    }
-
-    return ret;
-}
-
 void
 PartitionManager::DeletePartitions()
 {
@@ -136,7 +113,7 @@ PartitionManager::FormatPartition(PartitionType type, uint32_t arrayId, IODispat
     }
     else
     {
-        POS_TRACE_ERROR(EID(CREATE_ARRAY_DEBUG_MSG), "Failed to format {} partition", PARTITION_TYPE_STR[type]);
+        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "Failed to format {} partition", PARTITION_TYPE_STR[type]);
     }
 }
 
@@ -158,5 +135,19 @@ PartitionManager::GetRaidType(PartitionType type)
         return partitions[type]->GetRaidType();
     }
     return RaidTypeEnum::NONE;
+}
+
+const vector<const Partition*>
+PartitionManager::GetPartitions(void)
+{
+    vector<const Partition*> parts;
+    for (size_t i = 0; i < partitions.size(); i++)
+    {
+        if (nullptr != partitions[i])
+        {
+            parts.push_back(partitions[i]);
+        }
+    }
+    return parts;
 }
 } // namespace pos

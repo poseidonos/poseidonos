@@ -32,22 +32,23 @@
 
 #pragma once
 
-#include "partition.h"
-#include "src/array/device/array_device.h"
-#include <vector>
+#include "src/array/partition/partition_factory.h"
 
 using namespace std;
 
 namespace pos
 {
-
-class PartitionFactory
+class ArrayDevice;
+class Partition;
+class PartitionBuilder
 {
 public:
-    static int CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t nvmSizeInByte,
-        RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions /* OUT PARAM */);
-    static int CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& partitions /* OUT PARAM */,
-        uint32_t blksPerStripeOfMetaPart, uint32_t blksPerStripeOfDataPart);
+    static int Create(const vector<ArrayDevice*>& devs, RaidType metaRaid, RaidType dataRaid,
+        vector<Partition*>& partitions /* OUT PARAM */);
+
+private:
+    static int _CreateNvmPartitions(ArrayDevice* nvm,
+        vector<Partition*>& partitions /* OUT PARAM */);
 };
 
 } // namespace pos
