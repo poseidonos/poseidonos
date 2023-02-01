@@ -151,7 +151,16 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     const uint32_t arrayId = 0;
     uint32_t expectedVictimSegId = 0;
 
-    SegmentInfo* segInfos = new SegmentInfo[numOfSegment](maxValidBlockCount, maxOccupiedStripeCount, SegmentState::SSD);
+    SegmentInfo* segInfos = new SegmentInfo[numOfSegment];
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numOfSegment];//(maxValidBlockCount, maxOccupiedStripeCount, SegmentState::SSD);
+    for (int i = 0; i < numOfSegment; ++i)
+    {
+        segInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        segInfos[i].SetValidBlockCount(maxValidBlockCount);
+        segInfos[i].SetOccupiedStripeCount(maxOccupiedStripeCount);
+        segInfos[i].SetState(SegmentState::SSD);
+
+    }
     SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, arrayId, segInfos);
 
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
@@ -258,5 +267,6 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     delete gcCtx;
     delete blockAllocStatus;
     delete contextReplayer;
+    delete[] segmentInfoData;
 }
 }

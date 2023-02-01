@@ -99,6 +99,7 @@ private:
     uint32_t numSegments;
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
     SegmentInfo* segmentInfos;
+    SegmentInfoData* segmentInfoData;
     const int ALL_LOG_GROUP = -1;
 };
 

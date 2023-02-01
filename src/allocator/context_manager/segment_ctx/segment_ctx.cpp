@@ -120,6 +120,12 @@ SegmentCtx::Init(void)
 
     uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
+    segmentInfoData = new SegmentInfoData[numSegments];
+    for (uint32_t i = 0; i < numSegments ; ++i)
+    {
+        segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        segmentInfos[i].InitSegmentInfoData();
+    }
 
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
     {
@@ -151,6 +157,12 @@ SegmentCtx::Dispose(void)
     {
         delete[] segmentInfos;
         segmentInfos = nullptr;
+    }
+
+    if (segmentInfoData != nullptr)
+    {
+        delete[] segmentInfoData;
+        segmentInfoData = nullptr;
     }
 
     for (int state = SegmentState::FREE; state < SegmentState::NUM_STATES; state++)
@@ -291,7 +303,7 @@ SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
     return segmentFreed;
 }
 
-int
+uint32_t
 SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
 {
     return segmentInfos[segId].GetOccupiedStripeCount();
@@ -303,14 +315,6 @@ SegmentCtx::AfterLoad(char* buf)
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-    /*
-     * (Parameter given buffer)                      | char* buf[File Size of Segment Context File]                                            |
-     * (Expected layout of parameter given buffer)   | SegmentCtxHeader | SegmentInfoData[0] | SegmentInfoData[1] | ... | SegmentInfoData[N-1] |
-     */
-    for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); ++i)
-    {
-       memcpy(&segmentInfos[i].data, buf  + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), sizeof(SegmentInfoData));
-    }
     _RebuildSegmentList();
 }
 
@@ -339,14 +343,6 @@ void
 SegmentCtx::BeforeFlush(char* buf)
 {
     ctxHeader.ctxVersion = ctxDirtyVersion++;
-    /*
-     * (Parameter given buffer)                      | char* buf[File Size of Segment Context File]                                            |
-     * (Expected layout of parameter given buffer)   | SegmentCtxHeader | SegmentInfoData[0] | SegmentInfoData[1] | ... | SegmentInfoData[N-1] |
-     */
-    for(uint32_t i = 0; i < addrInfo->GetnumUserAreaSegments(); ++i)
-    {
-       memcpy(buf + sizeof(SegmentCtxHeader) + i * sizeof(SegmentInfoData), &segmentInfos[i].data, sizeof(SegmentInfoData));
-    }
 }
 
 void
@@ -369,8 +365,7 @@ SegmentCtx::GetSectionAddr(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            // NOTE : The caller should be aware that this method may return nullptr. That means Saving and loading SegmentInfoData via SegmentCtx::Beforeflush() and SegmentCtx::AfterLoad() methods.
-            ret = nullptr;
+            ret = (char*)segmentInfoData;
             break;
         }
     }
@@ -390,7 +385,6 @@ SegmentCtx::GetSectionSize(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            // To calculate size of SegmentCtx exactly, sectionSize of segmentInfo must exist even if sectionAddr of segmentInfo is  nullptr.
             ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfoData);
             break;
         }
