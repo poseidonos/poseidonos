@@ -51,22 +51,34 @@ enum SegmentState : int
     NUM_STATES,
 };
 
-struct SegmentInfoData
+class SegmentInfoData
 {
+public:
     std::atomic<uint32_t> validBlockCount;
     std::atomic<uint32_t> occupiedStripeCount;
     SegmentState state;
     // TODO(sang7.park) : add reserved field here.
     // DO NOT ADD ANY VIRTUAL METHODS HERE TO SUPPORT BACKWARD COMPATIBILITY
+    SegmentInfoData(){
+
+    }
+
+    SegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
+    {
+        this->validBlockCount = blkCount;
+        this->occupiedStripeCount = stripeCount;
+        this->state = segmentState;
+    }
+
 };
 
 class SegmentInfo
 {
 public:
     SegmentInfo(void);
-    SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState);
     ~SegmentInfo(void);
 
+    virtual void InitSegmentInfoData(void);
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(uint32_t cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
@@ -84,10 +96,12 @@ public:
     virtual bool MoveToVictimState(void);
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
+    virtual void AllocateSegmentInfoData(SegmentInfoData* segmentInfoData);
 
-    SegmentInfoData data;
 private:
     void _MoveToFreeState(void);
+
+    SegmentInfoData* data;
     std::mutex seglock;
 
 };

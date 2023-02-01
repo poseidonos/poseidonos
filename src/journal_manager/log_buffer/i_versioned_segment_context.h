@@ -39,6 +39,7 @@ namespace pos
 {
 class JournalConfiguration;
 class SegmentInfo;
+class SegmentInfoData;
 class VersionedSegmentInfo;
 
 class IVersionedSegmentContext

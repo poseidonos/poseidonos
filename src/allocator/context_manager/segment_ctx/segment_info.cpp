@@ -41,54 +41,54 @@
 namespace pos
 {
 SegmentInfo::SegmentInfo(void)
-: SegmentInfo(0, 0, SegmentState::FREE)
+:data(nullptr)
 {
-}
-
-// Constructor for UT to inject precondition values
-SegmentInfo::SegmentInfo(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
-{
-    SetValidBlockCount(blkCount);
-    SetOccupiedStripeCount(stripeCount);
-    SetState(segmentState);
 }
 
 SegmentInfo::~SegmentInfo(void)
 {
 }
 
+void
+SegmentInfo::InitSegmentInfoData(void)
+{
+    SetValidBlockCount(0);
+    SetOccupiedStripeCount(0);
+    SetState(SegmentState::FREE);
+}
+
 uint32_t
 SegmentInfo::GetValidBlockCount(void)
 {
-    return data.validBlockCount;
+    return data->validBlockCount;
 }
 
 void
 SegmentInfo::SetValidBlockCount(uint32_t cnt)
 {
     // for wbt
-    data.validBlockCount = cnt;
+    data->validBlockCount = cnt;
 }
 
 uint32_t
 SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
 {
-    return data.validBlockCount.fetch_add(inc) + inc;
+    return data->validBlockCount.fetch_add(inc) + inc;
 }
 
 std::pair<bool, SegmentState>
 SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    int32_t decreased = data.validBlockCount.fetch_sub(dec) - dec;
+    int32_t decreased = data->validBlockCount.fetch_sub(dec) - dec;
 
     if (decreased == 0)
     {
         if (true == allowVictimSegRelease)
         {
-            if (data.state == SegmentState::VICTIM || data.state == SegmentState::SSD)
+            if (data->state == SegmentState::VICTIM || data->state == SegmentState::SSD)
             {
-                std::pair<bool, SegmentState> result = {true, data.state};
+                std::pair<bool, SegmentState> result = {true, data->state};
                 _MoveToFreeState();
 
                 return result;
@@ -96,9 +96,9 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
         }
         else
         {
-            if (data.state == SegmentState::SSD)
+            if (data->state == SegmentState::SSD)
             {
-                std::pair<bool, SegmentState> result = {true, data.state};
+                std::pair<bool, SegmentState> result = {true, data->state};
                 _MoveToFreeState();
 
                 return result;
@@ -112,64 +112,64 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
         return {false, SegmentState::ERROR};
     }
 
-    return {false, data.state};
+    return {false, data->state};
 }
 
 void
 SegmentInfo::SetOccupiedStripeCount(uint32_t cnt)
 {
-    data.occupiedStripeCount = cnt;
+    data->occupiedStripeCount = cnt;
 }
 
 uint32_t
 SegmentInfo::GetOccupiedStripeCount(void)
 {
-    return data.occupiedStripeCount;
+    return data->occupiedStripeCount;
 }
 
 uint32_t
 SegmentInfo::IncreaseOccupiedStripeCount(void)
 {
     // ++ is equivalent to fetch_add(1) + 1
-    return ++(data.occupiedStripeCount);
+    return ++(data->occupiedStripeCount);
 }
 
 void
 SegmentInfo::SetState(SegmentState newState)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    data.state = newState;
+    data->state = newState;
 }
 
 SegmentState
 SegmentInfo::GetState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    return data.state;
+    return data->state;
 }
 
 void
 SegmentInfo::_MoveToFreeState(void)
 {
-    data.occupiedStripeCount = 0;
-    data.validBlockCount = 0;
+    data->occupiedStripeCount = 0;
+    data->validBlockCount = 0;
 
-    data.state = SegmentState::FREE;
+    data->state = SegmentState::FREE;
 }
 
 void
 SegmentInfo::MoveToNvramState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    if (data.state != SegmentState::FREE)
+    if (data->state != SegmentState::FREE)
     {
         POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
             "Failed to move to NVRAM state. Segment state {} valid count {} occupied stripe count {}",
-            data.state, data.validBlockCount, data.occupiedStripeCount);
+            data->state, data->validBlockCount, data->occupiedStripeCount);
         assert(false);
     }
 
-    data.state = SegmentState::NVRAM;
+    data->state = SegmentState::NVRAM;
 }
 
 bool
@@ -177,7 +177,7 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
 
-    if (data.validBlockCount == 0)
+    if (data->validBlockCount == 0)
     {
         _MoveToFreeState();
 
@@ -185,7 +185,7 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
     }
     else
     {
-        data.state = SegmentState::SSD;
+        data->state = SegmentState::SSD;
         return false;
     }
 }
@@ -194,15 +194,15 @@ bool
 SegmentInfo::MoveToVictimState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    if (data.state != SegmentState::SSD)
+    if (data->state != SegmentState::SSD)
     {
         POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
-            "Cannot move to victim state as it's not SSD state, state: {}", data.state);
+            "Cannot move to victim state as it's not SSD state, state: {}", data->state);
         return false;
     }
     else
     {
-        data.state = SegmentState::VICTIM;
+        data->state = SegmentState::VICTIM;
 
         return true;
     }
@@ -212,14 +212,21 @@ uint32_t
 SegmentInfo::GetValidBlockCountIfSsdState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    if (data.state != SegmentState::SSD)
+    if (data->state != SegmentState::SSD)
     {
         return UINT32_MAX;
     }
     else
     {
-        return data.validBlockCount;
+        return data->validBlockCount;
     }
+}
+
+void
+SegmentInfo::AllocateSegmentInfoData(SegmentInfoData *segmentInfoData)
+{
+    assert(nullptr != segmentInfoData);
+    data = segmentInfoData;
 }
 
 } // namespace pos

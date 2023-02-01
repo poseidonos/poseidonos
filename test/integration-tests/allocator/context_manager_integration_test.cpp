@@ -79,9 +79,11 @@ protected:
 
     JournalManager* journal;
     SegmentInfo* segInfosForSegCtx;
+    SegmentInfoData* segInfoDataForSegCtx;
     SegmentCtx* segCtx;
     IVersionedSegmentContext* versionedSegCtx;
     SegmentInfo* loadedSegInfos;
+    SegmentInfoData* loadedSegInfoDataForSegCtx;
     ContextManager* ctxManager;
     CheckpointHandler* cpHandler;
 
@@ -164,8 +166,14 @@ ContextManagerIntegrationTest::SetUp(void)
     ioManager = new NiceMock<MockContextIoManager>;
     addrInfo = new NiceMock<MockAllocatorAddressInfo>;
 
-    segInfosForSegCtx = new SegmentInfo[numOfSegment](validBlockCount,
+    segInfosForSegCtx = new SegmentInfo[numOfSegment];
+    segInfoDataForSegCtx = new SegmentInfoData[numOfSegment](validBlockCount,
         maxOccupiedStripeCount, SegmentState::SSD);
+    for(int i=0;i<numOfSegment;++i)
+    {
+        segInfosForSegCtx[i].AllocateSegmentInfoData(&segInfoDataForSegCtx[i]);
+    }
+
     segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, arrayId, segInfosForSegCtx);
 
     journal = new JournalManager(config, statusProvider,
@@ -176,7 +184,12 @@ ContextManagerIntegrationTest::SetUp(void)
         callbackSequenceController, replayHandler, arrayInfo, tp);
 
     versionedSegCtx = journal->GetVersionedSegmentContext();
-    loadedSegInfos = new SegmentInfo[numOfSegment]();
+    loadedSegInfos = new SegmentInfo[numOfSegment];
+    loadedSegInfoDataForSegCtx = new SegmentInfoData[numOfSegment](0, 0, SegmentState::FREE);
+    for(int i=0;i<numOfSegment;++i)
+    {
+        loadedSegInfos[i].AllocateSegmentInfoData(&loadedSegInfoDataForSegCtx[i]);
+    }
 
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
@@ -202,7 +215,9 @@ void
 ContextManagerIntegrationTest::TearDown(void)
 {
     delete [] segInfosForSegCtx;
+    delete [] segInfoDataForSegCtx;
     delete [] loadedSegInfos;
+    delete [] loadedSegInfoDataForSegCtx;
 
     if (nullptr != arrayInfo)
     {
