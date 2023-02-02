@@ -7,8 +7,6 @@ import (
 	"cli/cmd/otelmgr"
 	"fmt"
 
-	pb "kouros/api"
-
 	"github.com/spf13/cobra"
 )
 
@@ -30,14 +28,12 @@ Syntax:
 		t.SetTrace(m.GetRootContext(), globals.SYSTEM_CMD_APP_NAME, globals.SYSTEM_INFO_FUNC_NAME)
 		defer t.Release()
 
-		command := "SYSTEMINFO"
-
-		req, buildErr := buildSystemInfoReq(command)
-		if buildErr != nil {
-			fmt.Printf("failed to build request: %v", buildErr)
-			t.RecordError(buildErr)
-			return buildErr
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
 		}
+		res, req, gRpcErr := posMgr.GetSystemInfo()
 
 		printReqErr := displaymgr.PrintProtoReqJson(req)
 		if printReqErr != nil {
@@ -46,14 +42,13 @@ Syntax:
 			return printReqErr
 		}
 
-		res, gRpcErr := grpcmgr.SendSystemInfo(t.GetContext(), req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			t.RecordError(gRpcErr)
 			return gRpcErr
 		}
 
-		printResErr := displaymgr.PrintProtoResponse(command, res)
+		printResErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printResErr != nil {
 			fmt.Printf("failed to print the response: %v", printResErr)
 			t.RecordError(printResErr)
@@ -62,13 +57,6 @@ Syntax:
 
 		return nil
 	},
-}
-
-func buildSystemInfoReq(command string) (*pb.SystemInfoRequest, error) {
-	uuid := globals.GenerateUUID()
-	req := &pb.SystemInfoRequest{Command: command, Rid: uuid, Requestor: "cli"}
-
-	return req, nil
 }
 
 func init() {
