@@ -2,7 +2,6 @@ package grpcmgr
 
 import (
 	"cli/cmd/globals"
-	"cli/cmd/otelmgr"
 	"context"
 	"errors"
 	"fmt"
@@ -60,102 +59,6 @@ func dialToCliServer() (*grpc.ClientConn, error) {
 
 	conn, err := grpc.Dial(gRpcServerAddress, grpc.WithTimeout(time.Second*dialTimeout), grpc.WithInsecure(), grpc.WithBlock())
 	return conn, err
-}
-
-func SendSystemInfo(ctx context.Context, req *pb.SystemInfoRequest) (*pb.SystemInfoResponse, error) {
-	t := otelmgr.NewTracer()
-	t.SetTrace(ctx, globals.GRPC_MGR_APP_NAME, globals.GRPC_SYSTEM_INFO_FUNC_NAME)
-	defer t.Release()
-
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		t.RecordError(err)
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.SystemInfo(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		t.RecordError(err)
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendStopSystem(req *pb.StopSystemRequest) (*pb.StopSystemResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.StopSystem(ctx, req)
-
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendGetSystemProperty(req *pb.GetSystemPropertyRequest) (*pb.GetSystemPropertyResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.GetSystemProperty(ctx, req)
-
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
-}
-
-func SendSetSystemProperty(req *pb.SetSystemPropertyRequest) (*pb.SetSystemPropertyResponse, error) {
-	conn, err := dialToCliServer()
-	if err != nil {
-		err := errors.New(fmt.Sprintf("%s (internal error message: %s)",
-			dialErrorMsg, err.Error()))
-		return nil, err
-	}
-	defer conn.Close()
-
-	c := pb.NewPosCliClient(conn)
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(globals.ReqTimeout))
-	defer cancel()
-
-	res, err := c.SetSystemProperty(ctx, req)
-	if err != nil {
-		log.Error("error: ", err.Error())
-		return nil, err
-	}
-
-	return res, err
 }
 
 func SendStartTelemetryRpc(req *pb.StartTelemetryRequest) (*pb.StartTelemetryResponse, error) {

@@ -6,8 +6,6 @@ import (
 	"cli/cmd/grpcmgr"
 	"fmt"
 
-	pb "kouros/api"
-
 	"github.com/spf13/cobra"
 )
 
@@ -27,13 +25,12 @@ Example:
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var command = "GETSYSTEMPROPERTY"
-
-		req, buildErr := buildGetSystemPropertyReq(command)
-		if buildErr != nil {
-			fmt.Printf("failed to build request: %v", buildErr)
-			return buildErr
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
 		}
+		res, req, gRpcErr := posMgr.GetSystemProperty()
 
 		printReqErr := displaymgr.PrintProtoReqJson(req)
 		if printReqErr != nil {
@@ -41,13 +38,12 @@ Example:
 			return printReqErr
 		}
 
-		res, gRpcErr := grpcmgr.SendGetSystemProperty(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printResErr := displaymgr.PrintProtoResponse(command, res)
+		printResErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printResErr != nil {
 			fmt.Printf("failed to print the response: %v", printResErr)
 			return printResErr
@@ -55,13 +51,6 @@ Example:
 
 		return nil
 	},
-}
-
-func buildGetSystemPropertyReq(command string) (*pb.GetSystemPropertyRequest, error) {
-	uuid := globals.GenerateUUID()
-	req := &pb.GetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli"}
-
-	return req, nil
 }
 
 func init() {

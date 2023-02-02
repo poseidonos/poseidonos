@@ -1,11 +1,11 @@
 package systemcmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	pb "kouros/api"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -29,12 +29,18 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 		// TODO(mj): now the message format is for REBUILDPERFIMPACT only.
 		// The message format should be extended for other properties also.
 
-		var command = "REBUILDPERFIMPACT"
-		req, buildErr := buildSetSystemPropertyReq(command)
+		reqParam, buildErr := buildSetSystemPropertyReq()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.SetSystemProperty(reqParam)
 
 		printReqErr := displaymgr.PrintProtoReqJson(req)
 		if printReqErr != nil {
@@ -42,13 +48,12 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 			return printReqErr
 		}
 
-		res, gRpcErr := grpcmgr.SendSetSystemProperty(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printResErr := displaymgr.PrintProtoResponse(command, res)
+		printResErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printResErr != nil {
 			fmt.Printf("failed to print the response: %v", printResErr)
 			return printResErr
@@ -58,13 +63,10 @@ Example (To set the impact of rebuilding process on the I/O performance to low):
 	},
 }
 
-func buildSetSystemPropertyReq(command string) (*pb.SetSystemPropertyRequest, error) {
-	uuid := globals.GenerateUUID()
-
+func buildSetSystemPropertyReq() (*pb.SetSystemPropertyRequest_Param, error) {
 	param := &pb.SetSystemPropertyRequest_Param{Level: strings.ToLower(set_system_property_level)}
-	req := &pb.SetSystemPropertyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
 
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
