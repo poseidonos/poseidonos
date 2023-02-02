@@ -1,11 +1,11 @@
 package subsystemcmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"cli/cmd/socketmgr"
+	pb "kouros/api"
 
 	"github.com/labstack/gommon/log"
 	"github.com/spf13/cobra"
@@ -44,15 +44,17 @@ Example:
 			log.Fatalf("failed to marshal the protobuf request: %v", err)
 		}
 
-		displaymgr.PrintRequest(string(reqJson))
-
 		if !(globals.IsTestingReqBld) {
 			var resJson string
 
 			if globals.EnableGrpc == false {
 				resJson = socketmgr.SendReqAndReceiveRes(string(reqJson))
 			} else {
-				res, err := grpcmgr.SendCreateTransport(req)
+				posMgr, err := grpcmgr.GetPOSManager()
+				if err != nil {
+					log.Fatalf("failed to connect to POS: %v", err)
+				}
+				res, req, err := posMgr.CreateTransport(param)
 				if err != nil {
 					globals.PrintErrMsg(err)
 					return
@@ -62,8 +64,15 @@ Example:
 					log.Fatalf("failed to marshal the protobuf response: %v", err)
 				}
 				resJson = string(resByte)
+				reqJson, err = protojson.MarshalOptions{
+					EmitUnpopulated: true,
+				}.Marshal(req)
+				if err != nil {
+					log.Fatalf("failed to marshal the protobuf request: %v", err)
+				}
 			}
 
+			displaymgr.PrintRequest(string(reqJson))
 			displaymgr.PrintResponse(command, resJson, globals.IsDebug, globals.IsJSONRes, globals.DisplayUnit)
 		}
 	},
