@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 )

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
@@ -32,13 +31,12 @@ Syntax:
 			}
 		}
 
-		var command = "STOPSYSTEM"
-
-		req, buildErr := buildStopSystemReq(command)
-		if buildErr != nil {
-			fmt.Printf("failed to build request: %v", buildErr)
-			return buildErr
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
 		}
+		res, req, gRpcErr := posMgr.StopPoseidonOS()
 
 		printReqErr := displaymgr.PrintProtoReqJson(req)
 		if printReqErr != nil {
@@ -46,13 +44,12 @@ Syntax:
 			return printReqErr
 		}
 
-		res, gRpcErr := grpcmgr.SendStopSystem(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printResErr := displaymgr.PrintProtoResponse(command, res)
+		printResErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printResErr != nil {
 			fmt.Printf("failed to print the response: %v", printResErr)
 			return printResErr
@@ -60,13 +57,6 @@ Syntax:
 
 		return nil
 	},
-}
-
-func buildStopSystemReq(command string) (*pb.StopSystemRequest, error) {
-	uuid := globals.GenerateUUID()
-	req := &pb.StopSystemRequest{Command: command, Rid: uuid, Requestor: "cli"}
-
-	return req, nil
 }
 
 var stop_system_isForced = false
