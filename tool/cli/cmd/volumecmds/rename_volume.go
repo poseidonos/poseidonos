@@ -3,12 +3,12 @@ package volumecmds
 import (
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
-	"github.com/spf13/cobra"
-    pb "kouros/api"
-    "cli/cmd/grpcmgr"
-    "google.golang.org/protobuf/encoding/protojson"
-    "fmt"
+	"cli/cmd/grpcmgr"
+	"fmt"
+	pb "kouros/api"
 
+	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 //TODO(mj): function for --detail flag needs to be implemented.
@@ -26,52 +26,51 @@ Example (renaming a volume):
 	poseidonos-cli volume rename --volume-name OldVolumeName --array-name Array0 --new-volume-name NewVolumeName
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		reqParam, buildErr := buildRenameVolumeReqParam()
+		if buildErr != nil {
+			fmt.Printf("failed to build request: %v", buildErr)
+			return buildErr
+		}
 
-		var command = "RENAMEVOLUME"
-        req, buildErr := buildRenameVolumeReq(command)
-        if buildErr != nil {
-            fmt.Printf("failed to build request: %v", buildErr)
-            return buildErr
-        }
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.VolumeRename(reqParam)
 
-        reqJson, err := protojson.MarshalOptions{
-            EmitUnpopulated: true,
-        }.Marshal(req)
-        if err != nil {
-            fmt.Printf("failed to marshal the protobuf request: %v", err)
-            return err
-        }
+		reqJson, err := protojson.MarshalOptions{
+			EmitUnpopulated: true,
+		}.Marshal(req)
+		if err != nil {
+			fmt.Printf("failed to marshal the protobuf request: %v", err)
+			return err
+		}
 
 		displaymgr.PrintRequest(string(reqJson))
-        res, gRpcErr := grpcmgr.SendVolumeRename(req)
-        if gRpcErr != nil {
-            globals.PrintErrMsg(gRpcErr)
-            return gRpcErr
-        }
-        printErr := displaymgr.PrintProtoResponse(command, res)
-        if printErr != nil {
-            fmt.Printf("failed to print the response: %v", printErr)
-            return printErr
-        }
-        return nil
+		if gRpcErr != nil {
+			globals.PrintErrMsg(gRpcErr)
+			return gRpcErr
+		}
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
+		if printErr != nil {
+			fmt.Printf("failed to print the response: %v", printErr)
+			return printErr
+		}
+		return nil
 	},
 }
 
-func buildRenameVolumeReq(command string) (*pb.VolumeRenameRequest, error) {
+func buildRenameVolumeReqParam() (*pb.VolumeRenameRequest_Param, error) {
 
-    param := &pb.VolumeRenameRequest_Param{
-        Array: rename_volume_arrayName,
-        Name: rename_volume_volumeName,
-        Newname: rename_volume_newVolumeName,
-    }
+	param := &pb.VolumeRenameRequest_Param{
+		Array:   rename_volume_arrayName,
+		Name:    rename_volume_volumeName,
+		Newname: rename_volume_newVolumeName,
+	}
 
-    uuid := globals.GenerateUUID()
-
-    req := &pb.VolumeRenameRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-    return req, nil
+	return param, nil
 }
-
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
