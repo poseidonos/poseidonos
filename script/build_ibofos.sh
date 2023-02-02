@@ -18,7 +18,7 @@ build_pos()
     else
         cmake . -DSPDK_DEBUG_ENABLE=n -DUSE_LOCAL_REPO=n -DASAN_ENABLE=${BUILD_ASAN}
     fi
-    make -j
+    make -j 4
 
     cd $rootdir
     make clean
@@ -32,7 +32,7 @@ build_pos()
         export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:/usr/local/lib64/pkgconfig
     fi
 
-    make -j
+    make -j 8
 }
 
 while getopts "i" opt
@@ -44,4 +44,3 @@ do
 done
 
 build_pos
-
