@@ -1,18 +1,17 @@
 package cmd
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	_ "encoding/json"
 	"fmt"
+	pb "kouros/api"
 	"pnconnector/src/errors"
 	_ "pnconnector/src/setting"
 	"strings"
 
 	_ "github.com/c2h5oh/datasize"
-	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -100,25 +99,16 @@ func init() {
 
 func WBT(cmd *cobra.Command, args []string) error {
 
-	var err error
-
-	var xrId string
-	newUUID, err := uuid.NewUUID()
-
-	if err == nil {
-		xrId = newUUID.String()
-	}
-
 	InitConnect()
 
 	if args[0] == "list_wbt" {
-		var command = "LISTWBT"
-		req := &pb.ListWBTRequest{
-			Command:   command,
-			Rid:       xrId,
-			Requestor: "cli",
-		}
 
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.ListWBT()
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
 		}.Marshal(req)
@@ -128,12 +118,11 @@ func WBT(cmd *cobra.Command, args []string) error {
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendListWBT(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -141,7 +130,6 @@ func WBT(cmd *cobra.Command, args []string) error {
 		return nil
 	} else {
 		argv := make(map[string]string)
-		var command = "WBT"
 
 		for _, attr := range argList {
 			if cmd.PersistentFlags().Changed(attr.name) && attr.value != "" {
@@ -154,12 +142,12 @@ func WBT(cmd *cobra.Command, args []string) error {
 			Argv:     argv,
 		}
 
-		req := &pb.WBTRequest{
-			Command:   command,
-			Rid:       xrId,
-			Requestor: "cli",
-			Param:     param,
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
 		}
+		res, req, gRpcErr := posMgr.WBT(param)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -170,12 +158,11 @@ func WBT(cmd *cobra.Command, args []string) error {
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendWBT(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
-		printErr := displaymgr.PrintWBTResponse(command, res)
+		printErr := displaymgr.PrintWBTResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
