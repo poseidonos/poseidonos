@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -42,13 +42,18 @@ Example:
 			}
 		}
 
-		var command = "UNMOUNTVOLUME"
-
-		req, buildErr := buildUnmountVolumeReq(command)
+		reqParam, buildErr := buildUnmountVolumeReqParam()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.UnmountVolume(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -59,13 +64,12 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendUnmountVolume(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -75,18 +79,14 @@ Example:
 	},
 }
 
-func buildUnmountVolumeReq(command string) (*pb.UnmountVolumeRequest, error) {
+func buildUnmountVolumeReqParam() (*pb.UnmountVolumeRequest_Param, error) {
 
 	param := &pb.UnmountVolumeRequest_Param{
 		Name:  unmount_volume_volumeName,
 		Array: unmount_volume_arrayName,
 	}
 
-	uuid := globals.GenerateUUID()
-
-	req := &pb.UnmountVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

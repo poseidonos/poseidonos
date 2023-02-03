@@ -1,11 +1,12 @@
 package volumecmds
 
 import (
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
 	"fmt"
+	pb "kouros/api"
+
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -30,60 +31,67 @@ Example2 (displaying a detailed information of a volume):
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var (
-			command string
-			err     error
-		)
+		var err error
 
 		if list_volume_volumeName != "" {
-			command = "VOLUMEINFO"
-			err = executeVolumeInfoCmd(command)
+			err = executeVolumeInfoCmd()
 		} else {
-			command = "LISTVOLUME"
-			err = executeListVolumeCmd(command)
+			err = executeListVolumeCmd()
 		}
 
 		return err
 	},
 }
-func executeVolumeInfoCmd(command string) error {
-    req, buildErr := buildVolumeInfoReq(command)
-    if buildErr != nil {
-        fmt.Printf("failed to build request: %v", buildErr)
-        return buildErr
-    }
 
-    reqJson, err := protojson.MarshalOptions{
-        EmitUnpopulated: true,
-    }.Marshal(req)
-    if err != nil {
-        fmt.Printf("failed to marshal the protobuf request: %v", err)
-        return err
-    }
-    displaymgr.PrintRequest(string(reqJson))
-    fmt.Println("req",req)
-    res, gRpcErr := grpcmgr.SendVolumeInfo(req)
-    fmt.Println("res",res)
-    if gRpcErr != nil {
-        globals.PrintErrMsg(gRpcErr)
-        return gRpcErr
-    }
-
-    printErr := displaymgr.PrintProtoResponse(command, res)
-    if printErr != nil {
-        fmt.Printf("failed to print the response: %v", printErr)
-        return printErr
-    }
-
-    return nil
-}
-
-func executeListVolumeCmd(command string) error {
-	req, buildErr := buildListVolumeReq(command)
+func executeVolumeInfoCmd() error {
+	reqParam, buildErr := buildVolumeInfoReqParam()
 	if buildErr != nil {
 		fmt.Printf("failed to build request: %v", buildErr)
 		return buildErr
 	}
+
+	posMgr, err := grpcmgr.GetPOSManager()
+	if err != nil {
+		fmt.Printf("failed to connect to POS: %v", err)
+		return err
+	}
+	res, req, gRpcErr := posMgr.VolumeInfo(reqParam)
+
+	reqJson, err := protojson.MarshalOptions{
+		EmitUnpopulated: true,
+	}.Marshal(req)
+	if err != nil {
+		fmt.Printf("failed to marshal the protobuf request: %v", err)
+		return err
+	}
+	displaymgr.PrintRequest(string(reqJson))
+	if gRpcErr != nil {
+		globals.PrintErrMsg(gRpcErr)
+		return gRpcErr
+	}
+
+	printErr := displaymgr.PrintProtoResponse(req.Command, res)
+	if printErr != nil {
+		fmt.Printf("failed to print the response: %v", printErr)
+		return printErr
+	}
+
+	return nil
+}
+
+func executeListVolumeCmd() error {
+	reqParam, buildErr := buildListVolumeReqParam()
+	if buildErr != nil {
+		fmt.Printf("failed to build request: %v", buildErr)
+		return buildErr
+	}
+
+	posMgr, err := grpcmgr.GetPOSManager()
+	if err != nil {
+		fmt.Printf("failed to connect to POS: %v", err)
+		return err
+	}
+	res, req, gRpcErr := posMgr.ListVolume(reqParam)
 
 	reqJson, err := protojson.MarshalOptions{
 		EmitUnpopulated: true,
@@ -94,13 +102,12 @@ func executeListVolumeCmd(command string) error {
 	}
 	displaymgr.PrintRequest(string(reqJson))
 
-	res, gRpcErr := grpcmgr.SendListVolume(req)
 	if gRpcErr != nil {
 		globals.PrintErrMsg(gRpcErr)
 		return gRpcErr
 	}
 
-	printErr := displaymgr.PrintProtoResponse(command, res)
+	printErr := displaymgr.PrintProtoResponse(req.Command, res)
 	if printErr != nil {
 		fmt.Printf("failed to print the response: %v", printErr)
 		return printErr
@@ -109,20 +116,15 @@ func executeListVolumeCmd(command string) error {
 	return nil
 }
 
-func buildListVolumeReq(command string) (*pb.ListVolumeRequest, error) {
-	uuid := globals.GenerateUUID()
+func buildListVolumeReqParam() (*pb.ListVolumeRequest_Param, error) {
 	param := &pb.ListVolumeRequest_Param{Array: list_volume_arrayName}
-	req := &pb.ListVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-	return req, nil
+	return param, nil
 }
 
-func buildVolumeInfoReq(command string) (*pb.VolumeInfoRequest, error) {
-    uuid := globals.GenerateUUID()
-    param := &pb.VolumeInfoRequest_Param{Array: list_volume_arrayName, Volume:list_volume_volumeName}
-    req := &pb.VolumeInfoRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-    return req, nil
+func buildVolumeInfoReqParam() (*pb.VolumeInfoRequest_Param, error) {
+	param := &pb.VolumeInfoRequest_Param{Array: list_volume_arrayName, Volume: list_volume_volumeName}
+	return param, nil
 }
-
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
