@@ -346,7 +346,7 @@ MetaFs::_Initialize(void)
 
     if (EID(SUCCESS) != mgmt->InitializeSystem(arrayId_, &infoList))
         return false;
-    ctrl->Initialize(mgmt->GetEpochSignature());
+
     return true;
 }
 
@@ -452,6 +452,8 @@ MetaFs::_OpenMetaVolume(void)
     {
         return EID(MFS_META_VOLUME_OPEN_FAILED);
     }
+
+    ctrl->Initialize(mgmt->GetEpochSignature());
 
     return EID(SUCCESS);
 }
