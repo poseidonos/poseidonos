@@ -2485,37 +2485,48 @@ CommandProcessor::ExecuteWBTCommand(const WBTRequest* request, WBTResponse* repl
     JsonElement retElem("json");
     string errMsg = "fail";
 
-    if (wbtCmdHandler.VerifyWbtCommand())
-    {
-        cmdRetValue = wbtCmdHandler(argv, retElem);
-    }
-    else
-    {
-        ret = -1;
-        errMsg = "invalid wbt command";
-    }
+    try {
+        if (wbtCmdHandler.VerifyWbtCommand())
+        {
+            cmdRetValue = wbtCmdHandler(argv, retElem);
+        }
+        else
+        {
+           ret = -1;
+           errMsg = "invalid wbt command";
+        }
 
-    if (ret != 0)
-    {
-        _SetEventStatus(ret, reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
-    }
-    else
-    {
-        retElem.SetAttribute(JsonAttribute("returnCode", to_string(cmdRetValue)));
-
-        if (cmdRetValue == pos_cli::FAIL) {
-            reply->mutable_result()->mutable_data()->set_testdata(retElem.ToJson());
-            _SetEventStatus(cmdRetValue, reply->mutable_result()->mutable_status());
+        if (ret != 0)
+        {
+            _SetEventStatus(ret, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
             return grpc::Status::OK;
         }
+        else
+        {
+            retElem.SetAttribute(JsonAttribute("returnCode", to_string(cmdRetValue)));
+
+            if (cmdRetValue == pos_cli::FAIL) {
+                reply->mutable_result()->mutable_data()->set_testdata(retElem.ToJson());
+                _SetEventStatus(cmdRetValue, reply->mutable_result()->mutable_status());
+                _SetPosInfo(reply->mutable_info());
+                return grpc::Status::OK;
+            }
+            reply->mutable_result()->mutable_data()->set_testdata(retElem.ToJson());
+            _SetEventStatus(pos_cli::SUCCESS, reply->mutable_result()->mutable_status());
+            _SetPosInfo(reply->mutable_info());
+            return grpc::Status::OK;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        retElem.SetAttribute(JsonAttribute("returnCode", to_string(pos_cli::BADREQUEST)));
         reply->mutable_result()->mutable_data()->set_testdata(retElem.ToJson());
-        _SetEventStatus(pos_cli::SUCCESS, reply->mutable_result()->mutable_status());
+        _SetEventStatus(pos_cli::BADREQUEST, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
+
 }
 
 std::string
