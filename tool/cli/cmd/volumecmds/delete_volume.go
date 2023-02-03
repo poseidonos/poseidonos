@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -44,13 +44,18 @@ Example:
 			}
 		}
 
-		var command = "DELETEVOLUME"
-
-		req, buildErr := buildDeleteVolumeReq(command)
+		reqParam, buildErr := buildDeleteVolumeReqParam()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.DeleteVolume(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -61,13 +66,12 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendDeleteVolume(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -77,18 +81,14 @@ Example:
 	},
 }
 
-func buildDeleteVolumeReq(command string) (*pb.DeleteVolumeRequest, error) {
+func buildDeleteVolumeReqParam() (*pb.DeleteVolumeRequest_Param, error) {
 
 	param := &pb.DeleteVolumeRequest_Param{
 		Name:  delete_volume_volumeName,
 		Array: delete_volume_arrayName,
 	}
 
-	uuid := globals.GenerateUUID()
-
-	req := &pb.DeleteVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.

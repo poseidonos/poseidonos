@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"code.cloudfoundry.org/bytefmt"
 	"github.com/spf13/cobra"
@@ -33,13 +33,18 @@ Example:
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var command = "CREATEVOLUME"
-
-		req, buildErr := buildCreateVolumeReq(command)
+		reqParam, buildErr := buildCreateVolumeReqParam()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.CreateVolume(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -50,13 +55,12 @@ Example:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendCreateVolume(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -66,7 +70,7 @@ Example:
 	},
 }
 
-func buildCreateVolumeReq(command string) (*pb.CreateVolumeRequest, error) {
+func buildCreateVolumeReqParam() (*pb.CreateVolumeRequest_Param, error) {
 
 	if globals.IsValidVolName(create_volume_volumeName) == false {
 		err := errors.New("The volume name must contain [a-zA-Z0-9_- ] only.")
@@ -93,39 +97,35 @@ func buildCreateVolumeReq(command string) (*pb.CreateVolumeRequest, error) {
 	create_volume_isPrimary = !create_volume_isSecondary
 
 	param := &pb.CreateVolumeRequest_Param{
-		Name:      			create_volume_volumeName,
-		Array:     			create_volume_arrayName,
-		Size:      			volumeSizeInByte,
-		Maxiops:   			create_volume_maxIOPS,
-		Maxbw:     			create_volume_maxBandwidth,
-		Uuid:      			create_volume_uuid,
-		Nsid:      			create_volume_nsid,
-		IsPrimary:			create_volume_isPrimary,
-		IsAnaNonoptimized:	create_volume_isAnaNonoptimzed,
+		Name:              create_volume_volumeName,
+		Array:             create_volume_arrayName,
+		Size:              volumeSizeInByte,
+		Maxiops:           create_volume_maxIOPS,
+		Maxbw:             create_volume_maxBandwidth,
+		Uuid:              create_volume_uuid,
+		Nsid:              create_volume_nsid,
+		IsPrimary:         create_volume_isPrimary,
+		IsAnaNonoptimized: create_volume_isAnaNonoptimzed,
 	}
 
-	uuid := globals.GenerateUUID()
-
-	req := &pb.CreateVolumeRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 // Note (mj): In Go-lang, variables are shared among files in a package.
 // To remove conflicts between variables in different files of the same package,
 // we use the following naming rule: filename_variablename. We can replace this if there is a better way.
 var (
-	create_volume_volumeName          = ""
-	create_volume_arrayName           = ""
-	create_volume_volumeSize          = ""
-	create_volume_maxIOPS      uint64 = 0
-	create_volume_maxBandwidth uint64 = 0
-	create_volume_iswalvol            = false
-	create_volume_uuid                = ""
-	create_volume_nsid          int32 = 0
-	create_volume_isPrimary           = true
-	create_volume_isSecondary         = false
-	create_volume_isAnaNonoptimzed    = false
+	create_volume_volumeName              = ""
+	create_volume_arrayName               = ""
+	create_volume_volumeSize              = ""
+	create_volume_maxIOPS          uint64 = 0
+	create_volume_maxBandwidth     uint64 = 0
+	create_volume_iswalvol                = false
+	create_volume_uuid                    = ""
+	create_volume_nsid             int32  = 0
+	create_volume_isPrimary               = true
+	create_volume_isSecondary             = false
+	create_volume_isAnaNonoptimzed        = false
 )
 
 func init() {
