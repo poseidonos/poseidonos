@@ -15,4 +15,5 @@ public:
     MOCK_METHOD(int, Reset, (string arrayName), (override));
     MOCK_METHOD(int, Update, (AteData* ateData), (override));
 };
+
 } // namespace pbr

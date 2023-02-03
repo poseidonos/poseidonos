@@ -99,7 +99,7 @@ int
 ArrayManager::Load(void)
 {
     vector<pbr::AteData*> arrayTableEntries;
-    int ret = pbr::FakePbr::Load(arrayTableEntries);
+    int ret = pbr::FilePbr::Load(arrayTableEntries);
     if (ret == 0)
     {
         for (pbr::AteData* ate : arrayTableEntries)
@@ -456,7 +456,7 @@ ArrayManager::ResetPbr(void)
     }
     pthread_rwlock_unlock(&arrayListLock);
 
-    ret = pbr::FakePbr::Reset();
+    ret = pbr::FilePbr::Reset();
     if (ret == 0)
     {
         POS_TRACE_INFO(EID(POS_TRACE_PBR_RESET), "");

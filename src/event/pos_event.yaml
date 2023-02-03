@@ -1338,34 +1338,62 @@ Root:
     # PBR: 2300 - 2499
   -
     Id: 2300
-    Name: PBR_DEBUG_MSG
+    Name: PBR_DEBUG
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2301
+    Id: 2310
+    Name: PBR_LOAD_DEBUG
+    Severity:
+    Description: PBR loaded successfully
+    Cause:
+    Solution:
+  -
+    Id: 2311
     Name: PBR_LOAD_SUCCESS
     Severity:
     Description: PBR loaded successfully
     Cause:
     Solution:
   -
-    Id: 2302
+    Id: 2312
+    Name: PBR_LOAD_NOT_EXIST
+    Severity:
+    Description: PBR does not exist
+    Cause:
+    Solution:
+  -
+    Id: 2320
+    Name: PBR_RESET_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2321
     Name: PBR_RESET_SUCCESS
     Severity:
     Description: PBR reset successfully
     Cause:
     Solution:
   -
-    Id: 2303
+    Id: 2330
+    Name: PBR_UPDATE_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2331
     Name: PBR_UPDATE_SUCCESS
     Severity:
     Description: PBR updated successfully
     Cause:
     Solution:
   -
-    Id: 2330
+    Id: 2340
     Name: PBR_UNKNOWN_SIGNATURE
     Severity:
     Description:
@@ -1390,6 +1418,13 @@ Root:
     Name: PBR_CHECKSUM_VALID
     Severity:
     Description:
+    Cause:
+    Solution:
+  -
+    Id: 2361
+    Name: PBR_FILE_NOT_EXIST
+    Severity:
+    Description: PBR does not exist
     Cause:
     Solution:
   -

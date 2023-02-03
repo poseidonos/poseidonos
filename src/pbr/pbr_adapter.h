@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "fake_pbr.h"
+#include "file_pbr.h"
 
 #include <string>
 #include <vector>
@@ -45,7 +45,7 @@ class PbrAdapter
 {
 public:
     virtual ~PbrAdapter() {};
-    virtual int Load(vector<AteData*>& out);
+    virtual int Load(vector<AteData*>& ateListOut /* OUT PARAM */);
     virtual int Reset(void);
     virtual int Reset(string arrayName);
     virtual int Update(AteData* ateData);

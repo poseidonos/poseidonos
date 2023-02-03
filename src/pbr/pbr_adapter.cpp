@@ -35,26 +35,26 @@
 namespace pbr
 {
 int
-PbrAdapter::Load(vector<AteData*>& out)
+PbrAdapter::Load(vector<AteData*>& ateListOut)
 {
-    return FakePbr::Load(out);
+    return FilePbr::Load(ateListOut);
 }
 
 int
 PbrAdapter::Reset(void)
 {
-    return FakePbr::Reset();
+    return FilePbr::Reset();
 }
 
 int
 PbrAdapter::Reset(string arrayName)
 {
-    return FakePbr::Reset(arrayName);
+    return FilePbr::Reset(arrayName);
 }
 
 int
 PbrAdapter::Update(AteData* ateData)
 {
-    return FakePbr::Update(ateData);
+    return FilePbr::Update(ateData);
 }
 } // namespace pbr

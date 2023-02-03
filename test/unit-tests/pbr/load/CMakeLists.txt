@@ -1,0 +1,5 @@
+POS_ADD_UNIT_TEST(i_pbr_selector_ut i_pbr_selector_test.cpp)
+POS_ADD_UNIT_TEST(i_pbr_loader_ut i_pbr_loader_test.cpp)
+POS_ADD_UNIT_TEST(pbr_file_loader_ut pbr_file_loader_test.cpp)
+POS_ADD_UNIT_TEST(pbr_loader_ut pbr_loader_test.cpp)
+POS_ADD_UNIT_TEST(pbr_selector_ut pbr_selector_test.cpp)

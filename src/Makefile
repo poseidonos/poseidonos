@@ -40,6 +40,12 @@ SUBDIRS = allocator \
         spdk_wrapper/caller \
         pbr \
         pbr/checker \
+        pbr/content \
+        pbr/content/revision \
+        pbr/header \
+        pbr/io \
+        pbr/load \
+        pbr/update \
         bio \
         device/unvme \
         device/uram \

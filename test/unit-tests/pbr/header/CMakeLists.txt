@@ -1,0 +1,8 @@
+POS_ADD_UNIT_TEST(header_writer_ut header_writer_test.cpp)
+POS_ADD_UNIT_TEST(i_header_loader_ut i_header_loader_test.cpp)
+POS_ADD_UNIT_TEST(i_header_writer_ut i_header_writer_test.cpp)
+POS_ADD_UNIT_TEST(header_element_ut header_element_test.cpp)
+POS_ADD_UNIT_TEST(header_serializer_ut header_serializer_test.cpp)
+POS_ADD_UNIT_TEST(i_header_serializer_ut i_header_serializer_test.cpp)
+POS_ADD_UNIT_TEST(header_structure_ut header_structure_test.cpp)
+POS_ADD_UNIT_TEST(header_loader_ut header_loader_test.cpp)

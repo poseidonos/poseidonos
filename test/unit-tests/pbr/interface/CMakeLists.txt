@@ -1,0 +1,2 @@
+POS_ADD_UNIT_TEST(pbr_updater_factory_ut pbr_updater_factory_test.cpp)
+POS_ADD_UNIT_TEST(i_pbr_updater_ut i_pbr_updater_test.cpp)

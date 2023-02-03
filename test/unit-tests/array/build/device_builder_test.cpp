@@ -17,11 +17,14 @@ TEST(DeviceBuilder, Create_testIfDeviceListBuiltSuccessfullyWhenInputsAreValid)
     devs.nvm.push_back("nvm");
     devs.data.push_back("data1");
     devs.data.push_back("data2");
-    devs.spares.push_back("spare");
+    devs.data.push_back("data3");
     uint32_t EXPECTED_DEV_CNT = 4;
+    shared_ptr<MockUBlockDevice> mockNvm = make_shared<MockUBlockDevice>("mock-nvm", 1024, nullptr);
     shared_ptr<MockUBlockDevice> mockUblockDev = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     MockDeviceManager mockDevMgr;
-    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(mockUblockDev));
+    EXPECT_CALL(*mockNvm, GetType).WillRepeatedly(Return(DeviceType::NVRAM));
+    EXPECT_CALL(*mockUblockDev, GetType).WillRepeatedly(Return(DeviceType::SSD));
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockNvm)).WillRepeatedly(Return(mockUblockDev));
 
     // When
     DeviceBuilder builder;
@@ -31,9 +34,43 @@ TEST(DeviceBuilder, Create_testIfDeviceListBuiltSuccessfullyWhenInputsAreValid)
     // Then
     ASSERT_EQ(0, ret);
     ASSERT_EQ(EXPECTED_DEV_CNT, devList.size());
+
+    // Clean up
+    for (auto d : devList)
+    {
+        delete d;
+    }
 }
 
-TEST(DeviceBuilder, Create_testIfDeviceBuildingFailsWhenFailedToGetTheDevice)
+TEST(DeviceBuilder, Create_testIfDeviceBuildingFailsWhenFailedToGetSsdDevices)
+{
+    // Given
+    DeviceSet<string> devs;
+    devs.nvm.push_back("nvm");
+    devs.data.push_back("data1");
+    devs.data.push_back("data2");
+    devs.spares.push_back("spare");
+    shared_ptr<MockUBlockDevice> mockNvm = make_shared<MockUBlockDevice>("mock-nvm", 1024, nullptr);
+    MockDeviceManager mockDevMgr;
+    EXPECT_CALL(*mockNvm, GetType).WillRepeatedly(Return(DeviceType::NVRAM));
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(mockNvm)).WillRepeatedly(Return(nullptr));
+
+    // When
+    DeviceBuilder builder;
+    vector<ArrayDevice*> devList;
+    int ret = builder.Create(devs, devList, &mockDevMgr);
+
+    // Then
+    ASSERT_EQ(EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND), ret);
+
+    // Clean up
+    for (auto d : devList)
+    {
+        delete d;
+    }
+}
+
+TEST(DeviceBuilder, Create_testIfDeviceBuildingFailsWhenFailedToGetTheNvmDevice)
 {
     // Given
     DeviceSet<string> devs;
@@ -43,7 +80,8 @@ TEST(DeviceBuilder, Create_testIfDeviceBuildingFailsWhenFailedToGetTheDevice)
     devs.spares.push_back("spare");
     shared_ptr<MockUBlockDevice> mockUblockDev = make_shared<MockUBlockDevice>("mock-dev", 1024, nullptr);
     MockDeviceManager mockDevMgr;
-    EXPECT_CALL(mockDevMgr, GetDev).WillRepeatedly(Return(nullptr)); // returns nullptr since there's no matching device
+    EXPECT_CALL(*mockUblockDev, GetType).WillRepeatedly(Return(DeviceType::SSD));
+    EXPECT_CALL(mockDevMgr, GetDev).WillOnce(Return(nullptr)).WillRepeatedly(Return(mockUblockDev));
 
     // When
     DeviceBuilder builder;
@@ -51,7 +89,13 @@ TEST(DeviceBuilder, Create_testIfDeviceBuildingFailsWhenFailedToGetTheDevice)
     int ret = builder.Create(devs, devList, &mockDevMgr);
 
     // Then
-    ASSERT_EQ(EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND), ret);
+    ASSERT_EQ(EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND), ret);
+
+    // Clean up
+    for (auto d : devList)
+    {
+        delete d;
+    }
 }
 
 TEST(DeviceBuilder, Load_testIfDeviceListBuiltSuccessfullyWhenInputsAreValid)

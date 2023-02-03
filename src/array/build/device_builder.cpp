@@ -41,6 +41,20 @@ int
 DeviceBuilder::Create(const DeviceSet<string>& nameSet,
     vector<ArrayDevice*>& devs, IDevInfo* getDev)
 {
+    for (string devName : nameSet.nvm)
+    {
+        DevName name(devName);
+        UblockSharedPtr ublock = getDev->GetDev(name);
+        if (ublock == nullptr || ublock->GetType() != DeviceType::NVRAM)
+        {
+            int eid = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
+            POS_TRACE_WARN(eid, "nvm_name: {}", devName);
+            return eid;
+        }
+        ArrayDevice* dev = new ArrayDevice(ublock, ArrayDeviceState::NORMAL,
+            0, ArrayDeviceType::NVM);
+        devs.push_back(dev);
+    }
     uint32_t index = 0;
     for (string devName : nameSet.data)
     {
@@ -57,22 +71,6 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
         devs.push_back(dev);
         index++;
     }
-
-    for (string devName : nameSet.nvm)
-    {
-        DevName name(devName);
-        UblockSharedPtr ublock = getDev->GetDev(name);
-        if (ublock == nullptr || ublock->GetType() != DeviceType::NVRAM)
-        {
-            int eid = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
-            POS_TRACE_WARN(eid, "nvm_name: {}", devName);
-            return eid;
-        }
-        ArrayDevice* dev = new ArrayDevice(ublock, ArrayDeviceState::NORMAL,
-            0, ArrayDeviceType::NVM);
-        devs.push_back(dev);
-    }
-
     for (string devName : nameSet.spares)
     {
         DevName name(devName);
