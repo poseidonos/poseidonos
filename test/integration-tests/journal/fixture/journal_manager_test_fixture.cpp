@@ -3,7 +3,10 @@
 #include <experimental/filesystem>
 #include <string>
 
+#include "test/integration-tests/journal/fake/i_segment_ctx_mock.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
+#include "test/integration-tests/journal/fault_event.h"
+#include "src/journal_manager/log_buffer/reset_log_group.h"
 
 using ::testing::AtLeast;
 using ::testing::NiceMock;
@@ -24,7 +27,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     telemetryClient = new NiceMock<MockTelemetryClient>;
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
-    testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
+    testAllocator = new StrictMock<AllocatorMock>(testInfo, arrayInfo);
     volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
@@ -76,6 +79,9 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
             journal->ResetVersionedSegmentContext();
         }
         journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+
+        IContextManagerFake* contextManager = testAllocator->GetIContextManagerFake();
+        contextManager->PrepareVersionedSegmentCtx(journal->GetVersionedSegmentContext());
     }
 
     _GetLogBufferSizeInfo();
@@ -115,6 +121,7 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(JournalConfigurationBuild
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
+    testAllocator->GetISegmentCtxMock()->LoadContext();
     journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
@@ -145,6 +152,25 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
 }
 
 void
+JournalManagerTestFixture::InjectCheckpointFaultAfterMetaFlushCompleted(void)
+{
+    uint64_t latestContextVersion = 1;
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()), GetStoredContextVersion(SEGMENT_CTX))
+        .WillOnce(Return(0))
+        .WillRepeatedly(Return(1));
+
+    bool isFaultExecuted = false;
+    EventSmartPtr faultEvent(new FaultEvent(isFaultExecuted));
+    journal->InjectFaultEvent(typeid(ResetLogGroup), faultEvent);
+
+    writeTester->WaitForAllLogWriteDone();
+    ExpectCheckpointTriggered();
+    journal->StartCheckpoint();
+    while(isFaultExecuted != true)
+    {
+    }
+}
+void
 JournalManagerTestFixture::SetTriggerCheckpoint(bool isCheckpointEnabled)
 {
     journal->SetTriggerCheckpoint(isCheckpointEnabled);
@@ -154,7 +180,7 @@ void
 JournalManagerTestFixture::ExpectCheckpointTriggered(void)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()),
         FlushContexts)
         .Times(AtLeast(1));
 }

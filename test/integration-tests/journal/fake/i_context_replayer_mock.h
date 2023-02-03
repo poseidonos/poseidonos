@@ -5,10 +5,11 @@
 #include <vector>
 
 #include "src/allocator/i_context_replayer.h"
+using ::testing::Mock;
 
 namespace pos
 {
-class IContextReplayerMock : public IContextReplayer
+class IContextReplayerMock : public IContextReplayer, Mock
 {
 public:
     using IContextReplayer::IContextReplayer;

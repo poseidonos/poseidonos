@@ -25,6 +25,16 @@ static std::string GetLogDirName()
 
     return filename;
 }
+
+static std::string GetSegmentContextFileName(void)
+{
+    std::string test_suite = ::testing::UnitTest::GetInstance()->current_test_suite()->name();
+    std::string test = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    std::string filename = test_suite + "_" + test + "_SegmentContext.bin";
+
+    return filename;
+}
+
 // Test setup variables
 // TODO (cheolho.kang) Change it to global variable or singleton instance
 class TestInfo

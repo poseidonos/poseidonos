@@ -104,7 +104,7 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
     IJournalWriter* writer = journal->GetJournalWriter();
 
     // 추가한 IT 검증만을 위한 임시 코드
-    EventSmartPtr event(new TestJournalWriteCompletionWithMetaUpdate(&testingLogs, journal->GetVersionedSegmentContext(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
+    EventSmartPtr event(new TestJournalWriteCompletionWithMetaUpdate(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
     // EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
     int result = writer->AddBlockMapUpdatedLog(volumeIo, event);
     if (result == 0)
@@ -139,7 +139,7 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
             .offset = 0,
         },
         .numBlks = 0};
-    EventSmartPtr event(new TestJournalWriteCompletionWithMetaUpdate(&testingLogs, journal->GetVersionedSegmentContext(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
+    EventSmartPtr event(new TestJournalWriteCompletionWithMetaUpdate(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
     // EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
     int result = writer->AddStripeMapUpdatedLog(&stripe, oldAddr, event);
     if (result == 0)

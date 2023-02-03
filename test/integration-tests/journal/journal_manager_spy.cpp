@@ -1,7 +1,7 @@
 #include "test/integration-tests/journal/journal_manager_spy.h"
 
 #include <thread>
-
+ 
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_handler.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
@@ -18,6 +18,7 @@
 #include "test/integration-tests/journal/journal_configuration_spy.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "src/journal_manager/log_buffer/reset_log_group.h"
 
 using ::testing::NiceMock;
 
@@ -37,8 +38,20 @@ JournalManagerSpy::JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, 
 
     eventScheduler = new NiceMock<MockEventScheduler>;
     ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
-        std::thread eventExecution(&Event::Execute, event);
-        eventExecution.detach();
+        std::string targetEventName(typeid(*event.get()).name());
+        auto searchResult = faultInjectorTable.find(targetEventName);
+        if (searchResult != faultInjectorTable.end())
+        {
+            EventSmartPtr faultEvent = searchResult->second;
+            std::thread eventExecution(&Event::Execute, faultEvent);
+            eventExecution.detach();
+            faultInjectorTable.erase(searchResult);
+        }
+        else
+        {
+            std::thread eventExecution(&Event::Execute, event);
+            eventExecution.detach();
+        }
     });
 }
 
@@ -263,4 +276,10 @@ JournalManagerSpy::GetVersionedSegmentContext(void)
     return versionedSegCtx;
 }
 
+void
+JournalManagerSpy::InjectFaultEvent(const std::type_info& targetEventInfo, EventSmartPtr errorEvent)
+{
+    std::string targetEventName(targetEventInfo.name());
+    faultInjectorTable.insert({targetEventName, errorEvent});
+}
 } // namespace pos

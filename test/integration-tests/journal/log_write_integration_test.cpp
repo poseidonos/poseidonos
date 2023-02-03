@@ -112,7 +112,7 @@ TEST_F(LogWriteIntegrationTest, DISABLED_WriteLog_GcStripes)
         ->SetLogBufferSize(4160 * 2);
     testInfo->numBlksPerStripe *= 2;
     InitializeJournal(builder.Build());
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()),
         FlushContexts)
         .Times(AtLeast(1));
 

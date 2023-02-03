@@ -5,10 +5,11 @@
 #include "src/include/address_type.h"
 #include "src/mapper/i_stripemap.h"
 #include "test/integration-tests/journal/utils/test_info.h"
+using ::testing::Mock;
 
 namespace pos
 {
-class StripeMapMock : public IStripeMap
+class StripeMapMock : public IStripeMap, Mock
 {
 public:
     explicit StripeMapMock(TestInfo* testInfo);

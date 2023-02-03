@@ -1,5 +1,7 @@
 #include "test/integration-tests/journal/fixture/replay_test_fixture.h"
 
+#include "test/integration-tests/journal/fake/i_segment_ctx_mock.h"
+
 using ::testing::_;
 using ::testing::AnyNumber;
 using ::testing::InSequence;

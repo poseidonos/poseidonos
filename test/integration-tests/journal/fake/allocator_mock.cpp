@@ -1,24 +1,33 @@
 #include "allocator_mock.h"
 
-using ::testing::StrictMock;
+#include "test/integration-tests/journal/utils/test_info.h"
+#include "src/meta_file_intf/mock_file_intf.h"
+#include "test/integration-tests/journal/fake/i_segment_ctx_mock.h"
 
+using ::testing::StrictMock;
 namespace pos
 {
-AllocatorMock::AllocatorMock(IArrayInfo* info)
-: Allocator(info, nullptr)
+AllocatorMock::AllocatorMock(TestInfo* testInfo, IArrayInfo* info)
+: Allocator(info, nullptr),
+  testInfo(testInfo)
 {
-    wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
-    segmentCtxMock = new StrictMock<MockISegmentCtx>();
-    contextManagerMock = new StrictMock<IContextManagerMock>();
-    contextReplayerMock = new StrictMock<IContextReplayerMock>();
+    uint32_t arrayId = 0;
     addrInfoMock = new StrictMock<MockAllocatorAddressInfo>();
+    EXPECT_CALL(*addrInfoMock, GetblksPerSegment).WillRepeatedly(Return(testInfo->numBlksPerStripe * testInfo->numStripesPerSegment));
+    EXPECT_CALL(*addrInfoMock, GetstripesPerSegment).WillRepeatedly(Return(testInfo->numStripesPerSegment));
+    EXPECT_CALL(*addrInfoMock, GetnumUserAreaSegments).WillRepeatedly(Return(testInfo->numUserSegments));
+
+    wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
+    segmentCtxMock = new StrictMock<ISegmentCtxMock>(addrInfoMock, new MockFileIntf(GetSegmentContextFileName(), arrayId, MetaFileType::General, MetaVolumeType::NvRamVolume));
+    contextManagerFake = new StrictMock<IContextManagerFake>(segmentCtxMock, addrInfoMock);
+    contextReplayerMock = new StrictMock<IContextReplayerMock>();
 }
 
 AllocatorMock::~AllocatorMock(void)
 {
     delete segmentCtxMock;
     delete wbStripeAllocatorMock;
-    delete contextManagerMock;
+    delete contextManagerFake;
     delete contextReplayerMock;
     delete addrInfoMock;
 }
@@ -41,7 +50,7 @@ AllocatorMock::GetISegmentCtx(void)
     return segmentCtxMock;
 }
 
-MockISegmentCtx*
+ISegmentCtxMock*
 AllocatorMock::GetISegmentCtxMock(void)
 {
     return segmentCtxMock;
@@ -50,13 +59,13 @@ AllocatorMock::GetISegmentCtxMock(void)
 IContextManager*
 AllocatorMock::GetIContextManager(void)
 {
-    return contextManagerMock;
+    return contextManagerFake;
 }
 
-IContextManagerMock*
-AllocatorMock::GetIContextManagerMock(void)
+IContextManagerFake*
+AllocatorMock::GetIContextManagerFake(void)
 {
-    return contextManagerMock;
+    return contextManagerFake;
 }
 
 IContextReplayer*

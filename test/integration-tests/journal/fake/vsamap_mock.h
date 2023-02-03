@@ -6,9 +6,11 @@
 #include "src/mapper/i_vsamap.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 
+using ::testing::Mock;
+
 namespace pos
 {
-class VSAMapMock : public IVSAMap
+class VSAMapMock : public IVSAMap, Mock
 {
 public:
     explicit VSAMapMock(TestInfo* testInfo);

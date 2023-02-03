@@ -58,7 +58,7 @@ TEST_F(CheckpointIntegrationTest, TriggerCheckpoint)
             FlushDirtyMpages(mapId, _))
             .Times(1);
     }
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()), FlushContexts).Times(1);
 
     journal->StartCheckpoint();
     WaitForAllCheckpointDone();

@@ -5,8 +5,10 @@
 namespace pos
 {
 class WrittenLogs;
-class IVersionedSegmentContext;
+class IContextManagerFake;
 class TestInfo;
+class SegmentCtx;
+class IVersionedSegmentContext;
 
 enum LogEventType
 {
@@ -16,15 +18,17 @@ enum LogEventType
 class TestJournalWriteCompletionWithMetaUpdate : public MetaUpdateCallback
 {
 public:
-    TestJournalWriteCompletionWithMetaUpdate(WrittenLogs* logs, IVersionedSegmentContext* versionedContext, TestInfo* testInfo, VirtualBlks blks, LogEventType eventType);
+    TestJournalWriteCompletionWithMetaUpdate(WrittenLogs* logs, IContextManagerFake* contextManager, TestInfo* testInfo, VirtualBlks blks, LogEventType eventType);
 
 private:
     bool _DoSpecificJob(void) override;
 
     WrittenLogs* logs;
-    IVersionedSegmentContext* versionedContext;
+    IContextManagerFake* contextManager;
     TestInfo* testInfo;
     VirtualBlks blks;
     LogEventType eventType;
+    ISegmentCtx* segmentCtx;
+    IVersionedSegmentContext* versionedSegCtx;
 };
 } // namespace pos

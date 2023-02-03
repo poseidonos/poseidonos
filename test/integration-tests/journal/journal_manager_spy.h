@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <typeinfo>
 
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
@@ -51,10 +53,13 @@ public:
     void ResetVersionedSegmentContext(void);
     IVersionedSegmentContext* GetVersionedSegmentContext(void);
 
+    void InjectFaultEvent(const std::type_info& targetEventInfo, EventSmartPtr errorEvent);
+
 private:
     int _GetLogsFromBuffer(LogList& logList);
 
     MockEventScheduler* eventScheduler;
     std::string LogFileName;
+    std::unordered_map<std::string, EventSmartPtr> faultInjectorTable;
 };
 } // namespace pos

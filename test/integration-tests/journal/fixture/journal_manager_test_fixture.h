@@ -29,6 +29,7 @@ public:
     void SimulateSPORWithoutRecovery(JournalConfigurationBuilder& configurationBuilder);
     void SimulateSPORWithoutRecovery(JournalConfigurationSpy* config);
     void SimulateRocksDBSPORWithoutRecovery(void);
+    void InjectCheckpointFaultAfterMetaFlushCompleted(void);
     void SetTriggerCheckpoint(bool isCheckpointEnabled);
     void ExpectCheckpointTriggered(void);
     void WaitForAllCheckpointDone(void);
