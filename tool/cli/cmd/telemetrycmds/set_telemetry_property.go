@@ -3,10 +3,10 @@ package telemetrycmds
 import (
 	"fmt"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
+	pb "kouros/api"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -23,12 +23,17 @@ Syntax:
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		var command = "SETTELEMETRYPROPERTY"
-		req, buildErr := buildSetTelemetryPropertyReq(command)
+		reqParam, buildErr := buildSetTelemetryPropertyReqParam()
 		if buildErr != nil {
 			fmt.Printf("failed to build request: %v", buildErr)
 			return buildErr
 		}
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
+		}
+		res, req, gRpcErr := posMgr.SetTelemetryProperty(reqParam)
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -39,13 +44,12 @@ Syntax:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendSetTelemetryPropertyRpc(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -55,14 +59,11 @@ Syntax:
 	},
 }
 
-func buildSetTelemetryPropertyReq(command string) (*pb.SetTelemetryPropertyRequest, error) {
+func buildSetTelemetryPropertyReqParam() (*pb.SetTelemetryPropertyRequest_Param, error) {
 
 	param := &pb.SetTelemetryPropertyRequest_Param{PublicationListPath: set_telemetry_property_publicationListPath}
 
-	uuid := globals.GenerateUUID()
-	req := &pb.SetTelemetryPropertyRequest{Command: command, Rid: uuid, Requestor: "cli", Param: param}
-
-	return req, nil
+	return param, nil
 }
 
 var set_telemetry_property_publicationListPath = ""

@@ -3,7 +3,6 @@ package telemetrycmds
 import (
 	"fmt"
 
-	pb "kouros/api"
 	"cli/cmd/displaymgr"
 	"cli/cmd/globals"
 	"cli/cmd/grpcmgr"
@@ -22,13 +21,12 @@ Syntax:
   poseidonos-cli telemetry get-property
           `,
 	RunE: func(cmd *cobra.Command, args []string) error {
-
-		var command = "GETTELEMETRYPROPERTY"
-		req, buildErr := buildGetTelemetryPropertyReq(command)
-		if buildErr != nil {
-			fmt.Printf("failed to build request: %v", buildErr)
-			return buildErr
+		posMgr, err := grpcmgr.GetPOSManager()
+		if err != nil {
+			fmt.Printf("failed to connect to POS: %v", err)
+			return err
 		}
+		res, req, gRpcErr := posMgr.GetTelemetryProperty()
 
 		reqJson, err := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -39,13 +37,12 @@ Syntax:
 		}
 		displaymgr.PrintRequest(string(reqJson))
 
-		res, gRpcErr := grpcmgr.SendGetTelemetryProperty(req)
 		if gRpcErr != nil {
 			globals.PrintErrMsg(gRpcErr)
 			return gRpcErr
 		}
 
-		printErr := displaymgr.PrintProtoResponse(command, res)
+		printErr := displaymgr.PrintProtoResponse(req.Command, res)
 		if printErr != nil {
 			fmt.Printf("failed to print the response: %v", printErr)
 			return printErr
@@ -53,14 +50,6 @@ Syntax:
 
 		return nil
 	},
-}
-
-func buildGetTelemetryPropertyReq(command string) (*pb.GetTelemetryPropertyRequest, error) {
-
-	uuid := globals.GenerateUUID()
-	req := &pb.GetTelemetryPropertyRequest{Command: command, Rid: uuid, Requestor: "cli"}
-
-	return req, nil
 }
 
 func init() {
