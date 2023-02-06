@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "active_wb_stripe_replayer_spy.h"
+#include "src/allocator/include/allocator_const.h"
 #include "test/unit-tests/allocator/i_context_replayer_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"

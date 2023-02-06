@@ -171,24 +171,25 @@ TEST(ContextIoManager, FlushContexts_IfSyncSuccessAllFile)
     ContextIoManager ioManager(&info, &tp, &scheduler, segmentCtxIo, allocatorCtxIo, nullptr);
 
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion completion, ContextSectionBuffer externalBuf)
         {
             completion();
             return 0;
         });
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion completion, ContextSectionBuffer externalBuf)
         {
             completion();
             return 0;
         });
 
-    EXPECT_CALL(*segmentCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
-    EXPECT_CALL(*allocatorCtxIo, GetNumFilesFlushing).WillRepeatedly(Return(0));
+    EXPECT_CALL(*segmentCtxIo, GetNumOutstandingFlush).WillRepeatedly(Return(0));
+    EXPECT_CALL(*allocatorCtxIo, GetNumOutstandingFlush).WillRepeatedly(Return(0));
 
     // when
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
-    int ret = ioManager.FlushContexts(flushCallback, true);
+    ContextSectionBuffer externalBuf = { .owner = INVALID_CONTEXT_ID, .sectionId = INVALID_SECTION_ID, .buffer = nullptr };
+    int ret = ioManager.FlushContexts(flushCallback, true, externalBuf);
 
     // then
     EXPECT_EQ(0, ret);
@@ -212,7 +213,7 @@ TEST(ContextIoManager, FlushContexts_IfSyncFailFirstFile)
 
     // when
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
-    int ret = ioManager.FlushContexts(flushCallback, true);
+    int ret = ioManager.FlushContexts(flushCallback, true, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     EXPECT_LE(-1, ret);
@@ -236,7 +237,7 @@ TEST(ContextIoManager, FlushContexts_IfSyncFailSecondFile)
 
     // when
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
-    int ret = ioManager.FlushContexts(flushCallback, true);
+    int ret = ioManager.FlushContexts(flushCallback, true, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     EXPECT_LE(-1, ret);
@@ -259,13 +260,13 @@ TEST(ContextIoManager, FlushContexts_IfAsyncAlreadyFlushing)
 
     // when 1
     EventSmartPtr flushCallback(new MockCheckpointMetaFlushCompleted((CheckpointHandler*)this, 0));
-    int ret = ioManager.FlushContexts(flushCallback, false);
+    int ret = ioManager.FlushContexts(flushCallback, false, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     EXPECT_EQ(0, ret);
 
     // when 2
-    ret = ioManager.FlushContexts(nullptr, false);
+    ret = ioManager.FlushContexts(nullptr, false, INVALID_CONTEXT_SECTION_BUFFER);
     // then
     EXPECT_EQ(EID(ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS), ret);
 }
@@ -286,7 +287,7 @@ TEST(ContextIoManager, FlushContexts_IfAsyncSuccessAllFile)
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(0));
 
     // when
-    int ret = ioManager.FlushContexts(nullptr, false);
+    int ret = ioManager.FlushContexts(nullptr, false, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     EXPECT_EQ(0, ret);
@@ -308,7 +309,7 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailFirstFile)
     EXPECT_CALL(*segmentCtxIo, Flush).WillOnce(Return(-1));
 
     // when
-    int ret = ioManager.FlushContexts(nullptr, false);
+    int ret = ioManager.FlushContexts(nullptr, false, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     EXPECT_LE(-1, ret);
@@ -332,7 +333,7 @@ TEST(ContextIoManager, FlushContexts_IfAsyncFailSecondFile)
     EXPECT_CALL(*allocatorCtxIo, Flush).WillOnce(Return(-1));
 
     // when
-    int ret = ioManager.FlushContexts(nullptr, false);
+    int ret = ioManager.FlushContexts(nullptr, false, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     EXPECT_LE(-1, ret);
@@ -348,19 +349,6 @@ TEST(ContextIoManager, GetStoredContextVersion_TestGetter)
 
     EXPECT_CALL(*rebuildCtxIo, GetStoredVersion).WillOnce(Return(10));
     EXPECT_EQ(ioManager.GetStoredContextVersion(REBUILD_CTX), 10);
-}
-
-TEST(ContextIoManager, GetContextSectionAddr_TestGetter)
-{
-    NiceMock<MockAllocatorAddressInfo> info;
-    NiceMock<MockTelemetryPublisher> tp;
-
-    NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
-    ContextIoManager ioManager(&info, &tp, nullptr, nullptr, allocatorCtxIo, nullptr);
-
-    char buffer[100];
-    EXPECT_CALL(*allocatorCtxIo, GetSectionAddr(AC_CURRENT_SSD_LSID)).WillOnce(Return(buffer));
-    EXPECT_EQ(ioManager.GetContextSectionAddr(ALLOCATOR_CTX, AC_CURRENT_SSD_LSID), buffer);
 }
 
 TEST(ContextIoManager, GetContextSectionSize_TestGetter)

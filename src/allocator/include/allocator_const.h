@@ -34,7 +34,6 @@
 
 #include <cstdint>
 #include <set>
-#include <string>
 
 #include "src/include/address_type.h"
 #include "src/volume/volume_list.h"
@@ -46,39 +45,6 @@ using RTSegmentIter = std::set<SegmentId>::iterator;
 
 const int ACTIVE_STRIPE_TAIL_ARRAYLEN = MAX_VOLUME_COUNT;
 
-enum FileOwner
-{
-    SEGMENT_CTX,
-    ALLOCATOR_CTX,
-    NUM_ALLOCATOR_FILES,
-    REBUILD_CTX = NUM_ALLOCATOR_FILES,
-    NUM_FILES
-};
-
-enum SegmentCtxSection
-{
-    SC_HEADER = 0,
-    SC_SEGMENT_INFO,
-    NUM_SEGMENT_CTX_SECTION,
-};
-
-enum AllocatorCtxSection
-{
-    AC_HEADER = 0,
-    AC_CURRENT_SSD_LSID,
-    NUM_ALLOCATION_INFO,
-    AC_ALLOCATE_WBLSID_BITMAP = NUM_ALLOCATION_INFO,
-    AC_ACTIVE_STRIPE_TAIL,
-    NUM_ALLOCATOR_CTX_SECTION,
-};
-
-enum RebuildCtxSection
-{
-    RC_HEADER = 0,
-    RC_REBUILD_SEGMENT_LIST,
-    NUM_REBUILD_CTX_SECTION
-};
-
 enum WBTAllocatorMetaType
 {
     WBT_CURRENT_SSD_LSID,
@@ -89,31 +55,6 @@ enum WBTAllocatorMetaType
     WBT_SEGMENT_VALID_COUNT,
     WBT_SEGMENT_OCCUPIED_STRIPE,
     WBT_NUM_ALLOCATOR_META
-};
-
-class CtxHeader
-{
-public:
-    uint32_t sig;
-    uint64_t ctxVersion;
-};
-
-class AllocatorCtxHeader : public CtxHeader
-{
-public:
-    uint32_t numValidWbLsid;
-};
-
-class SegmentCtxHeader : public CtxHeader
-{
-public:
-    uint32_t numValidSegment;
-};
-
-class RebuildCtxHeader : public CtxHeader
-{
-public:
-    uint32_t numTargetSegments;
 };
 
 enum GcMode

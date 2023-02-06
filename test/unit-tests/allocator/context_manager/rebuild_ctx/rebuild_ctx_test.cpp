@@ -14,6 +14,21 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace pos
 {
+void
+InitializeRebuildCtxHeader(char* buf, int numSegments = 0, uint64_t version = 0)
+{
+    RebuildCtxHeader* headerPtr = reinterpret_cast<RebuildCtxHeader*>(buf);
+    headerPtr->sig = SIG_REBUILD_CTX;
+    headerPtr->numTargetSegments = numSegments;
+    headerPtr->ctxVersion = version;
+
+    SegmentId* segmentListPtr = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
+    for (int segmentId = 0; segmentId < numSegments; segmentId++)
+    {
+        *(segmentListPtr + segmentId) = segmentId;
+    }
+}
+
 TEST(RebuildCtx, Init_TestSimpleSetter)
 {
     // given
@@ -32,32 +47,27 @@ TEST(RebuildCtx, Close_TestCallEmptyFunc)
     rebuildCtx.Dispose();
 }
 
-TEST(RebuildCtx, GetSectionSize_TestSimpleGetter)
+TEST(RebuildCtx, GetSectionInfo_TestSimpleGetter)
 {
     // given
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(10);
     RebuildCtx rebuildCtx(nullptr, &addrInfo);
-    // when 1.
-    int ret = rebuildCtx.GetSectionSize(RC_HEADER);
-    // then 1.
-    EXPECT_EQ((int)sizeof(RebuildCtxHeader), ret);
-    // when 2.
-    ret = rebuildCtx.GetSectionSize(RC_REBUILD_SEGMENT_LIST);
-    // then 2.
-    EXPECT_EQ((int)sizeof(SegmentId) * 10, ret);
-}
+    rebuildCtx.Init();
 
-TEST(RebuildCtx, GetSectionAddr_TestSimpleGetter)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumUserAreaSegments(10);
-    RebuildCtx rebuildCtx(nullptr, nullptr);
+    uint64_t expectedOffset = 0;
     // when 1.
-    char* ret = rebuildCtx.GetSectionAddr(RC_HEADER);
+    auto ret = rebuildCtx.GetSectionInfo(RC_HEADER);
+    // then 1.
+    EXPECT_EQ(expectedOffset, ret.offset);
+    EXPECT_EQ(sizeof(RebuildCtxHeader), ret.size);
+    expectedOffset += sizeof(RebuildCtxHeader);
+    
     // when 2.
-    ret = rebuildCtx.GetSectionAddr(RC_REBUILD_SEGMENT_LIST);
+    ret = rebuildCtx.GetSectionInfo(RC_REBUILD_SEGMENT_LIST);
+    // then 2.
+    EXPECT_EQ(expectedOffset, ret.offset);
+    EXPECT_EQ((int)sizeof(SegmentId) * 10, ret.size);
 }
 
 TEST(RebuildCtx, GetStoredVersion_TestSimpleGetter)
@@ -76,21 +86,17 @@ TEST(RebuildCtx, ResetDirtyVersion_TestSimpleSetter)
     rebuildCtx.ResetDirtyVersion();
 }
 
-TEST(RebuildCtx, GetCtxLock_TestSimpleGetter)
-{
-    RebuildCtx rebuildCtx(nullptr, nullptr, nullptr);
-    std::mutex& m = rebuildCtx.GetCtxLock();
-}
-
-TEST(RebuildCtx, FinalizeIo_TestSimpleSetter)
+TEST(RebuildCtx, AfterFlush_TestSimpleSetter)
 {
     // given
-    RebuildCtx rebuildCtx(nullptr, nullptr);
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    RebuildCtx rebuildCtx(nullptr, &addrInfo);
     AsyncMetaFileIoCtx ctx;
-    char buf[100];
+    char buf[sizeof(RebuildCtxHeader)];
+    InitializeRebuildCtxHeader(buf);
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), buf);
     // when
-    rebuildCtx.FinalizeIo(ctx.GetBuffer());
+    rebuildCtx.AfterFlush(ctx.GetBuffer());
 }
 
 TEST(RebuildCtx, BeforeFlush_TestSimpleSetter)
@@ -111,16 +117,18 @@ TEST(RebuildCtx, BeforeFlush_TestSimpleSetter)
     rebuildCtx.FlushRebuildSegmentList(targetSegments);
 
     // when
-    char buf[100];
-    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(buf);
+    char buf[rebuildCtx.GetTotalDataSize()];
+    InitializeRebuildCtxHeader(buf);
+
     rebuildCtx.BeforeFlush(buf);
 
     // then
-    EXPECT_EQ(3, header->numTargetSegments);
-    int* segId = reinterpret_cast<int*>(buf + sizeof(RebuildCtxHeader));
+    RebuildCtxHeader* headerPtr = reinterpret_cast<RebuildCtxHeader*>(buf);
+    EXPECT_EQ(3, headerPtr->numTargetSegments);
+    SegmentId* segIdPtr = reinterpret_cast<SegmentId*>(buf + sizeof(RebuildCtxHeader));
     for (int i = 0; i < 3; i++)
     {
-        EXPECT_EQ(i, segId[i]);
+        EXPECT_EQ(i, segIdPtr[i]);
     }
 
     rebuildCtx.Dispose();
@@ -129,16 +137,17 @@ TEST(RebuildCtx, BeforeFlush_TestSimpleSetter)
 TEST(RebuildCtx, AfterLoad_testIfFalseDataHandling)
 {
     RebuildCtxHeader header;
-
-    header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 3;
-    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
-    char* buf2 = buf + sizeof(RebuildCtxHeader);
-    for (int i = 0; i < 3; i++)
-    {
-        buf2[i] = 1;
-    }
-    RebuildCtx rebuildCtx(nullptr, &header, nullptr);
+
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(5));
+
+    RebuildCtx rebuildCtx(nullptr, &header, &addrInfo);
+    rebuildCtx.Init();
+
+    char buf[rebuildCtx.GetTotalDataSize()];
+    InitializeRebuildCtxHeader(buf, 3);
+
     // when 1.
     rebuildCtx.AfterLoad(buf);
 }
@@ -147,16 +156,17 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccessAndSetBuf)
 {
     // given
     RebuildCtxHeader header;
-
-    header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 3;
+
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(5));
+
+    RebuildCtx rebuildCtx(nullptr, &header, &addrInfo);
+    rebuildCtx.Init();
+
     char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
-    char* buf2 = buf + sizeof(RebuildCtxHeader);
-    for (int i = 0; i < 3; i++)
-    {
-        buf2[i] = i;
-    }
-    RebuildCtx rebuildCtx(nullptr, &header, nullptr);
+    InitializeRebuildCtxHeader(buf, 3);
+
     // when 1.
     rebuildCtx.AfterLoad(buf);
 }
@@ -165,22 +175,22 @@ TEST(RebuildCtx, AfterLoad_testIfStoredVersionIsUpdated)
 {
     // given
     RebuildCtxHeader header;
-
-    header.sig = RebuildCtx::SIG_REBUILD_CTX;
     header.numTargetSegments = 3;
     header.ctxVersion = 2;
 
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(5));
+
+    RebuildCtx rebuildCtx(nullptr, &header, &addrInfo);
+    rebuildCtx.Init();
+
     char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
-    char* buf2 = buf + sizeof(RebuildCtxHeader);
-    for (int i = 0; i < 3; i++)
-    {
-        buf2[i] = i;
-    }
-    RebuildCtx rebuildCtx(nullptr, &header, nullptr);
+    InitializeRebuildCtxHeader(buf, 3, header.ctxVersion + 1);
+
     // when 1.
     rebuildCtx.AfterLoad(buf);
 
-    EXPECT_EQ(rebuildCtx.GetStoredVersion(), header.ctxVersion);
+    EXPECT_EQ(rebuildCtx.GetStoredVersion(), header.ctxVersion + 1);
 }
 
 } // namespace pos

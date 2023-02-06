@@ -35,9 +35,9 @@
 #include <mutex>
 #include <vector>
 
-#include "src/allocator/include/allocator_const.h"
-#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/context_manager/context/context.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 
 namespace pos

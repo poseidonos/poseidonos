@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -32,57 +32,62 @@
 
 #pragma once
 
-#include <vector>
-#include <atomic>
+#include <string.h>
 
-#include "src/allocator/context_manager/i_allocator_file_io_client.h"
-#include "src/meta_file_intf/meta_file_intf.h"
-#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
+#include "src/allocator/context_manager/context/context_section.h"
 
 namespace pos
 {
-class AllocatorAddressInfo;
-class AllocatorFileIoManager;
-
-class AllocatorFileIo
+template<typename T>
+class ContextSection
 {
 public:
-    AllocatorFileIo(void) = default;
-    AllocatorFileIo(FileOwner owner, IAllocatorFileIoClient* client_, AllocatorAddressInfo* addrInfo);
-    AllocatorFileIo(FileOwner owner, IAllocatorFileIoClient* client_, AllocatorAddressInfo* addrInfo, MetaFileIntf* file);
-    virtual ~AllocatorFileIo(void);
+    T data;
 
-    virtual void Init(void);
-    virtual void Dispose(void);
+    ContextSection<T>(void) = default;
 
-    virtual int LoadContext(void);
-    virtual int Flush(FnAllocatorCtxIoCompletion clientCallback, ContextSectionBuffer externalBuf = INVALID_CONTEXT_SECTION_BUFFER);
+    // Update in-memory address info to load or flush from/to disk
+    void InitAddressInfoWithItsData(uint64_t offset)
+    {
+        dataAddress = (char*)(&data);
+        info.offset = offset;
+        info.size = sizeof(data);
+    }
+    void InitAddressInfo(char* addr, uint64_t offset, uint64_t size)
+    {
+        dataAddress = addr;
+        info.offset = offset;
+        info.size = size;
+    }
 
-    virtual uint64_t GetStoredVersion(void);
-    virtual int GetSectionSize(int section);
+    void CopyTo(char* buf)
+    {
+        // src = dataAddress
+        // dest = buf + addr.offset
+        // size = addr.size
+        memcpy((buf + info.offset), dataAddress, info.size);
+    }
 
-    virtual int GetNumOutstandingRead(void);
-    virtual int GetNumOutstandingFlush(void);
+    void CopyFrom(char* buf)
+    {
+        // src = buf + addr.offset
+        // dest = dataAddress
+        // size = addr.size
+        memcpy(dataAddress, (buf + info.offset), info.size);
+    }
 
-private:
-    int _CreateAndOpenFile(void);
-    int _OpenAndLoadFile(void);
+    uint64_t GetSectionSize(void)
+    {
+        return info.size;
+    }
 
-    int _Load(void);
+    ContextSectionAddr GetSectionInfo(void)
+    {
+        return info;
+    }
 
-    void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-
-    AllocatorAddressInfo* addrInfo;
-    IAllocatorFileIoClient* client;
-
-    FileOwner owner;
-    MetaFileIntf* file;
-
-    std::atomic<int> numOutstandingReads;
-    std::atomic<int> numOutstandingFlushes;
-
-    bool initialized;
+protected:
+    char* dataAddress = nullptr;
+    ContextSectionAddr info;
 };
-
 } // namespace pos

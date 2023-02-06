@@ -92,6 +92,8 @@ private:
     virtual int _AsyncIORead(AsyncMetaFileIoCtx* ctx);
     rocksdb::DB* rocksMeta;
     FileDescriptorAllocator* fileDescriptorAllocator;
+    uint64_t size;
+
     inline std::string
     _MakeRocksDbKey(FileDescriptorType fd, FileOffsetType offset)
     {

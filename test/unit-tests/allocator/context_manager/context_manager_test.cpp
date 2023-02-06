@@ -305,27 +305,6 @@ TEST(ContextManager, NeedRebuildAgain_TestSimpleByPassFunc)
     EXPECT_EQ(true, ret);
 }
 
-TEST(ContextManager, GetContextSectionAddr_TestSimpleGetter)
-{
-    // given
-    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
-    NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockRebuildCtx>* reCtx = new NiceMock<MockRebuildCtx>();
-    NiceMock<MockGcCtx>* gcCtx = new NiceMock<MockGcCtx>();
-    NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
-    NiceMock<MockContextIoManager>* ioManager = new NiceMock<MockContextIoManager>;
-    NiceMock<MockTelemetryPublisher> tc;
-    ContextManager ctxManager(&tc, allocCtx, segCtx, reCtx, nullptr, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
-
-    EXPECT_CALL(*ioManager, GetContextSectionAddr).WillOnce(Return((char*)100));
-
-    // when
-    char* ret = ctxManager.GetContextSectionAddr(0, 0);
-
-    // then
-    EXPECT_EQ((char*)100, ret);
-}
-
 TEST(ContextManager, GetContextSectionSize_TestSimpleGetter)
 {
     // given
@@ -624,19 +603,19 @@ TEST(ContextManager, FlushContexts_testIfCallbackHasNullptr)
     });
 
     ON_CALL(*segmentFileIo, Flush)
-        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, ContextSectionBuffer externalBuf)
         {
             completion();
             return 0;
         });
     ON_CALL(*allocatorFileIo, Flush)
-        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, ContextSectionBuffer externalBuf)
         {
             completion();
             return 0;
         });
     ON_CALL(*rebuildFileIo, Flush)
-        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, int dstSectionId, char* externalBuf)
+        .WillByDefault([&](FnAllocatorCtxIoCompletion completion, ContextSectionBuffer externalBuf)
         {
             completion();
             return 0;

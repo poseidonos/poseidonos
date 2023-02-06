@@ -44,27 +44,25 @@
 namespace pos
 {
 RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, RebuildCtxHeader* header, AllocatorAddressInfo* info)
-: addrInfo(info),
+: totalDataSize(0),
+  listSize(0),
   ctxStoredVersion(0),
   ctxDirtyVersion(0),
-  listSize(0),
-  segmentList(nullptr),
+  initialized(false),
+  addrInfo(info),
   tp(tp_),
-  fileIo(nullptr),
-  initialized(false)
+  fileIo(nullptr)
 {
     if (header != nullptr)
     {
         // for UT
-        ctxHeader.sig = header->sig;
-        ctxHeader.ctxVersion = header->ctxVersion;
-        ctxHeader.numTargetSegments = header->numTargetSegments;
+        ctxHeader.data = *header;
     }
     else
     {
-        ctxHeader.sig = SIG_REBUILD_CTX;
-        ctxHeader.ctxVersion = 0;
-        ctxHeader.numTargetSegments = 0;
+        ctxHeader.data.sig = SIG_REBUILD_CTX;
+        ctxHeader.data.ctxVersion = 0;
+        ctxHeader.data.numTargetSegments = 0;
     }
 }
 
@@ -75,6 +73,7 @@ RebuildCtx::RebuildCtx(TelemetryPublisher* tp_, AllocatorAddressInfo* info)
 
 RebuildCtx::~RebuildCtx(void)
 {
+    Dispose();
 }
 
 void
@@ -84,13 +83,32 @@ RebuildCtx::Init(void)
     {
         return;
     }
+
     listSize = 0;
-    segmentList = new SegmentId[addrInfo->GetnumUserAreaSegments()]();
-    ctxHeader.ctxVersion = 0;
+    segmentList.data = new SegmentId[addrInfo->GetnumUserAreaSegments()]();
+    ctxHeader.data.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
 
+    _UpdateSectionInfo();
+
     initialized = true;
+}
+
+void
+RebuildCtx::_UpdateSectionInfo(void)
+{
+    uint64_t currentOffset = 0;
+    ctxHeader.InitAddressInfoWithItsData(currentOffset);
+    currentOffset += ctxHeader.GetSectionSize();
+
+    segmentList.InitAddressInfo(
+        (char*)(segmentList.data),
+        currentOffset,
+        sizeof(SegmentId) * addrInfo->GetnumUserAreaSegments());
+    currentOffset += segmentList.GetSectionSize();
+
+    totalDataSize = currentOffset;
 }
 
 void
@@ -101,10 +119,10 @@ RebuildCtx::Dispose(void)
         return;
     }
 
-    if (segmentList != nullptr)
+    if (segmentList.data != nullptr)
     {
-        delete segmentList;
-        segmentList = nullptr;
+        delete segmentList.data;
+        segmentList.data = nullptr;
     }
 
     initialized = false;
@@ -119,11 +137,21 @@ RebuildCtx::SetAllocatorFileIo(AllocatorFileIo* fileIo_)
 void
 RebuildCtx::AfterLoad(char* buf)
 {
-    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file loaded:{}", ctxHeader.ctxVersion);
-    ctxStoredVersion = ctxHeader.ctxVersion;
-    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+    RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(buf);
+    assert(header->sig == SIG_REBUILD_CTX);
 
-    listSize = ctxHeader.numTargetSegments;
+    // RC_HEADER
+    ctxHeader.CopyFrom(buf);    
+
+    // TODO load only listsize
+    // RC_REBUILD_SEGMENT_LIST
+    segmentList.CopyFrom(buf);
+
+    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file loaded:{}", ctxHeader.data.ctxVersion);
+    ctxStoredVersion = ctxHeader.data.ctxVersion;
+    ctxDirtyVersion = ctxHeader.data.ctxVersion + 1;
+
+    listSize = ctxHeader.data.numTargetSegments;
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_LOAD_REBUILD_SEGMENT),
         "RebuildCtx file loaded, segmentCount:{}", listSize);
 }
@@ -132,64 +160,46 @@ void
 RebuildCtx::BeforeFlush(char* buf)
 {
     // RC_HEADER
-    ctxHeader.numTargetSegments = listSize;
-    ctxHeader.ctxVersion = ctxDirtyVersion++;
-    memcpy(buf, &ctxHeader, sizeof(RebuildCtxHeader));
+    ctxHeader.data.numTargetSegments = listSize;
+    ctxHeader.data.ctxVersion = ctxDirtyVersion++;
+    ctxHeader.CopyTo(buf);
 
     // RC_REBUILD_SEGMENT_LIST
-    memcpy(buf + sizeof(RebuildCtxHeader), segmentList, sizeof(SegmentId) * listSize);
+    // TODO flush only listsize
+    segmentList.CopyTo(buf);
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT),
         "Ready to flush RebuildCtx file:{}, numTargetSegments:{}",
-        ctxHeader.ctxVersion, ctxHeader.numTargetSegments);
+        ctxHeader.data.ctxVersion, ctxHeader.data.numTargetSegments);
 }
 
 void
-RebuildCtx::FinalizeIo(char* buf)
+RebuildCtx::AfterFlush(char* buf)
 {
     RebuildCtxHeader* header = reinterpret_cast<RebuildCtxHeader*>(buf);
+    assert(header->sig == SIG_REBUILD_CTX);
+
     ctxStoredVersion = header->ctxVersion;
-    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT), "RebuildCtx file stored, version:{}, segmentCount:{}", header->ctxVersion, header->numTargetSegments);
+    POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT),
+        "RebuildCtx stored, array_id:{}, version:{}, segmentCount:{}",
+        addrInfo->GetArrayId(), header->ctxVersion, header->numTargetSegments);
 }
 
-char*
-RebuildCtx::GetSectionAddr(int section)
+ContextSectionAddr
+RebuildCtx::GetSectionInfo(int section)
 {
-    char* ret = nullptr;
-    switch (section)
+    if (section == RC_HEADER)
     {
-        case RC_HEADER:
-        {
-            ret = (char*)&ctxHeader;
-            break;
-        }
-        case RC_REBUILD_SEGMENT_LIST:
-        {
-            ret = (char*)segmentList;
-            break;
-        }
+        return ctxHeader.GetSectionInfo();
     }
-    return ret;
-}
-
-int
-RebuildCtx::GetSectionSize(int section)
-{
-    int ret = 0;
-    switch (section)
+    else if (section == RC_REBUILD_SEGMENT_LIST)
     {
-        case RC_HEADER:
-        {
-            ret = sizeof(RebuildCtxHeader);
-            break;
-        }
-        case RC_REBUILD_SEGMENT_LIST:
-        {
-            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentId);
-            break;
-        }
+        return segmentList.GetSectionInfo();
     }
-    return ret;
+    else
+    {
+        assert(false);
+    }
 }
 
 uint64_t
@@ -204,33 +214,27 @@ RebuildCtx::ResetDirtyVersion(void)
     ctxDirtyVersion = 0;
 }
 
-std::string
-RebuildCtx::GetFilename(void)
-{
-    return "RebuildContext";
-}
-
-uint32_t
-RebuildCtx::GetSignature(void)
-{
-    return SIG_REBUILD_CTX;
-}
-
 int
 RebuildCtx::GetNumSections(void)
 {
     return NUM_REBUILD_CTX_SECTION;
 }
 
+uint64_t
+RebuildCtx::GetTotalDataSize(void)
+{
+    return ctxHeader.GetSectionSize() + segmentList.GetSectionSize();
+}
+
 int
 RebuildCtx::_FlushContext(void)
 {
     FnAllocatorCtxIoCompletion completion = []() {}; // Do nothing on completion
-    int ret = fileIo->Flush(completion, INVALID_SECTION_ID);
+    int ret = fileIo->Flush(completion);
 
     POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE),
         "[RebuildCtxFlush] rebuildIssuedCount:{}, start to flush",
-        fileIo->GetNumFilesFlushing());
+        fileIo->GetNumOutstandingFlush());
 
     return ret;
 }
@@ -249,7 +253,7 @@ RebuildCtx::_UpdateRebuildList(std::set<SegmentId> segIdSet)
     int idx = 0;
     for (auto it = segIdSet.begin(); it != segIdSet.end(); it++)
     {
-        segmentList[idx++] = *it;
+        segmentList.data[idx++] = *it;
     }
 }
 
@@ -259,7 +263,7 @@ RebuildCtx::GetList(void)
     std::set<SegmentId> ret;
     for (uint32_t idx = 0; idx < listSize; idx++)
     {
-        ret.insert(segmentList[idx]);
+        ret.insert(segmentList.data[idx]);
     }
     return ret;
 }

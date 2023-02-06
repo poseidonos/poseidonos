@@ -12,11 +12,7 @@ TEST(IAllocatorFileIoClient, BeforeFlush_)
 {
 }
 
-TEST(IAllocatorFileIoClient, FinalizeIo_)
-{
-}
-
-TEST(IAllocatorFileIoClient, GetSectionAddr_)
+TEST(IAllocatorFileIoClient, AfterFlush_)
 {
 }
 

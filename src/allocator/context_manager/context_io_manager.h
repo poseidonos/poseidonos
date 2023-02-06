@@ -36,7 +36,6 @@
 #include "src/allocator/context_manager/allocator_file_io.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-#include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
 
 namespace pos
@@ -65,20 +64,18 @@ public:
     virtual void Dispose(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync,
-        char* externalBuf = nullptr);
+        ContextSectionBuffer externalBuf);
 
     virtual void WaitPendingIo(IOTYPE type);
 
     virtual uint64_t GetStoredContextVersion(int owner);
-
-    virtual char* GetContextSectionAddr(int owner, int section);
     virtual int GetContextSectionSize(int owner, int section);
 
 private:
     void _FlushCompleted(void);
 
-    int _GetNumFilesReading(void);
-    int _GetNumFilesFlushing(void);
+    int _GetTotalNumOutstandingRead(void);
+    int _GetTotalNumOutstandingFlush(void);
     int _GetNumRebuildFlush(void);
     uint32_t _GetPendingIoCount(uint32_t checkType);
 

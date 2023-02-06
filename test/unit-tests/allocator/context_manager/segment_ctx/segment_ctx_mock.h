@@ -20,14 +20,10 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, AfterLoad, (char* buf), (override));
     MOCK_METHOD(void, BeforeFlush, (char* buf), (override));
-    MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
-    MOCK_METHOD(void, FinalizeIo, (char* buf), (override));
-    MOCK_METHOD(char*, GetSectionAddr, (int section), (override));
-    MOCK_METHOD(int, GetSectionSize, (int section), (override));
+    MOCK_METHOD(void, AfterFlush, (char* buf), (override));
+    MOCK_METHOD(ContextSectionAddr, GetSectionInfo, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));
     MOCK_METHOD(void, ResetDirtyVersion, (), (override));
-    MOCK_METHOD(std::string, GetFilename, (), (override));
-    MOCK_METHOD(uint32_t, GetSignature, (), (override));
     MOCK_METHOD(int, GetNumSections, (), (override));
     MOCK_METHOD(void, MoveToFreeState, (SegmentId segId), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));

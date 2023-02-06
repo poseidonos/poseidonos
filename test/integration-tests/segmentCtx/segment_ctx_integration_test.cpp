@@ -150,25 +150,24 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     const uint32_t maxOccupiedStripeCount = 128;
     const uint32_t numOfStripesPerSegment = 10;
     const uint32_t arrayId = 0;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numOfSegment));
+
     uint32_t expectedVictimSegId = 0;
 
-    SegmentInfo* segInfos = new SegmentInfo[numOfSegment];
     SegmentInfoData* segmentInfoData = new SegmentInfoData[numOfSegment];
     for (int i = 0; i < numOfSegment; ++i)
     {
-        segInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
-        segInfos[i].InitSegmentInfoData();
-        segInfos[i].SetValidBlockCount(maxValidBlockCount);
-        segInfos[i].SetOccupiedStripeCount(maxOccupiedStripeCount);
-        segInfos[i].SetState(SegmentState::SSD);
-
+        segmentInfoData[i].validBlockCount = maxValidBlockCount;
+        segmentInfoData[i].occupiedStripeCount = maxOccupiedStripeCount;
+        segmentInfoData[i].state = SegmentState::SSD;
     }
-    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, arrayId, segInfos);
+    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, segmentInfoData);
 
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
     ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(maxValidBlockCount));
     ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numOfSegment));
     ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(numOfStripesPerSegment));
+    ON_CALL(addrInfo, GetArrayId).WillByDefault(Return(arrayId));
 
     segmentCtx->SetSegmentList(SegmentState::SSD, &ssdSegmentList);
     segmentCtx->SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
@@ -209,7 +208,7 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     blks.startVsa.offset = 64;
     segmentCtx->InvalidateBlks(blks, false);
 
-    uint32_t remainValidBlkCount = segInfos[victimSegId].GetValidBlockCount();
+    uint32_t remainValidBlkCount = segmentInfoData[victimSegId].validBlockCount;
     EXPECT_EQ(0, remainValidBlkCount);
 
     // all segment valid blocks invalidated but its state is SegmentState::VICTIM,
@@ -249,7 +248,7 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     blks.startVsa.offset = 0;
     segmentCtx->InvalidateBlks(blks, false);
 
-    remainValidBlkCount = segInfos[victimSegId].GetValidBlockCount();
+    remainValidBlkCount = segmentInfoData[victimSegId].validBlockCount;
     EXPECT_EQ(0, remainValidBlkCount);
 
     ret = victimSegmentList.Contains(victimSegId);
@@ -261,7 +260,6 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     ret = rebuildSegmentList.Contains(victimSegId);
     EXPECT_EQ(true, ret);
 
-    delete [] segInfos;
     delete [] segmentInfoData;
     delete segmentCtx;
     delete ioManager;

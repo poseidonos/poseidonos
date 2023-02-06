@@ -37,7 +37,14 @@
 
 #include <string>
 
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 #include "src/metafs/include/metafs_service.h"
+#include "src/meta_file_intf/meta_file_include.h"
+#include "src/meta_file_intf/rocksdb_metafs_intf.h"
+#include "src/metafs/metafs_file_intf.h"
+#include "src/metafs/config/metafs_config_manager.h"
 
 namespace pos
 {
@@ -50,7 +57,6 @@ MetaFileIntf::MetaFileIntf(const std::string fileName, const int arrayId,
     const MetaFileType fileType, const MetaVolumeType volumeType)
 : fileName(fileName),
   arrayId(arrayId),
-  size(0),
   isOpened(false),
   fd(-1),
   fileType(fileType),
@@ -123,6 +129,25 @@ bool
 MetaFileIntf::IsOpened(void)
 {
     return isOpened;
+}
+
+MetaFileIntf*
+MetaFileIntf::CreateFileIntf(std::string filename, int arrayId, MetaFileType type)
+{
+    MetaFileIntf* file = nullptr;
+    if (MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
+    {
+        file = new RocksDBMetaFsIntf(filename, arrayId, type);
+        POS_TRACE_INFO(EID(META_FILE_INTF_INITIALIZED),
+            "RocksDBMetaFsIntf has been initialized, fileName:{}, arrayId:{}", filename, arrayId);
+    }
+    else
+    {
+        file = new MetaFsFileIntf(filename, arrayId, type);
+        POS_TRACE_INFO(EID(META_FILE_INTF_INITIALIZED),
+            "MetaFsFileIntf has been initialized, fileName:{}, arrayId:{}", filename, arrayId);
+    }
+    return file;
 }
 
 } // namespace pos

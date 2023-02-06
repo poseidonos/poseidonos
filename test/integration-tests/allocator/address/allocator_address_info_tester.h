@@ -38,5 +38,6 @@ public:
     MOCK_METHOD(uint32_t, GetblksPerStripe, ());
     MOCK_METHOD(uint32_t, GetnumWbStripes, ());
     MOCK_METHOD(uint32_t, GetnumUserAreaStripes, ());
+    MOCK_METHOD(int, GetArrayId, ());
 };
 }

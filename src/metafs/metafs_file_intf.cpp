@@ -214,8 +214,6 @@ MetaFsFileIntf::Create(uint64_t fileSize)
         return -(int)rc;
     }
 
-    size = fileSize;
-
     return (int)rc;
 }
 

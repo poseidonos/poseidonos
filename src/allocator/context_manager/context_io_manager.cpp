@@ -83,8 +83,7 @@ ContextIoManager::Init(void)
         if (ret == EID(SUCCEED_TO_OPEN_WITH_CREATION)) // new file created
         {
             FnAllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
-            uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
-            ret = fileIo[owner]->Flush(completion, dstSectionId);
+            ret = fileIo[owner]->Flush(completion);
             if (ret == EID(SUCCESS))
             {
                 WaitPendingIo(IOTYPE_ALL);
@@ -126,7 +125,7 @@ ContextIoManager::Dispose(void)
 }
 
 int
-ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externalBuf)
+ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer externalBuf)
 {
     if (flushInProgress.exchange(true) == true)
     {
@@ -142,15 +141,14 @@ ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, char* externa
     {
         FnAllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
 
-        uint32_t dstSectionId = fileIo[owner]->GetDstSectionIdForExternalBufCopy();
-        ret = fileIo[owner]->Flush(completion, dstSectionId, externalBuf);
+        ret = fileIo[owner]->Flush(completion, externalBuf);
         if (ret != 0)
         {
             break;
         }
     }
     POSMetricValue v;
-    v.gauge = _GetNumFilesFlushing();
+    v.gauge = _GetTotalNumOutstandingFlush();
     telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, v, MT_GAUGE);
 
     if (sync == true)
@@ -170,12 +168,12 @@ ContextIoManager::_GetPendingIoCount(uint32_t checkType)
 
     if (checkType & IOTYPE_READ)
     {
-        pendingIoCount += _GetNumFilesReading();
+        pendingIoCount += _GetTotalNumOutstandingRead();
     }
 
     if (checkType & IOTYPE_FLUSH)
     {
-        pendingIoCount += _GetNumFilesFlushing();
+        pendingIoCount += _GetTotalNumOutstandingFlush();
     }
 
     if (checkType & IOTYPE_REBUILD_FLUSH)
@@ -205,7 +203,7 @@ ContextIoManager::WaitPendingIo(IOTYPE type)
 void
 ContextIoManager::_FlushCompleted(void)
 {
-    int remaining = _GetNumFilesFlushing();
+    int remaining = _GetTotalNumOutstandingFlush();
     POSMetricValue v;
     v.gauge = remaining;
     telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, v, MT_GAUGE);
@@ -229,12 +227,6 @@ ContextIoManager::GetStoredContextVersion(int owner)
     return fileIo[owner]->GetStoredVersion();
 }
 
-char*
-ContextIoManager::GetContextSectionAddr(int owner, int section)
-{
-    return fileIo[owner]->GetSectionAddr(section);
-}
-
 int
 ContextIoManager::GetContextSectionSize(int owner, int section)
 {
@@ -242,34 +234,34 @@ ContextIoManager::GetContextSectionSize(int owner, int section)
 }
 
 int
-ContextIoManager::_GetNumFilesReading(void)
+ContextIoManager::_GetTotalNumOutstandingRead(void)
 {
-    int numFilesReading = 0;
+    int num = 0;
 
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
-        numFilesReading += fileIo[owner]->GetNumFilesReading();
+        num += fileIo[owner]->GetNumOutstandingRead();
     }
 
-    return numFilesReading;
+    return num;
 }
 
 int
-ContextIoManager::_GetNumFilesFlushing(void)
+ContextIoManager::_GetTotalNumOutstandingFlush(void)
 {
-    int numFilesFlushing = 0;
+    int num = 0;
     for (int owner = 0; owner < NUM_ALLOCATOR_FILES; owner++)
     {
-        numFilesFlushing += fileIo[owner]->GetNumFilesFlushing();
+        num += fileIo[owner]->GetNumOutstandingFlush();
     }
 
-    return numFilesFlushing;
+    return num;
 }
 
 int
 ContextIoManager::_GetNumRebuildFlush(void)
 {
-    return fileIo[REBUILD_CTX]->GetNumFilesFlushing();
+    return fileIo[REBUILD_CTX]->GetNumOutstandingFlush();
 }
 
 } // namespace pos

@@ -78,7 +78,6 @@ protected:
     PartitionLogicalSize partitionLogicalSize;
 
     JournalManager* journal;
-    SegmentInfo* segInfosForSegCtx;
     SegmentInfoData* segInfoDataForSegCtx;
     SegmentCtx* segCtx;
     IVersionedSegmentContext* versionedSegCtx;
@@ -166,15 +165,11 @@ ContextManagerIntegrationTest::SetUp(void)
     ioManager = new NiceMock<MockContextIoManager>;
     addrInfo = new NiceMock<MockAllocatorAddressInfo>;
 
-    segInfosForSegCtx = new SegmentInfo[numOfSegment];
+    ON_CALL(*addrInfo, GetArrayId).WillByDefault(Return(arrayId));
     segInfoDataForSegCtx = new SegmentInfoData[numOfSegment](validBlockCount,
         maxOccupiedStripeCount, SegmentState::SSD);
-    for(int i=0;i<numOfSegment;++i)
-    {
-        segInfosForSegCtx[i].AllocateSegmentInfoData(&segInfoDataForSegCtx[i]);
-    }
 
-    segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, arrayId, segInfosForSegCtx);
+    segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, segInfoDataForSegCtx);
 
     journal = new JournalManager(config, statusProvider,
         logWriteContextFactory, logBufferIoContextFactory, journalEventFactory, logWriteHandler,
@@ -214,8 +209,6 @@ ContextManagerIntegrationTest::SetUp(void)
 void
 ContextManagerIntegrationTest::TearDown(void)
 {
-    delete [] segInfosForSegCtx;
-    delete [] segInfoDataForSegCtx;
     delete [] loadedSegInfos;
     delete [] loadedSegInfoDataForSegCtx;
 
@@ -242,6 +235,11 @@ ContextManagerIntegrationTest::TearDown(void)
     if (nullptr != ioManager)
     {
         delete ioManager;
+    }
+
+    if (nullptr != addrInfo)
+    {
+        delete addrInfo;
     }
 
     delete cpHandler;
@@ -319,7 +317,7 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserD
     NiceMock<MockRebuildCtx>* rebuildCtx = new NiceMock<MockRebuildCtx>();
 
     // SegmentCtx (Real)
-    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx, 0);
+    SegmentCtx* segmentCtx = new SegmentCtx(nullptr, rebuildCtx, allocatorAddressInfo, gcCtx);
 
     // Start Test
     for (int i = 0; i < TEST_TRIAL; ++i)
@@ -380,11 +378,10 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
 
     // Expects flushing allocator contexts to wait for rebuild context flush done
     AsyncMetaFileIoCtx* allocCtxFlush = new AsyncMetaFileIoCtx();
-    auto allocCtxHeader = new CtxHeader();
-    allocCtxHeader->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    auto allocCtxHeader = new AllocatorCtxHeader();
     allocCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, 0, (char*)allocCtxHeader);
     EXPECT_CALL(*allocatorCtxIo, Flush)
-        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, ContextSectionBuffer externalBuf)
         {
             std::thread allocCtxFlushCallback([&]
             {
@@ -400,11 +397,10 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
             return 0;
         });
     AsyncMetaFileIoCtx* segCtxFlush = new AsyncMetaFileIoCtx();
-    auto segCtxHeader = new CtxHeader();
-    segCtxHeader->sig = SegmentCtx::SIG_SEGMENT_CTX;
+    auto segCtxHeader = new SegmentCtxHeader();
     segCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)segCtxHeader);
     EXPECT_CALL(*segmentCtxIo, Flush)
-        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, ContextSectionBuffer externalBuf)
         {
             std::thread segCtxFlushCallback([&]
             {
@@ -421,16 +417,15 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
         });
 
     // When 1. Flushing contexts started by CheckpointHandler
-    ioManager.FlushContexts(checkpointCallback, false);
+    ioManager.FlushContexts(checkpointCallback, false, INVALID_CONTEXT_SECTION_BUFFER);
 
     // Test set-up for testing FlushRebuildContext
     // Expects flushing segment context to be completed right away
     AsyncMetaFileIoCtx* rebuildCtxFlush = new AsyncMetaFileIoCtx();
-    auto rebuildCtxHeader = new CtxHeader();
-    rebuildCtxHeader->sig = RebuildCtx::SIG_REBUILD_CTX;
+    auto rebuildCtxHeader = new RebuildCtxHeader();
     rebuildCtxFlush->SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(CtxHeader), (char*)rebuildCtxHeader);
     EXPECT_CALL(*rebuildCtxIo, Flush)
-        .WillOnce([&](FnAllocatorCtxIoCompletion callback, int dstSectionId, char* externalBuf)
+        .WillOnce([&](FnAllocatorCtxIoCompletion callback, ContextSectionBuffer externalBuf)
         {
             callback();
 
@@ -468,7 +463,7 @@ TEST_F(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwrit
     NiceMock<MockBlockAllocationStatus>* blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     NiceMock<MockContextReplayer>* contextReplayer = new NiceMock<MockContextReplayer>;
     NiceMock<MockTelemetryPublisher> tp;
-    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, 0);
+    SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx);
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
 
     std::mutex allocatorLock;
