@@ -73,11 +73,11 @@ private:
     static const uint32_t CREATED_DT_LENGTH = 8;
     static const uint64_t LAST_UPDATED_DT_OFFSET = 0x98;
     static const uint32_t LAST_UPDATED_DT_LENGTH = 8;
-    static const uint64_t ADE_COUNT_OFFSET = 0x100;
+    static const uint64_t ADE_COUNT_OFFSET = 0xa0;
     static const uint32_t ADE_COUNT_LENGTH = 4;
-    static const uint64_t PTE_COUNT_OFFSET = 0x104;
+    static const uint64_t PTE_COUNT_OFFSET = 0xa4;
     static const uint32_t PTE_COUNT_LENGTH = 4;
-    static const uint64_t ADE_START_OFFSET = 0x110;
+    static const uint64_t ADE_START_OFFSET = 0xb0;
     static const uint32_t ADE_LENGTH = 128;
     static const uint64_t ADE_SIGNATURE_OFFSET = 0x0;
     static const uint32_t ADE_SIGNATURE_LENGTH = 8;
@@ -89,7 +89,7 @@ private:
     static const uint32_t DEV_STATE_LENGTH = 4;
     static const uint64_t DEV_SERIAL_OFFSET = 0x30;
     static const uint32_t DEV_SERIAL_LENGTH = 64;
-    static const uint64_t PTE_START_OFFSET = 0x4110;
+    static const uint64_t PTE_START_OFFSET = 0x40b0;
     static const uint32_t PTE_LENGTH = 128;
     static const uint64_t PTE_SIGNATURE_OFFSET = 0x0;
     static const uint32_t PTE_SIGNATURE_LENGTH = 8;
