@@ -70,7 +70,7 @@ class ArrayManager : public IArrayMgmt, public IDeviceEvent, public IRebuildNoti
 
 public:
     ArrayManager();
-     ArrayManager(ArrayRebuilder* arrayRebuilder,
+    ArrayManager(ArrayRebuilder* arrayRebuilder,
         DeviceManager* deviceManager, TelemetryClient* telClient,
         function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory,
         ArrayBuilderAdapter* arrayBuilderAdapter = nullptr);
