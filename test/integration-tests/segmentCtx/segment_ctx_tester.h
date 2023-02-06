@@ -22,7 +22,9 @@ public:
         rebuildContext = new NiceMock<MockRebuildCtx>;
         tp = new NiceMock<MockTelemetryPublisher>;
 
-        realCtx = new SegmentCtx(tp, rebuildContext, addressInfo, gcContext, arrayId, nullptr);;
+        ON_CALL(*addressInfo, GetArrayId).WillByDefault(Return(arrayId));
+
+        realCtx = new SegmentCtx(tp, rebuildContext, addressInfo, gcContext, nullptr);
 
         MakeStubs();
     };

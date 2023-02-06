@@ -52,6 +52,7 @@ public:
     virtual uint32_t GetblksPerSegment(void) { return blksPerSegment; }
     virtual uint32_t GetstripesPerSegment(void) { return stripesPerSegment; }
     virtual uint32_t GetnumUserAreaSegments(void) { return numUserAreaSegments; }
+    virtual int GetArrayId(void) { return arrayId; }
 
     void SetblksPerStripe(uint32_t value) { blksPerStripe = value; }
     void SetchunksPerStripe(uint32_t value) { chunksPerStripe = value; }
@@ -60,6 +61,7 @@ public:
     void SetblksPerSegment(uint32_t value) { blksPerSegment = value; }
     void SetstripesPerSegment(uint32_t value) { stripesPerSegment = value; }
     void SetnumUserAreaSegments(uint32_t value) { numUserAreaSegments = value; }
+    void SetArrayId(int id) { arrayId = id; }
     void SetUT(bool ut) { isUT = ut; }
     virtual bool IsUT(void) { return isUT; }
 
@@ -71,6 +73,7 @@ private:
     uint32_t blksPerSegment;
     uint32_t stripesPerSegment;
     uint32_t numUserAreaSegments;
+    int arrayId;
     bool isUT;
 };
 

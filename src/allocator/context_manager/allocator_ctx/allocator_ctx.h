@@ -35,8 +35,10 @@
 #include <string>
 #include <vector>
 
+#include "src/allocator/context_manager/context/active_stripe_tail_context_section.h"
+#include "src/allocator/context_manager/context/context.h"
+#include "src/allocator/context_manager/context/context_section.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
-#include "src/allocator/include/allocator_const.h"
 #include "src/lib/bitmap.h"
 
 namespace pos
@@ -54,17 +56,14 @@ public:
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual void AfterLoad(char* buf);
-    virtual void BeforeFlush(char* buf);
-    virtual std::mutex& GetCtxLock(void) { return allocCtxLock; }
-    virtual void FinalizeIo(char* buf);
-    virtual char* GetSectionAddr(int section);
-    virtual int GetSectionSize(int section);
-    virtual uint64_t GetStoredVersion(void);
-    virtual void ResetDirtyVersion(void);
-    virtual std::string GetFilename(void);
-    virtual uint32_t GetSignature(void);
-    virtual int GetNumSections(void);
+    virtual void AfterLoad(char* buf) override;
+    virtual void BeforeFlush(char* buf) override;
+    virtual void AfterFlush(char* buf) override;
+    virtual ContextSectionAddr GetSectionInfo(int section) override;
+    virtual uint64_t GetStoredVersion(void) override;
+    virtual void ResetDirtyVersion(void) override;
+    virtual int GetNumSections(void) override;
+    virtual uint64_t GetTotalDataSize(void) override;
 
     virtual void SetCurrentSsdLsid(StripeId stripe);
     virtual StripeId GetCurrentSsdLsid(void);
@@ -77,30 +76,39 @@ public:
     virtual uint64_t GetAllocatedWbStripeCount(void);
     virtual uint64_t GetNumTotalWbStripe(void);
 
+    virtual void CopyContextSectionToBufferforWBT(int sectionId, char* dstBuf);
+    virtual void CopyContextSectionFromBufferforWBT(int sectionId, char* srcBuf);
+
     virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
     virtual VirtualBlkAddr GetActiveStripeTail(ASTailArrayIdx asTailArrayIdx);
     virtual void SetActiveStripeTail(ASTailArrayIdx asTailArrayIdx, VirtualBlkAddr vsa);
 
+    virtual std::mutex& GetCtxLock(void) { return allocCtxLock; }
     virtual std::mutex& GetActiveStripeTailLock(ASTailArrayIdx asTailArrayIdx);
 
-    static const uint32_t SIG_ALLOCATOR_CTX = 0xBFBFBFBF;
-
 private:
-    AllocatorCtxHeader ctxHeader;
+    void _UpdateSectionInfo(void);
+
+    // Data to be stored
+    ContextSection<AllocatorCtxHeader> ctxHeader;
+    ContextSection<StripeId> currentSsdLsid;
+    ContextSection<BitMapMutex*> allocWbLsidBitmap;
+    ActiveStripeTailContextSection activeStripeTail;
+
+    uint64_t totalDataSize;
+
+    // In-memory data structures
     std::atomic<uint64_t> ctxStoredVersion;
     std::atomic<uint64_t> ctxDirtyVersion;
 
-    VirtualBlkAddr activeStripeTail[ACTIVE_STRIPE_TAIL_ARRAYLEN];
     std::mutex activeStripeTailLock[ACTIVE_STRIPE_TAIL_ARRAYLEN];
-    BitMapMutex* allocWbLsidBitmap = nullptr;
-
-    StripeId currentSsdLsid;
-
-    AllocatorAddressInfo* addrInfo;
-    TelemetryPublisher* tp;
 
     std::mutex allocCtxLock;
     bool initialized;
+
+    // Dependencies
+    AllocatorAddressInfo* addrInfo;
+    TelemetryPublisher* tp;
 };
 
 } // namespace pos

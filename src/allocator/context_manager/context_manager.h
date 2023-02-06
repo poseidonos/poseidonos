@@ -88,7 +88,6 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner);
 
     virtual int SetNextSsdLsid(void);
-    virtual char* GetContextSectionAddr(int owner, int section);
     virtual int GetContextSectionSize(int owner, int section);
 
     virtual RebuildCtx* GetRebuildCtx(void) { return rebuildCtx; }

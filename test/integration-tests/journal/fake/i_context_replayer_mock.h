@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "src/allocator/i_context_replayer.h"
+#include "src/allocator/include/allocator_const.h"
 
 namespace pos
 {

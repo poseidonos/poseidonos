@@ -36,16 +36,16 @@
 #include <vector>
 
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
+#include "src/allocator/context_manager/context/context.h"
+#include "src/allocator/context_manager/context_flush_completion.h"
 #include "src/allocator/context_manager/context_io_manager.h"
 #include "src/allocator/context_manager/context_replayer.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-#include "src/allocator/context_manager/context_flush_completion.h"
-#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
-#include "src/allocator/include/allocator_const.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/logger/logger.h"
 #include "src/qos/qos_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
@@ -82,13 +82,13 @@ ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* inf
     rebuildCtx = new RebuildCtx(tp, info);
     blockAllocStatus = new BlockAllocationStatus();
     gcCtx = new GcCtx(blockAllocStatus, arrayId);
-    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx, arrayId);
+    segmentCtx = new SegmentCtx(tp, rebuildCtx, info, gcCtx);
 
     contextReplayer = new ContextReplayer(allocatorCtx, segmentCtx, info);
 
-    AllocatorFileIo* rebuildFileIo = new AllocatorFileIo(REBUILD_CTX, rebuildCtx, addrInfo, arrayId);
-    AllocatorFileIo* segmentFileIo = new AllocatorFileIo(SEGMENT_CTX, segmentCtx, addrInfo, arrayId);
-    AllocatorFileIo* allocatorFileIo = new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, addrInfo, arrayId);
+    AllocatorFileIo* rebuildFileIo = new AllocatorFileIo(REBUILD_CTX, rebuildCtx, addrInfo);
+    AllocatorFileIo* segmentFileIo = new AllocatorFileIo(SEGMENT_CTX, segmentCtx, addrInfo);
+    AllocatorFileIo* allocatorFileIo = new AllocatorFileIo(ALLOCATOR_CTX, allocatorCtx, addrInfo);
     ioManager = new ContextIoManager(info, tp, segmentFileIo, allocatorFileIo, rebuildFileIo);
 
     rebuildCtx->SetAllocatorFileIo(rebuildFileIo);
@@ -150,8 +150,18 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 
     EventSmartPtr contextFlushCompletion(new ContextFlushCompletion(this,
      callback, logGroupIdInProgress));
+
+    ContextSectionBuffer segInfoBuffer = INVALID_CONTEXT_SECTION_BUFFER;
+
     SegmentInfoData* vscSegInfoData = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoDataToFlush(logGroupId);
-    return ioManager->FlushContexts(contextFlushCompletion, sync, reinterpret_cast<char*>(vscSegInfoData));
+    if (vscSegInfoData != nullptr)
+    {
+        segInfoBuffer.owner = SEGMENT_CTX;
+        segInfoBuffer.sectionId = SC_SEGMENT_INFO,
+        segInfoBuffer.buffer = reinterpret_cast<char*>(vscSegInfoData);
+    }
+
+    return ioManager->FlushContexts(contextFlushCompletion, sync, segInfoBuffer);
 }
 
 SegmentId
@@ -233,12 +243,6 @@ int
 ContextManager::StopRebuilding(void)
 {
     return segmentCtx->StopRebuilding();
-}
-
-char*
-ContextManager::GetContextSectionAddr(int owner, int section)
-{
-    return ioManager->GetContextSectionAddr(owner, section);
 }
 
 int

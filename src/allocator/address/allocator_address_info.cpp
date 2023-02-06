@@ -50,6 +50,7 @@ AllocatorAddressInfo::Init(IArrayInfo* iArrayInfo)
     blksPerSegment = blksPerStripe * udSize->stripesPerSegment;
     stripesPerSegment = udSize->stripesPerSegment;
     numUserAreaSegments = udSize->totalSegments;
+    arrayId = iArrayInfo->GetIndex();
     isUT = false;
 }
 

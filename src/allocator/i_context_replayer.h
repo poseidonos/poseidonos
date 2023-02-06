@@ -32,10 +32,9 @@
 
 #pragma once
 
-#include <mutex>
 #include <vector>
 
-#include "src/allocator/include/allocator_const.h"
+#include "src/include/address_type.h"
 
 namespace pos
 {

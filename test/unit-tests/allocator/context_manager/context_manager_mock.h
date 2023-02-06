@@ -27,7 +27,6 @@ public:
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(int, SetNextSsdLsid, (), (override));
-    MOCK_METHOD(char*, GetContextSectionAddr, (int owner, int section), (override));
     MOCK_METHOD(int, GetContextSectionSize, (int owner, int section), (override));
     MOCK_METHOD(RebuildCtx*, GetRebuildCtx, (), (override));
     MOCK_METHOD(SegmentCtx*, GetSegmentCtx, (), (override));

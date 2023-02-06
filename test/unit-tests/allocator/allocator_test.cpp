@@ -161,17 +161,21 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     addrInfo->SetnumUserAreaSegments(10);
     NiceMock<MockIArrayInfo>* iArrayInfo = new NiceMock<MockIArrayInfo>();
     NiceMock<MockIStateControl>* iState = new NiceMock<MockIStateControl>();
+    NiceMock<MockAllocatorCtx>* allocCtx = new NiceMock<MockAllocatorCtx>();
     NiceMock<MockSegmentCtx>* segCtx = new NiceMock<MockSegmentCtx>();
-    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, nullptr, segCtx, nullptr,
+    NiceMock<MockContextManager>* ctxManager = new NiceMock<MockContextManager>(nullptr, allocCtx, segCtx, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, 0);
     NiceMock<MockBlockManager>* blkManager = new NiceMock<MockBlockManager>();
     NiceMock<MockWBStripeManager>* wbManager = new NiceMock<MockWBStripeManager>();
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
 
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
+    ON_CALL(*ctxManager, GetAllocatorCtx).WillByDefault(Return(allocCtx));
+    ON_CALL(*ctxManager, GetSegmentCtx).WillByDefault(Return(segCtx));
+
     // given 1. fail to create file
+    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     EXPECT_CALL(*file, Create).WillOnce(Return(-1));
     // when 1.
     int ret = alloc.GetMeta(WBT_SEGMENT_VALID_COUNT, "", file);
@@ -179,7 +183,6 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     EXPECT_EQ((int)ERRID(ALLOCATOR_FAILED_TO_CREATE_FILE), ret);
 
     // given 2. fail to Write file
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
     EXPECT_CALL(*segCtx, CopySegmentInfoToBufferforWBT);
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
     EXPECT_CALL(*file, Open);
@@ -192,7 +195,6 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
 
     // given 3. success to Write file
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
-    EXPECT_CALL(*ctxManager, GetSegmentCtx).WillOnce(Return(segCtx));
     EXPECT_CALL(*segCtx, CopySegmentInfoToBufferforWBT);
     EXPECT_CALL(*file, Create).WillOnce(Return(0));
     EXPECT_CALL(*file, Open);
@@ -211,7 +213,7 @@ TEST(Allocator, GetMeta_TestWBTFunctionsWithType)
     // when 4.
     ret = alloc.GetMeta(WBT_NUM_ALLOCATOR_META, "", file);
     // then 4.
-    EXPECT_EQ((int)ERRID(ALLOCATOR_META_ARCHIVE_STORE), ret);
+    EXPECT_EQ((int)ERRID(ALLOCATOR_WBT_WRONG_PARAMETER), ret);
 
     // given 5. failed to appendIo
     file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
@@ -253,6 +255,9 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     NiceMock<MockStripeManager>* stripeManager = new NiceMock<MockStripeManager>();
     Allocator alloc(nullptr, addrInfo, ctxManager, blkManager, wbManager, stripeManager, iArrayInfo, iState);
 
+    ON_CALL(*ctxManager, GetAllocatorCtx).WillByDefault(Return(allocCtx));
+    ON_CALL(*ctxManager, GetSegmentCtx).WillByDefault(Return(segCtx));
+
     // given 1. fail to appendIo file
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(-1));
@@ -289,7 +294,6 @@ TEST(Allocator, SetMeta_TestWBTFunctionsWithType)
     EXPECT_CALL(*file, Open);
     EXPECT_CALL(*file, AppendIO).WillOnce(Return(0));
     EXPECT_CALL(*file, Close);
-    EXPECT_CALL(*ctxManager, GetAllocatorCtx).WillOnce(Return(allocCtx));
     EXPECT_CALL(*allocCtx, SetAllocatedWbStripeCount);
     // when 4.
     ret = alloc.SetMeta(WBT_WBLSID_BITMAP, "", file);

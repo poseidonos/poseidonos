@@ -4285,7 +4285,7 @@ Root:
     Solution: but it's not the rebuilding target.
   -
     Id: 3199
-    Name: ALLOCATOR_RESERVED
+    Name: ALLOCATOR_WBT_WRONG_PARAMETER
     Severity:
     Description:
     Cause:
@@ -4313,7 +4313,7 @@ Root:
     Solution:
   -
     Id: 3203
-    Name: ALLOCATOR_FILE_IO_INITIALIZED
+    Name: RESERVED
     Severity:
     Description:
     Cause:
@@ -4446,9 +4446,9 @@ Root:
     Solution: none
   -
     Id: 3222
-    Name: SUCCEED_TO_OPEN_WITHOUT_CREATION
+    Name: RESERVED
     Severity:
-    Description: succeeded to open a meta file existed already
+    Description:
     Cause: none
     Solution: none
   # Metadata: 3300 - 3399
@@ -4476,6 +4476,13 @@ Root:
   -
     Id: 3303
     Name: META_STRIPE_FAILED_TO_ASSIGN
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 3304
+    Name: META_FILE_INTF_INITIALIZED
     Severity:
     Description:
     Cause:

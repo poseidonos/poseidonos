@@ -82,18 +82,18 @@ public:
     virtual int IssueIO(MetaFsIoOpcode opType, uint64_t fileOffset, uint64_t length, char* buffer);
     virtual int AppendIO(MetaFsIoOpcode opType, uint64_t& offset, uint64_t length, char* buffer);
 
+    static MetaFileIntf* CreateFileIntf(std::string filename, int arrayId, MetaFileType type);
+
 protected:
     virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
     virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) = 0;
 
     std::string fileName;
     int arrayId;
-    uint64_t size;
     bool isOpened;
     int fd;
     MetaFileType fileType;
     MetaVolumeType volumeType;
     MetaFilePropertySet fileProperty;
 };
-
 } // namespace pos

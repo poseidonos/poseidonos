@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -32,57 +32,23 @@
 
 #pragma once
 
-#include <vector>
-#include <atomic>
-
-#include "src/allocator/context_manager/i_allocator_file_io_client.h"
-#include "src/meta_file_intf/meta_file_intf.h"
-#include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
+#include "src/allocator/context_manager/context/context.h"
+#include "src/allocator/context_manager/context/context_section.h"
+#include "src/allocator/include/allocator_const.h"
+#include "src/include/address_type.h"
 
 namespace pos
 {
-class AllocatorAddressInfo;
-class AllocatorFileIoManager;
-
-class AllocatorFileIo
+class ActiveStripeTailContextSection : public ContextSection<VirtualBlkAddr[ACTIVE_STRIPE_TAIL_ARRAYLEN]>
 {
 public:
-    AllocatorFileIo(void) = default;
-    AllocatorFileIo(FileOwner owner, IAllocatorFileIoClient* client_, AllocatorAddressInfo* addrInfo);
-    AllocatorFileIo(FileOwner owner, IAllocatorFileIoClient* client_, AllocatorAddressInfo* addrInfo, MetaFileIntf* file);
-    virtual ~AllocatorFileIo(void);
-
-    virtual void Init(void);
-    virtual void Dispose(void);
-
-    virtual int LoadContext(void);
-    virtual int Flush(FnAllocatorCtxIoCompletion clientCallback, ContextSectionBuffer externalBuf = INVALID_CONTEXT_SECTION_BUFFER);
-
-    virtual uint64_t GetStoredVersion(void);
-    virtual int GetSectionSize(int section);
-
-    virtual int GetNumOutstandingRead(void);
-    virtual int GetNumOutstandingFlush(void);
-
-private:
-    int _CreateAndOpenFile(void);
-    int _OpenAndLoadFile(void);
-
-    int _Load(void);
-
-    void _LoadCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-    void _FlushCompletedThenCB(AsyncMetaFileIoCtx* ctx);
-
-    AllocatorAddressInfo* addrInfo;
-    IAllocatorFileIoClient* client;
-
-    FileOwner owner;
-    MetaFileIntf* file;
-
-    std::atomic<int> numOutstandingReads;
-    std::atomic<int> numOutstandingFlushes;
-
-    bool initialized;
+    void CopyToListElement(char* buf, int index)
+    {
+        // src = dataAddress + indexOffset
+        // dest = buf + addr.offset + indexOffset
+        // size = addr.size
+        auto indexOffset = sizeof(VirtualBlkAddr) * index;
+        memcpy((buf + info.offset + indexOffset), dataAddress + indexOffset, sizeof(VirtualBlkAddr));
+    }
 };
-
 } // namespace pos

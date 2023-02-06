@@ -22,6 +22,7 @@ public:
     MOCK_METHOD(uint32_t, GetblksPerSegment, (), (override));
     MOCK_METHOD(uint32_t, GetstripesPerSegment, (), (override));
     MOCK_METHOD(uint32_t, GetnumUserAreaSegments, (), (override));
+    MOCK_METHOD(int, GetArrayId, (), (override));
     MOCK_METHOD(bool, IsUT, (), (override));
 };
 } // namespace pos

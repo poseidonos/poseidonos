@@ -65,6 +65,8 @@ private:
     void _MockAsyncIo(AsyncMetaFileIoCtx* ctx);
     void _MockAsyncRead(AsyncMetaFileIoCtx* ctx);
     void _MockAsyncWrite(AsyncMetaFileIoCtx* ctx);
+
+    uint64_t size;
 };
 
 } // namespace pos

@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/include/meta_const.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/lib/bitmap_mock.h"
@@ -14,26 +15,58 @@ using ::testing::Return;
 using ::testing::ReturnRef;
 namespace pos
 {
-TEST(AllocatorCtx, AfterLoad_TestCheckingSignatureSuccess)
+TEST(AllocatorCtx, AfterLoad_testIfAllMetadataIsCopiedToContext)
 {
     // given
     AllocatorCtxHeader header;
-    header.sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
-    header.ctxVersion = 12;
+    
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
-    AllocatorCtx allocCtx(nullptr, &header, allocBitmap, nullptr);
+    char* bitmapAddr = new char[10 * BITMAP_ENTRY_SIZE];
+    ON_CALL(*allocBitmap, GetMapAddr).WillByDefault(Return((uint64_t*)bitmapAddr));
+    ON_CALL(*allocBitmap, GetNumEntry).WillByDefault(Return(10));
+    
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));
 
-    EXPECT_CALL(*allocBitmap, SetNumBitsSet(100));
+    AllocatorCtx allocCtx(nullptr, &header, allocBitmap, &addrInfo);
+    allocCtx.Init();
 
     // when
-    AllocatorCtxHeader* buf = new AllocatorCtxHeader();
-    buf->numValidWbLsid = 100;
+    char* buf = new char[allocCtx.GetTotalDataSize()];
 
-    allocCtx.AfterLoad((char*)buf);
-    EXPECT_EQ(allocCtx.GetStoredVersion(), header.ctxVersion);
+    auto bufferOffset = allocCtx.GetSectionInfo(AC_HEADER).offset;
+    AllocatorCtxHeader* headerPtr = reinterpret_cast<AllocatorCtxHeader*>(buf + bufferOffset);
+    headerPtr->sig = SIG_ALLOCATOR_CTX;
+    headerPtr->ctxVersion = 13;
+    headerPtr->numValidWbLsid = 20;
 
-    delete buf;
-    delete allocBitmap;
+    bufferOffset = allocCtx.GetSectionInfo(AC_CURRENT_SSD_LSID).offset;
+    StripeId* currentSsdLsidPtr = reinterpret_cast<StripeId*>(buf + bufferOffset);
+    *currentSsdLsidPtr = 1000;
+
+    bufferOffset = allocCtx.GetSectionInfo(AC_ACTIVE_STRIPE_TAIL).offset;
+    VirtualBlkAddr* vsaList = reinterpret_cast<VirtualBlkAddr*>(buf + bufferOffset);
+    for (auto index = 0; index < 5; index++)
+    {
+        vsaList[index].stripeId = index;
+        vsaList[index].offset = 0;
+    }
+
+    EXPECT_CALL(*allocBitmap, SetNumBitsSet(20));
+
+    allocCtx.AfterLoad(buf);
+    EXPECT_EQ(allocCtx.GetStoredVersion(), headerPtr->ctxVersion);
+    EXPECT_EQ(allocCtx.GetCurrentSsdLsid(), 1000);
+
+    for (auto index = 0; index < 5; index++)
+    {
+        auto tail = allocCtx.GetActiveStripeTail(index);
+        EXPECT_EQ(tail.stripeId, index);
+        EXPECT_EQ(tail.offset, 0);
+    }
+
+    delete[] buf;
+    delete[] bitmapAddr;
 }
 
 TEST(AllocatorCtx, GetStoredVersion_TestSimpleGetter)
@@ -108,14 +141,23 @@ TEST(AllocatorCtx, GetCurrentSsdLsid_TestSimpleGetter)
     allocCtx.GetCurrentSsdLsid();
 }
 
-TEST(AllocatorCtx, BeforeFlush_TestACHeader)
+TEST(AllocatorCtx, BeforeFlush_testIfAllMetaIsCopiedToBuffer)
 {
     // given
-    NiceMock<MockBitMapMutex> allocBitmap(100);
-    AllocatorCtx allocCtx(nullptr, nullptr, &allocBitmap, nullptr);
-    char* buf = new char[sizeof(AllocatorCtxHeader) + ACTIVE_STRIPE_TAIL_ARRAYLEN * sizeof(VirtualBlkAddr)];
+    NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    char* bitmapAddr = new char[10 * BITMAP_ENTRY_SIZE];
+    ON_CALL(*allocBitmap, GetMapAddr).WillByDefault(Return((uint64_t*)bitmapAddr));
+    ON_CALL(*allocBitmap, GetNumEntry).WillByDefault(Return(10));
 
-    EXPECT_CALL(allocBitmap, GetNumBitsSetWoLock).WillOnce(Return(10));
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));
+
+    AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, &addrInfo);
+    allocCtx.Init();
+
+    char* buf = new char[allocCtx.GetTotalDataSize()];
+
+    EXPECT_CALL(*allocBitmap, GetNumBitsSetWoLock).WillOnce(Return(10));
 
     for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; i++)
     {
@@ -126,16 +168,28 @@ TEST(AllocatorCtx, BeforeFlush_TestACHeader)
     }
 
     std::mutex lock;
-    EXPECT_CALL(allocBitmap, GetLock).WillOnce(ReturnRef(lock));
+    EXPECT_CALL(*allocBitmap, GetLock).WillOnce(ReturnRef(lock));
 
     // when
     allocCtx.BeforeFlush((char*)buf);
 
     // then
-    AllocatorCtxHeader* header = reinterpret_cast<AllocatorCtxHeader*>(buf);
+    // AC_HEADER
+    auto bufferOffset = allocCtx.GetSectionInfo(AC_HEADER).offset;
+    AllocatorCtxHeader* header = reinterpret_cast<AllocatorCtxHeader*>(buf + bufferOffset);
     EXPECT_EQ(header->numValidWbLsid, 10);
 
-    VirtualBlkAddr* vList = reinterpret_cast<VirtualBlkAddr*>(buf + sizeof(AllocatorCtxHeader));
+    // AC_CURRENT_SSD_LSID
+    bufferOffset = allocCtx.GetSectionInfo(AC_CURRENT_SSD_LSID).offset;
+    StripeId currentSsdLsid = *reinterpret_cast<StripeId*>(buf + bufferOffset);
+    EXPECT_EQ(currentSsdLsid, STRIPES_PER_SEGMENT - 1);
+
+    // AC_ALLOCATE_WBLSID_BITMAP
+    // TODO
+
+    // AC_ACTIVE_STRIPE_TAIL
+    bufferOffset = allocCtx.GetSectionInfo(AC_ACTIVE_STRIPE_TAIL).offset;
+    VirtualBlkAddr* vList = reinterpret_cast<VirtualBlkAddr*>(buf + bufferOffset);
     for (int i = 0; i < ACTIVE_STRIPE_TAIL_ARRAYLEN; i++)
     {
         EXPECT_EQ(i, vList[i].offset);
@@ -143,21 +197,25 @@ TEST(AllocatorCtx, BeforeFlush_TestACHeader)
     }
 
     delete[] buf;
+    delete[] bitmapAddr;
 }
 
-TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
+TEST(AllocatorCtx, AfterFlush_TestSimpleSetter)
 {
     // given
-    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, nullptr);
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));
+    AllocatorCtx allocCtx(nullptr, nullptr, nullptr, &addrInfo);
+    allocCtx.Init();
 
     AllocatorCtxHeader* buf = new AllocatorCtxHeader();
-    buf->sig = AllocatorCtx::SIG_ALLOCATOR_CTX;
+    buf->sig = SIG_ALLOCATOR_CTX;
     buf->ctxVersion = 12;
     AsyncMetaFileIoCtx ctx;
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), (char*)buf);
 
     // when
-    allocCtx.FinalizeIo(ctx.GetBuffer());
+    allocCtx.AfterFlush(ctx.GetBuffer());
 
     // then
     EXPECT_EQ(allocCtx.GetStoredVersion(), 12);
@@ -165,59 +223,44 @@ TEST(AllocatorCtx, FinalizeIo_TestSimpleSetter)
     delete buf;
 }
 
-TEST(AllocatorCtx, GetSectionAddr_TestGetEachSectionAddr)
+TEST(AllocatorCtx, GetSectionInfo_TestGetEachSectionSize)
 {
     // given
-    NiceMock<MockBitMapMutex> allocBitmap(100);
-    AllocatorCtx allocCtx(nullptr, nullptr, &allocBitmap, nullptr);
-
-    // when 1.
-    char* ret = allocCtx.GetSectionAddr(AC_HEADER);
-
-    // when 2.
-    ret = allocCtx.GetSectionAddr(AC_CURRENT_SSD_LSID);
-
-    // when 3.
-    EXPECT_CALL(allocBitmap, GetMapAddr).WillOnce(Return((uint64_t*)100));
-    // when 1.
-    ret = allocCtx.GetSectionAddr(AC_ALLOCATE_WBLSID_BITMAP);
-    // then
-    EXPECT_EQ((char*)(100), ret);
-
-    // when 4.
-    ret = allocCtx.GetSectionAddr(AC_ACTIVE_STRIPE_TAIL);
-}
-
-TEST(AllocatorCtx, GetSectionSize_TestGetEachSectionSize)
-{
-    // given
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumUserAreaSegments(10);
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
+    ON_CALL(*allocBitmap, GetMapAddr).WillByDefault(Return((uint64_t*)100));
+    ON_CALL(*allocBitmap, GetNumEntry).WillByDefault(Return(100));
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));    
     AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, &addrInfo);
+    allocCtx.Init();
 
     // when 1.
-    int ret = allocCtx.GetSectionSize(AC_HEADER);
+    uint64_t expectedOffset = 0;
+    auto ret = allocCtx.GetSectionInfo(AC_HEADER);
     // then 1.
-    EXPECT_EQ(sizeof(AllocatorCtxHeader), ret);
+    EXPECT_EQ(expectedOffset, ret.offset);
+    EXPECT_EQ(sizeof(AllocatorCtxHeader), ret.size);
+    expectedOffset += sizeof(AllocatorCtxHeader);
 
     // when 2.
-    ret = allocCtx.GetSectionSize(AC_CURRENT_SSD_LSID);
+    ret = allocCtx.GetSectionInfo(AC_CURRENT_SSD_LSID);
     // then 2.
-    EXPECT_EQ(sizeof(StripeId), ret);
+    EXPECT_EQ(expectedOffset, ret.offset);
+    EXPECT_EQ(sizeof(StripeId), ret.size);
+    expectedOffset += sizeof(StripeId);
 
     // when 3.
-    EXPECT_CALL(*allocBitmap, GetNumEntry).WillOnce(Return(100));
-    ret = allocCtx.GetSectionSize(AC_ALLOCATE_WBLSID_BITMAP);
+    ret = allocCtx.GetSectionInfo(AC_ALLOCATE_WBLSID_BITMAP);
     // then 3.
-    EXPECT_EQ(100 * BITMAP_ENTRY_SIZE, ret);
+    EXPECT_EQ(expectedOffset, ret.offset);
+    EXPECT_EQ(100 * BITMAP_ENTRY_SIZE, ret.size);
+    expectedOffset += 100 * BITMAP_ENTRY_SIZE;
 
     // when 4.
-    ret = allocCtx.GetSectionSize(AC_ACTIVE_STRIPE_TAIL);
+    ret = allocCtx.GetSectionInfo(AC_ACTIVE_STRIPE_TAIL);
     // then 4.
-    EXPECT_EQ(ACTIVE_STRIPE_TAIL_ARRAYLEN * sizeof(VirtualBlkAddr), ret);
-
-    delete allocBitmap;
+    EXPECT_EQ(expectedOffset, ret.offset);
+    EXPECT_EQ(ACTIVE_STRIPE_TAIL_ARRAYLEN * sizeof(VirtualBlkAddr), ret.size);
 }
 
 TEST(AllocatorCtx, AllocWbStripeWithParam_TestSimpleInterfaceFunc)

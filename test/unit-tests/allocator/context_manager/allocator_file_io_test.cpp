@@ -20,7 +20,7 @@ TEST(AllocatorFileIo, AllocatorFileIo_testConstructor)
     NiceMock<AllocatorAddressInfo> addrInfo;
 
     {
-        AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, 0);
+        AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo);
     }
 
     {
@@ -37,36 +37,12 @@ TEST(AllocatorFileIo, Init_TestInitAndClose)
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        buffer[sectionId] = new char[100 * sectionId]();
-        memset(buffer[sectionId], 'a' + sectionId, 100 * sectionId);
-
-        EXPECT_CALL(client, GetSectionSize(sectionId)).WillRepeatedly(Return(sectionId * 100));
-        EXPECT_CALL(client, GetSectionAddr(sectionId)).WillRepeatedly(Return(buffer[sectionId]));
-    }
-
     // when
     fileManager.Init();
-
-    // then
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        EXPECT_EQ(fileManager.GetSectionSize(sectionId), sectionId * 100);
-        EXPECT_EQ(fileManager.GetSectionAddr(sectionId), buffer[sectionId]);
-    }
 
     EXPECT_CALL(*file, IsOpened).WillOnce(Return(true));
     EXPECT_CALL(*file, Close);
     fileManager.Dispose();
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        delete[] buffer[sectionId];
-    }
 }
 
 TEST(AllocatorFileIo, Init_TestInitAndCloseAndFileNotOpened)
@@ -76,26 +52,10 @@ TEST(AllocatorFileIo, Init_TestInitAndCloseAndFileNotOpened)
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        buffer[sectionId] = new char[100 * sectionId]();
-        memset(buffer[sectionId], 'a' + sectionId, 100 * sectionId);
-
-        EXPECT_CALL(client, GetSectionSize(sectionId)).WillRepeatedly(Return(sectionId * 100));
-        EXPECT_CALL(client, GetSectionAddr(sectionId)).WillRepeatedly(Return(buffer[sectionId]));
-    }
-
     fileManager.Init();
     EXPECT_CALL(*file, IsOpened).WillOnce(Return(false));
+    EXPECT_CALL(*file, Close).Times(0);
     fileManager.Dispose();
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        delete[] buffer[sectionId];
-    }
 }
 
 TEST(AllocatorFileIo, LoadContext_testFileNotExist)
@@ -140,7 +100,7 @@ TEST(AllocatorFileIo, LoadContext_testFileLoad)
 
     int ret = fileManager.LoadContext();
     EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITHOUT_CREATION));
-    EXPECT_EQ(fileManager.GetNumFilesReading(), 1);
+    EXPECT_EQ(fileManager.GetNumOutstandingRead(), 1);
 }
 
 TEST(AllocatorFileIo, LoadContext_testFileLoadFail)
@@ -165,22 +125,14 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
-    // Prepare loaded buffer for test
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
-    EXPECT_CALL(client, GetSignature).WillRepeatedly(Return(0xAFAFAFAF));
-
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
-
-    buffer[0] = (char*)(new CtxHeader());
-    EXPECT_CALL(client, GetSectionAddr(0)).WillOnce(Return(buffer[0]));
-    EXPECT_CALL(client, GetSectionSize(0)).WillOnce(Return(sizeof(CtxHeader)));
-
-    for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        buffer[sectionId] = new char[100]();
-        EXPECT_CALL(client, GetSectionAddr(sectionId)).WillOnce(Return(buffer[sectionId]));
-        EXPECT_CALL(client, GetSectionSize(sectionId)).WillOnce(Return(100));
-    }
+    uint64_t testDataSize = sizeof(SegmentCtxHeader) + 100;
+    ON_CALL(client, GetTotalDataSize).WillByDefault(Return(testDataSize));
+    
+    char expectedBuffer[testDataSize];
+    memset((void*)expectedBuffer, 0, testDataSize);
+    SegmentCtxHeader* headerPtr = reinterpret_cast<SegmentCtxHeader*>(expectedBuffer);
+    headerPtr->sig = SIG_SEGMENT_CTX;
+    headerPtr->ctxVersion = 3;
 
     EXPECT_CALL(*file, GetIoDoneCheckFunc).WillOnce(Return([](void* ctx) { return 0; }));
     fileManager.Init();
@@ -188,19 +140,13 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
     EXPECT_CALL(*file, AsyncIO)
         .WillOnce([&](AsyncMetaFileIoCtx* ctx)
         {
+            EXPECT_EQ(fileManager.GetNumOutstandingRead(), 1);
+
             // Update the buffer with the prepared buffer above
-            EXPECT_EQ(fileManager.GetNumFilesReading(), 1);
-
-            CtxHeader header = {
-                .sig = 0xAFAFAFAF,
-                .ctxVersion = 0 };
-            memcpy(ctx->GetBuffer(), &header, sizeof(header));
-
-            char* ptr = ctx->GetBuffer() + sizeof(header);
-            for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-            {
-                memset(ptr + 100 * (sectionId - 1), 'a' + sectionId, 100);
-            }
+            memset((void*)ctx->GetBuffer(), 0, testDataSize);
+            SegmentCtxHeader* headerPtr = reinterpret_cast<SegmentCtxHeader*>(ctx->GetBuffer());
+            headerPtr->sig = SIG_SEGMENT_CTX;
+            headerPtr->ctxVersion = 3;
 
             ctx->HandleIoComplete(ctx);
 
@@ -209,24 +155,15 @@ TEST(AllocatorFileIo, LoadContext_testLoadAndCallback)
 
     // Load Context
     EXPECT_CALL(*file, DoesFileExist).WillOnce(Return(true));
-    EXPECT_CALL(client, AfterLoad);
+    EXPECT_CALL(client, AfterLoad).WillOnce([&](char* buf) {
+        // Compare buffer is loaded with expected data
+        EXPECT_EQ(memcmp(expectedBuffer, buf, testDataSize), 0);
+    });
 
     int ret = fileManager.LoadContext();
     EXPECT_EQ(ret, EID(SUCCEED_TO_OPEN_WITHOUT_CREATION));
 
-    EXPECT_EQ(fileManager.GetNumFilesReading(), 0);
-
-    // Compare buffer is loaded with expected data
-    EXPECT_EQ(((CtxHeader*)buffer[0])->sig, 0xAFAFAFAF);
-    EXPECT_EQ(((CtxHeader*)buffer[0])->ctxVersion, 0);
-    delete[] buffer[0];
-
-    for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        EXPECT_EQ(*(buffer[sectionId]), 'a' + sectionId);
-
-        delete[] buffer[sectionId];
-    }
+    EXPECT_EQ(fileManager.GetNumOutstandingRead(), 0);
 }
 
 TEST(AllocatorFileIo, Flush_testFlushAndCallback)
@@ -234,50 +171,34 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
     NiceMock<MockIAllocatorFileIoClient> client;
     NiceMock<AllocatorAddressInfo> addrInfo;
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
-    AllocatorFileIo fileManager(ALLOCATOR_CTX, &client, &addrInfo, file);
-
-    // Prepare buffer to flush
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
-    EXPECT_CALL(client, GetSignature).WillRepeatedly(Return(0xAFAFAFAF));
-
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
-
-    buffer[0] = (char*)(new CtxHeader());
-    ((CtxHeader*)buffer[0])->sig = 0xAFAFAFAF;
-    ((CtxHeader*)buffer[0])->ctxVersion = 0;
-
-    EXPECT_CALL(client, GetSectionAddr(0)).WillOnce(Return(buffer[0]));
-    EXPECT_CALL(client, GetSectionSize(0)).WillOnce(Return(sizeof(CtxHeader)));
-
-    for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        buffer[sectionId] = new char[100]();
-        memset(buffer[sectionId], 'a' + sectionId, 100);
-        EXPECT_CALL(client, GetSectionAddr(sectionId)).WillOnce(Return(buffer[sectionId]));
-        EXPECT_CALL(client, GetSectionSize(sectionId)).WillOnce(Return(100));
-    }
+    AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
     fileManager.Init();
 
-    std::mutex lock;
-    EXPECT_CALL(client, GetCtxLock).WillOnce(ReturnRef(lock));
-    EXPECT_CALL(client, FinalizeIo);
-    EXPECT_CALL(client, BeforeFlush).Times(1);
+    // Prepare buffer to flush
+    uint64_t testDataSize = sizeof(SegmentCtxHeader) + 1000;
+    ON_CALL(client, GetTotalDataSize).WillByDefault(Return(testDataSize));
+    
+    char expectedBuffer[testDataSize];
+    memset((void*)expectedBuffer, 0, testDataSize);
+    SegmentCtxHeader* headerPtr = reinterpret_cast<SegmentCtxHeader*>(expectedBuffer);
+    headerPtr->sig = SIG_SEGMENT_CTX;
+    headerPtr->ctxVersion = 5;
+
+    EXPECT_CALL(client, BeforeFlush)
+        .WillOnce([&](char* buf) {
+            memset(buf, 0, testDataSize);
+            SegmentCtxHeader* headerPtr = reinterpret_cast<SegmentCtxHeader*>(buf);
+            headerPtr->sig = SIG_SEGMENT_CTX;
+            headerPtr->ctxVersion = 5;
+        });
+    EXPECT_CALL(client, AfterFlush);
 
     EXPECT_CALL(*file, GetIoDoneCheckFunc).WillOnce(Return([](void* ctx) { return 0; }));
     EXPECT_CALL(*file, AsyncIO)
-        .WillOnce([&](AsyncMetaFileIoCtx* ctx)
-        {
-            EXPECT_EQ(fileManager.GetNumFilesFlushing(), 1);
-
-            EXPECT_EQ(((CtxHeader*)ctx->GetBuffer())->sig, 0xAFAFAFAF);
-            EXPECT_EQ(((CtxHeader*)ctx->GetBuffer())->ctxVersion, 0);
-
-            char* ptr = ctx->GetBuffer() + sizeof(CtxHeader);
-            for (int sectionId = 1; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-            {
-                EXPECT_EQ(*ptr, 'a' + sectionId);
-                ptr += 100;
-            }
+        .WillOnce([&](AsyncMetaFileIoCtx* ctx) {
+            // Data to be flushed
+            EXPECT_EQ(fileManager.GetNumOutstandingFlush(), 1);
+            EXPECT_EQ(memcmp(ctx->GetBuffer(), expectedBuffer, testDataSize), 0);
 
             ctx->HandleIoComplete(ctx);
 
@@ -285,15 +206,8 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
         });
 
     auto testCallback = []() {}; // do nothing
-    const int INVALID_SECTION_ID = -1;
-    int ret = fileManager.Flush(testCallback, INVALID_SECTION_ID);
+    int ret = fileManager.Flush(testCallback);
     EXPECT_EQ(ret, 0);
-    EXPECT_EQ(fileManager.GetNumFilesFlushing(), 0);
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        delete[] buffer[sectionId];
-    }
 }
 
 TEST(AllocatorFileIo, Flush_testFlushFail)
@@ -302,33 +216,16 @@ TEST(AllocatorFileIo, Flush_testFlushFail)
     NiceMock<AllocatorAddressInfo> addrInfo;
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
-
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        buffer[sectionId] = new char[100]();
-        memset(buffer[sectionId], 'a' + sectionId, 100);
-        EXPECT_CALL(client, GetSectionAddr(sectionId)).WillOnce(Return(buffer[sectionId]));
-    }
     fileManager.Init();
 
-    std::mutex lock;
-    EXPECT_CALL(client, GetCtxLock).WillOnce(ReturnRef(lock));
+    ON_CALL(client, GetTotalDataSize).WillByDefault(Return(10)); // dummy 
 
     EXPECT_CALL(client, BeforeFlush);
     EXPECT_CALL(*file, AsyncIO).WillOnce(Return(-1));
 
     auto testCallback = []() {}; // do nothing
-    const int INVALID_SECTION_ID = -1;
-    int ret = fileManager.Flush(testCallback, INVALID_SECTION_ID);
+    int ret = fileManager.Flush(testCallback);
     EXPECT_TRUE(ret < 0);
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        delete[] buffer[sectionId];
-    }
 }
 
 TEST(AllocatorFileIo, GetStoredVersion_TestSimpleGetter)
@@ -346,7 +243,7 @@ TEST(AllocatorFileIo, GetStoredVersion_TestSimpleGetter)
     delete file;
 }
 
-TEST(AllocatorFileIo, GetSectionAddr_TestSimpleGetter)
+TEST(AllocatorFileIo, GetSectionInfo_TestSimpleGetter)
 {
     // given
     NiceMock<MockIAllocatorFileIoClient> client;
@@ -354,50 +251,14 @@ TEST(AllocatorFileIo, GetSectionAddr_TestSimpleGetter)
     NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
     AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
 
-    char* buffer[NUM_SEGMENT_CTX_SECTION];
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
+    int sectionId = 3;
+    ContextSectionAddr info = {
+        .offset = 0,
+        .size = 30
+    };
+    EXPECT_CALL(client, GetSectionInfo(sectionId)).WillOnce(Return(info));
 
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        buffer[sectionId] = new char[100]();
-        memset(buffer[sectionId], 'a' + sectionId, 100);
-        EXPECT_CALL(client, GetSectionAddr(sectionId)).WillOnce(Return(buffer[sectionId]));
-    }
-    fileManager.Init();
-
-    // when
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        char* ret = fileManager.GetSectionAddr(sectionId);
-        EXPECT_EQ(ret, buffer[sectionId]);
-    }
-
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        delete[] buffer[sectionId];
-    }
-}
-
-TEST(AllocatorFileIo, GetSectionSize_TestSimpleGetter)
-{
-    // given
-    NiceMock<MockIAllocatorFileIoClient> client;
-    NiceMock<AllocatorAddressInfo> addrInfo;
-    NiceMock<MockMetaFileIntf>* file = new NiceMock<MockMetaFileIntf>("aa", "bb", MetaFileType::Map);
-    AllocatorFileIo fileManager(SEGMENT_CTX, &client, &addrInfo, file);
-
-    EXPECT_CALL(client, GetNumSections).WillRepeatedly(Return(NUM_SEGMENT_CTX_SECTION));
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        EXPECT_CALL(client, GetSectionSize(sectionId)).WillOnce(Return(sectionId * 100));
-    }
-    fileManager.Init();
-
-    // when
-    for (int sectionId = 0; sectionId < NUM_SEGMENT_CTX_SECTION; sectionId++)
-    {
-        int ret = fileManager.GetSectionSize(sectionId);
-        EXPECT_EQ(ret, sectionId * 100);
-    }
+    auto actual = fileManager.GetSectionSize(sectionId);
+    EXPECT_EQ(actual, info.size);
 }
 } // namespace pos

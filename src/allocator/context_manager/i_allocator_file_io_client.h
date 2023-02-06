@@ -35,7 +35,7 @@
 #include <mutex>
 #include <string>
 
-#include "src/allocator/include/allocator_const.h"
+#include "src/allocator/context_manager/context/context.h"
 #include "src/meta_file_intf/async_context.h"
 
 namespace pos
@@ -45,15 +45,12 @@ class IAllocatorFileIoClient
 public:
     virtual void AfterLoad(char* buf) = 0;
     virtual void BeforeFlush(char* buf) = 0;
-    virtual std::mutex& GetCtxLock(void) = 0;
-    virtual void FinalizeIo(char* buf) = 0;
-    virtual char* GetSectionAddr(int section) = 0;
-    virtual int GetSectionSize(int section) = 0;
+    virtual void AfterFlush(char* buf) = 0;
+    virtual ContextSectionAddr GetSectionInfo(int section) = 0;
     virtual uint64_t GetStoredVersion(void) = 0;
     virtual void ResetDirtyVersion(void) = 0;
-    virtual std::string GetFilename(void) = 0;
-    virtual uint32_t GetSignature(void) = 0;
     virtual int GetNumSections(void) = 0;
+    virtual uint64_t GetTotalDataSize(void) = 0;
 };
 
 } // namespace pos

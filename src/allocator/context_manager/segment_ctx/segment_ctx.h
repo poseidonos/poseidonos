@@ -36,13 +36,14 @@
 #include <string>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/context_manager/context/context.h"
+#include "src/allocator/context_manager/context/context_section.h"
+#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
-#include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
 #include "src/allocator/i_segment_ctx.h"
-#include "src/allocator/include/allocator_const.h"
 #include "src/include/address_type.h"
 
 namespace pos
@@ -52,13 +53,13 @@ class SegmentCtx : public IAllocatorFileIoClient, public ISegmentCtx
 {
 public:
     SegmentCtx(void) = default;
-    SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, int arrayId_);
-    SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
+    SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfoData* segmentInfoData_,
+        RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_);
+    SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfoData* segmentInfoData_,
         SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_,
-        GcCtx* gcCtx_, int arrayId_);
+        GcCtx* gcCtx_);
     explicit SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-        AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_, SegmentInfo* segmentInfo_ = nullptr);
+        AllocatorAddressInfo* info, GcCtx* gcCtx_, SegmentInfoData* segmentInfoData_ = nullptr);
     virtual ~SegmentCtx(void);
 
     // Only for UT
@@ -68,17 +69,14 @@ public:
     virtual void Init(void);
     virtual void Dispose(void);
 
-    virtual void AfterLoad(char* buf);
-    virtual void BeforeFlush(char* buf);
-    virtual std::mutex& GetCtxLock(void) { return segCtxLock; }
-    virtual void FinalizeIo(char* buf);
-    virtual char* GetSectionAddr(int section);
-    virtual int GetSectionSize(int section);
-    virtual uint64_t GetStoredVersion(void);
-    virtual void ResetDirtyVersion(void);
-    virtual std::string GetFilename(void);
-    virtual uint32_t GetSignature(void);
-    virtual int GetNumSections(void);
+    virtual void AfterLoad(char* buf) override;
+    virtual void BeforeFlush(char* buf) override;
+    virtual void AfterFlush(char* buf) override;
+    virtual ContextSectionAddr GetSectionInfo(int section) override;
+    virtual uint64_t GetStoredVersion(void) override;
+    virtual void ResetDirtyVersion(void) override;
+    virtual int GetNumSections(void) override;
+    virtual uint64_t GetTotalDataSize(void) override;
 
     virtual void MoveToFreeState(SegmentId segId);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
@@ -120,8 +118,6 @@ public:
     virtual SegmentInfo* GetSegmentInfos(void);
     virtual void ResetInfos(SegmentId segId);
 
-    static const uint32_t SIG_SEGMENT_CTX = 0xAFAFAFAF;
-
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
     void _GetUsedSegmentList(std::set<SegmentId>& segmentList);
@@ -142,29 +138,34 @@ private:
 
     int _OnNumFreeSegmentChanged(void);
 
-    SegmentCtxHeader ctxHeader;
+    void _UpdateSectionInfo(void);
+
+    // Data to be stored
+    ContextSection<SegmentCtxHeader> ctxHeader;
+    ContextSection<SegmentInfoData*> segmentInfoData;
+
+    uint64_t totalDataSize;
+
+    // In-memory data structures
     std::atomic<uint64_t> ctxDirtyVersion;
     std::atomic<uint64_t> ctxStoredVersion;
 
     SegmentInfo* segmentInfos;
-    SegmentInfoData* segmentInfoData;
 
     SegmentList* segmentList[SegmentState::NUM_STATES];
     SegmentList* rebuildList;
     SegmentId rebuildingSegment;
 
+    std::mutex segCtxLock;
+
     bool initialized;
 
+    // Dependencies
     AllocatorAddressInfo* addrInfo;
-
-    std::mutex segCtxLock;
 
     RebuildCtx* rebuildCtx;
     GcCtx* gcCtx;
     TelemetryPublisher* tp;
-
-    int arrayId;
-    const int INVALID_SECTION_ID = -1;
 };
 
 } // namespace pos

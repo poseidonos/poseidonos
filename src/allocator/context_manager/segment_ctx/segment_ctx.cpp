@@ -42,49 +42,63 @@
 #include "src/qos/qos_manager.h"
 namespace pos
 {
-SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, int arrayId_)
-: SegmentCtx(tp_, header, segmentInfo_, nullptr, rebuildCtx_, addrInfo_, gcCtx_, arrayId_)
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfoData* segmentInfoData_,
+    RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_)
+: SegmentCtx(tp_, header, segmentInfoData_, nullptr, rebuildCtx_, addrInfo_, gcCtx_)
 {
 }
 
-SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfo* segmentInfo_,
-    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_, int arrayId_)
-: ctxDirtyVersion(0),
+SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfoData* segmentInfoData_,
+    SegmentList* rebuildSegmentList, RebuildCtx* rebuildCtx_, AllocatorAddressInfo* addrInfo_, GcCtx* gcCtx_)
+: totalDataSize(0),
+  ctxDirtyVersion(0),
   ctxStoredVersion(0),
+  segmentInfos(nullptr),
   rebuildList(rebuildSegmentList),
   rebuildingSegment(UNMAP_SEGMENT),
   initialized(false),
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
   gcCtx(gcCtx_),
-  tp(tp_),
-  arrayId(arrayId_)
+  tp(tp_)
 {
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
     {
         segmentList[state] = nullptr;
     }
 
-    segmentInfos = segmentInfo_;
-    if (header != nullptr)
+    if (segmentInfoData_ != nullptr)
     {
-        // for UT
-        ctxHeader.sig = header->sig;
-        ctxHeader.ctxVersion = header->ctxVersion;
-        ctxHeader.numValidSegment = header->numValidSegment;
+        uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
+
+        segmentInfoData.data = segmentInfoData_;
+        segmentInfos = new SegmentInfo[numSegments];
+        for (uint32_t segId = 0; segId < numSegments; segId++)
+        {
+            segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoData.data[segId]);
+        }
     }
     else
     {
-        ctxHeader.sig = SIG_SEGMENT_CTX;
-        ctxHeader.ctxVersion = 0;
-        ctxHeader.numValidSegment = 0;
+        segmentInfoData.data = nullptr;
+    }
+
+    if (header != nullptr)
+    {
+        // for UT
+        ctxHeader.data = *header;
+    }
+    else
+    {
+        ctxHeader.data.sig = SIG_SEGMENT_CTX;
+        ctxHeader.data.ctxVersion = 0;
+        ctxHeader.data.numValidSegment = 0;
     }
 }
 
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, RebuildCtx* rebuildCtx_,
-    AllocatorAddressInfo* info, GcCtx* gcCtx_, int arrayId_, SegmentInfo* segmentInfo_)
-: SegmentCtx(tp_, nullptr, segmentInfo_, rebuildCtx_, info, gcCtx_, arrayId_)
+    AllocatorAddressInfo* info, GcCtx* gcCtx_, SegmentInfoData* segmentInfoData_)
+: SegmentCtx(tp_, nullptr, segmentInfoData_, rebuildCtx_, info, gcCtx_)
 {
 }
 
@@ -114,17 +128,20 @@ SegmentCtx::Init(void)
         return;
     }
 
-    ctxHeader.ctxVersion = 0;
+    ctxHeader.data.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
 
-    uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
-    segmentInfos = new SegmentInfo[numSegments];
-    segmentInfoData = new SegmentInfoData[numSegments];
-    for (uint32_t i = 0; i < numSegments ; ++i)
+    if (segmentInfoData.data == nullptr)
     {
-        segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
-        segmentInfos[i].InitSegmentInfoData();
+        uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
+        segmentInfos = new SegmentInfo[numSegments];
+        segmentInfoData.data = new SegmentInfoData[numSegments];
+        for (uint32_t i = 0; i < numSegments ; ++i)
+        {
+            segmentInfos[i].AllocateSegmentInfoData(&(segmentInfoData.data[i]));
+            segmentInfos[i].InitSegmentInfoData();
+        }
     }
 
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
@@ -140,9 +157,28 @@ SegmentCtx::Init(void)
         rebuildList = new SegmentList();
     }
 
+    _UpdateSectionInfo();
     _RebuildSegmentList();
 
     initialized = true;
+}
+
+void
+SegmentCtx::_UpdateSectionInfo(void)
+{
+    uint64_t currentOffset = 0;
+
+    // SC_HEADER
+    ctxHeader.InitAddressInfoWithItsData(currentOffset);
+    currentOffset += ctxHeader.GetSectionSize();
+
+    // SC_SEGMENT_INFO
+    uint64_t segmentInfoSize = sizeof(SegmentInfoData) * addrInfo->GetnumUserAreaSegments();
+    segmentInfoData.InitAddressInfo(
+        (char*)segmentInfoData.data, currentOffset, segmentInfoSize);
+    currentOffset += segmentInfoData.GetSectionSize();
+
+    totalDataSize = currentOffset;
 }
 
 void
@@ -159,10 +195,10 @@ SegmentCtx::Dispose(void)
         segmentInfos = nullptr;
     }
 
-    if (segmentInfoData != nullptr)
+    if (segmentInfoData.data != nullptr)
     {
-        delete[] segmentInfoData;
-        segmentInfoData = nullptr;
+        delete[] segmentInfoData.data;
+        segmentInfoData.data = nullptr;
     }
 
     for (int state = SegmentState::FREE; state < SegmentState::NUM_STATES; state++)
@@ -257,7 +293,7 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
 
         POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
             "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}, array_id:{}",
-            segId, prevState, removed, arrayId);
+            segId, prevState, removed, addrInfo->GetArrayId());
         _SegmentFreed(segId);
     }
 
@@ -312,9 +348,18 @@ SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
 void
 SegmentCtx::AfterLoad(char* buf)
 {
-    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
-    ctxStoredVersion = ctxHeader.ctxVersion;
-    ctxDirtyVersion = ctxHeader.ctxVersion + 1;
+    SegmentCtxHeader* header = reinterpret_cast<SegmentCtxHeader*>(buf);
+    assert(header->sig == SIG_SEGMENT_CTX);
+
+    // SC_HEADER
+    ctxHeader.CopyFrom(buf);
+    // SC_SEGMENT_INFO
+    segmentInfoData.CopyFrom(buf);
+
+    POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR),
+        "SegmentCtx file loaded:{}", ctxHeader.data.ctxVersion);
+    ctxStoredVersion = ctxHeader.data.ctxVersion;
+    ctxDirtyVersion = ctxHeader.data.ctxVersion + 1;
     _RebuildSegmentList();
 }
 
@@ -334,7 +379,8 @@ SegmentCtx::_RebuildSegmentList(void)
         if (state != SegmentState::FREE)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_ADDED_TO_LIST),
-                "array_id: {}, segment_id:{}, state:{}, valid_block_count: {}, occupied_stripe_count: {}", arrayId, segId, state, segmentInfos[segId].GetValidBlockCount(), segmentInfos[segId].GetOccupiedStripeCount());
+                "array_id: {}, segment_id:{}, state:{}, valid_block_count: {}, occupied_stripe_count: {}",
+                addrInfo->GetArrayId(), segId, state, segmentInfos[segId].GetValidBlockCount(), segmentInfos[segId].GetOccupiedStripeCount());
         }
     }
 }
@@ -342,54 +388,43 @@ SegmentCtx::_RebuildSegmentList(void)
 void
 SegmentCtx::BeforeFlush(char* buf)
 {
-    ctxHeader.ctxVersion = ctxDirtyVersion++;
+    ctxHeader.data.ctxVersion = ctxDirtyVersion++;
+
+    std::lock_guard<std::mutex> lock(segCtxLock);
+    // SC_HEADER
+    ctxHeader.CopyTo(buf);
+    // SC_SEGMENT_INFO
+    segmentInfoData.CopyTo(buf);
 }
 
 void
-SegmentCtx::FinalizeIo(char* buf)
+SegmentCtx::AfterFlush(char* buf)
 {
-    ctxStoredVersion = (reinterpret_cast<SegmentCtxHeader*>(buf))->ctxVersion;
-    POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG), "FinalizeIo, array_id: {}, context_version: {}", arrayId, ctxStoredVersion);
+    SegmentCtxHeader* header = reinterpret_cast<SegmentCtxHeader*>(buf);
+    assert(header->sig == SIG_SEGMENT_CTX);
+
+    ctxStoredVersion = header->ctxVersion;
+
+    POS_TRACE_DEBUG(EID(ALLOCATOR_DEBUG),
+        "SegmentCtx stored, array_id: {}, context_version: {}",
+        addrInfo->GetArrayId(), ctxStoredVersion);
 }
 
-char*
-SegmentCtx::GetSectionAddr(int section)
+ContextSectionAddr
+SegmentCtx::GetSectionInfo(int section)
 {
-    char* ret = nullptr;
-    switch (section)
+    if (section == SC_HEADER)
     {
-        case SC_HEADER:
-        {
-            ret = (char*)&ctxHeader;
-            break;
-        }
-        case SC_SEGMENT_INFO:
-        {
-            ret = (char*)segmentInfoData;
-            break;
-        }
+        return ctxHeader.GetSectionInfo();
     }
-    return ret;
-}
-
-int
-SegmentCtx::GetSectionSize(int section)
-{
-    uint64_t ret = 0;
-    switch (section)
+    else if (section == SC_SEGMENT_INFO)
     {
-        case SC_HEADER:
-        {
-            ret = sizeof(SegmentCtxHeader);
-            break;
-        }
-        case SC_SEGMENT_INFO:
-        {
-            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfoData);
-            break;
-        }
+        return segmentInfoData.GetSectionInfo();
     }
-    return ret;
+    else
+    {
+        assert(false);       
+    }
 }
 
 uint64_t
@@ -404,22 +439,16 @@ SegmentCtx::ResetDirtyVersion(void)
     ctxDirtyVersion = 0;
 }
 
-std::string
-SegmentCtx::GetFilename(void)
-{
-    return "SegmentContext";
-}
-
-uint32_t
-SegmentCtx::GetSignature(void)
-{
-    return SIG_SEGMENT_CTX;
-}
-
 int
 SegmentCtx::GetNumSections(void)
 {
     return NUM_SEGMENT_CTX_SECTION;
+}
+
+uint64_t
+SegmentCtx::GetTotalDataSize(void)
+{
+    return ctxHeader.GetSectionSize() + segmentInfoData.GetSectionSize();
 }
 
 SegmentState
@@ -444,7 +473,8 @@ SegmentCtx::AllocateFreeSegment(void)
         if (segId == UNMAP_SEGMENT)
         {
             POS_TRACE_DEBUG(EID(ALLOCATOR_ALLOCATE_FAILURE_NO_FREE_SEGMENT),
-                "segment_id:{}, free_segment_count:{}, array_id:{}", segId, GetNumOfFreeSegmentWoLock(), arrayId);
+                "segment_id:{}, free_segment_count:{}, array_id:{}",
+                segId, GetNumOfFreeSegmentWoLock(), addrInfo->GetArrayId());
             break;
         }
         else
@@ -454,7 +484,8 @@ SegmentCtx::AllocateFreeSegment(void)
 
             int numFreeSegment = _OnNumFreeSegmentChanged();
             POS_TRACE_DEBUG(EID(ALLOCATOR_FREE_SEGMENT_ALLOCATION_SUCCESS),
-                "segment_id:{}, free_segment_count:{}, array_id:{}", segId, numFreeSegment, arrayId);
+                "segment_id:{}, free_segment_count:{}, array_id:{}",
+                segId, numFreeSegment, addrInfo->GetArrayId());
 
             return segId;
         }
@@ -544,8 +575,9 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
 
         _UpdateTelemetryOnVictimSegmentAllocation(victimSegment);
 
-        POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM), "victim_segment_id:{}, free_segment_count:{}, array_id:{}",
-            victimSegment, GetNumOfFreeSegmentWoLock(), arrayId);
+        POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM),
+            "victim_segment_id:{}, free_segment_count:{}, array_id:{}",
+            victimSegment, GetNumOfFreeSegmentWoLock(), addrInfo->GetArrayId());
     }
 
     return stateChanged;
@@ -587,7 +619,8 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
-        "segment_id:{}, free_segment_count:{}, array_id:{}", segmentId, numOfFreeSegments, arrayId);
+        "segment_id:{}, free_segment_count:{}, array_id:{}",
+        segmentId, numOfFreeSegments, addrInfo->GetArrayId());
 }
 
 int
@@ -595,7 +628,7 @@ SegmentCtx::_OnNumFreeSegmentChanged(void)
 {
     int numOfFreeSegments = GetNumOfFreeSegment();
 
-    QosManagerSingleton::Instance()->SetGcFreeSegment(numOfFreeSegments, arrayId);
+    QosManagerSingleton::Instance()->SetGcFreeSegment(numOfFreeSegments, addrInfo->GetArrayId());
 
     gcCtx->UpdateCurrentGcMode(numOfFreeSegments);
 
