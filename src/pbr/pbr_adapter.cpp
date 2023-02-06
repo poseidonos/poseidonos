@@ -31,6 +31,7 @@
  */
 
 #include "pbr_adapter.h"
+#include "file_pbr.h"
 
 namespace pbr
 {
