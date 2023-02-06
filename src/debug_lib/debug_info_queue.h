@@ -36,6 +36,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -44,6 +45,8 @@
 
 #include "src/debug_lib/debug_info_queue.h"
 #include "src/debug_lib/dump_buffer.h"
+
+#include "tbb/concurrent_queue.h"
 
 namespace pos
 {
@@ -77,7 +80,7 @@ public:
         uint32_t num, bool enable);
     virtual ~DebugInfoQueue(void);
     std::mutex dumpQueueLock;
-    int AddDebugInfo(T& t, uint64_t userSpecific, bool lock_enable = true);
+    virtual int AddDebugInfo(T& t, uint64_t userSpecific, bool lock_enable = true);
     void RegisterDebugInfoQueue(std::string moduleName, uint32_t num, bool enable);
     void DeRegisterDebugInfoQueue(std::string moduleName);
     virtual void SetEnable(bool enable);
@@ -85,12 +88,31 @@ public:
     virtual uint64_t GetPoolSize(void);
 
     static const int MAX_ENTRIES_FOR_CALLBACK_ERROR = 10000; // temporary value
-
-protected:
     bool isEnabled;
-    std::queue<DumpObject<T>> dumpQueue;
     uint32_t entryBufSize;
     uint32_t entryMaxNum;
+
+protected:
+    std::queue<DumpObject<T>> dumpQueue;
+};
+
+template<typename T>
+class DebugInfoConcurrentQueue : public DebugInfoQueue<T>
+{
+public:
+    DebugInfoConcurrentQueue(void);
+    DebugInfoConcurrentQueue(std::string moduleName,
+        uint32_t num, bool enable);
+    virtual ~DebugInfoConcurrentQueue(void);
+
+    int AddDebugInfo(T& t, uint64_t userSpecific, bool& flushNeeded);
+    bool PopDebugInfo(DumpObject<T>* dumpObj);
+
+    static const int FLUSH_NEED_PERCENTAGE = 70;
+
+private:
+    std::atomic<uint32_t> entryCount;
+    tbb::concurrent_queue<DumpObject<T>> dumpConcurrentQueue;
 };
 
 } // namespace pos

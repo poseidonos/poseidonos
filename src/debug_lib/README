@@ -6,8 +6,14 @@
 
 ## Quick Start For Debug Info Maker
 
+Summarized class CopierDebugInfo shall inherit DebugInfoInstance.
+  - Summarized class needs to implement SEREALIZE Function to print out their object.
+Original(Source) class Copier inherits DebugInfoMaker<CopierDebugInfo>.
+  - Original class needs to implement MakeDebugInfo (summarizing information into DebugInfo class).
+
 
 1) Make summarized class for debugging. This class shall inherit DebugInfoInstance
+you need to SERIALIZING function to print out elements into json file.
 
 class CopierDebugInfo : public DebugInfoInstance
 {
@@ -23,6 +29,20 @@ public:
     CopierStateType copybackState;
     uint32_t arrayId;
     uint32_t numFreeSegment;
+    bool Serialize(Document& doc)
+    {
+        SERIALIZE(userDataMaxStripes);
+        SERIALIZE(userDataMaxBlks);
+        SERIALIZE(blocksPerChunk);
+        SERIALIZE(victimId);
+        SERIALIZE(targetId);
+        SERIALIZE(invalidBlkCnt);
+        SERIALIZE(copyDoneCnt);
+        SERIALIZE(copybackState);
+        SERIALIZE(arrayId);
+        SERIALIZE(numFreeSegment);
+        return true;
+    }
 };
 
 
@@ -51,13 +71,74 @@ void Copier::MakeDebugInfo(CopierDebugInfo& obj)
 
 RegisterDebugInfo("Copier_" + std::to_string(array->GetIndex()), 10000, true);
 
-first param : name
-second param : number of history queue's entries
-third param : periodical logging (true / false)
-fourth param : period for logging (unit : us)
-fifth param : enabled / disabled
+1st param : name
+2nd param : number of history queue's entries
+3rd param : periodical logging (true / false)
+4th param : period for logging (unit : us)
+5th param : enabled / disabled
 
 
 5) Add some logging point in original class's method
 
 AddDebugInfo(); 
+
+
+## There is no original class?
+
+original class means source class which can be derived to debug Info.
+However, we don't have original class in CLI Case.
+so, we can use DebugInfoMaker directly.
+
+
+1) Create CLIDebugInfo and please inherit "DebugInfoInstance"
+
+class CLIDebugMessage
+{
+public:
+    std::string sendReceive;
+    std::string message;
+    uint32_t errorCode;
+};
+class CLIDebugInfo : public DebugInfoInstance
+{
+public:
+    CLIDebugMessage info;
+
+    virtual DebugInfoOkay
+    IsOkay(void) final
+    {
+        if (info.errorCode != 0)
+        {
+            return DebugInfoOkay::FAIL;
+        }
+        return DebugInfoOkay::PASS;
+    }
+};
+
+
+2) Please define cliDebugInfo and DebugInfoMaker as below. Static variable is recommended.
+
+CLIDebugInfo cliDebugInfo;
+DebugInfoMaker<CLIDebugInfo>* debugCliInfoMaker;
+
+
+3) Please set location for new and delete of DebugInfoMaker.
+Constructor parameter is as below (so, RegisterDebugInfo is not necessary in this case.)
+1st param : CLI Debug Info
+2nd param : name
+3rd param : number of history queue's entries
+4th param : periodical logging (true / false)
+5th param : period for logging (unit : us)
+6th param : enabled / disabled
+
+pos::debugCliInfoMaker = new pos::DebugInfoMaker<CLIDebugInfo>(&cliDebugInfo, "Cli", 500);
+
+
+4) Change debugInfo as you want in your code flow. AddDebugInfo on log point as you want.
+
+    pos::cliDebugInfo.info.sendReceive = "ReceiveCLI";
+    pos::cliDebugInfo.info.message = request->ShortDebugString();
+    pos::cliDebugInfo.info.errorCode = grpc::StatusCode::OK;
+    pos::debugCliInfoMaker->AddDebugInfo();
+
+

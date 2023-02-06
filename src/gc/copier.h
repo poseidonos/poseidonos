@@ -49,6 +49,7 @@
 #include "src/debug_lib/debug_info_queue.h"
 #include "src/debug_lib/debug_info_queue.hpp"
 
+
 namespace pos
 {
 enum CopierStateType
@@ -76,6 +77,20 @@ public:
     CopierStateType copybackState;
     uint32_t arrayId;
     uint32_t numFreeSegment;
+    bool Serialize(Document& doc)
+    {
+        SERIALIZE(userDataMaxStripes);
+        SERIALIZE(userDataMaxBlks);
+        SERIALIZE(blocksPerChunk);
+        SERIALIZE(victimId);
+        SERIALIZE(targetId);
+        SERIALIZE(invalidBlkCnt);
+        SERIALIZE(copyDoneCnt);
+        SERIALIZE(copybackState);
+        SERIALIZE(arrayId);
+        SERIALIZE(numFreeSegment);
+        return true;
+    }
 };
 
 class Copier : public Event, public DebugInfoMaker<CopierDebugInfo>
