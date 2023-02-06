@@ -43,13 +43,7 @@ namespace pos
 class ArrayNamePolicy
 {
 public:
-    int CheckArrayName(string name);
-    // StringChecker
-private:
-    const size_t MIN_LEN = 2;
-    const size_t MAX_LEN = 63;
-    const char SPACE = ' ';
-    const char* ALLOWED_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_- ";
+    static int CheckArrayName(string name);
 };
 
 } // namespace pos

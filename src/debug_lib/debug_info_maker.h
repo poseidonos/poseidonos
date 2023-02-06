@@ -38,10 +38,16 @@
 #include "debug_info_queue.h"
 #include "src/cpu_affinity/affinity_manager.h"
 
+#include "rapidjson/document.h"
+#include "rapidjson/filewritestream.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/prettywriter.h"
 namespace pos
 {
 
 class DebugInfoQueueInstance;
+using namespace rapidjson;
 
 enum class DebugInfoOkay
 {
@@ -55,37 +61,56 @@ class DebugInfoInstance
 {
 public:
     DebugInfoInstance(void);
+    DebugInfoInstance(const DebugInfoInstance& debugInfoInstance);
     virtual ~DebugInfoInstance(void);
     virtual void RegisterDebugInfoInstance(std::string str);
     virtual void DeRegisterDebugInfoInstance(std::string str);
     DebugInfoOkay instanceOkay;
     DebugInfoOkay summaryOkay;
+    std::string name;
+    virtual bool Serialize(Document& doc)
+    {
+        return false;
+    }
+    virtual DebugInfoOkay IsOkay(void);
+
 private:
     static std::mutex registeringMutex;
 };
 
+extern Document debugInfoDoc;
+extern Document::AllocatorType& debugInfoAllocator;
+
+// This define should be used in DebugInfoInstance or child of DebugInfoInstance
+#define SERIALIZE(VAR) doc.AddMember(#VAR, VAR, debugInfoAllocator)
 template<typename T>
 class DebugInfoMaker
 {
 public:
     DebugInfoMaker(void);
+    DebugInfoMaker(T* t, std::string name, uint32_t entryCount, bool asyncLogging = false, uint64_t inputTimerUsec = 0, bool enabled = true);
     virtual ~DebugInfoMaker(void);
     void SetTimer(uint64_t inputTimerUsec);
     virtual void AddDebugInfo(uint64_t userSpecific = 0);
     virtual void RegisterDebugInfo(std::string name, uint32_t entryCount, bool asyncLogging = false, uint64_t inputTimerUsec = 0, bool enabled = true);
     virtual void DeRegisterDebugInfo(std::string name);
 protected:
-    virtual void MakeDebugInfo(T& obj) = 0;
-    virtual DebugInfoOkay IsOkay(T& obj);
+    virtual void MakeDebugInfo(T& obj)
+    {
+    }
 private:
     static const uint64_t DEFAULT_TIMER_VALUE = 2 * 1000ULL * 1000ULL; // 2 sec
     std::atomic<uint64_t> timerUsec;
     void _DebugInfoThread(void);
-    T debugInfoObject;
+    void _Flush(void);
+    bool _AppendToFile(const std::string& filename, const rapidjson::Document& document);
+    T* debugInfoObject;
+    std::atomic<bool> registered;
+    std::atomic<bool> run;
     DebugInfoQueue<T> debugInfoQueue;
     DebugInfoQueue<T> debugInfoQueueForError;
-    std::atomic<bool> run;
-    std::atomic<bool> registered;
+    DebugInfoConcurrentQueue<T> debugInfoConcurrentQueue;
+    std::atomic<bool> isOwner;
     std::thread* debugInfoThread;
     std::string infoName;
     static const uint64_t TIMER_TRIGGERED = 0xFFFFCCCC;

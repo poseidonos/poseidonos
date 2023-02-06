@@ -30,52 +30,61 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "array_name_policy.h"
-
-#include "src/include/pos_event_id.h"
+#include "array_builder.h"
+#include "device_builder.h"
+#include "partition_builder.h"
+#include "src/array/device/array_device_api.h"
+#include "src/helper/uuid/uuid_helper.h"
+#include "src/helper/time/time_helper.h"
+#include "src/array/array_name_policy.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-int
-ArrayNamePolicy::CheckArrayName(string name)
+ArrayBuildInfo*
+ArrayBuilder::Load(const DeviceSet<DeviceMeta>& devs, string metaRaid, string dataRaid)
 {
-    const size_t MIN_LEN = 2;
-    const size_t MAX_LEN = 63;
-    const char SPACE = ' ';
-    const char* ALLOWED_CHAR = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_- ";
-
-    int ret = EID(SUCCESS);
-    StringChecker checker(name);
-    size_t len = checker.Length();
-    if (len < MIN_LEN)
+    ArrayBuildInfo* info = new ArrayBuildInfo();
+    info->buildResult = DeviceBuilder::Load(devs, info->devices);
+    if (info->buildResult == 0)
     {
-        ret = EID(CREATE_ARRAY_NAME_TOO_SHORT);
-        POS_TRACE_WARN(ret, "name len: {}", len);
-        return ret;
+        info->buildResult = ArrayDeviceApi::ImportInspection(info->devices);
     }
-    else if (len > MAX_LEN)
+    if (info->buildResult == 0)
     {
-        ret = EID(CREATE_ARRAY_NAME_TOO_LONG);
-        POS_TRACE_WARN(ret, "name len: {}", len);
-        return ret;
+        info->buildResult = PartitionBuilder::Create(info->devices,
+            RaidType(metaRaid), RaidType(dataRaid), info->partitions);
     }
-
-    if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
+    if (info->buildResult != 0)
     {
-        ret = EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE);
-        POS_TRACE_WARN(ret, "name: {}", name);
-        return ret;
+        POS_TRACE_WARN(info->buildResult, "");
     }
-
-    if (checker.OnlyContains(ALLOWED_CHAR) == false)
-    {
-        ret = EID(CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR);
-        POS_TRACE_WARN(ret, "name allowed only: {}", ALLOWED_CHAR);
-        return ret;
-    }
-
-    return ret;
+    return info;
 }
 
+ArrayBuildInfo*
+ArrayBuilder::Create(string name, const DeviceSet<string>& devs,
+    string metaRaid, string dataRaid)
+{
+    ArrayBuildInfo* info = new ArrayBuildInfo();
+    info->buildResult = ArrayNamePolicy::CheckArrayName(name);
+    if (info->buildResult == 0)
+    {
+        info->buildResult = DeviceBuilder::Create(devs, info->devices);
+        if (info->buildResult == 0)
+        {
+            info->buildResult = ArrayDeviceApi::ImportInspection(info->devices);
+        }
+        if (info->buildResult == 0)
+        {
+            info->buildResult = PartitionBuilder::Create(info->devices,
+                RaidType(metaRaid), RaidType(dataRaid), info->partitions);
+        }
+    }
+    if (info->buildResult != 0)
+    {
+        POS_TRACE_WARN(info->buildResult, "");
+    }
+    return info;
+}
 } // namespace pos

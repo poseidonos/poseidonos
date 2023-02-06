@@ -30,57 +30,39 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef ARRAY_DEVICE_MANAGER_H_
-#define ARRAY_DEVICE_MANAGER_H_
+#pragma once
 
-#include <string>
-#include <tuple>
 #include <vector>
+#include <string>
 
 #include "array_device.h"
 #include "array_device_list.h"
-#include "src/array/meta/device_meta.h"
-#include "src/array_models/dto/device_set.h"
-#include "src/device/device_identifier.h"
+
 using namespace std;
 
 namespace pos
 {
 class DeviceManager;
-class DeviceMeta;
 
 class ArrayDeviceManager
 {
 public:
     ArrayDeviceManager(DeviceManager* sysDevMgr, string arrayName);
     virtual ~ArrayDeviceManager(void);
-    virtual int ImportByName(DeviceSet<string> nameSet);
-    virtual int Import(DeviceSet<DeviceMeta> metaSet);
     virtual void Clear(void);
+    virtual int Import(vector<ArrayDevice*> devs);
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
     virtual int ReplaceWithSpare(ArrayDevice* target, ArrayDevice*& swapOut);
-
-    virtual vector<ArrayDevice*> GetDevs(void);
-    virtual vector<ArrayDevice*> GetFaulty(void);
-    virtual vector<ArrayDevice*> GetRebuilding(void);
-    virtual vector<ArrayDevice*> GetDataDevices(void);
-    virtual vector<ArrayDevice*> GetSpareDevices(void);
-    virtual vector<ArrayDevice*> GetAvailableSpareDevices(void);
+    virtual vector<ArrayDevice*>& GetDevs(void);
 
     // This is UT helper method and doesn't need to be inherited. This isn't for production use.
     void SetArrayDeviceList(ArrayDeviceList* arrayDeviceList);
 
 private:
-    int _CheckConstraints(ArrayDeviceList* devList);
-    int _CheckActiveSsdsCount(const vector<ArrayDevice*>& devs);
-    uint64_t _GetBaseCapacity(const vector<ArrayDevice*>& devs);
-
     ArrayDeviceList* devs_ = nullptr;
     DeviceManager* sysDevMgr_;
-    string arrayName_;
+    string arrayName_ = "";
 };
 
 } // namespace pos
-
-#endif // ARRAY_DEVICE_MANAGER_H_

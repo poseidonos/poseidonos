@@ -158,6 +158,67 @@ DebugInfoQueue<T>::IsEnable()
 {
     return isEnabled;
 }
+
+template<typename T>
+DebugInfoConcurrentQueue<T>::DebugInfoConcurrentQueue(void)
+:DebugInfoQueue<T>()
+{
+    entryCount = 0;
+}
+
+template<typename T>
+DebugInfoConcurrentQueue<T>::DebugInfoConcurrentQueue(std::string moduleName, uint32_t num, bool enable)
+:DebugInfoQueue<T>(moduleName, num, enable)
+{
+    entryCount = 0;
+}
+
+template<typename T>
+DebugInfoConcurrentQueue<T>::~DebugInfoConcurrentQueue(void)
+{
+}
+
+template<typename T>
+int
+DebugInfoConcurrentQueue<T>::AddDebugInfo(T& t, uint64_t userSpecific, bool& flushNeeded)
+{
+    // We assume that there is no simulataneous access to isEnabled.
+    flushNeeded = false;
+    if (this->isEnabled == true)
+    {
+        if (entryCount >= this->entryMaxNum * 2)
+        {
+            // Delete Last Entry.
+            DumpObject<T> dummyObj;
+            if(dumpConcurrentQueue.try_pop(dummyObj) == true)
+            {
+                entryCount--;
+            }
+        }
+        if (entryCount >= this->entryMaxNum * FLUSH_NEED_PERCENTAGE / 100)
+        {
+            flushNeeded = true;
+        }
+        DumpObject<T> dumpObj(t, userSpecific);
+        dumpConcurrentQueue.push(dumpObj);
+        entryCount++;
+        return 0;
+    }
+    return -1;
+}
+
+template<typename T>
+bool
+DebugInfoConcurrentQueue<T>::PopDebugInfo(DumpObject<T>* dumpObj)
+{
+    if(dumpConcurrentQueue.try_pop(*dumpObj))
+    {
+        entryCount--;
+        return true;
+    }
+    return false;
+}
+
 // LCOV_EXCL_STOP
 } // namespace pos
 #endif // DUMP_MODULE_HPP_

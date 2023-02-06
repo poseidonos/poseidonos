@@ -116,6 +116,19 @@ PartitionFactory::CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& part
     {
         POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "NVM partitions are created");
     }
+    else
+    {
+        POS_TRACE_WARN(ret, "Failed to invoke a chain of partition builders. Cleaning up the partition objects");
+        for (Partition* part : partitions)
+        {
+            if (part != nullptr)
+            {
+                delete part;
+            }
+        }
+        partitions.clear();
+    }
+
     for (auto builder : builders)
     {
         delete builder;

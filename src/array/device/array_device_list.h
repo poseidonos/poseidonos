@@ -33,33 +33,30 @@
 #pragma once
 
 #include <mutex>
-#include <string>
 #include <vector>
 
 #include "array_device.h"
-#include "src/array/meta/array_meta.h"
+#include "array_device_type.h"
 
 using namespace std;
 
 namespace pos
 {
-using ArrayDeviceSet = DeviceSet<ArrayDevice*>;
 
 class ArrayDeviceList
 {
 public:
     ArrayDeviceList();
     virtual ~ArrayDeviceList();
-    virtual int SetNvm(ArrayDevice* nvm);
+    virtual int Import(vector<ArrayDevice*> devs);
     virtual int AddSsd(ArrayDevice* dev);
-    virtual int RemoveSpare(ArrayDevice* target);
+    virtual int RemoveSsd(ArrayDevice* target);
     virtual int SpareToData(ArrayDevice* target, ArrayDevice*& swapOut);
     virtual void Clear(void);
-    virtual vector<ArrayDevice*> GetDevs(void);
+    virtual vector<ArrayDevice*>& GetDevs(void);
 
 private:
-    vector<ArrayDevice*>::iterator _FindDev(ArrayDevice* dev);
     mutex* mtx = nullptr;
-    vector<ArrayDevice*> devs;
+    vector<ArrayDevice*> devices;
 };
 } // namespace pos

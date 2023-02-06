@@ -47,7 +47,7 @@ public:
     ArrayDevice(UblockSharedPtr uBlock,
         ArrayDeviceState state = ArrayDeviceState::NORMAL,
         uint32_t dataIndex = 0, ArrayDeviceType type = ArrayDeviceType::DATA);
-    ~ArrayDevice(void) override;
+    virtual ~ArrayDevice(void);
     string GetName(void) override;
     string GetSerial(void) override;
     uint32_t GetDataIndex(void) override;

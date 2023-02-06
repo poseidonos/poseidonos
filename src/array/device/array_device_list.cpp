@@ -31,7 +31,6 @@
  */
 
 #include "array_device_list.h"
-#include "src/array/device/array_device_api.h"
 
 #include <algorithm>
 #include <functional>
@@ -53,92 +52,63 @@ ArrayDeviceList::~ArrayDeviceList()
     delete mtx;
 }
 
-vector<ArrayDevice*>
-ArrayDeviceList::GetDevs(void)
+vector<ArrayDevice*>&
+ArrayDeviceList::GetDevs()
 {
-    return devs;
+    return devices;
 }
 
 int
-ArrayDeviceList::SetNvm(ArrayDevice* nvm)
+ArrayDeviceList::Import(vector<ArrayDevice*> devs)
 {
-    if (nvm->GetType() != ArrayDeviceType::NVM)
+    for(auto dev : devs)
     {
-        int eventId = EID(ARRAY_DEVICE_TYPE_NOT_MATCHED);
-        POS_TRACE_WARN(eventId, "type:{}", nvm->GetType());
-        return eventId;
+        POS_TRACE_INFO(EID(IMPORT_DEVICE), "type:{}, state:{}, name:{}, serail:{}, index:{}",
+            dev->GetType(), dev->GetState(), dev->GetName(), dev->GetSerial(), dev->GetDataIndex());
+        if (dev->GetUblock() != nullptr)
+        {
+            dev->GetUblock()->SetClass(DeviceClass::ARRAY);
+        }
+        devices.push_back(dev);
     }
-    unique_lock<mutex> lock(*mtx);
-    auto nvms = ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::NVM, devs);
-    if (nvms.size() > 0)
-    {
-        int eventId = EID(UNABLE_TO_SET_NVM_MORE_THAN_ONE);
-        POS_TRACE_WARN(eventId, "");
-        return eventId;
-    }
-
-    if (nvm == nullptr || nvm->GetUblock() == nullptr)
-    {
-        int eventId = EID(UNABLE_TO_SET_NVM_NO_OR_NULL);
-        POS_TRACE_WARN(eventId, "");
-        return eventId;
-    }
-
-    auto existing = ArrayDeviceApi::FindDevByName(nvm->GetName(), devs);
-    if (existing != nullptr)
-    {
-        int eventId = EID(UNABLE_TO_SET_NVM_ALREADY_OCCUPIED);
-        POS_TRACE_WARN(eventId, "devName: {}", nvm->GetName());
-        return eventId;
-    }
-    nvm->GetUblock()->SetClass(DeviceClass::ARRAY);
-    
-    devs.push_back(nvm);
     return 0;
 }
 
 int
 ArrayDeviceList::AddSsd(ArrayDevice* dev)
 {
-    if (dev->GetType() != ArrayDeviceType::DATA &&
-        dev->GetType() != ArrayDeviceType::SPARE)
-    {
-        int eventId = EID(ARRAY_DEVICE_TYPE_NOT_MATCHED);
-        POS_TRACE_WARN(eventId, "type:{}", dev->GetType());
-        return eventId;
-    }
     unique_lock<mutex> lock(*mtx);
     if (dev->GetUblock() != nullptr)
     {
-        auto existing = ArrayDeviceApi::FindDevByName(dev->GetName(), devs);
-        if (existing != nullptr)
+        if (Enumerable::First(devices,
+            [dev](auto d) { return d->GetName() == dev->GetName(); }) != nullptr)
         {
-            int eventId = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
-            POS_TRACE_WARN(eventId, "devName: {}", dev->GetName());
-            return eventId;
+            return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
         }
         dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     }
-    devs.push_back(dev);
+    devices.push_back(dev);
+    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
+        "ssd is added : {}", dev->GetName());
     return 0;
 }
 
 int
-ArrayDeviceList::RemoveSpare(ArrayDevice* target)
+ArrayDeviceList::RemoveSsd(ArrayDevice* target)
 {
     unique_lock<mutex> lock(*mtx);
-    auto it = _FindDev(target);
-    if (it != devs.end())
+    for (auto it = devices.begin(); it != devices.end(); ++it)
     {
-        ArrayDevice* dev = *it;
-        if (dev->GetType() == ArrayDeviceType::SPARE)
+        auto type = (*it)->GetType();
+        if ((*it) == target && type != ArrayDeviceType::NONE && type != ArrayDeviceType::NVM)
         {
-            if (dev->GetUblock() != nullptr)
+            if ((*it)->GetUblock() != nullptr)
             {
-                dev->GetUblock()->SetClass(DeviceClass::SYSTEM);
+                (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
             }
-            delete dev;
-            devs.erase(it);
+            devices.erase(it);
+            delete target;
+            target = nullptr;
             return 0;
         }
     }
@@ -149,8 +119,7 @@ void
 ArrayDeviceList::Clear()
 {
     unique_lock<mutex> lock(*mtx);
-
-    for (auto dev : devs)
+    for (auto dev : devices)
     {
         if (dev->GetUblock() != nullptr)
         {
@@ -158,52 +127,34 @@ ArrayDeviceList::Clear()
         }
         delete dev;
     }
-    devs.clear();
+    devices.clear();
+    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG), "Array devices are cleared");
 }
 
 int
 ArrayDeviceList::SpareToData(ArrayDevice* target, ArrayDevice*& swapOut)
 {
     unique_lock<mutex> lock(*mtx);
-    int noSpareToReplace = EID(NO_SPARE_SSD_TO_REPLACE);
-    auto activeSpareDevs = ArrayDeviceApi::ExtractDevicesByState(ArrayDeviceState::NORMAL,
-        ArrayDeviceApi::ExtractDevicesByType(ArrayDeviceType::SPARE, devs));
-    if (activeSpareDevs.size() > 0)
+    for (auto it = devices.begin(); it != devices.end(); ++it)
     {
-        ArrayDevice* spare = activeSpareDevs.front();
-        if (spare != nullptr)
+        ArrayDevice* dev = (*it);
+        if (dev->GetType() == ArrayDeviceType::SPARE &&
+            dev->GetState() == ArrayDeviceState::NORMAL)
         {
-            UblockSharedPtr newUblock = spare->GetUblock();
-            if (newUblock != nullptr)
-            {
-                UblockSharedPtr oldUblock = target->GetUblock();
-                spare->SetUblock(oldUblock);
-                swapOut = spare;
-                auto it = _FindDev(spare);
-                devs.erase(it);
-                target->SetUblock(newUblock);
-                POS_TRACE_INFO(EID(ARRAY_EVENT_SSD_REPLACED),
-                    "{} is replaced to the spare {}({}), swapout:{}({})",
-                    target->PrevUblockInfo(), target->GetName(), target->GetSerial(),
-                    swapOut->GetName(), swapOut->GetSerial());
-                return 0;
-            }
+            UblockSharedPtr newUblock = dev->GetUblock();
+            UblockSharedPtr oldUblock = target->GetUblock();
+            dev->SetUblock(oldUblock);
+            swapOut = dev;
+            devices.erase(it);
+            target->SetUblock(newUblock);
+            POS_TRACE_INFO(EID(SSD_REPLACED_TO_SPARE),
+                "{} is replaced to the spare {}({}), swapout:{}({})",
+                target->PrevUblockInfo(), target->GetName(), target->GetSerial(),
+                swapOut->GetName(), swapOut->GetSerial());
+            return 0;
         }
     }
-    POS_TRACE_WARN(noSpareToReplace, "There is no spare device available.");
-    return noSpareToReplace;
+    return EID(NO_SPARE_SSD_TO_REPLACE);
 }
 
-vector<ArrayDevice*>::iterator
-ArrayDeviceList::_FindDev(ArrayDevice* dev)
-{
-    for (auto it = devs.begin(); it != devs.end(); ++it)
-    {
-        if (dev == *it)
-        {
-            return it;
-        }
-    }
-    return devs.end();
-}
 } // namespace pos

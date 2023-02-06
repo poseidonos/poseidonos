@@ -26,37 +26,21 @@ public:
 class CLIDebugInfo : public DebugInfoInstance
 {
 public:
-    CLIDebugMessage info; 
-};
-
-class CLIInfo : public DebugInfoMaker<CLIDebugInfo>
-{
-public:
-    CLIInfo(void)
-    {
-        RegisterDebugInfo("Cli", 500);
-    }
-    ~CLIInfo(void)
-    {
-    }
     CLIDebugMessage info;
-    virtual void MakeDebugInfo(CLIDebugInfo& obj) final
-    {
-        obj.info.sendReceive = info.sendReceive;
-        obj.info.message = info.message;
-        obj.info.errorCode = info.errorCode;
-    }
+
     virtual DebugInfoOkay
-    IsOkay(CLIDebugInfo& obj) final
+    IsOkay(void) final
     {
-        if (obj.info.errorCode != 0)
+        if (info.errorCode != 0)
         {
             return DebugInfoOkay::FAIL;
         }
         return DebugInfoOkay::PASS;
     }
 };
-CLIInfo* debugCliInfoMaker;
+
+CLIDebugInfo cliDebugInfo;
+DebugInfoMaker<CLIDebugInfo>* debugCliInfoMaker;
 }
 // namespace pos
 
@@ -979,9 +963,9 @@ _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf
 void
 _LogCliRequest(const google::protobuf::Message* request, std::string command)
 {
-    pos::debugCliInfoMaker->info.sendReceive = "ReceiveCLI";
-    pos::debugCliInfoMaker->info.message = request->ShortDebugString();
-    pos::debugCliInfoMaker->info.errorCode = grpc::StatusCode::OK;
+    pos::cliDebugInfo.info.sendReceive = "ReceiveCLI";
+    pos::cliDebugInfo.info.message = request->ShortDebugString();
+    pos::cliDebugInfo.info.errorCode = grpc::StatusCode::OK;
     pos::debugCliInfoMaker->AddDebugInfo();
     logger()->SetCommand(command);
     POS_TRACE_TRACE(EID(CLI_MSG_RECEIVED), "request: {}", request->ShortDebugString());
@@ -996,9 +980,9 @@ _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status statu
     google::protobuf::util::JsonOptions printOptions;
     printOptions.always_print_primitive_fields = true;
     MessageToJsonString(*reply, &replyJson, printOptions);
-    pos::debugCliInfoMaker->info.sendReceive = "SendCLI";
-    pos::debugCliInfoMaker->info.message = reply->ShortDebugString();
-    pos::debugCliInfoMaker->info.errorCode = jsonStatusCode;
+    pos::cliDebugInfo.info.sendReceive = "SendCLI";
+    pos::cliDebugInfo.info.message = reply->ShortDebugString();
+    pos::cliDebugInfo.info.errorCode = jsonStatusCode;
     pos::debugCliInfoMaker->AddDebugInfo();
 
     logger()->SetCommand(command);
@@ -1014,12 +998,11 @@ RunGrpcServer()
 
     std::string server_address(GRPC_CLI_SERVER_SOCKET_ADDRESS);
     PosCliServiceImpl service;
-
+    pos::debugCliInfoMaker = new pos::DebugInfoMaker<CLIDebugInfo>(&cliDebugInfo, "Cli", 500);
     grpc::EnableDefaultHealthCheckService(true);
     grpc::reflection::InitProtoReflectionServerBuilderPlugin();
     ServerBuilder builder;
     grpc::ResourceQuota rq;
-    pos::debugCliInfoMaker = new pos::CLIInfo;
     rq.SetMaxThreads(MAX_NUM_CONCURRENT_CLIENTS + 1);
     builder.SetResourceQuota(rq);
     // Listen on the given address without any authentication mechanism.
@@ -1034,5 +1017,5 @@ RunGrpcServer()
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
     server->Wait();
-    delete debugCliInfoMaker;
+    delete pos::debugCliInfoMaker;
 }

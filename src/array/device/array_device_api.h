@@ -55,6 +55,7 @@ public:
     static vector<ArrayDevice*> ExtractDevicesByState(ArrayDeviceState state, const vector<ArrayDevice*>& devs);
     static vector<ArrayDevice*> ExtractDevicesByType(ArrayDeviceType type, const vector<ArrayDevice*>& devs);
     static vector<ArrayDevice*> ExtractDevices(const vector<ArrayDevice*>& devs);
+    static vector<ArrayDevice*> ExtractDevicesByTypeAndState(ArrayDeviceType type, ArrayDeviceState state, const vector<ArrayDevice*>& devs);
     static uint64_t GetMinimumCapacity(const vector<ArrayDevice*>& devs);
     static DeviceSet<DeviceMeta> ExportDeviceMeta(const vector<ArrayDevice*>& devs);
     static int ImportInspection(const vector<ArrayDevice*>& devs);
