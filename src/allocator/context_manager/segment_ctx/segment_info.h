@@ -63,10 +63,10 @@ public:
 
     }
 
-    SegmentInfoData(uint32_t blkCount, uint32_t stripeCount, SegmentState segmentState)
+    SegmentInfoData(uint32_t validBlockCount, uint32_t occupiedStripeCount, SegmentState segmentState)
     {
-        this->validBlockCount = blkCount;
-        this->occupiedStripeCount = stripeCount;
+        this->validBlockCount = validBlockCount;
+        this->occupiedStripeCount = occupiedStripeCount;
         this->state = segmentState;
     }
 
@@ -97,6 +97,7 @@ public:
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
     virtual void AllocateSegmentInfoData(SegmentInfoData* segmentInfoData);
+    virtual void UpdateFrom(SegmentInfo &segmentInfo);
 
 private:
     void _MoveToFreeState(void);

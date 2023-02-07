@@ -152,10 +152,11 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     uint32_t expectedVictimSegId = 0;
 
     SegmentInfo* segInfos = new SegmentInfo[numOfSegment];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numOfSegment];//(maxValidBlockCount, maxOccupiedStripeCount, SegmentState::SSD);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numOfSegment];
     for (int i = 0; i < numOfSegment; ++i)
     {
         segInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        segInfos[i].InitSegmentInfoData();
         segInfos[i].SetValidBlockCount(maxValidBlockCount);
         segInfos[i].SetOccupiedStripeCount(maxOccupiedStripeCount);
         segInfos[i].SetState(SegmentState::SSD);
@@ -260,6 +261,7 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     EXPECT_EQ(true, ret);
 
     delete [] segInfos;
+    delete [] segmentInfoData;
     delete segmentCtx;
     delete ioManager;
     delete allocatorCtx;
@@ -267,6 +269,5 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     delete gcCtx;
     delete blockAllocStatus;
     delete contextReplayer;
-    delete[] segmentInfoData;
 }
 }
