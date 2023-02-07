@@ -32,7 +32,7 @@
 
 #pragma once
 
-#include "src/pbr/dto/ade_data.h"
+#include "src/pbr/dto/ate_data.h"
 
 #include <string>
 #include <vector>

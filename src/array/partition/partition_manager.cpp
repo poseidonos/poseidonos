@@ -113,7 +113,8 @@ PartitionManager::FormatPartition(PartitionType type, uint32_t arrayId, IODispat
     }
     else
     {
-        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "Failed to format {} partition", PARTITION_TYPE_STR[type]);
+        POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG),
+            "target partition is null, part_type:{}", PARTITION_TYPE_STR[type]);
     }
 }
 

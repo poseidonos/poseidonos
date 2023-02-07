@@ -64,7 +64,7 @@ ContentWriter::Write(AteData* content, const pos::UblockSharedPtr dev)
         return -1;
     }
     int ret = writer->Write(dev, rawData, serializer->GetContentStartLba(), serializer->GetContentSize());
-    delete rawData;
+    delete[] rawData;
     return ret;
 }
 
@@ -77,7 +77,7 @@ ContentWriter::Write(AteData* content, string filePath)
         return -1;
     }
     int ret = writer->Write(filePath, rawData, serializer->GetContentStartLba(), serializer->GetContentSize());
-    delete rawData;
+    delete[] rawData;
     return ret;
 }
 
@@ -89,7 +89,7 @@ ContentWriter::_Serialize(AteData* content)
     int ret = serializer->Serialize(rawData, content);
     if (ret != 0)
     {
-        delete rawData;
+        delete[] rawData;
         return nullptr;
     }
     return rawData;

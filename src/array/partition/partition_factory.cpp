@@ -44,21 +44,17 @@ int
 PartitionFactory::CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t nvmSizeInByte,
     RaidTypeEnum metaRaid, RaidTypeEnum dataRaid, vector<Partition*>& partitions)
 {
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Try to split SSD partitions");
     vector<SsdPartitionBuilder*> builders;
     {
-        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for JOURNAL_SSD");
         RaidTypeEnum journalRaid = metaRaid;
         SsdPartitionOptions option(PartitionType::JOURNAL_SSD, journalRaid, devs, nvmSizeInByte);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {
-        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for META_SSD");
         SsdPartitionOptions option(PartitionType::META_SSD, metaRaid, devs, nvmSizeInByte);
         builders.push_back(new SsdPartitionBuilder(option));
     }
     {
-        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Prepare Partition Builder for USER_DATA");
         SsdPartitionOptions option(PartitionType::USER_DATA, dataRaid, devs, nvmSizeInByte);
         builders.push_back(new SsdPartitionBuilder(option));
     }
@@ -70,9 +66,10 @@ PartitionFactory::CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t
         prev = builders[i];
     }
     int ret = builders.front()->Build(ArrayConfig::SSD_PARTITION_START_LBA, partitions);
+    POS_TRACE_DEBUG(EID(BUILD_SSD_PARTITIONS_RESULT), "result:{}", ret);
     if (ret != 0)
     {
-        POS_TRACE_WARN(ret, "Failed to invoke a chain of partition builders. Cleaning up the partition objects");
+        POS_TRACE_WARN(ret, "");
         for (Partition* part : partitions)
         {
             if (part != nullptr)
@@ -88,8 +85,6 @@ PartitionFactory::CreateSsdPartitions(const vector<ArrayDevice*>& devs, uint64_t
         delete builder;
     }
     builders.clear();
-
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "SSD partitions are created");
     return ret;
 }
 
@@ -112,13 +107,10 @@ PartitionFactory::CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& part
     }
 
     int ret = builders.front()->Build(ArrayConfig::NVM_MBR_SIZE_BYTE / ArrayConfig::SECTOR_SIZE_BYTE, partitions);
-    if (ret == 0)
+    POS_TRACE_DEBUG(EID(BUILD_NVM_PARTITIONS_RESULT), "result:{}", ret);
+    if (ret != 0)
     {
-        POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "NVM partitions are created");
-    }
-    else
-    {
-        POS_TRACE_WARN(ret, "Failed to invoke a chain of partition builders. Cleaning up the partition objects");
+        POS_TRACE_WARN(ret, "");
         for (Partition* part : partitions)
         {
             if (part != nullptr)

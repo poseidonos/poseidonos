@@ -70,7 +70,7 @@ HeaderLoader::Load(HeaderElement* pHeaderOut, pos::UblockSharedPtr dev)
             return -1;
         }
     }
-    delete rawData;
+    delete[] rawData;
     return ret;
 }
 
@@ -86,7 +86,7 @@ HeaderLoader::Load(HeaderElement* pHeaderOut, string filePath)
     {
         ret = serializer->Deserialize(rawData, length, pHeaderOut);
     }
-    delete rawData;
+    delete[] rawData;
     return ret;
 }
 } // namespace pbr

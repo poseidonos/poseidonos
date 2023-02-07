@@ -126,7 +126,7 @@ int ContentSerializerRev0::_DeserializeAte(uint64_t startOffset, AteData* ateOut
         strncpy(signature, &rawData[startOffset + SIGNATURE_OFFSET], SIGNATURE_LENGTH);
         if (signature != ATE_SIGNATURE)
         {
-            int eid = EID(PBR_UNKNOWN_SIGNATURE);
+            int eid = EID(ATE_UNKNOWN_SIGNATURE);
             POS_TRACE_WARN(eid, "{}", signature);
             return eid;
         }
@@ -163,7 +163,9 @@ int ContentSerializerRev0::_DeserializeAte(uint64_t startOffset, AteData* ateOut
             if (signature != ADE_SIGNATURE)
             {
                 delete ade;
-                return -3;
+                int eid = EID(ADE_UNKNOWN_SIGNATURE);
+                POS_TRACE_WARN(eid, "{}", signature);
+                return eid;
             }
         } ////
             ade->devIndex = hex_to_uint32(&rawData[adeOffset + DEV_INDEX_OFFSET], DEV_INDEX_LENGTH);
@@ -188,7 +190,9 @@ int ContentSerializerRev0::_DeserializeAte(uint64_t startOffset, AteData* ateOut
             if (signature != PTE_SIGNATURE)
             {
                 delete pte;
-                return -4;
+                int eid = EID(PTE_UNKNOWN_SIGNATURE);
+                POS_TRACE_WARN(eid, "{}", signature);
+                return eid;
             }
         } ////
         pte->partType = hex_to_uint32(&rawData[pteOffset + PART_TYPE_OFFSET], PART_TYPE_LENGTH);

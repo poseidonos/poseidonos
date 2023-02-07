@@ -41,6 +41,8 @@ int
 DeviceBuilder::Create(const DeviceSet<string>& nameSet,
     vector<ArrayDevice*>& devs, IDevInfo* getDev)
 {
+    POS_TRACE_DEBUG(EID(DEVICE_BUILDER_CREATE_REQUEST), "nvm_count:{}, data_count:{}, spare_count:{}",
+        nameSet.nvm.size(), nameSet.data.size(), nameSet.spares.size());
     for (string devName : nameSet.nvm)
     {
         DevName name(devName);
@@ -48,7 +50,7 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
         if (ublock == nullptr || ublock->GetType() != DeviceType::NVRAM)
         {
             int eid = EID(CREATE_ARRAY_NVM_NAME_NOT_FOUND);
-            POS_TRACE_WARN(eid, "nvm_name: {}", devName);
+            POS_TRACE_WARN(eid, "nvm_name:{}", devName);
             return eid;
         }
         ArrayDevice* dev = new ArrayDevice(ublock, ArrayDeviceState::NORMAL,
@@ -63,7 +65,7 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
         if (ublock == nullptr || ublock->GetType() != DeviceType::SSD)
         {
             int eid = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
-            POS_TRACE_WARN(eid, "ssd_name: {}", devName);
+            POS_TRACE_WARN(eid, "ssd_name:{}", devName);
             return eid;
         }
         ArrayDevice* dev = new ArrayDevice(ublock, ArrayDeviceState::NORMAL,
@@ -78,7 +80,7 @@ DeviceBuilder::Create(const DeviceSet<string>& nameSet,
         if (ublock == nullptr || ublock->GetType() != DeviceType::SSD)
         {
             int eid = EID(CREATE_ARRAY_SSD_NAME_NOT_FOUND);
-            POS_TRACE_WARN(eid, "ssd_name: {}", devName);
+            POS_TRACE_WARN(eid, "ssd_name:{}", devName);
             return eid;
         }
         ArrayDevice* dev = new ArrayDevice(ublock, ArrayDeviceState::NORMAL,
@@ -92,6 +94,7 @@ int
 DeviceBuilder::Load(const vector<pbr::AdeData*>& adeList,
         vector<ArrayDevice*>& devs, IDevInfo* getDev)
 {
+    POS_TRACE_DEBUG(EID(DEVICE_BUILDER_LOAD_REQUEST), "dev_count:{}", adeList.size());
     for (pbr::AdeData* adeData : adeList)
     {
         DevUid uid(adeData->devSn);

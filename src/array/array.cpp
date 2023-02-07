@@ -35,7 +35,6 @@
 #include <string>
 #include <sstream>
 
-#include "src/array/array_name_policy.h"
 #include "src/array/rebuild/rebuild_handler.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/array/device/array_device_api.h"
@@ -105,7 +104,7 @@ Array::MakeDebugInfo(ArrayDebugInfo& obj)
 int
 Array::Import(ArrayBuildInfo* buildInfo)
 {
-    POS_TRACE_INFO(EID(IMPORT_ARRAY_DEBUG), "name:{}, index:{}, uuid:{}",
+    POS_TRACE_INFO(EID(IMPORT_ARRAY_DEBUG), "array_name:{}, array_index:{}, array_uuid:{}",
         buildInfo->arrayName, buildInfo->arrayIndex, buildInfo->arrayUuid);
     pthread_rwlock_wrlock(&stateLock);
     name_ = buildInfo->arrayName;
@@ -133,7 +132,8 @@ Array::Import(ArrayBuildInfo* buildInfo)
     pthread_rwlock_unlock(&stateLock);
     if (ret != 0)
     {
-        POS_TRACE_INFO(ret, "");
+        POS_TRACE_WARN(ret, "array_name:{}, array_index:{}, array_uuid:{}",
+        buildInfo->arrayName, buildInfo->arrayIndex, buildInfo->arrayUuid);
     }
     return ret;
 }
@@ -197,7 +197,7 @@ Array::Flush(void)
     int ret = _UpdatePbr();
     if (0 != ret)
     {
-        POS_TRACE_WARN(ret, "Flush: unable to update array({}) configuration", name_);
+        POS_TRACE_WARN(ret, "array_name:{}", name_);
         return;
     }
 }
@@ -205,7 +205,7 @@ Array::Flush(void)
 int
 Array::Delete(void)
 {
-    POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Trying to delete array({})", name_);
+    POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG), "Trying to delete array({})", name_);
     pthread_rwlock_wrlock(&stateLock);
     int ret = state->IsDeletable();
     if (ret != 0)
@@ -216,7 +216,7 @@ Array::Delete(void)
     // Rebuild would not be finished when rebuild io have an error on broken array
     if (rebuilder->IsRebuilding(name_))
     {
-        ret = EID(DELETE_ARRAY_DEBUG_MSG);
+        ret = EID(DELETE_ARRAY_DEBUG);
         goto error;
     }
 
@@ -274,7 +274,7 @@ Array::AddSpare(string devName)
     if (0 != ret)
     {
         pthread_rwlock_unlock(&stateLock);
-        POS_TRACE_ERROR(ret, "Unable to add spare device to array({})", name_);
+        POS_TRACE_WARN(ret, "array_name:{}", name_);
         return ret;
     }
 
@@ -931,7 +931,7 @@ Array::_RebuildDone(vector<IArrayDevice*> dsts, vector<IArrayDevice*> srcs, Rebu
         int ret = _UpdatePbr();
         if (0 != ret)
         {
-            POS_TRACE_ERROR(ret, "Unable to update the device state of array({})", name_);
+            POS_TRACE_ERROR(ret, "array_name:{}", name_);
         }
     }
     RaidState rs = ptnMgr->GetRaidState();

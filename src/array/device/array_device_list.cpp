@@ -63,7 +63,7 @@ ArrayDeviceList::Import(vector<ArrayDevice*> devs)
 {
     for (auto dev : devs)
     {
-        POS_TRACE_INFO(EID(IMPORT_DEVICE), "type:{}, state:{}, name:{}, serail:{}, index:{}",
+        POS_TRACE_INFO(EID(IMPORT_ARRAY_DEV_DEBUG), "type:{}, state:{}, name:{}, serail:{}, index:{}",
             dev->GetType(), dev->GetState(), dev->GetName(), dev->GetSerial(), dev->GetDataIndex());
         if (dev->GetUblock() != nullptr)
         {
@@ -88,8 +88,8 @@ ArrayDeviceList::AddSsd(ArrayDevice* dev)
         dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     }
     devices.push_back(dev);
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
-        "ssd is added : {}", dev->GetName());
+    POS_TRACE_INFO(EID(ARRAY_DEV_ADDED),
+        "dev_name:{}", dev->GetName());
     return 0;
 }
 
@@ -106,6 +106,8 @@ ArrayDeviceList::RemoveSsd(ArrayDevice* target)
             {
                 (*it)->GetUblock()->SetClass(DeviceClass::SYSTEM);
             }
+            POS_TRACE_INFO(EID(ARRAY_DEV_REMOVED),
+                "dev_name:{}", (*it)->GetName());
             devices.erase(it);
             delete target;
             target = nullptr;
@@ -128,7 +130,7 @@ ArrayDeviceList::Clear(void)
         delete dev;
     }
     devices.clear();
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG), "Array devices are cleared");
+    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG), "Array devices are cleared");
 }
 
 int
@@ -147,7 +149,7 @@ ArrayDeviceList::SpareToData(ArrayDevice* target, ArrayDevice*& swapOut)
             swapOut = dev;
             devices.erase(it);
             target->SetUblock(newUblock);
-            POS_TRACE_INFO(EID(SSD_REPLACED_TO_SPARE),
+            POS_TRACE_INFO(EID(DATA_SSD_REPLACED_TO_SPARE),
                 "{} is replaced to the spare {}({}), swapout:{}({})",
                 target->PrevUblockInfo(), target->GetName(), target->GetSerial(),
                 swapOut->GetName(), swapOut->GetSerial());

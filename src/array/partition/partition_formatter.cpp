@@ -73,7 +73,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
         {
             if (devs[i]->GetState() == ArrayDeviceState::FAULT)
             {
-                POS_TRACE_DEBUG(EID(FORMAT_PARTITION_DEBUG_MSG),
+                POS_TRACE_DEBUG(EID(FORMAT_PARTITION_DEBUG),
                     "The trim of the fault device has been skipped.");
                 continue;
             }
@@ -84,7 +84,7 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
             ubio->SetPba(pba);
             ubio->SetUblock(devs[i]->GetUblock());
             result = io->Submit(ubio, true);
-            POS_TRACE_DEBUG(EID(FORMAT_PARTITION_DEBUG_MSG),
+            POS_TRACE_DEBUG(EID(FORMAT_PARTITION_DEBUG),
                 "Try to trim from {} for {} on {}",
                 pba.lba, unitCount, devs[i]->GetUblock()->GetName());
 
@@ -107,12 +107,12 @@ PartitionFormatter::Format(const PartitionPhysicalSize* size, uint32_t arrayId,
 
         if (result == 0)
         {
-            POS_TRACE_INFO(EID(FORMAT_PARTITION_DEBUG_MSG),
+            POS_TRACE_INFO(EID(FORMAT_PARTITION_DEBUG),
                 "Trim Succeeded from {} ", startLba);
         }
         else
         {
-            POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG_MSG),
+            POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG),
                 "Trim Succeeded with wrong value from {}", startLba);
             return result;
             // To Do : Write All Zeroes

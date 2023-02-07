@@ -64,7 +64,7 @@ HeaderWriter::Write(HeaderElement* pHeader, pos::UblockSharedPtr dev)
     }
 
     int ret = writer->Write(dev, rawData, header::START_LBA, header::LENGTH);
-    delete rawData;
+    delete[] rawData;
     return ret;
 }
 
@@ -77,7 +77,7 @@ HeaderWriter::Write(HeaderElement* pHeader, string filePath)
         return -1;
     }
     int ret = writer->Write(filePath, rawData, header::START_LBA, header::LENGTH);
-    delete rawData;
+    delete[] rawData;
     return ret;
 }
 
@@ -89,7 +89,7 @@ HeaderWriter::_Serialize(HeaderElement* pHeader)
     int ret = serializer->Serialize(pHeader, rawData, length);
     if (ret != 0)
     {
-        delete rawData;
+        delete[] rawData;
         return nullptr;
     }
     return rawData;

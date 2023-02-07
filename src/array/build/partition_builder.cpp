@@ -44,6 +44,9 @@ int
 PartitionBuilder::Create(const vector<ArrayDevice*>& devs, RaidType metaRaid,
     RaidType dataRaid, vector<Partition*>& partitions)
 {
+    POS_TRACE_DEBUG(EID(PARTITION_BUILDER_CREATE_REQUEST),
+        "dev_count:{}, meta_raid_type:{}, data_raid_type:{}",
+        devs.size(), metaRaid.ToString(), dataRaid.ToString());
     if (devs.size() == 0)
     {
         // TODO : temporary code to ignore unit-test path

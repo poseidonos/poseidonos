@@ -30,15 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "array_name_policy.h"
+#pragma once
 
+#include <string>
+
+#include "src/helper/string/string_checker.h"
+#include "src/include/raid_type.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
+using namespace std;
+
 namespace pos
 {
-int
-ArrayNamePolicy::CheckArrayName(string name)
+inline int CheckArrayName(string name)
 {
     const size_t MIN_LEN = 2;
     const size_t MAX_LEN = 63;
@@ -50,31 +55,56 @@ ArrayNamePolicy::CheckArrayName(string name)
     size_t len = checker.Length();
     if (len < MIN_LEN)
     {
-        ret = EID(CREATE_ARRAY_NAME_TOO_SHORT);
+        ret = EID(ARRAY_NAME_TOO_SHORT);
         POS_TRACE_WARN(ret, "name len: {}", len);
         return ret;
     }
     else if (len > MAX_LEN)
     {
-        ret = EID(CREATE_ARRAY_NAME_TOO_LONG);
+        ret = EID(ARRAY_NAME_TOO_LONG);
         POS_TRACE_WARN(ret, "name len: {}", len);
         return ret;
     }
 
     if (checker.StartWith(SPACE) || checker.EndWith(SPACE))
     {
-        ret = EID(CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE);
+        ret = EID(ARRAY_NAME_START_OR_END_WITH_SPACE);
         POS_TRACE_WARN(ret, "name: {}", name);
         return ret;
     }
 
     if (checker.OnlyContains(ALLOWED_CHAR) == false)
     {
-        ret = EID(CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR);
+        ret = EID(ARRAY_NAME_INCLUDES_SPECIAL_CHAR);
         POS_TRACE_WARN(ret, "name allowed only: {}", ALLOWED_CHAR);
         return ret;
     }
 
+    return ret;
+}
+
+inline int CheckRaidType(string metaRaid, string dataRaid, uint32_t spareCount)
+{
+    POS_TRACE_DEBUG(EID(ARRAY_BUILDER_RAID_POLICY_CHECK_REQUEST),
+        "meta_raid_type:{}, data_raid_type:{}", metaRaid, dataRaid);
+    int ret = 0;
+    RaidType dataRaidType = RaidType(dataRaid);
+    RaidType metaRaidType = RaidType(metaRaid);
+    if (dataRaidType == RaidTypeEnum::NOT_SUPPORTED ||
+        metaRaidType == RaidTypeEnum::NOT_SUPPORTED)
+    {
+        ret = EID(NOT_SUPPORTED_RAIDTYPE);
+        POS_TRACE_WARN(ret, "meta_raid_type:{}, data_raid_type:{}", metaRaid, dataRaid);
+        return ret;
+    }
+    bool canAddSpare = dataRaidType != RaidTypeEnum::NONE &&
+        dataRaidType != RaidTypeEnum::RAID0;
+    if (canAddSpare == false && spareCount > 0)
+    {
+        ret = EID(RAID_DOES_NOT_SUPPORT_SPARE_DEV);
+        POS_TRACE_WARN(ret, "meta_raid_type:{}, data_raid_type:{}", metaRaid, dataRaid);
+        return ret;
+    }
     return ret;
 }
 

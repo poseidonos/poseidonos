@@ -354,7 +354,7 @@ ArrayState::WaitShutdownDone(void)
     int waitcount = 0;
     while (checkShutdown == true) // Broken State automatically triggers Shutdown to all array components
     {
-        POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG_MSG), "Wait for shutdown done");
+        POS_TRACE_INFO(EID(DELETE_ARRAY_DEBUG), "Wait for shutdown done");
         usleep(100000);
         waitcount++;
 

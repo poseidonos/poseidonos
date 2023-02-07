@@ -37,6 +37,7 @@
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/pbr/file_pbr.h"
 
 namespace pos
 {
@@ -104,7 +105,7 @@ ArrayManager::Load(void)
     {
         for (pbr::AteData* ate : arrayTableEntries)
         {
-            POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "array_name:{}", ate->arrayName);
+            POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG), "array_name:{}", ate->arrayName);
             ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Load(ate);
             ret = _Import(arrayBuildInfo);
             delete arrayBuildInfo;
