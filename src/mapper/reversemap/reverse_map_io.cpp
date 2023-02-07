@@ -73,6 +73,7 @@ ReverseMapIo::Flush(void)
     std::vector<ReverseMapPage> revMapPages = revMapPack->GetReverseMapPages();
     totalIoCnt = revMapPages.size();
 
+    // we used local variable so that there is no problem with operation even if instance is deleted
     const uint64_t totalCount = totalIoCnt;
     uint64_t issuedCount = 0;
 
@@ -145,6 +146,7 @@ ReverseMapIo::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     }
 
     // TODO: Handle zombie request (request that was not issued due to previous error)
+    // we used local variable so that there is no problem with operation even if instance is deleted
     const uint64_t issuedCount = totalIoCnt;
     const uint32_t doneCount = mfsAsyncIoDonePages.fetch_add(1);
     if ((doneCount + 1) == issuedCount)
