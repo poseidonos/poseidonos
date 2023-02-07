@@ -82,17 +82,19 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     config = journalConfiguration;
 
     numSegments = numSegments_;
-    segmentInfos = new SegmentInfo[numSegments]();
+    segmentInfos = new SegmentInfo[numSegments];
+    segmentInfoData = new SegmentInfoData[numSegments];
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
+        segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoData[segId]);
+        segmentInfos[segId].InitSegmentInfoData();
         if (nullptr != loadedSegmentInfo)
         {
             POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
                            segId, loadedSegmentInfo[segId].GetValidBlockCount(),
                            loadedSegmentInfo[segId].GetOccupiedStripeCount(),
                            loadedSegmentInfo[segId].GetState());
-
-            memcpy(segmentInfos, loadedSegmentInfo, sizeof(SegmentInfo) * numSegments);
+            segmentInfos[segId].UpdateFrom(loadedSegmentInfo[segId]);
         }
     }
 }

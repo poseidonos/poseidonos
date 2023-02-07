@@ -82,7 +82,7 @@ public:
 
     virtual void MoveToFreeState(SegmentId segId);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
-    virtual int GetOccupiedStripeCount(SegmentId segId);
+    virtual uint32_t GetOccupiedStripeCount(SegmentId segId);
     virtual SegmentState GetSegmentState(SegmentId segId);
     virtual void ResetSegmentsStates(void);
 
@@ -147,6 +147,7 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
 
     SegmentInfo* segmentInfos;
+    SegmentInfoData* segmentInfoData;
 
     SegmentList* segmentList[SegmentState::NUM_STATES];
     SegmentList* rebuildList;

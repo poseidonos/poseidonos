@@ -45,7 +45,7 @@ public:
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(void, ValidateBlocksWithGroupId, (VirtualBlks blks, int logGroupId), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
-    MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
+    MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
     MOCK_METHOD(SegmentInfo*, GetSegmentInfos, (), (override));
 

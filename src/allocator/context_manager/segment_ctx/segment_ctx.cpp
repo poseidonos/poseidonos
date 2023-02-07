@@ -120,6 +120,12 @@ SegmentCtx::Init(void)
 
     uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
     segmentInfos = new SegmentInfo[numSegments];
+    segmentInfoData = new SegmentInfoData[numSegments];
+    for (uint32_t i = 0; i < numSegments ; ++i)
+    {
+        segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        segmentInfos[i].InitSegmentInfoData();
+    }
 
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
     {
@@ -151,6 +157,12 @@ SegmentCtx::Dispose(void)
     {
         delete[] segmentInfos;
         segmentInfos = nullptr;
+    }
+
+    if (segmentInfoData != nullptr)
+    {
+        delete[] segmentInfoData;
+        segmentInfoData = nullptr;
     }
 
     for (int state = SegmentState::FREE; state < SegmentState::NUM_STATES; state++)
@@ -291,7 +303,7 @@ SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
     return segmentFreed;
 }
 
-int
+uint32_t
 SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
 {
     return segmentInfos[segId].GetOccupiedStripeCount();
@@ -303,7 +315,6 @@ SegmentCtx::AfterLoad(char* buf)
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR), "SegmentCtx file loaded:{}", ctxHeader.ctxVersion);
     ctxStoredVersion = ctxHeader.ctxVersion;
     ctxDirtyVersion = ctxHeader.ctxVersion + 1;
-
     _RebuildSegmentList();
 }
 
@@ -354,7 +365,7 @@ SegmentCtx::GetSectionAddr(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            ret = (char*)segmentInfos;
+            ret = (char*)segmentInfoData;
             break;
         }
     }
@@ -374,7 +385,7 @@ SegmentCtx::GetSectionSize(int section)
         }
         case SC_SEGMENT_INFO:
         {
-            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfo);
+            ret = addrInfo->GetnumUserAreaSegments() * sizeof(SegmentInfoData);
             break;
         }
     }
