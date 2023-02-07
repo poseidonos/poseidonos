@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "test/integration-tests/journal/fake/allocator_mock.h"
+#include "test/integration-tests/journal/fake/allocator_fake.h"
 #include "test/integration-tests/journal/fake/array_info_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/fake/state_subscription_mock.h"
@@ -26,8 +26,10 @@ public:
     void InitializeJournal(void);
     void InitializeJournal(JournalConfigurationSpy* config);
     void SimulateSPORWithoutRecovery(void);
+    void SimulateSPORWithoutRecovery(JournalConfigurationBuilder& configurationBuilder);
     void SimulateSPORWithoutRecovery(JournalConfigurationSpy* config);
     void SimulateRocksDBSPORWithoutRecovery(void);
+    void InjectCheckpointFaultAfterMetaFlushCompleted(void);
     void SetTriggerCheckpoint(bool isCheckpointEnabled);
     void ExpectCheckpointTriggered(void);
     void WaitForAllCheckpointDone(void);
@@ -37,7 +39,7 @@ public:
 protected:
     JournalManagerSpy* journal;
     MockMapper* testMapper;
-    AllocatorMock* testAllocator;
+    AllocatorFake* testAllocator;
     ArrayInfoMock* arrayInfo;
     StateSubscriptionMock* stateSub;
     IVolumeInfoManager* volumeManager;

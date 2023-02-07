@@ -119,6 +119,7 @@ LogGroupReleaser::_FlushNextLogGroup(void)
         }
     }
 }
+
 bool
 LogGroupReleaser::_IsFlushInProgress(void)
 {
@@ -149,7 +150,7 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
     LogGroupFooter footerAfterMapFlush = _CreateLogGroupFooterForReset(nextLogGroupId, footerBeforeMapFlush);
 
     EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, nextLogGroupId));
-    EventSmartPtr resetLogGroup(new ResetLogGroup(logBuffer, nextLogGroupId, footerAfterMapFlush, footerOffset, resetLogGroupCompletion));
+    EventSmartPtr resetLogGroup(new ResetLogGroup(config, logBuffer, nextLogGroupId, footerAfterMapFlush, footerOffset, resetLogGroupCompletion));
     EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, nextLogGroupId));
     EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footerBeforeMapFlush, footerOffset, nextLogGroupId, checkpointSubmission));
 

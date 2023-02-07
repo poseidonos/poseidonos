@@ -30,44 +30,22 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/journal_manager/log_buffer/reset_log_group.h"
+#pragma once
 
-#include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
-#include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
-#include "src/logger/logger.h"
+#include "src/event_scheduler/event.h"
+#include "src/include/smart_ptr_type.h"
 
 namespace pos
 {
-ResetLogGroup::ResetLogGroup(JournalConfiguration* config, IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback)
-: config(config),
-  logBuffer(logBuffer),
-  logGroupId(logGroupId),
-  footer(footer),
-  footerOffset(footerOffset),
-  callback(callback)
+class FaultEvent : public Event
 {
-}
+public:
+    FaultEvent(bool& isFaultExecuted);
 
-bool
-ResetLogGroup::Execute(void)
-{
-    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, logGroupId, callback));
-    if (config->IsRocksdbEnabled() == true)
-    {
-        int result = logBuffer->AsyncReset(logGroupId, event);
-        if (result == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return event->Execute();
-    }
-}
+    virtual bool Execute(void) override;
+
+private:
+    EventSmartPtr callback;
+    bool* isFaultExecuted;
+};
 } // namespace pos

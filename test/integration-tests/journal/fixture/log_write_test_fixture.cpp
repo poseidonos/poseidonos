@@ -9,12 +9,13 @@ namespace pos
 using ::testing::NiceMock;
 using ::testing::Return;
 
-LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, ArrayInfoMock* _array,
+LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, AllocatorFake* _allocator, ArrayInfoMock* _array,
     JournalManagerSpy* _journal, TestInfo* _testInfo)
 {
     Reset();
 
     mapper = _mapper;
+    allocator = _allocator;
     array = _array;
     journal = _journal;
     testInfo = _testInfo;
@@ -41,13 +42,13 @@ LogWriteTestFixture::UpdateJournal(JournalManagerSpy* _journal)
 }
 
 void
-LogWriteTestFixture::WriteLogsWithSize(uint64_t sizeToFill)
+LogWriteTestFixture::WriteLogsWithSize(uint64_t sizeToFill, SegmentId startStripeId)
 {
     UsedOffsetCalculator usedOffset(journal, sizeToFill);
 
+    StripeId vsid = startStripeId;
     while (1)
     {
-        StripeId vsid = std::rand() % testInfo->numUserStripes;
         StripeTestFixture stripe(vsid, testInfo->defaultTestVol);
         auto blksToWrite = _GenerateBlocksInStripe(stripe.GetVsid(), 0, testInfo->numBlksPerStripe);
 
@@ -82,6 +83,7 @@ LogWriteTestFixture::WriteLogsWithSize(uint64_t sizeToFill)
         {
             return;
         }
+        vsid++;
     }
 }
 
@@ -100,7 +102,8 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
     volumeIo->SetLsidEntry(stripeAddr);
 
     IJournalWriter* writer = journal->GetJournalWriter();
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
+
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
     int result = writer->AddBlockMapUpdatedLog(volumeIo, event);
     if (result == 0)
     {
@@ -128,8 +131,15 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
     ON_CALL(*stripe, GetUserLsid).WillByDefault(Return(newAddr.stripeId));
 
     IJournalWriter* writer = journal->GetJournalWriter();
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
-    int result = writer->AddStripeMapUpdatedLog(stripePtr, oldAddr, event);
+
+    VirtualBlks blks = {
+        .startVsa = {
+            .stripeId = newAddr.stripeId,
+            .offset = 0,
+        },
+        .numBlks = 0};
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogEventType::BLOCK_MAP_UPDATE));
+    int result = writer->AddStripeMapUpdatedLog(&stripe, oldAddr, event);
     if (result == 0)
     {
         testingLogs.AddToWriteList(stripePtr, oldAddr);
@@ -154,7 +164,15 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeId vsid, StripeId wbLs
     _GenerateGcBlockLogs(mapUpdates);
 
     IJournalWriter* writer = journal->GetJournalWriter();
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
+
+    // TODO (cheolho.kang): This is dummy code. Need to add code to make data containing the actual GC Block and Stripe Map information
+    VirtualBlks blks = {
+        .startVsa = {
+            .stripeId = mapUpdates.userLsid,
+            .offset = 0,
+        },
+        .numBlks = 0};
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogEventType::GC_MAP_UPDATE));
     int result = writer->AddGcStripeFlushedLog(mapUpdates, event);
     if (result == 0)
     {
@@ -180,7 +198,15 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeTestFixture& stripe)
     mapUpdates.userLsid = stripe.GetUserAddr().stripeId;
 
     IJournalWriter* writer = journal->GetJournalWriter();
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs));
+
+    // TODO (cheolho.kang): This is dummy code. Need to add code to make data containing the actual GC Block and Stripe Map information
+    VirtualBlks blks = {
+        .startVsa = {
+            .stripeId = mapUpdates.userLsid,
+            .offset = 0,
+        },
+        .numBlks = 0};
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogEventType::GC_MAP_UPDATE));
     int result = writer->AddGcStripeFlushedLog(mapUpdates, event);
     if (result == 0)
     {

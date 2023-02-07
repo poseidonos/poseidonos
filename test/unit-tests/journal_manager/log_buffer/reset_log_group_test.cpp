@@ -35,10 +35,12 @@
 #include <gtest/gtest.h>
 
 #include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
+#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 
 using ::testing::_;
 using ::testing::NiceMock;
+using ::testing::Return;
 
 namespace pos
 {
@@ -47,17 +49,19 @@ MATCHER_P(EqLogGroupFooter, expected, "")
     return (((LogGroupFooter)arg) == ((LogGroupFooter)expected));
 }
 
-TEST(ResetLogGroup, Execute_testIfLogBufferReseted)
+TEST(ResetLogGroup, Execute_testIfLogBufferResetedIfRocksDBDisabled)
 {
     // Given
     int logGroupId = 0;
     NiceMock<MockJournalLogBuffer> logBuffer;
+    NiceMock<MockJournalConfiguration> config;
     LogGroupFooter footer;
     footer.isReseted = true;
     footer.resetedSequenceNumber = 1;
     uint64_t footerOffset = 0;
 
-    ResetLogGroup event(&logBuffer, logGroupId, footer, footerOffset, nullptr);
+
+    ResetLogGroup event(&config, &logBuffer, logGroupId, footer, footerOffset, nullptr);
 
     // When
     EXPECT_CALL(logBuffer, WriteLogGroupFooter(_, EqLogGroupFooter(footer), _, _));
@@ -67,4 +71,27 @@ TEST(ResetLogGroup, Execute_testIfLogBufferReseted)
     EXPECT_EQ(result, true);
 }
 
+TEST(ResetLogGroup, Execute_testIfLogBufferResetedIfRocksDBEnabled)
+{
+    // Given
+    int logGroupId = 0;
+    NiceMock<MockJournalLogBuffer> logBuffer;
+    NiceMock<MockJournalConfiguration> config;
+    LogGroupFooter footer;
+    footer.isReseted = true;
+    footer.resetedSequenceNumber = 1;
+    uint64_t footerOffset = 0;
+
+
+    ResetLogGroup event(&config, &logBuffer, logGroupId, footer, footerOffset, nullptr);
+
+    // When
+    EXPECT_CALL(config, IsRocksdbEnabled).WillOnce(Return(true));
+    EXPECT_CALL(logBuffer, AsyncReset);
+    EXPECT_CALL(logBuffer, WriteLogGroupFooter(_, EqLogGroupFooter(footer), _, _));
+    bool result = event.Execute();
+
+    // Then
+    EXPECT_EQ(result, true);
+}
 } // namespace pos

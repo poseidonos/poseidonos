@@ -61,6 +61,13 @@ JournalConfigurationBuilder::SetRocksDBBasePath(std::string rocksDBBasePath)
     return this;
 }
 
+JournalConfigurationBuilder*
+JournalConfigurationBuilder::SetVersionedSegmentContextEnable(bool isVersionedSegmentContextEnabled)
+{
+    this->isVscEnabled = isVersionedSegmentContextEnabled;
+    return this;
+}
+
 JournalConfigurationSpy*
 JournalConfigurationBuilder::Build(void)
 {

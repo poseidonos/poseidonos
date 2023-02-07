@@ -1,13 +1,16 @@
 #include "test/integration-tests/journal/journal_manager_spy.h"
 
 #include <thread>
+#include <typeinfo>
 
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/checkpoint/checkpoint_handler.h"
 #include "src/journal_manager/checkpoint/dirty_map_manager.h"
 #include "src/journal_manager/journal_writer.h"
 #include "src/journal_manager/log/log_buffer_parser.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/reset_log_group.h"
 #include "src/journal_manager/log_write/buffer_offset_allocator.h"
 #include "src/journal_manager/log_write/journal_volume_event_handler.h"
 #include "src/journal_manager/replay/replay_handler.h"
@@ -36,8 +39,20 @@ JournalManagerSpy::JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, 
 
     eventScheduler = new NiceMock<MockEventScheduler>;
     ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
-        std::thread eventExecution(&Event::Execute, event);
-        eventExecution.detach();
+        std::string targetEventName(typeid(*event.get()).name());
+        auto searchResult = faultInjectorTable.find(targetEventName);
+        if (searchResult != faultInjectorTable.end())
+        {
+            EventSmartPtr faultEvent = searchResult->second;
+            std::thread eventExecution(&Event::Execute, faultEvent);
+            eventExecution.detach();
+            faultInjectorTable.erase(searchResult);
+        }
+        else
+        {
+            std::thread eventExecution(&Event::Execute, event);
+            eventExecution.detach();
+        }
     });
 }
 
@@ -243,4 +258,29 @@ JournalManagerSpy::GetStatusProvider(void)
     return statusProvider;
 }
 
+LogGroupReleaser*
+JournalManagerSpy::GetLogGroupReleaser(void)
+{
+    return logGroupReleaser;
+}
+
+void
+JournalManagerSpy::ResetVersionedSegmentContext(void)
+{
+    delete versionedSegCtx;
+    versionedSegCtx = _CreateVersionedSegmentCtx();
+}
+
+IVersionedSegmentContext*
+JournalManagerSpy::GetVersionedSegmentContext(void)
+{
+    return versionedSegCtx;
+}
+
+void
+JournalManagerSpy::InjectFaultEvent(const std::type_info& targetEventInfo, EventSmartPtr errorEvent)
+{
+    std::string targetEventName(targetEventInfo.name());
+    faultInjectorTable.insert({targetEventName, errorEvent});
+}
 } // namespace pos

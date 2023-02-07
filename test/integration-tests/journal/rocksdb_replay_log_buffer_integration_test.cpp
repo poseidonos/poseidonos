@@ -102,7 +102,8 @@ TEST_F(RocksDBReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
     SetTriggerCheckpoint(false);
 
     // Write dummy logs to the first log group (to be cleared by checkpoint later)
-    writeTester->WriteLogsWithSize(logGroupSize - sizeof(LogGroupFooter));
+    uint32_t startStripeIdForDummyLog = (testInfo->numUserSegments - 1) * testInfo->numStripesPerSegment;
+    writeTester->WriteLogsWithSize(logGroupSize - sizeof(LogGroupFooter), startStripeIdForDummyLog);
 
     // Write logs to fill log buffer, and start checkpoint to clear the first log group
     StripeId currentVsid = 0;

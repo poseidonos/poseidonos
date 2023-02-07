@@ -39,16 +39,18 @@
 namespace pos
 {
 class IJournalLogBuffer;
+class JournalConfiguration;
 
 class ResetLogGroup : public Event
 {
 public:
     ResetLogGroup(void) = default;
-    ResetLogGroup(IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback);
+    ResetLogGroup(JournalConfiguration* config, IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback);
 
     virtual bool Execute(void) override;
 
 private:
+    JournalConfiguration* config;
     IJournalLogBuffer* logBuffer;
     int logGroupId;
     LogGroupFooter footer;

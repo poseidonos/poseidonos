@@ -1,18 +1,16 @@
 #pragma once
 
-#include "test/integration-tests/journal/utils/test_info.h"
-
-#include "test/integration-tests/journal/fake/mapper_mock.h"
-#include "test/integration-tests/journal/fake/allocator_mock.h"
-
 #include "src/include/address_type.h"
+#include "test/integration-tests/journal/fake/allocator_fake.h"
+#include "test/integration-tests/journal/fake/mapper_mock.h"
+#include "test/integration-tests/journal/utils/test_info.h"
 
 namespace pos
 {
 class ReplayTestFixture
 {
 public:
-    ReplayTestFixture(MockMapper* mapper, AllocatorMock* allocator, TestInfo* testInfo);
+    ReplayTestFixture(MockMapper* mapper, AllocatorFake* allocator, TestInfo* testInfo);
     virtual ~ReplayTestFixture(void);
 
     void ExpectReturningUnmapStripes(void);
@@ -25,6 +23,7 @@ public:
 
     void ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe);
     void ExpectReplayFullStripe(StripeTestFixture stripe);
+    void ExpectReplayFullStripeWithoutReplaySegmentContex(StripeTestFixture stripe);
 
     void ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, StripeTestFixture stripe);
     void ExpectReplayFlushedActiveStripe(void);
@@ -35,7 +34,7 @@ private:
     VirtualBlks _GetBlock(VirtualBlks blks, uint32_t offset);
 
     MockMapper* mapper;
-    AllocatorMock* allocator;
+    AllocatorFake* allocator;
 
     TestInfo* testInfo;
 };
