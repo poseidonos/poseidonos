@@ -30,44 +30,51 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/journal_manager/log_buffer/reset_log_group.h"
+#pragma once
 
-#include "src/journal_manager/config/journal_configuration.h"
-#include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
-#include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
-#include "src/logger/logger.h"
+#include <atomic>
+#include <gmock/gmock.h>
+
+#include "src/allocator/i_segment_ctx.h"
 
 namespace pos
 {
-ResetLogGroup::ResetLogGroup(JournalConfiguration* config, IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback)
-: config(config),
-  logBuffer(logBuffer),
-  logGroupId(logGroupId),
-  footer(footer),
-  footerOffset(footerOffset),
-  callback(callback)
+class AllocatorAddressInfo;
+class MetaFileIntf;
+class SegmentInfo;
+class ISegmentCtxFake : public ISegmentCtx
 {
-}
+public:
+    explicit ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
+    virtual ~ISegmentCtxFake(void);
 
-bool
-ResetLogGroup::Execute(void)
-{
-    EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, logGroupId, callback));
-    if (config->IsRocksdbEnabled() == true)
-    {
-        int result = logBuffer->AsyncReset(logGroupId, event);
-        if (result == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return event->Execute();
-    }
-}
+    void LoadContext(void);
+    int FlushContexts(SegmentInfo* vscSegmentInfos);
+    uint64_t GetStoredVersion(void);
+    virtual SegmentInfo* GetSegmentInfos(void);
+
+    MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
+    MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
+    MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(void, ValidateBlocksWithGroupId, (VirtualBlks blks, int logGroupId), (override));
+    MOCK_METHOD(bool, InvalidateBlocksWithGroupId, (VirtualBlks blks, bool isForced, int logGroupId), (override));
+    MOCK_METHOD(bool, UpdateStripeCount, (StripeId lsid, int logGroupId), (override));
+    MOCK_METHOD(void, ResetInfos, (SegmentId segId), (override));
+
+private:
+    void _ValidateBlks(VirtualBlks blks);
+    bool _InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease);
+    bool _UpdateOccupiedStripeCount(StripeId lsid);
+    void _SegmentContextReadDone(void);
+    void _WaitForReadDone(void);
+
+    AllocatorAddressInfo* addrInfo;
+    MetaFileIntf* segmentContextFile;
+    std::atomic<uint64_t> ctxStoredVersion;
+    SegmentInfo* segmentInfos;
+    uint32_t numSegments;
+    uint64_t fileSize;
+    bool segmentContextReadDone;
+    bool isFlushedBefore;
+};
 } // namespace pos

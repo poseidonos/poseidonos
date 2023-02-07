@@ -3,12 +3,16 @@
 #include <experimental/filesystem>
 #include <string>
 
+#include "src/journal_manager/log_buffer/reset_log_group.h"
+#include "test/integration-tests/journal/fake/i_context_manager_fake.h"
+#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fault_event.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
 using ::testing::AtLeast;
 using ::testing::NiceMock;
-using ::testing::StrictMock;
 using ::testing::Return;
+using ::testing::StrictMock;
 
 namespace pos
 {
@@ -24,11 +28,11 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     telemetryClient = new NiceMock<MockTelemetryClient>;
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
-    testAllocator = new StrictMock<AllocatorMock>(arrayInfo);
+    testAllocator = new StrictMock<AllocatorFake>(testInfo, arrayInfo);
     volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
-    writeTester = new LogWriteTestFixture(testMapper, arrayInfo, journal, testInfo);
+    writeTester = new LogWriteTestFixture(testMapper, testAllocator, arrayInfo, journal, testInfo);
     replayTester = new ReplayTestFixture(testMapper, testAllocator, testInfo);
 }
 
@@ -72,7 +76,14 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
 
     if (journal->IsEnabled() == true)
     {
+        if (config->IsVscEnabled() == true)
+        {
+            journal->ResetVersionedSegmentContext();
+        }
         journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+
+        IContextManagerFake* contextManager = testAllocator->GetIContextManagerFake();
+        contextManager->PrepareVersionedSegmentCtx(journal->GetVersionedSegmentContext());
     }
 
     _GetLogBufferSizeInfo();
@@ -99,6 +110,21 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
+    testAllocator->GetISegmentCtxFake()->LoadContext();
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+}
+
+void
+JournalManagerTestFixture::SimulateSPORWithoutRecovery(JournalConfigurationBuilder& configurationBuilder)
+{
+    delete journal;
+
+    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
+    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, GetLogFileName());
+    journal->ResetJournalConfiguration(configurationBuilder.Build());
+    writeTester->UpdateJournal(journal);
+
+    testAllocator->GetISegmentCtxFake()->LoadContext();
     journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
@@ -125,9 +151,26 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
+    testAllocator->GetISegmentCtxFake()->LoadContext();
     journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
+void
+JournalManagerTestFixture::InjectCheckpointFaultAfterMetaFlushCompleted(void)
+{
+    uint64_t latestContextVersion = 1;
+
+    bool isFaultExecuted = false;
+    EventSmartPtr faultEvent(new FaultEvent(isFaultExecuted));
+    journal->InjectFaultEvent(typeid(ResetLogGroup), faultEvent);
+
+    writeTester->WaitForAllLogWriteDone();
+    ExpectCheckpointTriggered();
+    journal->StartCheckpoint();
+    while (isFaultExecuted != true)
+    {
+    }
+}
 void
 JournalManagerTestFixture::SetTriggerCheckpoint(bool isCheckpointEnabled)
 {
@@ -138,7 +181,7 @@ void
 JournalManagerTestFixture::ExpectCheckpointTriggered(void)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()),
         FlushContexts)
         .Times(AtLeast(1));
 }
@@ -161,9 +204,13 @@ JournalManagerTestFixture::GetJournal(void)
 int
 JournalManagerTestFixture::AddDummyLog(void)
 {
-    VirtualBlks blks;
-    blks.startVsa = UNMAP_VSA;
-    blks.numBlks = 1;
+    VirtualBlks blks{
+        .startVsa = {
+            .stripeId = std::rand() % testInfo->numUserStripes,
+            .offset = 0
+        },
+        .numBlks = 1
+    };
 
     bool result = writeTester->WriteBlockLog(testInfo->defaultTestVol,
         0, blks);

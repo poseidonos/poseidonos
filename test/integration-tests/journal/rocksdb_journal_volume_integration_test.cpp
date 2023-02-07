@@ -1,6 +1,9 @@
+#include "rocksdb_journal_volume_integration_test.h"
+
 #include <experimental/filesystem>
 
-#include "rocksdb_journal_volume_integration_test.h"
+#include "test/integration-tests/journal/fake/i_context_manager_fake.h"
+#include "test/integration-tests/journal/fake/i_context_replayer_mock.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -11,7 +14,7 @@ namespace pos
 {
 RocksDBJournalVolumeIntegrationTest::RocksDBJournalVolumeIntegrationTest(void)
 : JournalManagerTestFixture(GetLogDirName()),
-builder(testInfo)
+  builder(testInfo)
 {
 }
 
@@ -64,7 +67,7 @@ void
 RocksDBJournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false, _)).Times(volumesToDelete.size());
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()), FlushContexts(_, false, _)).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
         EXPECT_TRUE(journal->VolumeDeleted(volId) == 0);
@@ -82,7 +85,7 @@ RocksDBJournalVolumeIntegrationTest::CheckVolumeDeleteLogsWritten(Volumes& volum
     std::list<LogHandlerInterface*> logs = logList.GetLogs();
 
     int deleteVolumeLogFound = 0;
-    
+
     while (logs.size() != 0)
     {
         LogHandlerInterface* log = logs.front();

@@ -47,6 +47,7 @@ class VirtualBlks;
 class MetaUpdateCallback : public Callback
 {
 public:
+    MetaUpdateCallback(void);
     MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
         CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
         SystemTimeoutChecker* timeoutChecker = nullptr, EventScheduler* eventscheduler = nullptr);

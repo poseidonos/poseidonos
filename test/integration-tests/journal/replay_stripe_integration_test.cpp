@@ -1,8 +1,10 @@
 #include "gtest/gtest.h"
-
+#include "test/integration-tests/journal/fake/i_context_replayer_mock.h"
+#include "test/integration-tests/journal/fake/wbstripe_allocator_mock.h"
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::InSequence;
 using ::testing::Return;
 

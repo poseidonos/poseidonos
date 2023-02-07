@@ -1,5 +1,9 @@
 #include "journal_volume_integration_test.h"
+
 #include <iostream>
+
+#include "test/integration-tests/journal/fake/i_context_replayer_mock.h"
+#include "test/integration-tests/journal/fake/i_context_manager_fake.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -47,7 +51,7 @@ void
 JournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()), FlushContexts(_, false, _)).Times(volumesToDelete.size());
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()), FlushContexts(_, false, _)).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
         EXPECT_TRUE(journal->VolumeDeleted(volId) == 0);

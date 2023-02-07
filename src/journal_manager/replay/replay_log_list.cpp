@@ -209,7 +209,7 @@ ReplayLogList::SetSegInfoFlushed(int logGroupId)
 
     if (logGroups[logGroupId].size() == 1)
     {
-        auto replayLogGroup = logGroups[logGroupId].begin()->second;
+        auto& replayLogGroup = logGroups[logGroupId].begin()->second;
         POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS), "SetSegInfoFlushed, id:{}, numLogs:{}", logGroupId, replayLogGroup.logs.size());
 
         for (auto it = replayLogGroup.logs.begin(); it != replayLogGroup.logs.end(); it++)

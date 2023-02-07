@@ -1,6 +1,7 @@
 #include <experimental/filesystem>
+#include <gtest/gtest.h>
 
-#include "gtest/gtest.h"
+#include "test/integration-tests/journal/fake/i_context_manager_fake.h"
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 
 using ::testing::AtLeast;
@@ -129,7 +130,7 @@ TEST_F(RocksDBLogWriteIntegrationTest, DISABLED_WriteLog_GcStripes)
         ->SetLogBufferSize(4160 * 2);
     testInfo->numBlksPerStripe *= 2;
     InitializeJournal(builder.Build());
-    EXPECT_CALL(*(testAllocator->GetIContextManagerMock()),
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()),
         FlushContexts)
         .Times(AtLeast(1));
 

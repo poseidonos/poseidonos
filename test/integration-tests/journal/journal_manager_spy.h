@@ -1,12 +1,13 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
 #include "src/journal_manager/checkpoint/log_group_releaser.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/journal_manager/log/log_list.h"
-#include "test/integration-tests/journal/fake/allocator_mock.h"
+#include "test/integration-tests/journal/fake/allocator_fake.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/log_group_releaser_spy.h"
 
@@ -18,6 +19,7 @@ class IVolumeEventHandler;
 class IJournalStatusProvider;
 class TelemetryPublisher;
 class TelemetryClient;
+class IVersionedSegmentContext;
 
 class JournalManagerSpy : public JournalManager
 {
@@ -46,11 +48,16 @@ public:
     uint64_t GetNextOffset(void);
     IJournalWriter* GetJournalWriter(void);
     IJournalStatusProvider* GetStatusProvider(void);
+    LogGroupReleaser* GetLogGroupReleaser(void);
+    void ResetVersionedSegmentContext(void);
+    IVersionedSegmentContext* GetVersionedSegmentContext(void);
+    void InjectFaultEvent(const std::type_info& targetEventInfo, EventSmartPtr errorEvent);
 
 private:
     int _GetLogsFromBuffer(LogList& logList);
 
     MockEventScheduler* eventScheduler;
     std::string LogFileName;
+    std::unordered_map<std::string, EventSmartPtr> faultInjectorTable;
 };
 } // namespace pos

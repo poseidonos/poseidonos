@@ -12,10 +12,15 @@ using ::testing::AtLeast;
 
 namespace pos
 {
-class IContextManagerMock : public IContextManager
+class ISegmentCtxFake;
+class IVersionedSegmentContext;
+class AllocatorAddressInfo;
+class IContextManagerFake : public IContextManager
 {
 public:
-    using IContextManager::IContextManager;
+    explicit IContextManagerFake(ISegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo);
+    virtual ~IContextManagerFake(void);
+
     MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, int logGroupId), (override));
 
     virtual void UpdateOccupiedStripeCount(StripeId lsid) {}
@@ -28,34 +33,23 @@ public:
     virtual bool NeedRebuildAgain(void) { return true; }
     virtual uint32_t GetRebuildTargetSegmentCount(void) { return 0; }
     virtual int GetGcThreshold(GcMode mode) { return 0; }
-    virtual uint64_t GetStoredContextVersion(int owner) { return 0; }
     virtual SegmentCtx* GetSegmentCtx(void) { return nullptr; }
     virtual GcCtx* GetGcCtx(void) { return nullptr; }
-    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx) { return; }
     virtual void ResetFlushedInfo(int logGroupId) { return; }
     virtual void SetAllocateDuplicatedFlush(bool flag) { return; }
-    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_) { return; }
-    virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void) { return nullptr; }
-
-    IContextManagerMock(void)
-    {
-        ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this, &IContextManagerMock::_FlushContexts));
-        EXPECT_CALL(*this, FlushContexts(_, true, _)).Times(AtLeast(0));
-    }
+    
+    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_) override;
+    virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void) override;
+    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_) override;
+    IVersionedSegmentContext* GetVersionedSegmentContext(void);
+    virtual uint64_t GetStoredContextVersion(int owner) override;
 
 private:
-    int _FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
-    {
-        if (callback != nullptr)
-        {
-            bool result = callback->Execute();
-            if (result == false)
-            {
-                return -1;
-            }
-        }
-        return 0;
-    }
+    int _FlushContexts(EventSmartPtr callback, bool sync, int logGroupId);
+
+    ISegmentCtxFake* segmentCtx;
+    AllocatorAddressInfo* addrInfo;
+    IVersionedSegmentContext* versionedSegCtx;
 };
 
 } // namespace pos

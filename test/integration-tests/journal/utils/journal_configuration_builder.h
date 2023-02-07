@@ -17,6 +17,7 @@ public:
     JournalConfigurationBuilder* SetMaxPartitionSize(uint64_t partitionSize);
     JournalConfigurationBuilder* SetRocksDBEnable(uint64_t isRocksDBEnabled);
     JournalConfigurationBuilder* SetRocksDBBasePath(std::string rocksDBBasePath);
+    JournalConfigurationBuilder* SetVersionedSegmentContextEnable(bool isVersionedSegmentContextEnabled);
     JournalConfigurationSpy* Build(void);
 
 private:

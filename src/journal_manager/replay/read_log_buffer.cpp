@@ -88,7 +88,7 @@ ReadLogBuffer::Start(void)
 
     int result = 0;
     int numLogGroups = config->GetNumLogGroups();
-    uint64_t groupSize = config->GetLogGroupSize() * 2;
+    uint64_t groupSize = config->GetLogGroupSize();
 
     for (int groupId = 0; groupId < numLogGroups; groupId++)
     {
