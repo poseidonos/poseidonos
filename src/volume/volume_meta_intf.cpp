@@ -296,9 +296,9 @@ VolumeMetaIntf::_CreateIoRequest(const MetaFsIoOpcode opCode,
     request->SetIoInfo(opCode, 0, FILE_SIZE, buf);
     request->SetFileInfo(file->GetFd(), file->GetIoDoneCheckFunc());
     request->SetCallback([&](auto arg) {
-            doneFlag = true;
             ioResult = arg->GetError();
             delete arg;
+            doneFlag = true;
         });
     return request;
 }
