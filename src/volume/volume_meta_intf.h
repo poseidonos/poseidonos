@@ -57,9 +57,9 @@ private:
     static std::string _CreateJsonFrom(VolumeList& volList);
     static int _IssueIoAndWait(const MetaFsIoOpcode opCode, MetaFsFileIntf* file, char* buf);
     static int _CloseFile(unique_ptr<MetaFsFileIntf> file);
-    static std::unique_ptr<char[]> _AllocateBuffer(uint32_t size)
+    static std::unique_ptr<char[]> _AllocateZeroInitializedBuffer(uint32_t size)
     {
-        return std::unique_ptr<char[]>(new char[size]);
+        return std::unique_ptr<char[]>(new char[size]{});
     }
     static AsyncMetaFileIoCtx* _CreateIoRequest(const MetaFsIoOpcode opCode,
         MetaFsFileIntf* file, char* buf, std::atomic<bool>& doneFlag, int& ioResult);

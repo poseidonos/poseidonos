@@ -74,8 +74,7 @@ VolumeMetaIntf::LoadVolumes(VolumeList& volList, const std::string& arrayName,
         return EID(VOL_UNABLE_TO_LOAD_OPEN_FAILED);
     }
 
-    auto rBuf = _AllocateBuffer(FILE_SIZE);
-    memset(rBuf.get(), 0, FILE_SIZE);
+    auto rBuf = _AllocateZeroInitializedBuffer(FILE_SIZE);
 
     rc = _IssueIoAndWait(MetaFsIoOpcode::Read, file.get(), (char*)rBuf.get());
     if (EID(SUCCESS) != rc)
@@ -139,8 +138,7 @@ VolumeMetaIntf::SaveVolumes(VolumeList& volList, const string& arrayName,
         return EID(VOL_UNABLE_TO_SAVE_CONTENT_OVERFLOW);
     }
 
-    auto wBuf = _AllocateBuffer(FILE_SIZE);
-    memset(wBuf.get(), 0, FILE_SIZE);
+    auto wBuf = _AllocateZeroInitializedBuffer(FILE_SIZE);
     strncpy(wBuf.get(), contents.c_str(), contents.size());
 
     rc = _IssueIoAndWait(MetaFsIoOpcode::Write, file.get(), (char*)wBuf.get());
