@@ -229,4 +229,13 @@ SegmentInfo::AllocateSegmentInfoData(SegmentInfoData *segmentInfoData)
     data = segmentInfoData;
 }
 
+void
+SegmentInfo::UpdateFrom(SegmentInfo &segmentInfo)
+{
+    this->data->validBlockCount = (uint32_t)segmentInfo.data->validBlockCount;
+    this->data->occupiedStripeCount = (uint32_t)segmentInfo.data->occupiedStripeCount;
+    this->data->state = segmentInfo.data->state;
+}
+
+
 } // namespace pos

@@ -248,4 +248,26 @@ TEST(SegmentInfo, GetValidBlockCountIfSsdState_testIfValidCountIsReturnedWhenIts
     EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
 }
 
+TEST(SegmentInfo, UpdateFrom_testIfSegmentInfoDataIsSuccessfullyUpdatedByUpdateFromMethod)
+{
+    // Given initialized SegmentInfo and specific data allocated SegmentInfo.
+    SegmentInfo SegInfo;
+    SegmentInfoData SegInfoData(0, 0, SegmentState::FREE);
+    SegInfo.AllocateSegmentInfoData(&SegInfoData);
+    SegInfo.InitSegmentInfoData();
+
+    // initialized specific values in filledSegInfo.
+    SegmentInfo filledSegInfo;
+    SegmentInfoData filledSegInfoData(5, 3, SegmentState::VICTIM);
+    filledSegInfo.AllocateSegmentInfoData(&filledSegInfoData);
+
+    // When execute SegmentInfo::UpdateFrom()
+    SegInfo.UpdateFrom(filledSegInfo);
+
+    // Then SegInfo data must be updated.
+    EXPECT_EQ(SegInfo.GetValidBlockCount(), 5);
+    EXPECT_EQ(SegInfo.GetOccupiedStripeCount(), 3);
+    EXPECT_EQ(SegInfo.GetState(), SegmentState::VICTIM);
+}
+
 } // namespace pos
