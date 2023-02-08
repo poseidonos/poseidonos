@@ -16,11 +16,11 @@ TEST(HeaderSerializer, Deserialize_testIfReturnErrorWhenInvalidSignatureIsDetect
 {
     // Given
     IHeaderSerializer* serializer = new HeaderSerializer();
-    char rawData[header::SIGNATURE_LENGTH];
+    char rawData[header::LENGTH];
     HeaderElement he;
 
     // When
-    int ret = serializer->Deserialize(rawData, header::SIGNATURE_LENGTH, &he);
+    int ret = serializer->Deserialize(rawData, header::LENGTH, &he);
 
     // Then
     ASSERT_EQ(EID(PBR_UNKNOWN_SIGNATURE), ret);
@@ -33,12 +33,12 @@ TEST(HeaderSerializer, Deserialize_testIfReturnErrorWhenChecksumIsInvalid)
 {
     // Given
     IHeaderSerializer* serializer = new HeaderSerializer();
-    char rawData[header::SIGNATURE_LENGTH];
+    char rawData[header::LENGTH];
     HeaderElement he;
     strncpy(&rawData[header::SIGNATURE_OFFSET], header::SIGNATURE.c_str(), header::SIGNATURE_LENGTH);
 
     // When
-    int ret = serializer->Deserialize(rawData, header::SIGNATURE_LENGTH, &he);
+    int ret = serializer->Deserialize(rawData, header::LENGTH, &he);
 
     // Then
     ASSERT_EQ(EID(PBR_CHECKSUM_INVALID), ret);
