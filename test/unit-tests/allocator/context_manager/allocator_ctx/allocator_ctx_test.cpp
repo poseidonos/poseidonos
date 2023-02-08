@@ -19,12 +19,12 @@ TEST(AllocatorCtx, AfterLoad_testIfAllMetadataIsCopiedToContext)
 {
     // given
     AllocatorCtxHeader header;
-    
+
     NiceMock<MockBitMapMutex>* allocBitmap = new NiceMock<MockBitMapMutex>(100);
     char* bitmapAddr = new char[10 * BITMAP_ENTRY_SIZE];
     ON_CALL(*allocBitmap, GetMapAddr).WillByDefault(Return((uint64_t*)bitmapAddr));
     ON_CALL(*allocBitmap, GetNumEntry).WillByDefault(Return(10));
-    
+
     NiceMock<MockAllocatorAddressInfo> addrInfo;
     ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));
 
@@ -230,7 +230,7 @@ TEST(AllocatorCtx, GetSectionInfo_TestGetEachSectionSize)
     ON_CALL(*allocBitmap, GetMapAddr).WillByDefault(Return((uint64_t*)100));
     ON_CALL(*allocBitmap, GetNumEntry).WillByDefault(Return(100));
     NiceMock<MockAllocatorAddressInfo> addrInfo;
-    ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));    
+    ON_CALL(addrInfo, GetnumWbStripes).WillByDefault(Return(100));
     AllocatorCtx allocCtx(nullptr, nullptr, allocBitmap, &addrInfo);
     allocCtx.Init();
 

@@ -7,6 +7,9 @@
 #include "test/unit-tests/meta_file_intf/async_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 #include "src/include/pos_event_id.h"
+#include "src/meta_file_intf/mock_file_intf.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/include/allocator_const.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -260,5 +263,41 @@ TEST(AllocatorFileIo, GetSectionInfo_TestSimpleGetter)
 
     auto actual = fileManager.GetSectionSize(sectionId);
     EXPECT_EQ(actual, info.size);
+}
+
+
+TEST(AllocatorFileIo, DISABLED_Flush_testIfWrittingSegmentInfoDataCorrectly)
+{
+    // TODO(sang7.park) : To be fixed, maybe this test supposed to move tointeration test.
+    // Given : Segment numbers, SegmentCtx
+    int numOfSegment = 10;
+    AllocatorAddressInfo addrInfo;
+    addrInfo.SetnumUserAreaSegments(numOfSegment);
+
+    SegmentCtx* client = new SegmentCtx(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, nullptr, 0);
+    client->Init();
+    uint64_t segmentCtxFileSize = sizeof(SegmentCtxHeader) + numOfSegment * sizeof(SegmentInfoData);
+
+    MockFileIntf* file = new MockFileIntf("/tmp/buffer.bin",0,MetaFileType::General);
+    file->Create(segmentCtxFileSize);
+    file->Open();
+
+    SegmentInfo* segInfo = client->GetSegmentInfos();
+
+    AllocatorFileIo fileManager(SEGMENT_CTX, client, &addrInfo, file);
+    fileManager.Init();
+
+    // Given : SegmentInfoData is updated to specific values
+    for(int i = 0; i < numOfSegment ; ++i)
+    {
+        segInfo[i].SetValidBlockCount(i);
+        segInfo[i].SetOccupiedStripeCount(i*2);
+        segInfo[i].SetState((SegmentState)(i%(SegmentState::NUM_STATES)));
+    }
+
+    // When : segmentCtx flushed to SSD.
+    fileManager.Flush(nullptr, -1 /* don't care*/, nullptr);
+
+    fileManager.Dispose();
 }
 } // namespace pos

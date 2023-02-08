@@ -154,12 +154,14 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
 
     uint32_t expectedVictimSegId = 0;
 
+    SegmentInfo* segInfos = new SegmentInfo[numOfSegment];
     SegmentInfoData* segmentInfoData = new SegmentInfoData[numOfSegment];
     for (int i = 0; i < numOfSegment; ++i)
     {
-        segmentInfoData[i].validBlockCount = maxValidBlockCount;
-        segmentInfoData[i].occupiedStripeCount = maxOccupiedStripeCount;
-        segmentInfoData[i].state = SegmentState::SSD;
+        segInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
+        segInfos[i].SetValidBlockCount(maxValidBlockCount);
+        segInfos[i].SetOccupiedStripeCount(maxOccupiedStripeCount);
+        segInfos[i].SetState(SegmentState::SSD);
     }
     SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, segmentInfoData);
 

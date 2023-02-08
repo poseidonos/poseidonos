@@ -139,8 +139,7 @@ SegmentCtx::Init(void)
         segmentInfoData.data = new SegmentInfoData[numSegments];
         for (uint32_t i = 0; i < numSegments ; ++i)
         {
-            segmentInfos[i].AllocateSegmentInfoData(&(segmentInfoData.data[i]));
-            segmentInfos[i].InitSegmentInfoData();
+            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData.data[i]);
         }
     }
 
@@ -423,7 +422,7 @@ SegmentCtx::GetSectionInfo(int section)
     }
     else
     {
-        assert(false);       
+        assert(false);
     }
 }
 

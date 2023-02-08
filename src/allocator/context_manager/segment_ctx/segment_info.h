@@ -51,7 +51,7 @@ enum SegmentState : int
     NUM_STATES,
 };
 
-class SegmentInfoData
+struct SegmentInfoData
 {
 public:
     std::atomic<uint32_t> validBlockCount;
@@ -78,7 +78,7 @@ public:
     SegmentInfo(void);
     ~SegmentInfo(void);
 
-    virtual void InitSegmentInfoData(void);
+    virtual void AllocateAndInitSegmentInfoData(SegmentInfoData* segmentInfoData);
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(uint32_t cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
@@ -96,7 +96,6 @@ public:
     virtual bool MoveToVictimState(void);
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
-    virtual void AllocateSegmentInfoData(SegmentInfoData* segmentInfoData);
     virtual void UpdateFrom(SegmentInfo &segmentInfo);
 
 private:

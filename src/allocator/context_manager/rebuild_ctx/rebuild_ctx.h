@@ -69,6 +69,7 @@ public:
     virtual int GetNumSections(void) override;
     virtual uint64_t GetTotalDataSize(void) override;
 
+
     virtual int FlushRebuildSegmentList(std::set<SegmentId> segIdSet);
     virtual std::set<SegmentId> GetList(void);
 

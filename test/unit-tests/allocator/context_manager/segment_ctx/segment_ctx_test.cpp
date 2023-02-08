@@ -92,7 +92,7 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
         segmentInfoDataPtr[segId].occupiedStripeCount = 0;
         segmentInfoDataPtr[segId].state = SegmentState::FREE;
     }
-    
+
     segCtx.AfterLoad(buf);
 
     EXPECT_EQ(segCtx.GetStoredVersion(), 6);
