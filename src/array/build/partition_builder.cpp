@@ -78,7 +78,9 @@ PartitionBuilder::Load(const vector<pbr::PteData*>& pteList,
 
     if (nvm == nullptr)
     {
-        return -1;
+        ret = EID(LOAD_PARTITION_NVM_DOES_NOT_EXIST);
+        POS_TRACE_WARN(ret, "");
+        return ret;
     }
 
     uint64_t totalNvmBlks = nvm->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;

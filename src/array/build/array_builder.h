@@ -43,7 +43,9 @@ namespace pos
 class ArrayBuilder
 {
 public:
+    //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
     static ArrayBuildInfo* Load(pbr::AteData* ateData);
+    //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
     static ArrayBuildInfo* Create(string name, const DeviceSet<string>& devs,
         string metaRaid, string dataRaid);
 };

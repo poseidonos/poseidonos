@@ -42,6 +42,7 @@ namespace pbr
 inline uint32_t
 MakePbrChecksum(char* data, uint32_t dataLength, uint32_t checksumOffset, uint32_t checksumLength)
 {
+    assert(dataLength > checksumOffset + checksumLength);
     char tmp[dataLength];
     std::memcpy(&tmp, data, dataLength);
     for (uint32_t i = 0; i < checksumLength; i++)

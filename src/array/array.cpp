@@ -554,7 +554,7 @@ Array::GetDevices(ArrayDeviceType type)
 int
 Array::_UpdatePbr(void)
 {
-    pbr::AteData* ate = _GetAteData();
+    pbr::AteData* ate = _BuildAteData();
     int ret = pbrAdapter->Update(ate);
 
     POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "_UpdatePbr(name:{}, uuid:{}, ateuuid:{})",
@@ -570,7 +570,7 @@ Array::_ClearPbr(void)
 }
 
 pbr::AteData*
-Array::_GetAteData(void)
+Array::_BuildAteData(void)
 {
     pbr::AteData* ate = new pbr::AteData();
     ate->arrayName = name_;

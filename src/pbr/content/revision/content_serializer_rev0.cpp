@@ -46,24 +46,28 @@ namespace pbr
 int
 ContentSerializerRev0::Serialize(char* dataOut, AteData* ateData)
 {
+    POS_TRACE_DEBUG(EID(PBR_SERIALIZE_DEBUG), "revision:0");
     int ret = _SerializeAte(ATE_START_OFFSET, dataOut, ateData);
     if (ret == 0)
     {
         uint64_t backupAteOffset = _GetBackupAteOffset();
         ret = _SerializeAte(backupAteOffset, dataOut, ateData);
     }
+    POS_TRACE_DEBUG(EID(PBR_SERIALIZE_RESULT), "revision:0, ret:{}", ret);
     return ret;
 }
 
 int
 ContentSerializerRev0::Deserialize(AteData* ateOut, char* rawData)
 {
+    POS_TRACE_DEBUG(EID(PBR_DESERIALIZE_DEBUG), "revision:0");
     int ret = _DeserializeAte(ATE_START_OFFSET, ateOut, rawData);
     if (ret != 0)
     {
         uint64_t backupAteOffset = _GetBackupAteOffset();
         ret = _DeserializeAte(backupAteOffset, ateOut, rawData);
     }
+    POS_TRACE_DEBUG(EID(PBR_DESERIALIZE_RESULT), "revision:0, ret:{}", ret);
     return ret;
 }
 

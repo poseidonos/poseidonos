@@ -50,7 +50,6 @@ public:
     virtual int Write(AteData* content, string filePath) override;
 
 private:
-    char* _Serialize(AteData* content);
     IPbrWriter* writer = nullptr;
     IContentSerializer* serializer = nullptr;
 };

@@ -21,7 +21,7 @@ TEST(ContentSerializerRev0, Deserialize_testIfReturnErrorWhenInvalidSignatureIsD
     int ret = serializer.Deserialize(&ateData, rawData);
 
     // Then
-    ASSERT_EQ(EID(PBR_UNKNOWN_SIGNATURE), ret);
+    ASSERT_EQ(EID(ATE_UNKNOWN_SIGNATURE), ret);
 }
 
 TEST(ContentSerializerRev0, Deserialize_testIfReturnErrorWhenChecksumIsInvalid)

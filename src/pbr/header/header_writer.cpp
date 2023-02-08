@@ -55,44 +55,28 @@ HeaderWriter::~HeaderWriter(void)
 }
 
 int
-HeaderWriter::Write(HeaderElement* pHeader, pos::UblockSharedPtr dev)
+HeaderWriter::Write(HeaderElement* headerElem, pos::UblockSharedPtr dev)
 {
-    char* rawData = _Serialize(pHeader);
-    if (rawData == nullptr)
+    char* rawData = new char[header::LENGTH];
+    int ret = serializer->Serialize(headerElem, rawData, header::LENGTH);
+    if (ret == 0)
     {
-        return -1;
+        ret = writer->Write(dev, rawData, header::START_LBA, header::LENGTH);
     }
-
-    int ret = writer->Write(dev, rawData, header::START_LBA, header::LENGTH);
     delete[] rawData;
     return ret;
 }
 
 int
-HeaderWriter::Write(HeaderElement* pHeader, string filePath)
+HeaderWriter::Write(HeaderElement* headerElem, string filePath)
 {
-    char* rawData = _Serialize(pHeader);
-    if (rawData == nullptr)
+    char* rawData = new char[header::LENGTH];
+    int ret = serializer->Serialize(headerElem, rawData, header::LENGTH);
+    if (ret == 0)
     {
-        return -1;
+        ret = writer->Write(filePath, rawData, header::START_LBA, header::LENGTH);
     }
-    int ret = writer->Write(filePath, rawData, header::START_LBA, header::LENGTH);
     delete[] rawData;
     return ret;
 }
-
-char*
-HeaderWriter::_Serialize(HeaderElement* pHeader)
-{
-    uint32_t length = pbr::header::LENGTH;
-    char* rawData = new char[length];
-    int ret = serializer->Serialize(pHeader, rawData, length);
-    if (ret != 0)
-    {
-        delete[] rawData;
-        return nullptr;
-    }
-    return rawData;
-}
-
 } // namespace pbr

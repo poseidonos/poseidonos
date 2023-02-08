@@ -58,12 +58,14 @@ ContentWriter::~ContentWriter(void)
 int
 ContentWriter::Write(AteData* content, const pos::UblockSharedPtr dev)
 {
-    char* rawData = _Serialize(content);
-    if (rawData == nullptr)
+    uint32_t length = serializer->GetContentSize();
+    char* rawData = new char[length];
+    int ret = serializer->Serialize(rawData, content);
+    if (ret == 0)
     {
-        return -1;
+        ret = writer->Write(dev, rawData,
+            serializer->GetContentStartLba(), serializer->GetContentSize());
     }
-    int ret = writer->Write(dev, rawData, serializer->GetContentStartLba(), serializer->GetContentSize());
     delete[] rawData;
     return ret;
 }
@@ -71,28 +73,15 @@ ContentWriter::Write(AteData* content, const pos::UblockSharedPtr dev)
 int
 ContentWriter::Write(AteData* content, string filePath)
 {
-    char* rawData = _Serialize(content);
-    if (rawData == nullptr)
-    {
-        return -1;
-    }
-    int ret = writer->Write(filePath, rawData, serializer->GetContentStartLba(), serializer->GetContentSize());
-    delete[] rawData;
-    return ret;
-}
-
-char*
-ContentWriter::_Serialize(AteData* content)
-{
     uint32_t length = serializer->GetContentSize();
     char* rawData = new char[length];
     int ret = serializer->Serialize(rawData, content);
-    if (ret != 0)
+    if (ret == 0)
     {
-        delete[] rawData;
-        return nullptr;
+        ret = writer->Write(filePath, rawData,
+            serializer->GetContentStartLba(), serializer->GetContentSize());
     }
-    return rawData;
+    delete[] rawData;
+    return ret;
 }
-
 } // namespace pbr

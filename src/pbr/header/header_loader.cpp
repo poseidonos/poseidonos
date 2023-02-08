@@ -34,6 +34,8 @@
 #include "header_structure.h"
 #include "src/pbr/io/pbr_reader.h"
 #include "header_serializer.h"
+#include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 
 namespace pbr
 {
@@ -65,10 +67,6 @@ HeaderLoader::Load(HeaderElement* pHeaderOut, pos::UblockSharedPtr dev)
     if (ret == 0)
     {
         ret = serializer->Deserialize(rawData, length, pHeaderOut);
-        if (pHeaderOut->signature != header::SIGNATURE)
-        {
-            return -1;
-        }
     }
     delete[] rawData;
     return ret;

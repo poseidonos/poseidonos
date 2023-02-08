@@ -41,6 +41,7 @@ using namespace std;
 
 namespace pbr
 {
+// Fake module to record PBR in file
 class FilePbr
 {
 public:

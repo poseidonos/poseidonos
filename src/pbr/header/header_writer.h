@@ -49,11 +49,10 @@ public:
     virtual ~HeaderWriter(void);
 
 protected:
-    virtual int Write(HeaderElement* pHeader, pos::UblockSharedPtr dev) override;
-    virtual int Write(HeaderElement* pHeader, string filePath) override;
+    virtual int Write(HeaderElement* headerElem, pos::UblockSharedPtr dev) override;
+    virtual int Write(HeaderElement* headerElem, string filePath) override;
 
 private:
-    char* _Serialize(HeaderElement* pHeader);
     IPbrWriter* writer = nullptr;
     IHeaderSerializer* serializer = nullptr;
 };

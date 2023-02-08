@@ -1347,7 +1347,7 @@ Root:
     Id: 2310
     Name: PBR_LOAD_DEBUG
     Severity:
-    Description: PBR loaded successfully
+    Description:
     Cause:
     Solution:
   -
@@ -1443,9 +1443,37 @@ Root:
     Solution:
   -
     Id: 2361
+    Name: PBR_SERIALIZE_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2362
+    Name: PBR_SERIALIZE_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2363
+    Name: PBR_DESERIALIZE_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2364
+    Name: PBR_DESERIALIZE_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2371
     Name: PBR_FILE_NOT_EXIST
     Severity:
-    Description: PBR does not exist
+    Description: PBR file does not exist
     Cause:
     Solution:
   -
@@ -1723,6 +1751,13 @@ Root:
     Description:
     Cause:
     Solution:
+  -
+    Id: 2473
+    Name: LOAD_PARTITION_NVM_DOES_NOT_EXIST
+    Severity:
+    Description: Failed to load partitions during array load process.
+    Cause: Write buffer device could not be found.
+    Solution: Please try again after checking if there is a write buffer included in the array.
   -
     Id: 2480
     Name: BUILD_PARTITIONS_DEBUG

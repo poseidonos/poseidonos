@@ -132,7 +132,7 @@ private:
     void _DeletePartitions(void);
     int _UpdatePbr(void);
     void _ClearPbr(void);
-    pbr::AteData* _GetAteData(void);
+    pbr::AteData* _BuildAteData(void);
     void _RebuildDone(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildResult result);
     void _DetachSpare(IArrayDevice* target);
     void _DetachData(IArrayDevice* target);
