@@ -93,7 +93,7 @@ ReverseMapIo::Flush(void)
             this, std::placeholders::_1));
 
         offset += page.length;
-        issuedCount = (issuedIoCnt++);
+        issuedCount = (++issuedIoCnt);
         ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
