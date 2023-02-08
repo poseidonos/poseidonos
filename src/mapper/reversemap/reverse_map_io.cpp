@@ -13,7 +13,6 @@ ReverseMapIo::ReverseMapIo(ReverseMapPack* pack, EventSmartPtr clientCallback,
     TelemetryPublisher* tp, EventScheduler* es,
     std::function<void(ReverseMapIo*)> notify)
 : revMapPack(pack),
-  ioError(0),
   ioDirection(direction),
   fileOffset(offset),
   revMapFile(file),
@@ -35,6 +34,7 @@ ReverseMapIo::Load(void)
 
     uint64_t offset = fileOffset;
     uint64_t pageNum = 0;
+    int ret = EID(SUCCESS);
 
     std::vector<ReverseMapPage> revMapPages = revMapPack->GetReverseMapPages();
     totalIoCnt = revMapPages.size();
@@ -45,21 +45,20 @@ ReverseMapIo::Load(void)
         revMapPageAsyncIoReq->SetFileInfo(revMapFile->GetFd(), revMapFile->GetIoDoneCheckFunc());
         revMapPageAsyncIoReq->SetCallback(std::bind(&ReverseMapIo::_RevMapPageIoDone, this, std::placeholders::_1));
 
-        int ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
+        offset += page.length;
+        issuedIoCnt++;
+        ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), revMapPageAsyncIoReq->ToString());
 
-            ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
             break;
         }
 
-        offset += page.length;
-        issuedIoCnt++;
     }
-    return ioError;
+    return ret;
 }
 
 int
@@ -69,9 +68,14 @@ ReverseMapIo::Flush(void)
 
     uint64_t offset = fileOffset;
     uint64_t pageNum = 0;
+    int ret = EID(SUCCESS);
 
     std::vector<ReverseMapPage> revMapPages = revMapPack->GetReverseMapPages();
     totalIoCnt = revMapPages.size();
+
+    // we used local variable so that there is no problem with operation even if instance is deleted
+    const uint64_t totalCount = totalIoCnt;
+    uint64_t issuedCount = 0;
 
     if (telemetryPublisher)
     {
@@ -88,30 +92,29 @@ ReverseMapIo::Flush(void)
         revMapPageAsyncIoReq->SetCallback(std::bind(&ReverseMapIo::_RevMapPageIoDone,
             this, std::placeholders::_1));
 
-        int ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
+        offset += page.length;
+        issuedCount = (issuedIoCnt++);
+        ret = revMapFile->AsyncIO(revMapPageAsyncIoReq);
         if (ret < 0)
         {
             POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR), revMapPageAsyncIoReq->ToString());
 
-            ioError = ret;
             mapFlushState = MapFlushState::FLUSH_DONE;
             callback = nullptr;
             break;
         }
 
-        offset += page.length;
-        issuedIoCnt++;
     }
 
-    if (totalIoCnt != issuedIoCnt)
+    if (totalCount != issuedCount)
     {
         // TODO: Publish error metric
         POS_TRACE_ERROR(EID(REVMAP_IO_ERROR),
             "Not all reverse map flushed due to error, total {}, issued {}",
-            totalIoCnt, issuedIoCnt);
+            totalCount, issuedCount);
     }
 
-    return ioError;
+    return ret;
 }
 
 void
@@ -120,7 +123,7 @@ ReverseMapIo::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     RevMapPageAsyncIoCtx* revMapPageAsyncIoReq = static_cast<RevMapPageAsyncIoCtx*>(ctx);
     if (revMapPageAsyncIoReq->error != 0)
     {
-        ioError = revMapPageAsyncIoReq->error;
+        int ioError = revMapPageAsyncIoReq->error;
         POS_TRACE_ERROR(EID(MFS_ASYNCIO_ERROR),
             "[ReverseMapPack] Error!, MFS AsyncIO error, ioError:{} mpageNum:{}", ioError, revMapPageAsyncIoReq->GetMpageNum());
     }
@@ -131,8 +134,6 @@ ReverseMapIo::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
         metric.SetCountValue(1);
         telemetryPublisher->PublishMetric(metric);
     }
-
-    uint32_t res = mfsAsyncIoDonePages.fetch_add(1);
 
     if ((ioDirection == IO_LOAD) && (revMapPageAsyncIoReq->GetMpageNum() == 0))
     {
@@ -145,7 +146,10 @@ ReverseMapIo::_RevMapPageIoDone(AsyncMetaFileIoCtx* ctx)
     }
 
     // TODO: Handle zombie request (request that was not issued due to previous error)
-    if ((res + 1) == totalIoCnt)
+    // we used local variable so that there is no problem with operation even if instance is deleted
+    const uint64_t issuedCount = totalIoCnt;
+    const uint32_t doneCount = mfsAsyncIoDonePages.fetch_add(1);
+    if ((doneCount + 1) == issuedCount)
     {
         mapFlushState = MapFlushState::FLUSH_DONE;
 

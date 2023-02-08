@@ -51,14 +51,13 @@ private:
     void _RevMapPageIoDone(AsyncMetaFileIoCtx* ctx);
 
     ReverseMapPack* revMapPack;
-    int ioError;
     IoDirection ioDirection;
     uint64_t fileOffset;
     MetaFileIntf* revMapFile;
     std::atomic<uint32_t> mfsAsyncIoDonePages;
     std::atomic<MapFlushState> mapFlushState;
     EventSmartPtr callback;
-    std::atomic<uint64_t> issuedIoCnt;
+    uint64_t issuedIoCnt;
     uint64_t totalIoCnt;
     std::function<void(ReverseMapIo*)> notifyIoDone;
 
