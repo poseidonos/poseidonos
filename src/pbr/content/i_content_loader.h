@@ -48,7 +48,7 @@ class IContentLoader
 {
 public:
     virtual ~IContentLoader() {};
-    virtual int Load(AteData* ateOut /* OUT PARAM */, pos::UblockSharedPtr dev) = 0;
-    virtual int Load(AteData* ateOut /* OUT PARAM */, string filePath) = 0;
+    virtual int Load(AteData*& ateOut /* OUT PARAM */, pos::UblockSharedPtr dev) = 0;
+    virtual int Load(AteData*& ateOut /* OUT PARAM */, string filePath) = 0;
 };
 } // namespace pbr

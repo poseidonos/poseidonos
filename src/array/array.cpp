@@ -47,6 +47,7 @@
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/helper/time/time_helper.h"
+#include "src/node/node_info.h"
 
 namespace pos
 {
@@ -573,6 +574,7 @@ pbr::AteData*
 Array::_BuildAteData(void)
 {
     pbr::AteData* ate = new pbr::AteData();
+    ate->nodeUuid = NodeInfo::GetUuid();
     ate->arrayName = name_;
     ate->arrayUuid = uuid;
     ate->createdDateTime = createdDateTime;

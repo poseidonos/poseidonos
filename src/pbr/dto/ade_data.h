@@ -43,6 +43,7 @@ const string ADE_SIGNATURE = "ADE";
 class AdeData
 {
 public:
+    virtual ~AdeData(void) = default;
     uint32_t devIndex;
     uint32_t devType;
     uint32_t devState;

@@ -37,4 +37,5 @@
 namespace pbr
 {
     static const uint32_t REVISION = 0;
+    static const uint32_t REVISION_FOR_UPDATE_TEST = UINT32_MAX;
 } // namespace pos

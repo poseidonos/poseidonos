@@ -72,7 +72,7 @@ PbrLoader::Load(vector<AteData*>& ateListOut)
         ret = headerLoader->Load(&header, dev);
         if (ret == 0)
         {
-            AteData* ateData = new AteData();
+            AteData* ateData;
             ContentLoader contentLoader(ContentSerializerFactory::GetSerializer(header.revision));
             ret = contentLoader.Load(ateData, dev);
             if (ret == 0)

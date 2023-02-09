@@ -32,25 +32,39 @@
 
 #pragma once
 
-#include "i_content_loader.h"
-#include "i_content_serializer.h"
-#include "src/pbr/io/pbr_reader.h"
+#include "src/pbr/dto/ate_data.h"
+
+#include <string>
+#include <vector>
 
 using namespace std;
 
 namespace pbr
 {
-class ContentLoader : public IContentLoader
+// THIS CLASS IS FOR PBR UPDATE TEST
+class FakeAteData : public AteData
 {
 public:
-    ContentLoader(IContentSerializer* serializer);
-    ContentLoader(IPbrReader* reader, IContentSerializer* serializer);
-    virtual ~ContentLoader(void);
-    virtual int Load(AteData*& ateOut /* OUT PARAM */, pos::UblockSharedPtr dev) override;
-    virtual int Load(AteData*& ateOut /* OUT PARAM */, string filePath) override;
+    FakeAteData(void) {};
+    FakeAteData(AteData* data)
+    {
+        nodeUuid = data->nodeUuid;
+        arrayName = data->arrayName;
+        arrayUuid = data->arrayUuid;
+        createdDateTime = data->createdDateTime;
+        lastUpdatedDateTime = data->lastUpdatedDateTime;
+        for (auto item : data->adeList)
+        {
+            adeList.push_back(item);
+        }
+        for (auto item : data->pteList)
+        {
+            pteList.push_back(item);
+        }
+    }
+    virtual ~FakeAteData(void) = default;
 
-private:
-    IPbrReader* reader = nullptr;
-    IContentSerializer* serializer = nullptr;
+    // fakeSignature field newly added 
+    string fakeSignature = "";
 };
 } // namespace pbr

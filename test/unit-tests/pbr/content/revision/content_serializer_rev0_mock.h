@@ -2,7 +2,7 @@
 #include <string>
 #include <list>
 #include <vector>
-#include "src/pbr/content/revision/content_serializer_rev0.h"
+#include "src/pbr/content/revision0/content_serializer_rev0.h"
 
 namespace pbr
 {

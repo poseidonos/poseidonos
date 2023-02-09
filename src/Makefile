@@ -41,7 +41,8 @@ SUBDIRS = allocator \
         pbr \
         pbr/checker \
         pbr/content \
-        pbr/content/revision \
+        pbr/content/fake_revision \
+        pbr/content/revision0 \
         pbr/header \
         pbr/io \
         pbr/load \
