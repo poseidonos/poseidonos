@@ -35,11 +35,11 @@
 namespace pos
 {
 ArrayBuildInfo*
-ArrayBuilderAdapter::Load(const DeviceSet<DeviceMeta>& devs,
-    string metaRaid, string dataRaid)
+ArrayBuilderAdapter::Load(pbr::AteData* ateData)
 {
-    return ArrayBuilder::Load(devs, metaRaid, dataRaid);
+    return ArrayBuilder::Load(ateData);
 }
+
 
 ArrayBuildInfo*
 ArrayBuilderAdapter::Create(string name, const DeviceSet<string>& devs,

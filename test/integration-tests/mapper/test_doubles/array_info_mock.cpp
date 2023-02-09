@@ -68,13 +68,6 @@ MockArrayInfo::GetSizeInfo(PartitionType type)
     return pls;
 }
 
-DeviceSet<string>
-MockArrayInfo::GetDevNames(void)
-{
-    DeviceSet<string> ds;
-    return ds;
-}
-
 string
 MockArrayInfo::GetName(void)
 {
@@ -82,11 +75,10 @@ MockArrayInfo::GetName(void)
     return str;
 }
 
-unsigned int
+uint32_t
 MockArrayInfo::GetIndex(void)
 {
-    unsigned int idx = 0;
-    return idx;
+    return 0;
 }
 
 string
@@ -103,7 +95,7 @@ MockArrayInfo::GetDataRaidType(void)
     return str;
 }
 
-id_t 
+string 
 MockArrayInfo::GetUniqueId(void)
 {
     return 0;
@@ -129,7 +121,7 @@ MockArrayInfo::GetRebuildingProgress(void)
 }
 
 vector<IArrayDevice*>
-MockArrayInfo::GetArrayDevices(void)
+MockArrayInfo::GetDevices(ArrayDeviceType type)
 {
     vector<IArrayDevice*> ret;
     return ret;

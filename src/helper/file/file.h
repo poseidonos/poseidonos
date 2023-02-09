@@ -39,7 +39,7 @@
 
 using namespace std;
 
-static bool
+inline bool
 FileExists(const std::string& path)
 {
     struct stat info;
@@ -48,4 +48,10 @@ FileExists(const std::string& path)
         return false;
     }
     return (info.st_mode & S_IFREG) != 0;
+}
+
+inline std::string
+GetFileExtension(std::string fn)
+{
+    return fn.substr(fn.find_last_of(".") + 1);
 }

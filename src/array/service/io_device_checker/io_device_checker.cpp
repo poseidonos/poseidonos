@@ -66,7 +66,7 @@ IODeviceChecker::Register(unsigned int arrayIndex, IDeviceChecker* checker)
 {
     if (devCheckers[arrayIndex] == nullptr)
     {
-        int eventId = EID(ARRAY_DEV_DEBUG_MSG);
+        int eventId = EID(ARRAY_DEV_DEBUG);
         if (checker == nullptr)
         {
             POS_TRACE_WARN(eventId,
@@ -85,7 +85,7 @@ IODeviceChecker::Register(unsigned int arrayIndex, IDeviceChecker* checker)
 void
 IODeviceChecker::Unregister(unsigned int arrayIndex)
 {
-    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG_MSG),
+    POS_TRACE_INFO(EID(ARRAY_DEV_DEBUG),
         "IODeviceChecker::Unregister, array:{}", arrayIndex);
     devCheckers[arrayIndex] = nullptr;
 }
@@ -95,7 +95,7 @@ IODeviceChecker::IsRecoverable(unsigned int arrayIndex, IArrayDevice* target, UB
 {
     if (devCheckers[arrayIndex] == nullptr)
     {
-        POS_TRACE_ERROR(EID(ARRAY_DEV_DEBUG_MSG),
+        POS_TRACE_ERROR(EID(ARRAY_DEV_DEBUG),
             "IsRecoverableDevice, array {} does not exist", arrayIndex);
         return false;
     }
@@ -109,7 +109,7 @@ IODeviceChecker::FindDevice(unsigned int arrayIndex, string devSn)
 {
     if (devCheckers[arrayIndex] == nullptr)
     {
-        POS_TRACE_ERROR(EID(ARRAY_DEV_DEBUG_MSG),
+        POS_TRACE_ERROR(EID(ARRAY_DEV_DEBUG),
             "FindDevice, array {} does not exist", arrayIndex);
         return nullptr;
     }

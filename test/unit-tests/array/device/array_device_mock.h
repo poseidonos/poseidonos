@@ -22,6 +22,7 @@ public:
     MOCK_METHOD(UBlockDevice*, GetUblockPtr, (), (override));
     MOCK_METHOD(void, SetState, (ArrayDeviceState state), (override));
     MOCK_METHOD(void, SetUblock, (UblockSharedPtr uBlock), (override));
+    ~MockArrayDevice() {}
 };
 
 } // namespace pos

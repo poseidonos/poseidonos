@@ -87,7 +87,6 @@ StripePartition::Create(uint64_t startLba, uint64_t lastLba, uint64_t totalNvmBl
 void
 StripePartition::RegisterService(IPartitionServices* const svc)
 {
-    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "StripePartition::RegisterService");
     svc->AddTranslator(type, this);
     if (method->IsRecoverable() == true)
     {
@@ -96,7 +95,8 @@ StripePartition::RegisterService(IPartitionServices* const svc)
     }
     else
     {
-        POS_TRACE_INFO(EID(MOUNT_ARRAY_DEBUG_MSG), "{} partition (RaidType: {}) is excluded from rebuild target",
+        POS_TRACE_INFO(EID(PARTITION_SERVICE_DEBUG),
+            "{} partition (RaidType: {}) is excluded from rebuild target",
             PARTITION_TYPE_STR[type], raidType.ToString());
     }
 }
@@ -165,7 +165,7 @@ StripePartition::_SetPhysicalAddress(uint64_t startLba, uint64_t lastLba)
     physicalSize.chunksPerStripe = devs.size();
     physicalSize.stripesPerSegment = ArrayConfig::STRIPES_PER_SEGMENT;
     physicalSize.totalSegments = _GetSegmentCount(lastLba - startLba + 1);
-    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG),
+    POS_TRACE_DEBUG(EID(CREATE_PARTITION_DEBUG),
         "part_type:{}, start_lba:{}, last_lba:{}, dev_count:{}, segment_count:{}",
         PARTITION_TYPE_STR[type], startLba, lastLba, physicalSize.chunksPerStripe, physicalSize.totalSegments);
 
@@ -237,7 +237,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
 
         if (result == false)
         {
-            int eventId = EID(CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
+            int eventId = EID(INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL);
             POS_TRACE_WARN(eventId,
                 "raid_type:{}, buf_count:{}", raidType.ToString(), reqBuffersPerNuma);
             return eventId;
@@ -245,7 +245,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     }
     else
     {
-        int eventId = EID(CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE);
+        int eventId = EID(NOT_SUPPORTED_RAIDTYPE);
         POS_TRACE_WARN(eventId, "raidtype: {} ", raidType.ToString());
         return eventId;
     }
@@ -253,7 +253,7 @@ StripePartition::_SetMethod(uint64_t totalNvmBlks)
     size_t numofDevs = devs.size();
     if (method->CheckNumofDevsToConfigure(numofDevs) == false)
     {
-        int eventId = EID(CREATE_ARRAY_RAID_INVALID_SSD_CNT);
+        int eventId = EID(RAID_INVALID_SSD_CNT);
         POS_TRACE_WARN(eventId, "requested num of ssds: {}", numofDevs);
         return eventId;
     }

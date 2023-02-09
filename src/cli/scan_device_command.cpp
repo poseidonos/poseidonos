@@ -54,37 +54,13 @@ ScanDeviceCommand::~ScanDeviceCommand(void)
 string
 ScanDeviceCommand::Execute(json& doc, string rid)
 {
-    list<string> failedArrayList;
     DeviceManagerSingleton::Instance()->ScanDevs();
-    int result = ArrayManagerSingleton::Instance()->Load(failedArrayList);
-    JsonFormat jFormat;
+    int result = ArrayManagerSingleton::Instance()->Load();
     if (result != 0)
     {
-        string failedArrayString = "";
-        if (failedArrayList.empty() == false)
-        {
-            for (auto arrayName : failedArrayList)
-            {
-                failedArrayString += arrayName;
-                failedArrayString += " ";
-            }
-        }
-        else
-        {
-            failedArrayString += "no array found";
-        }
-
-        if (result == EID(LOAD_ARRAY_NVM_DOES_NOT_EXIST))
-        {
-            POS_TRACE_ERROR(result, "array loading failed : " + failedArrayString +
-            + ", check if uram is created or pmem is working normally");
-        }
-        else
-        {
-            POS_TRACE_ERROR(result, "array loading failed : {}", failedArrayString);
-        }
+        POS_TRACE_WARN(result, "{}");
     }
-
+    JsonFormat jFormat;
     return jFormat.MakeResponse("SCANDEVICE", rid, SUCCESS,
         "device scanning complete", GetPosInfo());
 }

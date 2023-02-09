@@ -113,36 +113,15 @@ ArrayDeviceApi::GetMinimumCapacity(const vector<ArrayDevice*>& devs)
     return 0;
 }
 
-DeviceSet<DeviceMeta>
-ArrayDeviceApi::ExportDeviceMeta(const vector<ArrayDevice*>& devs)
-{
-    DeviceSet<DeviceMeta> metaSet;
-    for (auto dev : devs)
-    {
-        if (dev->GetType() == ArrayDeviceType::DATA)
-        {
-            metaSet.data.push_back(DeviceMeta(dev->GetSerial(), dev->GetState()));
-        }
-        else if (dev->GetType() == ArrayDeviceType::SPARE)
-        {
-            metaSet.spares.push_back(DeviceMeta(dev->GetSerial(), dev->GetState()));
-        } 
-        else if (dev->GetType() == ArrayDeviceType::NVM)
-        {
-            metaSet.nvm.push_back(DeviceMeta(dev->GetSerial(), dev->GetState()));
-        }
-    }
-    return metaSet;
-}
-
 int
 ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
 {
     auto nvms = ExtractDevicesByType(ArrayDeviceType::NVM, devs);
     if (nvms.size() == 0 || nvms.front()->GetUblock() == nullptr)
     {
-        return EID(FAILED_TO_SET_WRITE_BUFFER);
+        return EID(IMPORT_DEVICE_NVM_DOES_NOT_EXIST);
     }
+
     auto activeDataSsds = ExtractDevicesByState(ArrayDeviceState::NORMAL,
         ExtractDevicesByType(ArrayDeviceType::DATA, devs));
     auto activeSpareSsds = ExtractDevicesByState(ArrayDeviceState::NORMAL,
@@ -150,13 +129,13 @@ ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
 
     if (activeDataSsds.size() == 0)
     {
-        return EID(CREATE_ARRAY_NO_AVAILABLE_DEVICE);
+        return EID(IMPORT_DEVICE_NO_AVAILABLE_DEVICE);
     }
 
     uint64_t minDataCapacity = GetMinimumCapacity(activeDataSsds);
     if (minDataCapacity < ArrayConfig::MINIMUM_SSD_SIZE_BYTE)
     {
-        return EID(CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN);
+        return EID(IMPORT_DEVICE_SSD_CAPACITY_IS_LT_MIN);
     }
 
     if (activeSpareSsds.size() > 0)
@@ -164,7 +143,7 @@ ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
         uint64_t minSpareCapacity = GetMinimumCapacity(activeSpareSsds);
         if (minSpareCapacity < minDataCapacity)
         {
-            return EID(CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA);
+            return EID(IMPORT_DEVICE_SPARE_CAPACITY_IS_LT_DATA);
         }
     }
     return 0;

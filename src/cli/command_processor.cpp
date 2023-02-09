@@ -21,7 +21,6 @@
 #include "src/logger/logger.h"
 #include "src/logger/preferences.h"
 #include "src/master_context/version_provider.h"
-#include "src/mbr/mbr_info.h"
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
 #include "src/resource_checker/smart_collector.h"
@@ -87,56 +86,22 @@ CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, Sto
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    int eventId = EID(SUCCESS);
     Status status = grpc::Status::OK;
 
-    int ret = 0;
-    std::vector<ArrayBootRecord> abrList;
-    ret = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
-
-    if (ret == 0)
+    int eventId = ArrayMgr()->Stop();
+    if (eventId == 0)
     {
-        if (!abrList.empty())
+        if (!_IsPosTerminating())
         {
-            eventId = EID(MBR_ABR_GET_LIST_SUCCESS);
-            POS_TRACE_DEBUG(eventId, "abr_list_size:{}", abrList.size());
-            for (const auto& abr : abrList)
-            {
-                ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(abr.arrayName);
-
-                if (CompInfo == nullptr || CompInfo->arrayInfo == nullptr)
-                {
-                    continue;
-                }
-                IArrayInfo* arrayInfo = CompInfo->arrayInfo;
-
-                if (arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
-                {
-                    eventId = EID(POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS);
-                    POS_TRACE_ERROR(eventId,
-                        "array:{}, state:{}",
-                        abr.arrayName, arrayInfo->GetState().ToString());
-
-                    _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
-                    _SetPosInfo(reply->mutable_info());
-
-                    return status;
-                }
-            }
+            _SetPosTerminating(true);
+            pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
+            eventId = EID(SUCCESS);
+        }
+        else
+        {
+            eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
         }
     }
-
-    if (!_IsPosTerminating())
-    {
-        _SetPosTerminating(true);
-        pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
-        eventId = EID(SUCCESS);
-    }
-    else
-    {
-        eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
-    }
-
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return status;
@@ -342,7 +307,7 @@ CommandProcessor::ExecuteResetMbrCommand(const ResetMbrRequest* request,
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    int result = ArrayManagerSingleton::Instance()->ResetMbr();
+    int result = ArrayManagerSingleton::Instance()->ResetPbr();
 
     if (result != 0)
     {
@@ -780,82 +745,38 @@ CommandProcessor::ExecuteListArrayCommand(const ListArrayRequest* request, ListA
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    std::vector<ArrayBootRecord> abrList;
-    int result = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
-
-    if (result != 0)
+    vector<const ComponentsInfo*> infoList = ArrayMgr()->GetInfo();
+    if (infoList.size() == 0)
     {
-        if (result == EID(MBR_DATA_NOT_FOUND))
-        {
-            result = EID(CLI_LIST_ARRAY_NO_ARRAY_EXISTS);
-            _SetEventStatus(result, reply->mutable_result()->mutable_status());
-            _SetPosInfo(reply->mutable_info());
-            return grpc::Status::OK;
-        }
-        else
-        {
-            int result = EID(CLI_LIST_ARRAY_FAILURE);
-            POS_TRACE_WARN(result, "");
-            _SetEventStatus(result, reply->mutable_result()->mutable_status());
-            _SetPosInfo(reply->mutable_info());
-            return grpc::Status::OK;
-        }
-    }
-
-    if (abrList.empty())
-    {
-        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+        int result = EID(CLI_LIST_ARRAY_NO_ARRAY_EXISTS);
+        _SetEventStatus(result, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-    else
+    for (const ComponentsInfo* ci : infoList)
     {
+        IArrayInfo* info = ci->arrayInfo;
         JsonArray jsonArrayList("arrayList");
-        for (const auto& abr : abrList)
+
+        string arrayName(info->GetName());
+        string createDatetime(info->GetCreateDatetime());
+        string updateDatetime(info->GetUpdateDatetime());
+        string arrayStatus(DEFAULT_ARRAY_STATUS);
+        grpc_cli::Array* array =
+            reply->mutable_result()->mutable_data()->add_arraylist();
+        if (info->GetState() >= ArrayStateEnum::NORMAL)
         {
-            string arrayName(abr.arrayName);
-            string createDatetime(abr.createDatetime);
-            string updateDatetime(abr.updateDatetime);
-            string arrayStatus(DEFAULT_ARRAY_STATUS);
-
-            ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(arrayName);
-            if (CompInfo == nullptr)
-            {
-                POS_TRACE_ERROR(EID(ARRAY_MGR_DEBUG_MSG),
-                    "Failed to list array"
-                    " because of failing to get componentsInfo"
-                    " with given array name. ArrayName: {}",
-                    arrayName);
-                _SetEventStatus(EID(ARRAY_MGR_DEBUG_MSG), reply->mutable_result()->mutable_status());
-                _SetPosInfo(reply->mutable_info());
-                continue;
-            }
-
-            IArrayInfo* info = CompInfo->arrayInfo;
-            grpc_cli::Array* array =
-                reply->mutable_result()->mutable_data()->add_arraylist();
-            if (info == nullptr)
-            {
-                arrayStatus = "Fault";
-                array->set_index(ARRAY_ERROR_INDEX);
-            }
-            else
-            {
-                if (info->GetState() >= ArrayStateEnum::NORMAL)
-                {
-                    arrayStatus = "Mounted";
-                }
-                array->set_index(info->GetIndex());
-                array->set_dataraid(info->GetDataRaidType());
-                array->set_writethroughenabled(info->IsWriteThroughEnabled());
-                array->set_name(arrayName);
-                array->set_status(arrayStatus);
-                array->set_createdatetime(createDatetime);
-                array->set_updatedatetime(updateDatetime);
-                array->set_capacity(SpaceInfo::TotalCapacity(info->GetIndex()));
-                array->set_used(SpaceInfo::Used(info->GetIndex()));
-            }
+            arrayStatus = "Mounted";
         }
+        array->set_index(info->GetIndex());
+        array->set_dataraid(info->GetDataRaidType());
+        array->set_writethroughenabled(info->IsWriteThroughEnabled());
+        array->set_name(arrayName);
+        array->set_status(arrayStatus);
+        array->set_createdatetime(createDatetime);
+        array->set_updatedatetime(updateDatetime);
+        array->set_capacity(SpaceInfo::TotalCapacity(info->GetIndex()));
+        array->set_used(SpaceInfo::Used(info->GetIndex()));
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
@@ -916,34 +837,26 @@ CommandProcessor::ExecuteArrayInfoCommand(const ArrayInfoRequest* request, Array
         array->set_gcmode(_GetGCMode(gc, arrayName));
     }
 
-    DeviceSet<string> nameSet = arrayInfo->GetDevNames();
-
-    if (nameSet.nvm.size() == 0 && nameSet.data.size() == 0)
+    for (auto dev : arrayInfo->GetDevices())
     {
-        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
-    }
-
-    for (string name : nameSet.nvm)
-    {
+        ArrayDeviceType type = dev->GetType();
+        string typeStr = "NONE";
+        if (type == ArrayDeviceType::DATA)
+        {
+            typeStr = "DATA";
+        }
+        else if (type == ArrayDeviceType::SPARE)
+        {
+            typeStr = "SPARE";
+        }
+        else if (type == ArrayDeviceType::NVM)
+        {
+            typeStr = "BUFFER";
+        }
         grpc_cli::Device* device = array->add_devicelist();
-        device->set_type("BUFFER");
-        device->set_name(name);
+        device->set_type(typeStr);
+        device->set_name(dev->GetName());
     }
-    for (string name : nameSet.data)
-    {
-        grpc_cli::Device* device = array->add_devicelist();
-        device->set_type("DATA");
-        device->set_name(name);
-    }
-    for (string name : nameSet.spares)
-    {
-        grpc_cli::Device* device = array->add_devicelist();
-        device->set_type("SPARE");
-        device->set_name(name);
-    }
-
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1133,32 +1046,13 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    list<string> failedArrayList;
     DeviceManagerSingleton::Instance()->ScanDevs();
-    int result = ArrayManagerSingleton::Instance()->Load(failedArrayList);
+    int result = ArrayManagerSingleton::Instance()->Load();
 
     if (result != 0)
     {
-        string failedArrayString = "";
-        if (failedArrayList.empty() == false)
-        {
-            for (auto arrayName : failedArrayList)
-            {
-                failedArrayString += arrayName;
-                failedArrayString += " ";
-            }
-        }
-        else
-        {
-            failedArrayString += "no array found";
-        }
-
-        POS_TRACE_WARN(result, "failedArrays: " + failedArrayString);
-        _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
+        POS_TRACE_WARN(result, "");
     }
-
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
@@ -1703,11 +1597,14 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     if (volMgr != nullptr)
     {
         int ret = volMgr->Create(volumeName, size, maxIops, maxBw, isWalVol, nsid, isPrimary, isAnaNonoptimized, uuid);
+        string targetAddress = "";
         if (ret == SUCCESS)
         {
-            string targetAddress = ArrayMgr()->GetTargetAddress(arrayName);
+            ret = ArrayMgr()->GetTargetAddress(arrayName, targetAddress);
+        }
+        if (ret == SUCCESS)
+        {
             reply->mutable_result()->mutable_data()->set_targetaddress(targetAddress);
-            
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
@@ -2926,5 +2823,4 @@ CommandProcessor::_HandleInputVolumes(
         }
     }
     return EID(SUCCESS);
-
 }

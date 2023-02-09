@@ -59,7 +59,7 @@ public:
     virtual void FormatPartition(PartitionType type, uint32_t arrayId, IODispatcher* io);
     virtual RaidState GetRaidState(void);
     virtual RaidTypeEnum GetRaidType(PartitionType type);
-    virtual const vector<const Partition*> GetPartitions(void);
+    virtual const vector<Partition*> GetPartitions(void);
 
 private:
     Partitions partitions;

@@ -46,7 +46,7 @@ ArrayMetricsPublisher::ArrayMetricsPublisher(IArrayInfo* arrayInfo, IArrayStateS
     spaceInfoPublisher = new SpaceInfoPublisher();
     spaceInfoPublisher->Register(arrayInfo->GetIndex());
     arrayStatePublisher = new ArrayStatePublisher();
-    arrayStatePublisher->Register(to_string(arrayInfo->GetUniqueId()));
+    arrayStatePublisher->Register(arrayInfo->GetUniqueId());
     VolumeEventPublisherSingleton::Instance()->RegisterSubscriber(this, arrayInfo->GetName(), arrayInfo->GetIndex());
     subscription->Register(this);
 }

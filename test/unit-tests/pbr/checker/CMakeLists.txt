@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(pbr_checksum_ut pbr_checksum_test.cpp)

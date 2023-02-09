@@ -39,6 +39,7 @@ public:
     MOCK_METHOD(void, _ReleaseDeviceContext, (DeviceContext * deviceContextToRelease), (override));
     MOCK_METHOD(bool, WrapupOpenDeviceSpecific, (), (override));
     MOCK_METHOD(void*, GetByteAddress, (), (override));
+    virtual ~MockUBlockDevice() {}
 };
 
 } // namespace pos

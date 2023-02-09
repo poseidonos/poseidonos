@@ -40,9 +40,8 @@ void PartitionServices::AddTranslator(PartitionType type, ITranslator* trans)
 {
     if (translator.find(type) == translator.end())
     {
-        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG),
-            "PartitionServices::AddTranslator, type:{}, trans:{}, size:{}",
-            type, (void*)(trans), translator.size());
+        POS_TRACE_DEBUG(EID(PARTITION_SERVICES_ADDED),
+            "Translator, type:{}, translator:{}", type, (void*)(trans));
         translator.emplace(type, trans);
     }
 }
@@ -51,24 +50,22 @@ void PartitionServices::AddRecover(PartitionType type, IRecover* recov)
 {
     if (recover.find(type) == recover.end())
     {
-        POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG),
-            "PartitionServices::AddRecover, type:{}, recov:{}",
-            type, (void*)(recov));
+        POS_TRACE_DEBUG(EID(PARTITION_SERVICES_ADDED),
+            "Recover, type:{}, recover:{}", type, (void*)(recov));
         recover.emplace(type, recov);
     }
 }
 
 void PartitionServices::AddRebuildTarget(RebuildTarget* tgt)
 {
-    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG),
-            "PartitionServices::AddRebuildTarget, tgt:{}",
-             (void*)(tgt));
+    POS_TRACE_DEBUG(EID(PARTITION_SERVICES_ADDED),
+            "RebuildTarget, tgt:{}", (void*)(tgt));
     rebuildTargets.push_back(tgt);
 }
 
 void PartitionServices::Clear(void)
 {
-    POS_TRACE_DEBUG(EID(UNMOUNT_ARRAY_DEBUG_MSG), "PartitionServices::Clear");
+    POS_TRACE_DEBUG(EID(PARTITION_SERVICES_CLEARED), "");
     translator.clear();
     recover.clear();
     rebuildTargets.clear();

@@ -72,7 +72,7 @@ MetaUpdater::UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback
         metaEventFactory->CreateBlockMapUpdateEvent(volumeIo);
     blockMapUpdate->SetCallee(callback);
 
-    if (journal->IsEnabled() == true && WriteByPass::GetBypass(to_string(arrayInfo->GetUniqueId())) == false)
+    if (journal->IsEnabled() == true && WriteByPass::GetBypass(arrayInfo->GetUniqueId()) == false)
     {
         result = journalWriter->AddBlockMapUpdatedLog(volumeIo, blockMapUpdate);
     }

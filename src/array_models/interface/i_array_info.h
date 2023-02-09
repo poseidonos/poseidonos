@@ -33,8 +33,8 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
-#include "src/array_models/dto/device_set.h"
 #include "src/array_models/dto/partition_logical_size.h"
 #include "src/include/array_state_type.h"
 #include "src/include/partition_type.h"
@@ -48,19 +48,18 @@ namespace pos
 class IArrayInfo
 {
 public:
-    virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type) = 0;
-    virtual DeviceSet<string> GetDevNames(void) = 0;
     virtual string GetName(void) = 0;
-    virtual unsigned int GetIndex(void) = 0;
-    virtual string GetMetaRaidType(void) = 0;
-    virtual string GetDataRaidType(void) = 0;
+    virtual string GetUniqueId(void) = 0;
+    virtual uint32_t GetIndex(void) = 0;
     virtual string GetCreateDatetime(void) = 0;
     virtual string GetUpdateDatetime(void) = 0;
-    virtual id_t GetUniqueId(void) = 0;
+    virtual string GetMetaRaidType(void) = 0;
+    virtual string GetDataRaidType(void) = 0;
     virtual ArrayStateType GetState(void) = 0;
     virtual StateContext* GetStateCtx(void) = 0;
     virtual uint32_t GetRebuildingProgress(void) = 0;
     virtual bool IsWriteThroughEnabled(void) = 0;
-    virtual vector<IArrayDevice*> GetArrayDevices(void) = 0;
+    virtual vector<IArrayDevice*> GetDevices(ArrayDeviceType type = ArrayDeviceType::NONE) = 0;
+    virtual const PartitionLogicalSize* GetSizeInfo(PartitionType type) = 0;
 };
 } // namespace pos

@@ -237,7 +237,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNvmNotExist)
     int actual = ArrayDeviceApi::ImportInspection(devs);
 
     // Then
-    ASSERT_EQ(actual, EID(FAILED_TO_SET_WRITE_BUFFER));
+    ASSERT_EQ(actual, EID(IMPORT_DEVICE_NVM_DOES_NOT_EXIST));
 
     // Clean up
     for (auto d : devs)
@@ -264,7 +264,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNvmExistButIsNullptr
     int actual = ArrayDeviceApi::ImportInspection(devs);
 
     // Then
-    ASSERT_EQ(actual, EID(FAILED_TO_SET_WRITE_BUFFER));
+    ASSERT_EQ(actual, EID(IMPORT_DEVICE_NVM_DOES_NOT_EXIST));
 
     // Clean up
     for (auto d : devs)
@@ -296,7 +296,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNoActiveDataSsd)
     int actual = ArrayDeviceApi::ImportInspection(devs);
 
     // Then
-    ASSERT_EQ(actual, EID(CREATE_ARRAY_NO_AVAILABLE_DEVICE));
+    ASSERT_EQ(actual, EID(IMPORT_DEVICE_NO_AVAILABLE_DEVICE));
 
     // Clean up
     for (auto d : devs)
@@ -333,7 +333,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSsdSizeIsLessThanMin
     int actual = ArrayDeviceApi::ImportInspection(devs);
 
     // Then
-    ASSERT_EQ(actual, EID(CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN));
+    ASSERT_EQ(actual, EID(IMPORT_DEVICE_SSD_CAPACITY_IS_LT_MIN));
 
     // Clean up
     for (auto d : devs)
@@ -374,7 +374,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsSmalle
     int actual = ArrayDeviceApi::ImportInspection(devs);
 
     // Then
-    ASSERT_EQ(actual, EID(CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA));
+    ASSERT_EQ(actual, EID(IMPORT_DEVICE_SPARE_CAPACITY_IS_LT_DATA));
 
     // Clean up
     for (auto d : devs)

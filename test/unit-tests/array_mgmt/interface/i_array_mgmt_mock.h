@@ -16,14 +16,16 @@ public:
     MOCK_METHOD(int, Delete, (string name), (override));
     MOCK_METHOD(int, Mount, (string name, bool isWTEnabled), (override));
     MOCK_METHOD(int, Unmount, (string name), (override));
+    MOCK_METHOD(int, Stop, (), (override));
     MOCK_METHOD(int, AddDevice, (string name, string dev), (override));
     MOCK_METHOD(int, RemoveDevice, (string name, string dev), (override));
     MOCK_METHOD(int, ReplaceDevice, (string name, string dev), (override));
     MOCK_METHOD(int, Rebuild, (string name), (override));
     MOCK_METHOD(void, SetTargetAddress, (string name, string targetAddress), (override));
-    MOCK_METHOD(string, GetTargetAddress, (string name), (override));
+    MOCK_METHOD(int, GetTargetAddress, (string name, string& address), (override));
     MOCK_METHOD(ComponentsInfo*, GetInfo, (string name), (override));
     MOCK_METHOD(ComponentsInfo*, GetInfo, (uint32_t arrayIdx), (override));
+    MOCK_METHOD(vector<const ComponentsInfo*>, GetInfo, (), (override));
 };
 
 } // namespace pos

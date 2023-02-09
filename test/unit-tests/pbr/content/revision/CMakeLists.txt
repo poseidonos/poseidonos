@@ -1,0 +1,1 @@
+POS_ADD_UNIT_TEST(content_serializer_rev0_ut content_serializer_rev0_test.cpp)

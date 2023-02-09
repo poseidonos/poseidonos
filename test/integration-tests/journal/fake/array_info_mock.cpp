@@ -46,20 +46,13 @@ ArrayInfoMock::GetSizeInfo(PartitionType type)
     return nullptr;
 }
 
-DeviceSet<string>
-ArrayInfoMock::GetDevNames(void)
-{
-    DeviceSet<string> ret;
-    return ret;
-}
-
 string
 ArrayInfoMock::GetName(void)
 {
     return "";
 }
 
-unsigned int
+uint32_t
 ArrayInfoMock::GetIndex(void)
 {
     return 0;
@@ -77,10 +70,10 @@ ArrayInfoMock::GetDataRaidType(void)
     return "";
 }
 
-id_t 
+string
 ArrayInfoMock::GetUniqueId(void)
 {
-    return 0;
+    return "";
 }
 
 ArrayStateType
@@ -120,7 +113,7 @@ ArrayInfoMock::IsWriteThroughEnabled(void)
 }
 
 vector<IArrayDevice*>
-ArrayInfoMock::GetArrayDevices(void)
+ArrayInfoMock::GetDevices(ArrayDeviceType type)
 {
     return {};
 }

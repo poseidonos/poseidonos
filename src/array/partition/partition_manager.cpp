@@ -113,7 +113,8 @@ PartitionManager::FormatPartition(PartitionType type, uint32_t arrayId, IODispat
     }
     else
     {
-        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG), "Failed to format {} partition", PARTITION_TYPE_STR[type]);
+        POS_TRACE_WARN(EID(FORMAT_PARTITION_DEBUG),
+            "target partition is null, part_type:{}", PARTITION_TYPE_STR[type]);
     }
 }
 
@@ -137,10 +138,10 @@ PartitionManager::GetRaidType(PartitionType type)
     return RaidTypeEnum::NONE;
 }
 
-const vector<const Partition*>
+const vector<Partition*>
 PartitionManager::GetPartitions(void)
 {
-    vector<const Partition*> parts;
+    vector<Partition*> parts;
     for (size_t i = 0; i < partitions.size(); i++)
     {
         if (nullptr != partitions[i])

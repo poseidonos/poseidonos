@@ -62,7 +62,7 @@ SetWriteBypassWbtCommand::Execute(Args& argv, JsonElement& elem)
     }
     else
     {
-        WriteByPass::SetBypass(to_string(info->arrayInfo->GetUniqueId()), numValue);
+        WriteByPass::SetBypass(info->arrayInfo->GetUniqueId(), numValue);
     }
     return 0;
 }

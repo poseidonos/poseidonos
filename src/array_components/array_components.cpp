@@ -43,10 +43,9 @@
 #include "src/admin/smart_log_mgr.h"
 namespace pos
 {
-ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, IAbrControl* abr)
+ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder)
 : ArrayComponents(arrayName,
     rebuilder,
-    abr,
     nullptr /*stateMgr*/,
     nullptr /*state*/,
     nullptr /*array*/,
@@ -68,7 +67,7 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
     POS_TRACE_DEBUG(SUCCESS, "Instantiating array components for {}", arrayName);
     this->stateMgr = StateManagerSingleton::Instance();
     this->state = stateMgr->CreateStateControl(arrayName);
-    this->array = new Array(arrayName, rebuilder, abr, state);
+    this->array = new Array(arrayName, rebuilder, state);
     this->metaFsFactory = [](Array* arrayPtr, bool isLoaded)
     {
         return new MetaFs(arrayPtr, isLoaded);
@@ -84,7 +83,6 @@ ArrayComponents::ArrayComponents(string arrayName, IArrayRebuilder* rebuilder, I
 
 ArrayComponents::ArrayComponents(string arrayName,
     IArrayRebuilder* rebuilder,
-    IAbrControl* abr,
     StateManager* stateMgr,
     IStateControl* state,
     Array* array,
@@ -103,7 +101,6 @@ ArrayComponents::ArrayComponents(string arrayName,
 : arrayName(arrayName),
   state(state),
   arrayRebuilder(rebuilder),
-  iAbr(abr),
   stateMgr(stateMgr),
   array(array),
   gc(gc),
@@ -171,36 +168,16 @@ ArrayComponents::GetInfo(void)
 }
 
 int
-ArrayComponents::Create(DeviceSet<string> nameSet, string metaFt, string dataFt)
+ArrayComponents::Import(ArrayBuildInfo* buildInfo)
 {
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Creating array component for {}", arrayName);
-    int ret = array->Create(nameSet, metaFt, dataFt);
+    int ret = array->Import(buildInfo);
     if (ret != 0)
     {
         return ret;
     }
-
-    _InstantiateMetaComponentsAndMountSequenceInOrder(false/* array has not been loaded yet*/);
+    bool isLoad = buildInfo->buildType == ArrayBuildType::LOAD;
+    _InstantiateMetaComponentsAndMountSequenceInOrder(isLoad);
     _SetMountSequence();
-
-    POS_TRACE_INFO(EID(CREATE_ARRAY_DEBUG_MSG), "Array components for {} have been created.", arrayName);
-    return 0;
-}
-
-int
-ArrayComponents::Load(void)
-{
-    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Loading array components for " + arrayName);
-    int ret = array->Load();
-    if (ret != 0)
-    {
-        return ret;
-    }
-
-    _InstantiateMetaComponentsAndMountSequenceInOrder(true/* array has been loaded already*/);
-    _SetMountSequence();
-
-    POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG_MSG), "Array components for {} have been loaded.", arrayName);
     return 0;
 }
 

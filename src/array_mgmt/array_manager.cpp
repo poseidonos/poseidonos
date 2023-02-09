@@ -37,29 +37,31 @@
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/mbr/abr_manager.h"
+#include "src/pbr/file_pbr.h"
 
 namespace pos
 {
 ArrayManager::ArrayManager()
-: ArrayManager(new ArrayRebuilder(this), new AbrManager(), DeviceManagerSingleton::Instance(),
+: ArrayManager(new ArrayRebuilder(this), DeviceManagerSingleton::Instance(),
     TelemetryClientSingleton::Instance(),
-    [](string name, IArrayRebuilder* arrayRebuilder, IAbrControl* iAbrControl)
+    [](string name, IArrayRebuilder* arrayRebuilder)
     {
-        return new ArrayComponents(name, arrayRebuilder, iAbrControl);
-    })
+        return new ArrayComponents(name, arrayRebuilder);
+    },
+    new ArrayBuilderAdapter())
 {
     // delegated to other constructor
 }
 
-ArrayManager::ArrayManager(ArrayRebuilder* arrayRebuilder, AbrManager* abrManager,
+ArrayManager::ArrayManager(ArrayRebuilder* arrayRebuilder,
     DeviceManager* deviceManager, TelemetryClient* telClient,
-    function<ArrayComponents*(string, IArrayRebuilder*, IAbrControl*)> arrayComponentsFactory)
+    function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory,
+    ArrayBuilderAdapter* arrayBuilderAdapter)
 : arrayRebuilder(arrayRebuilder),
-  abrManager(abrManager),
   deviceManager(deviceManager),
   telClient(telClient),
-  arrayComponentsFactory(arrayComponentsFactory)
+  arrayComponentsFactory(arrayComponentsFactory),
+  arrayBuilderAdapter(arrayBuilderAdapter)
 {
     pthread_rwlock_init(&arrayListLock, nullptr);
     if (deviceManager != nullptr)
@@ -79,13 +81,6 @@ ArrayManager::~ArrayManager()
         POS_TRACE_INFO(EID(ARRAY_MGR_DEBUG_MSG), "Deleting ArrayRebuilder");
         delete arrayRebuilder;
     }
-
-    if (abrManager != nullptr)
-    {
-        POS_TRACE_INFO(EID(ARRAY_MGR_DEBUG_MSG), "Deleting AbrManager");
-        delete abrManager;
-    }
-
     for (auto iter : arrayList)
     {
         ArrayComponents* array = _FindArray(iter.first);
@@ -102,39 +97,92 @@ ArrayManager::~ArrayManager()
 }
 
 int
-ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string dataFt)
+ArrayManager::Load(void)
 {
-    pthread_rwlock_wrlock(&arrayListLock);
-    if (_FindArray(name) != nullptr)
+    vector<pbr::AteData*> arrayTableEntries;
+    int ret = pbr::FilePbr::Load(arrayTableEntries);
+    if (ret == 0)
     {
-        int event = EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
-        POS_TRACE_WARN(event, "name duplicated: {}", name);
-        pthread_rwlock_unlock(&arrayListLock);
-        return event;
-    }
-
-    if (arrayList.size() >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
-    {
-        int event = EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS);
-        POS_TRACE_WARN(event,
-            "Current num of Arrays: {}", arrayList.size());
-        pthread_rwlock_unlock(&arrayListLock);
-        return event;
-    }
-
-    ArrayComponents* array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
-    int ret = array->Create(devs, metaFt, dataFt);
-    if (ret == EID(SUCCESS))
-    {
-        arrayList.emplace(name, array);
+        for (pbr::AteData* ate : arrayTableEntries)
+        {
+            POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG), "array_name:{}", ate->arrayName);
+            ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Load(ate);
+            ret = _Import(arrayBuildInfo);
+            delete arrayBuildInfo;
+            if (ret != 0)
+            {
+                break;
+            }
+        }
     }
     else
     {
-        POS_TRACE_WARN(EID(CREATE_ARRAY_DEBUG_MSG),
-            "ArrayManager is cleaning up ArrayComponents of {} because of array creation failure", name);
-        delete array;
+        POS_TRACE_WARN(ret, "");
+    }
+    return ret;
+}
+
+int
+ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string dataFt)
+{
+    pthread_rwlock_wrlock(&arrayListLock);
+    int ret = 0;
+    if (_FindArray(name) != nullptr)
+    {
+        ret = EID(CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS);
+        POS_TRACE_WARN(ret, "array_name: {}", name);
+    }
+    if (ret == 0)
+    {
+        if (arrayList.size() >= ArrayMgmtPolicy::MAX_ARRAY_CNT)
+        {
+            ret = EID(CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS);
+            POS_TRACE_WARN(ret, "num_of_arrays: {}", arrayList.size());
+        }
+    }
+    if (ret == 0)
+    {
+        ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Create(name, devs, metaFt, dataFt);
+        ret = _Import(arrayBuildInfo);
+        delete arrayBuildInfo;
     }
     pthread_rwlock_unlock(&arrayListLock);
+    return ret;
+}
+
+int
+ArrayManager::_Import(ArrayBuildInfo* arrayBuildInfo)
+{
+    int ret = arrayBuildInfo->buildResult;
+    if (ret == 0)
+    {
+        arrayBuildInfo->arrayIndex = _AllocArrayIndex(arrayBuildInfo->arrayName);
+        if (arrayBuildInfo->arrayIndex < ArrayMgmtPolicy::MAX_ARRAY_CNT)
+        {
+            ArrayComponents* array = arrayComponentsFactory(arrayBuildInfo->arrayName, arrayRebuilder);
+            ret = array->Import(arrayBuildInfo);
+            if (ret == 0)
+            {
+                arrayList.emplace(arrayBuildInfo->arrayName, array);
+            }
+            else
+            {
+                _ReleaseArrayIndex(arrayBuildInfo->arrayName);
+                delete array;
+            }
+        }
+    }
+    if (ret != 0)
+    {
+        arrayBuildInfo->Dispose();
+        POS_TRACE_WARN(ret, "array_name:{}", arrayBuildInfo->arrayName);
+    }
+    else
+    {
+        POS_TRACE_INFO(EID(POS_TRACE_ARRAY_LOADED),
+            "array_name:{}, num_of_arrays:{}",
+            arrayBuildInfo->arrayName, arrayList.size());
+    }
     return ret;
 }
 
@@ -146,21 +194,16 @@ ArrayManager::Delete(string name)
     if (array == nullptr)
     {
         pthread_rwlock_unlock(&arrayListLock);
-        if (AbrExists(name))
-        {
-            int result = _DeleteFaultArray(name);
-            return result;
-        }
         int ret = EID(DELETE_ARRAY_ARRAY_NAME_DOES_NOT_EXIST);
         POS_TRACE_WARN(ret, "array_name: {}", name);
         return ret;
     }
-
     int ret = array->Delete();
     if (ret == EID(SUCCESS))
     {
         delete array;
         arrayList.erase(name);
+        _ReleaseArrayIndex(name);
     }
     pthread_rwlock_unlock(&arrayListLock);
     return ret;
@@ -199,6 +242,25 @@ ArrayManager::Unmount(string name)
         }
         return ret;
     }, name, EID(UNMOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST));
+}
+
+
+int
+ArrayManager::Stop(void)
+{
+    pthread_rwlock_rdlock(&arrayListLock);
+    int ret = 0;
+    for (auto it = arrayList.begin(); it != arrayList.end(); it++)
+    {
+        ComponentsInfo* info = it->second->GetInfo();
+        if (info->arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
+        {
+            ret = EID(POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS);
+            break;
+        }
+    }
+    pthread_rwlock_unlock(&arrayListLock);
+    return ret;
 }
 
 int
@@ -284,14 +346,7 @@ ArrayManager::DeviceDetached(UblockSharedPtr dev)
 void
 ArrayManager::DeviceAttached(UblockSharedPtr dev)
 {
-    abrManager->InitDisk(dev);
-}
-
-int
-ArrayManager::GetAbrList(std::vector<ArrayBootRecord>& abrList)
-{
-    int result = abrManager->GetAbrList(abrList);
-    return result;
+    // todo : initialize device
 }
 
 ComponentsInfo*
@@ -323,6 +378,19 @@ ArrayManager::GetInfo(uint32_t arrayIdx)
         {
             info = iter->second->GetInfo();
         }
+    }
+    pthread_rwlock_unlock(&arrayListLock);
+    return info;
+}
+
+vector<const ComponentsInfo*>
+ArrayManager::GetInfo(void)
+{
+    vector<const ComponentsInfo*> info;
+    pthread_rwlock_rdlock(&arrayListLock);
+    for (auto it : arrayList)
+    {
+        info.push_back(it.second->GetInfo());
     }
     pthread_rwlock_unlock(&arrayListLock);
     return info;
@@ -363,99 +431,42 @@ ArrayManager::RebuildDone(string name)
 }
 
 int
-ArrayManager::Load(list<string>& failedArrayList)
+ArrayManager::ResetPbr(void)
 {
-    std::vector<ArrayBootRecord> abrList;
-    std::vector<ArrayBootRecord>::iterator it;
-    int result = abrManager->GetAbrList(abrList);
-    int loadResult = 0;
-    if (result == 0)
-    {
-        for (it = abrList.begin(); it != abrList.end(); it++)
-        {
-            loadResult = _Load(it->arrayName);
-            if (loadResult != 0)
-            {
-                string arrayName(it->arrayName);
-                POS_TRACE_ERROR(loadResult, "Array " + arrayName + " load failed");
-                failedArrayList.push_back(arrayName);
-                result = loadResult;
-            }
-        }
-    }
-    else
-    {
-        POS_TRACE_ERROR(result, "Failed to get abr list");
-    }
-
-    return result;
-}
-
-int
-ArrayManager::_Load(string name)
-{
-    POS_TRACE_INFO(EID(LOAD_MBR_TRYING), "array_name:{}", name);
+    POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "");
     pthread_rwlock_wrlock(&arrayListLock);
-    ArrayComponents* array = _FindArray(name);
-    if (array != nullptr)
+    int ret = 0;
+    for (auto it = arrayList.begin(); it != arrayList.end();)
     {
-        pthread_rwlock_unlock(&arrayListLock);
-        POS_TRACE_WARN(EID(LOAD_ARRAY_ALREADY_LOADED), "arrayname: {}", name);
-        return EID(LOAD_ARRAY_ALREADY_LOADED);
-    }
-
-    array = arrayComponentsFactory(name, arrayRebuilder, abrManager);
-    int ret = array->Load();
-    if (ret == EID(SUCCESS))
-    {
-        POS_TRACE_INFO(EID(LOAD_MBR_COMPLETED), "array_name:{}", name);
-        arrayList.emplace(name, array);
-    }
-    else
-    {
-        POS_TRACE_WARN(EID(LOAD_MBR_FAILED), "array_name:{}", name);
-        delete array;
-    }
-
-    pthread_rwlock_unlock(&arrayListLock);
-    return ret;
-}
-
-int
-ArrayManager::ResetMbr(void)
-{
-    POS_TRACE_INFO(EID(RESET_MBR_TRYING), "");
-    pthread_rwlock_wrlock(&arrayListLock);
-    int result = 0;
-    for (auto iter = arrayList.begin(); iter != arrayList.end();)
-    {
-        ArrayComponents* array = _FindArray(iter->first);
+        ArrayComponents* array = _FindArray(it->first);
         if (array != nullptr)
         {
-            result = array->Delete();
-            if (result == 0)
+            string name = array->GetInfo()->arrayInfo->GetName();
+            ret = array->Delete();
+            if (ret == 0)
             {
                 delete array;
-                iter = arrayList.erase(iter);
+                it = arrayList.erase(it);
+                _ReleaseArrayIndex(name);
                 continue;
             }
         }
         pthread_rwlock_unlock(&arrayListLock);
-        POS_TRACE_WARN(result, "Unable to delete array during reset mbr " + iter->first);
-        return result;
+        POS_TRACE_WARN(ret, "Unable to delete array during reset pbr " + it->first);
+        return ret;
     }
-
     pthread_rwlock_unlock(&arrayListLock);
-    result = abrManager->ResetMbr();
-    if (result == 0)
+
+    ret = pbr::FilePbr::Reset();
+    if (ret == 0)
     {
-        POS_TRACE_INFO(EID(RESET_MBR_COMPLETED), "");
+        POS_TRACE_INFO(EID(POS_TRACE_PBR_RESET), "");
     }
     else
     {
-        POS_TRACE_WARN(EID(RESET_MBR_FAILED), "");
+        POS_TRACE_WARN(ret, "");
     }
-    return result;
+    return ret;
 }
 
 ArrayComponents*
@@ -468,41 +479,6 @@ ArrayManager::_FindArray(string name)
     }
 
     return it->second;
-}
-
-bool
-ArrayManager::AbrExists(string arrayName)
-{
-    std::vector<ArrayBootRecord> abrList;
-    int result = GetAbrList(abrList);
-
-    if (result == 0)
-    {
-        for (auto const &abr : abrList)
-        {
-            if (abr.arrayName == arrayName)
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-int
-ArrayManager::_DeleteFaultArray(string arrayName)
-{
-    ArrayMeta meta;
-    meta.arrayName = arrayName;
-    int result = abrManager->LoadAbr(meta);
-    if (result != 0)
-    {
-        return result;
-    }
-    result = abrManager->DeleteAbr(arrayName);
-
-    return result;
 }
 
 void
@@ -529,14 +505,41 @@ ArrayManager::SetTargetAddress(string name, string targetAddress)
     pthread_rwlock_unlock(&arrayListLock);
 }
 
-string
-ArrayManager::GetTargetAddress(string name)
+int
+ArrayManager::GetTargetAddress(string name, string& address)
 {
-    pthread_rwlock_rdlock(&arrayListLock);
-    ArrayComponents* array = _FindArray(name);
-    string addr = array->GetTargetAddress();
-    pthread_rwlock_unlock(&arrayListLock);
-    return addr;
+    return _ExecuteOrHandleErrors([&address](ArrayComponents* array)
+    {
+        address = array->GetArray()->GetTargetAddress();
+        return 0;
+    }, name, EID(ARRAY_MGR_NO_ARRAY_MATCHING_REQ_NAME));
+}
+
+uint32_t
+ArrayManager::_AllocArrayIndex(string arrayName)
+{
+    for (uint32_t i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        if (arrayIndexMap[i] == "")
+        {
+            arrayIndexMap[i] = arrayName;
+            return i;
+        }
+    }
+    return ArrayMgmtPolicy::MAX_ARRAY_CNT;
+}
+
+void
+ArrayManager::_ReleaseArrayIndex(string arrayName)
+{
+    for (uint32_t i = 0; i < ArrayMgmtPolicy::MAX_ARRAY_CNT; i++)
+    {
+        if (arrayIndexMap[i] == arrayName)
+        {
+            arrayIndexMap[i] = "";
+            break;
+        }
+    }
 }
 
 } // namespace pos

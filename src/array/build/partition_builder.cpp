@@ -44,6 +44,9 @@ int
 PartitionBuilder::Create(const vector<ArrayDevice*>& devs, RaidType metaRaid,
     RaidType dataRaid, vector<Partition*>& partitions)
 {
+    POS_TRACE_DEBUG(EID(PARTITION_BUILDER_CREATE_REQUEST),
+        "dev_count:{}, meta_raid_type:{}, data_raid_type:{}",
+        devs.size(), metaRaid.ToString(), dataRaid.ToString());
     if (devs.size() == 0)
     {
         // TODO : temporary code to ignore unit-test path
@@ -60,6 +63,41 @@ PartitionBuilder::Create(const vector<ArrayDevice*>& devs, RaidType metaRaid,
     {
         ret = _CreateNvmPartitions(nvm, partitions);
     }
+    return ret;
+}
+
+int
+PartitionBuilder::Load(const vector<pbr::PteData*>& pteList,
+    const vector<ArrayDevice*>& devs, vector<Partition*>& partitions)
+{
+    int ret = 0;
+    ArrayDevice* nvm = Enumerable::First(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::NVM; });
+    vector<ArrayDevice*> dataSsds = Enumerable::Where(devs,
+        [](auto d) { return d->GetType() == ArrayDeviceType::DATA; });
+
+    if (nvm == nullptr)
+    {
+        ret = EID(LOAD_PARTITION_NVM_DOES_NOT_EXIST);
+        POS_TRACE_WARN(ret, "");
+        return ret;
+    }
+
+    uint64_t totalNvmBlks = nvm->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE;
+    for (pbr::PteData* pteData : pteList)
+    {
+        PartitionType partType = PartitionType(pteData->partType);
+        RaidType raidType = RaidType(pteData->raidType);
+        StripePartition* partition = new StripePartition(partType,
+            dataSsds, raidType);
+        ret = partition->Create(pteData->startLba, pteData->lastLba, totalNvmBlks);
+        if (ret != 0)
+        {
+            return ret;
+        }
+        partitions.push_back(partition);
+    }
+    ret = _CreateNvmPartitions(nvm, partitions);
     return ret;
 }
 

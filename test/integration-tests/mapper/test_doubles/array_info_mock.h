@@ -46,19 +46,18 @@ public:
     virtual ~MockArrayInfo(void);
 
     const PartitionLogicalSize* GetSizeInfo(PartitionType type) override;
-    DeviceSet<string> GetDevNames(void) override;
     string GetName(void) override;
-    unsigned int GetIndex(void) override;
-    string GetMetaRaidType(void) override;
-    string GetDataRaidType(void) override;
+    string GetUniqueId(void);
+    uint32_t GetIndex(void) override;
     string GetCreateDatetime(void) override { return ""; }
     string GetUpdateDatetime(void) override { return ""; }
-    id_t GetUniqueId(void);
+    string GetMetaRaidType(void) override;
+    string GetDataRaidType(void) override;
     ArrayStateType GetState(void) override;
     StateContext* GetStateCtx(void) override;
     uint32_t GetRebuildingProgress(void) override;
     virtual bool IsWriteThroughEnabled(void) override;
-    vector<IArrayDevice*> GetArrayDevices(void) override;
+    vector<IArrayDevice*> GetDevices(ArrayDeviceType type) override;
 
 private:
     PartitionLogicalSize* pls;

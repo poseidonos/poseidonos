@@ -36,6 +36,8 @@
 #include "src/array_components/components_info.h"
 
 #include <string>
+#include <vector>
+
 using namespace std;
 
 namespace pos
@@ -47,13 +49,15 @@ public:
     virtual int Delete(string name) = 0;
     virtual int Mount(string name, bool isWTEnabled) = 0;
     virtual int Unmount(string name) = 0;
+    virtual int Stop(void) = 0;
     virtual int AddDevice(string name, string dev) = 0;
     virtual int RemoveDevice(string name, string dev) = 0;
     virtual int ReplaceDevice(string name, string dev) = 0;
     virtual int Rebuild(string name) = 0;
     virtual void SetTargetAddress(string name, string targetAddress) = 0;
-    virtual string GetTargetAddress(string name) = 0;
+    virtual int GetTargetAddress(string name, string& address /* OUT PARAM */) = 0;
     virtual ComponentsInfo* GetInfo(string name) = 0;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) = 0;
+    virtual vector<const ComponentsInfo*> GetInfo(void) = 0;
 };
 } // namespace pos

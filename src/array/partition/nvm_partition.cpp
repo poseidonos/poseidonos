@@ -68,7 +68,6 @@ NvmPartition::Create(uint64_t startLba, uint32_t blksPerChunk)
 void
 NvmPartition::RegisterService(IPartitionServices* const svc)
 {
-    POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "NvmPartition::RegisterService");
     svc->AddTranslator(type, this);
 }
 
@@ -151,8 +150,9 @@ NvmPartition::IsByteAccessSupported(void)
 int
 NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
 {
-    POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, startLba:{}, blksPerChunk:{}, devsize:{}, devName:{}",
-        startLba, blksPerChunk, devs.size(), devs.front()->GetName());
+    string partType = PARTITION_TYPE_STR[type];
+    POS_TRACE_DEBUG(EID(CREATE_PARTITION_DEBUG), "part_type:{}, startLba:{}, blksPerChunk:{}, devsize:{}, devName:{}",
+        partType, startLba, blksPerChunk, devs.size(), devs.front()->GetName());
     physicalSize.startLba = startLba;
     physicalSize.blksPerChunk = blksPerChunk;
     physicalSize.chunksPerStripe = ArrayConfig::NVM_DEVICE_COUNT;
@@ -161,15 +161,15 @@ NvmPartition::_SetPhysicalAddress(uint64_t startLba, uint32_t blksPerChunk)
     {
         physicalSize.stripesPerSegment = (devs.front()->GetSize() / ArrayConfig::BLOCK_SIZE_BYTE -
             DIV_ROUND_UP(physicalSize.startLba, (uint64_t)ArrayConfig::SECTORS_PER_BLOCK)) / blksPerChunk;
-        POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, WRITE_BUFFER, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
-            startLba, blksPerChunk, physicalSize.stripesPerSegment);
+        POS_TRACE_DEBUG(EID(CREATE_PARTITION_DEBUG), "part_type:{}, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
+            partType, startLba, blksPerChunk, physicalSize.stripesPerSegment);
     }
     else if (type == PartitionType::META_NVM)
     {
         physicalSize.stripesPerSegment = ArrayConfig::META_NVM_SIZE /
             (ArrayConfig::BLOCK_SIZE_BYTE * physicalSize.blksPerChunk * physicalSize.chunksPerStripe);
-        POS_TRACE_DEBUG(EID(CREATE_ARRAY_DEBUG_MSG), "NvmPartition::_SetPhysicalAddress, META_NVM, startLba:{}, blksPerChunk:{}, strPerSeg:{}",
-            startLba, blksPerChunk, physicalSize.stripesPerSegment);
+        POS_TRACE_DEBUG(EID(CREATE_PARTITION_DEBUG), "part_type:{} startLba:{}, blksPerChunk:{}, strPerSeg:{}",
+            partType, startLba, blksPerChunk, physicalSize.stripesPerSegment);
     }
 
     physicalSize.lastLba = physicalSize.startLba +

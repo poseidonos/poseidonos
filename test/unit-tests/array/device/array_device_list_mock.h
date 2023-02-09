@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(int, SpareToData, (ArrayDevice* target, ArrayDevice*& swapOut), (override));
     MOCK_METHOD(void, Clear, (), (override));
     MOCK_METHOD(vector<ArrayDevice*>&, GetDevs, (), (override));
+    virtual ~MockArrayDeviceList() {}
 };
 
 } // namespace pos

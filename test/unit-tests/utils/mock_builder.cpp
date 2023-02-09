@@ -37,7 +37,6 @@
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/array_components/array_components_mock.h"
-#include "test/unit-tests/mbr/abr_manager_mock.h"
 #include "test/unit-tests/array/array_mock.h"
 #include "test/unit-tests/state/state_manager_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
@@ -68,18 +67,19 @@ BuildMockUBlockDevice(const char* devName, const std::string& SN)
     return shared_ptr<UBlockDevice>(rawPtr);
 }
 
+
 std::shared_ptr<MockArray>
 BuildMockArray(std::string arrayName)
 {
     return std::make_shared<MockArray>(arrayName, nullptr, nullptr, nullptr, nullptr,
-        nullptr, nullptr, nullptr, nullptr, nullptr);
+        nullptr, nullptr, nullptr, nullptr);
 }
 
 std::shared_ptr<MockArrayComponents>
 BuildMockArrayComponents(std::string arrayName, StateManager* stateManager)
 {
-    return std::make_shared<MockArrayComponents>(arrayName, nullptr, nullptr,
-        stateManager, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    return std::make_shared<MockArrayComponents>(arrayName, nullptr, stateManager,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);
 }
 
@@ -87,8 +87,8 @@ std::shared_ptr<MockArrayComponents>
 BuildMockArrayComponents(std::string arrayName, Array* array)
 {
     NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
-    return std::make_shared<MockArrayComponents>(arrayName, nullptr, nullptr,
-        mockStateMgr, nullptr, array, nullptr, 
+    return std::make_shared<MockArrayComponents>(arrayName, nullptr, mockStateMgr,
+        nullptr, array, nullptr, 
 #ifdef IBOF_CONFIG_REPLICATOR
         nullptr, 
 #endif
@@ -100,7 +100,7 @@ MockArrayComponents*
 NewMockArrayComponents(std::string arrayName)
 {
     NiceMock<MockStateManager>* mockStateMgr = new NiceMock<MockStateManager>();
-    return new MockArrayComponents(arrayName, nullptr, nullptr,
+    return new MockArrayComponents(arrayName, nullptr, 
         mockStateMgr, nullptr, nullptr, nullptr, 
 #ifdef IBOF_CONFIG_REPLICATOR
         nullptr, 
@@ -121,12 +121,6 @@ std::map<std::string, ArrayComponents*>
 BuildArrayComponentsMap(void)
 {
     return map<std::string, ArrayComponents*>();
-}
-
-std::shared_ptr<MockAbrManager>
-BuildMockAbrManager(void)
-{
-    return std::make_shared<MockAbrManager>(nullptr);
 }
 
 std::shared_ptr<MockTelemetryClient>

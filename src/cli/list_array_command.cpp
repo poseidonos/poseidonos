@@ -37,8 +37,8 @@
 
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_event_code.h"
-#include "src/mbr/mbr_info.h"
 #include "src/sys_info/space_info.h"
+#include "src/array_models/interface/i_array_info.h"
 
 namespace pos_cli
 {
@@ -58,79 +58,41 @@ ListArrayCommand::Execute(json& doc, string rid)
 {
     JsonFormat jFormat;
     JsonElement data("data");
-    std::vector<ArrayBootRecord> abrList;
-    int result = ArrayManagerSingleton::Instance()->GetAbrList(abrList);
 
-    if (result != 0)
+    JsonArray jsonArrayList("arrayList");
+    vector<const ComponentsInfo*> infoList = ArrayMgr()->GetInfo();
+
+    if (infoList.size() == 0)
     {
-        if (result == EID(MBR_DATA_NOT_FOUND))
-        {
-            result = EID(CLI_LIST_ARRAY_NO_ARRAY_EXISTS);
-            return jFormat.MakeResponse("LISTARRAY", rid, result,
-                "there is no array, all array data has been reset", data, GetPosInfo());
-        }
-        else
-        {
-            int event = EID(CLI_LIST_ARRAY_FAILURE);
-            POS_TRACE_WARN(event, "");
-            return jFormat.MakeResponse("LISTARRAY", rid, event,
-                "failed to retrieve array list", data, GetPosInfo());
-        }
+        return jFormat.MakeResponse("LISTARRAY", rid, EID(CLI_LIST_ARRAY_NO_ARRAY_EXISTS),
+            "there is no array", data, GetPosInfo());
     }
 
-    if (abrList.empty())
+    for (const ComponentsInfo* ci : infoList)
     {
-        data.SetAttribute(JsonAttribute("arrayList", "\"There is no array\""));
-    }
-    else
-    {
-        JsonArray jsonArrayList("arrayList");
-        for (const auto& abr : abrList)
+        IArrayInfo* info = ci->arrayInfo;
+
+        JsonElement arrayElement("");
+        string arrayName(info->GetName());
+        string createDatetime(info->GetCreateDatetime());
+        string updateDatetime(info->GetUpdateDatetime());
+        string arrayStatus("Unmounted");
+        if (info->GetState() >= ArrayStateEnum::NORMAL)
         {
-            JsonElement arrayElement("");
-            string arrayName(abr.arrayName);
-            string createDatetime(abr.createDatetime);
-            string updateDatetime(abr.updateDatetime);
-            string arrayStatus("Unmounted");
-
-            ComponentsInfo* CompInfo = ArrayMgr()->GetInfo(arrayName);
-            if (CompInfo == nullptr)
-            {
-                POS_TRACE_ERROR(EID(ARRAY_MGR_DEBUG_MSG),
-                    "Failed to list array"
-                    " because of failing to get componentsInfo"
-                    " with given array name. ArrayName: {}", arrayName);
-                continue;
-            }
-            IArrayInfo* info = CompInfo->arrayInfo;
-            if (info == nullptr)
-            {
-                arrayStatus = "Fault";
-                arrayElement.SetAttribute(JsonAttribute("index", ARRAY_ERROR_INDEX));
-            }
-            else
-            {
-                if (info->GetState() >= ArrayStateEnum::NORMAL)
-                {
-                    arrayStatus = "Mounted";
-                }
-                arrayElement.SetAttribute(JsonAttribute("index", info->GetIndex()));
-                arrayElement.SetAttribute(JsonAttribute("dataRaid", "\"" + info->GetDataRaidType() + "\""));
-                arrayElement.SetAttribute(JsonAttribute("writeThroughEnabled", info->IsWriteThroughEnabled() ? "true" : "false"));
-                arrayElement.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::TotalCapacity(info->GetIndex())) + "\""));
-                arrayElement.SetAttribute(JsonAttribute("used", "\"" + to_string(SpaceInfo::Used(info->GetIndex())) + "\""));
-            }
-
-            arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
-            arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
-
-            arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
-            arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
-            jsonArrayList.AddElement(arrayElement);
+            arrayStatus = "Mounted";
         }
-        data.SetArray(jsonArrayList);
+        arrayElement.SetAttribute(JsonAttribute("index", info->GetIndex()));
+        arrayElement.SetAttribute(JsonAttribute("dataRaid", "\"" + info->GetDataRaidType() + "\""));
+        arrayElement.SetAttribute(JsonAttribute("writeThroughEnabled", info->IsWriteThroughEnabled() ? "true" : "false"));
+        arrayElement.SetAttribute(JsonAttribute("capacity", "\"" + to_string(SpaceInfo::TotalCapacity(info->GetIndex())) + "\""));
+        arrayElement.SetAttribute(JsonAttribute("used", "\"" + to_string(SpaceInfo::Used(info->GetIndex())) + "\""));
+        arrayElement.SetAttribute(JsonAttribute("name", "\"" + arrayName + "\""));
+        arrayElement.SetAttribute(JsonAttribute("status", "\"" + arrayStatus + "\""));
+        arrayElement.SetAttribute(JsonAttribute("createDatetime", "\"" + createDatetime + "\""));
+        arrayElement.SetAttribute(JsonAttribute("updateDatetime", "\"" + updateDatetime + "\""));
+        jsonArrayList.AddElement(arrayElement);
     }
-
+    data.SetArray(jsonArrayList);
     return jFormat.MakeResponse("LISTARRAY", rid, SUCCESS,
         "list of array and its devices ", data, GetPosInfo());
 }

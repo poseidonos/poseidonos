@@ -32,14 +32,15 @@
 
 #pragma once
 
+#include <dirent.h>
 #include <execinfo.h>
 #include <sys/stat.h>
-
 #include <string>
+#include <vector>
 
 using namespace std;
 
-static bool
+inline bool
 DirExists(const std::string& path)
 {
     struct stat info;
@@ -50,7 +51,7 @@ DirExists(const std::string& path)
     return (info.st_mode & S_IFDIR) != 0;
 }
 
-static bool
+inline bool
 MakeDir(const std::string& path)
 {
     mode_t mode = 0755;
@@ -75,4 +76,23 @@ MakeDir(const std::string& path)
         default:
             return false;
     }
+}
+
+inline int
+GetFilesInTheDirectory(string dirPath, vector<string>& out)
+{
+    DIR *dp;
+    struct dirent *dir;
+    if ((dp = opendir(dirPath.c_str())) == NULL)
+    {
+        return -1;
+    }
+    while ((dir = readdir(dp)) != NULL)
+    {
+        if (dir->d_ino == 0) continue;
+
+        out.push_back(dir->d_name);
+    }
+    closedir(dp);
+    return 0;
 }

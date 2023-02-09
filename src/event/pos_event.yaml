@@ -1335,390 +1335,531 @@ Root:
     Solution:
 
 
-    # MBR: 2300 - 2499
+    # PBR: 2300 - 2499
   -
     Id: 2300
-    Name: MBR_ALLOCATE_MEMORY
+    Name: PBR_DEBUG
     Severity:
     Description:
-    Cause:
-    Solution:
-  -
-    Id: 2301
-    Name: MBR_CREATE_AND_WRITE
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2302
-    Name: MBR_ADD_AND_WRITE
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2303
-    Name: MBR_WRITE_DONE
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2304
-    Name: MBR_READ_DONE
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2305
-    Name: MBR_PARITY_CHECK
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2306
-    Name: MBR_SYSTEM_UUID_CHECK_SUCCESS
-    Severity:
-    Description: Successfully verified the system UUID.
-    Cause:
-    Solution:
-  -
-    Id: 2307
-    Name: MBR_DEVICE_NOT_FOUND
-    Severity:
-    Description: Could not find a device.
-    Cause:
-    Solution:
-  -
-    Id: 2308
-    Name: MBR_PARITY_CHECK_FAILED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2309
-    Name: MBR_SYSTEM_UUID_CHECK_FAILURE
-    Severity:
-    Description: Failed to verify the system UUID.
     Cause:
     Solution:
   -
     Id: 2310
-    Name: MBR_DATA_NOT_FOUND
+    Name: PBR_LOAD_DEBUG
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 2311
-    Name: MBR_KEY_NOT_FOUND
+    Name: PBR_LOAD_SUCCESS
     Severity:
-    Description:
+    Description: PBR loaded successfully
     Cause:
     Solution:
   -
     Id: 2312
-    Name: MBR_ABR_NOT_FOUND
+    Name: PBR_LOAD_NOT_EXIST
     Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2313
-    Name: MBR_DELETE_ABR_FAILED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2314
-    Name: MBR_MAX_ARRAY_CNT_EXCEED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2315
-    Name: MBR_ABR_ALREADY_EXIST
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2316
-    Name: MBR_WRONG_ARRAY_VALID_FLAG
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2317
-    Name: MBR_WRONG_ARRAY_INDEX_MAP
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2318
-    Name: MBR_DEVICE_ALREADY_IN_ARRAY
-    Severity:
-    Description: Device already belongs to an array.
-    Cause:
-    Solution: Select another device.
-  -
-    Id: 2319
-    Name: MBR_ABR_GET_LIST_SUCCESS
-    Severity:
-    Description: ABR list has been loaded.
+    Description: PBR does not exist
     Cause:
     Solution:
   -
     Id: 2320
-    Name: MBR_ALLOCATE_MEMORY_FAILED
+    Name: PBR_RESET_DEBUG
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 2321
-    Name: MBR_DATA_SIZE_ERROR
+    Name: PBR_RESET_SUCCESS
+    Severity:
+    Description: PBR reset successfully
+    Cause:
+    Solution:
+  -
+    Id: 2330
+    Name: PBR_UPDATE_DEBUG
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2322
-    Name: MBR_FORMAT_ERROR
+    Id: 2331
+    Name: PBR_UPDATE_SUCCESS
+    Severity:
+    Description: PBR updated successfully
+    Cause:
+    Solution:
+  -
+    Id: 2340
+    Name: PBR_UNKNOWN_SIGNATURE
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2323
-    Name: MBR_GET_SYSTEM_UUID_FAILED
+    Id: 2341
+    Name: ATE_UNKNOWN_SIGNATURE
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2324
-    Name: MBR_DEBUG_MSG
+    Id: 2342
+    Name: ADE_UNKNOWN_SIGNATURE
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2325
-    Name: MBR_WRITE_ERROR
+    Id: 2343
+    Name: PTE_UNKNOWN_SIGNATURE
     Severity:
     Description:
     Cause:
     Solution:
+  -
+    Id: 2350
+    Name: PBR_CHECKSUM_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2351
+    Name: PBR_CHECKSUM_INVALID
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2352
+    Name: PBR_CHECKSUM_VALID
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2361
+    Name: PBR_SERIALIZE_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2362
+    Name: PBR_SERIALIZE_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2363
+    Name: PBR_DESERIALIZE_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2364
+    Name: PBR_DESERIALIZE_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2371
+    Name: PBR_FILE_NOT_EXIST
+    Severity:
+    Description: PBR file does not exist
+    Cause:
+    Solution:
+  -
+    Id: 2380
+    Name: PBR_VOTING_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  
+  # Array Builder : 2400 - 2499
   -
     Id: 2400
-    Name: RESET_MBR_TRYING
+    Name: ARRAY_BUILDER_DEBUG
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 2401
-    Name: RESET_MBR_COMPLETED
+    Name: ARRAY_BUILDER_CREATE_REQUEST
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 2402
-    Name: RESET_MBR_FAILED
+    Name: ARRAY_BUILDER_CREATE_RESULT
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2410
-    Name: LOAD_MBR_TRYING
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2411
-    Name: LOAD_MBR_COMPLETED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2412
-    Name: LOAD_MBR_FAILED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  
-  # Array: 2500 - 2699
-  -
-    Id: 2500
-    Name: CREATE_ARRAY_DEBUG_MSG
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 2501
+    Id: 2403
     Name: CREATE_ARRAY_EXCEED_MAX_NUM_OF_ARRAYS
     Severity:
     Description: Failed to create array.
     Cause: The maximum number of possible arrays has been exceeded.
     Solution: If you remove the existing array
   -
-    Id: 2502
+    Id: 2404
     Name: CREATE_ARRAY_SAME_ARRAY_NAME_EXISTS
     Severity:
     Description: Failed to create array.
     Cause: Array with the same name already exists.
     Solution: Please use another name.
   -
-    Id: 2503
-    Name: CREATE_ARRAY_NAME_TOO_SHORT
+    Id: 2411
+    Name: ARRAY_BUILDER_LOAD_REQUEST
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2412
+    Name: ARRAY_BUILDER_LOAD_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2415
+    Name: ARRAY_NAME_POLICY_CHECK_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2416
+    Name: ARRAY_NAME_TOO_SHORT
     Severity:
     Description: Failed to create array.
     Cause: Array name is too short.
     Solution: Array name must be at least 2 characters long.
   -
-    Id: 2504
-    Name: CREATE_ARRAY_NAME_TOO_LONG
+    Id: 2417
+    Name: ARRAY_NAME_TOO_LONG
     Severity:
     Description: Failed to create an array.
     Cause: Array name is too long.
     Solution: Array name must be at most 63 characters long.
   -
-    Id: 2505
-    Name: CREATE_ARRAY_NAME_INCLUDES_SPECIAL_CHAR
+    Id: 2418
+    Name: ARRAY_NAME_INCLUDES_SPECIAL_CHAR
     Severity:
     Description: Failed to create an array.
     Cause: Array name contains a special character.
     Solution: Array name must not have any special character.
   -
-    Id: 2506
-    Name: CREATE_ARRAY_NAME_START_OR_END_WITH_SPACE
+    Id: 2419
+    Name: ARRAY_NAME_START_OR_END_WITH_SPACE
     Severity:
     Description: Failed to create an array.
     Cause: A whitespace exists at the beginning or end of the name.
     Solution: Remove the whitespace from the name.
   -
-    Id: 2507
+    Id: 2421
+    Name: ARRAY_BUILDER_RAID_POLICY_CHECK_REQUEST
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2422
+    Name: ARRAY_BUILDER_RAID_POLICY_CHECK_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2423
+    Name: NOT_SUPPORTED_RAIDTYPE
+    Severity:
+    Description: Failed to build an array.
+    Cause: The RAID type is not supported.
+    Solution: Please check the supported RAID types.
+  -
+    Id: 2424
+    Name: RAID_INVALID_SSD_CNT
+    Severity:
+    Description: Failed to build an array.
+    Cause: The number of devices to build the RAID you entered does not meet the requirement.
+    Solution: Check the device requirement for the RAID type.
+  -
+    Id: 2425
+    Name: RAID_DOES_NOT_SUPPORT_SPARE_DEV
+    Severity:
+    Description: Failed to build an array.
+    Cause: The RAID type entered does not support spare devices.
+    Solution: Please try again without spare device.
+  -
+    Id: 2430
+    Name: DEVICE_BUILDER_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2432
+    Name: IMPORT_DEVICE_INSPECTION_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2433
+    Name: IMPORT_DEVICE_NO_AVAILABLE_DEVICE
+    Severity:
+    Description: Failed to import an array.
+    Cause: There are no devices available in the requested device list.
+    Solution: Enter available devices.
+  -
+    Id: 2434
+    Name: IMPORT_DEVICE_SSD_CAPACITY_IS_LT_MIN
+    Severity:
+    Description: Failed to import devices to array.
+    Cause: The total capacity of data devices is smaller than the minimum requirement.
+    Solution: Please checkout the minimum requirement for data devices.
+  -
+    Id: 2435
+    Name: IMPORT_DEVICE_NVM_CAPACITY_IS_LT_MIN
+    Severity:
+    Description: Failed to import devices to array.
+    Cause: The total capacity of the write buffer is smaller than the minimum requirement.
+    Solution: Please checkout the minimum requirement for a write buffer.
+  -
+    Id: 2436
+    Name: IMPORT_DEVICE_SPARE_CAPACITY_IS_LT_DATA
+    Severity:
+    Description: Failed to import devices to array.
+    Cause: The capacity of the spare device is smaller than or equal to that of the smallest data device.
+    Solution: Please use another spare device.
+  -
+    Id: 2437
+    Name: IMPORT_DEVICE_NVM_DOES_NOT_EXIST
+    Severity:
+    Description: Failed to import devices to array.
+    Cause: Write buffer device could not be found.
+    Solution: Please try again after checking there is a write buffer in the array.
+  -
+    Id: 2441
+    Name: DEVICE_BUILDER_CREATE_REQUEST
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2442
+    Name: DEVICE_BUILDER_CREATE_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2443
     Name: CREATE_ARRAY_SSD_NAME_NOT_FOUND
     Severity:
     Description: Failed to create an array.
     Cause: Failed to find the device with the given name.
     Solution: Please check the data device list.
   -
-    Id: 2508
+    Id: 2444
     Name: CREATE_ARRAY_NVM_NAME_NOT_FOUND
     Severity:
     Description: Failed to create an array.
     Cause: Failed to find the write buffer with the given name.
     Solution: Please check the write buffer device name.
   -
-    Id: 2509
-    Name: CREATE_ARRAY_NOT_SUPPORTED_RAIDTYPE
+    Id: 2450
+    Name: AUTO_CREATE_ARRAY_DEBUG
     Severity:
-    Description: Failed to create an array.
-    Cause: The RAID type is not supported.
-    Solution: Please check the supported RAID types.
+    Description:
+    Cause:
+    Solution:
   -
-    Id: 2510
-    Name: CREATE_ARRAY_RAID_INVALID_SSD_CNT
-    Severity:
-    Description: Failed to create an array.
-    Cause: The number of devices to build the RAID you entered does not meet the requirement.
-    Solution: Check the device requirement for the RAID type.
-  -
-    Id: 2511
-    Name: CREATE_ARRAY_RAID_DOES_NOT_SUPPORT_SPARE_DEV
-    Severity:
-    Description: Failed to create an array.
-    Cause: The RAID type entered does not support spare devices.
-    Solution: Please try again without spare device.
-  -
-    Id: 2512
-    Name: CREATE_ARRAY_NO_AVAILABLE_DEVICE
-    Severity:
-    Description: Failed to create an array.
-    Cause: There are no devices available in the requested device list.
-    Solution: Enter available devices.
-  -
-    Id: 2513
-    Name: CREATE_ARRAY_SSD_CAPACITY_IS_LT_MIN
-    Severity:
-    Description: Failed to create an array.
-    Cause: The total capacity of data devices is smaller than the minimum requirement.
-    Solution: Please checkout the minimum requirement for data devices.
-  -
-    Id: 2514
-    Name: CREATE_ARRAY_NVM_CAPACITY_IS_LT_MIN
-    Severity:
-    Description: Failed to create an array.
-    Cause: The total capacity of the write buffer is smaller than the minimum requirement.
-    Solution: Please checkout the minimum requirement for a write buffer.
-  -
-    Id: 2515
-    Name: CREATE_ARRAY_SPARE_CAPACITY_IS_LT_DATA
-    Severity:
-    Description: Failed to create an array.
-    Cause: The capacity of the spare device is smaller than or equal to that of the smallest data device.
-    Solution: Please use another spare device.
-  -
-    Id: 2516
-    Name: CREATE_ARRAY_INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL
-    Severity:
-    Description: Failed to create an array.
-    Cause: Failed to create buffer pool for parity calculation.
-    Solution: Please check if there is enough huge page memory space.
-  -
-    Id: 2517
+    Id: 2451
     Name: CREATE_ARRAY_INSUFFICIENT_SAME_NUMA_DEVS
     Severity:
     Description: Failed to create an array.
     Cause: The number of SSDs requested on the same NUMA is insufficient.
     Solution: Please check the number of unoccupied SSDs on the same NUMA with the same capacity.
   -
-    Id: 2518
+    Id: 2452
     Name: CREATE_ARRAY_INSUFFICIENT_SAME_CAPACITY_DEVS
     Severity:
     Description: Failed to create an array.
     Cause: The number of SSDs requested with the same capacity on the same NUMA is insufficient
     Solution: Please check the number of unoccupied SSDs on the same NUMA with the same capacity.
   -
-    Id: 2519
-    Name: LOAD_ARRAY_DEBUG_MSG
+    Id: 2456
+    Name: DEVICE_BUILDER_LOAD_REQUEST
     Severity:
     Description:
     Cause:
     Solution:
   -
-    Id: 2520
-    Name: LOAD_ARRAY_NVM_DOES_NOT_EXIST
+    Id: 2457
+    Name: DEVICE_BUILDER_LOAD_RESULT
     Severity:
-    Description: Failed to load an array.
-    Cause: Write buffer device could not be found.
-    Solution: Please try again after checking there is a write buffer in the array.
+    Description:
+    Cause:
+    Solution:
   -
-    Id: 2521
-    Name: LOAD_ARRAY_ALREADY_LOADED
+    Id: 2460
+    Name: PARTITION_BUILDER_DEBUG
     Severity:
-    Description: Failed to load an array.
-    Cause: The array has already been loaded.
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2461
+    Name: PARTITION_BUILDER_CREATE_REQUEST
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2462
+    Name: PARTITION_BUILDER_CREATE_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2471
+    Name: PARTITION_BUILDER_LOAD_REQUEST
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2472
+    Name: PARTITION_BUILDER_LOAD_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2473
+    Name: LOAD_PARTITION_NVM_DOES_NOT_EXIST
+    Severity:
+    Description: Failed to load partitions during array load process.
+    Cause: Write buffer device could not be found.
+    Solution: Please try again after checking if there is a write buffer included in the array.
+  -
+    Id: 2480
+    Name: BUILD_PARTITIONS_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2481
+    Name: BUILD_PARTITIONS_WITH_HETERO_DEVS
+    Severity:
+    Description: Partitions are built with hetero devices.
+    Cause:
+    Solution:
+  -
+    Id: 2482
+    Name: BUILD_PARTITIONS_ZERO_SIZE_DEVICE_DETECTED
+    Severity:
+    Description: Devices with an zero size is detected during partition building.
+    Cause:
+    Solution:
+  -
+    Id: 2486
+    Name: BUILD_NVM_PARTITIONS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2487
+    Name: BUILD_NVM_PARTITIONS_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2491
+    Name: BUILD_SSD_PARTITIONS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2492
+    Name: BUILD_SSD_PARTITIONS_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2495
+    Name: CREATE_PARTITION_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2496
+    Name: PARTITION_SERVICE_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2497
+    Name: PARTITION_SERVICES_ADDED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2498
+    Name: PARTITION_SERVICES_CLEARED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  # Array: 2500 - 2699
+  -
+    Id: 2500
+    Name: IMPORT_ARRAY_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2501
+    Name: IMPORT_ARRAY_RESULT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 2510
+    Name: LOAD_ARRAY_DEBUG
+    Severity:
+    Description:
+    Cause:
     Solution:
   -
     Id: 2522
-    Name: DELETE_ARRAY_DEBUG_MSG
+    Name: DELETE_ARRAY_DEBUG
     Severity:
     Description:
     Cause:
@@ -1935,53 +2076,39 @@ Root:
     Solution: Please check array name to remove a device and try again
   -
     Id: 2553
-    Name: ARRAY_DEV_DEBUG_MSG
+    Name: ARRAY_DEV_DEBUG
     Severity:
     Description:
     Cause:
     Solution:
   -
     Id: 2554
-    Name: ARRAY_DEVICE_TYPE_NOT_MATCHED
+    Name: IMPORT_ARRAY_DEV_DEBUG
     Severity:
-    Description: Failed to add a device to array.
-    Cause: Internal logic error
+    Description:
+    Cause:
     Solution:
   -
     Id: 2555
-    Name: ARRAY_NVM_NOT_FOUND
+    Name: DATA_SSD_REPLACED_TO_SPARE
     Severity:
-    Description: Failed to configure an array.
-    Cause: Write buffer device of the requested name could not be found
-    Solution: Please check the write buffer device name and try again
+    Description:
+    Cause:
+    Solution:
   -
     Id: 2556
-    Name: UNABLE_TO_SET_NVM_MORE_THAN_ONE
+    Name: ARRAY_DEV_ADDED
     Severity:
-    Description: Failed to configure an array.
-    Cause: Up to one write buffer device is allowed for each array
-    Solution: Please enter only one write buffer device and try again
+    Description:
+    Cause:
+    Solution:
   -
     Id: 2557
-    Name: UNABLE_TO_SET_NVM_NO_OR_NULL
+    Name: ARRAY_DEV_REMOVED
     Severity:
-    Description: Failed to configure an array.
-    Cause: The write buffer is not entered or is not available.
-    Solution: Check the input and status of write buffer and try again.
-  -
-    Id: 2558
-    Name: UNABLE_TO_SET_NVM_ALREADY_OCCUPIED
-    Severity:
-    Description: Failed to configure an array.
-    Cause: Write buffer device is already in use elsewhere
-    Solution: Try again with a write buffer device that is not in use
-  -
-    Id: 2559
-    Name: UNABLE_TO_SET_NVM_CAPACITY_IS_LT_MIN
-    Severity:
-    Description: Failed to configure an array.
-    Cause: Write buffer device capacity does not meet minimum capacity condition
-    Solution: Please try again after securing enough size.
+    Description:
+    Cause:
+    Solution:
   -
     Id: 2560
     Name: UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED
@@ -2068,7 +2195,7 @@ Root:
     Solution:
   -
     Id: 2572
-    Name: FORMAT_PARTITION_DEBUG_MSG
+    Name: FORMAT_PARTITION_DEBUG
     Severity:
     Description:
     Cause:
@@ -2285,11 +2412,11 @@ Root:
     Solution: Please check the format of the target address.
   -
     Id: 2603
-    Name: AUTO_CREATE_ARRAY_DEBUG
+    Name: INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL
     Severity:
-    Description:
-    Cause:
-    Solution:
+    Description: Failed to alloc parity pool.
+    Cause: Failed to create buffer pool for parity calculation.
+    Solution: Please check if there is enough huge page memory space.
   -
     Id: 2604
     Name: RAID_BUFFER_POOL_ALLOCATED
