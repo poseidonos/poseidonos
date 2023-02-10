@@ -42,6 +42,11 @@ namespace pos
 class AllocatorAddressInfo;
 class MetaFileIntf;
 class SegmentInfo;
+class SegmentInfoData;
+class AsyncMetaFileIoCtx;
+
+// This class is to fake a flush of ISegmentContext,
+// LoadContext is to simulate a dirty bringup to load Segment Context.
 class ISegmentCtxFake : public ISegmentCtx
 {
 public:
@@ -49,7 +54,7 @@ public:
     virtual ~ISegmentCtxFake(void);
 
     void LoadContext(void);
-    int FlushContexts(SegmentInfo* vscSegmentInfos);
+    int FlushContexts(SegmentInfoData* vscSegmentInfoDatas);
     uint64_t GetStoredVersion(void);
     virtual SegmentInfo* GetSegmentInfos(void);
 
@@ -65,15 +70,22 @@ private:
     void _ValidateBlks(VirtualBlks blks);
     bool _InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease);
     bool _UpdateOccupiedStripeCount(StripeId lsid);
-    void _SegmentContextReadDone(void);
+    void _CompleteReadSegmentContext(AsyncMetaFileIoCtx* ctx);
+    void _CompleteWriteSegmentContext(AsyncMetaFileIoCtx* ctx);
     void _WaitForReadDone(void);
+    void _WaitForWriteDone(void);
 
     AllocatorAddressInfo* addrInfo;
     MetaFileIntf* segmentContextFile;
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
+    SegmentInfoData* segmentInfoData;
+
     uint32_t numSegments;
     uint64_t fileSize;
+
+    // No lock is required because EventScheduler use this on single-threaded
+    bool segmentContextWriteDone;
     bool segmentContextReadDone;
     bool isFlushedBefore;
 };

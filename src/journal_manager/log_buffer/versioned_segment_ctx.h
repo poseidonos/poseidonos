@@ -56,7 +56,7 @@ public:
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override {}
-    virtual SegmentInfo* GetUpdatedInfoToFlush(int logGroupId) override { return nullptr; }
+    virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override { return nullptr; }
     virtual void ResetFlushedInfo(int logGroupId) override {}
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
@@ -82,7 +82,7 @@ public:
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override;
 
-    virtual SegmentInfo* GetUpdatedInfoToFlush(int logGroupId) override;
+    virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override;
     virtual void ResetFlushedInfo(int logGroupId) override;
     virtual int GetNumSegments(void) override;
     virtual int GetNumLogGroups(void) override;
@@ -99,7 +99,7 @@ private:
     uint32_t numSegments;
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
     SegmentInfo* segmentInfos;
-    SegmentInfoData* segmentInfoData;
+    SegmentInfoData* segmentInfoDatas;
     const int ALL_LOG_GROUP = -1;
 };
 

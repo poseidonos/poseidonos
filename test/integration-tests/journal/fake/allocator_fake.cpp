@@ -22,7 +22,7 @@ AllocatorFake::AllocatorFake(TestInfo* testInfo, IArrayInfo* info)
     EXPECT_CALL(*addrInfoMock, GetnumUserAreaSegments).WillRepeatedly(Return(testInfo->numUserSegments));
 
     wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
-    segmentCtxFake = new StrictMock<ISegmentCtxFake>(addrInfoMock, new MockFileIntf(GetSegmentContextFileName(), arrayId, MetaFileType::General, MetaVolumeType::NvRamVolume));
+    segmentCtxFake = new StrictMock<ISegmentCtxFake>(addrInfoMock, new MockFileIntf(GetSegmentContextFileName(), arrayId, MetaFileType::General, MetaVolumeType::SsdVolume));
     contextManagerFake = new StrictMock<IContextManagerFake>(segmentCtxFake, addrInfoMock);
     contextReplayerMock = new StrictMock<IContextReplayerMock>();
 }

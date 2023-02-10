@@ -42,6 +42,7 @@
 #include "src/journal_manager/log_buffer/log_group_footer_write_event.h"
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/journal_manager/log_buffer/reset_log_group.h"
+#include "src/journal_manager/log_buffer/reset_log_group_on_rocksdb.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/logger/logger.h"
 
@@ -132,6 +133,7 @@ LogGroupReleaser::_TriggerCheckpoint(void)
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_STARTED),
         "logGroupId:{}", nextLogGroupId);
 
+    // TODO (cheolho.kang): Need to use factory method
     EventSmartPtr event = _CreateCheckpointSubmissionEvent();
     eventScheduler->EnqueueEvent(event);
 }
@@ -150,7 +152,15 @@ LogGroupReleaser::_CreateCheckpointSubmissionEvent(void)
     LogGroupFooter footerAfterMapFlush = _CreateLogGroupFooterForReset(nextLogGroupId, footerBeforeMapFlush);
 
     EventSmartPtr resetLogGroupCompletion(new LogGroupResetCompletedEvent(this, nextLogGroupId));
-    EventSmartPtr resetLogGroup(new ResetLogGroup(config, logBuffer, nextLogGroupId, footerAfterMapFlush, footerOffset, resetLogGroupCompletion));
+    EventSmartPtr resetLogGroup;
+    if (config->IsRocksdbEnabled() == true)
+    {
+        resetLogGroup = EventSmartPtr(new ResetLogGroupOnRocksDB(logBuffer, nextLogGroupId, resetLogGroupCompletion));
+    }
+    else
+    {
+        resetLogGroup = EventSmartPtr(new ResetLogGroup(logBuffer, nextLogGroupId, footerAfterMapFlush, footerOffset, resetLogGroupCompletion));
+    }
     EventSmartPtr checkpointSubmission(new CheckpointSubmission(checkpointManager, resetLogGroup, nextLogGroupId));
     EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footerBeforeMapFlush, footerOffset, nextLogGroupId, checkpointSubmission));
 

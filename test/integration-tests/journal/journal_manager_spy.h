@@ -58,6 +58,8 @@ private:
 
     MockEventScheduler* eventScheduler;
     std::string LogFileName;
-    std::unordered_map<std::string, EventSmartPtr> faultInjectorTable;
+
+    // No lock is required because EventScheduler use this on single-threaded
+    std::unordered_map<std::string, EventSmartPtr> eventReplaceTable;
 };
 } // namespace pos

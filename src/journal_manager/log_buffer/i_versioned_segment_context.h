@@ -52,7 +52,7 @@ public:
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) = 0;
-    virtual SegmentInfo* GetUpdatedInfoToFlush(int logGroupId) = 0;
+    virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) = 0;
     virtual void ResetFlushedInfo(int logGroupId) = 0;
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;

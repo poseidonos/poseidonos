@@ -37,16 +37,17 @@ JournalManagerSpy::JournalManagerSpy(TelemetryPublisher* tp, IArrayInfo* array, 
 
     LogFileName = logFileName;
 
+    // TODO (cheolho.kang): Move codes about the MockEventScheduler to the JournalManagerTestFixture
     eventScheduler = new NiceMock<MockEventScheduler>;
     ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
         std::string targetEventName(typeid(*event.get()).name());
-        auto searchResult = faultInjectorTable.find(targetEventName);
-        if (searchResult != faultInjectorTable.end())
+        auto searchResult = eventReplaceTable.find(targetEventName);
+        if (searchResult != eventReplaceTable.end())
         {
             EventSmartPtr faultEvent = searchResult->second;
             std::thread eventExecution(&Event::Execute, faultEvent);
             eventExecution.detach();
-            faultInjectorTable.erase(searchResult);
+            eventReplaceTable.erase(searchResult);
         }
         else
         {
@@ -281,6 +282,6 @@ void
 JournalManagerSpy::InjectFaultEvent(const std::type_info& targetEventInfo, EventSmartPtr errorEvent)
 {
     std::string targetEventName(targetEventInfo.name());
-    faultInjectorTable.insert({targetEventName, errorEvent});
+    eventReplaceTable.insert({targetEventName, errorEvent});
 }
 } // namespace pos

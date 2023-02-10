@@ -27,7 +27,7 @@ public:
     bool WriteGcStripeLog(int volumeId, StripeId vsid, StripeId wbLsid, StripeId userLsid);
     bool WriteGcStripeLog(int volumeId, StripeTestFixture& stripe);
 
-    void WriteLogsWithSize(uint64_t sizeToFill, SegmentId startStripeId = 0);
+    void WriteLogsWithSize(uint64_t sizeToFill, SegmentId startSegmentId = 0);
 
     void GenerateLogsForStripe(StripeTestFixture& stripe, uint32_t startOffset, int numBlks);
     void WriteLogsForStripe(StripeTestFixture& stripe);

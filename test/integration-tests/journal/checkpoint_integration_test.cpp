@@ -39,17 +39,17 @@ TEST_F(CheckpointIntegrationTest, TriggerCheckpoint)
 
     JournalConfigurationBuilder builder(testInfo);
     builder.SetJournalEnable(true)
-        ->SetLogBufferSize(64 * 1024);
+        ->SetLogBufferSize(32 * 1024);
 
     InitializeJournal(builder.Build());
     SetTriggerCheckpoint(false);
 
-    writeTester->WriteLogsWithSize(logGroupSize, 0);
+    writeTester->WriteLogsWithSize(logGroupSize);
     writeTester->WaitForAllLogWriteDone();
     MapList dirtyMaps = writeTester->GetDirtyMap();
 
     // This is dummy writes
-    writeTester->WriteLogsWithSize(logGroupSize / 2, 10 * testInfo->numStripesPerSegment);
+    writeTester->WriteLogsWithSize(logGroupSize / 2);
     writeTester->WaitForAllLogWriteDone();
 
     EXPECT_TRUE(journal->GetNumDirtyMap(0) == static_cast<int>(dirtyMaps.size()));
@@ -71,7 +71,7 @@ TEST_F(CheckpointIntegrationTest, WriteLogsToTriggerCheckpoint)
 
     JournalConfigurationBuilder builder(testInfo);
     builder.SetJournalEnable(true)
-        ->SetLogBufferSize(64 * 1024);
+        ->SetLogBufferSize(32 * 1024);
 
     InitializeJournal(builder.Build());
     SetTriggerCheckpoint(true);

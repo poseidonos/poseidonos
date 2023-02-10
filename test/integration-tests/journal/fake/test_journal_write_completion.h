@@ -2,6 +2,8 @@
 
 #include "src/event_scheduler/meta_update_call_back.h"
 
+#include "src/journal_manager/log/log_event.h"
+
 namespace pos
 {
 class WrittenLogs;
@@ -10,16 +12,10 @@ class TestInfo;
 class SegmentCtx;
 class IVersionedSegmentContext;
 
-enum LogEventType
-{
-    BLOCK_MAP_UPDATE,
-    STRIPE_MAP_UPDATE,
-    GC_MAP_UPDATE
-};
 class TestJournalWriteCompletion : public MetaUpdateCallback
 {
 public:
-    TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager, TestInfo* testInfo, VirtualBlks blks, LogEventType eventType);
+    TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager, TestInfo* testInfo, VirtualBlks blks, LogType eventType);
 
 private:
     bool _DoSpecificJob(void) override;
@@ -28,7 +24,7 @@ private:
     IContextManagerFake* contextManager;
     TestInfo* testInfo;
     VirtualBlks blks;
-    LogEventType eventType;
+    LogType eventType;
     ISegmentCtx* segmentCtx;
     IVersionedSegmentContext* versionedSegCtx;
 };

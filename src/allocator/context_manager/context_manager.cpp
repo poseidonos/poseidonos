@@ -150,8 +150,8 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 
     EventSmartPtr contextFlushCompletion(new ContextFlushCompletion(this,
      callback, logGroupIdInProgress));
-    SegmentInfo* vscSegInfo = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
-    return ioManager->FlushContexts(contextFlushCompletion, sync, reinterpret_cast<char*>(vscSegInfo));
+    SegmentInfoData* vscSegInfoData = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoDataToFlush(logGroupId);
+    return ioManager->FlushContexts(contextFlushCompletion, sync, reinterpret_cast<char*>(vscSegInfoData));
 }
 
 SegmentId

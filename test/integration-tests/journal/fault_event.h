@@ -45,7 +45,6 @@ public:
     virtual bool Execute(void) override;
 
 private:
-    EventSmartPtr callback;
     bool* isFaultExecuted;
 };
 } // namespace pos
