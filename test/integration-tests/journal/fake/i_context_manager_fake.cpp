@@ -1,5 +1,7 @@
 #include "i_context_manager_fake.h"
 
+#include <thread>
+
 #include "src/allocator/address/allocator_address_info.h"
 #include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
 
@@ -51,8 +53,8 @@ IContextManagerFake::GetStoredContextVersion(int owner)
 int
 IContextManagerFake::_FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
 {
-    SegmentInfo* vscSegInfo = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoToFlush(logGroupId);
-    segmentCtx->FlushContexts(vscSegInfo);
+    SegmentInfoData* vscSegInfoData = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoDataToFlush(logGroupId);
+    segmentCtx->FlushContexts(vscSegInfoData);
     if (callback != nullptr)
     {
         std::thread eventExecution(&Event::Execute, callback);

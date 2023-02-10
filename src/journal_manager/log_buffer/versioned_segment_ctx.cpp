@@ -83,17 +83,17 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
 
     numSegments = numSegments_;
     segmentInfos = new SegmentInfo[numSegments];
-    segmentInfoData = new SegmentInfoData[numSegments];
+    segmentInfoDatas = new SegmentInfoData[numSegments];
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoData[segId]);
+        segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoDatas[segId]);
         segmentInfos[segId].InitSegmentInfoData();
         if (nullptr != loadedSegmentInfo)
         {
             POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
-                           segId, loadedSegmentInfo[segId].GetValidBlockCount(),
-                           loadedSegmentInfo[segId].GetOccupiedStripeCount(),
-                           loadedSegmentInfo[segId].GetState());
+                segId, loadedSegmentInfo[segId].GetValidBlockCount(),
+                loadedSegmentInfo[segId].GetOccupiedStripeCount(),
+                loadedSegmentInfo[segId].GetState());
             segmentInfos[segId].UpdateFrom(loadedSegmentInfo[segId]);
         }
     }
@@ -152,7 +152,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         uint32_t result = getValidCount + validBlockCountDiff;
 
         POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-           "Before _UpdateSegmentContext, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
+            "Before _UpdateSegmentContext, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
             logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
 
         segmentInfos[segmentId].SetValidBlockCount(result);
@@ -176,8 +176,8 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
     }
 }
 
-SegmentInfo*
-VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
+SegmentInfoData*
+VersionedSegmentCtx::GetUpdatedInfoDataToFlush(int logGroupId)
 {
     _CheckLogGroupIdValidity(logGroupId);
 
@@ -195,7 +195,7 @@ VersionedSegmentCtx::GetUpdatedInfoToFlush(int logGroupId)
 
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_IN_PROGRESS), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
 
-    return segmentInfos;
+    return segmentInfoDatas;
 }
 
 void

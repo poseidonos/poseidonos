@@ -209,16 +209,16 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsReturned)
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
         GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
-    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+    SegmentInfoData* result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
 
     // Then
-    EXPECT_EQ(result[0].GetValidBlockCount(), 10);
-    EXPECT_EQ(result[1].GetValidBlockCount(), 2);
-    EXPECT_EQ(result[2].GetValidBlockCount(), 40);
+    EXPECT_EQ(result[0].validBlockCount, 10);
+    EXPECT_EQ(result[1].validBlockCount, 2);
+    EXPECT_EQ(result[2].validBlockCount, 40);
 
-    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 1);
-    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 1);
-    EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0);
+    EXPECT_EQ(result[0].occupiedStripeCount, 1);
+    EXPECT_EQ(result[1].occupiedStripeCount, 1);
+    EXPECT_EQ(result[2].occupiedStripeCount, 0);
 
     delete[] segmentInfos;
     delete[] segmentInfoData;
@@ -270,16 +270,16 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsApplied)
     changedOccupiedStripeCount.emplace(2, 0);
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
-    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+    SegmentInfoData* result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
 
     // Then
-    EXPECT_EQ(result[0].GetValidBlockCount(), 10 - 5);
-    EXPECT_EQ(result[1].GetValidBlockCount(), 9 + 2);
-    EXPECT_EQ(result[2].GetValidBlockCount(), 1 + 40);
+    EXPECT_EQ(result[0].validBlockCount, 10 - 5);
+    EXPECT_EQ(result[1].validBlockCount, 9 + 2);
+    EXPECT_EQ(result[2].validBlockCount, 1 + 40);
 
-    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 100 + 2);
-    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12 + 1);
-    EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0 + 0);
+    EXPECT_EQ(result[0].occupiedStripeCount, 100 + 2);
+    EXPECT_EQ(result[1].occupiedStripeCount, 12 + 1);
+    EXPECT_EQ(result[2].occupiedStripeCount, 0 + 0);
 
     delete[] segmentInfos;
     delete[] segmentInfoData;
@@ -310,7 +310,7 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenInvalidLogGroupId
     versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
 
     // When
-    ASSERT_DEATH(versionedSegCtx.GetUpdatedInfoToFlush(5), "");
+    ASSERT_DEATH(versionedSegCtx.GetUpdatedInfoDataToFlush(5), "");
 
     delete[] segmentInfos;
     delete[] segmentInfoData;
@@ -349,7 +349,7 @@ TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
         GetChangedOccupiedStripeCount).WillOnce(Return(changedOccupiedStripeCount));
 
-    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+    SegmentInfoData* result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
 
     // When
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), Reset).Times(1);
@@ -387,22 +387,22 @@ TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
     versionedSegCtx.Init(&config, segmentInfos, 3, versionedSegmentInfo);
 
     int targetLogGroup = 0;
-    SegmentInfo* result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
+    SegmentInfoData* result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
 
-    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 100);
-    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12);
-    EXPECT_EQ(result[2].GetOccupiedStripeCount(), 0);
+    EXPECT_EQ(result[0].occupiedStripeCount, 100);
+    EXPECT_EQ(result[1].occupiedStripeCount, 12);
+    EXPECT_EQ(result[2].occupiedStripeCount, 0);
 
     // Test
     versionedSegCtx.ResetInfosAfterSegmentFreed(0);
-    result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
-    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 0);
-    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 12);
+    result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
+    EXPECT_EQ(result[0].occupiedStripeCount, 0);
+    EXPECT_EQ(result[1].occupiedStripeCount, 12);
 
     versionedSegCtx.ResetInfosAfterSegmentFreed(1);
-    result = versionedSegCtx.GetUpdatedInfoToFlush(targetLogGroup);
-    EXPECT_EQ(result[0].GetOccupiedStripeCount(), 0);
-    EXPECT_EQ(result[1].GetOccupiedStripeCount(), 0);
+    result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
+    EXPECT_EQ(result[0].occupiedStripeCount, 0);
+    EXPECT_EQ(result[1].occupiedStripeCount, 0);
 
     delete[] segmentInfos;
     delete[] segmentInfoData;

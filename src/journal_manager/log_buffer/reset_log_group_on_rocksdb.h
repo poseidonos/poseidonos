@@ -14,7 +14,7 @@
 *       the documentation and/or other materials provided with the
 *       distribution.
 *     * Neither the name of Samsung Electronics Corporation nor the names of
-*       its contributors may be used to endorse or promote products derived
+ *       its contributors may be used to endorse or promote products derived
 *       from this software without specific prior written permission.
 *
 *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -30,60 +30,28 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/journal_manager/log_buffer/reset_log_group.h"
-#include "src/journal_manager/log_buffer/reset_log_group_on_rocksdb.h"
+#pragma once
 
-#include <gtest/gtest.h>
-
-#include "src/journal_manager/log_buffer/log_group_footer_write_context.h"
-#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
-
-using ::testing::_;
-using ::testing::NiceMock;
-using ::testing::Return;
+#include "src/event_scheduler/event.h"
+#include "src/include/smart_ptr_type.h"
+#include "src/journal_manager/log/log_group_footer.h"
 
 namespace pos
 {
-MATCHER_P(EqLogGroupFooter, expected, "")
+class IJournalLogBuffer;
+class JournalConfiguration;
+
+class ResetLogGroupOnRocksDB : public Event
 {
-    return (((LogGroupFooter)arg) == ((LogGroupFooter)expected));
-}
+public:
+    ResetLogGroupOnRocksDB(void) = default;
+    ResetLogGroupOnRocksDB(IJournalLogBuffer* logBuffer, int logGroupId, EventSmartPtr callback);
 
-TEST(ResetLogGroup, Execute_testIfLogBufferResetedIfRocksDBDisabled)
-{
-    // Given
-    int logGroupId = 0;
-    NiceMock<MockJournalLogBuffer> logBuffer;
-    LogGroupFooter footer;
-    footer.isReseted = true;
-    footer.resetedSequenceNumber = 1;
-    uint64_t footerOffset = 0;
+    virtual bool Execute(void) override;
 
-
-    ResetLogGroup event(&logBuffer, logGroupId, footer, footerOffset, nullptr);
-
-    // When
-    EXPECT_CALL(logBuffer, WriteLogGroupFooter(_, EqLogGroupFooter(footer), _, _));
-    bool result = event.Execute();
-
-    // Then
-    EXPECT_EQ(result, true);
-}
-
-TEST(ResetLogGroup, Execute_testIfLogBufferResetedIfRocksDBEnabled)
-{
-    // Given
-    int logGroupId = 0;
-    NiceMock<MockJournalLogBuffer> logBuffer;
-
-    ResetLogGroupOnRocksDB event(&logBuffer, logGroupId, nullptr);
-
-    // When
-    EXPECT_CALL(logBuffer, AsyncReset).WillOnce(Return(0));
-    bool result = event.Execute();
-
-    // Then
-    EXPECT_EQ(result, true);
-}
+private:
+    IJournalLogBuffer* logBuffer;
+    int logGroupId;
+    EventSmartPtr callback;
+};
 } // namespace pos

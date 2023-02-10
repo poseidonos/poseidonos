@@ -19,7 +19,7 @@ public:
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (int logGroupId, SegmentId segId), (override));
     MOCK_METHOD(int, GetNumSegments, (), (override));
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
-    MOCK_METHOD(SegmentInfo*, GetUpdatedInfoToFlush, (int logGroupId), (override));
+    MOCK_METHOD(SegmentInfoData*, GetUpdatedInfoDataToFlush, (int logGroupId), (override));
     MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
     MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo), (override));

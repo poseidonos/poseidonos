@@ -39,9 +39,8 @@
 
 namespace pos
 {
-ResetLogGroup::ResetLogGroup(JournalConfiguration* config, IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback)
-: config(config),
-  logBuffer(logBuffer),
+ResetLogGroup::ResetLogGroup(IJournalLogBuffer* logBuffer, int logGroupId, LogGroupFooter footer, uint64_t footerOffset, EventSmartPtr callback)
+: logBuffer(logBuffer),
   logGroupId(logGroupId),
   footer(footer),
   footerOffset(footerOffset),
@@ -53,21 +52,6 @@ bool
 ResetLogGroup::Execute(void)
 {
     EventSmartPtr event(new LogGroupFooterWriteEvent(logBuffer, footer, footerOffset, logGroupId, callback));
-    if (config->IsRocksdbEnabled() == true)
-    {
-        int result = logBuffer->AsyncReset(logGroupId, event);
-        if (result == 0)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        return event->Execute();
-    }
+    return event->Execute();
 }
 } // namespace pos

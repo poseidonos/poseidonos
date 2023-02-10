@@ -56,7 +56,14 @@ ISegmentCtxFake::ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* s
     isFlushedBefore = false;
     ctxStoredVersion = 0;
     segmentInfos = new SegmentInfo[numSegments];
-    fileSize = sizeof(SegmentInfo) * numSegments;
+    segmentInfoData = new SegmentInfoData[numSegments];
+    for (uint32_t i = 0; i < numSegments; ++i)
+    {
+        segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        segmentInfos[i].InitSegmentInfoData();
+    }
+
+    fileSize = sizeof(SegmentInfoData) * numSegments;
     segmentContextFile->Create(fileSize);
     segmentContextFile->Open();
 
@@ -75,6 +82,12 @@ ISegmentCtxFake::~ISegmentCtxFake(void)
         delete[] segmentInfos;
         segmentInfos = nullptr;
     }
+    if (segmentInfoData != nullptr)
+    {
+        delete[] segmentInfoData;
+        segmentInfoData = nullptr;
+    }
+
     if (segmentContextFile->IsOpened() == true)
     {
         int ret = segmentContextFile->Close();
@@ -94,28 +107,52 @@ ISegmentCtxFake::LoadContext(void)
         POS_TRACE_ERROR(EID(MFS_FILE_NOT_FOUND),
             "Segment context file doesn't exist, name:{}, size:{}", segmentContextFile->GetFileName(), fileSize);
     }
+    // It is assumed that this object will be reused without reconstructing the object on SPOR. Because there is no header, So it is impossible to check the version.
     else if (isFlushedBefore == true)
     {
         if (segmentContextFile->IsOpened() == false)
         {
             segmentContextFile->Open();
         }
-        SegmentInfo* buffer = new SegmentInfo[numSegments];
-        AllocatorIoCtx ctx(MetaFsIoOpcode::Read, segmentContextFile->GetFd(), 0, segmentContextFile->GetFileSize(), (char*)buffer, std::bind(&ISegmentCtxFake::_SegmentContextReadDone, this));
+        SegmentInfoData* buffer = new SegmentInfoData[numSegments];
+
+        FnCompleteMetaFileIo callback = std::bind(&ISegmentCtxFake::_CompleteReadSegmentContext, this, std::placeholders::_1);
+        AllocatorIoCtx ctx(nullptr);
+        ctx.SetIoInfo(MetaFsIoOpcode::Read, 0, segmentContextFile->GetFileSize(), (char*)buffer);
+        ctx.SetFileInfo(segmentContextFile->GetFd(), segmentContextFile->GetIoDoneCheckFunc());
+        ctx.SetCallback(callback);
         segmentContextFile->AsyncIO(&ctx);
         _WaitForReadDone();
 
-        delete[] segmentInfos;
-        segmentInfos = buffer;
+        delete[] segmentInfoData;
+        segmentInfoData = buffer;
+        for (uint32_t i = 0; i < numSegments; ++i)
+        {
+            segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        }
+    }
+    else
+    {
+        for (uint32_t i = 0; i < numSegments; ++i)
+        {
+            segmentInfos[i].InitSegmentInfoData();
+        }
     }
 }
 
 int
-ISegmentCtxFake::FlushContexts(SegmentInfo* vscSegmentInfos)
+ISegmentCtxFake::FlushContexts(SegmentInfoData* vscSegmentInfoDatas)
 {
-    char* targetBuffer = (vscSegmentInfos != nullptr) ? (char*)vscSegmentInfos : (char*)segmentInfos;
-    AllocatorIoCtx ctx(MetaFsIoOpcode::Write, segmentContextFile->GetFd(), 0, segmentContextFile->GetFileSize(), targetBuffer, nullptr);
+    char* targetBuffer = (vscSegmentInfoDatas != nullptr) ? (char*)vscSegmentInfoDatas : (char*)segmentInfoData;
+
+    FnCompleteMetaFileIo callback = std::bind(&ISegmentCtxFake::_CompleteWriteSegmentContext, this, std::placeholders::_1);
+    AllocatorIoCtx ctx(nullptr);
+    ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, segmentContextFile->GetFileSize(), targetBuffer);
+    ctx.SetFileInfo(segmentContextFile->GetFd(), segmentContextFile->GetIoDoneCheckFunc());
+    ctx.SetCallback(callback);
+
     segmentContextFile->AsyncIO(&ctx);
+    _WaitForWriteDone();
     ctxStoredVersion++;
     isFlushedBefore = true;
 }
@@ -174,9 +211,15 @@ ISegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
 }
 
 void
-ISegmentCtxFake::_SegmentContextReadDone(void)
+ISegmentCtxFake::_CompleteReadSegmentContext(AsyncMetaFileIoCtx* ctx)
 {
     segmentContextReadDone = true;
+}
+
+void
+ISegmentCtxFake::_CompleteWriteSegmentContext(AsyncMetaFileIoCtx* ctx)
+{
+    segmentContextWriteDone = true;
 }
 
 void
@@ -187,5 +230,15 @@ ISegmentCtxFake::_WaitForReadDone(void)
         usleep(1);
     }
     segmentContextReadDone = false;
+}
+
+void
+ISegmentCtxFake::_WaitForWriteDone(void)
+{
+    while (segmentContextWriteDone != true)
+    {
+        usleep(1);
+    }
+    segmentContextWriteDone = false;
 }
 } // namespace pos

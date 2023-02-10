@@ -60,7 +60,7 @@ ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
 }
 
 void
-ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite)
+ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite, bool needToReplaySegment)
 {
     // FIXME (huijeong.kim) Due to the limitation we have (see _AddLogInternal)
     // Replaying block map updated log could be non-sequential
@@ -75,7 +75,10 @@ ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksTo
         {
             VirtualBlks blk = _GetBlock(blks, offset);
             EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsWithSyncOpen(volId, rba + offset, blk));
-            EXPECT_CALL(*(allocator->GetISegmentCtxFake()), ValidateBlks(blk));
+            if (needToReplaySegment == true)
+            {
+                EXPECT_CALL(*(allocator->GetISegmentCtxFake()), ValidateBlks(blk));
+            }
         }
     }
 }
@@ -92,21 +95,24 @@ ReplayTestFixture::_GetBlock(VirtualBlks blks, uint32_t offset)
 }
 
 void
-ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe)
+ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe, bool needToReplaySegment)
 {
     EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(), stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
 
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
-        ReplayStripeRelease(stripe.GetWbAddr().stripeId))
-        .Times(1);
+    if (needToReplaySegment == true)
+    {
+        EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+            ReplayStripeRelease(stripe.GetWbAddr().stripeId))
+            .Times(1);
 
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
-        ReplayStripeFlushed(stripe.GetUserAddr().stripeId))
-        .Times(1);
+        EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+            ReplayStripeFlushed(stripe.GetUserAddr().stripeId))
+            .Times(1);
+    }
 }
 
 void
-ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe)
+ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe, bool needToReplaySegment)
 {
     BlockMapList blksToWrite = stripe.GetBlockMapList();
     // FIXME (huijeong.kim) Due to the limitation we have (see _AddLogInternal)
@@ -116,35 +122,10 @@ ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe)
 
         ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
         ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
-        ExpectReplayStripeFlush(stripe);
+        ExpectReplayStripeFlush(stripe, needToReplaySegment);
     }
 
-    ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), blksToWrite);
-}
-
-void
-ReplayTestFixture::ExpectReplayFullStripeWithoutReplaySegmentContex(StripeTestFixture stripe)
-{
-    BlockMapList blksToWrite = stripe.GetBlockMapList();
-    {
-        InSequence s;
-
-        ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
-        ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
-        EXPECT_CALL(*(mapper->GetStripeMapMock()), SetLSA(stripe.GetVsid(), stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc)).Times(1);
-    }
-
-    for (auto blk : blksToWrite)
-    {
-        BlkAddr rba = std::get<0>(blk);
-        VirtualBlks blks = std::get<1>(blk);
-
-        for (uint32_t offset = 0; offset < blks.numBlks; offset++)
-        {
-            VirtualBlks blk = _GetBlock(blks, offset);
-            EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsWithSyncOpen(stripe.GetVolumeId(), rba + offset, blk));
-        }
-    }
+    ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), blksToWrite, needToReplaySegment);
 }
 
 void

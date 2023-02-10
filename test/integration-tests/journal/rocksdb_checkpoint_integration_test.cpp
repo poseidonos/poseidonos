@@ -57,7 +57,7 @@ TEST_F(RocksDBCheckpointIntegrationTest, TriggerCheckpoint)
     MapList dirtyMaps = writeTester->GetDirtyMap();
 
     // This is dummy writes
-    writeTester->WriteLogsWithSize(logGroupSize / 2, 10 * testInfo->numStripesPerSegment);
+    writeTester->WriteLogsWithSize(logGroupSize / 2, 10);
     writeTester->WaitForAllLogWriteDone();
 
     EXPECT_TRUE(journal->GetNumDirtyMap(0) == static_cast<int>(dirtyMaps.size()));

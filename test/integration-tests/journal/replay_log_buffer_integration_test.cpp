@@ -65,6 +65,7 @@ ReplayLogBufferIntegrationTest::_CalculateLogGroupSize(uint32_t numStripes, uint
     {
         for (uint32_t blockIndex = 0; blockIndex < numBlockMapLogsInStripe; blockIndex++)
         {
+            // TODO (cheolho.kang): Needs to be refactored to share code with UsedOffsetCalculator
             _IncreaseOffsetIfOverMpageSize(nextOffset, sizeof(BlockWriteDoneLog));
             nextOffset += sizeof(BlockWriteDoneLog);
         }
@@ -123,8 +124,8 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
     SetTriggerCheckpoint(false);
 
     // Write dummy logs to the first log group (to be cleared by checkpoint later)
-    uint32_t startStripeIdForDummyLog = (testInfo->numUserSegments - 1) * testInfo->numStripesPerSegment;
-    writeTester->WriteLogsWithSize(logGroupSize - sizeof(LogGroupFooter), startStripeIdForDummyLog);
+    uint32_t startSegmentIdForDummyLog = testInfo->numUserSegments - 1;
+    writeTester->WriteLogsWithSize(logGroupSize - sizeof(LogGroupFooter), startSegmentIdForDummyLog);
 
     // Write logs to fill log buffer, and start checkpoint to clear the first log group
     StripeId currentVsid = 0;
@@ -173,18 +174,20 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
     EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
 }
 
+// TODO (cheolho.kang): Create a separate file for scenarios that check Valid Block Count / Stripe Occupied Count
 TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventIfSegmentContextFlushed)
 {
     POS_TRACE_DEBUG(9999, "ReplayLogBufferIntegrationTest::ReplayFullSegmentWhenCheckpointFailEventIfSegmentContextFlushed");
 
     // Given: Set the log buffer size to only get logs for one segment write.
     // Given: Versioned Segment Context disabled
-    uint32_t numDoubleReplayed = 10;
+    uint32_t numStripesDoubleReplayed = 10;
     uint32_t targetSegmentId = 0;
     uint32_t numSegments = 1;
     uint32_t numTotalStripes = testInfo->numStripesPerSegment * numSegments;        // 64 * 1
     uint32_t numBlockMapLogsPerStripe = 8;
     uint64_t sizeLogGroupAlignByMpage = _CalculateLogGroupSize(numTotalStripes / 2, numBlockMapLogsPerStripe);
+    uint32_t numStripesPerLogGroup = numTotalStripes / 2;
     JournalConfigurationBuilder builder(testInfo);
     builder.SetJournalEnable(true)
         ->SetLogBufferSize(sizeLogGroupAlignByMpage * 2);
@@ -204,7 +207,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
     }
     // Given: 10 stripes are written to LogGroup1 before starting Checkpoint
     std::vector<StripeTestFixture> writtenStripesForLogGroup1;
-    for (uint32_t i = 0; i < numDoubleReplayed; i++, stripeIndex++)
+    for (uint32_t i = 0; i < numStripesDoubleReplayed; i++, stripeIndex++)
     {
         StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
         writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
@@ -217,7 +220,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
 
     // Given: Add all remaining logs
     std::vector<StripeTestFixture> writtenStripesForLogGroup1AfterCheckpoint;
-    for (uint32_t i = 0; i < numTotalStripes / 2 - numDoubleReplayed; i++, stripeIndex++)
+    for (uint32_t i = 0; i < numTotalStripes / 2 - numStripesDoubleReplayed; i++, stripeIndex++)
     {
         StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
         writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
@@ -232,15 +235,16 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripesForLogGroup0)
     {
-        replayTester->ExpectReplayFullStripeWithoutReplaySegmentContex(stripeLog);
+        replayTester->ExpectReplayFullStripe(stripeLog, false);
     }
-    for (uint32_t index = 0; index < numTotalStripes / 2 - numDoubleReplayed; index++)
+    for (uint32_t index = 0; index < numTotalStripes / 2 - numStripesDoubleReplayed; index++)
     {
         replayTester->ExpectReplayFullStripe(writtenStripesForLogGroup1[index]);
     }
 
     // Then: Valid block count overflow occurs when performing a block map update for the 22th (numStripesPerLogGroup(32) - numStripeDobuleReplayed(10)) stripe in LogGroup 1
-    auto overflowedStripe = writtenStripesForLogGroup1[22];
+    int overflowedStripeId = numStripesPerLogGroup - numStripesDoubleReplayed;
+    auto overflowedStripe = writtenStripesForLogGroup1[overflowedStripeId];
     auto overflowedBlockMapList = overflowedStripe.GetBlockMapList()[0];
     replayTester->ExpectReplaySegmentAllocation(overflowedStripe.GetUserAddr().stripeId);
     replayTester->ExpectReplayStripeAllocation(overflowedStripe.GetVsid(), overflowedStripe.GetWbAddr().stripeId);
@@ -256,7 +260,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
     }
     catch (const std::exception& e)
     {
-        POS_TRACE_INFO(9999, "Expected assert fail, Valid block count was redundantly updated. error_msg: {}", e.what());
+        POS_TRACE_INFO(9999, "Expected assert fail, {}", e.what());
     }
 }
 
@@ -266,7 +270,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
 
     // Given: Set the log buffer size to only get logs for one segment write.
     // Given: Versioned Segment Context Enabled
-    uint32_t numDoubleReplayed = 10;
+    uint32_t numStripesDoubleReplayed = 10;
     uint32_t targetSegmentId = 0;
     uint32_t numSegments = 1;
     uint32_t numTotalStripes = testInfo->numStripesPerSegment * numSegments;        // 64 * 1
@@ -293,7 +297,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
     // Given: 10 stripes are written to LogGroup1 before starting Checkpoint
     std::vector<StripeTestFixture> writtenStripesForLogGroup1;
     std::vector<StripeTestFixture> writtenStripesForLogGoup1BeforeCheckpoint;
-    for (uint32_t index = 0; index < numDoubleReplayed; index++, stripeIndex++)
+    for (uint32_t index = 0; index < numStripesDoubleReplayed; index++, stripeIndex++)
     {
         StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
         writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
@@ -321,7 +325,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventI
     replayTester->ExpectReturningUnmapStripes();
     for (auto stripeLog : writtenStripesForLogGroup0)
     {
-        replayTester->ExpectReplayFullStripeWithoutReplaySegmentContex(stripeLog);
+        replayTester->ExpectReplayFullStripe(stripeLog, false);
     }
     for (auto stripeLog : writtenStripesForLogGroup1)
     {

@@ -2,6 +2,7 @@
 
 #include <experimental/filesystem>
 #include <string>
+#include <unistd.h>
 
 #include "src/journal_manager/log_buffer/reset_log_group.h"
 #include "test/integration-tests/journal/fake/i_context_manager_fake.h"
@@ -160,15 +161,16 @@ JournalManagerTestFixture::InjectCheckpointFaultAfterMetaFlushCompleted(void)
 {
     uint64_t latestContextVersion = 1;
 
-    bool isFaultExecuted = false;
-    EventSmartPtr faultEvent(new FaultEvent(isFaultExecuted));
+    bool checkpoitnStopped = false;
+    EventSmartPtr faultEvent(new FaultEvent(checkpoitnStopped));
     journal->InjectFaultEvent(typeid(ResetLogGroup), faultEvent);
 
     writeTester->WaitForAllLogWriteDone();
     ExpectCheckpointTriggered();
     journal->StartCheckpoint();
-    while (isFaultExecuted != true)
+    while (checkpoitnStopped != true)
     {
+        usleep(1);
     }
 }
 void

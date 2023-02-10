@@ -18,12 +18,11 @@ public:
 
     void ExpectReplaySegmentAllocation(StripeId userLsid);
     void ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid);
-    void ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite);
-    void ExpectReplayStripeFlush(StripeTestFixture stripe);
+    void ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksToWrite, bool needToReplaySegment = true);
+    void ExpectReplayStripeFlush(StripeTestFixture stripe, bool needToReplaySegment = true);
 
     void ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe);
-    void ExpectReplayFullStripe(StripeTestFixture stripe);
-    void ExpectReplayFullStripeWithoutReplaySegmentContex(StripeTestFixture stripe);
+    void ExpectReplayFullStripe(StripeTestFixture stripe, bool needToReplaySegment = true);
 
     void ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, StripeTestFixture stripe);
     void ExpectReplayFlushedActiveStripe(void);
