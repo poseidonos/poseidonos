@@ -57,6 +57,8 @@ pos::LibraryUnitTest libraryUnitTest;
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "tool/backend_io_test/io_config.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
+
 namespace pos
 {
 void FlushIO(void* mem, bool write, uint32_t lsid, CallbackSmartPtr callback);
@@ -123,7 +125,7 @@ public:
                 bio->SetUblock(dev);
                 CallbackSmartPtr callback(new DummyCallbackHandler(false, this));
                 bio->SetCallback(callback);
-                int ret = IODispatcherSingleton::Instance()->Submit(bio);
+                int ret = IoDispatcherServiceSingleton::Instance()->GetIODispatcher()->Submit(bio);
                 airlog("PERF_BACKEND_TEST", "AIR_WRITE", 0, blockSize);
             }
         }

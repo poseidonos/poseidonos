@@ -39,6 +39,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/array/service/array_service_layer.h"
 #include "src/include/address_type.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -192,7 +193,7 @@ StripeBasedRaceRebuild::_RecoverCompleted(uint32_t targetId, int result)
             "result:{}", (int)(ctx->GetResult()));
         EventSmartPtr nextEvent(new Rebuilder(this));
         nextEvent->SetEventType(BackendEvent_MetadataRebuild);
-        EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(nextEvent);
     }
 }
 
@@ -257,7 +258,7 @@ StripeBasedRaceRebuild::_Finish(void)
 
     EventSmartPtr complete(new RebuildCompleted(this));
     complete->SetEventType(BackendEvent_MetadataRebuild);
-    EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(complete);
     baseStripe = 0;
     return true;
 }
@@ -289,7 +290,7 @@ StripeBasedRaceRebuild::_TryLock(uint32_t from, uint32_t to)
             ctx->SetResult(RebuildState::FAIL);
             EventSmartPtr complete(new RebuildCompleted(this));
             complete->SetEventType(BackendEvent_MetadataRebuild);
-            EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
+            EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(complete);
             baseStripe = 0;
             return EID(REBUILD_TRY_LOCK_FAILED);
         }

@@ -49,6 +49,7 @@
 #include "src/mapper_service/mapper_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/resource_manager/buffer_pool.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -99,7 +100,7 @@ WBStripeManager::Init(void)
     }
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     if (stripeLoadStatus == nullptr)
     {

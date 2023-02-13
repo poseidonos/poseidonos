@@ -46,6 +46,8 @@
 #include "src/lib/block_alignment.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/i_volume_info_manager.h"
+#include "src/io/general_io/translator.h"
+#include "src/meta_service/i_meta_updater.h"
 
 namespace pos
 {
@@ -66,23 +68,16 @@ public:
         bool isReactorNow);
     ~WriteSubmission(void) override;
 
-    bool Execute(void) override;
+    virtual bool Execute(void) override;
+
+protected:
+    virtual void _SetupVolumeIo(VolumeIoSmartPtr newVolumeIo, VirtualBlksInfo& virtualBlksInfo,
+        CallbackSmartPtr callback);
+
+    VolumeIoSmartPtr volumeIo;
 
 private:
-    VolumeIoSmartPtr volumeIo;
-    uint32_t volumeId;
-    BlockAlignment blockAlignment;
-    uint32_t blockCount;
-    uint32_t allocatedBlockCount;
-    std::list<VirtualBlksInfo> allocatedVirtualBlks;
-    uint32_t processedBlockCount;
-    std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
-    RBAStateManager* rbaStateManager;
-    IBlockAllocator* iBlockAllocator;
-    FlowControl* flowControl;
-    IVolumeInfoManager* volumeManager;
-
-    void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
+    virtual void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
     void _AllocateFreeWriteBuffer(void);
     void _ReadOldBlock(BlkAddr rba, VirtualBlkAddrInfo& vsaInfo, bool isTail);
@@ -98,7 +93,17 @@ private:
     void _SubmitVolumeIo(void);
     VirtualBlkAddrInfo _PopHeadVsa(void);
     VirtualBlkAddrInfo _PopTailVsa(void);
-    void _SetupVolumeIo(VolumeIoSmartPtr newVolumeIo, VirtualBlksInfo& virtualBlksInfo,
-        CallbackSmartPtr callback);
+
+    uint32_t volumeId;
+    BlockAlignment blockAlignment;
+    uint32_t blockCount;
+    uint32_t allocatedBlockCount;
+    std::list<VirtualBlksInfo> allocatedVirtualBlks;
+    uint32_t processedBlockCount;
+    std::queue<VolumeIoSmartPtr> splitVolumeIoQueue;
+    RBAStateManager* rbaStateManager;
+    IBlockAllocator* iBlockAllocator;
+    FlowControl* flowControl;
+    IVolumeInfoManager* volumeManager;
 };
 } // namespace pos

@@ -44,6 +44,7 @@
 #include "src/device/unvme/unvme_ssd.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/logger/logger.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 #include "src/device/device_manager.h"
 
 using namespace std;
@@ -150,7 +151,7 @@ SmartCollector::CollectGetLogPage(void* payload, spdk_nvme_ctrlr* ctrlr, std::st
             assert(false);
     }
 
-    IIODispatcher* dispatcher = IODispatcherSingleton::Instance();
+    IIODispatcher* dispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     DeviceManager* deviceMgr = DeviceManagerSingleton::Instance();
 
     GetLogPageContext* smartLogPageContext = new GetLogPageContext(payload, lid);

@@ -46,6 +46,7 @@
 #include "src/metadata/segment_context_updater.h"
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/volume/volume_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -92,7 +93,7 @@ Metadata::Metadata(IArrayInfo* info, Mapper* mapper, Allocator* allocator,
         mapper->GetIStripeMap(),
         journal,
         journal->GetJournalWriter(),
-        EventSchedulerSingleton::Instance(),
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler(),
         metaEventFactory,
         arrayInfo);
 }
@@ -188,7 +189,7 @@ Metadata::Init(void)
         allocator->GetIContextReplayer(),
         VolumeServiceSingleton::Instance()->GetVolumeManager(arrayInfo->GetIndex()),
         metaFs,
-        EventSchedulerSingleton::Instance(),
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler(),
         TelemetryClientSingleton::Instance());
 
     if (result != 0)

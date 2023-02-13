@@ -15,6 +15,8 @@
 #include "src/main/poseidonos.h"
 #include "src/spdk_wrapper/nvme.hpp"
 #include "src/spdk_wrapper/abort_context.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include "test/unit-tests/cpu_affinity/affinity_manager_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
 #include "test/unit-tests/device/device_manager_mock.h"
@@ -22,6 +24,7 @@
 #include "test/unit-tests/io_scheduler/io_worker_mock.h"
 #include "test/unit-tests/array_mgmt/array_manager_mock.h"
 #include "test/unit-tests/utils/mock_builder.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -74,6 +77,10 @@ public:
     SetUp(void)
     {
         MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+        EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
+
+        mockIODispatcher = new NiceMock<MockIODispatcher>();
+        IoDispatcherServiceSingleton::Instance()->Register(mockIODispatcher);
         devMgr = DeviceManagerSingleton::Instance();
         cpu_set_t cpu_set;
         mockIOWorker = new NiceMock<MockIOWorker>(cpu_set, 0);
@@ -90,7 +97,7 @@ public:
         UblockSharedPtr ublockShared(dev);
         mockArrayMgr = new NiceMock<MockArrayManager>(nullptr, nullptr, nullptr, nullptr, nullptr);
         devMgr->SetDeviceEventCallback(mockArrayMgr);
-        devMgr->Initialize(&mockIODispatcher);
+        devMgr->Initialize(mockIODispatcher);
         devMgr->AttachDevice(ublockShared);
         call_count = 0;
     }
@@ -98,16 +105,22 @@ public:
     virtual void
     TearDown(void)
     {
+        EventSchedulerServiceSingleton::Instance()->Unregister();
+        IoDispatcherServiceSingleton::Instance()->Unregister();
+        EventSchedulerServiceSingleton::ResetInstance();
+        IoDispatcherServiceSingleton::ResetInstance();
         DeviceManagerSingleton::ResetInstance();
         devMgr = nullptr;
         delete mockIOWorker;
         delete mockArrayMgr;
+        delete mockIODispatcher;
     }
 
 protected:
     DeviceManager* devMgr;
     NiceMock<MockIOWorker>* mockIOWorker;
-    NiceMock<MockIODispatcher> mockIODispatcher;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    NiceMock<MockIODispatcher>* mockIODispatcher;
     NiceMock<MockArrayManager>* mockArrayMgr;
     static struct spdk_nvme_ctrlr_data ctrlrData;
     static struct spdk_nvme_ctrlr ctrlr;
@@ -178,7 +191,7 @@ TEST_F(CommandTimeoutHandlerFixture, DISABLED__AbortSubmitHandler_Execute)
     Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, &qpair, cid);
     // Then : Command Timeout Abort Handler is called and abort event is submitted
     std::queue<EventSmartPtr> queue =
-        EventSchedulerSingleton::Instance()->DequeueEvents();
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->DequeueEvents();
     EXPECT_GT(queue.size(), 0);
     EXPECT_FALSE(ctrlr.is_failed);
 
@@ -187,7 +200,7 @@ TEST_F(CommandTimeoutHandlerFixture, DISABLED__AbortSubmitHandler_Execute)
     Nvme::ControllerTimeoutCallback(nullptr, &ctrlr, nullptr, 1);
     // Then : qpair is null and is_failed is set as true
     queue =
-        EventSchedulerSingleton::Instance()->DequeueEvents();
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->DequeueEvents();
     EXPECT_EQ(queue.size(), 0);
     EXPECT_TRUE(ctrlr.is_failed);
 

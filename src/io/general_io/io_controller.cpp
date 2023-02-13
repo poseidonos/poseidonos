@@ -31,8 +31,8 @@
  */
 
 #include "src/io/general_io/io_controller.h"
-
 #include "src/include/branch_prediction.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -43,7 +43,7 @@ IOController::IOController(IODispatcher* ioDispatcherArg)
     ioDispatcher = ioDispatcherArg;
     if (unlikely(nullptr == ioDispatcher))
     {
-        ioDispatcher = IODispatcherSingleton::Instance();
+        ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     }
 }
 
@@ -56,7 +56,7 @@ IOController::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 {
     if (unlikely(nullptr == ioDispatcher))
     {
-        ioDispatcher = IODispatcherSingleton::Instance();
+        ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     }
     ioDispatcher->Submit(volumeIo);
 }

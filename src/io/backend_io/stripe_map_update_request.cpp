@@ -48,13 +48,15 @@
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
 #include "src/meta_service/meta_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
 StripeMapUpdateRequest::StripeMapUpdateRequest(StripeSmartPtr stripe, int arrayIdInput)
 : StripeMapUpdateRequest(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayIdInput),
-      MetaServiceSingleton::Instance()->GetMetaUpdater(arrayIdInput),
-      EventSchedulerSingleton::Instance(), make_shared<FlushCompletion>(stripe, arrayIdInput), arrayIdInput)
+    MetaServiceSingleton::Instance()->GetMetaUpdater(arrayIdInput),
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler(),
+    make_shared<FlushCompletion>(stripe, arrayIdInput), arrayIdInput)
 {
 }
 

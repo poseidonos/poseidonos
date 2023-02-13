@@ -44,6 +44,7 @@
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/io/general_io/io_submit_handler_count.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -70,7 +71,7 @@ AsyncByteIO::_CallbackFunc(void *callbackPtr)
         bool flag = (*callbackSmartPtr)->Execute();
         if (unlikely(flag == false))
         {
-            EventSchedulerSingleton::Instance()->EnqueueEvent(*callbackSmartPtr);
+            EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(*callbackSmartPtr);
         }
         delete callbackSmartPtr;
     }

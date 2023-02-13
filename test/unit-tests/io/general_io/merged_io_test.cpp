@@ -6,10 +6,13 @@
 #include "src/include/memory.h"
 #include "src/io_submit_interface/io_submit_handler_status.h"
 #include "src/state/state_manager.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 #include "test/unit-tests/event_scheduler/callback_mock.h"
 #include "test/unit-tests/state/state_manager_mock.h"
 #include "test/unit-tests/include/i_array_device_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -36,12 +39,18 @@ TEST(MergedIO, MergedIO_Constructor_Three)
 {
     // Given
     CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
     NiceMock<MockIODispatcher> mockIODispatcher;
-
+    IoDispatcherServiceSingleton::Instance()->Register(&mockIODispatcher);
     //when
     MergedIO mergedIO(callback, &mockIODispatcher, StateEnum::NORMAL);
 
     //then : do noting
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::ResetInstance();
+    EventSchedulerServiceSingleton::ResetInstance();
 }
 
 TEST(MergedIO, Reset_)
@@ -132,10 +141,12 @@ TEST(MergedIO, Process_success)
     // Given
     void* buffer = Memory<SECTOR_SIZE>::Alloc(512 / SECTOR_SIZE);
 
-    CallbackSmartPtr callback(new NiceMock<MockCallback>(true));    
+    CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIArrayDevice> mockIArrayDevice;
-    //NiceMock<MockIODispatcher> mockIODispatcher;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
     NiceMock<MockIODispatcher>* mockIODispatcher = new NiceMock<MockIODispatcher>;
+    IoDispatcherServiceSingleton::Instance()->Register(mockIODispatcher);
 
     PhysicalBlkAddr physicalBlkAddr{0, &mockIArrayDevice};
 
@@ -153,6 +164,10 @@ TEST(MergedIO, Process_success)
 
     Memory<SECTOR_SIZE>::Free(buffer);
 
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::ResetInstance();
+    EventSchedulerServiceSingleton::ResetInstance();
     delete mockIODispatcher;
 }
 
@@ -161,10 +176,12 @@ TEST(MergedIO, Process_ExistError)
     // Given
     void* buffer = Memory<SECTOR_SIZE>::Alloc(512 / SECTOR_SIZE);
 
-    CallbackSmartPtr callback(new NiceMock<MockCallback>(true));    
+    CallbackSmartPtr callback(new NiceMock<MockCallback>(true));
     NiceMock<MockIArrayDevice> mockIArrayDevice;
-    //NiceMock<MockIODispatcher> mockIODispatcher;
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
     NiceMock<MockIODispatcher>* mockIODispatcher = new NiceMock<MockIODispatcher>;
+    IoDispatcherServiceSingleton::Instance()->Register(mockIODispatcher);
 
     PhysicalBlkAddr physicalBlkAddr{0, &mockIArrayDevice};
 
@@ -182,6 +199,10 @@ TEST(MergedIO, Process_ExistError)
 
     Memory<SECTOR_SIZE>::Free(buffer);
 
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::ResetInstance();
+    EventSchedulerServiceSingleton::ResetInstance();
     delete mockIODispatcher;
 }
 

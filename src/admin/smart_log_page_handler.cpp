@@ -43,6 +43,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -63,7 +64,7 @@ SmartLogPageHandler::SmartLogPageHandler(struct spdk_nvme_cmd* cmd, pos_io* io, 
 {
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
 }
 

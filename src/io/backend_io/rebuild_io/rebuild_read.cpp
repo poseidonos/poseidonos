@@ -44,6 +44,8 @@
 #include "src/lib/block_alignment.h"
 #include "src/logger/logger.h"
 #include "src/resource_manager/buffer_pool.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
+
 namespace pos
 {
 int
@@ -122,7 +124,7 @@ RebuildRead::Recover(UbioSmartPtr ubio, BufferPool* bufferPool)
 
     for (auto split : splitList)
     {
-        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+        IODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
         ioDispatcher->Submit(split);
     }
     return EID(SUCCESS);

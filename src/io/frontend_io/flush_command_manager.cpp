@@ -36,7 +36,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/event_scheduler/spdk_event_scheduler.h"
 #include "src/io/frontend_io/flush_command_handler.h"
-
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include <memory>
 
 namespace pos
@@ -100,7 +100,7 @@ FlushCmdManager::FinishMetaFlush(void)
         {
             if (nullptr == eventScheduler)
             {
-                eventScheduler = EventSchedulerSingleton::Instance();
+                eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
             }
             eventScheduler->EnqueueEvent(flushCmdHandler);
         }
@@ -130,7 +130,7 @@ FlushCmdManager::UpdateVSANewEntries(uint32_t volId, int arrayId)
     EventSmartPtr flushCmdHandler(new FlushCmdHandler(flushIo));
     if (nullptr == eventScheduler)
     {
-         eventScheduler = EventSchedulerSingleton::Instance();
+         eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     eventScheduler->EnqueueEvent(flushCmdHandler);
 }

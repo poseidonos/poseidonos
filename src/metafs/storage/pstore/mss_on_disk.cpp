@@ -41,6 +41,7 @@
 #include "src/metafs/log/metafs_log.h"
 #include "src/metafs/storage/pstore/issue_write_event.h"
 #include "src/metafs/storage/pstore/mss_disk_inplace.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -404,7 +405,7 @@ MssOnDisk::_SubmitToEventHandler(MssAioCbCxt* ctx, CallbackSmartPtr callback)
         std::placeholders::_1, std::placeholders::_2, std::placeholders::_3,
         std::placeholders::_4);
     EventSmartPtr event = std::make_shared<IssueWriteEvent>(handler, ctx, callback);
-    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(event);
 }
 
 CallbackSmartPtr

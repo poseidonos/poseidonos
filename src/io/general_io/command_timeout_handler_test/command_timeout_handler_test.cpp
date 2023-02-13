@@ -51,6 +51,7 @@
 #include "src/event_scheduler/io_completer.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "tool/library_unit_test/library_unit_test.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 pos::LibraryUnitTest libraryUnitTest;
 namespace pos
@@ -114,7 +115,7 @@ test1_iotimeout_abort()
 {
     clean_test();
     libraryUnitTest.TestStart(1);
-    IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
+    IODispatcher& ioDispatcher = *(IoDispatcherServiceSingleton::Instance()->GetIODispatcher()));
 
     std::vector<UblockSharedPtr> devs = DeviceManagerSingleton::Instance()->GetDevs();
     struct spdk_nvme_ctrlr *ctrlr = nullptr, *prevCtrlr = nullptr;
@@ -146,7 +147,7 @@ test1_iotimeout_abort()
             bio->SetLba(512 * 1024 * 1024 / 512);
             bio->SetUblock(iter);
             bio->SetCallback(callback);
-            IODispatcherSingleton::Instance()->Submit(bio);
+            IoDispatcherServiceSingleton::Instance()->GetIODispatcher()->Submit(bio);
             prevCtrlr = ctrlr;
             break;
         }
@@ -198,7 +199,7 @@ DiskIo(UblockSharedPtr dev, void* ctx)
             bio->SetUblock(dev);
 
             bio->SetCallback(callback);
-            IODispatcherSingleton::Instance()->Submit(bio);
+            IoDispatcherServiceSingleton::Instance()->GetIODispatcher()->Submit(bio);
         }
         // We wait that callback is called for all IOs
         sleep(20);
@@ -210,7 +211,7 @@ test2_io_multiple_abort()
 {
     clean_test();
     libraryUnitTest.TestStart(2);
-    IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
+    IODispatcher& ioDispatcher = *(IoDispatcherServiceSingleton::Instance()->GetIODispatcher()));
 
     DeviceManagerSingleton::Instance()->IterateDevicesAndDoFunc(DiskIo, nullptr);
 

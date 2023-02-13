@@ -39,12 +39,13 @@
 #include "src/gc/stripe_copier.h"
 #include "src/include/backend_event.h"
 #include "src/logger/logger.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
 StripeCopySubmission::StripeCopySubmission(StripeId baseStripeId, CopierMeta* meta, uint32_t copyIndex)
 : StripeCopySubmission(baseStripeId, meta, copyIndex,
-      nullptr, EventSchedulerSingleton::Instance())
+      nullptr, EventSchedulerServiceSingleton::Instance()->GetEventScheduler())
 {
 }
 

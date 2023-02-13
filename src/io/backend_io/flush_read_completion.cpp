@@ -38,6 +38,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io/backend_io/flush_submission.h"
 #include "src/logger/logger.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -68,7 +69,7 @@ FlushReadCompletion::_DoSpecificJob(void)
     }
     if (nullptr == eventScheduler)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     eventScheduler->EnqueueEvent(flushEvent);
 

@@ -89,6 +89,12 @@ VolumeIo::~VolumeIo(void)
 {
 }
 
+void
+VolumeIo::AddToSectorRba(uint32_t sectorCount)
+{
+    sectorRba += sectorCount;
+}
+
 VolumeIoSmartPtr
 VolumeIo::Split(uint32_t sectors, bool removalFromTail)
 {

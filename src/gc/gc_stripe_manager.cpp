@@ -50,6 +50,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/master_context/config_manager.h"
 #include "src/volume/volume_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -396,7 +397,7 @@ GcStripeManager::CheckTimeout(void)
             {
                 EventSmartPtr flushEvent = std::make_shared<GcFlushSubmission>(iArrayInfo->GetName(),
                             allocatedBlkInfoList, volId, dataBuffer, this, isForceFlush);
-                EventSchedulerSingleton::Instance()->EnqueueEvent(flushEvent);
+                EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(flushEvent);
                 SetFlushed(volId, isForceFlush);
                 ++gcStripeCntForceFlushRequested;
                 POS_TRACE_WARN(EID(GC_STRIPE_FORCIBLY_FLUSHED), "array_id:{}, vol_id:{}", arrayId, volId);

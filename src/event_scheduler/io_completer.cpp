@@ -41,6 +41,7 @@
 #include "src/include/core_const.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/event_scheduler/event_factory.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -56,7 +57,7 @@ IoCompleter::IoCompleter(UbioSmartPtr ubio,
 {
     if (nullptr == eventScheduler)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     if (nullptr == eventFrameworkApi)
     {

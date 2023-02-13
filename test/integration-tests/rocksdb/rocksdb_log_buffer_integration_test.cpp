@@ -16,6 +16,7 @@
 #include "src/journal_manager/log_buffer/log_group_reset_completed_event.h"
 #include "src/rocksdb_log_buffer/rocksdb_log_buffer.h"
 #include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
+#include "test/integration-tests/framework/write_tester/volume_io_fake.h"
 
 namespace pos
 {
@@ -82,7 +83,7 @@ RocksDBLogBufferIntegrationTest::TearDown(void)
 LogWriteContext*
 RocksDBLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 {
-    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 0, 0));
+    VolumeIoSmartPtr volumeIo(new FakeVolumeIo(nullptr, 0, 0));
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(TEST_VOLUME_ID);
 

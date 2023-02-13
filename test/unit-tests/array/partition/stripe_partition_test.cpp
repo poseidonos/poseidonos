@@ -10,6 +10,9 @@
 #include "src/include/array_config.h"
 #include "src/include/pos_event_id.h"
 #include "src/helper/calc/calc.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/array/ft/raid5_mock.h"
 #include "test/unit-tests/array/ft/raid10_mock.h"
 #include "test/unit-tests/device/base/ublock_device_mock.h"
@@ -17,6 +20,7 @@
 #include "test/unit-tests/array/device/array_device_mock.h"
 
 using ::testing::Return;
+using ::testing::NiceMock;
 
 namespace pos
 {
@@ -355,7 +359,13 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
     StripePartition sPartition(PartitionType::USER_DATA, devs, raid);
     sPartition.Create(startLba, lastLba, totalNvmBlks);
     auto physicalSize = sPartition.GetPhysicalSize();
+
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
+
     MockIODispatcher mockIoDispatcher;
+    IoDispatcherServiceSingleton::Instance()->Register(&mockIoDispatcher);
+
     int cntSubmitIo = 0;
     EXPECT_CALL(mockIoDispatcher, Submit).WillRepeatedly([physicalSize, &cntSubmitIo](UbioSmartPtr ubio, bool sync, bool ublockSharedPtrCopyNeeded)
     {
@@ -397,6 +407,11 @@ TEST(StripePartition, Format_testIfThereAre4DeallocatesAnd4ReadsWhenThereAre4Nor
     {
         delete dev;
     }
+
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    EventSchedulerServiceSingleton::ResetInstance();
+    IoDispatcherServiceSingleton::ResetInstance();
 }
 
 TEST(StripePartition, ByteTranslate_testFunctionCallForCoverage)

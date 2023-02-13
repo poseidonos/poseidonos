@@ -14,6 +14,7 @@
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
+#include "test/integration-tests/framework/write_tester/volume_io_fake.h"
 
 namespace pos
 {
@@ -99,7 +100,7 @@ JournalLogBufferIntegrationTest::_PrepareLogBuffer(void)
 LogWriteContext*
 JournalLogBufferIntegrationTest::_CreateContextForBlockWriteDoneLog(void)
 {
-    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, 0, 0));
+    VolumeIoSmartPtr volumeIo(new FakeVolumeIo(nullptr, 0, 0));
     volumeIo->SetSectorRba(0);
     volumeIo->SetVolumeId(TEST_VOLUME_ID);
 

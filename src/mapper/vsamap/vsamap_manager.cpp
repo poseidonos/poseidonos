@@ -40,6 +40,7 @@
 #include "src/mapper/map_flushed_event.h"
 #include "src/sys_event/volume_event_publisher.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -78,7 +79,7 @@ VSAMapManager::VSAMapManager(TelemetryPublisher* tp_, MapperAddressInfo* info)
   numLoadIssuedCount(0),
   tp(tp_)
 {
-    eventScheduler = EventSchedulerSingleton::Instance();
+    eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     for (int volId = 0; volId < MAX_VOLUME_COUNT; ++volId)
     {
         // TODO (meta): map load state should be initialized to NOT_LOADED

@@ -47,6 +47,8 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/spdk_wrapper/abort_context.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 using namespace std;
 using namespace std::placeholders;
@@ -100,7 +102,7 @@ CommandTimeoutHandler::__AbortSubmitHandler::DiskIO(UblockSharedPtr dev, void *c
         bio->SetLba(0);
         bio->SetUblock(dev);
         bio->SetCallback(callback);
-        IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
+        IODispatcher& ioDispatcher = *(IoDispatcherServiceSingleton::Instance()->GetIODispatcher());
         ioDispatcher.Submit(bio);
     }
 }
@@ -214,7 +216,7 @@ CommandTimeoutHandler::_TimeoutActionAbortHandler(
 
     AbortContext* abortContext = new AbortContext(ctrlr, qpair, cid);
     EventSmartPtr event(new __AbortSubmitHandler(abortContext));
-    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(event);
 }
 
 void

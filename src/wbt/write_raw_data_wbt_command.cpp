@@ -38,6 +38,7 @@
 #include "src/io_scheduler/io_dispatcher.h"
 
 #include <string>
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -85,7 +86,7 @@ WriteRawDataCommand::Execute(Args &argv, JsonElement &elem)
                 if (0 == returnValue)
                 {
                     IODispatcher* ioDispatcher =
-                        IODispatcherSingleton::Instance();
+                        IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
                     int retValue = ioDispatcher->Submit(ubio, true);
                     if (retValue < 0 || ubio->GetError() != IOErrorType::SUCCESS)
                     {

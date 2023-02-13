@@ -36,7 +36,7 @@
 #include "src/mapper/map/map_io_handler.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "src/event_scheduler/event_scheduler.h"
-
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include <string>
 
 namespace pos
@@ -77,7 +77,8 @@ MapContent::Init(uint64_t numEntries, uint64_t entrySize, uint64_t mpageSize)
         mapHeader->Init(numMpages, mpageSize);
         if (mapIoHandler == nullptr)
         {
-            mapIoHandler = new MapIoHandler(map, mapHeader, mapId, addrInfo, EventSchedulerSingleton::Instance());
+            mapIoHandler = new MapIoHandler(map, mapHeader, mapId,
+                addrInfo, EventSchedulerServiceSingleton::Instance()->GetEventScheduler());
         }
     }
     return 0;

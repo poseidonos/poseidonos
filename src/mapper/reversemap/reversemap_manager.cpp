@@ -46,6 +46,7 @@
 #include "src/metafs/include/metafs_service.h"
 #include "src/metafs/metafs_file_intf.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -180,7 +181,7 @@ ReverseMapManager::_CreateIoContext(ReverseMapPack* rev, EventSmartPtr cb, IoDir
 
     return new ReverseMapIo(rev, cb,
         revMapWholefile, _GetFileOffset(vsid), direction, telemetryPublisher,
-        EventSchedulerSingleton::Instance(),
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler(),
         std::bind(&ReverseMapManager::_ReverseMapIoDone, this, std::placeholders::_1));
 }
 

@@ -39,6 +39,7 @@
 #include "src/include/backend_event.h"
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/address_type.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -175,7 +176,7 @@ void SegmentBasedRebuild::_RecoverCompleted(SegmentId segmentId, StripeId stripe
         allocatorSvc->ReleaseRebuildSegment(segmentId);
         EventSmartPtr nextEvent(new Rebuilder(this));
         nextEvent->SetEventType(BackendEvent_UserdataRebuild);
-        EventSchedulerSingleton::Instance()->EnqueueEvent(nextEvent);
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(nextEvent);
     }
 }
 
@@ -205,7 +206,7 @@ SegmentBasedRebuild::_Finish(RebuildState state)
 
     EventSmartPtr complete(new RebuildCompleted(this));
     complete->SetEventType(BackendEvent_UserdataRebuild);
-    EventSchedulerSingleton::Instance()->EnqueueEvent(complete);
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(complete);
 }
 
 SegmentId

@@ -76,24 +76,25 @@ public:
     VolumeIo(const VolumeIo& volumeIo);
     ~VolumeIo(void) override;
 
+    void AddToSectorRba(uint32_t sectorCount);
     virtual VolumeIoSmartPtr Split(uint32_t sectors, bool removalFromTail);
     virtual VolumeIoSmartPtr GetOriginVolumeIo(void);
     virtual uint32_t GetVolumeId(void);
-    void SetVolumeId(uint32_t inputVolumeId);
-    bool IsPollingNecessary(void);
-    uint32_t GetOriginCore(void) override;
+    virtual void SetVolumeId(uint32_t inputVolumeId);
+    virtual bool IsPollingNecessary(void);
+    virtual uint32_t GetOriginCore(void);
     virtual void SetLsidEntry(StripeAddr& lsidEntry);
-    void SetOldLsidEntry(StripeAddr& lsidEntry);
+    virtual void SetOldLsidEntry(StripeAddr& lsidEntry);
     virtual const StripeAddr& GetLsidEntry(void);
     virtual const StripeAddr& GetOldLsidEntry(void);
     virtual const VirtualBlkAddr& GetVsa(void);
-    void SetVsa(VirtualBlkAddr&);
-    void SetSectorRba(uint64_t inputSectorRba);
+    virtual void SetVsa(VirtualBlkAddr&);
+    virtual void SetSectorRba(uint64_t inputSectorRba);
     virtual uint64_t GetSectorRba(void);
-    void SetUserLsid(StripeId stripeId);
+    virtual void SetUserLsid(StripeId stripeId);
     virtual StripeId GetUserLsid(void);
 
-private:
+protected:
     static const StripeAddr INVALID_LSID_ENTRY;
     static const VirtualBlkAddr INVALID_VSA;
     static const uint64_t INVALID_RBA;

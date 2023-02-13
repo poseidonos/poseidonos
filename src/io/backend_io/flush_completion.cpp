@@ -42,12 +42,13 @@
 #include "src/io/backend_io/flush_count.h"
 #include "src/logger/logger.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
 FlushCompletion::FlushCompletion(StripeSmartPtr stripe, int arrayId)
 : FlushCompletion(stripe, MapperServiceSingleton::Instance()->GetIStripeMap(arrayId),
-      EventSchedulerSingleton::Instance(), arrayId)
+      EventSchedulerServiceSingleton::Instance()->GetEventScheduler(), arrayId)
 {
 }
 

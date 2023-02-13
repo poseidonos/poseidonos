@@ -82,8 +82,7 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
 : Event(isReactorNow),
   volumeIo(volumeIo),
   volumeId(volumeIo->GetVolumeId()),
-  blockAlignment(ChangeSectorToByte(volumeIo->GetSectorRba()),
-      volumeIo->GetSize()),
+  blockAlignment(ChangeSectorToByte(volumeIo->GetSectorRba()), volumeIo->GetSize()),
   blockCount(blockAlignment.GetBlockCount()),
   allocatedBlockCount(0),
   processedBlockCount(0),
@@ -276,6 +275,7 @@ WriteSubmission::_SubmitVolumeIo(void)
         else
         {
             _SendVolumeIo(volumeIo);
+            std::cout << "_SubmitVolumeIo volumeIo : " << volumeIo << std::endl;
         }
         splitVolumeIoQueue.pop();
     }
@@ -496,6 +496,7 @@ WriteSubmission::_CreateVolumeIo(VirtualBlksInfo& virtualBlksInfo)
     return split;
 }
 
+
 void
 WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     VirtualBlksInfo& virtualBlksInfo, CallbackSmartPtr callback)
@@ -503,6 +504,7 @@ WriteSubmission::_SetupVolumeIo(VolumeIoSmartPtr newVolumeIo,
     VirtualBlks vsaRange = virtualBlksInfo.first;
     StripeId userLsid = virtualBlksInfo.second;
     VirtualBlkAddr startVsa = vsaRange.startVsa;
+
     Translator translator(startVsa, volumeIo->GetArrayId(), userLsid);
     void* mem = newVolumeIo->GetBuffer();
     list<PhysicalEntry> physicalEntries =
@@ -536,5 +538,4 @@ WriteSubmission::_PrepareSingleBlock(VirtualBlksInfo& virtualBlksInfo)
 {
     _SetupVolumeIo(volumeIo, virtualBlksInfo, volumeIo->GetCallback());
 }
-
 } // namespace pos

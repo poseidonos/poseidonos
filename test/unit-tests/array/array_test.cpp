@@ -6,6 +6,7 @@
 #include "lib/spdk/lib/nvme/nvme_internal.h"
 #include "src/device/unvme/unvme_ssd.h"
 #include "src/include/partition_type.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include "test/unit-tests/array/partition/partition_services_mock.h"
 #include "test/unit-tests/array/array_mock.h"
 #include "test/unit-tests/array/device/array_device_manager_mock.h"
@@ -237,6 +238,9 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     mockArrayBuildInfo->buildResult = 0;
     EXPECT_CALL(*mockArraybuilder, Create).WillOnce(Return(mockArrayBuildInfo));
 
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
+
     Array array(mockArrayName, NULL, mockAbrControl, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL, mockArraybuilder.get());
 
     // When
@@ -245,6 +249,9 @@ TEST(Array, Create_testIfArrayCreatedWhenInputsAreValid)
     // Then
     ASSERT_EQ(0, actual);
     delete mockAbrControl;
+
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    EventSchedulerServiceSingleton::ResetInstance();
 }
 
 TEST(Array, Create_testIfErrorIsReturnedWhenDeviceImportFails)

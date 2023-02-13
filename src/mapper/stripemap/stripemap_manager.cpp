@@ -43,6 +43,7 @@
 #include "src/mapper/address/mapper_address_info.h"
 #include "src/mapper/map_flushed_event.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -57,7 +58,7 @@ StripeMapManager::StripeMapManager(TelemetryPublisher* tp_, StripeMapContent* co
     eventScheduler = eventSched;
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     pthread_rwlock_init(&stripeMapLock, nullptr);
 }
@@ -68,7 +69,7 @@ StripeMapManager::StripeMapManager(TelemetryPublisher* tp_, EventScheduler* even
     eventScheduler = eventSched;
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     pthread_rwlock_init(&stripeMapLock, nullptr);
 }

@@ -49,6 +49,8 @@
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/master_context/config_manager.h"
 #include "src/array/device/array_device_api.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -57,7 +59,7 @@ const int Array::LOCK_ACQUIRE_FAILED = -1;
 Array::Array(string name, IArrayRebuilder* rbdr, IAbrControl* abr, IStateControl* iState)
 : Array(name, rbdr, abr, new ArrayDeviceManager(DeviceManagerSingleton::Instance(), name),
       DeviceManagerSingleton::Instance(), new PartitionManager(), new ArrayState(iState),
-      new PartitionServices(), EventSchedulerSingleton::Instance(), ArrayService::Instance(),
+      new PartitionServices(), EventSchedulerServiceSingleton::Instance()->GetEventScheduler(), ArrayService::Instance(),
       new ArrayBuilderAdapter())
 {
 }
@@ -380,7 +382,7 @@ Array::AddSpare(string devName)
         return ret;
     }
 
-    vector<ArrayDevice*> targets = 
+    vector<ArrayDevice*> targets =
         ArrayDeviceApi::ExtractDevicesByState(ArrayDeviceState::FAULT, devMgr_->GetDevs());
     if (targets.size() > 0 && state->IsRebuildable())
     {
@@ -440,7 +442,7 @@ Array::ReplaceDevice(string devName)
         return ret;
     }
 
-    POS_TRACE_INFO(EID(REPLACE_DEV_DEBUG_MSG), 
+    POS_TRACE_INFO(EID(REPLACE_DEV_DEBUG_MSG),
         "trying to replace device from array, dev_name:{}, array_name:{}",
         devName, name_);
 
@@ -537,7 +539,7 @@ Array::Rebuild(void)
         pthread_rwlock_unlock(&stateLock);
         return eid;
     }
-    if (state->IsRebuildable() == false) 
+    if (state->IsRebuildable() == false)
     {
         eid = EID(REBUILD_ARRAY_IS_NORMAL);
         pthread_rwlock_unlock(&stateLock);
@@ -586,7 +588,7 @@ Array::GetDevNames(void)
         else if (dev->GetType() == ArrayDeviceType::SPARE)
         {
             devNames.spares.push_back(dev->GetName());
-        } 
+        }
         else if (dev->GetType() == ArrayDeviceType::NVM)
         {
             devNames.nvm.push_back(dev->GetName());

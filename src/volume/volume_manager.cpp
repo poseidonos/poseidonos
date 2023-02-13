@@ -93,7 +93,7 @@ VolumeManager::Init(void)
     }
     result = VolumeServiceSingleton::Instance()->Register(arrayInfo->GetIndex(), this);
     wtEnabled = arrayInfo->IsWriteThroughEnabled();
- 
+
     _PublishTelemetryArrayUsage();
     return result;
 }

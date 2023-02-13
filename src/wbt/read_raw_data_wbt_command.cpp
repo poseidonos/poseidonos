@@ -40,6 +40,7 @@
 #include "src/bio/ubio.h"
 #include "src/device/device_manager.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -82,7 +83,7 @@ ReadRawDataCommand::Execute(Args &argv, JsonElement &elem)
                 ubio->SetUblock(targetDevice);
 
                 IODispatcher* ioDispatcher =
-                    IODispatcherSingleton::Instance();
+                    IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
                 int retValue = ioDispatcher->Submit(ubio, true);
                 if (retValue >= 0 &&
                     ubio->GetError() == IOErrorType::SUCCESS)

@@ -80,6 +80,8 @@
 #include "src/resource_checker/smart_collector.h"
 #include "src/trace/trace_exporter.h"
 #include "src/trace/otlp_factory.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -166,7 +168,7 @@ Poseidonos::Terminate(void)
 {
     POS_TRACE_TRACE(EID(POS_TRACE_TERMINATING), "");
     MemoryChecker::Enable(false);
-    EventSchedulerSingleton::Instance()->SetTerminate(true);
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->SetTerminate(true);
     NvmfTargetSingleton::ResetInstance();
     DeviceManagerSingleton::ResetInstance();
     IODispatcherSingleton::ResetInstance();
@@ -349,9 +351,13 @@ Poseidonos::_SetupThreadModel(void)
 
     QosManagerSingleton::Instance()->InitializeSpdkManager();
     QosManagerSingleton::Instance()->Initialize();
-    EventSchedulerSingleton::Instance()->Initialize(workerCount,
-        schedulerCPUSet, workerCPUSet);
-    IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+
+    EventSchedulerServiceSingleton::Instance()->Register(EventSchedulerSingleton::Instance());
+    EventScheduler* eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
+    eventScheduler->Initialize(workerCount, schedulerCPUSet, workerCPUSet);
+
+    IoDispatcherServiceSingleton::Instance()->Register(IODispatcherSingleton::Instance());
+    IIODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     DeviceManagerSingleton::Instance()->Initialize(ioDispatcher);
 
     coreCount = affinityManager->GetTotalCore();
@@ -501,7 +507,7 @@ Poseidonos::_InitTraceExporter(char *procFullName,
         POS_TRACE_INFO(EID(TRACE_NOT_ENABLED), "The trace is not enabled by configuration");
         return EID(TRACE_NOT_ENABLED);
     }
-    
+
     std::string traceEndPoint = "";
     ret = cm->GetValue("trace", "collector_endpoint", &traceEndPoint, ConfigType::CONFIG_TYPE_STRING);
 
@@ -510,7 +516,7 @@ Poseidonos::_InitTraceExporter(char *procFullName,
         POS_TRACE_INFO(EID(TRACE_CONFIG_ERROR), "Trace is not enabled. Specify an endpoint of the traces in configuration");
         return EID(TRACE_CONFIG_ERROR);
     }
-    
+
     // Set service name
     std::stringstream ss(procFullName);
     std::string token, serviceName;

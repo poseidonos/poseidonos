@@ -45,6 +45,7 @@
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
 #include "src/signal_handler/user_signal_interface.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -88,14 +89,14 @@ Callback::Callback(bool isFrontEnd, CallbackType type, uint32_t weight, SystemTi
     }
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
 
     ioTimeoutChecker = IoTimeoutCheckerSingleton::Instance();
 
     createdTime = ioTimeoutChecker->GetCurrentRoughTime();
     ioTimeoutChecker->IncreasePendingCnt(type, createdTime);
-    
+
 }
 
 // LCOV_EXCL_START

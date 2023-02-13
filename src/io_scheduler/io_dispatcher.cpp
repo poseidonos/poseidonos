@@ -49,6 +49,8 @@
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/accel_engine_api.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+
 namespace pos
 {
 IODispatcher::DispatcherAction IODispatcher::frontendOperation;
@@ -73,7 +75,13 @@ IODispatcher::IODispatcher(EventFrameworkApi* eventFrameworkApiArg,
     }
     if (nullptr == eventScheduler)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
+        if (nullptr == eventScheduler)
+        {
+            POS_TRACE_TRACE(EID(POS_TRACE_INIT_FAIL),
+                "Eventschduler was not registered.");
+            assert(false);
+        }
     }
     eventScheduler->InjectIODispatcher(this);
     dispPolicy = new DispatcherPolicyQos(this, eventScheduler);
@@ -357,7 +365,7 @@ IODispatcher::_CallForFrontend(UblockSharedPtr dev)
             }
         }
     }
-    else 
+    else
     {
         frontendDoneCount = 0;
         _ProcessCurrentFrontend(devArg);
@@ -404,7 +412,7 @@ IODispatcher::_ProcessCurrentFrontend(void* ublockDevice)
     }
 
     frontendDoneCount++;
-    
+
     if (frontendDoneCount == AccelEngineApi::GetReactorCount())
     {
         frontendDone = true;
@@ -412,7 +420,7 @@ IODispatcher::_ProcessCurrentFrontend(void* ublockDevice)
     else
     {
         uint32_t nextCore = eventFrameworkApi->GetNextReactor();
-        if (nextCore == INVALID_CORE) 
+        if (nextCore == INVALID_CORE)
         {
             nextCore = eventFrameworkApi->GetFirstReactor();
         }

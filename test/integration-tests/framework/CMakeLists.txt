@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(framework_it framework_test.cpp)

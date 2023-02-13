@@ -54,6 +54,7 @@
 #include "test/unit-tests/event_scheduler/event_factory_mock.h"
 #include "test/unit-tests/io_scheduler/io_worker_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
+#include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 
 using namespace pos;
 using namespace std;
@@ -66,29 +67,26 @@ namespace pos
 {
 TEST(IODispatcher, IODispatcher_Stack)
 {
-    // Given: Do nothing
+    NiceMock<MockEventScheduler> mockEventScheduler;
 
     // When: Create IODispatcher
-    IODispatcher ioDispatcher;
-
-    // Then: Do nothing
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
 }
 
 TEST(IODispatcher, IODispatcher_Heap)
 {
-    // Given: Do nothing
-
+    NiceMock<MockEventScheduler> mockEventScheduler;
     // When: Create IODispatcher
-    IODispatcher* ioDispatcher = new IODispatcher;
+    IODispatcher* ioDispatcher = new IODispatcher(nullptr, &mockEventScheduler);
     delete ioDispatcher;
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, AddIOWorker_ZeroCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
 
@@ -101,8 +99,10 @@ TEST(IODispatcher, AddIOWorker_ZeroCPUSet)
 
 TEST(IODispatcher, AddIOWorker_ValidCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
     CPU_SET(1, &cpuSet);
@@ -117,8 +117,10 @@ TEST(IODispatcher, AddIOWorker_ValidCPUSet)
 
 TEST(IODispatcher, AddIOWorker_IntersectionCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet1, cpuSet2;
     CPU_ZERO(&cpuSet1);
     CPU_SET(1, &cpuSet1);
@@ -137,8 +139,10 @@ TEST(IODispatcher, AddIOWorker_IntersectionCPUSet)
 
 TEST(IODispatcher, RemoveIOWorker_ZeroCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t, AddIOWorker
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSetAdd, cpuSetRemove;
     CPU_ZERO(&cpuSetAdd);
     CPU_ZERO(&cpuSetRemove);
@@ -154,8 +158,10 @@ TEST(IODispatcher, RemoveIOWorker_ZeroCPUSet)
 
 TEST(IODispatcher, RemoveIOWorker_ValidCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t, AddIOWorker
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
     CPU_SET(1, &cpuSet);
@@ -171,8 +177,10 @@ TEST(IODispatcher, RemoveIOWorker_ValidCPUSet)
 
 TEST(IODispatcher, RemoveIOWorker_IntersectionCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t, AddIOWorker
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet1, cpuSet2;
     CPU_ZERO(&cpuSet1);
     CPU_SET(1, &cpuSet1);
@@ -191,8 +199,10 @@ TEST(IODispatcher, RemoveIOWorker_IntersectionCPUSet)
 
 TEST(IODispatcher, SizeIOWorker_SimpleCall)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t, AddIOWorker
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
     CPU_SET(1, &cpuSet);
@@ -210,30 +220,32 @@ TEST(IODispatcher, SizeIOWorker_SimpleCall)
 
 TEST(IODispatcher, AddDeviceForReactor_NotFirstReactorCore_SendEventFail)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(1));
     ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault(Return(false));
     AccelEngineApi::SetReactorCount(1);
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
 
     // When: Call AddDeviceForReactor with MockUBlockDevice
     ioDispatcher.AddDeviceForReactor(ublock);
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, AddDeviceForReactor_NotFirstReactorCore_SendEventSuccess)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice, t
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(1));
     ON_CALL(mockEventFrameworkApi, SendSpdkEvent(_, _, _)).WillByDefault(Return(false));
     AccelEngineApi::SetReactorCount(1);
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     std::thread t([&](void) -> void {
         usleep(100000); // 100ms, expect to reach while loop in _CallForFrontend
@@ -243,19 +255,19 @@ TEST(IODispatcher, AddDeviceForReactor_NotFirstReactorCore_SendEventSuccess)
     // When: Call AddDeviceForReactor with MockUBlockDevice
     ioDispatcher.AddDeviceForReactor(ublock);
     t.join();
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_LastReactor)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(true));
     AccelEngineApi::SetReactorCount(1);
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
 
     // When 1: Call AddDeviceForReactor with Opened BlockDevice
@@ -285,6 +297,8 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_LastReactor)
 
 TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEventFail)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
@@ -296,7 +310,7 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEvent
         delete static_cast<UblockSharedPtr*>(arg1);
         return false;
     });
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), Open()).WillByDefault(Return(true));
     EXPECT_CALL(*ublock.get(), Open()).Times(AtLeast(1));
@@ -314,6 +328,8 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEvent
 
 TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEventSuccess)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
@@ -325,7 +341,7 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEvent
         return true;
     });
     AccelEngineApi::SetReactorCount(1);
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), Open()).WillByDefault(Return(true));
     EXPECT_CALL(*ublock.get(), Open()).Times(AtLeast(1));
@@ -349,13 +365,15 @@ TEST(IODispatcher, AddDeviceForReactor_FirstReactorCore_NotLastReactor_SendEvent
 
 TEST(IODispatcher, RemoveDeviceForReactor_FirstReactorCore_LastReactor)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: MockEventFrameworkApi, IODispatcher, MockUBlockDevice
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(true));
     AccelEngineApi::SetReactorCount(1);
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
 
     auto ublock1 = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock1.get(), Open()).WillByDefault(Return(true));
@@ -378,21 +396,23 @@ TEST(IODispatcher, RemoveDeviceForReactor_FirstReactorCore_LastReactor)
 
 TEST(IODispatcher, AddDeviceForIOWorker_ZeroCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: IODispatcher, cpu_set_t
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
 
     // When: Call AddDeviceForIOWorker with zero cpuSet
     ioDispatcher.AddDeviceForIOWorker(nullptr, cpuSet);
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, AddDeviceForIOWorker_MissMatchedCPUSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: IODispatcher, cpu_set_t
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet1, cpuSet2;
     CPU_ZERO(&cpuSet1);
     CPU_SET(3, &cpuSet1);
@@ -402,14 +422,14 @@ TEST(IODispatcher, AddDeviceForIOWorker_MissMatchedCPUSet)
 
     // When: Call AddDeviceForIOWorker with nullptr and miss-matched cpuSet
     ioDispatcher.AddDeviceForIOWorker(nullptr, cpuSet2);
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, AddDeviceForIOWorker_MatchedCpuSet)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: IODispatcher, cpu_set_t, MockUBlockDevice
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
     CPU_SET(3, &cpuSet);
@@ -423,28 +443,28 @@ TEST(IODispatcher, AddDeviceForIOWorker_MatchedCpuSet)
 
     // When: Call AddDeviceForIOWorker with MockUBlockDevice and matched cpuSet
     ioDispatcher.AddDeviceForIOWorker(ublock, cpuSet);
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, RemoveDeviceForIOWorker_NullIOWorker)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+ 
     // Given: Set IODispatcher, MockUBlockDevice
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), GetDedicatedIOWorker()).WillByDefault(Return(nullptr));
     EXPECT_CALL(*ublock.get(), GetDedicatedIOWorker()).Times(1);
 
     // When: Call RemoveDeviceForIOWorker with MockUBlockDevice
     ioDispatcher.RemoveDeviceForIOWorker(ublock);
-
-    // Then: Do nothing
 }
 
 TEST(IODispatcher, RemoveDeviceForIOWorker_NormalIOWorker)
 {
+    NiceMock<MockEventScheduler> mockEventScheduler;
+
     // Given: Set IODispatcher, cpu_set_t, MockUBlockDevice, MockIOWorker
-    IODispatcher ioDispatcher;
+    IODispatcher ioDispatcher(nullptr, &mockEventScheduler);
     cpu_set_t cpuSet;
     CPU_ZERO(&cpuSet);
     CPU_SET(3, &cpuSet);
@@ -456,8 +476,6 @@ TEST(IODispatcher, RemoveDeviceForIOWorker_NormalIOWorker)
 
     // When: Call RemoveDeviceForIOWorker with MockUBlockDevice
     ioDispatcher.RemoveDeviceForIOWorker(ublock);
-
-    // Then: Do nothing
 }
 
 } // namespace pos

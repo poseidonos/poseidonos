@@ -34,13 +34,14 @@
 
 #include "src/bio/volume_io.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
 class IOController
 {
 public:
-    explicit IOController(IODispatcher* ioDispatcher = IODispatcherSingleton::Instance());
+    explicit IOController(IODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher());
     ~IOController(void);
 
     static void _SendVolumeIo(VolumeIoSmartPtr volumeIo);

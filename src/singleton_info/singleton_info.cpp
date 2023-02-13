@@ -68,6 +68,8 @@
 #include "src/resource_manager/memory_manager.h"
 #include "src/resource_checker/resource_checker.h"
 #include "src/event_scheduler/io_timeout_checker.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -137,8 +139,8 @@ SingletonInfo::Update(void)
     spdk = SpdkSingleton::Instance();
     rbaStateService = RBAStateServiceSingleton::Instance();
     volumeEventPublisher = VolumeEventPublisherSingleton::Instance();
-    eventScheduler = EventSchedulerSingleton::Instance();
-    ioDispatcher = IODispatcherSingleton::Instance();
+    eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
+    ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     ioDispatcherSubmission = IODispatcherSubmissionSingleton::Instance();
     qosManager = QosManagerSingleton::Instance();
     flushCmdManager = FlushCmdManagerSingleton::Instance();

@@ -40,6 +40,7 @@
 #include "src/device/device_manager.h"
 #include "src/include/io_error_type.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -71,7 +72,7 @@ WriteUncorrectableLbaWbtCommand::Execute(Args &argv, JsonElement &elem)
             ubio->SetLba(std::stoull(argv["lba"].get<std::string>()));
             ubio->SetUblock(targetDevice);
 
-            IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+            IODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
             int retValue = ioDispatcher->Submit(ubio, true);
             if (retValue >= 0 &&
                 ubio->GetError() == IOErrorType::SUCCESS)

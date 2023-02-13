@@ -17,6 +17,7 @@
 #include "src/io/general_io/io_recovery_event_factory.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/mapper_service/mapper_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/device/base/device_driver_mock.h"
@@ -27,7 +28,10 @@
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
+#include "test/unit-tests/io_scheduler/io_dispatcher_mock.h"
 #include "test/unit-tests/include/i_array_device_mock.h"
+
+#include <iostream>
 
 using namespace pos;
 using namespace std;
@@ -56,12 +60,11 @@ TEST(ReadSubmission, ReadSubmission_Stack)
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
 
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap,
+        &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
 
     // When: Try to create new ReadSubmission object with 4 arguments
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
-
-    // Then: Do nothing
 }
 
 TEST(ReadSubmission, ReadSubmission_Heap)
@@ -93,6 +96,14 @@ TEST(ReadSubmission, ReadSubmission_Heap)
 
 TEST(ReadSubmission, Execute_SingleBlock)
 {
+    NiceMock<EventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
+
+    NiceMock<MockIODispatcher> mockIoDispatcher;
+    IoDispatcherServiceSingleton::Instance()->Register(&mockIoDispatcher);
+    IODispatcher* tempIoDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
+    assert(tempIoDispatcher == &mockIoDispatcher);
+
     // Given
     char buf[1024];
     std::string arr_name = "";
@@ -111,6 +122,7 @@ TEST(ReadSubmission, Execute_SingleBlock)
     NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
 
     MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
+
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(1));
@@ -138,10 +150,20 @@ TEST(ReadSubmission, Execute_SingleBlock)
     // Then: Return true
     ASSERT_EQ(expected, actual);
     ASSERT_EQ(expectedStripeId, actualStripeId);
+
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::ResetInstance();
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    EventSchedulerServiceSingleton::ResetInstance();
 }
 
 TEST(ReadSubmission, Execute_MultiBlocks)
 {
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::ResetInstance();
+    EventSchedulerServiceSingleton::ResetInstance();
+
     // Given
     char buf[1024];
     std::string arr_name = "";
@@ -161,7 +183,13 @@ TEST(ReadSubmission, Execute_MultiBlocks)
     NiceMock<MockIStripeMap> mockIStripeMap;
     NiceMock<MockIWBStripeAllocator> mockIWBStripeAllocator;
     NiceMock<MockIVolumeInfoManager> mockVolumeInfoManager;
-    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap, &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
+    MockTranslator* mockTranslator = new MockTranslator(1, blkAddr, 0, 0, true, &mockIVSAMap, &mockIStripeMap,
+    &mockIWBStripeAllocator, nullptr, &mockVolumeInfoManager);
+    NiceMock<EventScheduler> mockEventScheduler;
+    EventSchedulerServiceSingleton::Instance()->Register(&mockEventScheduler);
+    NiceMock<MockIODispatcher> mockIoDispatcher;
+    IoDispatcherServiceSingleton::Instance()->Register(&mockIoDispatcher);
+
     ReadSubmission readSubmission{volumeIo, mockBlockAlignment, mockMerger, mockTranslator};
 
     ON_CALL(*mockBlockAlignment, GetBlockCount()).WillByDefault(Return(2));
@@ -180,6 +208,11 @@ TEST(ReadSubmission, Execute_MultiBlocks)
 
     // Then: Return true
     ASSERT_EQ(expected, actual);
+
+    IoDispatcherServiceSingleton::Instance()->Unregister();
+    IoDispatcherServiceSingleton::ResetInstance();
+    EventSchedulerServiceSingleton::Instance()->Unregister();
+    EventSchedulerServiceSingleton::ResetInstance();
 }
 
 } // namespace pos

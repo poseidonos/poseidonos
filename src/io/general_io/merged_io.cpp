@@ -43,6 +43,7 @@
 #include <string>
 
 #include "src/array_mgmt/array_manager.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -55,7 +56,7 @@ MergedIO::MergedIO(CallbackSmartPtr callback, IODispatcher* inputIoDispatcher, S
 {
     if (inputIoDispatcher == nullptr)
     {
-        ioDispatcher = IODispatcherSingleton::Instance();
+        ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     }
     else
     {

@@ -37,6 +37,7 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -46,7 +47,7 @@ PartitionRebuild::PartitionRebuild(RebuildBehavior* b, EventScheduler* eventSche
 {
     if (nullptr == eventScheduler)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
 }
 

@@ -63,6 +63,8 @@
 #include "src/spdk_wrapper/spdk.h"
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -371,9 +373,9 @@ AIO::SubmitAsyncAdmin(pos_io& io, IArrayInfo* arrayInfo)
     uint32_t originCore = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();
     CallbackSmartPtr adminCompletion(new AdminCompletion(&io, ioContext, originCore));
     IDevInfo* devmgr = DeviceManagerSingleton::Instance();
-    IIODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+    IIODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
     EventSmartPtr event(new AdminCommandHandler(&io, originCore, adminCompletion, arrayInfo, devmgr, ioDispatcher));
-    EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(event);
     return;
 }
 

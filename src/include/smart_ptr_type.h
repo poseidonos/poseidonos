@@ -45,6 +45,7 @@ class UBlockDevice;
 class UnvmeSsd;
 class Uram;
 class Stripe;
+class Translator;
 
 using UbioSmartPtr = std::shared_ptr<Ubio>;
 using VolumeIoSmartPtr = std::shared_ptr<VolumeIo>;
@@ -54,5 +55,5 @@ using UblockSharedPtr = std::shared_ptr<UBlockDevice>;
 using UnvmeSsdSharedPtr = std::shared_ptr<UnvmeSsd>;
 using UramSharedPtr = std::shared_ptr<Uram>;
 using StripeSmartPtr = std::shared_ptr<Stripe>;
-
+using TranslatorSmartPtr = std::shared_ptr<Translator>;
 } // namespace pos

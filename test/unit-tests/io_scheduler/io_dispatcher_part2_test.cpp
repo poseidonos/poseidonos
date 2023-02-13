@@ -72,7 +72,9 @@ TEST(IODispatcher, CompleteForThreadLocalDeviceList_SimpleCall)
     ON_CALL(mockEventFrameworkApi, GetFirstReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, GetCurrentReactor()).WillByDefault(Return(0));
     ON_CALL(mockEventFrameworkApi, IsLastReactorNow()).WillByDefault(Return(true));
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
     auto ublock = std::make_shared<MockUBlockDevice>("", 0, nullptr);
     ON_CALL(*ublock.get(), Open()).WillByDefault(Return(true));
     ON_CALL(*ublock.get(), CompleteIOs()).WillByDefault(Return(0));
@@ -96,7 +98,10 @@ TEST(IODispatcher, Submit_Reactor_Sync)
     // Given: IODispatcher, MockEventFrameworkApi, MockUbio
     NiceMock<MockEventFrameworkApi> mockEventFrameworkApi;
     ON_CALL(mockEventFrameworkApi, IsReactorNow()).WillByDefault(Return(true));
-    IODispatcher ioDispatcher{&mockEventFrameworkApi};
+
+    NiceMock<MockEventScheduler> mockEventScheduler;
+    IODispatcher ioDispatcher(&mockEventFrameworkApi, &mockEventScheduler);
+    
     auto ubio = std::make_shared<MockUbio>(nullptr, 0, 0);
     ON_CALL(*ubio.get(), IsSyncMode()).WillByDefault(Return(true));
     EXPECT_CALL(*ubio.get(), IsSyncMode()).Times(AtLeast(1));

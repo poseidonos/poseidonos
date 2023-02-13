@@ -3,7 +3,9 @@ export MODULE='"src/"'
 SUBDIRS = allocator \
         allocator_service \
         io_scheduler \
+        io_dispatcher_service \
         event_scheduler \
+        event_scheduler_service \
         network \
         node \
         mapper \
@@ -91,7 +93,7 @@ SUBDIRS = allocator \
         memory_checker \
         resource_checker \
         event \
-        trace 
+        trace
 
 ifeq ($(CONFIG_REPLICATOR), y)
         SUBDIRS += pos_replicator

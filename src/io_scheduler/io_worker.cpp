@@ -57,12 +57,13 @@
 #include "src/logger/logger.h"
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
 /* --------------------------------------------------------------------------*/
 /**
- * @Synopsis Constructor 
+ * @Synopsis Constructor
  *
  * @Param    coreAffinityInput
  */
@@ -89,7 +90,7 @@ IOWorker::IOWorker(cpu_set_t cpuSetInput, uint32_t id,
     }
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     thread = new std::thread(&IOWorker::Run, this);
 }

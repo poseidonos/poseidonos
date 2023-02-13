@@ -3,6 +3,7 @@
 #include "test/integration-tests/journal/fake/test_journal_write_completion.h"
 #include "test/integration-tests/journal/utils/used_offset_calculator.h"
 #include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
+#include "test/integration-tests/framework/write_tester/volume_io_fake.h"
 
 namespace pos
 {
@@ -93,7 +94,7 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
         .stripeLoc = IN_WRITE_BUFFER_AREA,
         .stripeId = StripeTestFixture::GetWbLsid(blks.startVsa.stripeId)};
 
-    VolumeIoSmartPtr volumeIo(new VolumeIo(nullptr, numBlksInSector, array->GetIndex()));
+    VolumeIoSmartPtr volumeIo(new FakeVolumeIo(nullptr, numBlksInSector, array->GetIndex()));
     volumeIo->SetSectorRba(ChangeBlockToSector(rba));
     volumeIo->SetVolumeId(volId);
     volumeIo->SetVsa(blks.startVsa);

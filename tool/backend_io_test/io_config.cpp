@@ -38,7 +38,7 @@ IOConfig::ExecuteLoop(void)
         {
             pendingIO++;
             EventSmartPtr event(new DummySubmitHandler(eventWorker, this));
-            EventSchedulerSingleton::Instance()->EnqueueEvent(event);
+            EEventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(event);
         }
     }
     while (pendingIO > 0)

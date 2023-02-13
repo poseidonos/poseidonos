@@ -50,12 +50,14 @@
 #include <set>
 
 #include "src/array_mgmt/array_manager.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
 SubmitAsyncWrite::SubmitAsyncWrite(void)
 : SubmitAsyncWrite(ArrayService::Instance()->Getter()->GetTranslator(),
-      IODispatcherSingleton::Instance())
+  IoDispatcherServiceSingleton::Instance()->GetIODispatcher())
 {
 }
 
@@ -108,7 +110,7 @@ SubmitAsyncWrite::Execute(
     if (ret != 0 || parityResult != 0)
     {
         callback->InformError(IOErrorType::GENERIC_ERROR);
-        EventSchedulerSingleton::Instance()->EnqueueEvent(callback);
+        EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->EnqueueEvent(callback);
         IOSubmitHandlerCountSingleton::Instance()->callbackNotCalledCount++;
         IOSubmitHandlerCountSingleton::Instance()->pendingWrite--;
         airlog("Pending_Internal_Write", "internal", arrayId, -1);

@@ -51,6 +51,7 @@
 #include "src/io/general_io/translator.h"
 #include "src/logger/logger.h"
 #include "src/volume/volume_service.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -58,7 +59,7 @@ CopierReadCompletion::CopierReadCompletion(VictimStripe* victimStripe, uint32_t 
     void* buffer, CopierMeta* meta, StripeId stripeId)
 : CopierReadCompletion(victimStripe, listIndex, buffer, meta, stripeId, nullptr,
       VolumeServiceSingleton::Instance()->GetVolumeManager(meta->GetArrayIndex()),
-      EventSchedulerSingleton::Instance())
+      EventSchedulerServiceSingleton::Instance()->GetEventScheduler())
 {
 }
 

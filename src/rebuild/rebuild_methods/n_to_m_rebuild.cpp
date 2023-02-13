@@ -41,6 +41,8 @@
 #include "src/logger/logger.h"
 
 #include <functional>
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
+
 using namespace std;
 
 namespace pos
@@ -161,7 +163,7 @@ NToMRebuild::_Read(int arrayIndex, StripeId stripeId, const PartitionPhysicalSiz
     readCompletion->SetWaitingCount(splitList.size());
     for (auto split : splitList)
     {
-        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+        IODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
         ioDispatcher->Submit(split);
     }
 }
@@ -302,7 +304,7 @@ NToMRebuild::_Write(int arrayIndex, StripeId stripeId, const PartitionPhysicalSi
     writeCompletion->SetWaitingCount(splitList.size());
     for (auto split : splitList)
     {
-        IODispatcher* ioDispatcher = IODispatcherSingleton::Instance();
+        IODispatcher* ioDispatcher = IoDispatcherServiceSingleton::Instance()->GetIODispatcher();
         ioDispatcher->Submit(split);
     }
 }

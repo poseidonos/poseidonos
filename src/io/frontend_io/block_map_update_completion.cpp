@@ -38,7 +38,7 @@
 #include "src/io/frontend_io/write_completion.h"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include <memory>
 
 namespace pos
@@ -58,7 +58,7 @@ BlockMapUpdateCompletion::BlockMapUpdateCompletion(VolumeIoSmartPtr inputVolumeI
     CallbackSmartPtr originCallback)
 : BlockMapUpdateCompletion(
     inputVolumeIo, originCallback, EventFrameworkApiSingleton::Instance()->IsReactorNow(),
-    EventSchedulerSingleton::Instance(),
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler(),
     std::make_shared<WriteCompletion>(inputVolumeIo))
 {
 }

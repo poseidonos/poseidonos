@@ -51,6 +51,7 @@
 #include "src/logger/logger.h"
 #include "src/node/node_info.h"
 #include "version_provider.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 using namespace std::placeholders;
 namespace pos
@@ -346,7 +347,7 @@ MbrManager::_DiskIo(UblockSharedPtr dev, void* ctx)
     bio->SetLba(MBR_ADDRESS);
     bio->SetUblock(dev);
 
-    IODispatcher& ioDispatcher = *IODispatcherSingleton::Instance();
+    IODispatcher& ioDispatcher = *(IoDispatcherServiceSingleton::Instance()->GetIODispatcher());
     ioDispatcher.Submit(bio, true);
 }
 

@@ -43,6 +43,7 @@
 #include "src/include/pos_event_id.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/event_framework_api.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
@@ -55,7 +56,7 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore, Cal
   dispatcher(dispatcher)
 {
     smartLogMgr = SmartLogMgrSingleton::Instance();
-    eventScheduler = EventSchedulerSingleton::Instance();
+    eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
 
     void* bio = io->context;
     struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;
@@ -81,7 +82,7 @@ AdminCommandHandler::AdminCommandHandler(pos_io* posIo, uint32_t originCore,
 {
     if (eventScheduler == nullptr)
     {
-        eventScheduler = EventSchedulerSingleton::Instance();
+        eventScheduler = EventSchedulerServiceSingleton::Instance()->GetEventScheduler();
     }
     void* bio = io->context;
     struct spdk_bdev_io* bioPos = (struct spdk_bdev_io*)bio;

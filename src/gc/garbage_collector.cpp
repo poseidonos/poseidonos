@@ -41,11 +41,12 @@
 #include "src/logger/logger.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
 GarbageCollector::GarbageCollector(IArrayInfo* i, IStateControl* s)
-: GarbageCollector(i, s, nullptr, nullptr, EventSchedulerSingleton::Instance())
+: GarbageCollector(i, s, nullptr, nullptr, EventSchedulerServiceSingleton::Instance()->GetEventScheduler())
 {
     this->copierFactory = [](GcStatus* gcStatus, IArrayInfo* array, CopierSmartPtr inputEvent)
     {

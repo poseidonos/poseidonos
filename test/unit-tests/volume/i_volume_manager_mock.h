@@ -26,6 +26,7 @@ public:
     MOCK_METHOD(int, GetVolumeID, (std::string volName), (override));
     MOCK_METHOD(int, GetVolumeCount, (), (override));
     MOCK_METHOD(int, CheckVolumeValidity, (int volId), (override));
+    MOCK_METHOD(int, CheckVolumeValidity, (std::string Name), (override));
     MOCK_METHOD(int, GetVolumeMountStatus, (int volId), (override));
     MOCK_METHOD(int, GetReplicationState, (int volId), (override));
     MOCK_METHOD(int, GetReplicationRole, (int volId), (override));
@@ -38,6 +39,10 @@ public:
     MOCK_METHOD(VolumeBase*, GetVolume, (int volId), (override));
     MOCK_METHOD(std::string, GetArrayName, (), (override));
     MOCK_METHOD(int, CancelVolumeReplay, (int volId), (override));
+    MOCK_METHOD(bool, IsWriteThroughEnabled, (), (override));
+    MOCK_METHOD(bool, GetNeedWriteBypass, (), (override));
+    MOCK_METHOD(int, Unmount, (int volId), (override));
+    MOCK_METHOD(int, SaveVolumeMeta, (), (override));
 };
 
 } // namespace pos

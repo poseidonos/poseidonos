@@ -38,12 +38,13 @@
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 namespace pos
 {
 ContextIoManager::ContextIoManager(AllocatorAddressInfo* info, TelemetryPublisher* tp,
     AllocatorFileIo* segmentFileIo, AllocatorFileIo* allocatorFileIo, AllocatorFileIo* rebuildFileIo)
-: ContextIoManager(info, tp, EventSchedulerSingleton::Instance(), segmentFileIo, allocatorFileIo, rebuildFileIo)
+: ContextIoManager(info, tp, EventSchedulerServiceSingleton::Instance()->GetEventScheduler(), segmentFileIo, allocatorFileIo, rebuildFileIo)
 {
 }
 

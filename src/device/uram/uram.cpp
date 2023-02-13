@@ -59,6 +59,7 @@
 #include "uram_device_context.h"
 #include "uram_drv.h"
 #include "uram_restore_completion.h"
+#include "src/io_dispatcher_service/io_dispatcher_Service.h"
 
 namespace pos
 {
@@ -148,7 +149,7 @@ Uram::_RecoverBackup(void)
             if (bytesPerHugepage == rc)
             {
                 UramRestoreCompletion::IncreasePendingUbio();
-                IODispatcherSingleton::Instance()->Submit(ubio);   
+                IoDispatcherServiceSingleton::Instance()->GetIODispatcher()->Submit(ubio);   
             }
             else
             {

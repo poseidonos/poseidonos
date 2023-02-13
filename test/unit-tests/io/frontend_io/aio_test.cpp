@@ -18,6 +18,7 @@
 #include "test/unit-tests/bio/flush_io_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
+#include "src/event_scheduler_service/event_scheduler_service.h"
 
 using namespace pos;
 using namespace std;
@@ -242,15 +243,15 @@ TEST(AIO, DISABLED_AIO_SubmitAsyncAdmin_IoTypeGetLogPage)
     bio.internal.caller_ctx = &nvmfRequest;
     posIo.context = &bio;
 
-    EventSchedulerSingleton::Instance()->DequeueEvents();
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->DequeueEvents();
 
     aio.SubmitAsyncAdmin(posIo, mockArrayInfo);
 
     // Then : check eventscheduler queue
-    std::queue<EventSmartPtr> queueList = EventSchedulerSingleton::Instance()->DequeueEvents();
+    std::queue<EventSmartPtr> queueList = EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->DequeueEvents();
     ASSERT_EQ(1, queueList.size());
 
-    EventSchedulerSingleton::Instance()->DequeueEvents();
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler()->DequeueEvents();
     delete mockArrayManager;
     delete mockArrayInfo;
 }

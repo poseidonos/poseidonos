@@ -42,7 +42,7 @@
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/meta_service/meta_service.h"
 #include "src/io/frontend_io/block_map_update_completion.h"
-
+#include "src/event_scheduler_service/event_scheduler_service.h"
 #include <memory>
 
 namespace pos
@@ -50,7 +50,8 @@ namespace pos
 BlockMapUpdateRequest::BlockMapUpdateRequest(VolumeIoSmartPtr volumeIo, CallbackSmartPtr originCallback)
 : BlockMapUpdateRequest(volumeIo, originCallback, std::make_shared<BlockMapUpdateCompletion>(volumeIo, originCallback),
     MetaServiceSingleton::Instance()->GetMetaUpdater(volumeIo->GetArrayId()),
-    EventSchedulerSingleton::Instance(), EventFrameworkApiSingleton::Instance()->IsReactorNow())
+    EventSchedulerServiceSingleton::Instance()->GetEventScheduler(),
+    EventFrameworkApiSingleton::Instance()->IsReactorNow())
 {
 }
 
