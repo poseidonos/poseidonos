@@ -44,6 +44,7 @@ const string PTE_SIGNATURE = "PTE";
 class PteData
 {
 public:
+    virtual ~PteData(void) = default;
     uint32_t partType;
     uint32_t raidType;
     uint64_t startLba;

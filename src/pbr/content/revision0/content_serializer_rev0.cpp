@@ -33,7 +33,6 @@
 #include "content_serializer_rev0.h"
 #include "src/pbr/checker/pbr_checksum.h"
 #include "src/helper/string/hex_string_converter.h"
-#include "src/node/node_info.h"
 #include "src/helper/uuid/uuid_helper.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
@@ -58,8 +57,9 @@ ContentSerializerRev0::Serialize(char* dataOut, AteData* ateData)
 }
 
 int
-ContentSerializerRev0::Deserialize(AteData* ateOut, char* rawData)
+ContentSerializerRev0::Deserialize(AteData*& ateOut, char* rawData)
 {
+    ateOut = new AteData();
     POS_TRACE_DEBUG(EID(PBR_DESERIALIZE_DEBUG), "revision:0");
     int ret = _DeserializeAte(ATE_START_OFFSET, ateOut, rawData);
     if (ret != 0)
@@ -88,7 +88,7 @@ ContentSerializerRev0::_SerializeAte(uint64_t startOffset, char* dataOut, AteDat
 {
     memset(&dataOut[startOffset], 0, ATE_SIZE);
     strncpy(&dataOut[startOffset + SIGNATURE_OFFSET], ATE_SIGNATURE.c_str(), SIGNATURE_LENGTH);
-    UuidHelper::UuidToByte(pos::NodeInfo::GetUuid(), &dataOut[startOffset + NODE_UUID_OFFSET]);
+    UuidHelper::UuidToByte(ateData->nodeUuid, &dataOut[startOffset + NODE_UUID_OFFSET]);
     UuidHelper::UuidToByte(ateData->arrayUuid, &dataOut[startOffset + ARRAY_UUID_OFFSET]);
     strncpy(&dataOut[startOffset + ARRAY_NAME_OFFSET], ateData->arrayName.c_str(), ARRAY_NAME_LENGTH);
     uint64_to_hex(ateData->createdDateTime, &dataOut[startOffset + CREATED_DT_OFFSET], CREATED_DT_LENGTH);

@@ -55,7 +55,7 @@ ContentLoader::~ContentLoader()
 }
 
 int
-ContentLoader::Load(AteData* ateOut, pos::UblockSharedPtr dev)
+ContentLoader::Load(AteData*& ateOut, pos::UblockSharedPtr dev)
 {
     uint32_t length = serializer->GetContentSize();
     uint64_t startLba = serializer->GetContentStartLba();
@@ -71,7 +71,7 @@ ContentLoader::Load(AteData* ateOut, pos::UblockSharedPtr dev)
 }
 
 int
-ContentLoader::Load(AteData* ateOut, string filePath)
+ContentLoader::Load(AteData*& ateOut, string filePath)
 {
     uint32_t length = serializer->GetContentSize();
     uint64_t startOffset = serializer->GetContentStartLba();

@@ -1,0 +1,1 @@
+POS_ADD_INTEGRATION_TEST(pbr_serializer_it pbr_serializer_test.cpp)

@@ -85,9 +85,7 @@ HeaderSerializer::Deserialize(char* rawData, uint32_t length, HeaderElement* hea
         }
     } ////
     {
-        char revision[header::REVISION_LENGTH + 1] = {'\0',};
-        memcpy(revision, &rawData[header::REVISION_OFFSET], header::REVISION_LENGTH);
-        headerElemOut->revision = atoi(revision);
+        headerElemOut->revision = hex_to_uint32(&rawData[header::REVISION_OFFSET], header::REVISION_LENGTH);
     }
     return 0;
 }

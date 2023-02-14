@@ -35,24 +35,28 @@
 #include <cstdint>
 
 #include "src/pbr/content/i_content_serializer.h"
-#include "src/pbr/dto/ate_data.h"
 #include "src/pbr/header/header_structure.h"
 
 namespace pbr
 {
-class ContentSerializerRev0 : public IContentSerializer
+// THIS CLASS IS FOR PBR UPDATE TEST
+class ContentSerializerFakeRevision : public IContentSerializer
 {
 public:
+    ContentSerializerFakeRevision(void) = default;
+    virtual ~ContentSerializerFakeRevision(void) = default;
     virtual int Serialize(char* dataOut /* OUT PARAM */, AteData* ateData) override;
-    virtual int Deserialize(AteData* ateOut /* OUT PARAM */, char* rawData) override;
+    virtual int Deserialize(AteData*& ateOut /* OUT PARAM */, char* rawData) override;
     virtual uint32_t GetContentSize(void) override;
     virtual uint64_t GetContentStartLba(void) override;
 
 private:
+    private:
     static int _SerializeAte(uint64_t startOffset, char* dataOut /* OUT PARAM */, AteData* ateData);
     static int _DeserializeAte(uint64_t startOffset, AteData* ateOut /* OUT PARAM */, char* rawData);
     static uint64_t _GetBackupAteOffset(void);
-    static const uint32_t revision = 0;
+    // REVISION CHANGED
+    static const uint32_t revision = UINT32_MAX;
     static const uint32_t TOTAL_PBR_SIZE = 64 * 1024;
     static const uint64_t PBR_CONTENT_START_LBA = header::LENGTH;
     static const uint32_t PBR_CONTENT_SIZE = TOTAL_PBR_SIZE - PBR_CONTENT_START_LBA;
@@ -65,10 +69,15 @@ private:
     static const uint32_t CHECKSUM_LENGTH = 4;
     static const uint64_t NODE_UUID_OFFSET = 0x10;
     static const uint32_t NODE_UUID_LENGTH = 16;
-    static const uint64_t ARRAY_UUID_OFFSET = 0x30;
+    // ARRAY_UUID_OFFSET CHANGED 0x30 -> 0x20
+    static const uint64_t ARRAY_UUID_OFFSET = 0x20;
     static const uint32_t ARRAY_UUID_LENGTH = 16;
-    static const uint64_t ARRAY_NAME_OFFSET = 0x50;
+    // ARRAY_NAME_OFFSET CHANGED 0x50 -> 0x30
+    static const uint64_t ARRAY_NAME_OFFSET = 0x30;
     static const uint32_t ARRAY_NAME_LENGTH = 64;
+    // FAKE_SIGNATURE ADDED AT 0x70
+    static const uint64_t FAKE_SIGNATURE_OFFSET = 0x70;
+    static const uint32_t FAKE_SIGNATURE_LENGTH = 8;
     static const uint64_t CREATED_DT_OFFSET = 0x90;
     static const uint32_t CREATED_DT_LENGTH = 8;
     static const uint64_t LAST_UPDATED_DT_OFFSET = 0x98;
