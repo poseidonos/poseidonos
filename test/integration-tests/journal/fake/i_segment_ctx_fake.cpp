@@ -52,6 +52,7 @@ ISegmentCtxFake::ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* s
   segmentContextFile(segmentContextFile)
 {
     numSegments = addrInfo->GetnumUserAreaSegments();
+    segmentContextWriteDone = false;
     segmentContextReadDone = false;
     isFlushedBefore = false;
     ctxStoredVersion = 0;
