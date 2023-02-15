@@ -33,6 +33,7 @@
 #include "file_pbr.h"
 #include "revision.h"
 #include "src/pbr/load/pbr_file_loader.h"
+#include "src/pbr/load/pbr_selector.h"
 #include "src/pbr/update/pbr_file_updater.h"
 #include "src/helper/file/file.h"
 #include "src/helper/file/directory.h"
@@ -59,15 +60,26 @@ FilePbr::Load(vector<AteData*>& ateListOut)
             fileList.push_back(filePath);
         }
     }
-    if (fileList.size() > 0)
+    if (fileList.size() == 0)
     {
-        IPbrLoader* loader = new PbrFileLoader(fileList);
-        ret = loader->Load(ateListOut);
-        delete loader;
+        ret = EID(PBR_LOAD_NO_VALID_PBR_FOUND);
+        POS_TRACE_INFO(ret, "");
+        return ret;
+    }
+
+    unique_ptr<IPbrLoader> loader = make_unique<PbrFileLoader>(fileList);
+    ret = loader->Load(ateListOut);
+    if (ret == 0)
+    {
+        ret = PbrSelector::Select(ateListOut);
+    }
+    if (ret == 0)
+    {
+        POS_TRACE_INFO(EID(PBR_LOAD_SUCCESS), "");
     }
     else
     {
-        POS_TRACE_INFO(EID(PBR_LOAD_NOT_EXIST), "");
+        POS_TRACE_WARN(ret, "");
     }
     return ret;
 }
@@ -84,9 +96,8 @@ FilePbr::Reset(void)
         if (ext == "pbr")
         {
             string filePath = _GetFullPath(file);
-            IPbrUpdater* updater = new PbrFileUpdater(REVISION, filePath);
+            unique_ptr<IPbrUpdater> updater = make_unique<PbrFileUpdater>(REVISION, filePath);
             int result = updater->Clear();
-            delete updater;
             if (result == 0)
             {
                 POS_TRACE_DEBUG(EID(PBR_RESET_SUCCESS), "file_name:{}", file);
@@ -105,9 +116,8 @@ int
 FilePbr::Reset(string arrayName)
 {
     string filePath = _GetFullPath(arrayName + ".pbr");
-    IPbrUpdater* updater = new PbrFileUpdater(REVISION, filePath);
+    unique_ptr<IPbrUpdater> updater = make_unique<PbrFileUpdater>(REVISION, filePath);
     int ret = updater->Clear();
-    delete updater;
     if (ret == 0)
     {
         POS_TRACE_DEBUG(EID(PBR_RESET_SUCCESS), "array_name:{}", arrayName);
@@ -128,9 +138,8 @@ FilePbr::Update(AteData* ateData)
     }
 
     string filePath = _GetFullPath(ateData->arrayName + ".pbr");
-    IPbrUpdater* updater = new PbrFileUpdater(REVISION, filePath);
+    unique_ptr<IPbrUpdater> updater = make_unique<PbrFileUpdater>(REVISION, filePath);
     int ret = updater->Update(ateData);
-    delete updater;
     return ret;
 }
 

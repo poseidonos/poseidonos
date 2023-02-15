@@ -32,28 +32,26 @@
 
 #include "pbr_file_loader.h"
 #include "src/pbr/header/header_loader.h"
-#include "src/pbr/load/pbr_selector.h"
 #include "src/pbr/content/content_loader.h"
 #include "src/pbr/content/content_serializer_factory.h"
+#include "src/include/pos_event_id.h"
 
 namespace pbr
 {
 PbrFileLoader::PbrFileLoader(vector<string> fileList)
-: PbrFileLoader(new HeaderLoader(), new PbrSelector(), fileList)
+: PbrFileLoader(new HeaderLoader(), fileList)
 {
 }
 
-PbrFileLoader::PbrFileLoader(IHeaderLoader* headerLoader, IPbrSelector* pbrSelector,
+PbrFileLoader::PbrFileLoader(IHeaderLoader* headerLoader,
     vector<string> fileList)
 : headerLoader(headerLoader),
-  pbrSelector(pbrSelector),
   fileList(fileList)
 {
 }
 
 PbrFileLoader::~PbrFileLoader(void)
 {
-    delete pbrSelector;
     delete headerLoader;
 }
 
@@ -61,7 +59,6 @@ int
 PbrFileLoader::Load(vector<AteData*>& ateListOut)
 {
     int ret = 0;
-    ContentSerializerFactory factory;
     for (auto filePath : fileList)
     {
         HeaderElement header;
@@ -69,7 +66,7 @@ PbrFileLoader::Load(vector<AteData*>& ateListOut)
         if (ret == 0)
         {
             AteData* ateData;
-            ContentLoader contentLoader(factory.GetSerializer(header.revision));
+            ContentLoader contentLoader(ContentSerializerFactory::GetSerializer(header.revision));
             ret = contentLoader.Load(ateData, filePath);
             if (ret == 0)
             {
@@ -81,9 +78,9 @@ PbrFileLoader::Load(vector<AteData*>& ateListOut)
             }
         }
     }
-    if (ret == 0)
+    if (ateListOut.size() == 0)
     {
-        ret = pbrSelector->Select(ateListOut);
+        ret = EID(PBR_LOAD_NO_VALID_PBR_FOUND);
     }
     return ret;
 }

@@ -33,17 +33,19 @@
 #pragma once
 
 #include "src/pbr/dto/ate_data.h"
-
-#include <vector>
-
-using namespace std;
+#include "pbr_candidate.h"
+#include <map>
 
 namespace pbr
 {
-class IPbrSelector
+class PbrVoting
 {
 public:
-    virtual ~IPbrSelector() {};
-    virtual int Select(vector<AteData*>& candidates) = 0;
+    virtual ~PbrVoting();
+    virtual void Vote(AteData* candidate);
+    virtual map<string, AteData*> Poll(void);
+
+private:
+    map<string, vector<PbrCandidate*>> districts;
 };
 } // namespace pbr

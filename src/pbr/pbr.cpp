@@ -33,25 +33,31 @@
 #include "pbr.h"
 #include "revision.h"
 #include "src/pbr/load/pbr_loader.h"
+#include "src/pbr/load/pbr_selector.h"
 #include "src/pbr/update/pbr_updater.h"
-
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+
+#include <memory>
 
 namespace pbr
 {
 int
 Pbr::Load(vector<AteData*>& ateListOut, vector<pos::UblockSharedPtr> devs)
 {
-    IPbrLoader* loader = new PbrLoader(devs);
+    unique_ptr<IPbrLoader> loader = make_unique<PbrLoader>(devs);
     int ret = loader->Load(ateListOut);
+    if (ateListOut.size() > 0)
+    {
+        ret = PbrSelector::Select(ateListOut);
+    }
     return ret;
 }
 
 int
 Pbr::Reset(vector<pos::UblockSharedPtr> devs)
 {
-    IPbrUpdater* updater = new PbrUpdater(REVISION, devs);
+    unique_ptr<IPbrUpdater> updater = make_unique<PbrUpdater>(REVISION, devs);
     int ret = updater->Clear();
     return ret;
 }
@@ -59,7 +65,7 @@ Pbr::Reset(vector<pos::UblockSharedPtr> devs)
 int
 Pbr::Update(vector<pos::UblockSharedPtr> devs, AteData* ateData)
 {
-    IPbrUpdater* updater = new PbrUpdater(REVISION, devs);
+    unique_ptr<IPbrUpdater> updater = make_unique<PbrUpdater>(REVISION, devs);
     int ret = updater->Update(ateData);
     return ret;
 }

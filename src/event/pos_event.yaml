@@ -1359,9 +1359,9 @@ Root:
     Solution:
   -
     Id: 2312
-    Name: PBR_LOAD_NOT_EXIST
+    Name: PBR_LOAD_NO_VALID_PBR_FOUND
     Severity:
-    Description: PBR does not exist
+    Description: No valid PBR found
     Cause:
     Solution:
   -
@@ -1481,6 +1481,34 @@ Root:
     Name: PBR_VOTING_DEBUG
     Severity:
     Description:
+    Cause:
+    Solution:
+  -
+    Id: 2381
+    Name: PBR_NEED_VOTING
+    Severity:
+    Description: There are more than one PBR for the same array
+    Cause:
+    Solution:
+  -
+    Id: 2382
+    Name: PBR_VOTING_ELECTED
+    Severity:
+    Description: The PBR has been elected
+    Cause:
+    Solution:
+  -
+    Id: 2383
+    Name: PBR_VOTING_NO_CANDIDATE
+    Severity:
+    Description: There's no PBR candidate
+    Cause:
+    Solution:
+  -
+    Id: 2384
+    Name: PBR_VOTING_NO_WINNER
+    Severity:
+    Description: Can't choose the winner of the vote
     Cause:
     Solution:
   -

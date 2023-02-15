@@ -30,55 +30,81 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pbr_selector.h"
+#include "pbr_voting.h"
+#include "src/helper/enumerable/query.h"
 #include "src/logger/logger.h"
+#include "src/include/pos_event_id.h"
 #include <algorithm>
-
-using namespace std;
 
 namespace pbr
 {
-int
-PbrSelector::Select(vector<AteData*>& candidiates, unique_ptr<PbrVoting> voting)
+bool comparePbrCandidate(PbrCandidate *a, PbrCandidate *b)
 {
-    int ret = 0;
-    if (candidiates.size() == 0)
+    if (a->GetNumOfVotes() == b->GetNumOfVotes())
     {
-        ret = EID(PBR_VOTING_NO_CANDIDATE);
-        POS_TRACE_WARN(ret, "");
-        return ret;
+        return a->GetId() > b->GetId();
     }
-    for (auto candidate : candidiates)
+    return a->GetNumOfVotes() > b->GetNumOfVotes();
+}
+
+PbrVoting::~PbrVoting()
+{
+    for (auto d : districts)
     {
-        voting->Vote(candidate);
-    }
-    auto winners = voting->Poll();
-    if (winners.size() == 0)
-    {
-        ret = EID(PBR_VOTING_NO_WINNER);
-        POS_TRACE_WARN(ret, "num_of_candidates:{}", candidiates.size());
-    }
-    for (auto it = candidiates.begin(); it != candidiates.end();)
-    {
-        bool isWinner = false;
-        for (auto winner : winners)
+        for (auto candidate : d.second)
         {
-            if (winner.second == *it)
-            {
-                isWinner = true;
-                break;
-            }
+            delete candidate;
         }
-        if (isWinner == false)
+    }
+}
+
+void
+PbrVoting::Vote(AteData* candidate)
+{
+    string arrayUuid = candidate->arrayUuid;
+    uint64_t id = candidate->lastUpdatedDateTime;
+
+    auto it = districts.find(arrayUuid);
+    if (it == districts.end())
+    {
+        districts.emplace(arrayUuid, vector<PbrCandidate*>{ new PbrCandidate(candidate) });
+    }
+    else
+    {
+        vector<PbrCandidate*>& candidates = it->second;
+        PbrCandidate* pc = Enumerable::First(candidates,
+            [id](auto c) { return c->GetId() == id; });
+        if (pc == nullptr)
         {
-            delete *it;
-            it = candidiates.erase(it);
+            candidates.push_back(new PbrCandidate(candidate));
         }
         else
         {
-            ++it;
+            pc->Vote();
         }
     }
-    return ret;
+}
+
+map<string, AteData*>
+PbrVoting::Poll(void)
+{
+    map<string, AteData*> winners;
+    for (auto d : districts)
+    {
+        string arrayUuid = d.first;
+        auto candidates = d.second;
+        auto winner = candidates.front();
+        if (candidates.size() > 1)
+        {
+            POS_TRACE_WARN(EID(PBR_NEED_VOTING), "array_uuid:{}, num_of_candidates:{}",
+                arrayUuid, candidates.size());
+            sort(candidates.begin(), candidates.end(), comparePbrCandidate);
+            winner = candidates.front();
+            POS_TRACE_WARN(EID(PBR_VOTING_ELECTED), "array_uuid:{}, last_updated_dt:{}",
+                arrayUuid, winner->GetId());
+        }
+        winners.emplace(arrayUuid, winner->GetAteData());
+    }
+    return winners;
 }
 } // namespace pbr
