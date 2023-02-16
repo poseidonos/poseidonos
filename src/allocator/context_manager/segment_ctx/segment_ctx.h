@@ -78,7 +78,7 @@ public:
     virtual int GetNumSections(void) override;
     virtual uint64_t GetTotalDataSize(void) override;
 
-    virtual void MoveToFreeState(SegmentId segId);
+    virtual bool MoveToFreeState(SegmentId segId);
     virtual uint32_t GetValidBlockCount(SegmentId segId);
     virtual uint32_t GetOccupiedStripeCount(SegmentId segId);
     virtual SegmentState GetSegmentState(SegmentId segId);

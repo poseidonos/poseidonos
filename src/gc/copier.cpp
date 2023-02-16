@@ -354,11 +354,15 @@ Copier::_CleanUpVictimSegments(void)
         if (0 == validCount && UNMAP_SEGMENT != victimSegId)
         {
             // Push to free list among the victim lists
-            segmentCtx->MoveToFreeState(victimSegId);
-            SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
-            segmentCtxUpdater->ResetInfos(victimSegId);
-            POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
-                "victim_segment_id:{}, count:{}", victimSegId, validCount);
+            bool succeed = segmentCtx->MoveToFreeState(victimSegId);
+            if (succeed == true)
+            {
+                // TODO check if VSC can be called inside segment context
+                SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
+                segmentCtxUpdater->ResetInfos(victimSegId);
+                POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
+                    "victim_segment_id:{}, count:{}", victimSegId, validCount);
+            }
         }
     }
 }

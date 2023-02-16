@@ -41,7 +41,9 @@
 namespace pos
 {
 SegmentInfo::SegmentInfo(void)
-:data(nullptr)
+: data(nullptr),
+  arrayId(-1),
+  segmentId(0)
 {
 }
 
@@ -116,7 +118,7 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
     else if (decreased < 0)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
-            "Valid block count decreasedCount:{} total validCount:{} : UNDERFLOWED", dec, decreased);
+            "Valid block count UNDERFLOWED, decreasedCount:{}, totalValidCount:{} segmentId:{}", dec, decreased, segmentId);
         return {false, SegmentState::ERROR};
     }
 
@@ -146,7 +148,29 @@ void
 SegmentInfo::SetState(SegmentState newState)
 {
     std::lock_guard<std::mutex> lock(seglock);
+    _SetState(newState);
+}
+
+void
+SegmentInfo::_SetState(SegmentState newState)
+{
+    SegmentState prevState = data->state;
     data->state = newState;
+
+    POS_TRACE_DEBUG(EID(ALLOCATOR_SEGINFO_SETSTATE), "segment_id:{}, prev_state:{}, next_state:{}, array_id:{}",
+        segmentId, ToSegmentStateString(prevState), ToSegmentStateString(data->state), arrayId);
+}
+
+void
+SegmentInfo::SetArrayId(int arrayId)
+{
+    this->arrayId = arrayId;
+}
+
+void
+SegmentInfo::SetSegmentId(SegmentId segmentId)
+{
+    this->segmentId = segmentId;
 }
 
 SegmentState
@@ -162,7 +186,7 @@ SegmentInfo::_MoveToFreeState(void)
     data->occupiedStripeCount = 0;
     data->validBlockCount = 0;
 
-    data->state = SegmentState::FREE;
+    _SetState(SegmentState::FREE);
 }
 
 void
@@ -172,12 +196,12 @@ SegmentInfo::MoveToNvramState(void)
     if (data->state != SegmentState::FREE)
     {
         POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
-            "Failed to move to NVRAM state. Segment state {} valid count {} occupied stripe count {}",
-            data->state, data->validBlockCount, data->occupiedStripeCount);
+            "Failed to move to NVRAM state, state:{}, valid_block_count:{}, occupied_stripe_count:{}, segmentId:{}, arrayId {}",
+            ToSegmentStateString(data->state), data->validBlockCount, data->occupiedStripeCount, segmentId, arrayId);
         assert(false);
     }
 
-    data->state = SegmentState::NVRAM;
+    _SetState(SegmentState::NVRAM);
 }
 
 bool
@@ -193,7 +217,26 @@ SegmentInfo::MoveToSsdStateOrFreeStateIfItBecomesEmpty(void)
     }
     else
     {
-        data->state = SegmentState::SSD;
+        _SetState(SegmentState::SSD);
+        return false;
+    }
+}
+
+bool
+SegmentInfo::MoveVictimToFree(void)
+{
+    std::lock_guard<std::mutex> lock(seglock);
+
+    if (data->state == SegmentState::VICTIM && data->validBlockCount == 0)
+    {
+        _MoveToFreeState();
+        return true;
+    }
+    else
+    {
+        POS_TRACE_DEBUG(EID(CANNOT_FREE_SEGMENT),
+            "segment_id:{}, state:{}, valid_block_count:{}, array_id:{}",
+            segmentId, ToSegmentStateString(data->state), data->validBlockCount, arrayId);
         return false;
     }
 }
@@ -204,14 +247,14 @@ SegmentInfo::MoveToVictimState(void)
     std::lock_guard<std::mutex> lock(seglock);
     if (data->state != SegmentState::SSD)
     {
-        POS_TRACE_ERROR(EID(UNKNOWN_ALLOCATOR_ERROR),
-            "Cannot move to victim state as it's not SSD state, state: {}", data->state);
+        POS_TRACE_WARN(EID(UNKNOWN_ALLOCATOR_ERROR),
+            "Cannot move to victim state as it's not SSD state, state:{}, segment_id:{}, array_id:{}",
+            ToSegmentStateString(data->state), segmentId, arrayId);
         return false;
     }
     else
     {
-        data->state = SegmentState::VICTIM;
-
+        _SetState(SegmentState::VICTIM);
         return true;
     }
 }
@@ -238,5 +281,25 @@ SegmentInfo::UpdateFrom(SegmentInfo &segmentInfo)
     this->data->state = segmentInfo.data->state;
 }
 
+const std::unordered_map<SegmentState, std::string> segmentStateToString =
+    {
+        {SegmentState::FREE, "FREE"},
+        {SegmentState::NVRAM, "NVRAM"},
+        {SegmentState::SSD, "SSD"},
+        {SegmentState::VICTIM, "VICTIM"},
+        {SegmentState::ERROR, "ERROR"}};
 
+std::string
+SegmentInfo::ToSegmentStateString(SegmentState state)
+{
+    auto stateStr = segmentStateToString.find(state);
+    if (stateStr == segmentStateToString.end())
+    {
+        return "OTHER";
+    }
+    else
+    {
+        return stateStr->second;
+    }
+}
 } // namespace pos

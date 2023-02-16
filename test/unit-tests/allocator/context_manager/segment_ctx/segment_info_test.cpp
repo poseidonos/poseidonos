@@ -212,6 +212,42 @@ TEST(SegmentInfo, MoveToSsdState_testIfStateChangedToFree)
     EXPECT_EQ(segInfos.GetState(), SegmentState::FREE);
 }
 
+TEST(SegmentInfo, MoveVictimToFree_testIfStateChangedOnlyWhenVictimSegmentIsReadyToBeFreed)
+{
+    // When segment is in VICTIM state
+    {
+        // given
+        SegmentInfo segInfo;
+        SegmentInfoData segmentInfoData(0, 1024, SegmentState::VICTIM);
+
+        segInfo.AllocateSegmentInfoData(&segmentInfoData);
+
+        // when
+        bool ret = segInfo.MoveVictimToFree();
+
+        // then
+        EXPECT_EQ(ret, true);
+        EXPECT_EQ(segInfo.GetState(), SegmentState::FREE);
+    }
+
+    // When segment is in FREE state
+    // it can be already freed by other thread before GC try to move it to free
+    {
+        // given
+        SegmentInfo segInfo;
+        SegmentInfoData segmentInfoData(0, 0, SegmentState::FREE);
+
+        segInfo.AllocateSegmentInfoData(&segmentInfoData);
+
+        // when
+        bool ret = segInfo.MoveVictimToFree();
+
+        // then
+        EXPECT_EQ(ret, false);
+        EXPECT_EQ(segInfo.GetState(), SegmentState::FREE);
+    }
+}
+
 TEST(SegmentInfo, MoveToVictimState_testIfStateChanged)
 {
     // given

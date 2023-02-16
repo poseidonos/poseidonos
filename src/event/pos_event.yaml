@@ -4446,11 +4446,60 @@ Root:
     Solution: none
   -
     Id: 3222
-    Name: RESERVED
+    Name: ALLOCATOR_SEGMENTLIST_RESET
+    Severity: INFO
+    Description: SegmentList has been reset
+    Cause:
+    Solution:
+  -
+    Id: 3223
+    Name: ALLOCATOR_SEGMENTLIST_POP
+    Severity:
+    Description: Segment has been popped
+    Cause:
+    Solution:
+  -
+    Id: 3224
+    Name: ALLOCATOR_SEGMENTLIST_DUPLICATED_ADD
+    Severity: WARN
+    Description: Segment cannot be added
+    Cause: This could be a concurrency bug
+    Solution: Developers should investigate further
+  -
+    Id: 3225
+    Name: ALLOCATOR_SEGMENTLIST_ADD
+    Severity:
+    Description: Segment has been added
+    Cause:
+    Solution:
+  -
+    Id: 3226
+    Name: ALLOCATOR_SEGMENTLIST_REMOVE
+    Severity: INFO
+    Description: Segment has been removed
+    Cause:
+    Solution:
+  -
+    Id: 3227
+    Name: ALLOCATOR_SEGMENTLIST_FAILED_TO_REMOVE
+    Severity: WARN
+    Description: Segment has been gone already
+    Cause: This could be a concurrency bug
+    Solution: Developers should investigate further
+  -
+    Id: 3228
+    Name: ALLOCATOR_SEGINFO_SETSTATE
+    Severity:
+    Description: Segment state has been set
+    Cause:
+    Solution:
+  -
+    Id: 3229
+    Name: CANNOT_FREE_SEGMENT
     Severity:
     Description:
-    Cause: none
-    Solution: none
+    Cause:
+    Solution:
   # Metadata: 3300 - 3399
   -
     Id: 3300
