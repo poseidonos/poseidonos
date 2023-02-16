@@ -47,7 +47,7 @@ hex_to_uint32(char* src, uint32_t len)
         if (value > 0)
         {
             uint32_t multiple = 1;
-            for (int j = 0; j < len - 1 - i; j++)
+            for (uint32_t j = 0; j < len - 1 - i; j++)
             {
                 multiple *= 256;
             }
@@ -83,7 +83,7 @@ hex_to_uint64(char* src, uint32_t len)
         if (value > 0)
         {
             uint64_t multiple = 1;
-            for (int j = 0; j < len - 1 - i; j++)
+            for (uint32_t j = 0; j < len - 1 - i; j++)
             {
                 multiple *= 256;
             }
