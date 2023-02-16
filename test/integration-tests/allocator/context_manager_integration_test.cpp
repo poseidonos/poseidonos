@@ -166,8 +166,12 @@ ContextManagerIntegrationTest::SetUp(void)
     addrInfo = new NiceMock<MockAllocatorAddressInfo>;
 
     ON_CALL(*addrInfo, GetArrayId).WillByDefault(Return(arrayId));
-    segInfoDataForSegCtx = new SegmentInfoData[numOfSegment](validBlockCount,
-        maxOccupiedStripeCount, SegmentState::SSD);
+    segInfoDataForSegCtx = new SegmentInfoData[numOfSegment];
+    for (int i = 0; i < numOfSegment; i++)
+    {
+        segInfoDataForSegCtx[i].Set(validBlockCount,
+            maxOccupiedStripeCount, SegmentState::SSD);
+    }
 
     segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, segInfoDataForSegCtx);
 
@@ -180,9 +184,10 @@ ContextManagerIntegrationTest::SetUp(void)
 
     versionedSegCtx = journal->GetVersionedSegmentContext();
     loadedSegInfos = new SegmentInfo[numOfSegment];
-    loadedSegInfoDataForSegCtx = new SegmentInfoData[numOfSegment](0, 0, SegmentState::FREE);
+    loadedSegInfoDataForSegCtx = new SegmentInfoData[numOfSegment];
     for(int i=0;i<numOfSegment;++i)
     {
+        loadedSegInfoDataForSegCtx[i].Set(0, 0, SegmentState::FREE);
         loadedSegInfos[i].AllocateAndInitSegmentInfoData(&loadedSegInfoDataForSegCtx[i]);
     }
 

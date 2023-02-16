@@ -979,4 +979,82 @@ TEST(SegmentCtx, ResetSegmentsState_testIfSegmentStateBecomesNVRAMWhenOccupiedSt
     EXPECT_EQ(SegmentState::SSD, segmentInfoData[2].state);
     EXPECT_EQ(SegmentState::FREE, segmentInfoData[3].state);
 }
+
+TEST(SegmentCtx, MoveToFreeState_testIfSegmentFreedWhenStateChanged)
+{
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    NiceMock<MockRebuildCtx> rebuildCtx;
+    NiceMock<MockSegmentList> freeSegmentList, ssdSegmentList, rebuildSegmentList, victimSegmentList;
+
+    uint32_t stripesPerSegment = 1024;
+    int numSegments = 1;
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+
+    // Given: a segment is VICTIM state and ready to be freed
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegments];
+    for (int i = 0; i < numSegments; i++)
+    {
+        segmentInfoData[i].Set(0, stripesPerSegment, SegmentState::VICTIM);
+    }
+
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockTelemetryPublisher> tp;
+    SegmentCtx segmentCtx(&tp, nullptr, segmentInfoData, &rebuildSegmentList, &rebuildCtx, &addrInfo,
+        &gcCtx);
+    segmentCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
+    segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
+    segmentCtx.SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
+
+    // Then: The segment should be freed
+    SegmentId segId = 0;
+
+    EXPECT_CALL(victimSegmentList, RemoveFromList(segId)).WillOnce(Return(true));
+    EXPECT_CALL(freeSegmentList, AddToList(segId));
+
+    // When: MoveVictimToFree is called (supposed to be called by GC)
+    bool segmentFreed = segmentCtx.MoveToFreeState(segId);
+    EXPECT_EQ(segmentFreed, true);
+}
+
+TEST(SegmentCtx, MoveToFreeState_testIfSegmentIsNotFreedWhenStateIsNotChanged)
+{
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    NiceMock<MockRebuildCtx> rebuildCtx;
+    NiceMock<MockSegmentList> freeSegmentList, ssdSegmentList, rebuildSegmentList, victimSegmentList;
+
+    uint32_t stripesPerSegment = 1024;
+    int numSegments = 1;
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(stripesPerSegment));
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numSegments));
+
+    // Given: a segment is SSD state and there's only 1 valid block in this segment
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegments];
+    for (int i = 0; i < numSegments; i++)
+    {
+        segmentInfoData[i].Set(1, stripesPerSegment, SegmentState::SSD);
+    }
+
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockTelemetryPublisher> tp;
+    SegmentCtx segmentCtx(&tp, nullptr, segmentInfoData, &rebuildSegmentList, &rebuildCtx, &addrInfo,
+        &gcCtx);
+    segmentCtx.SetSegmentList(SegmentState::FREE, &freeSegmentList);
+    segmentCtx.SetSegmentList(SegmentState::SSD, &ssdSegmentList);
+    segmentCtx.SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
+
+    // Given: GC map udpate sequence call InvalidateBlks with num blocks to invalidate 1, and segment is freed
+    bool segmentFreed = segmentCtx.InvalidateBlks(VirtualBlks{.startVsa = {.stripeId = 0, .offset = 0}, .numBlks = 1}, true);
+    EXPECT_EQ(segmentFreed, true);
+
+    // Then: The segment should not be freed
+    SegmentId segId = 0;
+
+    EXPECT_CALL(victimSegmentList, RemoveFromList(segId)).Times(0);
+    EXPECT_CALL(freeSegmentList, AddToList(segId)).Times(0);
+
+    // When: MoveVictimToFree is called (supposed to be called by GC Copier)
+    segmentFreed = segmentCtx.MoveToFreeState(segId);
+    EXPECT_EQ(segmentFreed, false);
+}
 } // namespace pos

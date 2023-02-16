@@ -96,19 +96,28 @@ public:
     virtual void SetState(SegmentState newState);
     virtual SegmentState GetState(void);
 
+    /* arrayId and segmentId are for debuggability, not for operation */
+    virtual void SetArrayId(int arrayId);
+    virtual void SetSegmentId(SegmentId segmentId);
+
     virtual void MoveToNvramState(void);
     virtual bool MoveToSsdStateOrFreeStateIfItBecomesEmpty(void);
     virtual bool MoveToVictimState(void);
+    virtual bool MoveVictimToFree(void);
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
     virtual void UpdateFrom(SegmentInfo &segmentInfo);
+    static std::string ToSegmentStateString(SegmentState state);
 
 private:
     void _MoveToFreeState(void);
+    void _SetState(SegmentState newState);
 
     SegmentInfoData* data;
     std::mutex seglock;
 
+    int arrayId;
+    SegmentId segmentId;
 };
 
 } // namespace pos

@@ -7,18 +7,18 @@ namespace pos
 TEST(SegmentList, SegmentList_Constructor)
 {
     {
-        SegmentList list;
+        SegmentList list(0, SegmentState::FREE);
     }
 
     {
-        SegmentList* list = new SegmentList();
+        SegmentList* list = new SegmentList(0, SegmentState::FREE);
         delete list;
     }
 }
 
 TEST(SegmentList, Reset_testWhenListIsEmpty)
 {
-    SegmentList list;
+    SegmentList list(0, SegmentState::FREE);
     list.Reset();
 
     EXPECT_EQ(list.GetNumSegments(), 0);
@@ -27,7 +27,7 @@ TEST(SegmentList, Reset_testWhenListIsEmpty)
 
 TEST(SegmentList, Reset_testWhenListIsNotEmpty)
 {
-    SegmentList list;
+    SegmentList list(0, SegmentState::FREE);
 
     list.AddToList(0);
     list.AddToList(1);
@@ -48,7 +48,7 @@ TEST(SegmentList, Reset_testWhenListIsNotEmpty)
 
 TEST(SegmentList, PopSegment_testWhenListIsEmpty)
 {
-    SegmentList list;
+    SegmentList list(0, SegmentState::FREE);
     EXPECT_EQ(list.PopSegment(), UNMAP_SEGMENT);
     EXPECT_EQ(list.GetNumSegments(), 0);
     EXPECT_EQ(list.GetNumSegmentsWoLock(), 0);
@@ -56,7 +56,7 @@ TEST(SegmentList, PopSegment_testWhenListIsEmpty)
 
 TEST(SegmentList, AddToList_testAddAndPop)
 {
-    SegmentList list;
+    SegmentList list(0, SegmentState::FREE);
 
     list.AddToList(0);
     list.AddToList(1);
@@ -83,7 +83,7 @@ TEST(SegmentList, AddToList_testAddAndPop)
 
 TEST(SegmentList, RemoveFromList_testRemove)
 {
-    SegmentList list;
+    SegmentList list(0, SegmentState::FREE);
     list.AddToList(0);
     list.AddToList(10);
     list.AddToList(20);
