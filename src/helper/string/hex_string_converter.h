@@ -40,12 +40,21 @@ using namespace std;
 inline uint32_t
 hex_to_uint32(char* src, uint32_t len)
 {
-    uint32_t val = 0;
+    uint32_t ret = 0;
     for (uint32_t i = 0; i < len; i++)
     {
-        val += (uint8_t)src[i] << (8  * (len - 1 - i));
+        uint32_t value = (uint8_t)src[i];
+        if (value > 0)
+        {
+            uint32_t multiple = 1;
+            for (int j = 0; j < len - 1 - i; j++)
+            {
+                multiple *= 256;
+            }
+            ret += value * multiple;
+        }
     }
-    return val;
+    return ret;
 }
 
 inline void
@@ -67,12 +76,21 @@ uint32_to_hex(uint32_t value, char* dest, uint32_t len)
 inline uint64_t
 hex_to_uint64(char* src, uint32_t len)
 {
-    uint64_t val = 0;
+    uint64_t ret = 0;
     for (uint32_t i = 0; i < len; i++)
     {
-        val += (uint8_t)src[i] << (8  * (len - 1 - i));
+        uint64_t value = (uint8_t)src[i];
+        if (value > 0)
+        {
+            uint64_t multiple = 1;
+            for (int j = 0; j < len - 1 - i; j++)
+            {
+                multiple *= 256;
+            }
+            ret += value * multiple;
+        }
     }
-    return val;
+    return ret;
 }
 
 inline void
