@@ -352,8 +352,8 @@ TelemetryAirDelegator::RegisterAirEvent(void)
             "Callback_Constructor", "Callback_Destructor", "Pending_Flush", "Pending_Internal_Write",
             "RequestedUserRead", "RequestedUserWrite", "RequestedUserAdminIo",
             "CompleteUserRead", "CompleteUserWrite", "CompleteUserAdminIo",
-            "UserFlushProcess", "PartialWriteProcess", "UserFailIo",
-            "UserReadPendingCnt", "UserWritePendingCnt", "InternalIoPendingCnt", "TimeOutIoCnt",
+            "PartialWriteProcess", "UserFailIo", "InternalIoPendingCnt", "TimeOutIoCnt",
+            "TotalRequestedFlushCnt", "TotalRequestedTrimCmdCnt", "TotalRequestedWriteSectorCnt"
             "Feqos_Global_BW_Throttling", "Feqos_Dynamic_BW_Throttling", "Feqos_Global_Iops_Throttling",
             "Feqos_Dynamic_Iops_Throttling", "Feqos_Volume_Q_Count", "Q_EventQueue"},
         std::move(dataHandler));

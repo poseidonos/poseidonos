@@ -97,7 +97,7 @@ ReadCompletion::_DoSpecificJob(void)
     {
     }
     volumeIo = nullptr;
-    airlog("CompleteUserRead", "user", GetEventType(), 1);
+    airlog("CompleteUserRead", "user", 0, 1);
 
     return true;
 }

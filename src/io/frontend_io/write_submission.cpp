@@ -92,7 +92,8 @@ WriteSubmission::WriteSubmission(VolumeIoSmartPtr volumeIo, RBAStateManager* inp
   flowControl(inputFlowControl),
   volumeManager(inputVolumeManager)
 {
-    airlog("RequestedUserWrite", "user", GetEventType(), 1);
+    airlog("RequestedUserWrite", "user", 0, 1);
+    airlog("TotalRequestedWriteSectorCnt", "user", 0, blockCount);
     if (nullptr == volumeManager)
     {
         volumeManager = VolumeServiceSingleton::Instance()->GetVolumeManager(volumeIo->GetArrayId());

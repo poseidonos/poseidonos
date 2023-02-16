@@ -180,8 +180,6 @@ AioCompletion::_SendUserCompletion(void)
         if (likely(_GetMostCriticalError() != IOErrorType::VOLUME_UMOUNTED))
         {
             volumeManager->DecreasePendingIOCount(volumeIo->GetVolumeId(), static_cast<VolumeIoType>(dir));
-            airlog("UserWritePendingCnt", "user", volumeIo->GetVolumeId(), -1);
-            airlog("UserReadPendingCnt", "user", volumeIo->GetVolumeId(), -1);
         }
     }
     volumeIo = nullptr;
@@ -399,7 +397,7 @@ AdminCompletion::_DoSpecificJob(void)
     }
     io->complete_cb(io, POS_IO_STATUS_SUCCESS);
 
-    airlog("CompleteUserAdminIo", "user", GetEventType(), 1);
+    airlog("CompleteUserAdminIo", "user", 0, 1);
 
     return true;
 }
