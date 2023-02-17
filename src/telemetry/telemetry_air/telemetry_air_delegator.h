@@ -149,7 +149,7 @@ private:
         {"RequestedUserAdminIo", "", false, "count", TEL140002_COUNT_OF_REQUSTED_USER_ADMINIO, POSMetricTypes::MT_GAUGE},
         {"CompleteUserRead", "", false, "count", TEL140003_COUNT_OF_COMPLETE_USER_READ, POSMetricTypes::MT_GAUGE},
         {"CompleteUserWrite", "", false, "count", TEL140004_COUNT_OF_COMPLETE_USER_WRITE, POSMetricTypes::MT_GAUGE},
-        {"CompleteUserAdminIo", "", false, "count", TEL140005_COUNT_OF_COMPLETE_USER_ADMINIO, POSMetricTypes::MT_GAUGE},        
+        {"CompleteUserAdminIo", "", false, "count", TEL140005_COUNT_OF_COMPLETE_USER_ADMINIO, POSMetricTypes::MT_GAUGE},
         {"PartialWriteProcess", "", false, "count", TEL140006_COUNT_OF_PARTIAL_WRITE_PROCESS, POSMetricTypes::MT_GAUGE},
         {"UserFailIo", "", false, "count", TEL140007_COUNT_OF_USER_FAIL_IO, POSMetricTypes::MT_GAUGE},
         {"InternalIoPendingCnt", "", false, "count", TEL140008_COUNT_OF_INTERNAL_IO_PENDING, POSMetricTypes::MT_GAUGE},
