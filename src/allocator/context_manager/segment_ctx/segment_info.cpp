@@ -50,10 +50,16 @@ SegmentInfo::~SegmentInfo(void)
 }
 
 void
-SegmentInfo::AllocateAndInitSegmentInfoData(SegmentInfoData* segmentInfoData)
+SegmentInfo::AllocateSegmentInfoData(SegmentInfoData* segmentInfoData)
 {
     assert(nullptr != segmentInfoData);
-    data = segmentInfoData;
+    this->data = segmentInfoData;
+}
+
+void
+SegmentInfo::AllocateAndInitSegmentInfoData(SegmentInfoData* segmentInfoData)
+{
+    AllocateSegmentInfoData(segmentInfoData);
     SetValidBlockCount(0);
     SetOccupiedStripeCount(0);
     SetState(SegmentState::FREE);

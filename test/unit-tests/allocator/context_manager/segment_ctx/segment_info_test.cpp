@@ -20,9 +20,10 @@ TEST(SegmentInfo, SegmentInfoData_ConstructorInitializationValue)
 {
     int numSegInfos = 4;
     SegmentInfo* segInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by AllocateAndInitSegmentInfoData()
         segInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 

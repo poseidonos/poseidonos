@@ -57,9 +57,10 @@ TEST(VersionedSegmentCtx, Init_testIfInitWhenNumberOfLogGroupsIsTwo)
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
     versionedSegCtx.Init(&config, segmentInfos, 3);
@@ -84,9 +85,10 @@ TEST(VersionedSegmentCtx, Dispose_testIfContextIsDeleted)
     // When : Init and Dispose
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
     versionedSegCtx.Init(&config, segmentInfos, 3);
@@ -106,9 +108,10 @@ TEST(VersionedSegmentCtx, IncreaseValidBlockCount_testIfValidBlockCountIsIncreas
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
@@ -144,9 +147,10 @@ TEST(VersionedSegmentCtx, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountI
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
@@ -179,9 +183,10 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsReturned)
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
@@ -234,9 +239,10 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfChangedValueIsApplied)
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
@@ -295,9 +301,10 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenInvalidLogGroupId
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
@@ -326,9 +333,10 @@ TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
@@ -369,9 +377,10 @@ TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
 
     int numSegInfos = 3;
     SegmentInfo* segmentInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by the following
         segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
     segmentInfos[0].SetOccupiedStripeCount(100);

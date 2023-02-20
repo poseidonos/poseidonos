@@ -168,13 +168,6 @@ ContextManagerIntegrationTest::SetUp(void)
     ON_CALL(*addrInfo, GetArrayId).WillByDefault(Return(arrayId));
     segInfoDataForSegCtx = new SegmentInfoData[numOfSegment](validBlockCount,
         maxOccupiedStripeCount, SegmentState::SSD);
-    for(int i=0;i<numOfSegment;++i)
-    {
-        segInfosForSegCtx[i].AllocateAndInitSegmentInfoData(&segInfoDataForSegCtx[i]);
-        segInfosForSegCtx[i].SetValidBlockCount(validBlockCount);
-        segInfosForSegCtx[i].SetOccupiedStripeCount(maxOccupiedStripeCount);
-        segInfosForSegCtx[i].SetState(SegmentState::SSD);
-    }
 
     segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, segInfoDataForSegCtx);
 

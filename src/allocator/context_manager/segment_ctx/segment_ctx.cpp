@@ -75,6 +75,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
         segmentInfos = new SegmentInfo[numSegments];
         for (uint32_t segId = 0; segId < numSegments; segId++)
         {
+            // This time, SegmentInfoData is created outside and injected to here, hence we skip initializing it,
+            // but just allocate only.
             segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoData.data[segId]);
         }
     }
@@ -139,6 +141,7 @@ SegmentCtx::Init(void)
         segmentInfoData.data = new SegmentInfoData[numSegments];
         for (uint32_t i = 0; i < numSegments ; ++i)
         {
+            // This time, SegmentInfoData needs to be newly created "and initialized", hence we use AllocateAndInitSegmentInfoData()
             segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData.data[i]);
         }
     }

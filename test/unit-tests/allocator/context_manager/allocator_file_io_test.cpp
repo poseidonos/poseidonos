@@ -274,7 +274,7 @@ TEST(AllocatorFileIo, DISABLED_Flush_testIfWrittingSegmentInfoDataCorrectly)
     AllocatorAddressInfo addrInfo;
     addrInfo.SetnumUserAreaSegments(numOfSegment);
 
-    SegmentCtx* client = new SegmentCtx(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, nullptr, 0);
+    SegmentCtx* client = new SegmentCtx(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, nullptr);
     client->Init();
     uint64_t segmentCtxFileSize = sizeof(SegmentCtxHeader) + numOfSegment * sizeof(SegmentInfoData);
 
@@ -294,9 +294,10 @@ TEST(AllocatorFileIo, DISABLED_Flush_testIfWrittingSegmentInfoDataCorrectly)
         segInfo[i].SetOccupiedStripeCount(i*2);
         segInfo[i].SetState((SegmentState)(i%(SegmentState::NUM_STATES)));
     }
+    auto testCallback = []() {}; // do nothing
 
     // When : segmentCtx flushed to SSD.
-    fileManager.Flush(nullptr, -1 /* don't care*/, nullptr);
+    fileManager.Flush(testCallback);
 
     fileManager.Dispose();
 }
