@@ -265,40 +265,4 @@ TEST(AllocatorFileIo, GetSectionInfo_TestSimpleGetter)
     EXPECT_EQ(actual, info.size);
 }
 
-
-TEST(AllocatorFileIo, DISABLED_Flush_testIfWrittingSegmentInfoDataCorrectly)
-{
-    // TODO(sang7.park) : To be fixed, maybe this test supposed to move tointeration test.
-    // Given : Segment numbers, SegmentCtx
-    int numOfSegment = 10;
-    AllocatorAddressInfo addrInfo;
-    addrInfo.SetnumUserAreaSegments(numOfSegment);
-
-    SegmentCtx* client = new SegmentCtx(nullptr, nullptr, nullptr, nullptr, nullptr, &addrInfo, nullptr);
-    client->Init();
-    uint64_t segmentCtxFileSize = sizeof(SegmentCtxHeader) + numOfSegment * sizeof(SegmentInfoData);
-
-    MockFileIntf* file = new MockFileIntf("/tmp/buffer.bin",0,MetaFileType::General);
-    file->Create(segmentCtxFileSize);
-    file->Open();
-
-    SegmentInfo* segInfo = client->GetSegmentInfos();
-
-    AllocatorFileIo fileManager(SEGMENT_CTX, client, &addrInfo, file);
-    fileManager.Init();
-
-    // Given : SegmentInfoData is updated to specific values
-    for(int i = 0; i < numOfSegment ; ++i)
-    {
-        segInfo[i].SetValidBlockCount(i);
-        segInfo[i].SetOccupiedStripeCount(i*2);
-        segInfo[i].SetState((SegmentState)(i%(SegmentState::NUM_STATES)));
-    }
-    auto testCallback = []() {}; // do nothing
-
-    // When : segmentCtx flushed to SSD.
-    fileManager.Flush(testCallback);
-
-    fileManager.Dispose();
-}
 } // namespace pos
