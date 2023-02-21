@@ -86,8 +86,7 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     segmentInfoDatas = new SegmentInfoData[numSegments];
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoDatas[segId]);
-        segmentInfos[segId].InitSegmentInfoData();
+        segmentInfos[segId].AllocateAndInitSegmentInfoData(&segmentInfoDatas[segId]);
         if (nullptr != loadedSegmentInfo)
         {
             POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",

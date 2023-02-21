@@ -20,10 +20,11 @@ TEST(SegmentInfo, SegmentInfoData_ConstructorInitializationValue)
 {
     int numSegInfos = 4;
     SegmentInfo* segInfos = new SegmentInfo[numSegInfos];
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos](0, 0, SegmentState::FREE);
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
-        segInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+        // segmentInfoData[i] will be initialized to (0, 0, SegmentState::FREE) by AllocateAndInitSegmentInfoData()
+        segInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
     for (int i = 0; i < numSegInfos; ++i)
@@ -44,8 +45,7 @@ TEST(SegmentInfo, InitSegmentInfoData_testIfSegmentInfoDataInitializationSuccess
     SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegInfos];
     for (int i = 0; i < numSegInfos; ++i)
     {
-        segInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
-        segInfos[i].InitSegmentInfoData();
+        segInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
     for (int i = 0; i < numSegInfos; ++i)
@@ -63,7 +63,7 @@ TEST(SegmentInfo, SetValidBlockCount_TestSimpleSetter)
 {
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(0, 0, SegmentState::FREE);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
 
     segInfos.SetValidBlockCount(5);
     EXPECT_EQ(segInfos.GetValidBlockCount(), 5);
@@ -79,7 +79,7 @@ TEST(SegmentInfo, IncreaseValidBlockCount_TestIncreaseValue)
 {
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(0, 0, SegmentState::FREE);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
 
     EXPECT_EQ(segInfos.IncreaseValidBlockCount(5), 5);
     EXPECT_EQ(segInfos.IncreaseValidBlockCount(3), 8);
@@ -92,7 +92,8 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToNonZero)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(10, 0, SegmentState::FREE);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(10);
 
     // when
     auto result = segInfos.DecreaseValidBlockCount(3, false);
@@ -106,8 +107,10 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenSsdState)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(3, 10, SegmentState::SSD);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
-
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(3);
+    segInfos.SetOccupiedStripeCount(10);
+    segInfos.SetState(SegmentState::SSD);
     // when
     auto result = segInfos.DecreaseValidBlockCount(3, false);
     bool segmentFreed = result.second;
@@ -126,8 +129,10 @@ TEST(SegmentInfo, DecreaseValidBlockCount_testDecreaseToZeroWhenNvramState)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(3, 10, SegmentState::NVRAM);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
-
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(3);
+    segInfos.SetOccupiedStripeCount(10);
+    segInfos.SetState(SegmentState::NVRAM);
     // when
     auto result = segInfos.DecreaseValidBlockCount(3, false);
     bool segmentFreed = result.first;
@@ -141,7 +146,7 @@ TEST(SegmentInfo, SetOccupiedStripeCount_TestSimpleSetter)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(0, 0, SegmentState::FREE);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
 
     // when
     segInfos.SetOccupiedStripeCount(3);
@@ -155,7 +160,7 @@ TEST(SegmentInfo, IncreaseOccupiedStripeCount_TestIncreaseValue)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(0, 0, SegmentState::FREE);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
 
     // when, then
     EXPECT_EQ(segInfos.IncreaseOccupiedStripeCount(), 1);
@@ -170,7 +175,7 @@ TEST(SegmentInfo, MoveToNvramState_testIfStateChanged)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(0, 0, SegmentState::FREE);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
     // when
     segInfos.MoveToNvramState();
     // then
@@ -182,8 +187,10 @@ TEST(SegmentInfo, MoveToSsdState_testIfStateChangedToSSD)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(10, 10, SegmentState::NVRAM);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
-
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(10);
+    segInfos.SetOccupiedStripeCount(10);
+    segInfos.SetState(SegmentState::NVRAM);
     // when
     segInfos.MoveToSsdStateOrFreeStateIfItBecomesEmpty();
     // then
@@ -195,8 +202,10 @@ TEST(SegmentInfo, MoveToSsdState_testIfStateChangedToFree)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(0, 10, SegmentState::NVRAM);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
-
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(0);
+    segInfos.SetOccupiedStripeCount(10);
+    segInfos.SetState(SegmentState::NVRAM);
     // when
     segInfos.MoveToSsdStateOrFreeStateIfItBecomesEmpty();
     // then
@@ -208,8 +217,10 @@ TEST(SegmentInfo, MoveToVictimState_testIfStateChanged)
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(10, 10, SegmentState::SSD);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
-
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(10);
+    segInfos.SetOccupiedStripeCount(10);
+    segInfos.SetState(SegmentState::SSD);
     // when
     segInfos.MoveToVictimState();
     // then
@@ -221,8 +232,10 @@ TEST(SegmentInfo, GetValidBlockCountIfSsdState_testIfValidCountIsReturnedWhenIts
     // given
     SegmentInfo segInfos;
     SegmentInfoData segmentInfoData(34, 10, SegmentState::SSD);
-    segInfos.AllocateSegmentInfoData(&segmentInfoData);
-
+    segInfos.AllocateAndInitSegmentInfoData(&segmentInfoData);
+    segInfos.SetValidBlockCount(34);
+    segInfos.SetOccupiedStripeCount(10);
+    segInfos.SetState(SegmentState::SSD);
     // when
     EXPECT_EQ(segInfos.GetValidBlockCountIfSsdState(), 34);
 }
@@ -231,20 +244,26 @@ TEST(SegmentInfo, GetValidBlockCountIfSsdState_testIfValidCountIsReturnedWhenIts
 {
     SegmentInfo freeSegInfo;
     SegmentInfoData freeSegInfoData(0, 10, SegmentState::FREE);
-    freeSegInfo.AllocateSegmentInfoData(&freeSegInfoData);
-
+    freeSegInfo.AllocateAndInitSegmentInfoData(&freeSegInfoData);
+    freeSegInfo.SetValidBlockCount(0);
+    freeSegInfo.SetOccupiedStripeCount(10);
+    freeSegInfo.SetState(SegmentState::FREE);
     EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
 
     SegmentInfo nvramSegInfo;
     SegmentInfoData nvramSegInfoData(30, 0, SegmentState::NVRAM);
-    nvramSegInfo.AllocateSegmentInfoData(&nvramSegInfoData);
-
+    nvramSegInfo.AllocateAndInitSegmentInfoData(&nvramSegInfoData);
+    nvramSegInfo.SetValidBlockCount(30);
+    nvramSegInfo.SetOccupiedStripeCount(0);
+    nvramSegInfo.SetState(SegmentState::NVRAM);
     EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
 
     SegmentInfo victimSegInfo;
     SegmentInfoData victimSegInfoData(30, 0, SegmentState::VICTIM);
-    victimSegInfo.AllocateSegmentInfoData(&victimSegInfoData);
-
+    victimSegInfo.AllocateAndInitSegmentInfoData(&victimSegInfoData);
+    victimSegInfo.SetValidBlockCount(30);
+    victimSegInfo.SetOccupiedStripeCount(0);
+    victimSegInfo.SetState(SegmentState::VICTIM);
     EXPECT_EQ(freeSegInfo.GetValidBlockCountIfSsdState(), UINT32_MAX);
 }
 
@@ -253,14 +272,17 @@ TEST(SegmentInfo, UpdateFrom_testIfSegmentInfoDataIsSuccessfullyUpdatedByUpdateF
     // Given initialized SegmentInfo and specific data allocated SegmentInfo.
     SegmentInfo SegInfo;
     SegmentInfoData SegInfoData(0, 0, SegmentState::FREE);
-    SegInfo.AllocateSegmentInfoData(&SegInfoData);
-    SegInfo.InitSegmentInfoData();
-
+    SegInfo.AllocateAndInitSegmentInfoData(&SegInfoData);
+    SegInfo.SetValidBlockCount(0);
+    SegInfo.SetOccupiedStripeCount(0);
+    SegInfo.SetState(SegmentState::FREE);
     // initialized specific values in filledSegInfo.
     SegmentInfo filledSegInfo;
     SegmentInfoData filledSegInfoData(5, 3, SegmentState::VICTIM);
-    filledSegInfo.AllocateSegmentInfoData(&filledSegInfoData);
-
+    filledSegInfo.AllocateAndInitSegmentInfoData(&filledSegInfoData);
+    filledSegInfo.SetValidBlockCount(5);
+    filledSegInfo.SetOccupiedStripeCount(3);
+    filledSegInfo.SetState(SegmentState::VICTIM);
     // When execute SegmentInfo::UpdateFrom()
     SegInfo.UpdateFrom(filledSegInfo);
 

@@ -1,1 +1,2 @@
 POS_ADD_INTEGRATION_TEST(context_manager_it context_manager_integration_test.cpp)
+POS_ADD_INTEGRATION_TEST(allocator_file_io_it allocator_file_io_integration_test.cpp)

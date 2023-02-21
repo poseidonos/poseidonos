@@ -183,7 +183,7 @@ ContextManagerIntegrationTest::SetUp(void)
     loadedSegInfoDataForSegCtx = new SegmentInfoData[numOfSegment](0, 0, SegmentState::FREE);
     for(int i=0;i<numOfSegment;++i)
     {
-        loadedSegInfos[i].AllocateSegmentInfoData(&loadedSegInfoDataForSegCtx[i]);
+        loadedSegInfos[i].AllocateAndInitSegmentInfoData(&loadedSegInfoDataForSegCtx[i]);
     }
 
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;

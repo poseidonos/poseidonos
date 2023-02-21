@@ -60,8 +60,7 @@ ISegmentCtxFake::ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* s
     segmentInfoData = new SegmentInfoData[numSegments];
     for (uint32_t i = 0; i < numSegments; ++i)
     {
-        segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
-        segmentInfos[i].InitSegmentInfoData();
+        segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
     }
 
     fileSize = sizeof(SegmentInfoData) * numSegments;
@@ -129,14 +128,16 @@ ISegmentCtxFake::LoadContext(void)
         segmentInfoData = buffer;
         for (uint32_t i = 0; i < numSegments; ++i)
         {
-            segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
+            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
         }
     }
     else
     {
         for (uint32_t i = 0; i < numSegments; ++i)
         {
-            segmentInfos[i].InitSegmentInfoData();
+            segmentInfos[i].SetValidBlockCount(0);
+            segmentInfos[i].SetOccupiedStripeCount(0);
+            segmentInfos[i].SetState(SegmentState::FREE);
         }
     }
 }

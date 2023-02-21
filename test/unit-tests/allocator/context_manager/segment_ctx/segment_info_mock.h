@@ -11,7 +11,7 @@ class MockSegmentInfo : public SegmentInfo
 {
 public:
     using SegmentInfo::SegmentInfo;
-    MOCK_METHOD(void, InitSegmentInfoData, (), (override));
+    MOCK_METHOD(void, AllocateAndInitSegmentInfoData, (SegmentInfoData* segmentInfoData), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (), (override));
     MOCK_METHOD(void, SetValidBlockCount, (uint32_t cnt), (override));
     MOCK_METHOD(uint32_t, IncreaseValidBlockCount, (uint32_t inc), (override));
@@ -24,7 +24,6 @@ public:
     MOCK_METHOD(bool, MoveToSsdStateOrFreeStateIfItBecomesEmpty, (), (override));
     MOCK_METHOD(bool, MoveToVictimState, (), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCountIfSsdState, (), (override));
-    MOCK_METHOD(void,  AllocateSegmentInfoData,(SegmentInfoData* segmentInfoData), (override));
 };
 
 } // namespace pos
