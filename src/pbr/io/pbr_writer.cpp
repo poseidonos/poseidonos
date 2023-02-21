@@ -33,6 +33,8 @@
 #include "pbr_writer.h"
 #include "src/device/base/ublock_device.h"
 #include "src/io_scheduler/io_dispatcher.h"
+#include "src/logger/logger.h"
+#include "src/helper/file/directory.h"
 
 #include <fstream>
 
@@ -42,10 +44,11 @@ namespace pbr
 {
 
 int
-PbrWriter::Write(pos::UblockSharedPtr dev, char* data, uint64_t startLba, uint32_t length)
+PbrWriter::Write(pos::UblockSharedPtr dev, char* data, uint64_t startOffset, uint32_t length)
 {
     uint32_t sectorSize = 512;
     uint32_t sectorCnt = length / sectorSize;
+    uint64_t startLba = startOffset / (uint64_t)sectorSize;
     if (length % sectorSize > 0)
     {
         sectorCnt++;
@@ -54,12 +57,20 @@ PbrWriter::Write(pos::UblockSharedPtr dev, char* data, uint64_t startLba, uint32
     bio->dir = pos::UbioDir::Write;
     bio->SetLba(startLba);
     bio->SetUblock(dev);
-    pos::IODispatcherSingleton::Instance()->Submit(bio, true);
-    return 0;
+    int ret = pos::IODispatcherSingleton::Instance()->Submit(bio, true);
+    string filePath = "/etc/pos/pbr/log/" + dev->GetSN() + ".pbr";
+    Write(filePath, data, startOffset, length);
+    return ret;
 }
 
 int PbrWriter::Write(string filePath, char* data, uint64_t startOffset, uint32_t length)
 {
+    size_t dirPos = filePath.find_last_of("/");
+    string dirPath = filePath.substr(0, dirPos);
+    if (DirExists(dirPath) == false)
+    {
+        MakeDir(dirPath);
+    }
     fstream file;
     file.open(filePath, ios_base::out | ios_base::in);
     if(file.is_open() == false)
@@ -67,7 +78,6 @@ int PbrWriter::Write(string filePath, char* data, uint64_t startOffset, uint32_t
         file.open(filePath, ios_base::out);
         file.close();
     }
-
     ofstream f(filePath, ios::in | ios::ate);
     f.seekp(startOffset, ios::beg);
     f.write(data, length);

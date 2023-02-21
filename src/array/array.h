@@ -132,6 +132,7 @@ private:
     void _DeletePartitions(void);
     int _UpdatePbr(void);
     void _ClearPbr(void);
+    vector<UblockSharedPtr> _GetPbrDevs(void);
     pbr::AteData* _BuildAteData(void);
     void _RebuildDone(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildResult result);
     void _DetachSpare(IArrayDevice* target);

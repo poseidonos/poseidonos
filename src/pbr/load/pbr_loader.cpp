@@ -31,21 +31,24 @@
  */
 
 #include "pbr_loader.h"
-#include "src/pbr/header/header_loader.h"
-#include "src/pbr/content/content_loader.h"
+#include "src/pbr/header/header_serializer.h"
 #include "src/pbr/content/content_serializer_factory.h"
-#include "src/include/pos_event_id.h"
+#include "src/pbr/io/pbr_reader.h"
+#include "src/logger/logger.h"
+#include <memory.h>
+#include <rte_malloc.h>
 
 namespace pbr
 {
 PbrLoader::PbrLoader(vector<pos::UblockSharedPtr> devs)
-: PbrLoader(new HeaderLoader(), devs)
+: PbrLoader(new HeaderSerializer(), new PbrReader(), devs)
 {
 }
 
-PbrLoader::PbrLoader(IHeaderLoader* headerLoader,
-    vector<pos::UblockSharedPtr> devs)
-: headerLoader(headerLoader),
+PbrLoader::PbrLoader(IHeaderSerializer* headerSerializer,
+    IPbrReader* pbrReader, vector<pos::UblockSharedPtr> devs)
+: headerSerializer(headerSerializer),
+  pbrReader(pbrReader),
   devs(devs)
 {
 }
@@ -57,32 +60,43 @@ PbrLoader::~PbrLoader(void)
         dev = nullptr;
     }
     devs.clear();
-    delete headerLoader;
+    delete pbrReader;
+    delete headerSerializer;
 }
 
 int
 PbrLoader::Load(vector<AteData*>& ateListOut)
 {
     int ret = 0;
+    uint32_t pbrSize = header::TOTAL_PBR_SIZE;
+    void* pbrData = rte_malloc(nullptr, pbrSize, pbrSize);
     for (auto dev : devs)
     {
-        HeaderElement header;
-        ret = headerLoader->Load(&header, dev);
+        memset(pbrData, 0, pbrSize);
+        int ret = pbrReader->Read(dev, (char*)pbrData, 0, pbrSize);
         if (ret == 0)
         {
-            AteData* ateData;
-            ContentLoader contentLoader(ContentSerializerFactory::GetSerializer(header.revision));
-            ret = contentLoader.Load(ateData, dev);
+            HeaderElement headerElem;
+            ret = headerSerializer->Deserialize((char*)pbrData, header::LENGTH, &headerElem);
             if (ret == 0)
             {
-                ateListOut.push_back(ateData);
-            }
-            else
-            {
-                delete ateData;
+                auto serializer = ContentSerializerFactory::GetSerializer(headerElem.revision);
+                uint64_t startOffset = serializer->GetContentStartLba();
+                AteData* ateData = nullptr;
+                ret = serializer->Deserialize(ateData, &((char*)pbrData)[startOffset]);
+                delete serializer;
+                if (ret == 0)
+                {
+                    ateListOut.push_back(ateData);
+                }
+                else
+                {
+                    delete ateData;
+                }
             }
         }
     }
+    rte_free(pbrData);
     if (ateListOut.size() == 0)
     {
         ret = EID(PBR_LOAD_NO_VALID_PBR_FOUND);

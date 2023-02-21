@@ -54,9 +54,8 @@ private:
     static int _DeserializeAte(uint64_t startOffset, AteData* ateOut /* OUT PARAM */, char* rawData);
     static uint64_t _GetBackupAteOffset(void);
     static const uint32_t revision = 0;
-    static const uint32_t TOTAL_PBR_SIZE = 64 * 1024;
     static const uint64_t PBR_CONTENT_START_LBA = header::LENGTH;
-    static const uint32_t PBR_CONTENT_SIZE = TOTAL_PBR_SIZE - PBR_CONTENT_START_LBA;
+    static const uint32_t PBR_CONTENT_SIZE = header::TOTAL_PBR_SIZE - PBR_CONTENT_START_LBA;
     static const uint64_t ATE_START_OFFSET = 0;
     static const uint64_t ATE_SIZE = 24 * 1024;
     static const uint64_t BACKUP_ATE_START_OFFSET = ATE_START_OFFSET + ATE_SIZE;

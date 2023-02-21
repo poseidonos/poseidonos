@@ -35,15 +35,12 @@
 #include "src/pbr/load/pbr_loader.h"
 #include "src/pbr/load/pbr_selector.h"
 #include "src/pbr/update/pbr_updater.h"
-#include "src/include/pos_event_id.h"
-#include "src/logger/logger.h"
 
-#include <memory>
 
 namespace pbr
 {
 int
-Pbr::Load(vector<AteData*>& ateListOut, vector<pos::UblockSharedPtr> devs)
+Pbr::Load(vector<pos::UblockSharedPtr> devs, vector<AteData*>& ateListOut)
 {
     unique_ptr<IPbrLoader> loader = make_unique<PbrLoader>(devs);
     int ret = loader->Load(ateListOut);

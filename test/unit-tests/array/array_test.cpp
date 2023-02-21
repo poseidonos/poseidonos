@@ -167,14 +167,16 @@ TEST(Array, Delete_testIfArrayDeletedSuccessfullyWhenInputsAreValid)
     MockPartitionServices* mockSvc = new MockPartitionServices;
     MockPartitionManager* mockPtnMgr = new MockPartitionManager();
     pbr::MockPbrAdapter* mockPbrAdapter = new pbr::MockPbrAdapter();
+    vector<ArrayDevice*> mockDevs;
 
     EXPECT_CALL(*mockRebuilder, IsRebuilding).WillOnce(Return(false));
     EXPECT_CALL(*mockState, IsDeletable).WillOnce(Return(0));
+    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillOnce(ReturnRef(mockDevs));
     EXPECT_CALL(*mockArrDevMgr, Clear).Times(1);
     EXPECT_CALL(*mockState, SetDelete).Times(1);
     EXPECT_CALL(*mockState, WaitShutdownDone).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, DeletePartitions).Times(1);
-    EXPECT_CALL(*mockPbrAdapter, Reset("mock")).WillOnce(Return(0));
+    EXPECT_CALL(*mockPbrAdapter, Reset(vector<pos::UblockSharedPtr>(), "mock")).WillOnce(Return(0));
 
     Array array("mock", mockRebuilder, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL, mockPbrAdapter);
 
@@ -365,7 +367,7 @@ TEST(Array, AddSpare_testIfSpareIsNotAddedWhenFailedToFlush)
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockPbrAdapter, Update).WillOnce(Return(FAILED_TO_FLUSH));
-    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillOnce(ReturnRef((devs)));
+    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillRepeatedly(ReturnRef((devs)));
     EXPECT_CALL(*mockPtnMgr, GetPartitions).WillOnce(Return(vector<Partition*>()));
 
     Array array("mock", NULL, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL, mockPbrAdapter);
@@ -390,7 +392,7 @@ TEST(Array, RemoveSpare_testIfSpareIsRemovedWhenInputsAreValid)
 
     EXPECT_CALL(*mockState, CanRemoveSpare).WillOnce(Return(0));
     EXPECT_CALL(*mockArrDevMgr, RemoveSpare(mockSpareName)).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillOnce(ReturnRef((devs)));
+    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillRepeatedly(ReturnRef((devs)));
     EXPECT_CALL(*mockPtnMgr, GetPartitions).WillOnce(Return(vector<Partition*>()));
     EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
     EXPECT_CALL(*mockPbrAdapter, Update).WillOnce(Return(0));
@@ -463,7 +465,7 @@ TEST(Array, RemoveSpare_testIfSpareIsNotRemovedWhenFailedToFlush)
     EXPECT_CALL(*mockArrDevMgr, RemoveSpare(mockSpareName)).WillOnce(Return(0));
     EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
     EXPECT_CALL(*mockPbrAdapter, Update).WillOnce(Return(FAILED_TO_FLUSH));
-    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillOnce(ReturnRef((devs)));
+    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillRepeatedly(ReturnRef((devs)));
     EXPECT_CALL(*mockPtnMgr, GetPartitions).WillOnce(Return(vector<Partition*>()));
 
     Array array("mock", NULL, mockArrDevMgr, NULL, mockPtnMgr, mockState, NULL, NULL, NULL, mockPbrAdapter);
@@ -944,7 +946,7 @@ TEST(Array, TriggerRebuild_testIfFaultyArrayDeviceDoesNotNeedToRetryAfterTrigger
     EXPECT_CALL(mockArrayRebuilder, Rebuild).Times(AtLeast(0)); // simply, ignore
     EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
     EXPECT_CALL(*mockPtnMgr, GetPartitions).WillOnce(Return(vector<Partition*>()));
-    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillOnce(ReturnRef(mockDevs));
+    EXPECT_CALL(*mockArrDevMgr, GetDevs).WillRepeatedly(ReturnRef(mockDevs));
     EXPECT_CALL(*mockPbrAdapter, Update).WillOnce(Return(0));
 
     Array array("mock-array", &mockArrayRebuilder, mockArrDevMgr, NULL, mockPtnMgr, mockState, mockSvc, NULL, NULL, mockPbrAdapter);

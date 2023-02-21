@@ -33,8 +33,9 @@
 #pragma once
 
 #include "src/pbr/interface/i_pbr_updater.h"
-#include "src/pbr/header/i_header_writer.h"
-#include "src/pbr/content/i_content_writer.h"
+#include "src/pbr/header/i_header_serializer.h"
+#include "src/pbr/content/i_content_serializer.h"
+#include "src/pbr/io/i_pbr_writer.h"
 
 #include <vector>
 
@@ -46,8 +47,8 @@ class PbrFileUpdater : public IPbrUpdater
 {
 public:
     PbrFileUpdater(uint32_t revision, string filePath);
-    PbrFileUpdater(IHeaderWriter* headerWriter, IContentWriter* contentWriter,
-        uint32_t revision, string filePath);
+    PbrFileUpdater(IHeaderSerializer* headerSerializer, IContentSerializer* contentSerializer,
+        IPbrWriter* pbrWriter, uint32_t revision, string filePath);
     virtual ~PbrFileUpdater();
 
 protected:
@@ -55,8 +56,9 @@ protected:
     virtual int Clear(void) override;
 
 private:
-    IHeaderWriter* headerWriter = nullptr;
-    IContentWriter* contentWriter = nullptr;
+    IHeaderSerializer* headerSerializer = nullptr;
+    IContentSerializer* contentSerializer = nullptr;
+    IPbrWriter* pbrWriter = nullptr;
     uint32_t revision;
     string filePath;
 };

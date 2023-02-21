@@ -227,9 +227,9 @@ Array::Delete(void)
         goto error;
     }
 
+    _ClearPbr();
     _DeletePartitions();
     devMgr_->Clear();
-    _ClearPbr();
     state->SetDelete();
 
     pthread_rwlock_unlock(&stateLock);
@@ -556,7 +556,7 @@ int
 Array::_UpdatePbr(void)
 {
     pbr::AteData* ate = _BuildAteData();
-    int ret = pbrAdapter->Update(ate);
+    int ret = pbrAdapter->Update(_GetPbrDevs(), ate);
 
     POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "_UpdatePbr(name:{}, uuid:{}, ateuuid:{})",
         ate->arrayName, uuid, ate->arrayUuid);
@@ -567,7 +567,24 @@ Array::_UpdatePbr(void)
 void
 Array::_ClearPbr(void)
 {
-    pbrAdapter->Reset(name_);
+    pbrAdapter->Reset(_GetPbrDevs(), name_);
+}
+
+vector<UblockSharedPtr>
+Array::_GetPbrDevs(void)
+{
+    vector<pos::UblockSharedPtr> devs;
+    for (auto d : devMgr_->GetDevs())
+    {
+        if (d->GetState() != ArrayDeviceState::FAULT &&
+            d->GetType() == ArrayDeviceType::DATA)
+        {
+            devs.push_back(d->GetUblock());
+            POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "_GetPbrDevs, sn:{}",
+                d->GetSerial());
+        }
+    }
+    return devs;
 }
 
 pbr::AteData*

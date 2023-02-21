@@ -49,6 +49,7 @@
 #include "src/telemetry/telemetry_client/telemetry_client.h"
 #include "src/cli/command_processor.h"
 #include "src/array/build/array_builder_adapter.h"
+#include "src/pbr/pbr_adapter.h"
 
 using namespace std;
 
@@ -73,7 +74,8 @@ public:
     ArrayManager(ArrayRebuilder* arrayRebuilder,
         DeviceManager* deviceManager, TelemetryClient* telClient,
         function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory,
-        ArrayBuilderAdapter* arrayBuilderAdapter = nullptr);
+        ArrayBuilderAdapter* arrayBuilderAdapter = nullptr,
+        pbr::PbrAdapter* pbrAdapter = nullptr);
     virtual ~ArrayManager();
     virtual int Load(void);
     virtual int Create(string name, DeviceSet<string> devs, string metaFt, string dataFt) override;
@@ -119,6 +121,7 @@ private:
     function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory = nullptr;
     pthread_rwlock_t arrayListLock;
     ArrayBuilderAdapter* arrayBuilderAdapter = nullptr;
+    pbr::PbrAdapter* pbrAdapter = nullptr;
 };
 // Note that we do not recommend direct access to ArrayManagerSingleton.
 using ArrayManagerSingleton = Singleton<ArrayManager>;

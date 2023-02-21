@@ -43,13 +43,14 @@ namespace header
 {
 // WARNING: DO NOT CHANGE FOR COMPATIBILITY
 const string SIGNATURE = "PBR";
-static const uint8_t START_LBA = 0;
-static const uint8_t LENGTH = 64;
-static const uint8_t SIGNATURE_OFFSET = 0x0;
-static const uint8_t SIGNATURE_LENGTH = 8;
-static const uint8_t REVISION_OFFSET = 0x8;
-static const uint8_t REVISION_LENGTH = 4;
-static const uint8_t CHECKSUM_OFFSET = 0xc;
-static const uint8_t CHECKSUM_LENGTH = 4;
+static const uint32_t START_LBA = 0;
+static const uint32_t LENGTH = 64;
+static const uint32_t SIGNATURE_OFFSET = 0x0;
+static const uint32_t SIGNATURE_LENGTH = 8;
+static const uint32_t REVISION_OFFSET = 0x8;
+static const uint32_t REVISION_LENGTH = 4;
+static const uint32_t CHECKSUM_OFFSET = 0xc;
+static const uint32_t CHECKSUM_LENGTH = 4;
+static const uint32_t TOTAL_PBR_SIZE = 64 * 1024;
 } // namespace header
 } // namespace pbr

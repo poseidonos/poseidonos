@@ -38,7 +38,7 @@
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/pbr/file_pbr.h"
+#include "src/helper/enumerable/query.h"
 
 namespace pos
 {
@@ -49,7 +49,8 @@ ArrayManager::ArrayManager()
     {
         return new ArrayComponents(name, arrayRebuilder);
     },
-    new ArrayBuilderAdapter())
+    new ArrayBuilderAdapter(),
+    new pbr::PbrAdapter())
 {
     // delegated to other constructor
 }
@@ -57,12 +58,14 @@ ArrayManager::ArrayManager()
 ArrayManager::ArrayManager(ArrayRebuilder* arrayRebuilder,
     DeviceManager* deviceManager, TelemetryClient* telClient,
     function<ArrayComponents*(string, IArrayRebuilder*)> arrayComponentsFactory,
-    ArrayBuilderAdapter* arrayBuilderAdapter)
+    ArrayBuilderAdapter* arrayBuilderAdapter,
+    pbr::PbrAdapter* pbrAdapter)
 : arrayRebuilder(arrayRebuilder),
   deviceManager(deviceManager),
   telClient(telClient),
   arrayComponentsFactory(arrayComponentsFactory),
-  arrayBuilderAdapter(arrayBuilderAdapter)
+  arrayBuilderAdapter(arrayBuilderAdapter),
+  pbrAdapter(pbrAdapter)
 {
     pthread_rwlock_init(&arrayListLock, nullptr);
     if (deviceManager != nullptr)
@@ -77,11 +80,9 @@ ArrayManager::ArrayManager(ArrayRebuilder* arrayRebuilder,
 
 ArrayManager::~ArrayManager()
 {
-    if (arrayRebuilder != nullptr)
-    {
-        POS_TRACE_INFO(EID(ARRAY_MGR_DEBUG_MSG), "Deleting ArrayRebuilder");
-        delete arrayRebuilder;
-    }
+    delete pbrAdapter;
+    delete arrayBuilderAdapter;
+    delete arrayRebuilder;
     for (auto iter : arrayList)
     {
         ArrayComponents* array = _FindArray(iter.first);
@@ -101,7 +102,9 @@ int
 ArrayManager::Load(void)
 {
     vector<pbr::AteData*> arrayTableEntries;
-    int ret = pbr::FilePbr::Load(arrayTableEntries);
+    auto devs = Enumerable::Where(deviceManager->GetDevs(),
+        [](auto d) { return d != nullptr && d->GetType() == DeviceType::SSD; });
+    int ret = pbrAdapter->Load(devs, arrayTableEntries);
     if (ret == 0)
     {
         for (pbr::AteData* ate : arrayTableEntries)
@@ -493,7 +496,9 @@ ArrayManager::ResetPbr(void)
     }
     pthread_rwlock_unlock(&arrayListLock);
 
-    ret = pbr::FilePbr::Reset();
+    auto devs = Enumerable::Where(deviceManager->GetDevs(),
+        [](auto d) { return d != nullptr && d->GetType() == DeviceType::SSD; });
+    ret = pbrAdapter->Reset(devs);
     if (ret == 0)
     {
         POS_TRACE_INFO(EID(POS_TRACE_PBR_RESET), "");
