@@ -250,21 +250,35 @@ ArrayManager::Unmount(string name)
 }
 
 
+// This function should not be called from reactor and Event worker because of busy waiting.
+// CLI context or separate thread (std:: thread) can call this function safely.
+// this function should not be called simultaneously with "Unmount / Stop" from other context.
 void
 ArrayManager::UnmountAllArrayAndStop(void)
 {
-    pthread_rwlock_rdlock(&arrayListLock);
-    for (auto it = arrayList.begin(); it != arrayList.end(); it++)
-    {
-        Unmount(it->first);
-    }
-    pthread_rwlock_unlock(&arrayListLock);
-    // Check if the states of all array is under "Try_mount"
+    int ret = 0;
     do
     {
-        usleep(1);
+        pthread_rwlock_rdlock(&arrayListLock);
+        for (auto it = arrayList.begin(); it != arrayList.end(); it++)
+        {
+            ComponentsInfo* info = it->second->GetInfo();
+            if (info->arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
+            {
+                Unmount(it->first);
+            }
+        }
+        pthread_rwlock_unlock(&arrayListLock);
+        // Check if the states of all array is under "Try_mount"
+        ret = Stop();
+        if (ret == 0)
+        {
+            break;
+        }
+        // sleep 300 ms
+        usleep(300000);
     }
-    while(Stop() != 0);
+    while(ret != 0);
 }
 
 int

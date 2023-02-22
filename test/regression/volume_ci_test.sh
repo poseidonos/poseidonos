@@ -1,5 +1,6 @@
 #!/bin/bash
 
+shutdown_mode="normal"
 source tc_lib_ci.sh
 
 ############################
@@ -17,7 +18,7 @@ tc_vol_0()
     EXPECT_PASS "bringup_pos" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -41,7 +42,7 @@ tc_vol_1()
     EXPECT_PASS "delete_and_check" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -71,7 +72,7 @@ tc_vol_2()
     EXPECT_PASS "delete_and_check" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -97,14 +98,14 @@ tc_vol_3()
     write_and_verify '1'
     EXPECT_PASS "write_and_verify" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     delete_and_check '1'
     EXPECT_PASS "delete_and_check" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -140,7 +141,7 @@ tc_vol_4()
     EXPECT_PASS "delete_and_check" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -169,11 +170,11 @@ tc_vol_5()
     delete_and_check '2'
     EXPECT_PASS "delete_and_check" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -223,7 +224,7 @@ tc_vol_6()
     done
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -267,7 +268,7 @@ tc_vol_7()
     done
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -329,7 +330,7 @@ tc_vol_8()
     done
 
     end_tc "${tcName}"
-    graceful_shutdown skip
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -355,7 +356,7 @@ tc_npor_0()
     write_data '1'
     EXPECT_PASS "write_data" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     mount_and_check '1'
@@ -365,7 +366,7 @@ tc_npor_0()
     EXPECT_PASS "verify_data" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -400,7 +401,7 @@ tc_npor_1()
     write_data '2'
     EXPECT_PASS "write_data" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     mount_and_check '1'
@@ -416,7 +417,7 @@ tc_npor_1()
     EXPECT_PASS "verify_data" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -442,7 +443,7 @@ tc_npor_2()
     write_data '1'
     EXPECT_PASS "write_data" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     mount_and_check '1'
@@ -457,11 +458,11 @@ tc_npor_2()
     delete_and_check '1'
     EXPECT_PASS "delete_and_check" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -497,13 +498,13 @@ tc_npor_3()
         unmount_and_check '1'
         EXPECT_PASS "unmount_and_check" $?
         
-        npor_and_check_volumes
+        npor_and_check_volumes $shutdown_mode
         EXPECT_PASS "npor_and_check_volumes" $?
 
     done
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -529,7 +530,7 @@ tc_npor_4()
     delete_and_check '1'
     EXPECT_PASS "delete_and_check" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     create_and_check '3' 2GB 0 0
@@ -541,7 +542,7 @@ tc_npor_4()
     delete_and_check '3'
     EXPECT_PASS "delete_and_check" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     create_and_check '4' 2GB 0 0
@@ -553,7 +554,7 @@ tc_npor_4()
     delete_and_check '4'
     EXPECT_PASS "delete_and_check" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     create_and_check '6' 2GB 0 0
@@ -599,7 +600,7 @@ tc_spor_0()
     EXPECT_PASS "verify_data" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -633,7 +634,7 @@ tc_inode_0()
     unmount_and_check '1'
     EXPECT_PASS "unmount_and_check" $?
 
-    npor_and_check_volumes
+    npor_and_check_volumes $shutdown_mode
     EXPECT_PASS "npor_and_check_volumes" $?
 
     mount_and_check '1'
@@ -643,7 +644,7 @@ tc_inode_0()
     EXPECT_PASS "verify_data" $?
 
     end_tc "${tcName}"
-    graceful_shutdown
+    graceful_shutdown $shutdown_mode
 }
 
 ############################
@@ -737,7 +738,7 @@ isVm=0
 max_test_iteration=100
 test_mode=""
 
-while getopts "f:v:p:" opt
+while getopts "f:v:p:s:" opt
 do
     case "$opt" in
         f) target_fabric_ip="$OPTARG"
@@ -745,6 +746,8 @@ do
         v) isVm="$OPTARG"
             ;;
         p) test_mode="precommit"
+            ;;
+        s) shutdown_mode="$OPTARG"
             ;;
         ?) exit 2
             ;;
