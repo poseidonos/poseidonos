@@ -74,7 +74,8 @@ public:
     virtual int Init(void);
     virtual void Dispose(void);
 
-    virtual int FlushContexts(EventSmartPtr callback, bool sync, int logGroupId = ALL_LOG_GROUP);
+    virtual int FlushContexts(EventSmartPtr callback, bool sync);
+    virtual int FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
     virtual SegmentId AllocateRebuildTargetSegment(void);
@@ -101,8 +102,6 @@ public:
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
     virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
-    virtual void ResetFlushedInfo(int logGroupId);
-    virtual void SetAllocateDuplicatedFlush(bool flag);
     virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_);
     virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void);
 
@@ -121,11 +120,6 @@ private:
     std::mutex ctxLock;
 
     TelemetryPublisher* telPublisher;
-
-    const int INVALID_LOG_GROUP_ID = 0xFFFF;
-    static const int ALL_LOG_GROUP = -1;
-    int logGroupIdInProgress;
-    bool allowDuplicatedFlush;
 
     ISegmentCtx* segmentContextUpdater;
 };

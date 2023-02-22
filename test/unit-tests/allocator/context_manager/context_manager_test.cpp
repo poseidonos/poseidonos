@@ -623,7 +623,6 @@ TEST(ContextManager, FlushContexts_testIfCallbackHasNullptr)
 
     // Flush meta data while unmounting volume.
     // Fluhsed info sholud be cleared after completion.
-    ctxManager.SetAllocateDuplicatedFlush(false);
     int ret = ctxManager.FlushContexts(nullptr, true);
     EXPECT_EQ(0, ret);
 

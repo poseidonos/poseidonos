@@ -203,7 +203,7 @@ ContextManagerIntegrationTest::SetUp(void)
         versionedSegCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     cpHandler = new CheckpointHandler(ALLOCATOR_META_ID);;
-    cpHandler->Init(nullptr, ctxManager, nullptr);
+    cpHandler->Init(nullptr, nullptr, ctxManager, nullptr);
 
     EXPECT_CALL(*contextManager, GetSegmentCtx()).WillRepeatedly(Return(segCtx));
 

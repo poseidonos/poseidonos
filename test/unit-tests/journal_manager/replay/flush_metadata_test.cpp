@@ -8,6 +8,7 @@
 
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::_;
 
 namespace pos
 {
@@ -22,7 +23,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedSuccessfullyWhenAllFlushSuccess)
 
     // Then
     EXPECT_CALL(mapFlush, StoreAll).WillOnce(Return(0));
-    EXPECT_CALL(contextManager, FlushContexts).WillOnce(Return(0));
+    EXPECT_CALL(contextManager, FlushContexts(_, _)).WillOnce(Return(0));
 
     // When
     int result = flushMetadataTask.Start();
@@ -41,7 +42,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNegativeValueWhenMapFlushFails)
     // Then
     int retCode = -1000;
     EXPECT_CALL(mapFlush, StoreAll).WillOnce(Return(retCode));
-    EXPECT_CALL(contextManager, FlushContexts).Times(0);
+    EXPECT_CALL(contextManager, FlushContexts(_, _)).Times(0);
 
     // When
     int result = flushMetadataTask.Start();
@@ -60,7 +61,7 @@ TEST(FlushMetadata, Start_testIfTaskCompletedWithNegativeValueWhenAllocatorConte
     // Then
     int retCode = -2000;
     EXPECT_CALL(mapFlush, StoreAll).WillOnce(Return(0));
-    EXPECT_CALL(contextManager, FlushContexts).WillOnce(Return(retCode));
+    EXPECT_CALL(contextManager, FlushContexts(_, _)).WillOnce(Return(retCode));
 
     // When
     int result = flushMetadataTask.Start();
