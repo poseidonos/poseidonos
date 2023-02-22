@@ -215,9 +215,9 @@ MpioHandler::_PublishPeriodicMetrics()
             doneCountByFileType[idx] = 0;
         }
 
-        if (sampledProcessedMpioCount)
+        for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
         {
-            for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
+            if (sampledProcessedMpioCount[ioType])
             {
                 POSMetric mTimeSpentAllStage(TEL40201_METAFS_MPIO_TIME_SPENT_PROCESSING_ALL_STAGES, POSMetricTypes::MT_GAUGE);
                 mTimeSpentAllStage.AddLabel("direction", MetaFileUtil::ConvertToDirectionName(ioType));

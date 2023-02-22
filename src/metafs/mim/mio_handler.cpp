@@ -246,9 +246,9 @@ MioHandler::_PublishPeriodicMetrics(void)
         metricMioHandlerWorking.SetGaugeValue(GetCurrDateTimestamp());
         metricVector->emplace_back(metricMioHandlerWorking);
 
-        if (totalProcessedMioCount)
+        for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
         {
-            for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
+            if (totalProcessedMioCount[ioType])
             {
                 POSMetric m(TEL40302_METAFS_PROCESSED_MIO_COUNT, POSMetricTypes::MT_GAUGE);
                 m.SetGaugeValue(totalProcessedMioCount[ioType]);

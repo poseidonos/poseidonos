@@ -45,7 +45,8 @@ namespace pos
 VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
   numSegments(0),
-  segmentInfos(nullptr)
+  segmentInfos(nullptr),
+  segmentInfoDatas(nullptr)
 {
 }
 

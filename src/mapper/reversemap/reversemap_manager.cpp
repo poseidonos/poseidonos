@@ -53,6 +53,7 @@ ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, I
 : numMpagesPerStripe(0),
   fileSizePerStripe(0),
   fileSizeWholeRevermap(0),
+  counts{},
   revMapWholefile(nullptr),
   iVSAMap(ivsaMap),
   iStripeMap(istripeMap),
@@ -61,11 +62,6 @@ ReverseMapManager::ReverseMapManager(IVSAMap* ivsaMap, IStripeMap* istripeMap, I
   telemetryPublisher(tp),
   rocksDbEnabled(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsRocksdbEnabled())
 {
-    for (int i = 0; i < IoDirection::NUM_DIRECTIONS; i++)
-    {
-        counts[i].issuedCount = 0;
-        counts[i].completedCount = 0;
-    }
 }
 // LCOV_EXCL_START
 ReverseMapManager::~ReverseMapManager(void)
