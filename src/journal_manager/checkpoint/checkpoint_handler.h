@@ -43,6 +43,7 @@
 namespace pos
 {
 class EventScheduler;
+class IVersionedSegmentContext;
 
 class CheckpointHandler
 {
@@ -51,13 +52,12 @@ public:
     CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback, const int arrayId);
     virtual ~CheckpointHandler(void) = default;
 
-    virtual void Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler);
+    virtual void Init(IVersionedSegmentContext* versionedSegCtx, IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler);
 
-    virtual int Start(MapList pendingDirtyMaps, EventSmartPtr callback);
-    virtual int FlushCompleted(int metaId, int logGroupId);
+    virtual int Start(MapList pendingDirtyMaps, EventSmartPtr callback, int logGroupIdInProgress);
+    virtual int FlushCompleted(int metaId);
 
     virtual CheckpointStatus GetStatus(void);
-    virtual void UpdateLogGroupInProgress(int logGroupId);
 
 private:
     void _CheckMapFlushCompleted(void);
@@ -68,6 +68,7 @@ private:
 
     static const int ALLOCATOR_META_ID = 1000;
 
+    IVersionedSegmentContext* versionedSegmentCtx;
     IMapFlush* mapFlush;
     IContextManager* contextManager;
     EventScheduler* scheduler;
@@ -82,7 +83,6 @@ private:
     std::mutex completionLock;
     EventSmartPtr checkpointCompletionCallback;
     int arrayId;
-    int logGroupIdInProgress;
 };
 
 } // namespace pos

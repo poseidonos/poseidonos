@@ -78,7 +78,8 @@ CheckpointManager::~CheckpointManager(void)
 void
 CheckpointManager::Init(IMapFlush* mapFlush, IContextManager* ctxManager,
     EventScheduler* scheduler, CallbackSequenceController* seqController,
-    DirtyMapManager* dMapManager, TelemetryPublisher* tp)
+    DirtyMapManager* dMapManager, IVersionedSegmentContext* versionedSegCtx,
+    TelemetryPublisher* tp)
 {
     eventScheduler = scheduler;
 
@@ -86,7 +87,7 @@ CheckpointManager::Init(IMapFlush* mapFlush, IContextManager* ctxManager,
     dirtyMapManager = dMapManager;
     telemetryPublisher = tp;
 
-    checkpointHandler->Init(mapFlush, ctxManager, scheduler);
+    checkpointHandler->Init(versionedSegCtx, mapFlush, ctxManager, scheduler);
 }
 
 int
@@ -266,8 +267,7 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
     }
 
     sequenceController->GetCheckpointExecutionApproval();
-    checkpointHandler->UpdateLogGroupInProgress(request.groupId);
-    int ret = checkpointHandler->Start(dirtyMaps, completionEvent);
+    int ret = checkpointHandler->Start(dirtyMaps, completionEvent, request.groupId);
     sequenceController->AllowCallbackExecution();
     if (ret != 0)
     {

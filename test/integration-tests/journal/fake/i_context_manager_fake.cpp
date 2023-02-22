@@ -12,7 +12,6 @@ IContextManagerFake::IContextManagerFake(ISegmentCtxFake* segmentCtx, AllocatorA
   addrInfo(addrInfo)
 {
     ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this, &IContextManagerFake::_FlushContexts));
-    EXPECT_CALL(*this, FlushContexts(_, true, _)).Times(AtLeast(0));
 }
 
 IContextManagerFake::~IContextManagerFake(void)
@@ -51,10 +50,9 @@ IContextManagerFake::GetStoredContextVersion(int owner)
 }
 
 int
-IContextManagerFake::_FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
+IContextManagerFake::_FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer)
 {
-    SegmentInfoData* vscSegInfoData = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoDataToFlush(logGroupId);
-    segmentCtx->FlushContexts(vscSegInfoData);
+    segmentCtx->FlushContexts(reinterpret_cast<SegmentInfoData*>(buffer.buffer));
     if (callback != nullptr)
     {
         std::thread eventExecution(&Event::Execute, callback);

@@ -14,7 +14,8 @@ public:
     using ContextManager::ContextManager;
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
-    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, int logGroupId), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
+    MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, ContextSectionBuffer buffer), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateRebuildTargetSegment, (), (override));
@@ -37,8 +38,6 @@ public:
     MOCK_METHOD(std::mutex&, GetCtxLock, (), (override));
     MOCK_METHOD(BlockAllocationStatus*, GetAllocationStatus, (), (override));
     MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
-    MOCK_METHOD(void, ResetFlushedInfo, (int logGroupId), (override));
-    MOCK_METHOD(void, SetAllocateDuplicatedFlush, (bool flag), (override));
     MOCK_METHOD(void, SetSegmentContextUpdaterPtr, (ISegmentCtx* segmentContextUpdater_), (override));
     MOCK_METHOD(ISegmentCtx*, GetSegmentContextUpdaterPtr, (), (override));
 };

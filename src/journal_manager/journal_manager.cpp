@@ -272,8 +272,6 @@ JournalManager::Init(IVSAMap* vsaMap, IStripeMap* stripeMap,
             _InitModules(tc, vsaMap, stripeMap, mapFlush, segmentCtx,
                 wbStripeAllocator, ctxManager, ctxReplayer, volumeManager, eventScheduler);
 
-            ctxManager->SetAllocateDuplicatedFlush(false);
-
             if (journalingStatus.Get() == WAITING_TO_BE_REPLAYED)
             {
                 result = _DoRecovery();
@@ -482,7 +480,8 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
 
     bufferAllocator->Init(logGroupReleaser, config);
     dirtyMapManager->Init(config);
-    checkpointManager->Init(mapFlush, contextManager, eventScheduler, sequenceController, dirtyMapManager, telemetryPublisher);
+    checkpointManager->Init(mapFlush, contextManager, eventScheduler,
+        sequenceController, dirtyMapManager, versionedSegCtx, telemetryPublisher);
 
     const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
