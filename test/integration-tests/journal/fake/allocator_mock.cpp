@@ -1,8 +1,8 @@
-#include "allocator_fake.h"
+#include "allocator_mock.h"
 
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/fake/i_context_manager_fake.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 #include "test/integration-tests/journal/fake/wbstripe_allocator_mock.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
@@ -11,7 +11,7 @@
 using ::testing::StrictMock;
 namespace pos
 {
-AllocatorFake::AllocatorFake(TestInfo* testInfo, IArrayInfo* info)
+AllocatorMock::AllocatorMock(TestInfo* testInfo, IArrayInfo* info)
 : Allocator(info, nullptr),
   testInfo(testInfo)
 {
@@ -22,65 +22,65 @@ AllocatorFake::AllocatorFake(TestInfo* testInfo, IArrayInfo* info)
     EXPECT_CALL(*addrInfoMock, GetnumUserAreaSegments).WillRepeatedly(Return(testInfo->numUserSegments));
 
     wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
-    segmentCtxFake = new StrictMock<ISegmentCtxFake>(addrInfoMock, new MockFileIntf(GetSegmentContextFileName(), arrayId, MetaFileType::General, MetaVolumeType::SsdVolume));
+    segmentCtxFake = new StrictMock<SegmentCtxFake>(addrInfoMock, new MockFileIntf(GetSegmentContextFileName(), arrayId, MetaFileType::General, MetaVolumeType::SsdVolume));
     contextManagerFake = new StrictMock<IContextManagerFake>(segmentCtxFake, addrInfoMock);
-    contextReplayerMock = new StrictMock<IContextReplayerMock>();
+    contextReplayerFake = new StrictMock<IContextReplayerFake>();
 }
 
-AllocatorFake::~AllocatorFake(void)
+AllocatorMock::~AllocatorMock(void)
 {
     delete segmentCtxFake;
     delete wbStripeAllocatorMock;
     delete contextManagerFake;
-    delete contextReplayerMock;
+    delete contextReplayerFake;
     delete addrInfoMock;
 }
 
 IWBStripeAllocator*
-AllocatorFake::GetIWBStripeAllocator(void)
+AllocatorMock::GetIWBStripeAllocator(void)
 {
     return wbStripeAllocatorMock;
 }
 
 WBStripeAllocatorMock*
-AllocatorFake::GetWBStripeAllocatorMock(void)
+AllocatorMock::GetWBStripeAllocatorMock(void)
 {
     return wbStripeAllocatorMock;
 }
 
 ISegmentCtx*
-AllocatorFake::GetISegmentCtx(void)
+AllocatorMock::GetISegmentCtx(void)
 {
     return segmentCtxFake;
 }
 
-ISegmentCtxFake*
-AllocatorFake::GetISegmentCtxFake(void)
+SegmentCtxFake*
+AllocatorMock::GetSegmentCtxFake(void)
 {
     return segmentCtxFake;
 }
 
 IContextManager*
-AllocatorFake::GetIContextManager(void)
+AllocatorMock::GetIContextManager(void)
 {
     return contextManagerFake;
 }
 
 IContextManagerFake*
-AllocatorFake::GetIContextManagerFake(void)
+AllocatorMock::GetIContextManagerFake(void)
 {
     return contextManagerFake;
 }
 
 IContextReplayer*
-AllocatorFake::GetIContextReplayer(void)
+AllocatorMock::GetIContextReplayer(void)
 {
-    return contextReplayerMock;
+    return contextReplayerFake;
 }
 
-IContextReplayerMock*
-AllocatorFake::GetIContextReplayerMock(void)
+IContextReplayerFake*
+AllocatorMock::GetIContextReplayerFake(void)
 {
-    return contextReplayerMock;
+    return contextReplayerFake;
 }
 } // namespace pos

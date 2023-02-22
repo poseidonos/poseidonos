@@ -1,15 +1,14 @@
-#include <gmock/gmock.h>
+#include "src/allocator/i_context_replayer.h"
 
-#include <list>
-#include <string>
+#include <gmock/gmock.h>
 #include <vector>
 
-#include "src/allocator/i_context_replayer.h"
 #include "src/allocator/include/allocator_const.h"
 
 namespace pos
 {
-class IContextReplayerMock : public IContextReplayer
+class ISegmentCtx;
+class IContextReplayerFake : public IContextReplayer
 {
 public:
     using IContextReplayer::IContextReplayer;
@@ -22,13 +21,12 @@ public:
     MOCK_METHOD(void, SetActiveStripeTail,
         (int index, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(void, ResetActiveStripeTail, (int index), (override));
+
     virtual void ResetSegmentsStates(void) {}
-    virtual std::vector<VirtualBlkAddr>
-    GetAllActiveStripeTail(void)
-    {
-        std::vector<VirtualBlkAddr> ret(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA);
-        return ret;
-    }
+    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
+
+private:
+    ISegmentCtx* segmentCtx;
 };
 
 } // namespace pos

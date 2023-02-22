@@ -3,11 +3,11 @@
 #include <thread>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 
 namespace pos
 {
-IContextManagerFake::IContextManagerFake(ISegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo)
+IContextManagerFake::IContextManagerFake(SegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo)
 : segmentCtx(segmentCtx),
   addrInfo(addrInfo)
 {

@@ -8,11 +8,11 @@
 
 namespace pos
 {
-class VSAMapMock : public IVSAMap
+class VSAMapFake : public IVSAMap
 {
 public:
-    explicit VSAMapMock(TestInfo* testInfo);
-    virtual ~VSAMapMock(void);
+    explicit VSAMapFake(TestInfo* testInfo);
+    virtual ~VSAMapFake(void);
 
     virtual VirtualBlkAddr GetVSAInternal(int volumeId, BlkAddr rba,
         int& caller) override;

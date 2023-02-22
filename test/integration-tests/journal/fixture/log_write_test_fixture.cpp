@@ -10,7 +10,7 @@ namespace pos
 using ::testing::NiceMock;
 using ::testing::Return;
 
-LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, AllocatorFake* _allocator, ArrayInfoMock* _array,
+LogWriteTestFixture::LogWriteTestFixture(MockMapper* _mapper, AllocatorMock* _allocator, ArrayInfoMock* _array,
     JournalManagerSpy* _journal, TestInfo* _testInfo)
 {
     Reset();

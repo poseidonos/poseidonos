@@ -5,7 +5,7 @@
 
 #include "src/allocator/include/allocator_const.h"
 #include "src/journal_manager/log/log_event.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 #include "test/integration-tests/journal/fixture/journal_manager_test_fixture.h"
 #include "test/integration-tests/journal/utils/used_offset_calculator.h"
 
@@ -253,7 +253,7 @@ TEST_F(ReplayLogBufferIntegrationTest, DISABLED_ReplayFullSegmentWhenCheckpointF
             .stripeId = overflowedStripe.GetVsid(),
             .offset = 0},
         .numBlks = 1};
-    EXPECT_CALL(*(testMapper->GetVSAMapMock()), SetVSAsWithSyncOpen(overflowedStripe.GetVolumeId(), overflowedBlockMapList.first, virtualBlks));
+    EXPECT_CALL(*(testMapper->GetVSAMapFake()), SetVSAsWithSyncOpen(overflowedStripe.GetVolumeId(), overflowedBlockMapList.first, virtualBlks));
     try
     {
         journal->DoRecoveryForTest();

@@ -6,7 +6,7 @@
 
 #include "src/allocator/i_context_manager.h"
 #include "src/event_scheduler/event.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -18,7 +18,7 @@ class AllocatorAddressInfo;
 class IContextManagerFake : public IContextManager
 {
 public:
-    explicit IContextManagerFake(ISegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo);
+    explicit IContextManagerFake(SegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo);
     virtual ~IContextManagerFake(void);
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync) { return 0; }
@@ -44,7 +44,7 @@ public:
 private:
     int _FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer);
 
-    ISegmentCtxFake* segmentCtx;
+    SegmentCtxFake* segmentCtx;
     AllocatorAddressInfo* addrInfo;
     IVersionedSegmentContext* versionedSegCtx;
 };

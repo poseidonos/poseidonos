@@ -1,9 +1,9 @@
-#include "vsamap_mock.h"
+#include "vsamap_fake.h"
 #include "src/mapper/include/mapper_const.h"
 
 namespace pos
 {
-VSAMapMock::VSAMapMock(TestInfo* testInfo)
+VSAMapFake::VSAMapFake(TestInfo* testInfo)
 : testInfo(testInfo)
 {
     map = new VirtualBlkAddr*[testInfo->maxNumVolume];
@@ -17,12 +17,12 @@ VSAMapMock::VSAMapMock(TestInfo* testInfo)
     }
 
     ON_CALL(*this, SetVSAsInternal).WillByDefault(::testing::Invoke(this,
-        &VSAMapMock::_SetVSAsInternal));
+        &VSAMapFake::_SetVSAsInternal));
     ON_CALL(*this, SetVSAsWithSyncOpen).WillByDefault(::testing::Invoke(this,
-        &VSAMapMock::_SetVSAsWithSyncOpen));
+        &VSAMapFake::_SetVSAsWithSyncOpen));
 }
 
-VSAMapMock::~VSAMapMock(void)
+VSAMapFake::~VSAMapFake(void)
 {
     for (int idx = 0; idx < testInfo->maxNumVolume; idx++)
     {
@@ -32,7 +32,7 @@ VSAMapMock::~VSAMapMock(void)
 }
 
 VirtualBlkAddr
-VSAMapMock::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
+VSAMapFake::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
 {
     assert(volumeId < testInfo->maxNumVolume);
     assert(rba < testInfo->maxVolumeSizeInBlock);
@@ -42,7 +42,7 @@ VSAMapMock::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
 }
 
 MpageList
-VSAMapMock::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks)
+VSAMapFake::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks)
 {
     MpageList dirty;
     int numEntriesPerPage = testInfo->metaPageSize / 8;
@@ -59,7 +59,7 @@ VSAMapMock::GetDirtyVsaMapPages(int volumeId, BlkAddr startRba, uint64_t numBlks
 }
 
 int
-VSAMapMock::_SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
+VSAMapFake::_SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     assert(volumeId < testInfo->maxNumVolume);
 
@@ -73,32 +73,32 @@ VSAMapMock::_SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtua
 }
 
 int
-VSAMapMock::GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks,
+VSAMapFake::GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks,
     VsaArray& vsaArray)
 {
     return 0;
 }
 
 int
-VSAMapMock::SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
+VSAMapFake::SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     return 0;
 }
 
 VirtualBlkAddr
-VSAMapMock::GetRandomVSA(BlkAddr rba)
+VSAMapFake::GetRandomVSA(BlkAddr rba)
 {
     return UNMAP_VSA;
 }
 
 int64_t
-VSAMapMock::GetNumUsedBlks(int volId)
+VSAMapFake::GetNumUsedBlks(int volId)
 {
     return 0;
 }
 
 VirtualBlkAddr
-VSAMapMock::GetVSAWithSyncOpen(int volId, BlkAddr rba)
+VSAMapFake::GetVSAWithSyncOpen(int volId, BlkAddr rba)
 {
     assert(volId < testInfo->maxNumVolume);
     assert(rba < testInfo->maxVolumeSizeInBlock);
@@ -107,7 +107,7 @@ VSAMapMock::GetVSAWithSyncOpen(int volId, BlkAddr rba)
 }
 
 int
-VSAMapMock::_SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
+VSAMapFake::_SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     assert(volId < testInfo->maxNumVolume);
     for (uint32_t blkCount = 0; blkCount < virtualBlks.numBlks; blkCount++)

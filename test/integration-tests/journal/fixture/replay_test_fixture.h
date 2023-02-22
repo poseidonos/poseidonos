@@ -1,7 +1,7 @@
 #pragma once
 
 #include "src/include/address_type.h"
-#include "test/integration-tests/journal/fake/allocator_fake.h"
+#include "test/integration-tests/journal/fake/allocator_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 
@@ -10,7 +10,7 @@ namespace pos
 class ReplayTestFixture
 {
 public:
-    ReplayTestFixture(MockMapper* mapper, AllocatorFake* allocator, TestInfo* testInfo);
+    ReplayTestFixture(MockMapper* mapper, AllocatorMock* allocator, TestInfo* testInfo);
     virtual ~ReplayTestFixture(void);
 
     void ExpectReturningUnmapStripes(void);
@@ -33,7 +33,7 @@ private:
     VirtualBlks _GetBlock(VirtualBlks blks, uint32_t offset);
 
     MockMapper* mapper;
-    AllocatorFake* allocator;
+    AllocatorMock* allocator;
 
     TestInfo* testInfo;
 };

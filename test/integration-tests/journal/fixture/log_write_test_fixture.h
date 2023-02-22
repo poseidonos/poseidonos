@@ -1,6 +1,6 @@
 #pragma once
 
-#include "test/integration-tests/journal/fake/allocator_fake.h"
+#include "test/integration-tests/journal/fake/allocator_mock.h"
 #include "test/integration-tests/journal/fake/array_info_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/fixture/stripe_test_fixture.h"
@@ -15,7 +15,7 @@ class LogWriteTestFixture
 {
 public:
     LogWriteTestFixture(void) = delete;
-    LogWriteTestFixture(MockMapper* _mapper, AllocatorFake* _allocator, ArrayInfoMock* _array,
+    LogWriteTestFixture(MockMapper* _mapper, AllocatorMock* _allocator, ArrayInfoMock* _array,
         JournalManagerSpy* _journal, TestInfo* _testInfo);
     virtual ~LogWriteTestFixture(void);
 
@@ -56,7 +56,7 @@ private:
 
     MockMapper* mapper;
     ArrayInfoMock* array;
-    AllocatorFake* allocator;
+    AllocatorMock* allocator;
     JournalManagerSpy* journal;
 };
 } // namespace pos

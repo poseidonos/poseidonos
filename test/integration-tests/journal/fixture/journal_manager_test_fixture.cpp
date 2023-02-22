@@ -6,7 +6,7 @@
 
 #include "src/journal_manager/log_buffer/reset_log_group.h"
 #include "test/integration-tests/journal/fake/i_context_manager_fake.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 #include "test/integration-tests/journal/fault_event.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
@@ -29,7 +29,7 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     telemetryClient = new NiceMock<MockTelemetryClient>;
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
-    testAllocator = new StrictMock<AllocatorFake>(testInfo, arrayInfo);
+    testAllocator = new StrictMock<AllocatorMock>(testInfo, arrayInfo);
     volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
@@ -108,7 +108,7 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    testAllocator->GetISegmentCtxFake()->LoadContext();
+    testAllocator->GetSegmentCtxFake()->LoadContext();
     journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
@@ -122,7 +122,7 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(JournalConfigurationBuild
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    testAllocator->GetISegmentCtxFake()->LoadContext();
+    testAllocator->GetSegmentCtxFake()->LoadContext();
     journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
@@ -149,7 +149,7 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    testAllocator->GetISegmentCtxFake()->LoadContext();
+    testAllocator->GetSegmentCtxFake()->LoadContext();
     journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
