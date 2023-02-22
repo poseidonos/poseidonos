@@ -506,6 +506,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     logFilledNotifier->Register(dirtyMapManager);
     logFilledNotifier->Register(bufferAllocator);
     logFilledNotifier->Register(logWriteHandler);
+    logFilledNotifier->Register(versionedSegCtx);
 
     logGroupReleaser->Init(config, logFilledNotifier, logBuffer,
         checkpointManager, mapFlush, contextManager, eventScheduler);

@@ -198,15 +198,6 @@ VersionedSegmentCtx::GetUpdatedInfoDataToFlush(int logGroupId)
     return segmentInfoDatas;
 }
 
-void
-VersionedSegmentCtx::ResetFlushedInfo(int logGroupId)
-{
-    _CheckLogGroupIdValidity(logGroupId);
-    segmentInfoDiffs[logGroupId]->Reset();
-
-    POS_TRACE_INFO(EID(VERSIONED_SEGMENT_INFO), "Versioned segment info is flushed, logGroupId:{}", logGroupId);
-}
-
 int
 VersionedSegmentCtx::GetNumSegments(void)
 {
@@ -252,4 +243,20 @@ VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
     segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
     segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
 }
+
+void
+VersionedSegmentCtx::LogFilled(int logGroupId, const MapList& dirty)
+{
+    // do nothing
+}
+
+void 
+VersionedSegmentCtx::LogBufferReseted(int logGroupId)
+{    
+    _CheckLogGroupIdValidity(logGroupId);
+    segmentInfoDiffs[logGroupId]->Reset();
+
+    POS_TRACE_INFO(EID(VERSIONED_SEGMENT_INFO), "Versioned segment info is flushed, logGroupId:{}", logGroupId);
+}
+
 } // namespace pos

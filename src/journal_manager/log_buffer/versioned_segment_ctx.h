@@ -57,12 +57,14 @@ public:
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override {}
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override { return nullptr; }
-    virtual void ResetFlushedInfo(int logGroupId) override {}
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
     virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override { return; }
+
+    virtual void LogFilled(int logGroupId, const MapList& dirty) {}
+    virtual void LogBufferReseted(int logGroupId) {}
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
@@ -78,16 +80,20 @@ public:
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo);
 
+    // Implementation of IVersionedSegmentContext interface
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override;
 
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override;
-    virtual void ResetFlushedInfo(int logGroupId) override;
     virtual int GetNumSegments(void) override;
     virtual int GetNumLogGroups(void) override;
 
     virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override;
+
+    // Implementation of LogBufferWriteDoneEvent interface
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override;
+    virtual void LogBufferReseted(int logGroupId) override;
 
 private:
     void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);
