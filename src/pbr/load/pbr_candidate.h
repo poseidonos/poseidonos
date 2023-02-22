@@ -32,16 +32,26 @@
 
 #pragma once
 
-#include "pbr_voting.h"
 #include "src/pbr/dto/ate_data.h"
-#include <vector>
-#include <memory>
 
 namespace pbr
 {
-class PbrSelector
+class PbrCandidate
 {
 public:
-    static int Select(vector<AteData*>& candidates, unique_ptr<PbrVoting> voting = make_unique<PbrVoting>());
+    PbrCandidate(AteData* ateData)
+    : ate(ateData)
+    {
+        id = ate->lastUpdatedDateTime;
+    }
+    void Vote(void) { numOfVotes++; }
+    AteData* GetAteData(void) { return ate; }
+    uint64_t GetId(void) const { return id; }
+    uint32_t GetNumOfVotes(void) const { return numOfVotes; }
+
+private:
+    AteData* ate = nullptr;
+    uint64_t id = 0;
+    uint32_t numOfVotes = 1;
 };
 } // namespace pbr

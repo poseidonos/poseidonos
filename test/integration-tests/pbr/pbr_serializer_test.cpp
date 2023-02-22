@@ -3,6 +3,7 @@
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
+#include <fstream>
 
 #include "src/pbr/load/pbr_file_loader.h"
 #include "src/pbr/update/pbr_file_updater.h"
@@ -39,11 +40,15 @@ TEST(PbrSerializerTest, Serialize_testIfResultsOfSerializingSamplePbr)
     ret = updater->Update(ateData);
     ASSERT_EQ(0, ret);
 
+    // Read original sample to compare
     char samplePbrData[fileSize];
+    ifstream f(samplePbr, ios::in | ios::ate);
+    f.seekg(0, ios::beg);
+    f.read(samplePbrData, fileSize);
+    f.close();
+
     char testPbrData[fileSize];
-    IPbrReader* samplePbrReader = new PbrReader();
     IPbrReader* testPbrReader = new PbrReader();
-    samplePbrReader->Read(samplePbr, samplePbrData, 0, fileSize);
     testPbrReader->Read(testPbr, testPbrData, 0, fileSize);
 
     // Then
@@ -60,7 +65,6 @@ TEST(PbrSerializerTest, Serialize_testIfResultsOfSerializingSamplePbr)
     // Clean Up
     updater->Clear(); // remove test_pbr.pbr
     delete testPbrReader;
-    delete samplePbrReader;
     delete updater;
     delete loader;
 }

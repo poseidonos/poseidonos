@@ -41,6 +41,7 @@
 #include <string>
 #include <isa-l.h>
 #include <algorithm>
+
 namespace pos
 {
 Raid6::Raid6(const PartitionPhysicalSize* pSize)
