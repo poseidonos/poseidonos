@@ -54,7 +54,8 @@ RocksDBMetaFsIntf::RocksDBMetaFsIntf(const std::string fileName, const int array
   metaFs(MetaFsServiceSingleton::Instance()->GetMetaFs(arrayId)),
   blksPerStripe(0),
   baseLpn(UINT64_MAX),
-  BYTE_ACCESS_ENABLED(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsDirectAccessEnabled())
+  BYTE_ACCESS_ENABLED(MetaFsServiceSingleton::Instance()->GetConfigManager()->IsDirectAccessEnabled()),
+  size(0)
 {
     rocksMeta = metaFs->GetRocksMeta();
     fileDescriptorAllocator = metaFs->GetFileDescriptorAllocator();
@@ -71,7 +72,8 @@ RocksDBMetaFsIntf::RocksDBMetaFsIntf(std::string fileName, int arrayId, MetaFs* 
   baseLpn(UINT64_MAX),
   BYTE_ACCESS_ENABLED(false),
   rocksMeta(nullptr),
-  fileDescriptorAllocator(nullptr)
+  fileDescriptorAllocator(nullptr),
+  size(0)
 {
 }
 

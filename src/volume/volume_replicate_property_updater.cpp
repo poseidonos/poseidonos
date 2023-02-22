@@ -56,14 +56,12 @@ VolumeReplicatePropertyUpdater::Do(string name, ReplicationState state)
 {
     VolumeBase* vol = volumeList.GetVolume(name);
 
-    ReplicationState originState = vol->GetReplicationState();
-
     vol->SetReplicationState(state);
 
     int ret = _SaveVolumes();
     if (ret != EID(SUCCESS))
     {
-        vol->SetReplicationState(originState);
+        vol->SetReplicationState(vol->GetReplicationState());
         return ret;
     }
 
