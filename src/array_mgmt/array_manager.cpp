@@ -33,6 +33,7 @@
 #include "array_manager.h"
 
 #include <list>
+#include <unistd.h>
 
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
@@ -248,6 +249,23 @@ ArrayManager::Unmount(string name)
     }, name, EID(UNMOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
+
+void
+ArrayManager::UnmountAllArrayAndStop(void)
+{
+    pthread_rwlock_rdlock(&arrayListLock);
+    for (auto it = arrayList.begin(); it != arrayList.end(); it++)
+    {
+        Unmount(it->first);
+    }
+    pthread_rwlock_unlock(&arrayListLock);
+    // Check if the states of all array is under "Try_mount"
+    do
+    {
+        usleep(1);
+    }
+    while(Stop() != 0);
+}
 
 int
 ArrayManager::Stop(void)

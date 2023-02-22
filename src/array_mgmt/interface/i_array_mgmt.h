@@ -59,5 +59,6 @@ public:
     virtual ComponentsInfo* GetInfo(string name) = 0;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) = 0;
     virtual vector<const ComponentsInfo*> GetInfo(void) = 0;
+    virtual void UnmountAllArrayAndStop(void) = 0;
 };
 } // namespace pos

@@ -90,6 +90,7 @@ public:
     virtual ComponentsInfo* GetInfo(string name) override;
     virtual ComponentsInfo* GetInfo(uint32_t arrayIdx) override;
     virtual vector<const ComponentsInfo*> GetInfo(void) override;
+    virtual void UnmountAllArrayAndStop(void);
 
     virtual int DeviceDetached(UblockSharedPtr dev) override;
     virtual void DeviceAttached(UblockSharedPtr dev) override;

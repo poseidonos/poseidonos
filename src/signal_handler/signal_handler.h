@@ -38,12 +38,14 @@
 #include <cstdio>
 #include <list>
 #include <string>
+#include <thread>
 
 #include "src/lib/singleton.h"
 
 namespace pos
 {
 typedef void (*SignalHandlerType)(int);
+
 class SignalHandler
 {
 public:
@@ -59,6 +61,7 @@ private:
     void _GetThreadIdList(void);
     void _BacktraceAndInvokeNextThread(int sig);
     void _Backtrace(void);
+    void _ShutdownProcess(void);
     void _Log(std::string logMsg, bool printTimeStamp = true);
     std::list<long> threadList;
     std::atomic<uint32_t> pendingThreads;
@@ -67,6 +70,7 @@ private:
     std::atomic<bool> listUpdated;
     std::atomic<int> dominantSignal;
     FILE* btLogFilePtr;
+    std::thread* shutdownTask;
 };
 
 using SignalHandlerSingleton = Singleton<SignalHandler>;

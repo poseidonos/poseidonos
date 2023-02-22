@@ -46,6 +46,9 @@
 #include "src/include/pos_event_id.h"
 #include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
+#include "src/array/array.h"
+#include "src/array_mgmt/array_manager.h"
+#include "src/cli/cli_server.h"
 #define gettid() syscall(SYS_gettid)
 #define tgkill(tgid, tid, sig) syscall(SYS_tgkill, tgid, tid, sig)
 
@@ -57,6 +60,7 @@ SignalHandler::SignalHandler(void)
     char btLogPath[] = "/var/log/pos/pos_backtrace.log";
     pendingThreads = 0;
     btLogFilePtr = fopen(btLogPath, "w");
+    shutdownTask = nullptr;
 }
 
 SignalHandler::~SignalHandler(void)
@@ -67,6 +71,11 @@ SignalHandler::~SignalHandler(void)
     {
         fclose(btLogFilePtr);
     }
+    if (shutdownTask != nullptr)
+    {
+        shutdownTask->join();
+        delete shutdownTask;
+    }
 }
 
 void
@@ -75,6 +84,8 @@ SignalHandler::Register(void)
     signal(SIGINT, SignalHandler::INTHandler);
     signal(SIGSEGV, SignalHandler::ExceptionHandler);
     signal(SIGABRT, SignalHandler::ExceptionHandler);
+    signal(SIGTERM, SignalHandler::ExceptionHandler);
+    signal(SIGQUIT, SignalHandler::ExceptionHandler);
     signal(SIGUSR1, SIG_DFL);
 }
 
@@ -85,6 +96,8 @@ SignalHandler::Deregister(void)
     signal(SIGSEGV, SIG_DFL);
     signal(SIGABRT, SIG_DFL);
     signal(SIGUSR1, SIG_DFL);
+    signal(SIGTERM, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
 }
 
 void
@@ -135,12 +148,31 @@ SignalHandler::_Log(std::string logMsg, bool printTimeStamp)
 }
 
 void
+SignalHandler::_ShutdownProcess(void)
+{
+    IArrayMgmt* array = ArrayMgr();
+    array->UnmountAllArrayAndStop();
+    pos_cli::Exit();
+}
+
+void
 SignalHandler::_ExceptionHandler(int sig)
 {
-    _BacktraceAndInvokeNextThread(sig);
-
-    signal(sig, SIG_DFL);
-    raise(sig);
+    switch(sig)
+    {
+        case SIGTERM:
+        case SIGQUIT:
+        {
+            shutdownTask = new std::thread(&SignalHandler::_ShutdownProcess, this);
+            break;
+        }
+        default:
+        {
+            _BacktraceAndInvokeNextThread(sig);
+            signal(sig, SIG_DFL);
+            raise(sig);
+        }
+    }
 }
 
 void
