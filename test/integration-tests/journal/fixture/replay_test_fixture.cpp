@@ -1,7 +1,7 @@
 #include "replay_test_fixture.h"
 
-#include "test/integration-tests/journal/fake/i_context_replayer_mock.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/i_context_replayer_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 #include "test/integration-tests/journal/fake/wbstripe_allocator_mock.h"
 
 using ::testing::_;
@@ -12,7 +12,7 @@ using ::testing::Return;
 namespace pos
 {
 ReplayTestFixture::ReplayTestFixture(MockMapper* mapper,
-    AllocatorFake* allocator, TestInfo* testInfo)
+    AllocatorMock* allocator, TestInfo* testInfo)
 : mapper(mapper),
   allocator(allocator),
   testInfo(testInfo)
@@ -43,7 +43,7 @@ void
 ReplayTestFixture::ExpectReplaySegmentAllocation(StripeId userLsid)
 {
     StripeId firstStripe = userLsid / testInfo->numStripesPerSegment * testInfo->numStripesPerSegment;
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
         ReplaySegmentAllocation(firstStripe))
         .Times(AnyNumber());
 }
@@ -54,7 +54,7 @@ ReplayTestFixture::ExpectReplayStripeAllocation(StripeId vsid, StripeId wbLsid)
     EXPECT_CALL(*(mapper->GetStripeMapMock()),
         SetLSA(vsid, wbLsid, IN_WRITE_BUFFER_AREA))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
         ReplayStripeAllocation(wbLsid, vsid))
         .Times(1);
 }
@@ -74,10 +74,10 @@ ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksTo
         for (uint32_t offset = 0; offset < blks.numBlks; offset++)
         {
             VirtualBlks blk = _GetBlock(blks, offset);
-            EXPECT_CALL(*(mapper->GetVSAMapMock()), SetVSAsWithSyncOpen(volId, rba + offset, blk));
+            EXPECT_CALL(*(mapper->GetVSAMapFake()), SetVSAsWithSyncOpen(volId, rba + offset, blk));
             if (needToReplaySegment == true)
             {
-                EXPECT_CALL(*(allocator->GetISegmentCtxFake()), ValidateBlks(blk));
+                EXPECT_CALL(*(allocator->GetSegmentCtxFake()), ValidateBlks(blk));
             }
         }
     }
@@ -101,11 +101,11 @@ ReplayTestFixture::ExpectReplayStripeFlush(StripeTestFixture stripe, bool needTo
 
     if (needToReplaySegment == true)
     {
-        EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+        EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
             ReplayStripeRelease(stripe.GetWbAddr().stripeId))
             .Times(1);
 
-        EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+        EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
             ReplayStripeFlushed(stripe.GetUserAddr().stripeId))
             .Times(1);
     }
@@ -141,7 +141,7 @@ ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
         for (uint32_t blockOffset = 0; blockOffset < (*vsa).second.numBlks; blockOffset++)
         {
             VirtualBlks blks = _GetBlock((*vsa).second, blockOffset);
-            EXPECT_CALL(*(allocator->GetISegmentCtxFake()), InvalidateBlks(blks, true));
+            EXPECT_CALL(*(allocator->GetSegmentCtxFake()), InvalidateBlks(blks, true));
         }
     }
 }
@@ -152,19 +152,19 @@ ReplayTestFixture::ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, Stripe
     EXPECT_CALL(*(allocator->GetWBStripeAllocatorMock()),
         ReconstructActiveStripe(testInfo->defaultTestVol, stripe.GetWbAddr().stripeId, tail, stripe.GetRevMap()))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
         SetActiveStripeTail(testInfo->defaultTestVol, tail, stripe.GetWbAddr().stripeId))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(allocator->GetIContextReplayerFake()), ReplaySsdLsid).Times(1);
 }
 
 void
 ReplayTestFixture::ExpectReplayFlushedActiveStripe(void)
 {
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()),
+    EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
         ResetActiveStripeTail(testInfo->defaultTestVol))
         .Times(1);
-    EXPECT_CALL(*(allocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(allocator->GetIContextReplayerFake()), ReplaySsdLsid).Times(1);
 }
 
 VirtualBlkAddr

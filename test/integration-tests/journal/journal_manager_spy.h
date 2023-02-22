@@ -7,7 +7,7 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/journal_manager.h"
 #include "src/journal_manager/log/log_list.h"
-#include "test/integration-tests/journal/fake/allocator_fake.h"
+#include "test/integration-tests/journal/fake/allocator_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/log_group_releaser_spy.h"
 

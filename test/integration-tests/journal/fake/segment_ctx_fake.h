@@ -47,11 +47,11 @@ class AsyncMetaFileIoCtx;
 
 // This class is to fake a flush of ISegmentContext,
 // LoadContext is to simulate a dirty bringup to load Segment Context.
-class ISegmentCtxFake : public ISegmentCtx
+class SegmentCtxFake : public ISegmentCtx
 {
 public:
-    explicit ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
-    virtual ~ISegmentCtxFake(void);
+    explicit SegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
+    virtual ~SegmentCtxFake(void);
 
     void LoadContext(void);
     int FlushContexts(SegmentInfoData* vscSegmentInfoDatas);
