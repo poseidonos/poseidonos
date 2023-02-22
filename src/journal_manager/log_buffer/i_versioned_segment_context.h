@@ -34,6 +34,7 @@
 
 #include <vector>
 #include "src/include/address_type.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
 
 namespace pos
 {
@@ -42,7 +43,7 @@ class SegmentInfo;
 class SegmentInfoData;
 class VersionedSegmentInfo;
 
-class IVersionedSegmentContext
+class IVersionedSegmentContext: public LogBufferWriteDoneEvent
 {
 public:
     virtual ~IVersionedSegmentContext(void) = default;
@@ -53,7 +54,6 @@ public:
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) = 0;
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) = 0;
-    virtual void ResetFlushedInfo(int logGroupId) = 0;
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
     virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) = 0;

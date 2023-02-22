@@ -323,7 +323,7 @@ TEST(VersionedSegmentCtx, GetUpdatedInfoToFlush_testIfFailsWhenInvalidLogGroupId
     delete[] segmentInfoData;
 }
 
-TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
+TEST(VersionedSegmentCtx, LogBufferReseted_testIfInfoIsResetted)
 {
     // Given
     VersionedSegmentCtx versionedSegCtx;
@@ -361,7 +361,7 @@ TEST(VersionedSegmentCtx, ResetFlushedInfo_testIfInfoIsResetted)
 
     // When
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), Reset).Times(1);
-    versionedSegCtx.ResetFlushedInfo(targetLogGroup);
+    versionedSegCtx.LogBufferReseted(targetLogGroup);
 
     delete[] segmentInfos;
     delete[] segmentInfoData;

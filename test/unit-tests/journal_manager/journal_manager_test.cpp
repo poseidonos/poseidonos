@@ -221,6 +221,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
         EXPECT_CALL(*logFilledNotifier, Register(dirtyMapManager));
         EXPECT_CALL(*logFilledNotifier, Register(bufferAllocator));
         EXPECT_CALL(*logFilledNotifier, Register(logWriteHandler));
+        EXPECT_CALL(*logFilledNotifier, Register(versionedSegmentCtx));
     }
 
     // When: Journal is initialized
@@ -261,6 +262,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
         EXPECT_CALL(*logFilledNotifier, Register(dirtyMapManager));
         EXPECT_CALL(*logFilledNotifier, Register(bufferAllocator));
         EXPECT_CALL(*logFilledNotifier, Register(logWriteHandler));
+        EXPECT_CALL(*logFilledNotifier, Register(versionedSegmentCtx));
     }
 
     // When: Journal is initialized
