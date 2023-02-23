@@ -66,6 +66,7 @@
 #include "src/cli/mount_volume_command.h"
 #include "src/cli/rebuild_perf_impact_command.h"
 #include "src/cli/remove_device_command.h"
+#include "src/cli/remove_listener_command.h"
 #include "src/cli/rename_volume_command.h"
 #include "src/cli/reset_mbr_command.h"
 #include "src/cli/reset_qos_volume_policy_command.h"
@@ -108,6 +109,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["LISTSUBSYSTEM"] = new ListSubsystemCommand();
     cmdDictionary["SUBSYSTEMINFO"] = new ListSubsystemCommand();
     cmdDictionary["ADDLISTENER"] = new AddListenerCommand();
+    cmdDictionary["REMOVELISTENER"] = new RemoveListenerCommand();
     cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();
     cmdDictionary["DELETEVOLUME"] = new DeleteVolumeCommand();

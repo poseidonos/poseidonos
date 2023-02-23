@@ -689,6 +689,24 @@ class PosCliServiceImpl final : public PosCli::Service
     }
 
     grpc::Status
+    RemoveListener(ServerContext* context, const RemoveListenerRequest* request,
+        RemoveListenerResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteRemoveListenerCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
     ListSubsystem(ServerContext* context, const ListSubsystemRequest* request,
         ListSubsystemResponse* reply) override
     {

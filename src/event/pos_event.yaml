@@ -639,6 +639,20 @@ Root:
     Cause:
     Solution:
   -
+    Id: 1253
+    Name: CLI_REMOVE_LISTENER_FAILURE
+    Severity:
+    Description: Failed to remove a listener.
+    Cause:
+    Solution:
+  -
+    Id: 1254
+    Name: CLI_REMOVE_LISTENER_SUCCESS
+    Severity:
+    Description: A listener has been removed.
+    Cause:
+    Solution:
+  -
     Id: 1600
     Name: INVALID_PARAM
     Severity:
@@ -1333,7 +1347,20 @@ Root:
     Description: Failed to add a transport.
     Cause: An error occurred during RPC to SPDK.
     Solution:
-
+  -
+    Id: 2210
+    Name: REMOVE_LISTENER_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to remove a listener.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2211
+    Name: REMOVE_LISTENER_FAILURE_SPDK_FAILURE
+    Severity:
+    Description: Failed to remove a listener.
+    Cause: An error occurred during RPC to SPDK.
+    Solution:
 
     # PBR: 2300 - 2499
   -

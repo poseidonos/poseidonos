@@ -1374,6 +1374,50 @@ CommandProcessor::ExecuteAddListenerCommand(const AddListenerRequest* request, A
 }
 
 grpc::Status
+CommandProcessor::ExecuteRemoveListenerCommand(const RemoveListenerRequest* request, RemoveListenerResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    const char* DEFAULT_ADRFAM = "IPv4";
+    string subnqn = (request->param()).subnqn();
+    string transportType = (request->param()).transporttype();
+    string targetAddress = (request->param()).targetaddress();
+    string transportServiceId = (request->param()).transportserviceid();
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        POS_TRACE_INFO(EID(REMOVE_LISTENER_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
+        _SetEventStatus(EID(REMOVE_LISTENER_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    auto ret = rpcClient.SubsystemRemoveListener(
+        subnqn,
+        transportType,
+        DEFAULT_ADRFAM,
+        targetAddress,
+        transportServiceId);
+
+    if (ret.first != SUCCESS)
+    {
+        POS_TRACE_INFO(EID(REMOVE_LISTENER_FAILURE_SPDK_FAILURE), "subnqn:{}, rpc_return:{}", subnqn, ret.second);
+        _SetEventStatus(EID(REMOVE_LISTENER_FAILURE_SPDK_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply)
 {
     string command = request->command();

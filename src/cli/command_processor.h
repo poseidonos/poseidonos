@@ -111,6 +111,8 @@ using grpc_cli::QosResetVolumePolicyResponse;
 using grpc_cli::QosVolumeNameParam;
 using grpc_cli::RebuildArrayRequest;
 using grpc_cli::RebuildArrayResponse;
+using grpc_cli::RemoveListenerRequest;
+using grpc_cli::RemoveListenerResponse;
 using grpc_cli::RemoveSpareRequest;
 using grpc_cli::RemoveSpareResponse;
 using grpc_cli::ReplaceArrayDeviceRequest;
@@ -217,6 +219,7 @@ public:
     grpc::Status ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* request, CreateSubsystemResponse* reply);
     grpc::Status ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* request, DeleteSubsystemResponse* reply);
     grpc::Status ExecuteAddListenerCommand(const AddListenerRequest* request, AddListenerResponse* reply);
+    grpc::Status ExecuteRemoveListenerCommand(const RemoveListenerRequest* request, RemoveListenerResponse* reply);
     grpc::Status ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply);
     grpc::Status ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* request, SubsystemInfoResponse* reply);
     grpc::Status ExecuteCreateTransportCommand(const CreateTransportRequest* request, CreateTransportResponse* reply);

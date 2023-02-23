@@ -205,6 +205,12 @@ service PosCli {
     	};
 	}
 
+	rpc RemoveListener (RemoveListenerRequest) returns (RemoveListenerResponse) {
+		option (google.api.http) = {
+			post: "/v1/removelistener"
+		};
+	}
+
 	rpc ListSubsystem (ListSubsystemRequest) returns (ListSubsystemResponse) {
 		option (google.api.http) = {
       		post: "/v1/listsubsystem"
@@ -1222,6 +1228,29 @@ message AddListenerRequest {
 }
 
 message AddListenerResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message RemoveListenerRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string transportType = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+	}
+	Param param = 4;
+}
+
+message RemoveListenerResponse {
 	string command = 1;
 	string rid = 2;
 	message Result {

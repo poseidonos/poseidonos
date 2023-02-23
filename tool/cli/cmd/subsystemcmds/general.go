@@ -14,7 +14,7 @@ Subsystem Command for PoseidonOS. Use this command category when you
 create or delete a subsystem. 
 
 Syntax: 
-  poseidonos-cli subsystem [add-listener|create|delete|list|create-transport] [flags]
+  poseidonos-cli subsystem [add-listener|create|delete|list|remove-listener|create-transport] [flags]
 	  `,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -28,5 +28,6 @@ func init() {
 	SubsystemCmd.AddCommand(DeleteSubsystemCmd)
 	SubsystemCmd.AddCommand(ListSubsystemCmd)
 	SubsystemCmd.AddCommand(AddListenerCmd)
+	SubsystemCmd.AddCommand(RemoveListenerCmd)
 	SubsystemCmd.AddCommand(CreateTransportCmd)
 }

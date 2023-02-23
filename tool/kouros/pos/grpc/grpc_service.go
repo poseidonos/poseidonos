@@ -860,6 +860,28 @@ func SendAddListener(posConn POSGRPCConnection, req *pb.AddListenerRequest) (*pb
 	return res, err
 }
 
+func SendRemoveListener(posConn POSGRPCConnection, req *pb.RemoveListenerRequest) (*pb.RemoveListenerResponse, error) {
+	conn, err := dialToCliServer(posConn)
+	if err != nil {
+		log.Print(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(posConn.ReqTimeout))
+	defer cancel()
+
+	res, err := c.RemoveListener(ctx, req)
+	if err != nil {
+		log.Print("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendListSubsystem(posConn POSGRPCConnection, req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse, error) {
 	conn, err := dialToCliServer(posConn)
 	if err != nil {

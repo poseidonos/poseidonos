@@ -30,42 +30,26 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_RPC_CLIENT_H_
-#define SPDK_RPC_CLIENT_H_
-
-#include <jsonrpccpp/client.h>
+#pragma once
 
 #include <string>
-#include <utility>
 
-#include "src/spdk_wrapper/caller/spdk_env_caller.h"
+#include "src/cli/command.h"
 
-namespace pos
+namespace pos_cli
 {
-class SpdkRpcClient
+class RemoveListenerCommand : public Command
 {
 public:
-    SpdkRpcClient(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
-    virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(
-        std::string name, uint32_t numBlocks, uint32_t blockSize, uint32_t numa);
-    std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
-    std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    Json::Value SubsystemList(void);
-    std::pair<int, std::string> SubsystemRemoveListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    virtual std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize);
+    RemoveListenerCommand(void);
+    ~RemoveListenerCommand(void) override;
+    string Execute(json& doc, string rid) override;
 
 private:
-    void _SetClient(void);
-
-    jsonrpc::Client* client;
-    jsonrpc::IClientConnector* connector;
-    static const int SUCCESS = 0;
-
-    SpdkEnvCaller* spdkEnvCaller;
+    bool _CheckParamValidityAndGetNqn(json& doc);
+    int _RemoveListener(json& doc);
+    const char* DEFAULT_ADRFAM = "IPv4";
+    string errorMessage;
+    string subnqn;
 };
-
-} // namespace pos
-
-#endif // SPDK_RPC_CLIENT_H_
+}; // namespace pos_cli

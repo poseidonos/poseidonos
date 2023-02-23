@@ -140,6 +140,10 @@ type POSManager interface {
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	AddListener(param *pb.AddListenerRequest_Param) (*pb.AddListenerResponse, *pb.AddListenerRequest, error)
 
+	// Remove a listener to an NVMe-oF subsystem
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	RemoveListener(param *pb.RemoveListenerRequest_Param) (*pb.RemoveListenerResponse, *pb.RemoveListenerRequest, error)
+
 	// Create an NVMe-oF subsystem to PoseidonOS.
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	CreateSubsystem(param *pb.CreateSubsystemRequest_Param) (*pb.CreateSubsystemResponse, *pb.CreateSubsystemRequest, error)
