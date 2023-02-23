@@ -75,6 +75,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
         segmentInfos = new SegmentInfo[numSegments];
         for (uint32_t segId = 0; segId < numSegments; segId++)
         {
+            // This time, SegmentInfoData is created outside and injected to here, hence we skip initializing it,
+            // but just allocate only.
             segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoData.data[segId]);
         }
     }
@@ -139,8 +141,10 @@ SegmentCtx::Init(void)
         segmentInfoData.data = new SegmentInfoData[numSegments];
         for (uint32_t i = 0; i < numSegments ; ++i)
         {
-            segmentInfos[i].AllocateSegmentInfoData(&(segmentInfoData.data[i]));
-            segmentInfos[i].InitSegmentInfoData();
+            // This time, SegmentInfoData needs to be newly created "and initialized", hence we use AllocateAndInitSegmentInfoData()
+            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData.data[i]);
+            segmentInfos[i].SetArrayId(addrInfo->GetArrayId());
+            segmentInfos[i].SetSegmentId((SegmentId)i);
         }
     }
 
@@ -148,13 +152,13 @@ SegmentCtx::Init(void)
     {
         if (segmentList[state] == nullptr)
         {
-            segmentList[state] = new SegmentList();
+            segmentList[state] = new SegmentList(addrInfo->GetArrayId(), (SegmentState)state);
         }
     }
 
     if (rebuildList == nullptr)
     {
-        rebuildList = new SegmentList();
+        rebuildList = new SegmentList(addrInfo->GetArrayId(), SegmentState::START /* don't care */);
     }
 
     _UpdateSectionInfo();
@@ -219,32 +223,23 @@ SegmentCtx::Dispose(void)
     initialized = false;
 }
 
-void
+bool
 SegmentCtx::MoveToFreeState(SegmentId segId)
 {
-    bool removed = segmentList[SegmentState::VICTIM]->RemoveFromList(segId);
-
-    if (true == removed)
+    bool segmentFreed = segmentInfos[segId].MoveVictimToFree();
+    if (segmentFreed == true)
     {
-        bool segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
-        if (segmentFreed == true)
-        {
-            POS_TRACE_DEBUG(EID(ALLOCATOR_COPIER_FREE_SEGMENT_SUCCESS),
+        bool removed = segmentList[SegmentState::VICTIM]->RemoveFromList(segId);
+        POS_TRACE_INFO(EID(ALLOCATOR_COPIER_FREE_SEGMENT_SUCCESS),
             "segment_id:{}, is_removed_from_victim_segment_list:{}", segId, removed);
-            _SegmentFreed(segId);
-        }
-        else
-        {
-            POS_TRACE_CRITICAL(EID(ALLOCATOR_SEGMENT_REMOVAL_FAILURE_VALID_COUNT_NOT_ZERO),
-            "segment_id: {}", segId);
-            assert(false);
-        }
+        _SegmentFreed(segId);
     }
     else
     {
         POS_TRACE_DEBUG(EID(ALLOCATOR_SEGMENT_REMOVAL_FAILURE_ALREADY_FREE_SEGMENT),
-            "segment_id: {}, is_removed_from_victim_segment_list: {}", segId, removed);
+            "segment_id:{}, state:{}", segId, segmentInfos[segId].GetState());
     }
+    return segmentFreed;
 }
 
 void
@@ -423,7 +418,7 @@ SegmentCtx::GetSectionInfo(int section)
     }
     else
     {
-        assert(false);       
+        assert(false);
     }
 }
 
@@ -570,6 +565,7 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
         }
         else
         {
+            segmentList[SegmentState::SSD]->RemoveFromList(victimSegment);
             segmentList[SegmentState::VICTIM]->AddToList(victimSegment);
         }
 

@@ -119,6 +119,10 @@ ArrayManager::Load(void)
     {
         POS_TRACE_WARN(ret, "");
     }
+    for (pbr::AteData* ate : arrayTableEntries)
+    {
+        delete ate;
+    }
     return ret;
 }
 

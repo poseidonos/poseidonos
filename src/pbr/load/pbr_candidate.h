@@ -32,41 +32,26 @@
 
 #pragma once
 
-#include "src/meta_file_intf/meta_file_intf.h"
+#include "src/pbr/dto/ate_data.h"
 
-#include <cassert>
-#include <cstdint>
-#include <string>
-
-namespace pos
+namespace pbr
 {
-class MockFileIntf : public MetaFileIntf
+class PbrCandidate
 {
 public:
-    using MetaFileIntf::MetaFileIntf;
-    virtual ~MockFileIntf(void) = default;
-
-    virtual int Create(uint64_t fileSize) override;
-    virtual bool DoesFileExist(void) override;
-    virtual int Delete(void) override;
-    virtual uint64_t GetFileSize(void) override;
-
-    virtual int AsyncIO(AsyncMetaFileIoCtx* ctx) override;
-    virtual FnCheckMetaFileIoDone GetIoDoneCheckFunc(void) override;
-    virtual int CheckIoDoneStatus(void* data) override;
-
-    virtual int Open(void) override;
-    virtual int Close(void) override;
+    PbrCandidate(AteData* ateData)
+    : ate(ateData)
+    {
+        id = ate->lastUpdatedDateTime;
+    }
+    void Vote(void) { numOfVotes++; }
+    AteData* GetAteData(void) { return ate; }
+    uint64_t GetId(void) const { return id; }
+    uint32_t GetNumOfVotes(void) const { return numOfVotes; }
 
 private:
-    virtual int _Read(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
-    virtual int _Write(int fd, uint64_t fileOffset, uint64_t length, char* buffer) override;
-
-    void _MockAsyncIo(AsyncMetaFileIoCtx* ctx);
-    void _MockAsyncRead(AsyncMetaFileIoCtx* ctx);
-    void _MockAsyncWrite(AsyncMetaFileIoCtx* ctx);
-
-    uint64_t size = 0;
+    AteData* ate = nullptr;
+    uint64_t id = 0;
+    uint32_t numOfVotes = 1;
 };
-
-} // namespace pos
+} // namespace pbr

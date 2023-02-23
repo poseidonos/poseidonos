@@ -51,7 +51,7 @@ enum SegmentState : int
     NUM_STATES,
 };
 
-class SegmentInfoData
+struct SegmentInfoData
 {
 public:
     std::atomic<uint32_t> validBlockCount;
@@ -60,16 +60,20 @@ public:
     // TODO(sang7.park) : add reserved field here.
     // DO NOT ADD ANY VIRTUAL METHODS HERE TO SUPPORT BACKWARD COMPATIBILITY
     SegmentInfoData(){
-
+        SegmentInfoData(0, 0, SegmentState::FREE);
     }
 
     SegmentInfoData(uint32_t validBlockCount, uint32_t occupiedStripeCount, SegmentState segmentState)
+    {
+        this->Set(validBlockCount, occupiedStripeCount, segmentState);
+    }
+
+    void Set(uint32_t validBlockCount, uint32_t occupiedStripeCount, SegmentState segmentState)
     {
         this->validBlockCount = validBlockCount;
         this->occupiedStripeCount = occupiedStripeCount;
         this->state = segmentState;
     }
-
 };
 
 class SegmentInfo
@@ -78,7 +82,8 @@ public:
     SegmentInfo(void);
     ~SegmentInfo(void);
 
-    virtual void InitSegmentInfoData(void);
+    virtual void AllocateSegmentInfoData(SegmentInfoData* segmentInfoData);
+    virtual void AllocateAndInitSegmentInfoData(SegmentInfoData* segmentInfoData);
     virtual uint32_t GetValidBlockCount(void);
     virtual void SetValidBlockCount(uint32_t cnt);
     virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
@@ -91,20 +96,28 @@ public:
     virtual void SetState(SegmentState newState);
     virtual SegmentState GetState(void);
 
+    /* arrayId and segmentId are for debuggability, not for operation */
+    virtual void SetArrayId(int arrayId);
+    virtual void SetSegmentId(SegmentId segmentId);
+
     virtual void MoveToNvramState(void);
     virtual bool MoveToSsdStateOrFreeStateIfItBecomesEmpty(void);
     virtual bool MoveToVictimState(void);
+    virtual bool MoveVictimToFree(void);
 
     virtual uint32_t GetValidBlockCountIfSsdState(void);
-    virtual void AllocateSegmentInfoData(SegmentInfoData* segmentInfoData);
     virtual void UpdateFrom(SegmentInfo &segmentInfo);
+    static std::string ToSegmentStateString(SegmentState state);
 
 private:
     void _MoveToFreeState(void);
+    void _SetState(SegmentState newState);
 
     SegmentInfoData* data;
     std::mutex seglock;
 
+    int arrayId;
+    SegmentId segmentId;
 };
 
 } // namespace pos

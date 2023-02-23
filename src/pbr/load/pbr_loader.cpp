@@ -32,21 +32,20 @@
 
 #include "pbr_loader.h"
 #include "src/pbr/header/header_loader.h"
-#include "src/pbr/load/pbr_selector.h"
 #include "src/pbr/content/content_loader.h"
 #include "src/pbr/content/content_serializer_factory.h"
+#include "src/include/pos_event_id.h"
 
 namespace pbr
 {
 PbrLoader::PbrLoader(vector<pos::UblockSharedPtr> devs)
-: PbrLoader(new HeaderLoader(), new PbrSelector(), devs)
+: PbrLoader(new HeaderLoader(), devs)
 {
 }
 
-PbrLoader::PbrLoader(IHeaderLoader* headerLoader, IPbrSelector* pbrSelector,
+PbrLoader::PbrLoader(IHeaderLoader* headerLoader,
     vector<pos::UblockSharedPtr> devs)
 : headerLoader(headerLoader),
-  pbrSelector(pbrSelector),
   devs(devs)
 {
 }
@@ -58,7 +57,6 @@ PbrLoader::~PbrLoader(void)
         dev = nullptr;
     }
     devs.clear();
-    delete pbrSelector;
     delete headerLoader;
 }
 
@@ -85,9 +83,9 @@ PbrLoader::Load(vector<AteData*>& ateListOut)
             }
         }
     }
-    if (ret == 0)
+    if (ateListOut.size() == 0)
     {
-        ret = pbrSelector->Select(ateListOut);
+        ret = EID(PBR_LOAD_NO_VALID_PBR_FOUND);
     }
     return ret;
 }

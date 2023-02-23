@@ -33,7 +33,6 @@
 #pragma once
 
 #include "i_pbr_loader.h"
-#include "i_pbr_selector.h"
 #include "src/pbr/header/i_header_loader.h"
 
 #include <vector>
@@ -46,7 +45,7 @@ class PbrLoader : public IPbrLoader
 {
 public:
     PbrLoader(vector<pos::UblockSharedPtr> devs);
-    PbrLoader(IHeaderLoader* headerLoader, IPbrSelector* pbrSelector,
+    PbrLoader(IHeaderLoader* headerLoader,
         vector<pos::UblockSharedPtr> devs);
     virtual ~PbrLoader(void);
 
@@ -55,7 +54,6 @@ protected:
 
 private:
     IHeaderLoader* headerLoader = nullptr;
-    IPbrSelector* pbrSelector = nullptr;
     vector<pos::UblockSharedPtr> devs;
 };
 } // namespace pbr

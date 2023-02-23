@@ -73,6 +73,11 @@ public:
 private:
     struct IoCount
     {
+        IoCount(void)
+        {
+            issuedCount = 0;
+            completedCount = 0;
+        }
         std::atomic<uint64_t> issuedCount;
         std::atomic<uint64_t> completedCount;
     };

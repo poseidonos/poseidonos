@@ -35,6 +35,7 @@
 #include <mutex>
 #include <set>
 
+#include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/address_type.h"
 
 namespace pos
@@ -42,7 +43,8 @@ namespace pos
 class SegmentList
 {
 public:
-    SegmentList(void);
+    SegmentList(void) = default;
+    SegmentList(int arrayId, SegmentState state);
     virtual ~SegmentList(void) = default;
 
     virtual void Reset(void);
@@ -57,6 +59,8 @@ public:
     virtual std::set<SegmentId> GetList(void);
 
 private:
+    int arrayId;
+    SegmentState state;
     uint32_t numSegments;
     std::mutex m;
     std::set<SegmentId> segments;

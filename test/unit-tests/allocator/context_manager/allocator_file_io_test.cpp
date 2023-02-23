@@ -7,6 +7,9 @@
 #include "test/unit-tests/meta_file_intf/async_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
 #include "src/include/pos_event_id.h"
+#include "src/meta_file_intf/mock_file_intf.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/include/allocator_const.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -261,4 +264,5 @@ TEST(AllocatorFileIo, GetSectionInfo_TestSimpleGetter)
     auto actual = fileManager.GetSectionSize(sectionId);
     EXPECT_EQ(actual, info.size);
 }
+
 } // namespace pos

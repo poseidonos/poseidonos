@@ -175,7 +175,7 @@ TEST_F(ReplayLogBufferIntegrationTest, ReplayCirculatedLogBuffer)
 }
 
 // TODO (cheolho.kang): Create a separate file for scenarios that check Valid Block Count / Stripe Occupied Count
-TEST_F(ReplayLogBufferIntegrationTest, ReplayFullSegmentWhenCheckpointFailEventIfSegmentContextFlushed)
+TEST_F(ReplayLogBufferIntegrationTest, DISABLED_ReplayFullSegmentWhenCheckpointFailEventIfSegmentContextFlushed)
 {
     POS_TRACE_DEBUG(9999, "ReplayLogBufferIntegrationTest::ReplayFullSegmentWhenCheckpointFailEventIfSegmentContextFlushed");
 

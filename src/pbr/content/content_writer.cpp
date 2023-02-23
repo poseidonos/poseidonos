@@ -35,6 +35,8 @@
 #include "content_serializer_factory.h"
 #include "src/pbr/io/pbr_writer.h"
 
+#include <memory.h>
+
 namespace pbr
 {
 ContentWriter::ContentWriter(uint32_t revision)
@@ -75,6 +77,7 @@ ContentWriter::Write(AteData* content, string filePath)
 {
     uint32_t length = serializer->GetContentSize();
     char* rawData = new char[length];
+    memset(rawData, 0, length);
     int ret = serializer->Serialize(rawData, content);
     if (ret == 0)
     {

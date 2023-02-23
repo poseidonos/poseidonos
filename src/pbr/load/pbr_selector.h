@@ -32,13 +32,16 @@
 
 #pragma once
 
-#include "i_pbr_selector.h"
+#include "pbr_voting.h"
+#include "src/pbr/dto/ate_data.h"
+#include <vector>
+#include <memory>
 
 namespace pbr
 {
-class PbrSelector : public IPbrSelector
+class PbrSelector
 {
-protected:
-    virtual int Select(vector<AteData*>& candidates) override;
+public:
+    static int Select(vector<AteData*>& candidates, unique_ptr<PbrVoting> voting = make_unique<PbrVoting>());
 };
 } // namespace pbr

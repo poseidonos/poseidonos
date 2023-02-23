@@ -55,7 +55,8 @@ MetaFsConfigManager::MetaFsConfigManager(ConfigManager* configManager)
   rocksdbEnabled_(false),
   rocksDbPath_(""),
   supportNumaDedicatedScheduling_(false),
-  needToIgnoreNumaDedicatedScheduling_(false)
+  needToIgnoreNumaDedicatedScheduling_(false),
+  supportCheckingCrcWhenReading_(false)
 {
     _BuildConfigMap();
 }

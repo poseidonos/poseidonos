@@ -72,6 +72,7 @@ JournalManager::JournalManager(void)
   statusProvider(nullptr),
   logBuffer(nullptr),
   logWriteContextFactory(nullptr),
+  logBufferIoContextFactory(nullptr),
   eventFactory(nullptr),
   logWriteHandler(nullptr),
   volumeEventHandler(nullptr),
