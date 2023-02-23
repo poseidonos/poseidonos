@@ -116,10 +116,18 @@ UNVMfSubmitHandler(struct pos_io* io)
             {
                 AIO aio;
                 aio.SubmitFlush(*io);
-                airlog("UserFlushProcess", "user", io->ioType, 1);
+                airlog("TotalRequestedFlushCnt", "user", io->ioType, 1);
                 return POS_IO_STATUS_SUCCESS;
             }
             break;
+            /*case IO_TYPE::DEALLOCATE:
+            {
+                AIO aio;
+                aio.SubmitTrim(*io);
+                airlog("TotalRequestedTrimCnt", "user", io->volume_id, 1);
+                return POS_IO_STATUS_SUCCESS;
+            }
+            break;*/
             default:
             {
                 POS_EVENT_ID eventId = EID(BLKHDLR_WRONG_IO_DIRECTION);
@@ -139,9 +147,6 @@ UNVMfSubmitHandler(struct pos_io* io)
             ioCompleter.CompleteUbioWithoutRecovery(IOErrorType::VOLUME_UMOUNTED, true);
             return POS_IO_STATUS_SUCCESS;
         }
-
-        airlog("UserWritePendingCnt", "user", io->volume_id, 1);
-        airlog("UserReadPendingCnt", "user", io->volume_id, 1);
 
 #ifdef IBOF_CONFIG_REPLICATOR
         PosReplicatorManager* replicatorManager = PosReplicatorManagerSingleton::Instance();

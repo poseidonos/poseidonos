@@ -67,7 +67,7 @@ ReadSubmission::ReadSubmission(VolumeIoSmartPtr volumeIo, BlockAlignment* blockA
     {
         translator = new Translator{volumeIo->GetVolumeId(), blockAlignment->GetHeadBlock(), blockAlignment->GetBlockCount(), volumeIo->GetArrayId(), true};
     }
-    airlog("RequestedUserRead", "user", GetEventType(), 1);
+    airlog("RequestedUserRead", "user", 0, 1);
 }
 
 ReadSubmission::~ReadSubmission()

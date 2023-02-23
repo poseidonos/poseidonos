@@ -103,7 +103,7 @@ WriteCompletion::_DoSpecificJob()
 
     volumeIo = nullptr;
 
-    airlog("CompleteUserWrite", "user", GetEventType(), 1);
+    airlog("CompleteUserWrite", "user", 0, 1);
 
     return executionSuccessful;
 }
