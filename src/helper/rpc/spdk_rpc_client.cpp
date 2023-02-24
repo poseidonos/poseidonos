@@ -214,6 +214,19 @@ SpdkRpcClient::SubsystemRemoveListener(std::string subnqn, std::string trtype, s
 }
 
 Json::Value
+SpdkRpcClient::SubsystemListListener(std::string subnqn)
+{
+    const string method = "nvmf_subsystem_get_listeners";
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+
+    Json::Value ret = client->CallMethod(method, param);
+
+    return ret;
+}
+
+Json::Value
 SpdkRpcClient::SubsystemList(void)
 {
     const string method = "nvmf_get_subsystems";

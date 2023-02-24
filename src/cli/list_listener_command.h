@@ -38,17 +38,11 @@
 
 namespace pos_cli
 {
-class RemoveListenerCommand : public Command
+class ListListenerCommand : public Command
 {
 public:
-    RemoveListenerCommand(void);
-    ~RemoveListenerCommand(void) override;
+    ListListenerCommand(void);
+    ~ListListenerCommand(void) override;
     string Execute(json& doc, string rid) override;
-
-private:
-    int _RemoveListener(json& doc);
-    const char* DEFAULT_ADRFAM = "IPv4";
-    string errorMessage;
-    string subnqn;
 };
 }; // namespace pos_cli

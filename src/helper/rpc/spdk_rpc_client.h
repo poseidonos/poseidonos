@@ -51,9 +51,12 @@ public:
         std::string name, uint32_t numBlocks, uint32_t blockSize, uint32_t numa);
     std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
     std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
     Json::Value SubsystemList(void);
+
+    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
     std::pair<int, std::string> SubsystemRemoveListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
+    Json::Value SubsystemListListener(std::string subnqn);
+
     virtual std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize);
 
 private:

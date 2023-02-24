@@ -298,6 +298,7 @@ SubsystemCmd = "subsystem" ,
   | ListSubsystemCmd
   | AddListenerCmd
   | RemoveListenerCmd
+  | ListListenerCmd
   | CreateTransportCmd
   ) ;
 
@@ -322,6 +323,9 @@ RemoveListenerCmd = "remove-listener" , ( "--subnqn" | "-q" ) ,
   SubsystemNQN , ( "--trtype" | "-t" ) , TransportType ,
   ( "--traddr" | "-i" ) , TargetAddress , ( "--trsvcid" | "-p" ) ,
   TransportServiceId ;
+
+ListListenerCmd = "list-listener" , ( "--subnqn" | "-q" ) ,
+  SubsystemNQN ;
 
 CreateTransportCmd = "create-transport" ,
   ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,

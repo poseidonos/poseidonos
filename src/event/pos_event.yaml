@@ -653,6 +653,20 @@ Root:
     Cause:
     Solution:
   -
+    Id: 1255
+    Name: CLI_LIST_LISTENER_FAILURE
+    Severity:
+    Description: Failed to list a listener.
+    Cause:
+    Solution:
+  -
+    Id: 1256
+    Name: CLI_LIST_LISTENER_SUCCESS
+    Severity:
+    Description: A listener has been listed.
+    Cause:
+    Solution:
+  -
     Id: 1600
     Name: INVALID_PARAM
     Severity:
@@ -1360,6 +1374,13 @@ Root:
     Severity:
     Description: Failed to remove a listener.
     Cause: An error occurred during RPC to SPDK.
+    Solution:
+  -
+    Id: 2212
+    Name: LIST_LISTENER_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to list a listener.
+    Cause: Could not find the subsystem with the subnqn.
     Solution:
 
     # PBR: 2300 - 2499

@@ -32,6 +32,8 @@
 #include "src/include/array_config.h"
 #include "src/wbt/wbt_cmd_handler.h"
 
+#include <iostream>
+
 CommandProcessor::CommandProcessor(void)
 {
 }
@@ -1410,6 +1412,47 @@ CommandProcessor::ExecuteRemoveListenerCommand(const RemoveListenerRequest* requ
         _SetEventStatus(EID(REMOVE_LISTENER_FAILURE_SPDK_FAILURE), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteListListenerCommand(const ListListenerRequest* request, ListListenerResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    string subnqn = (request->param()).subnqn();
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        POS_TRACE_INFO(EID(LIST_LISTENER_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
+        _SetEventStatus(EID(LIST_LISTENER_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    auto list = rpcClient.SubsystemListListener(subnqn);
+    std::cout << "ExecuteListListenerCommand subnqn: " << subnqn << std::endl;
+    std::cout << list << std::endl;
+
+    for (const auto& listener : list)
+    {
+        grpc_cli::Listener* listenerListItem =
+            reply->mutable_result()->mutable_data()->add_listenerlist();
+        listenerListItem->set_ana_state(listener["ana_state"].asString());
+        auto addr = listenerListItem->mutable_address();
+        addr->set_adrfam(listener["address"]["adrfam"].asString());
+        addr->set_traddr(listener["address"]["traddr"].asString());
+        addr->set_trsvcid(listener["address"]["trsvcid"].asString());
+        addr->set_trtype(listener["address"]["trtype"].asString());
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());

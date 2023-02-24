@@ -211,6 +211,12 @@ service PosCli {
 		};
 	}
 
+	rpc ListListener (ListListenerRequest) returns (ListListenerResponse) {
+		option (google.api.http) = {
+			post: "/v1/listlistener"
+		};
+	}
+
 	rpc ListSubsystem (ListSubsystemRequest) returns (ListSubsystemResponse) {
 		option (google.api.http) = {
       		post: "/v1/listsubsystem"
@@ -1255,6 +1261,41 @@ message RemoveListenerResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Listener {
+	message Address {
+		string trtype = 1;
+		string adrfam = 2;
+		string traddr = 3;
+		string trsvcid = 4;
+	}
+	Address address = 1;
+	string ana_state = 2;
+}
+
+message ListListenerRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+	}
+	Param param = 4;
+}
+
+message ListListenerResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message ListenerList {
+			repeated Listener listenerlist = 1;
+		}
+		ListenerList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;

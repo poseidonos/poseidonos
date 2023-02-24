@@ -56,6 +56,7 @@
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_array_command.h"
 #include "src/cli/list_device_command.h"
+#include "src/cli/list_listener_command.h"
 #include "src/cli/list_qos_policies_command.h"
 #include "src/cli/list_subsystem_command.h"
 #include "src/cli/list_volume_command.h"
@@ -110,6 +111,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["SUBSYSTEMINFO"] = new ListSubsystemCommand();
     cmdDictionary["ADDLISTENER"] = new AddListenerCommand();
     cmdDictionary["REMOVELISTENER"] = new RemoveListenerCommand();
+    cmdDictionary["LISTLISTENER"] = new ListListenerCommand();
     cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();
     cmdDictionary["DELETEVOLUME"] = new DeleteVolumeCommand();

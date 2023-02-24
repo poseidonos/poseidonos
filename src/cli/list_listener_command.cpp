@@ -30,25 +30,62 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "src/cli/list_listener_command.h"
 
-#include <string>
-
-#include "src/cli/command.h"
+#include "src/cli/cli_event_code.h"
+#include "src/helper/rpc/spdk_rpc_client.h"
+#include "src/network/nvmf_target.h"
+#include "src/logger/logger.h"
 
 namespace pos_cli
 {
-class RemoveListenerCommand : public Command
+ListListenerCommand::ListListenerCommand(void)
 {
-public:
-    RemoveListenerCommand(void);
-    ~RemoveListenerCommand(void) override;
-    string Execute(json& doc, string rid) override;
+}
 
-private:
-    int _RemoveListener(json& doc);
-    const char* DEFAULT_ADRFAM = "IPv4";
+// Exclude destructor of abstract class from function coverage report to avoid known issues in gcc/gcov
+// LCOV_EXCL_START
+ListListenerCommand::~ListListenerCommand(void)
+{
+}
+// LCOV_EXCL_STOP
+
+string
+ListListenerCommand::Execute(json& doc, string rid)
+{
+    JsonFormat jFormat;
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+    JsonElement data("data");
+    string subnqn = doc["param"]["name"].get<string>();
     string errorMessage;
-    string subnqn;
-};
-}; // namespace pos_cli
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        errorMessage = "Failed to list listener. Requested Subsystem does not exist or invalid subnqn. ";
+        POS_EVENT_ID result = EID(LIST_LISTENER_FAILURE_NO_SUBNQN);
+        return jFormat.MakeResponse(
+            "LISTLISTENER", rid, static_cast<int>(result), errorMessage, data, GetPosInfo());
+    }
+
+    auto list = rpcClient.SubsystemListListener(subnqn);
+
+    JsonArray array("listenerlist");
+    for (const auto& listener : list)
+    {
+        JsonElement elem("");
+        elem.SetAttribute(
+            JsonAttribute("ana_state", "\"" + listener["ana_state"].asString() + "\""));
+
+        array.AddElement(elem);
+    }
+
+    data.SetArray(array);
+
+    int event = EID(CLI_LIST_LISTENER_SUCCESS);
+    POS_TRACE_INFO(event, "");
+    return jFormat.MakeResponse(
+        "LISTLISTENER", rid, SUCCESS,
+        "list of existing listeners", data, GetPosInfo());
+}
+} // namespace pos_cli

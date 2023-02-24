@@ -9,7 +9,7 @@ Subsystem Command for PoseidonOS. Use this command category when you
 create or delete a subsystem. 
 
 Syntax: 
-  poseidonos-cli subsystem [add-listener|create|delete|list|remove-listener|create-transport] [flags]
+  poseidonos-cli subsystem [add-listener|create|delete|list|list-listener|remove-listener|create-transport] [flags]
 	  
 
 ```
@@ -44,5 +44,6 @@ poseidonos-cli subsystem [flags]
 * [poseidonos-cli subsystem create-transport](poseidonos-cli_subsystem_create-transport.md)	 - Create NVMf transport to PoseidonOS.
 * [poseidonos-cli subsystem delete](poseidonos-cli_subsystem_delete.md)	 - Delete a subsystem from PoseidonOS.
 * [poseidonos-cli subsystem list](poseidonos-cli_subsystem_list.md)	 - List subsystems from PoseidonOS.
+* [poseidonos-cli subsystem list-listener](poseidonos-cli_subsystem_list-listener.md)	 - List a listener to an NVMe-oF subsystem
 * [poseidonos-cli subsystem remove-listener](poseidonos-cli_subsystem_remove-listener.md)	 - Remove a listener to an NVMe-oF subsystem
 

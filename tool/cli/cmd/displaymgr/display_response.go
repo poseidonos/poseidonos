@@ -546,6 +546,44 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		}
 		w.Flush()
 
+	case "LISTLISTENER":
+		res := &pb.ListListenerResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w,
+			"Addr.trtype\t"+
+				globals.FieldSeparator+"Addr.adrfam\t"+
+				globals.FieldSeparator+"Addr.traddr\t"+
+				globals.FieldSeparator+"Addr.trsvcid\t"+
+				globals.FieldSeparator+"ana_state")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"------------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"------------------\t"+
+				globals.FieldSeparator+"--------------\t"+
+				globals.FieldSeparator+"---------------")
+
+		// Data
+		for _, listener := range res.GetResult().GetData().GetListenerlist() {
+			fmt.Fprintln(w,
+				listener.GetAddress().GetTrtype()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetAdrfam()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetTraddr()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetTrsvcid()+"\t"+
+					globals.FieldSeparator+listener.GetAnaState())
+		}
+		w.Flush()
+
 	case "SUBSYSTEMINFO":
 		res := &pb.SubsystemInfoResponse{}
 		protojson.Unmarshal([]byte(resJson), res)

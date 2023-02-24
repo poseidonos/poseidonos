@@ -91,6 +91,8 @@ using grpc_cli::ListArrayRequest;
 using grpc_cli::ListArrayResponse;
 using grpc_cli::ListDeviceRequest;
 using grpc_cli::ListDeviceResponse;
+using grpc_cli::ListListenerRequest;
+using grpc_cli::ListListenerResponse;
 using grpc_cli::ListQOSPolicyRequest;
 using grpc_cli::ListQOSPolicyResponse;
 using grpc_cli::ListSubsystemRequest;
@@ -220,6 +222,7 @@ public:
     grpc::Status ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* request, DeleteSubsystemResponse* reply);
     grpc::Status ExecuteAddListenerCommand(const AddListenerRequest* request, AddListenerResponse* reply);
     grpc::Status ExecuteRemoveListenerCommand(const RemoveListenerRequest* request, RemoveListenerResponse* reply);
+    grpc::Status ExecuteListListenerCommand(const ListListenerRequest* request, ListListenerResponse* reply);
     grpc::Status ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply);
     grpc::Status ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* request, SubsystemInfoResponse* reply);
     grpc::Status ExecuteCreateTransportCommand(const CreateTransportRequest* request, CreateTransportResponse* reply);
