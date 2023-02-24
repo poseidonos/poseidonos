@@ -99,7 +99,8 @@ SUBDIRS = allocator \
         memory_checker \
         resource_checker \
         event \
-        trace 
+        trace \
+        restore
 
 ifeq ($(CONFIG_REPLICATOR), y)
         SUBDIRS += pos_replicator

@@ -80,6 +80,7 @@ private:
     int _LoadConfiguration(void);
     void _RunCLIService(void);
     void _SetupThreadModel(void);
+    void _RestoreState(void);
 
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
     const uint32_t total_init_seq_cnt {13};
