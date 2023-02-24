@@ -22,6 +22,8 @@ using grpc_cli::PosCli;
 using namespace google::protobuf;
 
 void
+ShutdownGrpcServer();
+void
 RunGrpcServer();
 void
 _LogCliRequest(const google::protobuf::Message* request, std::string command = "");

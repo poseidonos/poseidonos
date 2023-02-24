@@ -32,48 +32,20 @@
 
 #pragma once
 
-#include <signal.h>
-
-#include <atomic>
-#include <cstdio>
-#include <list>
-#include <string>
-#include <thread>
-
-#include "src/lib/singleton.h"
-
 namespace pos
 {
-typedef void (*SignalHandlerType)(int);
 
-class SignalHandler
+// This interface class should not be inherited by multiple classes
+class PoseidonosInterface
 {
 public:
-    SignalHandler(void);
-    ~SignalHandler(void);
-    void Register(void);
-    void Deregister(void);
-    static void INTHandler(int sig);
-    static void ExceptionHandler(int sig);
-
-private:
-    void _ExceptionHandler(int sig);
-    void _GetThreadIdList(void);
-    void _BacktraceAndInvokeNextThread(int sig);
-    void _Backtrace(void);
-    void _ShutdownProcess(void);
-    void _Log(std::string logMsg, bool printTimeStamp = true);
-    std::list<long> threadList;
-    std::atomic<uint32_t> pendingThreads;
-    static const long ATOI_ERR = 0;
-    static const int MAX_CALL_STACK = 100;
-    std::atomic<bool> listUpdated;
-    std::atomic<int> dominantSignal;
-    FILE* btLogFilePtr;
-    std::thread* shutdownTask;
-    std::thread* signalHandler;
+    virtual void TriggerTerminate(void) = 0;
+    static PoseidonosInterface* GetInterface(void)
+    {
+        return instance;
+    }
+protected:
+    static PoseidonosInterface* instance;
 };
-
-using SignalHandlerSingleton = Singleton<SignalHandler>;
 
 } // namespace pos
