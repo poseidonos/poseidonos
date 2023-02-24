@@ -299,6 +299,7 @@ SubsystemCmd = "subsystem" ,
   | AddListenerCmd
   | RemoveListenerCmd
   | ListListenerCmd
+  | SetListenerAnaStateCmd
   | CreateTransportCmd
   ) ;
 
@@ -326,6 +327,11 @@ RemoveListenerCmd = "remove-listener" , ( "--subnqn" | "-q" ) ,
 
 ListListenerCmd = "list-listener" , ( "--subnqn" | "-q" ) ,
   SubsystemNQN ;
+
+SetListenerAnaStateCmd = "set-listener-ana-state" , ( "--subnqn" | "-q" ) ,
+  SubsystemNQN , ( "--trtype" | "-t" ) , TransportType ,
+  ( "--traddr" | "-i" ) , TargetAddress , ( "--trsvcid" | "-p" ) ,
+  TransportServiceId , ( "--anastate" | "-a" ) , AnaState ;
 
 CreateTransportCmd = "create-transport" ,
   ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,

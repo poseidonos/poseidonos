@@ -217,6 +217,12 @@ service PosCli {
 		};
 	}
 
+	rpc SetListenerAnaState (SetListenerAnaStateRequest) returns (SetListenerAnaStateResponse) {
+		option (google.api.http) = {
+			post: "/v1/setlisteneranastate"
+		};
+	}
+
 	rpc ListSubsystem (ListSubsystemRequest) returns (ListSubsystemResponse) {
 		option (google.api.http) = {
       		post: "/v1/listsubsystem"
@@ -1266,6 +1272,30 @@ message RemoveListenerResponse {
 	PosInfo info = 4;
 }
 
+message SetListenerAnaStateRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string transportType = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+		string anaState = 5;
+	}
+	Param param = 4;
+}
+
+message SetListenerAnaStateResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
 message Listener {
 	message Address {
 		string trtype = 1;
@@ -1274,7 +1304,7 @@ message Listener {
 		string trsvcid = 4;
 	}
 	Address address = 1;
-	string ana_state = 2;
+	string anaState = 2;
 }
 
 message ListListenerRequest {

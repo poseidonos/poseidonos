@@ -348,6 +348,15 @@ func (p *POSGRPCManager) ListListener(param *pb.ListListenerRequest_Param) (*pb.
 	return res, req, err
 }
 
+// Set a listener's ana state to an NVMe-oF subsystem
+// The function takes a protobuf format as parameter and returns response in protobuf format
+func (p *POSGRPCManager) SetListenerAnaState(param *pb.SetListenerAnaStateRequest_Param) (*pb.SetListenerAnaStateResponse, *pb.SetListenerAnaStateRequest, error) {
+	command := "SETLISTENERANASTATE"
+	req := &pb.SetListenerAnaStateRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor, Param: param}
+	res, err := grpc.SendSetListenerAnaState(p.connection, req)
+	return res, req, err
+}
+
 // Create an NVMe-oF subsystem to PoseidonOS.
 // The function takes a protobuf format as parameter and returns response in protobuf format
 func (p *POSGRPCManager) CreateSubsystem(param *pb.CreateSubsystemRequest_Param) (*pb.CreateSubsystemResponse, *pb.CreateSubsystemRequest, error) {

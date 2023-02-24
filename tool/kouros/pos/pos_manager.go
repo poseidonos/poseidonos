@@ -148,6 +148,10 @@ type POSManager interface {
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	ListListener(param *pb.ListListenerRequest_Param) (*pb.ListListenerResponse, *pb.ListListenerRequest, error)
 
+	// Set a listener's ana state to an NVMe-oF subsystem
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	SetListenerAnaState(param *pb.SetListenerAnaStateRequest_Param) (*pb.SetListenerAnaStateResponse, *pb.SetListenerAnaStateRequest, error)
+
 	// Create an NVMe-oF subsystem to PoseidonOS.
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	CreateSubsystem(param *pb.CreateSubsystemRequest_Param) (*pb.CreateSubsystemResponse, *pb.CreateSubsystemRequest, error)
