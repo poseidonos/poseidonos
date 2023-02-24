@@ -34,6 +34,8 @@
 
 #include "src/pbr/dto/ate_data.h"
 
+#include <memory>
+
 namespace pbr
 {
 class IContentSerializer
@@ -42,7 +44,7 @@ public:
     IContentSerializer(void) = default;
     virtual ~IContentSerializer(void) = default;
     virtual int Serialize(char* rawDataOut /* OUT PARAM */, AteData* ateData) = 0;
-    virtual int Deserialize(AteData*& ateOut /* OUT PARAM */, char* rawData) = 0;
+    virtual int Deserialize(unique_ptr<AteData>& ateOut /* OUT PARAM */, char* rawData) = 0;
     virtual uint32_t GetContentSize(void) = 0;
     virtual uint64_t GetContentStartLba(void) = 0;
 };

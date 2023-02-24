@@ -46,18 +46,18 @@ class FakeAteData : public AteData
 {
 public:
     FakeAteData(void) {};
-    FakeAteData(AteData* data)
+    FakeAteData(AteData& data)
     {
-        nodeUuid = data->nodeUuid;
-        arrayName = data->arrayName;
-        arrayUuid = data->arrayUuid;
-        createdDateTime = data->createdDateTime;
-        lastUpdatedDateTime = data->lastUpdatedDateTime;
-        for (auto item : data->adeList)
+        nodeUuid = data.nodeUuid;
+        arrayName = data.arrayName;
+        arrayUuid = data.arrayUuid;
+        createdDateTime = data.createdDateTime;
+        lastUpdatedDateTime = data.lastUpdatedDateTime;
+        for (auto item : data.adeList)
         {
             adeList.push_back(item);
         }
-        for (auto item : data->pteList)
+        for (auto item : data.pteList)
         {
             pteList.push_back(item);
         }

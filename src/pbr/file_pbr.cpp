@@ -45,7 +45,7 @@ namespace pbr
 const string FilePbr::dirPath = "/etc/pos/pbr/";
 
 int
-FilePbr::Load(vector<AteData*>& ateListOut)
+FilePbr::Load(vector<unique_ptr<AteData>>& ateListOut)
 {
     vector<string> files;
     GetFilesInTheDirectory(dirPath, files);

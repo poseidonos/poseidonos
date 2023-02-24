@@ -38,6 +38,7 @@
 #include "src/pbr/io/i_pbr_writer.h"
 
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -47,8 +48,11 @@ class PbrFileUpdater : public IPbrUpdater
 {
 public:
     PbrFileUpdater(uint32_t revision, string filePath);
-    PbrFileUpdater(IHeaderSerializer* headerSerializer, IContentSerializer* contentSerializer,
-        IPbrWriter* pbrWriter, uint32_t revision, string filePath);
+    PbrFileUpdater(unique_ptr<IHeaderSerializer> headerSerializer,
+        unique_ptr<IContentSerializer> contentSerializer,
+        unique_ptr<IPbrWriter> pbrWriter,
+        uint32_t revision,
+        string filePath);
     virtual ~PbrFileUpdater();
 
 protected:
@@ -56,9 +60,9 @@ protected:
     virtual int Clear(void) override;
 
 private:
-    IHeaderSerializer* headerSerializer = nullptr;
-    IContentSerializer* contentSerializer = nullptr;
-    IPbrWriter* pbrWriter = nullptr;
+    unique_ptr<IHeaderSerializer> headerSerializer = nullptr;
+    unique_ptr<IContentSerializer> contentSerializer = nullptr;
+    unique_ptr<IPbrWriter> pbrWriter = nullptr;
     uint32_t revision;
     string filePath;
 };

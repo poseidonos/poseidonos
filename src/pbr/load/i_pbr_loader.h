@@ -34,6 +34,7 @@
 
 #include "src/pbr/dto/ate_data.h"
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -43,6 +44,6 @@ class IPbrLoader
 {
 public:
     virtual ~IPbrLoader() {};
-    virtual int Load(vector<AteData*>& ateListOut /* OUT PARAM */) = 0;
+    virtual int Load(vector<unique_ptr<AteData>>& ateListOut /* OUT PARAM */) = 0;
 };
 } // namespace pbr

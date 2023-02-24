@@ -39,7 +39,8 @@ using namespace std;
 namespace pbr
 {
 int
-PbrSelector::Select(vector<AteData*>& candidiates, unique_ptr<PbrVoting> voting)
+PbrSelector::Select(vector<unique_ptr<AteData>>& candidiates,
+    unique_ptr<PbrVoting> voting)
 {
     int ret = 0;
     if (candidiates.size() == 0)
@@ -48,9 +49,9 @@ PbrSelector::Select(vector<AteData*>& candidiates, unique_ptr<PbrVoting> voting)
         POS_TRACE_WARN(ret, "");
         return ret;
     }
-    for (auto candidate : candidiates)
+    for (auto& candidate : candidiates)
     {
-        voting->Vote(candidate);
+        voting->Vote(candidate.get());
     }
     auto winners = voting->Poll();
     if (winners.size() == 0)
@@ -63,7 +64,7 @@ PbrSelector::Select(vector<AteData*>& candidiates, unique_ptr<PbrVoting> voting)
         bool isWinner = false;
         for (auto winner : winners)
         {
-            if (winner.second == *it)
+            if (winner.second == (*it).get())
             {
                 isWinner = true;
                 break;
@@ -71,7 +72,6 @@ PbrSelector::Select(vector<AteData*>& candidiates, unique_ptr<PbrVoting> voting)
         }
         if (isWinner == false)
         {
-            delete *it;
             it = candidiates.erase(it);
         }
         else

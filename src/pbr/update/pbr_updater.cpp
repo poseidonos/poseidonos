@@ -40,17 +40,21 @@
 
 namespace pbr
 {
-PbrUpdater::PbrUpdater(uint32_t revision, vector<pos::UblockSharedPtr> devs)
-: PbrUpdater(new HeaderSerializer(), ContentSerializerFactory::GetSerializer(revision),
-    new PbrWriter(), revision, devs)
+PbrUpdater::PbrUpdater(uint32_t revision, const vector<pos::UblockSharedPtr>& devs)
+: PbrUpdater(make_unique<HeaderSerializer>(),
+    ContentSerializerFactory::GetSerializer(revision),
+    make_unique<PbrWriter>(), revision, devs)
 {
 }
 
-PbrUpdater::PbrUpdater(IHeaderSerializer* headerSerializer, IContentSerializer* contentSerializer,
-    IPbrWriter* pbrWriter, uint32_t revision, vector<pos::UblockSharedPtr> devs)
-: headerSerializer(headerSerializer),
-  contentSerializer(contentSerializer),
-  pbrWriter(pbrWriter),
+PbrUpdater::PbrUpdater(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IContentSerializer> contentSerializer,
+    unique_ptr<IPbrWriter> pbrWriter,
+    uint32_t revision,
+    const vector<pos::UblockSharedPtr>& devs)
+: headerSerializer(move(headerSerializer)),
+  contentSerializer(move(contentSerializer)),
+  pbrWriter(move(pbrWriter)),
   revision(revision),
   devs(devs)
 {
@@ -63,9 +67,6 @@ PbrUpdater::~PbrUpdater(void)
         dev = nullptr;
     }
     devs.clear();
-    delete pbrWriter;
-    delete contentSerializer;
-    delete headerSerializer;
 }
 
 int

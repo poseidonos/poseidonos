@@ -38,6 +38,7 @@
 #include "src/pbr/io/i_pbr_writer.h"
 
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -46,9 +47,12 @@ namespace pbr
 class PbrUpdater : public IPbrUpdater
 {
 public:
-    PbrUpdater(uint32_t revision, vector<pos::UblockSharedPtr> devs);
-    PbrUpdater(IHeaderSerializer* headerSerializer, IContentSerializer* contentSerializer,
-        IPbrWriter* pbrWriter, uint32_t revision, vector<pos::UblockSharedPtr> devs);
+    PbrUpdater(uint32_t revision, const vector<pos::UblockSharedPtr>& devs);
+    PbrUpdater(unique_ptr<IHeaderSerializer> headerSerializer,
+        unique_ptr<IContentSerializer> contentSerializer,
+        unique_ptr<IPbrWriter> pbrWriter,
+        uint32_t revision,
+        const vector<pos::UblockSharedPtr>& devs);
     virtual ~PbrUpdater();
 
 protected:
@@ -56,9 +60,9 @@ protected:
     virtual int Clear(void) override;
 
 private:
-    IHeaderSerializer* headerSerializer = nullptr;
-    IContentSerializer* contentSerializer = nullptr;
-    IPbrWriter* pbrWriter = nullptr;
+    unique_ptr<IHeaderSerializer> headerSerializer = nullptr;
+    unique_ptr<IContentSerializer> contentSerializer = nullptr;
+    unique_ptr<IPbrWriter> pbrWriter = nullptr;
     uint32_t revision;
     vector<pos::UblockSharedPtr> devs;
 };

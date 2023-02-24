@@ -35,35 +35,35 @@
 #include "src/pbr/content/content_serializer_factory.h"
 #include "src/pbr/io/pbr_reader.h"
 #include "src/logger/logger.h"
+
 #include <memory.h>
 
 namespace pbr
 {
 PbrFileLoader::PbrFileLoader(vector<string> fileList)
-: PbrFileLoader(new HeaderSerializer(), new PbrReader(), fileList)
+: PbrFileLoader(make_unique<HeaderSerializer>(),
+    make_unique<PbrReader>(), fileList)
 {
 }
 
-PbrFileLoader::PbrFileLoader(IHeaderSerializer* headerSerializer,
-    IPbrReader* pbrReader, vector<string> fileList)
-: headerSerializer(headerSerializer),
-  pbrReader(pbrReader),
+PbrFileLoader::PbrFileLoader(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IPbrReader> pbrReader, vector<string> fileList)
+: headerSerializer(move(headerSerializer)),
+  pbrReader(move(pbrReader)),
   fileList(fileList)
 {
 }
 
 PbrFileLoader::~PbrFileLoader(void)
 {
-    delete pbrReader;
-    delete headerSerializer;
 }
 
 int
-PbrFileLoader::Load(vector<AteData*>& ateListOut)
+PbrFileLoader::Load(vector<unique_ptr<AteData>>& ateListOut)
 {
     int ret = 0;
     uint32_t pbrSize = header::TOTAL_PBR_SIZE;
-    char* pbrData = new char[pbrSize];
+    char pbrData[pbrSize];
     for (auto filePath : fileList)
     {
         memset(pbrData, 0, pbrSize);
@@ -76,21 +76,15 @@ PbrFileLoader::Load(vector<AteData*>& ateListOut)
             {
                 auto serializer = ContentSerializerFactory::GetSerializer(headerElem.revision);
                 uint64_t startOffset = serializer->GetContentStartLba();
-                AteData* ateData = nullptr;
+                unique_ptr<AteData> ateData = nullptr;
                 ret = serializer->Deserialize(ateData, &pbrData[startOffset]);
-                delete serializer;
                 if (ret == 0)
                 {
-                    ateListOut.push_back(ateData);
-                }
-                else
-                {
-                    delete ateData;
+                    ateListOut.push_back(move(ateData));
                 }
             }
         }
     }
-    delete[] pbrData;
     if (ateListOut.size() == 0)
     {
         ret = EID(PBR_LOAD_NO_VALID_PBR_FOUND);
