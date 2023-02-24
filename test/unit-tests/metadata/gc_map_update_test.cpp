@@ -7,11 +7,11 @@
 
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
-#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
+#include "test/unit-tests/metadata/segment_context_updater_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -22,7 +22,7 @@ TEST(GcMapUpdate, GcMapUpdate_testIfConstructedSuccessfully)
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
@@ -32,7 +32,7 @@ TEST(GcMapUpdate, GcMapUpdate_testIfConstructedSuccessfully)
     PartitionLogicalSize partitionLogicalSize;
     partitionLogicalSize.stripesPerSegment = 1;
     EXPECT_CALL(arrayInfo, GetSizeInfo).WillRepeatedly(Return(&partitionLogicalSize));
-    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
+    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtxUpdater, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
 }
 
 TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
@@ -45,7 +45,7 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
 
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
@@ -68,7 +68,7 @@ TEST(GcMapUpdate, _DoSpecificJob_testWithValidMapAndInvalidSegBlks)
     }
     invalidSegCnt[1] = 10;
 
-    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtx, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
+    GcMapUpdate gcMapUpdate(&vsaMap, &stripeMap, &segmentCtxUpdater, &contextManager, &arrayInfo, StripeSmartPtr(stripe), mapUpdateInfoList, invalidSegCnt);
 
     ON_CALL(*stripe, GetUserLsid).WillByDefault(Return(userLsid));
     ON_CALL(*stripe, GetVsid).WillByDefault(Return(vsid));

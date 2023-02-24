@@ -40,7 +40,6 @@
 #include "src/allocator/context_manager/block_allocation_status.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
-#include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_context_replayer.h"
 #include "src/allocator/i_segment_ctx.h"
@@ -52,7 +51,6 @@ namespace pos
 class IAllocatorFileIoClient;
 class AllocatorCtx;
 class SegmentCtx;
-class VersionedSegmentCtx;
 class ContextReplayer;
 class TelemetryPublisher;
 class EventScheduler;
@@ -67,7 +65,7 @@ public:
     ContextManager(void) = default;
     ContextManager(TelemetryPublisher* tp,
         AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
-        IVersionedSegmentContext* versionedSegCtx_, GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
+        GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_,
         ContextIoManager* ioManager, ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_);
     ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_);
     virtual ~ContextManager(void);
@@ -101,9 +99,6 @@ public:
     virtual GcCtx* GetGcCtx(void) { return gcCtx; }
     virtual std::mutex& GetCtxLock(void) { return ctxLock; }
     virtual BlockAllocationStatus* GetAllocationStatus(void) { return blockAllocStatus; }
-    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_);
-    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_);
-    virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void);
 
 private:
     ContextIoManager* ioManager;
@@ -111,7 +106,6 @@ private:
     AllocatorCtx* allocatorCtx;
     SegmentCtx* segmentCtx;
     RebuildCtx* rebuildCtx;
-    IVersionedSegmentContext* versionedSegCtx;
     ContextReplayer* contextReplayer;
     GcCtx* gcCtx;
     BlockAllocationStatus* blockAllocStatus;

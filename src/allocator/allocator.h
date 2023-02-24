@@ -92,7 +92,6 @@ public:
     virtual IContextManager* GetIContextManager(void);
     virtual IContextReplayer* GetIContextReplayer(void);
     virtual ISegmentCtx* GetISegmentCtx(void);
-    void PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx);
 
 private:
     void _CreateSubmodules(void);

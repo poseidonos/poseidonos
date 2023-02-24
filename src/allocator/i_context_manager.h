@@ -60,9 +60,6 @@ public:
 
     virtual SegmentCtx* GetSegmentCtx(void) = 0;
     virtual GcCtx* GetGcCtx(void) = 0;
-    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_) = 0;
-    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_) = 0;
-    virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void) = 0;
 };
 
 } // namespace pos

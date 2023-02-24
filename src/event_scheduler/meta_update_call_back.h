@@ -37,18 +37,20 @@
 #include <memory>
 
 #include "callback.h"
+#include "src/allocator/i_segment_ctx.h"
 #include "src/metadata/segment_context_updater.h"
 
 namespace pos
 {
 class EventScheduler;
 class VirtualBlks;
+class SegmentContextUpdater;
 
-class MetaUpdateCallback : public Callback
+class MetaUpdateCallback : public Callback, public ISegmentCtx
 {
 public:
     MetaUpdateCallback(void);
-    MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
+    MetaUpdateCallback(bool isFrontEnd, SegmentContextUpdater* segmentCtx_,
         CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
         SystemTimeoutChecker* timeoutChecker = nullptr, EventScheduler* eventscheduler = nullptr);
     virtual ~MetaUpdateCallback(void);
@@ -57,11 +59,11 @@ public:
     virtual int GetLogGroupId(void);
 
 protected:
-    virtual void ValidateBlks(VirtualBlks blks);
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid);
+    virtual void ValidateBlks(VirtualBlks blks) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
 
-    ISegmentCtx* segmentCtx;
+    SegmentContextUpdater* segmentCtx;
     int logGroupId;
 };
 } // namespace pos

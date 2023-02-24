@@ -31,6 +31,8 @@
 */
 
 #include "src/metadata/segment_context_updater.h"
+
+#include "src/allocator/i_segment_ctx.h"
 #include "src/array_models/dto/partition_logical_size.h"
 
 namespace pos
@@ -50,24 +52,6 @@ SegmentContextUpdater::~SegmentContextUpdater(void)
 }
 
 void
-SegmentContextUpdater::ValidateBlks(VirtualBlks blks)
-{
-    activeSegmentCtx->ValidateBlks(blks);
-}
-
-bool
-SegmentContextUpdater::InvalidateBlks(VirtualBlks blks, bool isForced)
-{
-    return activeSegmentCtx->InvalidateBlks(blks, isForced);
-}
-
-bool
-SegmentContextUpdater::UpdateOccupiedStripeCount(StripeId lsid)
-{
-    return activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
-}
-
-void
 SegmentContextUpdater::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
 {
     pthread_rwlock_wrlock(&lock);
@@ -83,39 +67,20 @@ SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForc
     pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
     bool ret = activeSegmentCtx->InvalidateBlks(blks, isForced);
-    if (true == ret)
-    {
-        versionedContext->ResetInfosAfterSegmentFreed(segmentId);
-    }
-    else
-    {
-        versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-    }
+    versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
     pthread_rwlock_unlock(&lock);
     return ret;
 }
 
 bool
-SegmentContextUpdater::UpdateStripeCount(StripeId lsid, int logGroupId)
+SegmentContextUpdater::UpdateOccupiedStripeCountWithGroupId(StripeId lsid, int logGroupId)
 {
     pthread_rwlock_wrlock(&lock);
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
     bool ret = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
-    if (true == ret)
-    {
-        versionedContext->ResetInfosAfterSegmentFreed(segmentId);
-    }
-    else
-    {
-        versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
-    }
+    versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
     pthread_rwlock_unlock(&lock);
     return ret;
 }
 
-void
-SegmentContextUpdater::ResetInfos(SegmentId segId)
-{
-    versionedContext->ResetInfosAfterSegmentFreed(segId);
-}
 } // namespace pos

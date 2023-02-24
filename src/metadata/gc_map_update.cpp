@@ -42,7 +42,7 @@
 namespace pos
 {
 GcMapUpdate::GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    ISegmentCtx* segmentCtx_, IContextManager* contextManager,
+    SegmentContextUpdater* segmentCtx_, IContextManager* contextManager,
     IArrayInfo* arrayInfo, StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList,
     std::map<SegmentId, uint32_t> invalidSegCnt)
 : MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),

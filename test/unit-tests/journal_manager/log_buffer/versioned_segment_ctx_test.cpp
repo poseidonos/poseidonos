@@ -367,7 +367,7 @@ TEST(VersionedSegmentCtx, LogBufferReseted_testIfInfoIsResetted)
     delete[] segmentInfoData;
 }
 
-TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
+TEST(VersionedSegmentCtx, NotifySegmentFreed_testIfSegmentFreed)
 {
     // Make precondition
     VersionedSegmentCtx versionedSegCtx;
@@ -403,12 +403,12 @@ TEST(VersionedSegmentCtx, ResetSegInfos_testIfSegmentFreed)
     EXPECT_EQ(result[2].occupiedStripeCount, 0);
 
     // Test
-    versionedSegCtx.ResetInfosAfterSegmentFreed(0);
+    versionedSegCtx.NotifySegmentFreed(0);
     result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
     EXPECT_EQ(result[0].occupiedStripeCount, 0);
     EXPECT_EQ(result[1].occupiedStripeCount, 12);
 
-    versionedSegCtx.ResetInfosAfterSegmentFreed(1);
+    versionedSegCtx.NotifySegmentFreed(1);
     result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
     EXPECT_EQ(result[0].occupiedStripeCount, 0);
     EXPECT_EQ(result[1].occupiedStripeCount, 0);

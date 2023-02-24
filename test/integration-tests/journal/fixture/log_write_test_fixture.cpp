@@ -105,7 +105,8 @@ LogWriteTestFixture::WriteBlockLog(int volId, BlkAddr rba, VirtualBlks blks)
 
     IJournalWriter* writer = journal->GetJournalWriter();
 
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogType::BLOCK_WRITE_DONE));
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(),
+        journal->GetVersionedSegmentContext(), testInfo, blks, LogType::BLOCK_WRITE_DONE));
     int result = writer->AddBlockMapUpdatedLog(volumeIo, event);
     if (result == 0)
     {
@@ -140,7 +141,8 @@ LogWriteTestFixture::WriteStripeLog(StripeId vsid, StripeAddr oldAddr, StripeAdd
             .offset = 0,
         },
         .numBlks = 0};
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogType::STRIPE_MAP_UPDATED));
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(),
+        journal->GetVersionedSegmentContext(), testInfo, blks, LogType::STRIPE_MAP_UPDATED));
     int result = writer->AddStripeMapUpdatedLog(stripePtr, oldAddr, event);
     if (result == 0)
     {
@@ -175,7 +177,8 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeId vsid, StripeId wbLs
             .offset = 0,
         },
         .numBlks = 0};
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogType::GC_STRIPE_FLUSHED));
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(),
+        journal->GetVersionedSegmentContext(), testInfo, blks, LogType::GC_STRIPE_FLUSHED));
     int result = writer->AddGcStripeFlushedLog(mapUpdates, event);
     if (result == 0)
     {
@@ -209,7 +212,8 @@ LogWriteTestFixture::WriteGcStripeLog(int volumeId, StripeTestFixture& stripe)
             .offset = 0,
         },
         .numBlks = 0};
-    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(), testInfo, blks, LogType::GC_STRIPE_FLUSHED));
+    EventSmartPtr event(new TestJournalWriteCompletion(&testingLogs, allocator->GetIContextManagerFake(),
+        journal->GetVersionedSegmentContext(), testInfo, blks, LogType::GC_STRIPE_FLUSHED));
     int result = writer->AddGcStripeFlushedLog(mapUpdates, event);
     if (result == 0)
     {

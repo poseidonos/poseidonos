@@ -6,13 +6,13 @@
 
 #include "src/allocator/i_context_manager.h"
 #include "src/event_scheduler/event.h"
+#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
 
 namespace pos
 {
-class ISegmentCtxFake;
 class IVersionedSegmentContext;
 class AllocatorAddressInfo;
 class IContextManagerFake : public IContextManager
@@ -37,12 +37,10 @@ public:
     virtual SegmentCtx* GetSegmentCtx(void) { return nullptr; }
     virtual GcCtx* GetGcCtx(void) { return nullptr; }
     
-    virtual void SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_) override;
-    virtual ISegmentCtx* GetSegmentContextUpdaterPtr(void) override;
-    virtual void PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_) override;
     IVersionedSegmentContext* GetVersionedSegmentContext(void);
     virtual uint64_t GetStoredContextVersion(int owner) override;
 
+    ISegmentCtx* GetISegmentCtx(void) { return dynamic_cast<ISegmentCtx*>(segmentCtx); }
 private:
     int _FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer);
 

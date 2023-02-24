@@ -23,9 +23,6 @@ public:
     MOCK_METHOD(int, GetGcThreshold, (GcMode mode), (override));
     MOCK_METHOD(SegmentCtx*, GetSegmentCtx, (), (override));
     MOCK_METHOD(GcCtx*, GetGcCtx, (), (override));
-    MOCK_METHOD(void, PrepareVersionedSegmentCtx, (IVersionedSegmentContext* versionedSegCtx), (override));
-    MOCK_METHOD(void, SetSegmentContextUpdaterPtr, (ISegmentCtx* segmentContextUpdater_), (override));
-    MOCK_METHOD(ISegmentCtx*, GetSegmentContextUpdaterPtr, (), (override));
 };
 
 } // namespace pos

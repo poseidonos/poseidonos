@@ -82,9 +82,6 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
             journal->ResetVersionedSegmentContext();
         }
         journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
-
-        IContextManagerFake* contextManager = testAllocator->GetIContextManagerFake();
-        contextManager->PrepareVersionedSegmentCtx(journal->GetVersionedSegmentContext());
     }
 
     _GetLogBufferSizeInfo();

@@ -44,7 +44,7 @@
 namespace pos
 {
 MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+    SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
     IContextManager* contextManager, IArrayInfo* arrayInfo)
 : vsaMap(vsaMap),
   stripeMap(stripeMap),
@@ -53,7 +53,6 @@ MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
   contextManager(contextManager),
   arrayInfo(arrayInfo)
 {
-    contextManager->SetSegmentContextUpdaterPtr(segmentCtx);
 }
 
 CallbackSmartPtr

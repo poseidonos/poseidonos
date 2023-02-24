@@ -42,22 +42,22 @@
 namespace pos
 {
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-    ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator)
+    SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator)
 : BlockMapUpdate(volumeIo, vsaMap, segmentCtx_, wbStripeAllocator,
-    new VsaRangeMaker(volumeIo->GetVolumeId(),
-        ChangeSectorToBlock(volumeIo->GetSectorRba()),
-        DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
+      new VsaRangeMaker(volumeIo->GetVolumeId(),
+          ChangeSectorToBlock(volumeIo->GetSectorRba()),
+          DivideUp(volumeIo->GetSize(), BLOCK_SIZE), volumeIo->GetArrayId()))
 {
 }
 
 BlockMapUpdate::BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-    ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+    SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
     VsaRangeMaker* vsaRangeMaker)
 : MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),
-    volumeIo(volumeIo),
-    vsaMap(vsaMap),
-    wbStripeAllocator(wbStripeAllocator),
-    oldVsaRangeMaker(vsaRangeMaker)
+  volumeIo(volumeIo),
+  vsaMap(vsaMap),
+  wbStripeAllocator(wbStripeAllocator),
+  oldVsaRangeMaker(vsaRangeMaker)
 {
 }
 

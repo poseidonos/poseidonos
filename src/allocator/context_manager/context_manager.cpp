@@ -52,7 +52,7 @@
 namespace pos
 {
 ContextManager::ContextManager(TelemetryPublisher* tp,
-    AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, IVersionedSegmentContext* versionedSegCtx_,
+    AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
     GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_, ContextIoManager* ioManager_,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
@@ -63,7 +63,6 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
     allocatorCtx = allocCtx_;
     segmentCtx = segCtx_;
     rebuildCtx = rebuildCtx_;
-    versionedSegCtx = versionedSegCtx_;
     gcCtx = gcCtx_;
     blockAllocStatus = blockAllocStatus_;
     contextReplayer = ctxReplayer_;
@@ -72,8 +71,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_)
-: ContextManager(tp, nullptr, nullptr, nullptr, nullptr,
-    nullptr, nullptr, nullptr, nullptr, info, arrayId_)
+: ContextManager(tp, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, info, arrayId_)
 {
     allocatorCtx = new AllocatorCtx(tp, info);
     rebuildCtx = new RebuildCtx(tp, info);
@@ -230,23 +229,5 @@ uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return segmentCtx->GetRebuildTargetSegmentCount();
-}
-
-void
-ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
-{
-    versionedSegCtx = versionedSegCtx_;
-}
-
-void
-ContextManager::SetSegmentContextUpdaterPtr(ISegmentCtx *segmentContextUpdater_)
-{
-    segmentContextUpdater = segmentContextUpdater_;
-}
-
-ISegmentCtx*
-ContextManager::GetSegmentContextUpdaterPtr(void)
-{
-    return segmentContextUpdater;
 }
 } // namespace pos

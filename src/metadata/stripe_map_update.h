@@ -32,17 +32,18 @@
 
 #pragma once
 
-#include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/callback.h"
 #include "src/event_scheduler/meta_update_call_back.h"
 #include "src/mapper/i_stripemap.h"
 
 namespace pos
 {
+class SegmentContextUpdater;
+
 class StripeMapUpdate : public MetaUpdateCallback
 {
 public:
-    StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap, ISegmentCtx* segmentCtx_);
+    StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap, SegmentContextUpdater* segmentCtx_);
     virtual ~StripeMapUpdate(void);
 
 private:

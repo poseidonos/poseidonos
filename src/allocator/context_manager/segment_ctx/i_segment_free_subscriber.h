@@ -1,6 +1,6 @@
 /*
 *   BSD LICENSE
-*   Copyright (c) 2021 Samsung Electronics Corporation
+*   Copyright (c) 2022 Samsung Electronics Corporation
 *   All rights reserved.
 *
 *   Redistribution and use in source and binary forms, with or without
@@ -14,7 +14,7 @@
 *       the documentation and/or other materials provided with the
 *       distribution.
 *     * Neither the name of Samsung Electronics Corporation nor the names of
- *       its contributors may be used to endorse or promote products derived
+*       its contributors may be used to endorse or promote products derived
 *       from this software without specific prior written permission.
 *
 *   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -30,33 +30,15 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "src/metadata/stripe_map_update.h"
+#pragma once
 
-#include "src/allocator/stripe_manager/stripe.h"
 #include "src/include/address_type.h"
-#include "src/spdk_wrapper/event_framework_api.h"
 
 namespace pos
 {
-StripeMapUpdate::StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap,
-    SegmentContextUpdater* segmentCtx_)
-: MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),
-  stripe(stripe),
-  stripeMap(stripeMap)
+class ISegmentFreeSubscriber
 {
-}
-
-StripeMapUpdate::~StripeMapUpdate(void)
-{
-}
-
-bool
-StripeMapUpdate::_DoSpecificJob(void)
-{
-    StripeId currentLsid = stripe->GetUserLsid();
-    stripeMap->SetLSA(stripe->GetVsid(), currentLsid, IN_USER_AREA);
-    UpdateOccupiedStripeCount(currentLsid);
-
-    return true;
-}
+public:
+    virtual void NotifySegmentFreed(SegmentId segmentId) = 0;
+};
 } // namespace pos

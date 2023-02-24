@@ -35,6 +35,7 @@
 #include <vector>
 #include "src/include/address_type.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/allocator/context_manager/segment_ctx/i_segment_free_subscriber.h"
 
 namespace pos
 {
@@ -43,7 +44,7 @@ class SegmentInfo;
 class SegmentInfoData;
 class VersionedSegmentInfo;
 
-class IVersionedSegmentContext: public LogBufferWriteDoneEvent
+class IVersionedSegmentContext: public LogBufferWriteDoneEvent, public ISegmentFreeSubscriber
 {
 public:
     virtual ~IVersionedSegmentContext(void) = default;
@@ -56,7 +57,6 @@ public:
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) = 0;
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) = 0;
 
     // For UT
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,

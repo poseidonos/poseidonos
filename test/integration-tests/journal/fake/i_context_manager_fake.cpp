@@ -18,24 +18,6 @@ IContextManagerFake::~IContextManagerFake(void)
 {
 }
 
-void
-IContextManagerFake::SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_)
-{
-    segmentCtx = (ISegmentCtxFake*)segmentContextUpdater_;
-}
-
-ISegmentCtx*
-IContextManagerFake::GetSegmentContextUpdaterPtr(void)
-{
-    return segmentCtx;
-}
-
-void
-IContextManagerFake::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
-{
-    versionedSegCtx = versionedSegCtx_;
-}
-
 IVersionedSegmentContext*
 IContextManagerFake::GetVersionedSegmentContext(void)
 {

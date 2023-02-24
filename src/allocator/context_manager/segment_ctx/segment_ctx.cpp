@@ -35,11 +35,12 @@
 #include <mutex>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/allocator/context_manager/segment_ctx/i_segment_free_subscriber.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
-#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 #include "src/qos/qos_manager.h"
+#include "src/telemetry/telemetry_client/telemetry_publisher.h"
 namespace pos
 {
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfoData* segmentInfoData_,
@@ -674,6 +675,8 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
         return;
     }
 
+    // Should notify subscriber before add it to the free list
+    _NotifySegmentFreedToSubscribers(segmentId);
     segmentList[SegmentState::FREE]->AddToList(segmentId);
 
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
@@ -967,24 +970,6 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
     }
 }
 
-void
-SegmentCtx::ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId)
-{
-    ValidateBlks(blks);
-}
-
-bool
-SegmentCtx::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
-{
-    return InvalidateBlks(blks, isForced);
-}
-
-bool
-SegmentCtx::UpdateStripeCount(StripeId lsid, int logGroupId)
-{
-    return UpdateOccupiedStripeCount(lsid);
-}
-
 SegmentInfo*
 SegmentCtx::GetSegmentInfos(void)
 {
@@ -992,9 +977,17 @@ SegmentCtx::GetSegmentInfos(void)
 }
 
 void
-SegmentCtx::ResetInfos(SegmentId segId)
+SegmentCtx::AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber)
 {
-    // TODO (dh.ihm) : need to check if there is additional implementation.
-    return;
+    freeSubscribers.push_back(subscriber);
+}
+
+void
+SegmentCtx::_NotifySegmentFreedToSubscribers(SegmentId segmentId)
+{
+    for (auto sub : freeSubscribers)
+    {
+        sub->NotifySegmentFreed(segmentId);
+    }
 }
 } // namespace pos
