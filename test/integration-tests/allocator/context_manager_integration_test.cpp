@@ -9,7 +9,6 @@
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/include/address_type.h"
 #include "src/journal_manager/journal_manager.h"
-#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/allocator/address/allocator_address_info_tester.h"
 #include "test/integration-tests/allocator/allocator_it_common.h"
@@ -36,8 +35,6 @@
 #include "test/unit-tests/journal_manager/log_buffer/journal_log_buffer_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_buffer_io_context_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_factory_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_ctx_mock.h"
-#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
 #include "test/unit-tests/journal_manager/log_write/buffer_offset_allocator_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_event_factory_mock.h"
 #include "test/unit-tests/journal_manager/log_write/journal_volume_event_handler_mock.h"
@@ -64,10 +61,6 @@ public:
     virtual void TearDown(void);
 
 protected:
-    uint32_t IncreaseVscValidBlockCount(int logGroupId, int segId, int cnt);
-    uint32_t DecreaseVscValidBlockCount(int logGroupId, int segId, int cnt);
-    uint32_t IncreaseVscOccupiedStripeCount(int logGroupId, int segId, int cnt);
-
     const uint32_t numOfSegment = 10;
     const uint32_t validBlockCount = 0;
     const uint32_t maxOccupiedStripeCount = 128;
@@ -80,7 +73,6 @@ protected:
     JournalManager* journal;
     SegmentInfoData* segInfoDataForSegCtx;
     SegmentCtx* segCtx;
-    IVersionedSegmentContext* versionedSegCtx;
     SegmentInfo* loadedSegInfos;
     SegmentInfoData* loadedSegInfoDataForSegCtx;
     ContextManager* ctxManager;
@@ -182,7 +174,6 @@ ContextManagerIntegrationTest::SetUp(void)
         nullptr, dirtyMapManager, logFilledNotifier,
         callbackSequenceController, replayHandler, arrayInfo, tp);
 
-    versionedSegCtx = journal->GetVersionedSegmentContext();
     loadedSegInfos = new SegmentInfo[numOfSegment];
     loadedSegInfoDataForSegCtx = new SegmentInfoData[numOfSegment];
     for(int i=0;i<numOfSegment;++i)
@@ -191,16 +182,8 @@ ContextManagerIntegrationTest::SetUp(void)
         loadedSegInfos[i].AllocateAndInitSegmentInfoData(&loadedSegInfoDataForSegCtx[i]);
     }
 
-    std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
-    for (int index = 0; index < numLogGroups; index++)
-    {
-        std::shared_ptr<VersionedSegmentInfo> input(new VersionedSegmentInfo());
-        versionedSegmentInfo.push_back(input);
-    }
-    versionedSegCtx->Init(config, loadedSegInfos, numOfSegment, versionedSegmentInfo);
-
     ctxManager = new ContextManager(tp, allocCtx, segCtx, reCtx,
-        versionedSegCtx, gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
+        gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
     cpHandler = new CheckpointHandler(ALLOCATOR_META_ID);;
     cpHandler->Init(nullptr, nullptr, ctxManager, nullptr);
@@ -260,30 +243,6 @@ ContextManagerIntegrationTest::_InitializePartitionSize(void)
     partitionLogicalSize.stripesPerSegment = 2;
     partitionLogicalSize.totalStripes = 300;
     partitionLogicalSize.totalSegments = 300;
-}
-
-uint32_t
-ContextManagerIntegrationTest::IncreaseVscValidBlockCount(int logGroupId, int segId, int cnt)
-{
-    versionedSegCtx->IncreaseValidBlockCount(logGroupId, segId, cnt);
-    return cnt;
-}
-
-uint32_t
-ContextManagerIntegrationTest::DecreaseVscValidBlockCount(int logGroupId, int segId, int cnt)
-{
-    versionedSegCtx->DecreaseValidBlockCount(logGroupId, segId, cnt);
-    return cnt;
-}
-
-uint32_t
-ContextManagerIntegrationTest::IncreaseVscOccupiedStripeCount(int logGroupId, int segId, int cnt)
-{
-    for (int i = 0; i < cnt; i++)
-    {
-        versionedSegCtx->IncreaseOccupiedStripeCount(logGroupId, segId);
-    }
-    return cnt;
 }
 
 TEST_F(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
@@ -474,7 +433,7 @@ TEST_F(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwrit
     std::mutex allocatorLock;
     ON_CALL(*allocatorCtx, GetCtxLock).WillByDefault(ReturnRef(allocatorLock));
 
-    ContextManager contextManager(&telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx, nullptr,
+    ContextManager contextManager(&telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,
         gcCtx, blockAllocStatus, ioManager, contextReplayer, &addrInfo, ARRAY_ID);
     contextManager.Init();
 

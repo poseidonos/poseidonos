@@ -450,6 +450,12 @@ JournalManager::GetVersionedSegmentContext(void)
     return versionedSegCtx;
 }
 
+ISegmentFreeSubscriber*
+JournalManager::GetSegmentFreeSubscriber(void)
+{
+    return versionedSegCtx;
+}
+
 int
 JournalManager::_Reset(void)
 {

@@ -32,6 +32,8 @@
 
 #include "meta_update_call_back.h"
 
+#include "src/metadata/segment_context_updater.h"
+
 namespace pos
 {
 
@@ -41,7 +43,7 @@ MetaUpdateCallback::MetaUpdateCallback(void)
 {
 }
 
-MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
+MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, SegmentContextUpdater* segmentCtx_,
     CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg,
     EventScheduler* eventSchedulerArg)
 : Callback(isFrontEnd, type, weight, timeoutCheckerArg, eventSchedulerArg),
@@ -83,6 +85,6 @@ MetaUpdateCallback::InvalidateBlks(VirtualBlks blks, bool isForced)
 bool
 MetaUpdateCallback::UpdateOccupiedStripeCount(StripeId lsid)
 {
-    return segmentCtx->UpdateStripeCount(lsid, logGroupId);
+    return segmentCtx->UpdateOccupiedStripeCountWithGroupId(lsid, logGroupId);
 }
 } // namespace pos

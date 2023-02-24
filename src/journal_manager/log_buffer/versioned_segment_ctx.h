@@ -61,10 +61,13 @@ public:
     virtual int GetNumLogGroups(void) override { return 0; };
     virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override { return; }
 
-    virtual void LogFilled(int logGroupId, const MapList& dirty) {}
-    virtual void LogBufferReseted(int logGroupId) {}
+    // LogBufferWriteDoneEvent
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override {}
+    virtual void LogBufferReseted(int logGroupId) override {}
+
+    // ISegmentFreeSubscriber
+    virtual void NotifySegmentFreed(SegmentId segmentId) override {}
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
@@ -89,11 +92,12 @@ public:
     virtual int GetNumSegments(void) override;
     virtual int GetNumLogGroups(void) override;
 
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override;
-
     // Implementation of LogBufferWriteDoneEvent interface
     virtual void LogFilled(int logGroupId, const MapList& dirty) override;
     virtual void LogBufferReseted(int logGroupId) override;
+
+    // Implementation of ISegmentFreeSubscriber interface
+    virtual void NotifySegmentFreed(SegmentId segmentId) override;
 
 private:
     void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);

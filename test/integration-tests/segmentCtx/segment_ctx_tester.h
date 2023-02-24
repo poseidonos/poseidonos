@@ -45,7 +45,6 @@ public:
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
-    MOCK_METHOD(void, ValidateBlocksWithGroupId, (VirtualBlks blks, int logGroupId), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
@@ -69,7 +68,7 @@ private:
         AllocateFreeSegmentStub();
         GetNumOfFreeSegmentStub();
         GetAllocatedSegmentCountStub();
-        ValidateBlocksWithGroupIdStub();
+        ValidateBlksStub();
         GetValidBlockCountStub();
         GetOccupiedStripeCountStub();
         UpdateOccupiedStripeCountStub();
@@ -119,11 +118,11 @@ private:
         });
     };
 
-    virtual void ValidateBlocksWithGroupIdStub(void)
+    virtual void ValidateBlksStub(void)
     {
-        ON_CALL(*this, ValidateBlocksWithGroupId).WillByDefault([this](VirtualBlks blks, int logGroupId)
+        ON_CALL(*this, ValidateBlks).WillByDefault([this](VirtualBlks blks)
         {
-            realCtx->ValidateBlocksWithGroupId(blks, logGroupId);
+            realCtx->ValidateBlks(blks);
         });
     };
 

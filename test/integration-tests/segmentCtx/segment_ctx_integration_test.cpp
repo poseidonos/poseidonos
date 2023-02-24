@@ -90,8 +90,6 @@ TEST_F(SegmentCtxIntegrationTest, LifeCycleTest)
     numOfAllocatedSegments = segmentCtx->GetAllocatedSegmentCount();
     EXPECT_EQ(numOfAllocatedSegments, numOfFreeSegments);
 
-    // Start log write - group id 0
-    int logGroupId = 0;
     uint32_t segId = 0;
 
     VirtualBlkAddr vsa;
@@ -106,7 +104,7 @@ TEST_F(SegmentCtxIntegrationTest, LifeCycleTest)
         blks.startVsa = vsa;
         blks.numBlks = 1;
 
-        segmentCtx->ValidateBlocksWithGroupId(blks, logGroupId);
+        segmentCtx->ValidateBlks(blks);
     }
 
     uint32_t validBlkCount = segmentCtx->GetValidBlockCount(segId);

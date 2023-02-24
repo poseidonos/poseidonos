@@ -32,7 +32,6 @@
 
 #pragma once
 
-#include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/event_scheduler/callback.h"
 #include "src/include/smart_ptr_type.h"
@@ -42,14 +41,15 @@
 namespace pos
 {
 class VsaRangeMaker;
+class SegmentContextUpdater;
 
 class BlockMapUpdate : public MetaUpdateCallback
 {
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator);
+        SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator);
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        ISegmentCtx* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+        SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
         VsaRangeMaker* vsaRangeMaker);
     virtual ~BlockMapUpdate(void);
 

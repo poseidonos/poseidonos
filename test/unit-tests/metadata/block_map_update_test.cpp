@@ -2,12 +2,12 @@
 
 #include <gtest/gtest.h>
 
-#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/allocator/stripe_manager/stripe_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
 #include "test/unit-tests/io/general_io/vsa_range_maker_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
+#include "test/unit-tests/metadata/segment_context_updater_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -20,11 +20,11 @@ TEST(BlockMapUpdate, BlockMapUpdate_testIfUTConstructedSuccessfully)
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
 
-    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
+    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtxUpdater,
         &wbStripeAllocator, vsaRangeMaker);
 }
 
@@ -33,7 +33,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
@@ -76,7 +76,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfully)
     // Then 3. Old map should be invalidated
     EXPECT_CALL(*vsaRangeMaker, GetVsaRange).WillOnce(ReturnRef(oldVsas));
 
-    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
+    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtxUpdater,
         &wbStripeAllocator, vsaRangeMaker);
     bool actual = blockMapUpdate.Execute();
     EXPECT_EQ(actual, true);
@@ -87,7 +87,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
@@ -125,7 +125,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
 
     // Then 4. New map should be validated
 
-    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
+    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtxUpdater,
         &wbStripeAllocator, vsaRangeMaker);
     bool actual = blockMapUpdate.Execute();
     EXPECT_EQ(actual, true);
@@ -136,7 +136,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
     NiceMock<MockVolumeIo>* mockVolumeIo(new NiceMock<MockVolumeIo>(nullptr, 0, 0));
     VolumeIoSmartPtr mockVolumeIoPtr(mockVolumeIo);
     NiceMock<MockIVSAMap> vsaMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockStripe>* stripe = new NiceMock<MockStripe>();
     NiceMock<MockVsaRangeMaker>* vsaRangeMaker = new NiceMock<MockVsaRangeMaker>(0, 0, 0, &vsaMap);
@@ -187,7 +187,7 @@ TEST(BlockMapUpdate, DoSpecificJob_testIfMetaIsUpdatedSuccessfullyWhenOldVsasAre
 
     // Then 4. New map should be validated
 
-    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtx,
+    BlockMapUpdate blockMapUpdate(mockVolumeIoPtr, &vsaMap, &segmentCtxUpdater,
         &wbStripeAllocator, vsaRangeMaker);
     bool actual = blockMapUpdate.Execute();
     EXPECT_EQ(actual, true);

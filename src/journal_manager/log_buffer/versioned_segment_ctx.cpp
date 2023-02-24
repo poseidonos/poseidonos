@@ -233,18 +233,6 @@ VersionedSegmentCtx::_CheckSegIdValidity(int segId)
 }
 
 void
-VersionedSegmentCtx::ResetInfosAfterSegmentFreed(SegmentId targetSegmentId)
-{
-    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
-    {
-        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(targetSegmentId);
-        segmentInfoDiffs[groupId]->ResetValidBlockCount(targetSegmentId);
-    }
-    segmentInfos[targetSegmentId].SetOccupiedStripeCount(0);
-    segmentInfos[targetSegmentId].SetState(SegmentState::FREE);
-}
-
-void
 VersionedSegmentCtx::LogFilled(int logGroupId, const MapList& dirty)
 {
     // do nothing
@@ -257,6 +245,18 @@ VersionedSegmentCtx::LogBufferReseted(int logGroupId)
     segmentInfoDiffs[logGroupId]->Reset();
 
     POS_TRACE_INFO(EID(VERSIONED_SEGMENT_INFO), "Versioned segment info is flushed, logGroupId:{}", logGroupId);
+}
+
+void
+VersionedSegmentCtx::NotifySegmentFreed(SegmentId segmentId)
+{
+    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
+    {
+        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(segmentId);
+        segmentInfoDiffs[groupId]->ResetValidBlockCount(segmentId);
+    }
+    segmentInfos[segmentId].SetOccupiedStripeCount(0);
+    segmentInfos[segmentId].SetState(SegmentState::FREE);
 }
 
 } // namespace pos

@@ -15,7 +15,9 @@ class IVersionedSegmentContext;
 class TestJournalWriteCompletion : public MetaUpdateCallback
 {
 public:
-    TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager, TestInfo* testInfo, VirtualBlks blks, LogType eventType);
+    TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager,
+        IVersionedSegmentContext* versionedSegmentContext,
+        TestInfo* testInfo, VirtualBlks blks, LogType eventType);
 
 private:
     bool _DoSpecificJob(void) override;

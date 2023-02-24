@@ -125,12 +125,6 @@ Allocator::Init(void)
 }
 
 void
-Allocator::PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx)
-{
-    contextManager->PrepareVersionedSegmentCtx(vscSegCtx);
-}
-
-void
 Allocator::Dispose(void)
 {
     if (isInitialized == true)

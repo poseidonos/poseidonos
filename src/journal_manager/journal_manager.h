@@ -132,6 +132,8 @@ public:
         return journalingStatus.Get();
     }
 
+    virtual ISegmentFreeSubscriber* GetSegmentFreeSubscriber(void);
+
     IJournalWriter* GetJournalWriter(void);
     IJournalVolumeEventHandler* GetVolumeEventHandler(void);
     IJournalStatusProvider* GetJournalStatusProvider(void);

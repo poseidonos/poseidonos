@@ -8,15 +8,16 @@
 
 namespace pos
 {
-TestJournalWriteCompletion::TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager, TestInfo* testInfo, VirtualBlks blks, LogType eventType)
+TestJournalWriteCompletion::TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager,
+    IVersionedSegmentContext* versionedSegmentContext, TestInfo* testInfo, VirtualBlks blks, LogType eventType)
 : logs(logs),
   contextManager(contextManager),
   testInfo(testInfo),
   blks(blks),
-  eventType(eventType)
+  eventType(eventType),
+  versionedSegCtx(versionedSegmentContext)
 {
-    segmentCtx = contextManager->GetSegmentContextUpdaterPtr();
-    versionedSegCtx = contextManager->GetVersionedSegmentContext();
+    segmentCtx = contextManager->GetISegmentCtx();
 }
 
 bool
