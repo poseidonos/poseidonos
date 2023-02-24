@@ -318,17 +318,23 @@ normal_shutdown()
     print_info "Shutting down normally"
 
     iexecc rm -rf shutdown.txt result.txt
+    if [ $1 == "signal" ];then
+        print_info "Shutdown as signal"
+        pkill poseidonos
+    elif [ $1 == "stoponly" ];then
+        texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
+        print_info "Shutdown as system stop"
+    else
+        unmount_array;
+        result=$?
 
-    unmount_array;
-    result=$?
+        if [ $result != 0 ]; then
+            print_result "failed to unmount array." 1
+            return 1
+        fi
 
-    if [ $result != 0 ]; then
-        print_result "failed to unmount array." 1
-        return 1
+        texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
     fi
-
-    texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
-    
     ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
     do
@@ -336,20 +342,21 @@ normal_shutdown()
         ps -C poseidonos > /dev/null
     done
 
-    iexecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
-    result=$(<result.txt)
+    if [ $1 != "signal" ];then
+        iexecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
+        result=$(<result.txt)
 
-    if [ "$result" == "" ]; then
-        print_result "there is a problem" 1
-        iexecc cat shutdown.txt
-        iexecc rm -rf shutdown.txt result.txt
-        return 1
-    elif [ ${result} != 0 ]; then
-        print_result "Failed to shutdown" 1
-        iexecc rm -rf shutdown.txt result.txt
-        return 1
+        if [ "$result" == "" ]; then
+            print_result "there is a problem" 1
+            iexecc cat shutdown.txt
+            iexecc rm -rf shutdown.txt result.txt
+            return 1
+        elif [ ${result} != 0 ]; then
+            print_result "Failed to shutdown" 1
+            iexecc rm -rf shutdown.txt result.txt
+            return 1
+        fi
     fi
-
     for i in `seq 1 ${support_max_subsystem}`
     do
         disconnect_nvmf_contollers ${i}
@@ -373,17 +380,22 @@ graceful_shutdown()
         disconnect_nvmf_contollers ${i}
     done
 
-    if [ -z $1 ]; then
-        unmount_array;
+    if [ $1 == "signal" ];then
+        print_info "Shutdown as signal"
+        pkill poseidonos
+    elif [ $1 == "stoponly" ];then
+        print_info "Shutdown as system stop"
+        texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
+    else
+        unmount_array
         result=$?
 
         if [ $result != 0 ]; then
             print_result "failed to unmount array." 1
             return 1
         fi
+        texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
     fi
-
-    texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
 
     ps -C poseidonos > /dev/null
     while [[ ${?} == 0 ]]
@@ -534,7 +546,7 @@ npor_and_check_volumes()
     iexecc cat npor_and_check_volumes0.txt | jq '.Response.result.data.volumes | length' > result0.txt
     result0=$(<result0.txt)
 
-    normal_shutdown;
+    normal_shutdown $1;
     result=$?
 
     if [ $result -ne 0 ]; then

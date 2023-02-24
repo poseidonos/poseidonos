@@ -33,6 +33,7 @@
 #include "array_manager.h"
 
 #include <list>
+#include <unistd.h>
 
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
@@ -248,6 +249,37 @@ ArrayManager::Unmount(string name)
     }, name, EID(UNMOUNT_ARRAY_ARRAY_NAME_DOES_NOT_EXIST));
 }
 
+
+// This function should not be called from reactor and Event worker because of busy waiting.
+// CLI context or separate thread (std:: thread) can call this function safely.
+// this function should not be called simultaneously with "Unmount / Stop" from other context.
+void
+ArrayManager::UnmountAllArrayAndStop(void)
+{
+    int ret = 0;
+    do
+    {
+        pthread_rwlock_rdlock(&arrayListLock);
+        for (auto it = arrayList.begin(); it != arrayList.end(); it++)
+        {
+            ComponentsInfo* info = it->second->GetInfo();
+            if (info->arrayInfo->GetState() >= ArrayStateEnum::TRY_MOUNT)
+            {
+                Unmount(it->first);
+            }
+        }
+        pthread_rwlock_unlock(&arrayListLock);
+        // Check if the states of all array is under "Try_mount"
+        ret = Stop();
+        if (ret == 0)
+        {
+            break;
+        }
+        // sleep 300 ms
+        usleep(300000);
+    }
+    while(ret != 0);
+}
 
 int
 ArrayManager::Stop(void)

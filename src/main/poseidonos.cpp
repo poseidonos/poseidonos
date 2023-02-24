@@ -91,12 +91,12 @@ Poseidonos::Init(int argc, char** argv)
     if (ret == 0)
     {
         POS_TRACE_TRACE(EID(POS_CONFIG_LOADED), "{}", ConfigManagerSingleton::Instance()->RawData());
-        POS_TRACE_INFO(EID(POS_INITIALIZING_SIG_HANDLER), "");
-        _InitSignalHandler();
         POS_TRACE_INFO(EID(POS_INITIALIZING_VERSION), "");
         _LoadVersion();
         POS_TRACE_INFO(EID(POS_INITIALIZING_SPDK), "");
         _InitSpdk(argc, argv);
+        POS_TRACE_INFO(EID(POS_INITIALIZING_SIG_HANDLER), "");
+        _InitSignalHandler();
         POS_TRACE_INFO(EID(POS_INITIALIZING_CPU_AFFINITY), "");
         _InitAffinity();
         POS_TRACE_INFO(EID(POS_INITIALIZING_THREAD_MODEL), "");

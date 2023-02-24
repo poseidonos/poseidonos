@@ -87,20 +87,17 @@ CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, Sto
     reply->set_rid(request->rid());
 
     Status status = grpc::Status::OK;
-
-    int eventId = ArrayMgr()->Stop();
-    if (eventId == 0)
+    int eventId = 0;
+    ArrayMgr()->UnmountAllArrayAndStop();
+    if (!_IsPosTerminating())
     {
-        if (!_IsPosTerminating())
-        {
-            _SetPosTerminating(true);
-            pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
-            eventId = EID(SUCCESS);
-        }
-        else
-        {
-            eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
-        }
+        _SetPosTerminating(true);
+        pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
+        eventId = EID(SUCCESS);
+    }
+    else
+    {
+        eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
     }
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());

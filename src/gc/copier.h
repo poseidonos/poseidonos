@@ -185,9 +185,9 @@ private:
     GcStatus* gcStatus;
 
     bool thresholdCheck = true;
-    bool isStopped = false;
-    bool isPaused = false;
-    bool readyToEnd = false;
+    volatile bool isStopped = false;
+    volatile bool isPaused = false;
+    volatile bool readyToEnd = false;
     uint32_t gcBusyRetryCnt = 0;
 
     CallbackSmartPtr stripeCopySubmissionPtr;

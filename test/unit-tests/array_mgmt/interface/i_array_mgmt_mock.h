@@ -17,6 +17,7 @@ public:
     MOCK_METHOD(int, Mount, (string name, bool isWTEnabled), (override));
     MOCK_METHOD(int, Unmount, (string name), (override));
     MOCK_METHOD(int, Stop, (), (override));
+    MOCK_METHOD(void, UnmountAllArrayAndStop, (), (override));
     MOCK_METHOD(int, AddDevice, (string name, string dev), (override));
     MOCK_METHOD(int, RemoveDevice, (string name, string dev), (override));
     MOCK_METHOD(int, ReplaceDevice, (string name, string dev), (override));
