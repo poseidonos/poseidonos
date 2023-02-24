@@ -90,7 +90,7 @@ PbrFileLoader::Load(vector<AteData*>& ateListOut)
             }
         }
     }
-    delete pbrData;
+    delete[] pbrData;
     if (ateListOut.size() == 0)
     {
         ret = EID(PBR_LOAD_NO_VALID_PBR_FOUND);

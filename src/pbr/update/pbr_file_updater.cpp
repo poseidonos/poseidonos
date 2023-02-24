@@ -78,7 +78,7 @@ PbrFileUpdater::Update(AteData* ateData)
             pbrWriter->Write(filePath, pbrData, 0, pbrSize);
         }
     }
-    delete pbrData;
+    delete[] pbrData;
     return ret;
 }
 
