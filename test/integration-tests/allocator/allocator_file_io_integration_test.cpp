@@ -37,7 +37,7 @@ TEST(AllocatorFileIo, InitBeforeFlushAfterLoad_testIfSegmentCtxIsSerializedAndDe
 
     // Then 1: the total size to flush should be the sum of segmentctx header and the list of segment info data
     auto actual = segCtxClient->GetTotalDataSize();
-    uint64_t expected = sizeof(SegmentCtxHeader) + sizeof(SegmentInfoData) * numSegments;
+    uint64_t expected = sizeof(SegmentCtxHeader) + SegmentInfoData::ONSSD_SIZE * numSegments + SegmentCtxExtended::ONSSD_SIZE;
     EXPECT_EQ(expected, actual);
 
     // When 2: the segment context is flushed to a local file system

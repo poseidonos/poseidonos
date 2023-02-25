@@ -4,6 +4,14 @@
 
 namespace pos
 {
+
+static void CheckAndAssertIfNotEqual(SegmentInfoData& left, SegmentInfoData& right)
+{
+    EXPECT_EQ(left.validBlockCount, right.validBlockCount);
+    EXPECT_EQ(left.occupiedStripeCount, right.occupiedStripeCount);
+    EXPECT_EQ(left.state, right.state);
+}
+
 TEST(SegmentInfo, SegmentInfo_Constructor)
 {
     {
@@ -328,4 +336,45 @@ TEST(SegmentInfo, UpdateFrom_testIfSegmentInfoDataIsSuccessfullyUpdatedByUpdateF
     EXPECT_EQ(SegInfo.GetState(), SegmentState::VICTIM);
 }
 
+TEST(SegmentInfoData, ToBytes_testIfDeserializedObjContainsOriginalData)
+{
+    // Given: 4 different segment info data in different states
+    SegmentInfoData data1(0, 1024, SegmentState::SSD);
+    SegmentInfoData data2(10, UINT32_MAX, SegmentState::NVRAM); // won't happen in prod if there's no memory corruption, but...
+    SegmentInfoData data3(-1 /* let it underflow */, 0, SegmentState::VICTIM); // won't happen in prod
+    SegmentInfoData data4(0, 1024, SegmentState::FREE);
+    SegmentInfoData newData;
+    char ioBuffer[SegmentInfoData::ONSSD_SIZE];  
+
+    // When 1 & Then 1: data1 should be successfully se/deserialized
+    {
+        memset(ioBuffer, 0, SegmentInfoData::ONSSD_SIZE);
+        EXPECT_EQ(true, data1.ToBytes(ioBuffer));
+        EXPECT_EQ(true, newData.FromBytes(ioBuffer));
+        CheckAndAssertIfNotEqual(data1,  newData);
+    }
+
+    // When 2 & Then 2: data2 should be successfully se/deserialized
+    {
+        memset(ioBuffer, 0, SegmentInfoData::ONSSD_SIZE);
+        EXPECT_EQ(true, data2.ToBytes(ioBuffer));
+        EXPECT_EQ(true, newData.FromBytes(ioBuffer));
+        CheckAndAssertIfNotEqual(data2,  newData);
+    }
+
+    // When 3 & Then 3: data3 should be successfully se/deserialized
+    {
+        memset(ioBuffer, 0, SegmentInfoData::ONSSD_SIZE);
+        EXPECT_EQ(true, data3.ToBytes(ioBuffer));
+        EXPECT_EQ(true, newData.FromBytes(ioBuffer));
+        CheckAndAssertIfNotEqual(data3,  newData);
+    }
+
+    // When 4 & Then 4: data4 should be successfully se/deserialized
+    {
+        EXPECT_EQ(true, data4.ToBytes(ioBuffer));
+        EXPECT_EQ(true, newData.FromBytes(ioBuffer));
+        CheckAndAssertIfNotEqual(data4,  newData);
+    }
+}
 } // namespace pos

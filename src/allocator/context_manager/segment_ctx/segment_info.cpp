@@ -289,6 +289,74 @@ const std::unordered_map<SegmentState, std::string> segmentStateToString =
         {SegmentState::VICTIM, "VICTIM"},
         {SegmentState::ERROR, "ERROR"}};
 
+bool
+SegmentInfoData::ToBytes(char* destBuf)
+{
+    pos_bc::SegmentInfoDataProto proto;
+    proto.set_valid_block_count( this->validBlockCount );
+    proto.set_occupied_stripe_count( this->occupiedStripeCount );
+    proto.set_state( (pos_bc::SegmentState) this->state );
+    size_t effectiveSize = proto.ByteSizeLong();
+    if (effectiveSize <= ONSSD_SIZE)
+    {
+        // normal case.
+        int ret = proto.SerializeToArray(destBuf, ONSSD_SIZE);
+        if (ret == 0)
+        {
+            POS_TRACE_ERROR(EID(SEGMENTINFODATA_FAILED_TO_SERIALIZE), 
+                "validBlockCount: {}, occupiedStripeCount: {}, segmentState: {}",
+                this->validBlockCount, this->occupiedStripeCount, this->state);
+            return false;
+        }
+
+        // fill zeros up to ONSSD_SIZE bytes-position
+        for(unsigned int bytePos = effectiveSize; bytePos < ONSSD_SIZE; bytePos ++)
+        {
+            destBuf[bytePos] = 0;
+        }
+
+        return true;
+    }
+    else
+    {
+        // error case. we don't serialize here to avoid memory corruption on destBuf.
+        size_t expectedSize = ONSSD_SIZE;
+        POS_TRACE_ERROR(EID(SEGMENTINFODATA_SERIALIZE_OVERFLOW),
+            "effectiveSize: {}, expectedSize: {}", effectiveSize, expectedSize);
+        return false;
+    }
+}
+
+bool
+SegmentInfoData::FromBytes(char* srcBuf)
+{
+    pos_bc::SegmentInfoDataProto proto;
+    int ret = proto.ParseFromArray(srcBuf, ONSSD_SIZE);
+    if (ret == 0)
+    {
+        // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+        // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+        // The current implementation has a risk of not detecting a parse error when there has been
+        // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+        // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf. 
+    } 
+
+    size_t effectiveSize = proto.ByteSizeLong();
+    if (effectiveSize <= ONSSD_SIZE)
+    {
+        // normal case. update internal member variables with proto
+        Set(proto.valid_block_count(), proto.occupied_stripe_count(), (SegmentState) proto.state());
+        return true;
+    }
+    else
+    {
+        size_t expectedSize = ONSSD_SIZE;
+        POS_TRACE_ERROR(EID(SEGMENTINFODATA_DESERIALIZE_CORRUPTION),
+            "effectiveSize: {}, expectedSize: {}", effectiveSize, expectedSize);
+        return false;
+    }
+}
+
 std::string
 SegmentInfo::ToSegmentStateString(SegmentState state)
 {
