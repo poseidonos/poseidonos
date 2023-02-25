@@ -70,19 +70,28 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
     if (segmentInfoData_ != nullptr)
     {
         uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
+        POS_TRACE_INFO(EID(SEGMENTCTX_SEGMENTINFODATA_INJECTED), "numSegments: {}", numSegments);
 
-        segmentInfoData.data = segmentInfoData_;
         segmentInfos = new SegmentInfo[numSegments];
         for (uint32_t segId = 0; segId < numSegments; segId++)
         {
+            SegmentInfoData* infoData = segmentInfoData_ + segId;
+
             // This time, SegmentInfoData is created outside and injected to here, hence we skip initializing it,
             // but just allocate only.
-            segmentInfos[segId].AllocateSegmentInfoData(&segmentInfoData.data[segId]);
+            this->segmentInfos[segId].AllocateSegmentInfoData(infoData);
+
+            // Initialize the context section for segment info data for persistence. 
+            // Note that "infoDataSection" does not store/handle memory pointer internally. (hence, no ownership required)
+            ContextSection<SegmentInfoData*> infoDataSection(infoData);
+            this->segmentInfoDataSections.push_back( infoDataSection );
         }
     }
     else
     {
-        segmentInfoData.data = nullptr;
+        // Do nothing if SegmentInfoData list isn't injected from the caller
+        uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
+        POS_TRACE_INFO(EID(SEGMENTCTX_SEGMENTINFODATA_WITHOUT_INJECTION), "numSegments: {}", numSegments);
     }
 
     if (header != nullptr)
@@ -134,18 +143,31 @@ SegmentCtx::Init(void)
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
 
-    if (segmentInfoData.data == nullptr)
+    if (this->segmentInfoDataSections.size() == 0)
     {
+        // prod code path when the caller didn't specify any pre-conditions on SegmentInfoData list
         uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
-        segmentInfos = new SegmentInfo[numSegments];
-        segmentInfoData.data = new SegmentInfoData[numSegments];
+        this->segmentInfos = new SegmentInfo[numSegments];
+        SegmentInfoData* infoDataArray = new SegmentInfoData[numSegments];
         for (uint32_t i = 0; i < numSegments ; ++i)
         {
             // This time, SegmentInfoData needs to be newly created "and initialized", hence we use AllocateAndInitSegmentInfoData()
-            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData.data[i]);
-            segmentInfos[i].SetArrayId(addrInfo->GetArrayId());
-            segmentInfos[i].SetSegmentId((SegmentId)i);
+            SegmentInfoData* infoData = infoDataArray + i;
+            this->segmentInfos[i].AllocateAndInitSegmentInfoData(infoData);
+            this->segmentInfos[i].SetArrayId(addrInfo->GetArrayId());
+            this->segmentInfos[i].SetSegmentId((SegmentId)i);
+
+            // Initialize context section for SegmentInfoData
+            // "infoData" here has been already initialized to (0, 0, FREE) by AllocateAndInitSegmentInfoData() in the above.
+            ContextSection<SegmentInfoData*> infoDataSection(infoData);
+            this->segmentInfoDataSections.push_back( infoDataSection );
         }
+        POS_TRACE_INFO(EID(SEGMENTCTX_INIT_NEW_SEGMENTINFODATA), "arrayId: {}, numSegments: {}", addrInfo->GetArrayId(), numSegments);
+    }
+    else
+    {
+        uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
+        POS_TRACE_INFO(EID(SEGMENTCTX_USE_EXISTING_SEGMENTINFODATA), "arrayId:{}, numSegments: {}", addrInfo->GetArrayId(), numSegments);
     }
 
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
@@ -177,10 +199,20 @@ SegmentCtx::_UpdateSectionInfo(void)
     currentOffset += ctxHeader.GetSectionSize();
 
     // SC_SEGMENT_INFO
-    uint64_t segmentInfoSize = sizeof(SegmentInfoData) * addrInfo->GetnumUserAreaSegments();
-    segmentInfoData.InitAddressInfo(
-        (char*)segmentInfoData.data, currentOffset, segmentInfoSize);
-    currentOffset += segmentInfoData.GetSectionSize();
+    for(auto& infoDataSection: this->segmentInfoDataSections)
+    {
+        uint64_t sectionSize = infoDataSection.GetSectionSize();
+        infoDataSection.InitAddressInfo(/* 'dataAddress' isn't being used for SegmentInfoData's ser/deserialization */
+            currentOffset, sectionSize);
+        currentOffset += sectionSize;
+    }
+
+    // SC_EXTENDED
+    {
+        uint64_t sectionSize = this->ctxExtended.GetSectionSize();
+        this->ctxExtended.InitAddressInfo(currentOffset, sectionSize);
+        currentOffset += sectionSize;
+    }
 
     totalDataSize = currentOffset;
 }
@@ -199,11 +231,7 @@ SegmentCtx::Dispose(void)
         segmentInfos = nullptr;
     }
 
-    if (segmentInfoData.data != nullptr)
-    {
-        delete[] segmentInfoData.data;
-        segmentInfoData.data = nullptr;
-    }
+    segmentInfoDataSections.clear();
 
     for (int state = SegmentState::FREE; state < SegmentState::NUM_STATES; state++)
     {
@@ -348,8 +376,15 @@ SegmentCtx::AfterLoad(char* buf)
 
     // SC_HEADER
     ctxHeader.CopyFrom(buf);
+
     // SC_SEGMENT_INFO
-    segmentInfoData.CopyFrom(buf);
+    for(auto& infoDataSection: this->segmentInfoDataSections)
+    {
+        infoDataSection.CopyFrom(buf);
+    }
+
+    // SC_EXTENDED
+    this->ctxExtended.CopyFrom(buf);
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_LOAD_ERROR),
         "SegmentCtx file loaded:{}", ctxHeader.data.ctxVersion);
@@ -388,8 +423,15 @@ SegmentCtx::BeforeFlush(char* buf)
     std::lock_guard<std::mutex> lock(segCtxLock);
     // SC_HEADER
     ctxHeader.CopyTo(buf);
+
     // SC_SEGMENT_INFO
-    segmentInfoData.CopyTo(buf);
+    for(auto& infoDataSection: this->segmentInfoDataSections)
+    {
+        infoDataSection.CopyTo(buf);
+    }
+
+    // SC_EXTENDED
+    this->ctxExtended.CopyTo(buf);
 }
 
 void
@@ -414,7 +456,22 @@ SegmentCtx::GetSectionInfo(int section)
     }
     else if (section == SC_SEGMENT_INFO)
     {
-        return segmentInfoData.GetSectionInfo();
+        ContextSectionAddr addr;
+        bool firstSectionSeen = false;
+        for (auto& infoDataSection: this->segmentInfoDataSections)
+        {
+            if (!firstSectionSeen)
+            {
+                firstSectionSeen = true;
+                addr.offset = infoDataSection.GetSectionInfo().offset;
+            }
+            addr.size += infoDataSection.GetSectionSize();
+        }
+        return addr;
+    }
+    else if (section == SC_EXTENDED)
+    {
+        return this->ctxExtended.GetSectionInfo();
     }
     else
     {
@@ -443,7 +500,14 @@ SegmentCtx::GetNumSections(void)
 uint64_t
 SegmentCtx::GetTotalDataSize(void)
 {
-    return ctxHeader.GetSectionSize() + segmentInfoData.GetSectionSize();
+    uint64_t totalDataSize = 0;
+    totalDataSize += ctxHeader.GetSectionSize();
+    for(auto& infoDataSection: this->segmentInfoDataSections)
+    {
+        totalDataSize += infoDataSection.GetSectionSize();
+    }
+    totalDataSize += this->ctxExtended.GetSectionSize();
+    return totalDataSize;
 }
 
 SegmentState

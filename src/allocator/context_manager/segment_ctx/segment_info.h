@@ -37,6 +37,7 @@
 #include <utility>
 
 #include "src/include/address_type.h"
+#include "proto/generated/cpp/pos_bc.pb.h"
 
 namespace pos
 {
@@ -63,6 +64,11 @@ public:
         SegmentInfoData(0, 0, SegmentState::FREE);
     }
 
+    SegmentInfoData(const SegmentInfoData& target)
+    {
+        SegmentInfoData(target.validBlockCount, target.occupiedStripeCount, target.state);
+    }
+
     SegmentInfoData(uint32_t validBlockCount, uint32_t occupiedStripeCount, SegmentState segmentState)
     {
         this->Set(validBlockCount, occupiedStripeCount, segmentState);
@@ -74,6 +80,20 @@ public:
         this->occupiedStripeCount = occupiedStripeCount;
         this->state = segmentState;
     }
+
+    size_t SerializedSize() {
+        // "protobuf-encoded size" + "zero-padded size"
+        return ONSSD_SIZE;
+    }
+
+    // The fixed size for a single SegmentInfoDataProto
+    const static size_t ONSSD_SIZE = 128; // in bytes
+
+    // Serialize a single SegmentInfoData
+    bool ToBytes(char* destBuf);
+
+    // Deserialize a single SegmentInfoData
+    bool FromBytes(char* srcBuf);
 };
 
 class SegmentInfo

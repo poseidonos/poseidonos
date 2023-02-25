@@ -4527,7 +4527,99 @@ Root:
     Severity:
     Description:
     Cause:
-    Solution:
+    Solution:    
+  -
+    Id: 3230
+    Name: SEGMENTINFODATA_SERIALIZE_OVERFLOW
+    Severity: ERROR
+    Description: The size of serialized SegmentInfoData is too large to be stored on disk.
+    Cause: There may have been disruptive metadata layout changes checked in without getting caught by unit/integration/system tests.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3231
+    Name: SEGMENTINFODATA_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize (validBlockCount, occupiedStripeCount, segmentState) into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3232
+    Name: SEGMENTINFODATA_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3233
+    Name: SEGMENTINFODATA_FAILED_TO_DESERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to deserialize SegmentInfoData from byte stream.
+    Cause: If it is the first time to run with protobuf, the on-disk layout cannot be deserialized. If this is the case, it can be ignored.
+    Solution: 
+  -
+    Id: 3234
+    Name: SEGMENTCTX_SEGMENTINFODATA_INJECTED
+    Severity: INFO
+    Description: Segment context has been constructed with pre-conditioned SegmentInfoData array
+    Cause: 
+    Solution: 
+  -
+    Id: 3235
+    Name: SEGMENTCTX_SEGMENTINFODATA_WITHOUT_INJECTION
+    Severity: INFO
+    Description: Segment context has been constructed with empty SegmentInfoData.
+    Cause: The caller is expected to invoke SegmentCtx::Init() explicitly to be able to allocate/init SegmentInfoData array
+    Solution: 
+  -
+    Id: 3236
+    Name: SEGMENTCTX_INIT_NEW_SEGMENTINFODATA
+    Severity: INFO
+    Description: Segment context is initialized with new SegmentInfoData created.
+    Cause: 
+    Solution: 
+  -
+    Id: 3237
+    Name: SEGMENTCTX_USE_EXISTING_SEGMENTINFODATA
+    Severity: INFO
+    Description: Segment context is initialized without creating new SegmentInfoData.
+    Cause: Mainly to support dependency injection in unit tests
+    Solution: 
+  -
+    Id: 3238
+    Name: SEGMENTCTX_BEFOREFLUSH_PRINT
+    Severity: DEBUG
+    Description: Print the segment number for serialization
+    Cause: 
+    Solution: 
+  -
+    Id: 3239
+    Name: SEGMENTCTX_AFTERLOAD_PRINT
+    Severity: DEBUG
+    Description: Print the segment number for deserialization
+    Cause: 
+    Solution: 
+  -
+    Id: 3240
+    Name: SEGMENTCTX_EXTENDED_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3241
+    Name: SEGMENTCTX_EXTENDED_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3242
+    Name: SEGMENTCTX_EXTENDED_FAILED_TO_DESERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+
   # Metadata: 3300 - 3399
   -
     Id: 3300
