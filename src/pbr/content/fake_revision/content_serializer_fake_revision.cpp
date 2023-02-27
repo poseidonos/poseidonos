@@ -88,7 +88,6 @@ int
 ContentSerializerFakeRevision::_SerializeAte(uint64_t startOffset, char* dataOut, AteData* ateData)
 {
     FakeAteData* fakeAteData = dynamic_cast<FakeAteData*>(ateData);
-    memset(&dataOut[startOffset], 0, ATE_SIZE);
     strncpy(&dataOut[startOffset + SIGNATURE_OFFSET], ATE_SIGNATURE.c_str(), SIGNATURE_LENGTH);
     UuidHelper::UuidToByte(fakeAteData->nodeUuid, &dataOut[startOffset + NODE_UUID_OFFSET]);
     UuidHelper::UuidToByte(fakeAteData->arrayUuid, &dataOut[startOffset + ARRAY_UUID_OFFSET]);

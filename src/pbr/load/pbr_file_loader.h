@@ -33,7 +33,8 @@
 #pragma once
 
 #include "i_pbr_loader.h"
-#include "src/pbr/header/i_header_loader.h"
+#include "src/pbr/header/i_header_serializer.h"
+#include "src/pbr/io/i_pbr_reader.h"
 
 #include <vector>
 #include <string>
@@ -46,15 +47,16 @@ class PbrFileLoader : public IPbrLoader
 {
 public:
     PbrFileLoader(vector<string> fileList);
-    PbrFileLoader(IHeaderLoader* headerLoader,
-        vector<string> fileList);
+    PbrFileLoader(IHeaderSerializer* headerSerializer,
+        IPbrReader* pbrReader, vector<string> fileList);
     virtual ~PbrFileLoader(void);
 
 protected:
     virtual int Load(vector<AteData*>& ateListOut /* OUT PARAM */) override;
 
 private:
-    IHeaderLoader* headerLoader = nullptr;
+    IHeaderSerializer* headerSerializer = nullptr;
+    IPbrReader* pbrReader = nullptr;
     vector<string> fileList;
 };
 } // namespace pbr

@@ -86,7 +86,6 @@ ContentSerializerRev0::GetContentStartLba(void)
 int
 ContentSerializerRev0::_SerializeAte(uint64_t startOffset, char* dataOut, AteData* ateData)
 {
-    memset(&dataOut[startOffset], 0, ATE_SIZE);
     strncpy(&dataOut[startOffset + SIGNATURE_OFFSET], ATE_SIGNATURE.c_str(), SIGNATURE_LENGTH);
     UuidHelper::UuidToByte(ateData->nodeUuid, &dataOut[startOffset + NODE_UUID_OFFSET]);
     UuidHelper::UuidToByte(ateData->arrayUuid, &dataOut[startOffset + ARRAY_UUID_OFFSET]);

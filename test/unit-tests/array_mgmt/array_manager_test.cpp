@@ -17,6 +17,7 @@
 #include "test/unit-tests/array/device/array_device_mock.h"
 #include "test/unit-tests/array/build/array_builder_adapter_mock.h"
 #include "test/unit-tests/array/build/array_build_info_mock.h"
+#include "test/unit-tests/pbr/pbr_adapter_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -502,9 +503,15 @@ TEST(ArrayManager, ResetPbr_testIfResetSuccessWhenThereIsNoArray)
 {
     // Given
     auto emptyArrayMap = BuildArrayComponentsMap();
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr);
+    pbr::MockPbrAdapter mockPbrAdapter;
+    MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+    MockDeviceManager mockDevMgr(&mockAffinityMgr);
+    auto arrayMgr = new ArrayManager(nullptr, &mockDevMgr, nullptr, nullptr, nullptr, &mockPbrAdapter);
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
     int RESET_SUCCESS = 0;
+
+    EXPECT_CALL(mockPbrAdapter, Reset(vector<pos::UblockSharedPtr>())).WillOnce(Return(0));
+    EXPECT_CALL(mockDevMgr, GetDevs()).WillOnce(Return(vector<pos::UblockSharedPtr>()));
 
     // When
     int actual = arrayMgr->ResetPbr();
@@ -520,16 +527,21 @@ TEST(ArrayManager, ResetPbr_testIfEveryArrayCallsDeleteSuccessfully)
     auto mockArray = BuildMockArray(arrayName);
     auto mockArrayComp = NewMockArrayComponents(arrayName);
     auto arrayMap = BuildArrayComponentsMap(arrayName, mockArrayComp);
-    auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, nullptr);
+    pbr::MockPbrAdapter mockPbrAdapter;
+    MockAffinityManager mockAffinityMgr = BuildDefaultAffinityManagerMock();
+    MockDeviceManager mockDevMgr(&mockAffinityMgr);
+    auto arrayMgr = new ArrayManager(nullptr, &mockDevMgr, nullptr, nullptr, nullptr, &mockPbrAdapter);
     auto mockStateControl = new MockStateControl(arrayName);
     auto mockGc = new MockGarbageCollector(mockArray.get(), mockStateControl);
     MockComponentsInfo* mockCompInfo = new MockComponentsInfo(mockArray.get(), mockGc);
     arrayMgr->SetArrayComponentMap(arrayMap);
 
     int DELETE_SUCCESS = 0;
+    EXPECT_CALL(mockPbrAdapter, Reset(vector<pos::UblockSharedPtr>())).WillOnce(Return(0));
     EXPECT_CALL(*mockArray, GetName).WillOnce(Return(arrayName));
     EXPECT_CALL(*mockArrayComp, GetInfo).WillOnce(Return(mockCompInfo));
     EXPECT_CALL(*mockArrayComp, Delete).WillOnce(Return(DELETE_SUCCESS));
+    EXPECT_CALL(mockDevMgr, GetDevs()).WillOnce(Return(vector<pos::UblockSharedPtr>()));
     int RESET_SUCCESS = 0;
 
     // When

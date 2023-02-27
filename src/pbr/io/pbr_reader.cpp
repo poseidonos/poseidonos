@@ -34,7 +34,6 @@
 #include "src/device/base/ublock_device.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
 
 #include <fstream>
 
@@ -43,10 +42,11 @@ using namespace std;
 namespace pbr
 {
 int
-PbrReader::Read(pos::UblockSharedPtr dev, char* dataOut, uint64_t startLba, uint32_t length)
+PbrReader::Read(pos::UblockSharedPtr dev, char* dataOut, uint64_t startOffset, uint32_t length)
 {
     uint32_t sectorSize = 512;
     uint32_t sectorCnt = length / sectorSize;
+    uint64_t startLba = startOffset / (uint64_t)sectorSize;
     if (length % sectorSize > 0)
     {
         sectorCnt++;

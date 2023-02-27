@@ -10,10 +10,10 @@ class MockPbrAdapter : public PbrAdapter
 {
 public:
     using PbrAdapter::PbrAdapter;
-    MOCK_METHOD(int, Load, (vector<AteData*>& out), (override));
-    MOCK_METHOD(int, Reset, (), (override));
-    MOCK_METHOD(int, Reset, (string arrayName), (override));
-    MOCK_METHOD(int, Update, (AteData* ateData), (override));
+    MOCK_METHOD(int, Load, (vector<pos::UblockSharedPtr> devs, vector<AteData*>& out), (override));
+    MOCK_METHOD(int, Reset, (vector<pos::UblockSharedPtr> devs), (override));
+    MOCK_METHOD(int, Reset, (vector<pos::UblockSharedPtr> devs, string arrayName), (override));
+    MOCK_METHOD(int, Update, (vector<pos::UblockSharedPtr> devs, AteData* ateData), (override));
 };
 
 } // namespace pbr
