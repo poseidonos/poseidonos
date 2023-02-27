@@ -119,8 +119,8 @@ TEST_F(SegmentCtxIntegrationTest, LifeCycleTest)
     uint32_t occupiedStripeCount = segmentCtx->GetOccupiedStripeCount(segId);
     EXPECT_EQ(occupiedStripeCount, segmentCtx->GetStripesPerSegment());
 
-    SegmentInfo* retSegmentInfo = segmentCtx->GetSegmentInfos();
-    EXPECT_EQ(retSegmentInfo[segId].GetState(), SegmentState::SSD);
+    SegmentInfoData* retSegmentInfo = segmentCtx->GetSegmentInfos();
+    EXPECT_EQ(retSegmentInfo[segId].state, SegmentState::SSD);
 }
 
 TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedByUserWrite)

@@ -491,7 +491,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
 
     const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
 
-    SegmentInfo* loadedSegmentInfos = nullptr;
+    SegmentInfoData* loadedSegmentInfos = nullptr;
     if (nullptr != contextManager)
     {
         SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();

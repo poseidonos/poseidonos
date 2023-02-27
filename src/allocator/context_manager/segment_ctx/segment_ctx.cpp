@@ -970,10 +970,10 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
     }
 }
 
-SegmentInfo*
+SegmentInfoData*
 SegmentCtx::GetSegmentInfos(void)
 {
-    return segmentInfos;
+    return segmentInfoData.data;
 }
 
 void

@@ -40,7 +40,6 @@
 namespace pos
 {
 class JournalConfiguration;
-class SegmentInfo;
 class SegmentInfoData;
 class VersionedSegmentInfo;
 
@@ -49,7 +48,7 @@ class IVersionedSegmentContext: public LogBufferWriteDoneEvent, public ISegmentF
 public:
     virtual ~IVersionedSegmentContext(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) = 0;
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfos, uint32_t numSegments) = 0;
     virtual void Dispose(void) = 0;
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
@@ -59,7 +58,7 @@ public:
     virtual int GetNumLogGroups(void) = 0;
 
     // For UT
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) = 0;
 };
 
