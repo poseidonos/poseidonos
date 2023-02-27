@@ -30,47 +30,19 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SPDK_RPC_CLIENT_H_
-#define SPDK_RPC_CLIENT_H_
-
-#include <jsonrpccpp/client.h>
+#pragma once
 
 #include <string>
-#include <utility>
 
-#include "src/spdk_wrapper/caller/spdk_env_caller.h"
+#include "src/cli/command.h"
 
-namespace pos
+namespace pos_cli
 {
-class SpdkRpcClient
+class ListListenerCommand : public Command
 {
 public:
-    SpdkRpcClient(SpdkEnvCaller* spdkEnvCaller = new SpdkEnvCaller());
-    virtual ~SpdkRpcClient(void);
-    std::pair<int, std::string> BdevMallocCreate(
-        std::string name, uint32_t numBlocks, uint32_t blockSize, uint32_t numa);
-    std::pair<int, std::string> SubsystemCreate(std::string subnqn, std::string sn, std::string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting);
-    std::pair<int, std::string> SubsystemDelete(std::string subnqn);
-    Json::Value SubsystemList(void);
-
-    std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    std::pair<int, std::string> SubsystemRemoveListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    std::pair<int, std::string> SubsystemSetListenerAnaState(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid, std::string anastate);
-    Json::Value SubsystemListListener(std::string subnqn);
-
-    virtual std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize);
-    Json::Value TransportList(void);
-
-private:
-    void _SetClient(void);
-
-    jsonrpc::Client* client;
-    jsonrpc::IClientConnector* connector;
-    static const int SUCCESS = 0;
-
-    SpdkEnvCaller* spdkEnvCaller;
+    ListListenerCommand(void);
+    ~ListListenerCommand(void) override;
+    string Execute(json& doc, string rid) override;
 };
-
-} // namespace pos
-
-#endif // SPDK_RPC_CLIENT_H_
+}; // namespace pos_cli

@@ -639,6 +639,48 @@ Root:
     Cause:
     Solution:
   -
+    Id: 1253
+    Name: CLI_REMOVE_LISTENER_FAILURE
+    Severity:
+    Description: Failed to remove a listener.
+    Cause:
+    Solution:
+  -
+    Id: 1254
+    Name: CLI_REMOVE_LISTENER_SUCCESS
+    Severity:
+    Description: A listener has been removed.
+    Cause:
+    Solution:
+  -
+    Id: 1255
+    Name: CLI_LIST_LISTENER_FAILURE
+    Severity:
+    Description: Failed to list a listener.
+    Cause:
+    Solution:
+  -
+    Id: 1256
+    Name: CLI_LIST_LISTENER_SUCCESS
+    Severity:
+    Description: A listener has been listed.
+    Cause:
+    Solution:
+  -
+    Id: 1257
+    Name: CLI_SET_LISTENER_ANA_STATE_FAILURE
+    Severity:
+    Description: Failed to set a listener ana state.
+    Cause:
+    Solution:
+  -
+    Id: 1258
+    Name: CLI_SET_LISTENER_ANA_STATE_SUCCESS
+    Severity:
+    Description: A listener's ana state has been set.
+    Cause:
+    Solution:
+  -
     Id: 1600
     Name: INVALID_PARAM
     Severity:
@@ -1333,7 +1375,41 @@ Root:
     Description: Failed to add a transport.
     Cause: An error occurred during RPC to SPDK.
     Solution:
-
+  -
+    Id: 2210
+    Name: REMOVE_LISTENER_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to remove a listener.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2211
+    Name: REMOVE_LISTENER_FAILURE_SPDK_FAILURE
+    Severity:
+    Description: Failed to remove a listener.
+    Cause: An error occurred during RPC to SPDK.
+    Solution:
+  -
+    Id: 2212
+    Name: LIST_LISTENER_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to list a listener.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2213
+    Name: SET_LISTENER_ANA_STATE_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to set a listener ana state.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2214
+    Name: SET_LISTENER_ANA_STATE_FAILURE_SPDK_FAILURE
+    Severity:
+    Description: Failed to set a listener ana state.
+    Cause: An error occurred during RPC to SPDK.
+    Solution:
 
     # PBR: 2300 - 2499
   -

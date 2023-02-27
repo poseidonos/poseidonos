@@ -330,6 +330,33 @@ func (p *POSGRPCManager) AddListener(param *pb.AddListenerRequest_Param) (*pb.Ad
 	return res, req, err
 }
 
+// Remove a listener to an NVMe-oF subsystem
+// The function takes a protobuf format as parameter and returns response in protobuf format
+func (p *POSGRPCManager) RemoveListener(param *pb.RemoveListenerRequest_Param) (*pb.RemoveListenerResponse, *pb.RemoveListenerRequest, error) {
+	command := "REMOVELISTENER"
+	req := &pb.RemoveListenerRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor, Param: param}
+	res, err := grpc.SendRemoveListener(p.connection, req)
+	return res, req, err
+}
+
+// List a listener to an NVMe-oF subsystem
+// The function takes a protobuf format as parameter and returns response in protobuf format
+func (p *POSGRPCManager) ListListener(param *pb.ListListenerRequest_Param) (*pb.ListListenerResponse, *pb.ListListenerRequest, error) {
+	command := "LISTLISTENER"
+	req := &pb.ListListenerRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor, Param: param}
+	res, err := grpc.SendListListener(p.connection, req)
+	return res, req, err
+}
+
+// Set a listener's ana state to an NVMe-oF subsystem
+// The function takes a protobuf format as parameter and returns response in protobuf format
+func (p *POSGRPCManager) SetListenerAnaState(param *pb.SetListenerAnaStateRequest_Param) (*pb.SetListenerAnaStateResponse, *pb.SetListenerAnaStateRequest, error) {
+	command := "SETLISTENERANASTATE"
+	req := &pb.SetListenerAnaStateRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor, Param: param}
+	res, err := grpc.SendSetListenerAnaState(p.connection, req)
+	return res, req, err
+}
+
 // Create an NVMe-oF subsystem to PoseidonOS.
 // The function takes a protobuf format as parameter and returns response in protobuf format
 func (p *POSGRPCManager) CreateSubsystem(param *pb.CreateSubsystemRequest_Param) (*pb.CreateSubsystemResponse, *pb.CreateSubsystemRequest, error) {
@@ -352,6 +379,15 @@ func (p *POSGRPCManager) CreateTransport(param *pb.CreateTransportRequest_Param)
 	command := "CREATETRANSPORT"
 	req := &pb.CreateTransportRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor, Param: param}
 	res, err := grpc.SendCreateTransport(p.connection, req)
+	return res, req, err
+}
+
+// List NVMf transport to PoseidonOS
+// The function takes a protobuf format as parameter and returns response in protobuf format
+func (p *POSGRPCManager) ListTransport() (*pb.ListTransportResponse, *pb.ListTransportRequest, error) {
+	command := "LISTTRANSPORT"
+	req := &pb.ListTransportRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor}
+	res, err := grpc.SendListTransport(p.connection, req)
 	return res, req, err
 }
 

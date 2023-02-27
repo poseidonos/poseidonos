@@ -689,6 +689,60 @@ class PosCliServiceImpl final : public PosCli::Service
     }
 
     grpc::Status
+    RemoveListener(ServerContext* context, const RemoveListenerRequest* request,
+        RemoveListenerResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteRemoveListenerCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
+    ListListener(ServerContext* context, const ListListenerRequest* request,
+        ListListenerResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteListListenerCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
+    SetListenerAnaState(ServerContext* context, const SetListenerAnaStateRequest* request,
+        SetListenerAnaStateResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteSetListenerAnaStateCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
     ListSubsystem(ServerContext* context, const ListSubsystemRequest* request,
         ListSubsystemResponse* reply) override
     {
@@ -731,6 +785,24 @@ class PosCliServiceImpl final : public PosCli::Service
         _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateTransportCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
+    ListTransport(ServerContext* context, const ListTransportRequest* request,
+        ListTransportResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteListTransportCommand(request, reply);
         if (context->IsCancelled())
         {
             _LogGrpcTimeout(request, reply);

@@ -297,6 +297,9 @@ SubsystemCmd = "subsystem" ,
   | DeleteSubsystemCmd
   | ListSubsystemCmd
   | AddListenerCmd
+  | RemoveListenerCmd
+  | ListListenerCmd
+  | SetListenerAnaStateCmd
   | CreateTransportCmd
   ) ;
 
@@ -317,9 +320,33 @@ AddListenerCmd = "add-listener" , ( "--subnqn" | "-q" ) ,
   ( "--traddr" | "-i" ) , TargetAddress , ( "--trsvcid" | "-p" ) ,
   TransportServiceId ;
 
+RemoveListenerCmd = "remove-listener" , ( "--subnqn" | "-q" ) ,
+  SubsystemNQN , ( "--trtype" | "-t" ) , TransportType ,
+  ( "--traddr" | "-i" ) , TargetAddress , ( "--trsvcid" | "-p" ) ,
+  TransportServiceId ;
+
+ListListenerCmd = "list-listener" , ( "--subnqn" | "-q" ) ,
+  SubsystemNQN ;
+
+SetListenerAnaStateCmd = "set-listener-ana-state" , ( "--subnqn" | "-q" ) ,
+  SubsystemNQN , ( "--trtype" | "-t" ) , TransportType ,
+  ( "--traddr" | "-i" ) , TargetAddress , ( "--trsvcid" | "-p" ) ,
+  TransportServiceId , ( "--anastate" | "-a" ) , AnaState ;
+
 CreateTransportCmd = "create-transport" ,
   ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,
   BufCacheSize ] , [ "--num-shared-buf" , NumSharedBuffers ] ;
+
+TransportCmd = "transport" ,
+  ( CreateTransportSubCmd
+  | ListTransportSubCmd
+  ) ;
+
+CreateTransportSubCmd = "create" ,
+  ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,
+  BufCacheSize ] , [ "--num-shared-buf" , NumSharedBuffers ] ;
+
+ListTransportSubCmd = "list";
 
 TelemetryCmd = "telemetry" ,
   ( TelemetryStartCmd
