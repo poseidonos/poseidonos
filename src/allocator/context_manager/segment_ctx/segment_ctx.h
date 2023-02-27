@@ -114,7 +114,7 @@ public:
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
     virtual void AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber) override;
 
-    virtual SegmentInfo* GetSegmentInfos(void);
+    virtual SegmentInfoData* GetSegmentInfos(void);
 
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);

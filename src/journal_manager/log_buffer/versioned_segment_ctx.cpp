@@ -45,8 +45,7 @@ namespace pos
 VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
   numSegments(0),
-  segmentInfos(nullptr),
-  segmentInfoDatas(nullptr)
+  segmentInfoData(nullptr)
 {
 }
 
@@ -56,7 +55,7 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_)
 {
     _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
 
@@ -68,7 +67,7 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_,
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_,
     std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo)
 {
     _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
@@ -78,23 +77,33 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
 }
 
 void
-VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_)
+VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_)
 {
     config = journalConfiguration;
 
     numSegments = numSegments_;
-    segmentInfos = new SegmentInfo[numSegments];
-    segmentInfoDatas = new SegmentInfoData[numSegments];
+    segmentInfoData = new SegmentInfoData[numSegments];
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        segmentInfos[segId].AllocateAndInitSegmentInfoData(&segmentInfoDatas[segId]);
-        if (nullptr != loadedSegmentInfo)
+        if (loadedSegmentInfo != nullptr)
         {
-            POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
-                segId, loadedSegmentInfo[segId].GetValidBlockCount(),
-                loadedSegmentInfo[segId].GetOccupiedStripeCount(),
-                loadedSegmentInfo[segId].GetState());
-            segmentInfos[segId].UpdateFrom(loadedSegmentInfo[segId]);
+            segmentInfoData[segId].validBlockCount = loadedSegmentInfo[segId].validBlockCount.load();
+            segmentInfoData[segId].occupiedStripeCount = loadedSegmentInfo[segId].occupiedStripeCount.load();
+            segmentInfoData[segId].state = loadedSegmentInfo[segId].state;
+
+            if (nullptr != loadedSegmentInfo)
+            {
+                POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
+                    segId, loadedSegmentInfo[segId].validBlockCount,
+                    loadedSegmentInfo[segId].occupiedStripeCount,
+                    loadedSegmentInfo[segId].state);
+            }
+        }
+        else
+        {
+            // For Unit Test
+            // Test should provide loadedSegmentInfo, but some are not, so initialize it here temporally
+            segmentInfoData[segId].Set(0, 0, SegmentState::FREE);
         }
     }
 }
@@ -102,10 +111,10 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
 void
 VersionedSegmentCtx::Dispose(void)
 {
-    if (segmentInfos != nullptr)
+    if (segmentInfoData != nullptr)
     {
-        delete[] segmentInfos;
-        segmentInfos = nullptr;
+        delete[] segmentInfoData;
+        segmentInfoData = nullptr;
     }
 }
 
@@ -148,14 +157,14 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         auto segmentId = it->first;
         auto validBlockCountDiff = it->second;
 
-        uint32_t getValidCount = segmentInfos[segmentId].GetValidBlockCount();
+        uint32_t getValidCount = segmentInfoData[segmentId].validBlockCount;
         uint32_t result = getValidCount + validBlockCountDiff;
 
         POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
             "Before _UpdateSegmentContext, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
             logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
 
-        segmentInfos[segmentId].SetValidBlockCount(result);
+        segmentInfoData[segmentId].validBlockCount = result;
 
         if (0 > (int)getValidCount)
         {
@@ -172,7 +181,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         auto segmentId = it->first;
         auto occupiedStripeCountDiff = it->second;
 
-        segmentInfos[segmentId].SetOccupiedStripeCount(segmentInfos[segmentId].GetOccupiedStripeCount() + occupiedStripeCountDiff);
+        segmentInfoData[segmentId].occupiedStripeCount += occupiedStripeCountDiff;
     }
 }
 
@@ -195,7 +204,7 @@ VersionedSegmentCtx::GetUpdatedInfoDataToFlush(int logGroupId)
 
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_IN_PROGRESS), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
 
-    return segmentInfoDatas;
+    return segmentInfoData;
 }
 
 int
@@ -255,8 +264,8 @@ VersionedSegmentCtx::NotifySegmentFreed(SegmentId segmentId)
         segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(segmentId);
         segmentInfoDiffs[groupId]->ResetValidBlockCount(segmentId);
     }
-    segmentInfos[segmentId].SetOccupiedStripeCount(0);
-    segmentInfos[segmentId].SetState(SegmentState::FREE);
+    segmentInfoData[segmentId].occupiedStripeCount = 0;
+    segmentInfoData[segmentId].state = SegmentState::FREE;
 }
 
 } // namespace pos
