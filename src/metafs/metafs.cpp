@@ -519,7 +519,7 @@ MetaFs::_RegisterMediaInfoIfAvailable(PartitionType ptnType, MetaStorageInfoList
 {
     std::shared_ptr<MetaStorageInfo> media = _MakeMetaStorageMediaInfo(ptnType);
 
-    if (media->valid)
+    if (media->IsValid())
     {
         POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
             "PartitionType {} is available, arrayId: {}",
@@ -539,30 +539,17 @@ std::shared_ptr<MetaStorageInfo>
 MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 {
     const PartitionLogicalSize* ptnSize = arrayInfo_->GetSizeInfo(ptnType);
-
-    std::shared_ptr<MetaStorageInfo> newInfo = std::make_shared<MetaStorageInfo>();
-    switch (ptnType)
-    {
-        case META_NVM:
-            newInfo->media = MetaStorageType::NVRAM;
-            break;
-
-        case JOURNAL_SSD:
-            newInfo->media = MetaStorageType::JOURNAL_SSD;
-            break;
-
-        default:
-            newInfo->media = MetaStorageType::SSD;
-            break;
-    }
+    const auto partition = MetaFileUtil::ConvertToMediaType(ptnType);
+    std::shared_ptr<MetaStorageInfo> newInfo = std::make_shared<MetaStorageInfo>(partition);
 
     if (ptnSize)
     {
         POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
             "ptnType: {}, totalStripes: {}", (int)ptnType, ptnSize->totalStripes);
-        newInfo->valid = true;
-        newInfo->mediaCapacity = static_cast<uint64_t>(ptnSize->totalStripes) *
+        const uint64_t capacity = static_cast<uint64_t>(ptnSize->totalStripes) *
             ptnSize->blksPerStripe * ArrayConfig::BLOCK_SIZE_BYTE;
+        newInfo->SetValid(true);
+        newInfo->SetCapacity(capacity);
     }
 
     return newInfo;

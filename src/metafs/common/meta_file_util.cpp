@@ -49,6 +49,14 @@ const MetaFsVolumeToMedia MetaFileUtil::VOLUME_TO_MEDIA[] =
         {MetaVolumeType::NvRamVolume, MetaStorageType::NVRAM},
         {MetaVolumeType::JournalVolume, MetaStorageType::JOURNAL_SSD}};
 
+const PartitionToMedia MetaFileUtil::PARTITION_TO_MEDIA[] =
+    {
+        {PartitionType::META_NVM, MetaStorageType::NVRAM},
+        {PartitionType::WRITE_BUFFER, MetaStorageType::SSD},
+        {PartitionType::META_SSD, MetaStorageType::SSD},
+        {PartitionType::USER_DATA, MetaStorageType::Max},
+        {PartitionType::JOURNAL_SSD, MetaStorageType::JOURNAL_SSD}};
+
 const std::unordered_map<MetaVolumeType, std::string> MetaFileUtil::VOLUME_NAME =
     {
         {MetaVolumeType::SsdVolume, "SSD"},
@@ -74,6 +82,12 @@ MetaStorageType
 MetaFileUtil::ConvertToMediaType(const MetaVolumeType volume)
 {
     return VOLUME_TO_MEDIA[(uint32_t)volume].media;
+}
+
+MetaStorageType
+MetaFileUtil::ConvertToMediaType(const PartitionType partition)
+{
+    return PARTITION_TO_MEDIA[(uint32_t)partition].media;
 }
 
 std::string

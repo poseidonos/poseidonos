@@ -40,6 +40,7 @@
 #include "meta_storage_specific.h"
 #include "meta_volume_type.h"
 #include "metafs_type.h"
+#include "src/include/partition_type.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/metafs/include/meta_file_property.h"
 
@@ -59,11 +60,19 @@ public:
     MetaStorageType media;
 };
 
+class PartitionToMedia
+{
+public:
+    PartitionType type;
+    MetaStorageType media;
+};
+
 class MetaFileUtil
 {
 public:
     static StringHashType GetHashKeyFromFileName(const std::string& fileName);
     static MetaStorageType ConvertToMediaType(const MetaVolumeType volume);
+    static MetaStorageType ConvertToMediaType(const PartitionType partition);
     static std::string ConvertToMediaTypeName(const MetaVolumeType volume);
     static MetaVolumeType ConvertToVolumeType(const MetaStorageType media);
     static uint64_t GetEpochSignature(std::time_t t = std::time(0));
@@ -76,6 +85,7 @@ public:
 private:
     static const MetaFsMediaToVolume MEDIA_TO_VOLUME[(uint32_t)MetaStorageType::Max];
     static const MetaFsVolumeToMedia VOLUME_TO_MEDIA[(uint32_t)MetaVolumeType::Max];
+    static const PartitionToMedia PARTITION_TO_MEDIA[(uint32_t)PartitionType::TYPE_COUNT];
     static const std::unordered_map<MetaVolumeType, std::string> VOLUME_NAME;
     static const std::unordered_map<MetaFileType, std::string> FILE_TYPE;
 };

@@ -142,4 +142,21 @@ TEST(MetaFileUtil, ConvertToDirectionName_testIfDirectionTypesMatchedToTheirName
     EXPECT_EQ("read", MetaFileUtil::ConvertToDirectionName(1));
     EXPECT_DEATH(MetaFileUtil::ConvertToDirectionName(2), "");
 }
+
+TEST(MetaFileUtil, ConvertToMediaType_testIfPartitionTypesMatcheToStorageType)
+{
+    std::unordered_map<PartitionType, MetaStorageType> expectedResult =
+    {
+        {PartitionType::META_NVM, MetaStorageType::NVRAM},
+        {PartitionType::WRITE_BUFFER, MetaStorageType::SSD},
+        {PartitionType::META_SSD, MetaStorageType::SSD},
+        {PartitionType::USER_DATA, MetaStorageType::Max},
+        {PartitionType::JOURNAL_SSD, MetaStorageType::JOURNAL_SSD}};
+
+    for (int i = 0; i < (int)PartitionType::TYPE_COUNT; i++)
+    {
+        PartitionType type = (PartitionType)i;
+        EXPECT_EQ(expectedResult[type], MetaFileUtil::ConvertToMediaType(type));
+    }
+}
 } // namespace pos
