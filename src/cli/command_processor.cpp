@@ -1664,6 +1664,37 @@ CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* re
 }
 
 grpc::Status
+CommandProcessor::ExecuteListTransportCommand(const ListTransportRequest* request, ListTransportResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+
+    auto list = rpcClient.TransportList();
+
+    for (const auto& transport : list)
+    {
+        grpc_cli::Transport* trListItem =
+            reply->mutable_result()->mutable_data()->add_transportlist();
+        trListItem->set_type(transport["trtype"].asString());
+        trListItem->set_maxqueuedepth(transport["max_queue_depth"].asInt());
+        trListItem->set_maxioqpairsperctrlr(transport["max_io_qpairs_per_ctrlr"].asInt());
+        trListItem->set_incapsuledatasize(transport["in_capsule_data_size"].asInt());
+        trListItem->set_maxiosize(transport["max_io_size"].asInt());
+        trListItem->set_iounitsize(transport["io_unit_size"].asInt());
+        trListItem->set_aborttimeoutsec(transport["abort_timeout_sec"].asInt());
+        trListItem->set_bufcachesize(transport["buf_cache_size"].asInt());
+        trListItem->set_numsharedbuf(transport["num_shared_buffers"].asInt());
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
 CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply)
 {
     string command = request->command();

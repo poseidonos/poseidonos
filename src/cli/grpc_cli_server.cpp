@@ -797,6 +797,24 @@ class PosCliServiceImpl final : public PosCli::Service
     }
 
     grpc::Status
+    ListTransport(ServerContext* context, const ListTransportRequest* request,
+        ListTransportResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteListTransportCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
     CreateVolume(ServerContext* context, const CreateVolumeRequest* request,
         CreateVolumeResponse* reply) override
     {

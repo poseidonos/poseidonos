@@ -992,6 +992,28 @@ func SendCreateTransport(posConn POSGRPCConnection, req *pb.CreateTransportReque
 	return res, err
 }
 
+func SendListTransport(posConn POSGRPCConnection, req *pb.ListTransportRequest) (*pb.ListTransportResponse, error) {
+	conn, err := dialToCliServer(posConn)
+	if err != nil {
+		log.Print(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(posConn.ReqTimeout))
+	defer cancel()
+
+	res, err := c.ListTransport(ctx, req)
+	if err != nil {
+		log.Print("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendVolumeProperty(posConn POSGRPCConnection, req *pb.SetVolumePropertyRequest) (*pb.SetVolumePropertyResponse, error) {
 	conn, err := dialToCliServer(posConn)
 	if err != nil {

@@ -14,7 +14,7 @@ Transport Command for PoseidonOS. Use this command category when you
 create or list a transport. 
 
 Syntax: 
-  poseidonos-cli transport [create] [flags]
+  poseidonos-cli transport [create|list] [flags]
 	  `,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -25,4 +25,5 @@ func init() {
 	// Add subcommands to transport command.
 	// If you create a new subcommand, add it here.
 	TransportCmd.AddCommand(CreateTransportCmd)
+	TransportCmd.AddCommand(ListTransportCmd)
 }

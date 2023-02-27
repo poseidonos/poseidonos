@@ -50,7 +50,7 @@ struct TableStruct_cli_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[259]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[264]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -392,6 +392,18 @@ extern ListSubsystemResponse_ResultDefaultTypeInternal _ListSubsystemResponse_Re
 class ListSubsystemResponse_Result_SubsystemList;
 struct ListSubsystemResponse_Result_SubsystemListDefaultTypeInternal;
 extern ListSubsystemResponse_Result_SubsystemListDefaultTypeInternal _ListSubsystemResponse_Result_SubsystemList_default_instance_;
+class ListTransportRequest;
+struct ListTransportRequestDefaultTypeInternal;
+extern ListTransportRequestDefaultTypeInternal _ListTransportRequest_default_instance_;
+class ListTransportResponse;
+struct ListTransportResponseDefaultTypeInternal;
+extern ListTransportResponseDefaultTypeInternal _ListTransportResponse_default_instance_;
+class ListTransportResponse_Result;
+struct ListTransportResponse_ResultDefaultTypeInternal;
+extern ListTransportResponse_ResultDefaultTypeInternal _ListTransportResponse_Result_default_instance_;
+class ListTransportResponse_Result_TransportList;
+struct ListTransportResponse_Result_TransportListDefaultTypeInternal;
+extern ListTransportResponse_Result_TransportListDefaultTypeInternal _ListTransportResponse_Result_TransportList_default_instance_;
 class ListVolumeRequest;
 struct ListVolumeRequestDefaultTypeInternal;
 extern ListVolumeRequestDefaultTypeInternal _ListVolumeRequest_default_instance_;
@@ -752,6 +764,9 @@ extern SystemInfoResponse_ResultDefaultTypeInternal _SystemInfoResponse_Result_d
 class SystemInfoResponse_Result_Data;
 struct SystemInfoResponse_Result_DataDefaultTypeInternal;
 extern SystemInfoResponse_Result_DataDefaultTypeInternal _SystemInfoResponse_Result_Data_default_instance_;
+class Transport;
+struct TransportDefaultTypeInternal;
+extern TransportDefaultTypeInternal _Transport_default_instance_;
 class UnmountArrayRequest;
 struct UnmountArrayRequestDefaultTypeInternal;
 extern UnmountArrayRequestDefaultTypeInternal _UnmountArrayRequest_default_instance_;
@@ -949,6 +964,10 @@ template<> ::grpc_cli::ListSubsystemRequest* Arena::CreateMaybeMessage<::grpc_cl
 template<> ::grpc_cli::ListSubsystemResponse* Arena::CreateMaybeMessage<::grpc_cli::ListSubsystemResponse>(Arena*);
 template<> ::grpc_cli::ListSubsystemResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::ListSubsystemResponse_Result>(Arena*);
 template<> ::grpc_cli::ListSubsystemResponse_Result_SubsystemList* Arena::CreateMaybeMessage<::grpc_cli::ListSubsystemResponse_Result_SubsystemList>(Arena*);
+template<> ::grpc_cli::ListTransportRequest* Arena::CreateMaybeMessage<::grpc_cli::ListTransportRequest>(Arena*);
+template<> ::grpc_cli::ListTransportResponse* Arena::CreateMaybeMessage<::grpc_cli::ListTransportResponse>(Arena*);
+template<> ::grpc_cli::ListTransportResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::ListTransportResponse_Result>(Arena*);
+template<> ::grpc_cli::ListTransportResponse_Result_TransportList* Arena::CreateMaybeMessage<::grpc_cli::ListTransportResponse_Result_TransportList>(Arena*);
 template<> ::grpc_cli::ListVolumeRequest* Arena::CreateMaybeMessage<::grpc_cli::ListVolumeRequest>(Arena*);
 template<> ::grpc_cli::ListVolumeRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::ListVolumeRequest_Param>(Arena*);
 template<> ::grpc_cli::ListVolumeResponse* Arena::CreateMaybeMessage<::grpc_cli::ListVolumeResponse>(Arena*);
@@ -1069,6 +1088,7 @@ template<> ::grpc_cli::SystemInfoRequest* Arena::CreateMaybeMessage<::grpc_cli::
 template<> ::grpc_cli::SystemInfoResponse* Arena::CreateMaybeMessage<::grpc_cli::SystemInfoResponse>(Arena*);
 template<> ::grpc_cli::SystemInfoResponse_Result* Arena::CreateMaybeMessage<::grpc_cli::SystemInfoResponse_Result>(Arena*);
 template<> ::grpc_cli::SystemInfoResponse_Result_Data* Arena::CreateMaybeMessage<::grpc_cli::SystemInfoResponse_Result_Data>(Arena*);
+template<> ::grpc_cli::Transport* Arena::CreateMaybeMessage<::grpc_cli::Transport>(Arena*);
 template<> ::grpc_cli::UnmountArrayRequest* Arena::CreateMaybeMessage<::grpc_cli::UnmountArrayRequest>(Arena*);
 template<> ::grpc_cli::UnmountArrayRequest_Param* Arena::CreateMaybeMessage<::grpc_cli::UnmountArrayRequest_Param>(Arena*);
 template<> ::grpc_cli::UnmountArrayResponse* Arena::CreateMaybeMessage<::grpc_cli::UnmountArrayResponse>(Arena*);
@@ -36956,6 +36976,936 @@ class CreateTransportResponse PROTOBUF_FINAL :
 };
 // -------------------------------------------------------------------
 
+class ListTransportRequest PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListTransportRequest) */ {
+ public:
+  inline ListTransportRequest() : ListTransportRequest(nullptr) {}
+  virtual ~ListTransportRequest();
+  explicit constexpr ListTransportRequest(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListTransportRequest(const ListTransportRequest& from);
+  ListTransportRequest(ListTransportRequest&& from) noexcept
+    : ListTransportRequest() {
+    *this = ::std::move(from);
+  }
+
+  inline ListTransportRequest& operator=(const ListTransportRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListTransportRequest& operator=(ListTransportRequest&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListTransportRequest& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListTransportRequest* internal_default_instance() {
+    return reinterpret_cast<const ListTransportRequest*>(
+               &_ListTransportRequest_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    194;
+
+  friend void swap(ListTransportRequest& a, ListTransportRequest& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListTransportRequest* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListTransportRequest* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListTransportRequest* New() const final {
+    return CreateMaybeMessage<ListTransportRequest>(nullptr);
+  }
+
+  ListTransportRequest* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListTransportRequest>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListTransportRequest& from);
+  void MergeFrom(const ListTransportRequest& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListTransportRequest* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListTransportRequest";
+  }
+  protected:
+  explicit ListTransportRequest(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kRequestorFieldNumber = 3,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // string requestor = 3;
+  void clear_requestor();
+  const std::string& requestor() const;
+  void set_requestor(const std::string& value);
+  void set_requestor(std::string&& value);
+  void set_requestor(const char* value);
+  void set_requestor(const char* value, size_t size);
+  std::string* mutable_requestor();
+  std::string* release_requestor();
+  void set_allocated_requestor(std::string* requestor);
+  private:
+  const std::string& _internal_requestor() const;
+  void _internal_set_requestor(const std::string& value);
+  std::string* _internal_mutable_requestor();
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListTransportRequest)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr requestor_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class Transport PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.Transport) */ {
+ public:
+  inline Transport() : Transport(nullptr) {}
+  virtual ~Transport();
+  explicit constexpr Transport(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  Transport(const Transport& from);
+  Transport(Transport&& from) noexcept
+    : Transport() {
+    *this = ::std::move(from);
+  }
+
+  inline Transport& operator=(const Transport& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline Transport& operator=(Transport&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const Transport& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const Transport* internal_default_instance() {
+    return reinterpret_cast<const Transport*>(
+               &_Transport_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    195;
+
+  friend void swap(Transport& a, Transport& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(Transport* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(Transport* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline Transport* New() const final {
+    return CreateMaybeMessage<Transport>(nullptr);
+  }
+
+  Transport* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<Transport>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const Transport& from);
+  void MergeFrom(const Transport& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(Transport* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.Transport";
+  }
+  protected:
+  explicit Transport(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTypeFieldNumber = 1,
+    kMaxQueueDepthFieldNumber = 2,
+    kMaxIoQpairsPerCtrlrFieldNumber = 3,
+    kInCapsuleDataSizeFieldNumber = 4,
+    kMaxIoSizeFieldNumber = 5,
+    kIoUnitSizeFieldNumber = 6,
+    kAbortTimeoutSecFieldNumber = 7,
+    kBufCacheSizeFieldNumber = 8,
+    kNumSharedBufFieldNumber = 9,
+  };
+  // string type = 1;
+  void clear_type();
+  const std::string& type() const;
+  void set_type(const std::string& value);
+  void set_type(std::string&& value);
+  void set_type(const char* value);
+  void set_type(const char* value, size_t size);
+  std::string* mutable_type();
+  std::string* release_type();
+  void set_allocated_type(std::string* type);
+  private:
+  const std::string& _internal_type() const;
+  void _internal_set_type(const std::string& value);
+  std::string* _internal_mutable_type();
+  public:
+
+  // int32 maxQueueDepth = 2;
+  void clear_maxqueuedepth();
+  ::PROTOBUF_NAMESPACE_ID::int32 maxqueuedepth() const;
+  void set_maxqueuedepth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_maxqueuedepth() const;
+  void _internal_set_maxqueuedepth(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 maxIoQpairsPerCtrlr = 3;
+  void clear_maxioqpairsperctrlr();
+  ::PROTOBUF_NAMESPACE_ID::int32 maxioqpairsperctrlr() const;
+  void set_maxioqpairsperctrlr(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_maxioqpairsperctrlr() const;
+  void _internal_set_maxioqpairsperctrlr(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 inCapsuleDataSize = 4;
+  void clear_incapsuledatasize();
+  ::PROTOBUF_NAMESPACE_ID::int32 incapsuledatasize() const;
+  void set_incapsuledatasize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_incapsuledatasize() const;
+  void _internal_set_incapsuledatasize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 maxIoSize = 5;
+  void clear_maxiosize();
+  ::PROTOBUF_NAMESPACE_ID::int32 maxiosize() const;
+  void set_maxiosize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_maxiosize() const;
+  void _internal_set_maxiosize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 ioUnitSize = 6;
+  void clear_iounitsize();
+  ::PROTOBUF_NAMESPACE_ID::int32 iounitsize() const;
+  void set_iounitsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_iounitsize() const;
+  void _internal_set_iounitsize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 abortTimeoutSec = 7;
+  void clear_aborttimeoutsec();
+  ::PROTOBUF_NAMESPACE_ID::int32 aborttimeoutsec() const;
+  void set_aborttimeoutsec(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_aborttimeoutsec() const;
+  void _internal_set_aborttimeoutsec(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 bufCacheSize = 8;
+  void clear_bufcachesize();
+  ::PROTOBUF_NAMESPACE_ID::int32 bufcachesize() const;
+  void set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_bufcachesize() const;
+  void _internal_set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 numSharedBuf = 9;
+  void clear_numsharedbuf();
+  ::PROTOBUF_NAMESPACE_ID::int32 numsharedbuf() const;
+  void set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_numsharedbuf() const;
+  void _internal_set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.Transport)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr type_;
+  ::PROTOBUF_NAMESPACE_ID::int32 maxqueuedepth_;
+  ::PROTOBUF_NAMESPACE_ID::int32 maxioqpairsperctrlr_;
+  ::PROTOBUF_NAMESPACE_ID::int32 incapsuledatasize_;
+  ::PROTOBUF_NAMESPACE_ID::int32 maxiosize_;
+  ::PROTOBUF_NAMESPACE_ID::int32 iounitsize_;
+  ::PROTOBUF_NAMESPACE_ID::int32 aborttimeoutsec_;
+  ::PROTOBUF_NAMESPACE_ID::int32 bufcachesize_;
+  ::PROTOBUF_NAMESPACE_ID::int32 numsharedbuf_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ListTransportResponse_Result_TransportList PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListTransportResponse.Result.TransportList) */ {
+ public:
+  inline ListTransportResponse_Result_TransportList() : ListTransportResponse_Result_TransportList(nullptr) {}
+  virtual ~ListTransportResponse_Result_TransportList();
+  explicit constexpr ListTransportResponse_Result_TransportList(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListTransportResponse_Result_TransportList(const ListTransportResponse_Result_TransportList& from);
+  ListTransportResponse_Result_TransportList(ListTransportResponse_Result_TransportList&& from) noexcept
+    : ListTransportResponse_Result_TransportList() {
+    *this = ::std::move(from);
+  }
+
+  inline ListTransportResponse_Result_TransportList& operator=(const ListTransportResponse_Result_TransportList& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListTransportResponse_Result_TransportList& operator=(ListTransportResponse_Result_TransportList&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListTransportResponse_Result_TransportList& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListTransportResponse_Result_TransportList* internal_default_instance() {
+    return reinterpret_cast<const ListTransportResponse_Result_TransportList*>(
+               &_ListTransportResponse_Result_TransportList_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    196;
+
+  friend void swap(ListTransportResponse_Result_TransportList& a, ListTransportResponse_Result_TransportList& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListTransportResponse_Result_TransportList* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListTransportResponse_Result_TransportList* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListTransportResponse_Result_TransportList* New() const final {
+    return CreateMaybeMessage<ListTransportResponse_Result_TransportList>(nullptr);
+  }
+
+  ListTransportResponse_Result_TransportList* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListTransportResponse_Result_TransportList>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListTransportResponse_Result_TransportList& from);
+  void MergeFrom(const ListTransportResponse_Result_TransportList& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListTransportResponse_Result_TransportList* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListTransportResponse.Result.TransportList";
+  }
+  protected:
+  explicit ListTransportResponse_Result_TransportList(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTransportlistFieldNumber = 1,
+  };
+  // repeated .grpc_cli.Transport transportlist = 1;
+  int transportlist_size() const;
+  private:
+  int _internal_transportlist_size() const;
+  public:
+  void clear_transportlist();
+  ::grpc_cli::Transport* mutable_transportlist(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Transport >*
+      mutable_transportlist();
+  private:
+  const ::grpc_cli::Transport& _internal_transportlist(int index) const;
+  ::grpc_cli::Transport* _internal_add_transportlist();
+  public:
+  const ::grpc_cli::Transport& transportlist(int index) const;
+  ::grpc_cli::Transport* add_transportlist();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Transport >&
+      transportlist() const;
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListTransportResponse.Result.TransportList)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Transport > transportlist_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ListTransportResponse_Result PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListTransportResponse.Result) */ {
+ public:
+  inline ListTransportResponse_Result() : ListTransportResponse_Result(nullptr) {}
+  virtual ~ListTransportResponse_Result();
+  explicit constexpr ListTransportResponse_Result(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListTransportResponse_Result(const ListTransportResponse_Result& from);
+  ListTransportResponse_Result(ListTransportResponse_Result&& from) noexcept
+    : ListTransportResponse_Result() {
+    *this = ::std::move(from);
+  }
+
+  inline ListTransportResponse_Result& operator=(const ListTransportResponse_Result& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListTransportResponse_Result& operator=(ListTransportResponse_Result&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListTransportResponse_Result& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListTransportResponse_Result* internal_default_instance() {
+    return reinterpret_cast<const ListTransportResponse_Result*>(
+               &_ListTransportResponse_Result_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    197;
+
+  friend void swap(ListTransportResponse_Result& a, ListTransportResponse_Result& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListTransportResponse_Result* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListTransportResponse_Result* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListTransportResponse_Result* New() const final {
+    return CreateMaybeMessage<ListTransportResponse_Result>(nullptr);
+  }
+
+  ListTransportResponse_Result* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListTransportResponse_Result>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListTransportResponse_Result& from);
+  void MergeFrom(const ListTransportResponse_Result& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListTransportResponse_Result* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListTransportResponse.Result";
+  }
+  protected:
+  explicit ListTransportResponse_Result(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ListTransportResponse_Result_TransportList TransportList;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStatusFieldNumber = 1,
+    kDataFieldNumber = 2,
+  };
+  // .grpc_cli.Status status = 1;
+  bool has_status() const;
+  private:
+  bool _internal_has_status() const;
+  public:
+  void clear_status();
+  const ::grpc_cli::Status& status() const;
+  ::grpc_cli::Status* release_status();
+  ::grpc_cli::Status* mutable_status();
+  void set_allocated_status(::grpc_cli::Status* status);
+  private:
+  const ::grpc_cli::Status& _internal_status() const;
+  ::grpc_cli::Status* _internal_mutable_status();
+  public:
+  void unsafe_arena_set_allocated_status(
+      ::grpc_cli::Status* status);
+  ::grpc_cli::Status* unsafe_arena_release_status();
+
+  // .grpc_cli.ListTransportResponse.Result.TransportList data = 2;
+  bool has_data() const;
+  private:
+  bool _internal_has_data() const;
+  public:
+  void clear_data();
+  const ::grpc_cli::ListTransportResponse_Result_TransportList& data() const;
+  ::grpc_cli::ListTransportResponse_Result_TransportList* release_data();
+  ::grpc_cli::ListTransportResponse_Result_TransportList* mutable_data();
+  void set_allocated_data(::grpc_cli::ListTransportResponse_Result_TransportList* data);
+  private:
+  const ::grpc_cli::ListTransportResponse_Result_TransportList& _internal_data() const;
+  ::grpc_cli::ListTransportResponse_Result_TransportList* _internal_mutable_data();
+  public:
+  void unsafe_arena_set_allocated_data(
+      ::grpc_cli::ListTransportResponse_Result_TransportList* data);
+  ::grpc_cli::ListTransportResponse_Result_TransportList* unsafe_arena_release_data();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListTransportResponse.Result)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::grpc_cli::Status* status_;
+  ::grpc_cli::ListTransportResponse_Result_TransportList* data_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
+class ListTransportResponse PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.ListTransportResponse) */ {
+ public:
+  inline ListTransportResponse() : ListTransportResponse(nullptr) {}
+  virtual ~ListTransportResponse();
+  explicit constexpr ListTransportResponse(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  ListTransportResponse(const ListTransportResponse& from);
+  ListTransportResponse(ListTransportResponse&& from) noexcept
+    : ListTransportResponse() {
+    *this = ::std::move(from);
+  }
+
+  inline ListTransportResponse& operator=(const ListTransportResponse& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ListTransportResponse& operator=(ListTransportResponse&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const ListTransportResponse& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ListTransportResponse* internal_default_instance() {
+    return reinterpret_cast<const ListTransportResponse*>(
+               &_ListTransportResponse_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    198;
+
+  friend void swap(ListTransportResponse& a, ListTransportResponse& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(ListTransportResponse* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ListTransportResponse* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline ListTransportResponse* New() const final {
+    return CreateMaybeMessage<ListTransportResponse>(nullptr);
+  }
+
+  ListTransportResponse* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<ListTransportResponse>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const ListTransportResponse& from);
+  void MergeFrom(const ListTransportResponse& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(ListTransportResponse* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "grpc_cli.ListTransportResponse";
+  }
+  protected:
+  explicit ListTransportResponse(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_cli_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef ListTransportResponse_Result Result;
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kCommandFieldNumber = 1,
+    kRidFieldNumber = 2,
+    kResultFieldNumber = 3,
+    kInfoFieldNumber = 4,
+  };
+  // string command = 1;
+  void clear_command();
+  const std::string& command() const;
+  void set_command(const std::string& value);
+  void set_command(std::string&& value);
+  void set_command(const char* value);
+  void set_command(const char* value, size_t size);
+  std::string* mutable_command();
+  std::string* release_command();
+  void set_allocated_command(std::string* command);
+  private:
+  const std::string& _internal_command() const;
+  void _internal_set_command(const std::string& value);
+  std::string* _internal_mutable_command();
+  public:
+
+  // string rid = 2;
+  void clear_rid();
+  const std::string& rid() const;
+  void set_rid(const std::string& value);
+  void set_rid(std::string&& value);
+  void set_rid(const char* value);
+  void set_rid(const char* value, size_t size);
+  std::string* mutable_rid();
+  std::string* release_rid();
+  void set_allocated_rid(std::string* rid);
+  private:
+  const std::string& _internal_rid() const;
+  void _internal_set_rid(const std::string& value);
+  std::string* _internal_mutable_rid();
+  public:
+
+  // .grpc_cli.ListTransportResponse.Result result = 3;
+  bool has_result() const;
+  private:
+  bool _internal_has_result() const;
+  public:
+  void clear_result();
+  const ::grpc_cli::ListTransportResponse_Result& result() const;
+  ::grpc_cli::ListTransportResponse_Result* release_result();
+  ::grpc_cli::ListTransportResponse_Result* mutable_result();
+  void set_allocated_result(::grpc_cli::ListTransportResponse_Result* result);
+  private:
+  const ::grpc_cli::ListTransportResponse_Result& _internal_result() const;
+  ::grpc_cli::ListTransportResponse_Result* _internal_mutable_result();
+  public:
+  void unsafe_arena_set_allocated_result(
+      ::grpc_cli::ListTransportResponse_Result* result);
+  ::grpc_cli::ListTransportResponse_Result* unsafe_arena_release_result();
+
+  // .grpc_cli.PosInfo info = 4;
+  bool has_info() const;
+  private:
+  bool _internal_has_info() const;
+  public:
+  void clear_info();
+  const ::grpc_cli::PosInfo& info() const;
+  ::grpc_cli::PosInfo* release_info();
+  ::grpc_cli::PosInfo* mutable_info();
+  void set_allocated_info(::grpc_cli::PosInfo* info);
+  private:
+  const ::grpc_cli::PosInfo& _internal_info() const;
+  ::grpc_cli::PosInfo* _internal_mutable_info();
+  public:
+  void unsafe_arena_set_allocated_info(
+      ::grpc_cli::PosInfo* info);
+  ::grpc_cli::PosInfo* unsafe_arena_release_info();
+
+  // @@protoc_insertion_point(class_scope:grpc_cli.ListTransportResponse)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr command_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr rid_;
+  ::grpc_cli::ListTransportResponse_Result* result_;
+  ::grpc_cli::PosInfo* info_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_cli_2eproto;
+};
+// -------------------------------------------------------------------
+
 class CreateVolumeRequest_Param PROTOBUF_FINAL :
     public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:grpc_cli.CreateVolumeRequest.Param) */ {
  public:
@@ -36999,7 +37949,7 @@ class CreateVolumeRequest_Param PROTOBUF_FINAL :
                &_CreateVolumeRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    194;
+    199;
 
   friend void swap(CreateVolumeRequest_Param& a, CreateVolumeRequest_Param& b) {
     a.Swap(&b);
@@ -37256,7 +38206,7 @@ class CreateVolumeRequest PROTOBUF_FINAL :
                &_CreateVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    195;
+    200;
 
   friend void swap(CreateVolumeRequest& a, CreateVolumeRequest& b) {
     a.Swap(&b);
@@ -37458,7 +38408,7 @@ class CreateVolumeResponse_Result_CreateVolumeData PROTOBUF_FINAL :
                &_CreateVolumeResponse_Result_CreateVolumeData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    196;
+    201;
 
   friend void swap(CreateVolumeResponse_Result_CreateVolumeData& a, CreateVolumeResponse_Result_CreateVolumeData& b) {
     a.Swap(&b);
@@ -37602,7 +38552,7 @@ class CreateVolumeResponse_Result PROTOBUF_FINAL :
                &_CreateVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    197;
+    202;
 
   friend void swap(CreateVolumeResponse_Result& a, CreateVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -37770,7 +38720,7 @@ class CreateVolumeResponse PROTOBUF_FINAL :
                &_CreateVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    198;
+    203;
 
   friend void swap(CreateVolumeResponse& a, CreateVolumeResponse& b) {
     a.Swap(&b);
@@ -37974,7 +38924,7 @@ class DeleteVolumeRequest_Param PROTOBUF_FINAL :
                &_DeleteVolumeRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    199;
+    204;
 
   friend void swap(DeleteVolumeRequest_Param& a, DeleteVolumeRequest_Param& b) {
     a.Swap(&b);
@@ -38136,7 +39086,7 @@ class DeleteVolumeRequest PROTOBUF_FINAL :
                &_DeleteVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    200;
+    205;
 
   friend void swap(DeleteVolumeRequest& a, DeleteVolumeRequest& b) {
     a.Swap(&b);
@@ -38338,7 +39288,7 @@ class DeleteVolumeResponse_Result PROTOBUF_FINAL :
                &_DeleteVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    201;
+    206;
 
   friend void swap(DeleteVolumeResponse_Result& a, DeleteVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -38484,7 +39434,7 @@ class DeleteVolumeResponse PROTOBUF_FINAL :
                &_DeleteVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    202;
+    207;
 
   friend void swap(DeleteVolumeResponse& a, DeleteVolumeResponse& b) {
     a.Swap(&b);
@@ -38688,7 +39638,7 @@ class UnmountVolumeRequest_Param PROTOBUF_FINAL :
                &_UnmountVolumeRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    203;
+    208;
 
   friend void swap(UnmountVolumeRequest_Param& a, UnmountVolumeRequest_Param& b) {
     a.Swap(&b);
@@ -38850,7 +39800,7 @@ class UnmountVolumeRequest PROTOBUF_FINAL :
                &_UnmountVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    204;
+    209;
 
   friend void swap(UnmountVolumeRequest& a, UnmountVolumeRequest& b) {
     a.Swap(&b);
@@ -39052,7 +40002,7 @@ class UnmountVolumeResponse_Result PROTOBUF_FINAL :
                &_UnmountVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    205;
+    210;
 
   friend void swap(UnmountVolumeResponse_Result& a, UnmountVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -39198,7 +40148,7 @@ class UnmountVolumeResponse PROTOBUF_FINAL :
                &_UnmountVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    206;
+    211;
 
   friend void swap(UnmountVolumeResponse& a, UnmountVolumeResponse& b) {
     a.Swap(&b);
@@ -39402,7 +40352,7 @@ class MountVolumeRequest_Param PROTOBUF_FINAL :
                &_MountVolumeRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    207;
+    212;
 
   friend void swap(MountVolumeRequest_Param& a, MountVolumeRequest_Param& b) {
     a.Swap(&b);
@@ -39582,7 +40532,7 @@ class MountVolumeRequest PROTOBUF_FINAL :
                &_MountVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    208;
+    213;
 
   friend void swap(MountVolumeRequest& a, MountVolumeRequest& b) {
     a.Swap(&b);
@@ -39784,7 +40734,7 @@ class MountVolumeResponse_Result PROTOBUF_FINAL :
                &_MountVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    209;
+    214;
 
   friend void swap(MountVolumeResponse_Result& a, MountVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -39930,7 +40880,7 @@ class MountVolumeResponse PROTOBUF_FINAL :
                &_MountVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    210;
+    215;
 
   friend void swap(MountVolumeResponse& a, MountVolumeResponse& b) {
     a.Swap(&b);
@@ -40134,7 +41084,7 @@ class SetVolumePropertyRequest_Param PROTOBUF_FINAL :
                &_SetVolumePropertyRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    211;
+    216;
 
   friend void swap(SetVolumePropertyRequest_Param& a, SetVolumePropertyRequest_Param& b) {
     a.Swap(&b);
@@ -40369,7 +41319,7 @@ class SetVolumePropertyRequest PROTOBUF_FINAL :
                &_SetVolumePropertyRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    212;
+    217;
 
   friend void swap(SetVolumePropertyRequest& a, SetVolumePropertyRequest& b) {
     a.Swap(&b);
@@ -40571,7 +41521,7 @@ class SetVolumePropertyResponse_Result PROTOBUF_FINAL :
                &_SetVolumePropertyResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    213;
+    218;
 
   friend void swap(SetVolumePropertyResponse_Result& a, SetVolumePropertyResponse_Result& b) {
     a.Swap(&b);
@@ -40717,7 +41667,7 @@ class SetVolumePropertyResponse PROTOBUF_FINAL :
                &_SetVolumePropertyResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    214;
+    219;
 
   friend void swap(SetVolumePropertyResponse& a, SetVolumePropertyResponse& b) {
     a.Swap(&b);
@@ -40921,7 +41871,7 @@ class Volume PROTOBUF_FINAL :
                &_Volume_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    215;
+    220;
 
   friend void swap(Volume& a, Volume& b) {
     a.Swap(&b);
@@ -41214,7 +42164,7 @@ class ListVolumeRequest_Param PROTOBUF_FINAL :
                &_ListVolumeRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    216;
+    221;
 
   friend void swap(ListVolumeRequest_Param& a, ListVolumeRequest_Param& b) {
     a.Swap(&b);
@@ -41358,7 +42308,7 @@ class ListVolumeRequest PROTOBUF_FINAL :
                &_ListVolumeRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    217;
+    222;
 
   friend void swap(ListVolumeRequest& a, ListVolumeRequest& b) {
     a.Swap(&b);
@@ -41560,7 +42510,7 @@ class ListVolumeResponse_Result_VolumeList PROTOBUF_FINAL :
                &_ListVolumeResponse_Result_VolumeList_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    218;
+    223;
 
   friend void swap(ListVolumeResponse_Result_VolumeList& a, ListVolumeResponse_Result_VolumeList& b) {
     a.Swap(&b);
@@ -41706,7 +42656,7 @@ class ListVolumeResponse_Result PROTOBUF_FINAL :
                &_ListVolumeResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    219;
+    224;
 
   friend void swap(ListVolumeResponse_Result& a, ListVolumeResponse_Result& b) {
     a.Swap(&b);
@@ -41874,7 +42824,7 @@ class ListVolumeResponse PROTOBUF_FINAL :
                &_ListVolumeResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    220;
+    225;
 
   friend void swap(ListVolumeResponse& a, ListVolumeResponse& b) {
     a.Swap(&b);
@@ -42078,7 +43028,7 @@ class QosVolumeNameParam PROTOBUF_FINAL :
                &_QosVolumeNameParam_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    221;
+    226;
 
   friend void swap(QosVolumeNameParam& a, QosVolumeNameParam& b) {
     a.Swap(&b);
@@ -42222,7 +43172,7 @@ class QosCreateVolumePolicyRequest_Param PROTOBUF_FINAL :
                &_QosCreateVolumePolicyRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    222;
+    227;
 
   friend void swap(QosCreateVolumePolicyRequest_Param& a, QosCreateVolumePolicyRequest_Param& b) {
     a.Swap(&b);
@@ -42430,7 +43380,7 @@ class QosCreateVolumePolicyRequest PROTOBUF_FINAL :
                &_QosCreateVolumePolicyRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    223;
+    228;
 
   friend void swap(QosCreateVolumePolicyRequest& a, QosCreateVolumePolicyRequest& b) {
     a.Swap(&b);
@@ -42632,7 +43582,7 @@ class QosCreateVolumePolicyResponse_Result PROTOBUF_FINAL :
                &_QosCreateVolumePolicyResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    224;
+    229;
 
   friend void swap(QosCreateVolumePolicyResponse_Result& a, QosCreateVolumePolicyResponse_Result& b) {
     a.Swap(&b);
@@ -42778,7 +43728,7 @@ class QosCreateVolumePolicyResponse PROTOBUF_FINAL :
                &_QosCreateVolumePolicyResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    225;
+    230;
 
   friend void swap(QosCreateVolumePolicyResponse& a, QosCreateVolumePolicyResponse& b) {
     a.Swap(&b);
@@ -42982,7 +43932,7 @@ class QosResetVolumePolicyRequest_Param PROTOBUF_FINAL :
                &_QosResetVolumePolicyRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    226;
+    231;
 
   friend void swap(QosResetVolumePolicyRequest_Param& a, QosResetVolumePolicyRequest_Param& b) {
     a.Swap(&b);
@@ -43146,7 +44096,7 @@ class QosResetVolumePolicyRequest PROTOBUF_FINAL :
                &_QosResetVolumePolicyRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    227;
+    232;
 
   friend void swap(QosResetVolumePolicyRequest& a, QosResetVolumePolicyRequest& b) {
     a.Swap(&b);
@@ -43348,7 +44298,7 @@ class VolumeInfoRequest_Param PROTOBUF_FINAL :
                &_VolumeInfoRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    228;
+    233;
 
   friend void swap(VolumeInfoRequest_Param& a, VolumeInfoRequest_Param& b) {
     a.Swap(&b);
@@ -43510,7 +44460,7 @@ class VolumeInfoRequest PROTOBUF_FINAL :
                &_VolumeInfoRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    229;
+    234;
 
   friend void swap(VolumeInfoRequest& a, VolumeInfoRequest& b) {
     a.Swap(&b);
@@ -43712,7 +44662,7 @@ class QosResetVolumePolicyResponse_Result PROTOBUF_FINAL :
                &_QosResetVolumePolicyResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    230;
+    235;
 
   friend void swap(QosResetVolumePolicyResponse_Result& a, QosResetVolumePolicyResponse_Result& b) {
     a.Swap(&b);
@@ -43858,7 +44808,7 @@ class QosResetVolumePolicyResponse PROTOBUF_FINAL :
                &_QosResetVolumePolicyResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    231;
+    236;
 
   friend void swap(QosResetVolumePolicyResponse& a, QosResetVolumePolicyResponse& b) {
     a.Swap(&b);
@@ -44062,7 +45012,7 @@ class VolumeInfoResponse_Result PROTOBUF_FINAL :
                &_VolumeInfoResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    232;
+    237;
 
   friend void swap(VolumeInfoResponse_Result& a, VolumeInfoResponse_Result& b) {
     a.Swap(&b);
@@ -44228,7 +45178,7 @@ class VolumeInfoResponse PROTOBUF_FINAL :
                &_VolumeInfoResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    233;
+    238;
 
   friend void swap(VolumeInfoResponse& a, VolumeInfoResponse& b) {
     a.Swap(&b);
@@ -44432,7 +45382,7 @@ class VolumeRenameRequest_Param PROTOBUF_FINAL :
                &_VolumeRenameRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    234;
+    239;
 
   friend void swap(VolumeRenameRequest_Param& a, VolumeRenameRequest_Param& b) {
     a.Swap(&b);
@@ -44612,7 +45562,7 @@ class VolumeRenameRequest PROTOBUF_FINAL :
                &_VolumeRenameRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    235;
+    240;
 
   friend void swap(VolumeRenameRequest& a, VolumeRenameRequest& b) {
     a.Swap(&b);
@@ -44814,7 +45764,7 @@ class VolumeRenameResponse_Result PROTOBUF_FINAL :
                &_VolumeRenameResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    236;
+    241;
 
   friend void swap(VolumeRenameResponse_Result& a, VolumeRenameResponse_Result& b) {
     a.Swap(&b);
@@ -44960,7 +45910,7 @@ class VolumeRenameResponse PROTOBUF_FINAL :
                &_VolumeRenameResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    237;
+    242;
 
   friend void swap(VolumeRenameResponse& a, VolumeRenameResponse& b) {
     a.Swap(&b);
@@ -45164,7 +46114,7 @@ class ListWBTRequest PROTOBUF_FINAL :
                &_ListWBTRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    238;
+    243;
 
   friend void swap(ListWBTRequest& a, ListWBTRequest& b) {
     a.Swap(&b);
@@ -45344,7 +46294,7 @@ class WBTTest PROTOBUF_FINAL :
                &_WBTTest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    239;
+    244;
 
   friend void swap(WBTTest& a, WBTTest& b) {
     a.Swap(&b);
@@ -45488,7 +46438,7 @@ class ListWBTResponse_Result_Tests PROTOBUF_FINAL :
                &_ListWBTResponse_Result_Tests_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    240;
+    245;
 
   friend void swap(ListWBTResponse_Result_Tests& a, ListWBTResponse_Result_Tests& b) {
     a.Swap(&b);
@@ -45634,7 +46584,7 @@ class ListWBTResponse_Result PROTOBUF_FINAL :
                &_ListWBTResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    241;
+    246;
 
   friend void swap(ListWBTResponse_Result& a, ListWBTResponse_Result& b) {
     a.Swap(&b);
@@ -45802,7 +46752,7 @@ class ListWBTResponse PROTOBUF_FINAL :
                &_ListWBTResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    242;
+    247;
 
   friend void swap(ListWBTResponse& a, ListWBTResponse& b) {
     a.Swap(&b);
@@ -46006,7 +46956,7 @@ class ListQOSPolicyRequest_Param_Volume PROTOBUF_FINAL :
                &_ListQOSPolicyRequest_Param_Volume_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    243;
+    248;
 
   friend void swap(ListQOSPolicyRequest_Param_Volume& a, ListQOSPolicyRequest_Param_Volume& b) {
     a.Swap(&b);
@@ -46150,7 +47100,7 @@ class ListQOSPolicyRequest_Param PROTOBUF_FINAL :
                &_ListQOSPolicyRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    244;
+    249;
 
   friend void swap(ListQOSPolicyRequest_Param& a, ListQOSPolicyRequest_Param& b) {
     a.Swap(&b);
@@ -46316,7 +47266,7 @@ class ListQOSPolicyRequest PROTOBUF_FINAL :
                &_ListQOSPolicyRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    245;
+    250;
 
   friend void swap(ListQOSPolicyRequest& a, ListQOSPolicyRequest& b) {
     a.Swap(&b);
@@ -46518,7 +47468,7 @@ class QOSResult_Arrays PROTOBUF_FINAL :
                &_QOSResult_Arrays_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    246;
+    251;
 
   friend void swap(QOSResult_Arrays& a, QOSResult_Arrays& b) {
     a.Swap(&b);
@@ -46662,7 +47612,7 @@ class QOSResult_RebuildPolicy PROTOBUF_FINAL :
                &_QOSResult_RebuildPolicy_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    247;
+    252;
 
   friend void swap(QOSResult_RebuildPolicy& a, QOSResult_RebuildPolicy& b) {
     a.Swap(&b);
@@ -46806,7 +47756,7 @@ class QOSResult_VolumePolicies PROTOBUF_FINAL :
                &_QOSResult_VolumePolicies_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    248;
+    253;
 
   friend void swap(QOSResult_VolumePolicies& a, QOSResult_VolumePolicies& b) {
     a.Swap(&b);
@@ -47069,7 +48019,7 @@ class QOSResult PROTOBUF_FINAL :
                &_QOSResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    249;
+    254;
 
   friend void swap(QOSResult& a, QOSResult& b) {
     a.Swap(&b);
@@ -47259,7 +48209,7 @@ class ListQOSPolicyResponse_Result_ListQOSResult PROTOBUF_FINAL :
                &_ListQOSPolicyResponse_Result_ListQOSResult_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    250;
+    255;
 
   friend void swap(ListQOSPolicyResponse_Result_ListQOSResult& a, ListQOSPolicyResponse_Result_ListQOSResult& b) {
     a.Swap(&b);
@@ -47405,7 +48355,7 @@ class ListQOSPolicyResponse_Result PROTOBUF_FINAL :
                &_ListQOSPolicyResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    251;
+    256;
 
   friend void swap(ListQOSPolicyResponse_Result& a, ListQOSPolicyResponse_Result& b) {
     a.Swap(&b);
@@ -47573,7 +48523,7 @@ class ListQOSPolicyResponse PROTOBUF_FINAL :
                &_ListQOSPolicyResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    252;
+    257;
 
   friend void swap(ListQOSPolicyResponse& a, ListQOSPolicyResponse& b) {
     a.Swap(&b);
@@ -47760,7 +48710,7 @@ public:
   private:
   static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
     ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_cli_2eproto);
-    return ::descriptor_table_cli_2eproto.file_level_metadata[253];
+    return ::descriptor_table_cli_2eproto.file_level_metadata[258];
   }
 
   public:
@@ -47811,7 +48761,7 @@ class WBTRequest_Param PROTOBUF_FINAL :
                &_WBTRequest_Param_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    254;
+    259;
 
   friend void swap(WBTRequest_Param& a, WBTRequest_Param& b) {
     a.Swap(&b);
@@ -47979,7 +48929,7 @@ class WBTRequest PROTOBUF_FINAL :
                &_WBTRequest_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    255;
+    260;
 
   friend void swap(WBTRequest& a, WBTRequest& b) {
     a.Swap(&b);
@@ -48181,7 +49131,7 @@ class WBTResponse_Result_TestData PROTOBUF_FINAL :
                &_WBTResponse_Result_TestData_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    256;
+    261;
 
   friend void swap(WBTResponse_Result_TestData& a, WBTResponse_Result_TestData& b) {
     a.Swap(&b);
@@ -48325,7 +49275,7 @@ class WBTResponse_Result PROTOBUF_FINAL :
                &_WBTResponse_Result_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    257;
+    262;
 
   friend void swap(WBTResponse_Result& a, WBTResponse_Result& b) {
     a.Swap(&b);
@@ -48493,7 +49443,7 @@ class WBTResponse PROTOBUF_FINAL :
                &_WBTResponse_default_instance_);
   }
   static constexpr int kIndexInFileMessages =
-    258;
+    263;
 
   friend void swap(WBTResponse& a, WBTResponse& b) {
     a.Swap(&b);
@@ -89100,6 +90050,923 @@ inline void CreateTransportResponse::set_allocated_info(::grpc_cli::PosInfo* inf
 
 // -------------------------------------------------------------------
 
+// ListTransportRequest
+
+// string command = 1;
+inline void ListTransportRequest::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& ListTransportRequest::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportRequest.command)
+  return _internal_command();
+}
+inline void ListTransportRequest::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListTransportRequest.command)
+}
+inline std::string* ListTransportRequest::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportRequest.command)
+  return _internal_mutable_command();
+}
+inline const std::string& ListTransportRequest::_internal_command() const {
+  return command_.Get();
+}
+inline void ListTransportRequest::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListTransportRequest::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListTransportRequest.command)
+}
+inline void ListTransportRequest::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListTransportRequest.command)
+}
+inline void ListTransportRequest::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListTransportRequest.command)
+}
+inline std::string* ListTransportRequest::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListTransportRequest::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportRequest.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListTransportRequest::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportRequest.command)
+}
+
+// string rid = 2;
+inline void ListTransportRequest::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& ListTransportRequest::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportRequest.rid)
+  return _internal_rid();
+}
+inline void ListTransportRequest::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListTransportRequest.rid)
+}
+inline std::string* ListTransportRequest::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportRequest.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& ListTransportRequest::_internal_rid() const {
+  return rid_.Get();
+}
+inline void ListTransportRequest::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListTransportRequest::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListTransportRequest.rid)
+}
+inline void ListTransportRequest::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListTransportRequest.rid)
+}
+inline void ListTransportRequest::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListTransportRequest.rid)
+}
+inline std::string* ListTransportRequest::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListTransportRequest::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportRequest.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListTransportRequest::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportRequest.rid)
+}
+
+// string requestor = 3;
+inline void ListTransportRequest::clear_requestor() {
+  requestor_.ClearToEmpty();
+}
+inline const std::string& ListTransportRequest::requestor() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportRequest.requestor)
+  return _internal_requestor();
+}
+inline void ListTransportRequest::set_requestor(const std::string& value) {
+  _internal_set_requestor(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListTransportRequest.requestor)
+}
+inline std::string* ListTransportRequest::mutable_requestor() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportRequest.requestor)
+  return _internal_mutable_requestor();
+}
+inline const std::string& ListTransportRequest::_internal_requestor() const {
+  return requestor_.Get();
+}
+inline void ListTransportRequest::_internal_set_requestor(const std::string& value) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListTransportRequest::set_requestor(std::string&& value) {
+  
+  requestor_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListTransportRequest.requestor)
+}
+inline void ListTransportRequest::set_requestor(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListTransportRequest.requestor)
+}
+inline void ListTransportRequest::set_requestor(const char* value,
+    size_t size) {
+  
+  requestor_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListTransportRequest.requestor)
+}
+inline std::string* ListTransportRequest::_internal_mutable_requestor() {
+  
+  return requestor_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListTransportRequest::release_requestor() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportRequest.requestor)
+  return requestor_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListTransportRequest::set_allocated_requestor(std::string* requestor) {
+  if (requestor != nullptr) {
+    
+  } else {
+    
+  }
+  requestor_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), requestor,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportRequest.requestor)
+}
+
+// -------------------------------------------------------------------
+
+// Transport
+
+// string type = 1;
+inline void Transport::clear_type() {
+  type_.ClearToEmpty();
+}
+inline const std::string& Transport::type() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.type)
+  return _internal_type();
+}
+inline void Transport::set_type(const std::string& value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.type)
+}
+inline std::string* Transport::mutable_type() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Transport.type)
+  return _internal_mutable_type();
+}
+inline const std::string& Transport::_internal_type() const {
+  return type_.Get();
+}
+inline void Transport::_internal_set_type(const std::string& value) {
+  
+  type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Transport::set_type(std::string&& value) {
+  
+  type_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Transport.type)
+}
+inline void Transport::set_type(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Transport.type)
+}
+inline void Transport::set_type(const char* value,
+    size_t size) {
+  
+  type_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Transport.type)
+}
+inline std::string* Transport::_internal_mutable_type() {
+  
+  return type_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Transport::release_type() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Transport.type)
+  return type_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Transport::set_allocated_type(std::string* type) {
+  if (type != nullptr) {
+    
+  } else {
+    
+  }
+  type_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), type,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Transport.type)
+}
+
+// int32 maxQueueDepth = 2;
+inline void Transport::clear_maxqueuedepth() {
+  maxqueuedepth_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_maxqueuedepth() const {
+  return maxqueuedepth_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::maxqueuedepth() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.maxQueueDepth)
+  return _internal_maxqueuedepth();
+}
+inline void Transport::_internal_set_maxqueuedepth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  maxqueuedepth_ = value;
+}
+inline void Transport::set_maxqueuedepth(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_maxqueuedepth(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.maxQueueDepth)
+}
+
+// int32 maxIoQpairsPerCtrlr = 3;
+inline void Transport::clear_maxioqpairsperctrlr() {
+  maxioqpairsperctrlr_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_maxioqpairsperctrlr() const {
+  return maxioqpairsperctrlr_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::maxioqpairsperctrlr() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.maxIoQpairsPerCtrlr)
+  return _internal_maxioqpairsperctrlr();
+}
+inline void Transport::_internal_set_maxioqpairsperctrlr(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  maxioqpairsperctrlr_ = value;
+}
+inline void Transport::set_maxioqpairsperctrlr(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_maxioqpairsperctrlr(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.maxIoQpairsPerCtrlr)
+}
+
+// int32 inCapsuleDataSize = 4;
+inline void Transport::clear_incapsuledatasize() {
+  incapsuledatasize_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_incapsuledatasize() const {
+  return incapsuledatasize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::incapsuledatasize() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.inCapsuleDataSize)
+  return _internal_incapsuledatasize();
+}
+inline void Transport::_internal_set_incapsuledatasize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  incapsuledatasize_ = value;
+}
+inline void Transport::set_incapsuledatasize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_incapsuledatasize(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.inCapsuleDataSize)
+}
+
+// int32 maxIoSize = 5;
+inline void Transport::clear_maxiosize() {
+  maxiosize_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_maxiosize() const {
+  return maxiosize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::maxiosize() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.maxIoSize)
+  return _internal_maxiosize();
+}
+inline void Transport::_internal_set_maxiosize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  maxiosize_ = value;
+}
+inline void Transport::set_maxiosize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_maxiosize(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.maxIoSize)
+}
+
+// int32 ioUnitSize = 6;
+inline void Transport::clear_iounitsize() {
+  iounitsize_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_iounitsize() const {
+  return iounitsize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::iounitsize() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.ioUnitSize)
+  return _internal_iounitsize();
+}
+inline void Transport::_internal_set_iounitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  iounitsize_ = value;
+}
+inline void Transport::set_iounitsize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_iounitsize(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.ioUnitSize)
+}
+
+// int32 abortTimeoutSec = 7;
+inline void Transport::clear_aborttimeoutsec() {
+  aborttimeoutsec_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_aborttimeoutsec() const {
+  return aborttimeoutsec_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::aborttimeoutsec() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.abortTimeoutSec)
+  return _internal_aborttimeoutsec();
+}
+inline void Transport::_internal_set_aborttimeoutsec(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  aborttimeoutsec_ = value;
+}
+inline void Transport::set_aborttimeoutsec(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_aborttimeoutsec(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.abortTimeoutSec)
+}
+
+// int32 bufCacheSize = 8;
+inline void Transport::clear_bufcachesize() {
+  bufcachesize_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_bufcachesize() const {
+  return bufcachesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::bufcachesize() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.bufCacheSize)
+  return _internal_bufcachesize();
+}
+inline void Transport::_internal_set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  bufcachesize_ = value;
+}
+inline void Transport::set_bufcachesize(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_bufcachesize(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.bufCacheSize)
+}
+
+// int32 numSharedBuf = 9;
+inline void Transport::clear_numsharedbuf() {
+  numsharedbuf_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::_internal_numsharedbuf() const {
+  return numsharedbuf_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Transport::numsharedbuf() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Transport.numSharedBuf)
+  return _internal_numsharedbuf();
+}
+inline void Transport::_internal_set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  numsharedbuf_ = value;
+}
+inline void Transport::set_numsharedbuf(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_numsharedbuf(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Transport.numSharedBuf)
+}
+
+// -------------------------------------------------------------------
+
+// ListTransportResponse_Result_TransportList
+
+// repeated .grpc_cli.Transport transportlist = 1;
+inline int ListTransportResponse_Result_TransportList::_internal_transportlist_size() const {
+  return transportlist_.size();
+}
+inline int ListTransportResponse_Result_TransportList::transportlist_size() const {
+  return _internal_transportlist_size();
+}
+inline void ListTransportResponse_Result_TransportList::clear_transportlist() {
+  transportlist_.Clear();
+}
+inline ::grpc_cli::Transport* ListTransportResponse_Result_TransportList::mutable_transportlist(int index) {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.Result.TransportList.transportlist)
+  return transportlist_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Transport >*
+ListTransportResponse_Result_TransportList::mutable_transportlist() {
+  // @@protoc_insertion_point(field_mutable_list:grpc_cli.ListTransportResponse.Result.TransportList.transportlist)
+  return &transportlist_;
+}
+inline const ::grpc_cli::Transport& ListTransportResponse_Result_TransportList::_internal_transportlist(int index) const {
+  return transportlist_.Get(index);
+}
+inline const ::grpc_cli::Transport& ListTransportResponse_Result_TransportList::transportlist(int index) const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.Result.TransportList.transportlist)
+  return _internal_transportlist(index);
+}
+inline ::grpc_cli::Transport* ListTransportResponse_Result_TransportList::_internal_add_transportlist() {
+  return transportlist_.Add();
+}
+inline ::grpc_cli::Transport* ListTransportResponse_Result_TransportList::add_transportlist() {
+  // @@protoc_insertion_point(field_add:grpc_cli.ListTransportResponse.Result.TransportList.transportlist)
+  return _internal_add_transportlist();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::grpc_cli::Transport >&
+ListTransportResponse_Result_TransportList::transportlist() const {
+  // @@protoc_insertion_point(field_list:grpc_cli.ListTransportResponse.Result.TransportList.transportlist)
+  return transportlist_;
+}
+
+// -------------------------------------------------------------------
+
+// ListTransportResponse_Result
+
+// .grpc_cli.Status status = 1;
+inline bool ListTransportResponse_Result::_internal_has_status() const {
+  return this != internal_default_instance() && status_ != nullptr;
+}
+inline bool ListTransportResponse_Result::has_status() const {
+  return _internal_has_status();
+}
+inline void ListTransportResponse_Result::clear_status() {
+  if (GetArena() == nullptr && status_ != nullptr) {
+    delete status_;
+  }
+  status_ = nullptr;
+}
+inline const ::grpc_cli::Status& ListTransportResponse_Result::_internal_status() const {
+  const ::grpc_cli::Status* p = status_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::Status&>(
+      ::grpc_cli::_Status_default_instance_);
+}
+inline const ::grpc_cli::Status& ListTransportResponse_Result::status() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.Result.status)
+  return _internal_status();
+}
+inline void ListTransportResponse_Result::unsafe_arena_set_allocated_status(
+    ::grpc_cli::Status* status) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(status_);
+  }
+  status_ = status;
+  if (status) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListTransportResponse.Result.status)
+}
+inline ::grpc_cli::Status* ListTransportResponse_Result::release_status() {
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::Status* ListTransportResponse_Result::unsafe_arena_release_status() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportResponse.Result.status)
+  
+  ::grpc_cli::Status* temp = status_;
+  status_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::Status* ListTransportResponse_Result::_internal_mutable_status() {
+  
+  if (status_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::Status>(GetArena());
+    status_ = p;
+  }
+  return status_;
+}
+inline ::grpc_cli::Status* ListTransportResponse_Result::mutable_status() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.Result.status)
+  return _internal_mutable_status();
+}
+inline void ListTransportResponse_Result::set_allocated_status(::grpc_cli::Status* status) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete status_;
+  }
+  if (status) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(status);
+    if (message_arena != submessage_arena) {
+      status = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, status, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  status_ = status;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportResponse.Result.status)
+}
+
+// .grpc_cli.ListTransportResponse.Result.TransportList data = 2;
+inline bool ListTransportResponse_Result::_internal_has_data() const {
+  return this != internal_default_instance() && data_ != nullptr;
+}
+inline bool ListTransportResponse_Result::has_data() const {
+  return _internal_has_data();
+}
+inline void ListTransportResponse_Result::clear_data() {
+  if (GetArena() == nullptr && data_ != nullptr) {
+    delete data_;
+  }
+  data_ = nullptr;
+}
+inline const ::grpc_cli::ListTransportResponse_Result_TransportList& ListTransportResponse_Result::_internal_data() const {
+  const ::grpc_cli::ListTransportResponse_Result_TransportList* p = data_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::ListTransportResponse_Result_TransportList&>(
+      ::grpc_cli::_ListTransportResponse_Result_TransportList_default_instance_);
+}
+inline const ::grpc_cli::ListTransportResponse_Result_TransportList& ListTransportResponse_Result::data() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.Result.data)
+  return _internal_data();
+}
+inline void ListTransportResponse_Result::unsafe_arena_set_allocated_data(
+    ::grpc_cli::ListTransportResponse_Result_TransportList* data) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(data_);
+  }
+  data_ = data;
+  if (data) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListTransportResponse.Result.data)
+}
+inline ::grpc_cli::ListTransportResponse_Result_TransportList* ListTransportResponse_Result::release_data() {
+  
+  ::grpc_cli::ListTransportResponse_Result_TransportList* temp = data_;
+  data_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::ListTransportResponse_Result_TransportList* ListTransportResponse_Result::unsafe_arena_release_data() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportResponse.Result.data)
+  
+  ::grpc_cli::ListTransportResponse_Result_TransportList* temp = data_;
+  data_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::ListTransportResponse_Result_TransportList* ListTransportResponse_Result::_internal_mutable_data() {
+  
+  if (data_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::ListTransportResponse_Result_TransportList>(GetArena());
+    data_ = p;
+  }
+  return data_;
+}
+inline ::grpc_cli::ListTransportResponse_Result_TransportList* ListTransportResponse_Result::mutable_data() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.Result.data)
+  return _internal_mutable_data();
+}
+inline void ListTransportResponse_Result::set_allocated_data(::grpc_cli::ListTransportResponse_Result_TransportList* data) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete data_;
+  }
+  if (data) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(data);
+    if (message_arena != submessage_arena) {
+      data = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, data, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  data_ = data;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportResponse.Result.data)
+}
+
+// -------------------------------------------------------------------
+
+// ListTransportResponse
+
+// string command = 1;
+inline void ListTransportResponse::clear_command() {
+  command_.ClearToEmpty();
+}
+inline const std::string& ListTransportResponse::command() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.command)
+  return _internal_command();
+}
+inline void ListTransportResponse::set_command(const std::string& value) {
+  _internal_set_command(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListTransportResponse.command)
+}
+inline std::string* ListTransportResponse::mutable_command() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.command)
+  return _internal_mutable_command();
+}
+inline const std::string& ListTransportResponse::_internal_command() const {
+  return command_.Get();
+}
+inline void ListTransportResponse::_internal_set_command(const std::string& value) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListTransportResponse::set_command(std::string&& value) {
+  
+  command_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListTransportResponse.command)
+}
+inline void ListTransportResponse::set_command(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListTransportResponse.command)
+}
+inline void ListTransportResponse::set_command(const char* value,
+    size_t size) {
+  
+  command_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListTransportResponse.command)
+}
+inline std::string* ListTransportResponse::_internal_mutable_command() {
+  
+  return command_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListTransportResponse::release_command() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportResponse.command)
+  return command_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListTransportResponse::set_allocated_command(std::string* command) {
+  if (command != nullptr) {
+    
+  } else {
+    
+  }
+  command_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), command,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportResponse.command)
+}
+
+// string rid = 2;
+inline void ListTransportResponse::clear_rid() {
+  rid_.ClearToEmpty();
+}
+inline const std::string& ListTransportResponse::rid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.rid)
+  return _internal_rid();
+}
+inline void ListTransportResponse::set_rid(const std::string& value) {
+  _internal_set_rid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.ListTransportResponse.rid)
+}
+inline std::string* ListTransportResponse::mutable_rid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.rid)
+  return _internal_mutable_rid();
+}
+inline const std::string& ListTransportResponse::_internal_rid() const {
+  return rid_.Get();
+}
+inline void ListTransportResponse::_internal_set_rid(const std::string& value) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void ListTransportResponse::set_rid(std::string&& value) {
+  
+  rid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.ListTransportResponse.rid)
+}
+inline void ListTransportResponse::set_rid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.ListTransportResponse.rid)
+}
+inline void ListTransportResponse::set_rid(const char* value,
+    size_t size) {
+  
+  rid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.ListTransportResponse.rid)
+}
+inline std::string* ListTransportResponse::_internal_mutable_rid() {
+  
+  return rid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* ListTransportResponse::release_rid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportResponse.rid)
+  return rid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void ListTransportResponse::set_allocated_rid(std::string* rid) {
+  if (rid != nullptr) {
+    
+  } else {
+    
+  }
+  rid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), rid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportResponse.rid)
+}
+
+// .grpc_cli.ListTransportResponse.Result result = 3;
+inline bool ListTransportResponse::_internal_has_result() const {
+  return this != internal_default_instance() && result_ != nullptr;
+}
+inline bool ListTransportResponse::has_result() const {
+  return _internal_has_result();
+}
+inline void ListTransportResponse::clear_result() {
+  if (GetArena() == nullptr && result_ != nullptr) {
+    delete result_;
+  }
+  result_ = nullptr;
+}
+inline const ::grpc_cli::ListTransportResponse_Result& ListTransportResponse::_internal_result() const {
+  const ::grpc_cli::ListTransportResponse_Result* p = result_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::ListTransportResponse_Result&>(
+      ::grpc_cli::_ListTransportResponse_Result_default_instance_);
+}
+inline const ::grpc_cli::ListTransportResponse_Result& ListTransportResponse::result() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.result)
+  return _internal_result();
+}
+inline void ListTransportResponse::unsafe_arena_set_allocated_result(
+    ::grpc_cli::ListTransportResponse_Result* result) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(result_);
+  }
+  result_ = result;
+  if (result) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListTransportResponse.result)
+}
+inline ::grpc_cli::ListTransportResponse_Result* ListTransportResponse::release_result() {
+  
+  ::grpc_cli::ListTransportResponse_Result* temp = result_;
+  result_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::ListTransportResponse_Result* ListTransportResponse::unsafe_arena_release_result() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportResponse.result)
+  
+  ::grpc_cli::ListTransportResponse_Result* temp = result_;
+  result_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::ListTransportResponse_Result* ListTransportResponse::_internal_mutable_result() {
+  
+  if (result_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::ListTransportResponse_Result>(GetArena());
+    result_ = p;
+  }
+  return result_;
+}
+inline ::grpc_cli::ListTransportResponse_Result* ListTransportResponse::mutable_result() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.result)
+  return _internal_mutable_result();
+}
+inline void ListTransportResponse::set_allocated_result(::grpc_cli::ListTransportResponse_Result* result) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete result_;
+  }
+  if (result) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(result);
+    if (message_arena != submessage_arena) {
+      result = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, result, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  result_ = result;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportResponse.result)
+}
+
+// .grpc_cli.PosInfo info = 4;
+inline bool ListTransportResponse::_internal_has_info() const {
+  return this != internal_default_instance() && info_ != nullptr;
+}
+inline bool ListTransportResponse::has_info() const {
+  return _internal_has_info();
+}
+inline void ListTransportResponse::clear_info() {
+  if (GetArena() == nullptr && info_ != nullptr) {
+    delete info_;
+  }
+  info_ = nullptr;
+}
+inline const ::grpc_cli::PosInfo& ListTransportResponse::_internal_info() const {
+  const ::grpc_cli::PosInfo* p = info_;
+  return p != nullptr ? *p : reinterpret_cast<const ::grpc_cli::PosInfo&>(
+      ::grpc_cli::_PosInfo_default_instance_);
+}
+inline const ::grpc_cli::PosInfo& ListTransportResponse::info() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.ListTransportResponse.info)
+  return _internal_info();
+}
+inline void ListTransportResponse::unsafe_arena_set_allocated_info(
+    ::grpc_cli::PosInfo* info) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(info_);
+  }
+  info_ = info;
+  if (info) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:grpc_cli.ListTransportResponse.info)
+}
+inline ::grpc_cli::PosInfo* ListTransportResponse::release_info() {
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::grpc_cli::PosInfo* ListTransportResponse::unsafe_arena_release_info() {
+  // @@protoc_insertion_point(field_release:grpc_cli.ListTransportResponse.info)
+  
+  ::grpc_cli::PosInfo* temp = info_;
+  info_ = nullptr;
+  return temp;
+}
+inline ::grpc_cli::PosInfo* ListTransportResponse::_internal_mutable_info() {
+  
+  if (info_ == nullptr) {
+    auto* p = CreateMaybeMessage<::grpc_cli::PosInfo>(GetArena());
+    info_ = p;
+  }
+  return info_;
+}
+inline ::grpc_cli::PosInfo* ListTransportResponse::mutable_info() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.ListTransportResponse.info)
+  return _internal_mutable_info();
+}
+inline void ListTransportResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete info_;
+  }
+  if (info) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(info);
+    if (message_arena != submessage_arena) {
+      info = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, info, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  info_ = info;
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.ListTransportResponse.info)
+}
+
+// -------------------------------------------------------------------
+
 // CreateVolumeRequest_Param
 
 // string name = 1;
@@ -101477,6 +103344,16 @@ inline void WBTResponse::set_allocated_info(::grpc_cli::PosInfo* info) {
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

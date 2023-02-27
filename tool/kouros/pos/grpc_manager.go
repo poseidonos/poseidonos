@@ -382,6 +382,15 @@ func (p *POSGRPCManager) CreateTransport(param *pb.CreateTransportRequest_Param)
 	return res, req, err
 }
 
+// List NVMf transport to PoseidonOS
+// The function takes a protobuf format as parameter and returns response in protobuf format
+func (p *POSGRPCManager) ListTransport() (*pb.ListTransportResponse, *pb.ListTransportRequest, error) {
+	command := "LISTTRANSPORT"
+	req := &pb.ListTransportRequest{Command: command, Rid: utils.GenerateUUID(), Requestor: p.requestor}
+	res, err := grpc.SendListTransport(p.connection, req)
+	return res, req, err
+}
+
 // Delete a subsystem from PoseidonOS
 // The function takes a protobuf format as parameter and returns response in protobuf format
 func (p *POSGRPCManager) DeleteSubsystem(param *pb.DeleteSubsystemRequest_Param) (*pb.DeleteSubsystemResponse, *pb.DeleteSubsystemRequest, error) {

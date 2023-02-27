@@ -97,6 +97,8 @@ using grpc_cli::ListQOSPolicyRequest;
 using grpc_cli::ListQOSPolicyResponse;
 using grpc_cli::ListSubsystemRequest;
 using grpc_cli::ListSubsystemResponse;
+using grpc_cli::ListTransportRequest;
+using grpc_cli::ListTransportResponse;
 using grpc_cli::ListVolumeRequest;
 using grpc_cli::ListVolumeResponse;
 using grpc_cli::LoggerInfoRequest;
@@ -228,7 +230,10 @@ public:
     grpc::Status ExecuteSetListenerAnaStateCommand(const SetListenerAnaStateRequest* request, SetListenerAnaStateResponse* reply);
     grpc::Status ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply);
     grpc::Status ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* request, SubsystemInfoResponse* reply);
+
+    // Transport Commands
     grpc::Status ExecuteCreateTransportCommand(const CreateTransportRequest* request, CreateTransportResponse* reply);
+    grpc::Status ExecuteListTransportCommand(const ListTransportRequest* request, ListTransportResponse* reply);
 
     // Volume Commands
     grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);

@@ -162,6 +162,10 @@ type POSManager interface {
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	CreateTransport(param *pb.CreateTransportRequest_Param) (*pb.CreateTransportResponse, *pb.CreateTransportRequest, error)
 
+	// List NVMf transport to PoseidonOS
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	ListTransport() (*pb.ListTransportResponse, *pb.ListTransportRequest, error)
+
 	// Delete a subsystem from PoseidonOS
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	DeleteSubsystem(param *pb.DeleteSubsystemRequest_Param) (*pb.DeleteSubsystemResponse, *pb.DeleteSubsystemRequest, error)

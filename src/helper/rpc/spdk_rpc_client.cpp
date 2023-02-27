@@ -315,3 +315,15 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
 
     return make_pair(SUCCESS, "");
 }
+
+Json::Value
+SpdkRpcClient::TransportList(void)
+{
+    const string method = "nvmf_get_transports";
+
+    Json::Value param;
+
+    Json::Value ret = client->CallMethod(method, param);
+
+    return ret;
+}

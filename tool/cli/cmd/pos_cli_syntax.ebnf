@@ -339,11 +339,14 @@ CreateTransportCmd = "create-transport" ,
 
 TransportCmd = "transport" ,
   ( CreateTransportSubCmd
+  | ListTransportSubCmd
   ) ;
 
 CreateTransportSubCmd = "create" ,
   ( "--trtype" | "-t" ) , TransportType , [ ( "--buf-cache-size" | "-c" ) ,
   BufCacheSize ] , [ "--num-shared-buf" , NumSharedBuffers ] ;
+
+ListTransportSubCmd = "list";
 
 TelemetryCmd = "telemetry" ,
   ( TelemetryStartCmd

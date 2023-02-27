@@ -241,6 +241,12 @@ service PosCli {
     	};
 	}
 
+	rpc ListTransport (ListTransportRequest) returns (ListTransportResponse) {
+		option (google.api.http) = {
+			post: "/v1/listtransport"
+		};
+	}
+
     // Volume Commands
 	rpc CreateVolume (CreateVolumeRequest) returns (CreateVolumeResponse) {
 		option (google.api.http) = {
@@ -1418,6 +1424,38 @@ message CreateTransportResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ListTransportRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message Transport {
+	string type = 1;
+	int32 maxQueueDepth = 2;
+	int32 maxIoQpairsPerCtrlr = 3;
+	int32 inCapsuleDataSize = 4;
+	int32 maxIoSize = 5;
+	int32 ioUnitSize = 6;
+	int32 abortTimeoutSec = 7;
+	int32 bufCacheSize = 8;
+	int32 numSharedBuf = 9;
+}
+
+message ListTransportResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message TransportList {
+			repeated Transport transportlist = 1;
+		}
+		TransportList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;

@@ -1,25 +1,27 @@
-## poseidonos-cli transport
+## poseidonos-cli transport list
 
-Transport Command for PoseidonOS.
+List NVMf transport to PoseidonOS.
 
 ### Synopsis
 
 
-Transport Command for PoseidonOS. Use this command category when you
-create or list a transport. 
+List NVMf transport to PoseidonOS.
 
-Syntax: 
-  poseidonos-cli transport [create|list] [flags]
-	  
+Syntax:
+	poseidonos-cli transport list
+
+Example:
+	poseidonos-cli transport list
+    
 
 ```
-poseidonos-cli transport [flags]
+poseidonos-cli transport list [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for transport
+  -h, --help   help for list
 ```
 
 ### Options inherited from parent commands
@@ -38,7 +40,5 @@ poseidonos-cli transport [flags]
 
 ### SEE ALSO
 
-* [poseidonos-cli](poseidonos-cli.md)	 - poseidonos-cli - A command-line interface for PoseidonOS
-* [poseidonos-cli transport create](poseidonos-cli_transport_create.md)	 - Create NVMf transport to PoseidonOS.
-* [poseidonos-cli transport list](poseidonos-cli_transport_list.md)	 - List NVMf transport to PoseidonOS.
+* [poseidonos-cli transport](poseidonos-cli_transport.md)	 - Transport Command for PoseidonOS.
 

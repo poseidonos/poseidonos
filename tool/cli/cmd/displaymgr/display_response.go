@@ -584,6 +584,56 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 		}
 		w.Flush()
 
+	case "LISTTRANSPORT":
+		res := &pb.ListTransportResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w,
+			"TR type\t"+
+				globals.FieldSeparator+"max QD\t"+
+				globals.FieldSeparator+"max IO Qpairs/ctrlr\t"+
+				globals.FieldSeparator+"incapsule data sz\t"+
+				globals.FieldSeparator+"max IO sz\t"+
+				globals.FieldSeparator+"IO unit sz\t"+
+				globals.FieldSeparator+"abort TO sec\t"+
+				globals.FieldSeparator+"buf cache sz\t"+
+				globals.FieldSeparator+"num shared buf")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-------\t"+
+				globals.FieldSeparator+"------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-----------------\t"+
+				globals.FieldSeparator+"---------\t"+
+				globals.FieldSeparator+"----------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"--------------")
+
+		// Data
+		for _, transport := range res.GetResult().GetData().GetTransportlist() {
+			fmt.Fprintln(w,
+				transport.GetType()+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetMaxQueueDepth()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetMaxIoQpairsPerCtrlr()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetInCapsuleDataSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetMaxIoSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetIoUnitSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetAbortTimeoutSec()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetBufCacheSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetNumSharedBuf()), 10))
+		}
+		w.Flush()
+
 	case "SUBSYSTEMINFO":
 		res := &pb.SubsystemInfoResponse{}
 		protojson.Unmarshal([]byte(resJson), res)

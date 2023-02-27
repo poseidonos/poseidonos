@@ -59,6 +59,7 @@
 #include "src/cli/list_listener_command.h"
 #include "src/cli/list_qos_policies_command.h"
 #include "src/cli/list_subsystem_command.h"
+#include "src/cli/list_transport_command.h"
 #include "src/cli/list_volume_command.h"
 #include "src/cli/volume_info_command.h"
 #include "src/cli/list_wbt_command.h"
@@ -115,6 +116,7 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["SETLISTENERANASTATE"] = new SetListenerAnaStateCommand();
     cmdDictionary["LISTLISTENER"] = new ListListenerCommand();
     cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
+    cmdDictionary["LISTTRANSPORT"] = new ListTransportCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();
     cmdDictionary["DELETEVOLUME"] = new DeleteVolumeCommand();
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();
