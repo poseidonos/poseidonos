@@ -46,7 +46,6 @@
 #include "src/cli/cli_server.h"
 #include "src/include/poseidonos_interface.h"
 #include "src/include/pos_event_id.h"
-#include "src/lib/system_timeout_checker.h"
 #include "src/logger/logger.h"
 
 #define gettid() syscall(SYS_gettid)
@@ -165,6 +164,7 @@ SignalHandler::_ExceptionHandler(int sig)
         case SIGTERM:
         case SIGQUIT:
         {
+            _Log("Quit Signal Handling!");
             sigset_t oldset;
             SignalMask::MaskQuitSignal(&oldset);
             _ShutdownProcess();
