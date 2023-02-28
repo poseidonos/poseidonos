@@ -37,14 +37,15 @@
 namespace pbr
 {
 int
-PbrAdapter::Load(vector<pos::UblockSharedPtr> devs, vector<AteData*>& ateListOut)
+PbrAdapter::Load(const vector<pos::UblockSharedPtr>& devs,
+    vector<unique_ptr<pbr::AteData>>& ateListOut)
 {
     int ret = Pbr::Load(devs, ateListOut);
     return ret;
 }
 
 int
-PbrAdapter::Reset(vector<pos::UblockSharedPtr> devs)
+PbrAdapter::Reset(const vector<pos::UblockSharedPtr>& devs)
 {
     int ret = Pbr::Reset(devs);
     FilePbr::Reset();
@@ -52,7 +53,7 @@ PbrAdapter::Reset(vector<pos::UblockSharedPtr> devs)
 }
 
 int
-PbrAdapter::Reset(vector<pos::UblockSharedPtr> devs, string arrayName)
+PbrAdapter::Reset(const vector<pos::UblockSharedPtr>& devs, string arrayName)
 {
     int ret = Pbr::Reset(devs);
     FilePbr::Reset(arrayName);
@@ -60,10 +61,10 @@ PbrAdapter::Reset(vector<pos::UblockSharedPtr> devs, string arrayName)
 }
 
 int
-PbrAdapter::Update(vector<pos::UblockSharedPtr> devs, AteData* ateData)
+PbrAdapter::Update(const vector<pos::UblockSharedPtr>& devs, unique_ptr<AteData> ateData)
 {
-    int ret = Pbr::Update(devs, ateData);
-    FilePbr::Update(ateData);
+    int ret = Pbr::Update(devs, ateData.get());
+    FilePbr::Update(ateData.get());
     return ret;
 }
 } // namespace pbr

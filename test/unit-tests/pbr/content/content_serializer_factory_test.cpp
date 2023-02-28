@@ -14,9 +14,6 @@ TEST(ContentSerializerFactory, GetSerializer_testIfAnInstanceIsReturnedWhenAVali
 
     // Then
     ASSERT_NE(serializer, nullptr);
-
-    // Clean up
-    delete serializer;
 }
 
 TEST(ContentSerializerFactory, GetSerializer_testIfNullptrIsReturnedWhenAInvalidRevisionIsEntered)

@@ -40,15 +40,16 @@
 
 namespace pbr
 {
-PbrLoader::PbrLoader(vector<pos::UblockSharedPtr> devs)
-: PbrLoader(new HeaderSerializer(), new PbrReader(), devs)
+PbrLoader::PbrLoader(const vector<pos::UblockSharedPtr>& devs)
+: PbrLoader(make_unique<HeaderSerializer>(),
+    make_unique<PbrReader>(), devs)
 {
 }
 
-PbrLoader::PbrLoader(IHeaderSerializer* headerSerializer,
-    IPbrReader* pbrReader, vector<pos::UblockSharedPtr> devs)
-: headerSerializer(headerSerializer),
-  pbrReader(pbrReader),
+PbrLoader::PbrLoader(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IPbrReader> pbrReader, const vector<pos::UblockSharedPtr>& devs)
+: headerSerializer(move(headerSerializer)),
+  pbrReader(move(pbrReader)),
   devs(devs)
 {
 }
@@ -60,12 +61,10 @@ PbrLoader::~PbrLoader(void)
         dev = nullptr;
     }
     devs.clear();
-    delete pbrReader;
-    delete headerSerializer;
 }
 
 int
-PbrLoader::Load(vector<AteData*>& ateListOut)
+PbrLoader::Load(vector<unique_ptr<AteData>>& ateListOut)
 {
     int ret = 0;
     uint32_t pbrSize = header::TOTAL_PBR_SIZE;
@@ -82,16 +81,11 @@ PbrLoader::Load(vector<AteData*>& ateListOut)
             {
                 auto serializer = ContentSerializerFactory::GetSerializer(headerElem.revision);
                 uint64_t startOffset = serializer->GetContentStartLba();
-                AteData* ateData = nullptr;
+                unique_ptr<AteData> ateData = nullptr;
                 ret = serializer->Deserialize(ateData, &((char*)pbrData)[startOffset]);
-                delete serializer;
                 if (ret == 0)
                 {
-                    ateListOut.push_back(ateData);
-                }
-                else
-                {
-                    delete ateData;
+                    ateListOut.push_back(move(ateData));
                 }
             }
         }

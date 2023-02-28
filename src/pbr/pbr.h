@@ -44,8 +44,9 @@ namespace pbr
 class Pbr
 {
 public:
-    static int Load(vector<pos::UblockSharedPtr> devs, vector<AteData*>& ateListOut /* OUT PARAM */);
-    static int Reset(vector<pos::UblockSharedPtr> devs);
-    static int Update(vector<pos::UblockSharedPtr> devs, AteData* ateData);
+    static int Load(const vector<pos::UblockSharedPtr>& devs,
+        vector<unique_ptr<pbr::AteData>>& ateListOut /* OUT PARAM */);
+    static int Reset(const vector<pos::UblockSharedPtr>& devs);
+    static int Update(const vector<pos::UblockSharedPtr>& devs, AteData* ateData);
 };
 } // namespace pbr

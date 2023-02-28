@@ -46,7 +46,7 @@ public:
     ContentSerializerFakeRevision(void) = default;
     virtual ~ContentSerializerFakeRevision(void) = default;
     virtual int Serialize(char* dataOut /* OUT PARAM */, AteData* ateData) override;
-    virtual int Deserialize(AteData*& ateOut /* OUT PARAM */, char* rawData) override;
+    virtual int Deserialize(unique_ptr<AteData>& ateOut /* OUT PARAM */, char* rawData) override;
     virtual uint32_t GetContentSize(void) override;
     virtual uint64_t GetContentStartLba(void) override;
 

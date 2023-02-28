@@ -34,6 +34,7 @@
 
 #include <list>
 #include <unistd.h>
+#include <memory>
 
 #include "src/device/device_manager.h"
 #include "src/include/pos_event_id.h"
@@ -101,16 +102,16 @@ ArrayManager::~ArrayManager()
 int
 ArrayManager::Load(void)
 {
-    vector<pbr::AteData*> arrayTableEntries;
+    vector<unique_ptr<pbr::AteData>> arrayTableEntries;
     auto devs = Enumerable::Where(deviceManager->GetDevs(),
         [](auto d) { return d != nullptr && d->GetType() == DeviceType::SSD; });
     int ret = pbrAdapter->Load(devs, arrayTableEntries);
     if (ret == 0)
     {
-        for (pbr::AteData* ate : arrayTableEntries)
+        for (auto& ate : arrayTableEntries)
         {
             POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG), "array_name:{}", ate->arrayName);
-            ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Load(ate);
+            ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Load(ate.get());
             ret = _Import(arrayBuildInfo);
             delete arrayBuildInfo;
             if (ret != 0)
@@ -123,10 +124,7 @@ ArrayManager::Load(void)
     {
         POS_TRACE_WARN(ret, "");
     }
-    for (pbr::AteData* ate : arrayTableEntries)
-    {
-        delete ate;
-    }
+    arrayTableEntries.clear();
     return ret;
 }
 

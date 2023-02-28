@@ -33,6 +33,7 @@
 #pragma once
 
 #include "i_content_serializer.h"
+#include <memory>
 
 namespace pbr
 {
@@ -40,7 +41,7 @@ namespace pbr
 class ContentSerializerFactory
 {
 public:
-    static IContentSerializer* GetSerializer(uint32_t revision);
+    static unique_ptr<IContentSerializer> GetSerializer(uint32_t revision);
 };
 
 } // namespace pbr
