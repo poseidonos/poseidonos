@@ -6009,9 +6009,66 @@ Root:
     Cause:
     Solution:
 
+  # Volume: 4500 - 4599
   -
     Id: 4500
     Name: VOLUME_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4500
+    Name: VOLUME_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4501
+    Name: VOLUME_CREATE_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4502
+    Name: VOLUME_DELETE_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+    -
+    Id: 4503
+    Name: VOLUME_DETACH_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+    -
+    Id: 4504
+    Name: VOLUME_LOAD_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4505
+    Name: VOLUME_MOUNT_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4506
+    Name: VOLUME_UNMOUNT_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4507
+    Name: VOLUME_UPDATE_EVENT
     Severity:
     Description:
     Cause:
@@ -6031,37 +6088,7 @@ Root:
     Cause:
     Solution:
 
-  -
-    Id: 4580
-    Name: LOGGER_FILTER_POLICY_DECODE_FAIL
-    Severity:
-    Description: Failed to decode logger filter policy.
-    Cause:
-    Solution:
-  -
-    Id: 4581
-    Name: LOGGER_FILTER_POLICY_FILE_NOT_FOUND
-    Severity:
-    Description: Failed to find a logger filter policy file.
-    Cause:
-    Solution: Check out the instructions in the help message of the command.
-  -
-    Id: 4582
-    Name: LOGGER_SET_LEVEL_FAILED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 4583
-    Name: LOGGER_FILTER_APPLY_SUCCESS
-    Severity:
-    Description: Log filter has been applied.
-    Cause:
-    Solution:
-
-
-  # QoS: 4600 - 4999
+  # QoS: 4600 - 4699
   -
     Id: 4600
     Name: QOS_CLI_WRONG_MISSING_PARAMETER
@@ -6167,6 +6194,36 @@ Root:
     Description: Failed to find a array with the given name
     Cause: Wrong Array Name parameter provided
     Solution: Provide valid existing array name
+
+  # Apply Logger: 4700 - 4999
+  -
+    Id: 4700
+    Name: LOGGER_FILTER_POLICY_DECODE_FAIL
+    Severity:
+    Description: Failed to decode logger filter policy.
+    Cause:
+    Solution:
+  -
+    Id: 4701
+    Name: LOGGER_FILTER_POLICY_FILE_NOT_FOUND
+    Severity:
+    Description: Failed to find a logger filter policy file.
+    Cause:
+    Solution: Check out the instructions in the help message of the command.
+  -
+    Id: 4702
+    Name: LOGGER_SET_LEVEL_FAILED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4703
+    Name: LOGGER_FILTER_APPLY_SUCCESS
+    Severity:
+    Description: Log filter has been applied.
+    Cause:
+    Solution:
 
   # IOPath nvmf: 5000 - 5099
   -
