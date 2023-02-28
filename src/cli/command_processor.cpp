@@ -83,6 +83,7 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
 grpc::Status
 CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, StopSystemResponse* reply)
 {
+    POS_REPORT_TRACE(EID(POS_SYSTEM_STOP_EXE), "system stop CLI is executing...");
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
@@ -92,12 +93,14 @@ CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, Sto
     if (!_IsPosTerminating())
     {
         _SetPosTerminating(true);
+        POS_REPORT_TRACE(EID(POS_TERMINATION_TRIGGERED), "Entering a termination process...");
         pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
         eventId = EID(SUCCESS);
     }
     else
     {
-        eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
+        POS_REPORT_TRACE(EID(POS_TERMINATION_FAILED_ALREADY_IN_PROGRESS), "already in termination process");
+        eventId = EID(POS_TERMINATION_FAILED_ALREADY_IN_PROGRESS);
     }
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());

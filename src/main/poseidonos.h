@@ -82,6 +82,10 @@ private:
     void _SetupThreadModel(void);
 
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
+    const uint32_t total_init_seq_cnt {13};
+    uint32_t curr_init_seq_num {0};
+    const uint32_t total_term_seq_cnt {6};
+    uint32_t curr_term_seq_num {0};
 
     IoRecoveryEventFactory* ioRecoveryEventFactory = nullptr;
     TelemetryAirDelegator* telemetryAirDelegator = nullptr;
