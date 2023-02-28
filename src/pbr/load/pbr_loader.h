@@ -37,6 +37,7 @@
 #include "src/pbr/io/i_pbr_reader.h"
 
 #include <vector>
+#include <memory>
 
 using namespace std;
 
@@ -45,17 +46,17 @@ namespace pbr
 class PbrLoader : public IPbrLoader
 {
 public:
-    PbrLoader(vector<pos::UblockSharedPtr> devs);
-    PbrLoader(IHeaderSerializer* headerSerializer,
-        IPbrReader* pbrReader, vector<pos::UblockSharedPtr> devs);
+    PbrLoader(const vector<pos::UblockSharedPtr>& devs);
+    PbrLoader(unique_ptr<IHeaderSerializer> headerSerializer,
+        unique_ptr<IPbrReader> pbrReader, const vector<pos::UblockSharedPtr>& devs);
     virtual ~PbrLoader(void);
 
 protected:
-    virtual int Load(vector<AteData*>& ateListOut /* OUT PARAM */) override;
+    virtual int Load(vector<unique_ptr<AteData>>& ateListOut /* OUT PARAM */) override;
 
 private:
-    IHeaderSerializer* headerSerializer = nullptr;
-    IPbrReader* pbrReader = nullptr;
+    unique_ptr<IHeaderSerializer> headerSerializer = nullptr;
+    unique_ptr<IPbrReader> pbrReader = nullptr;
     vector<pos::UblockSharedPtr> devs;
 };
 } // namespace pbr

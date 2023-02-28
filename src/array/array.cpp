@@ -227,6 +227,7 @@ Array::Delete(void)
         goto error;
     }
 
+    // Before removing the device list, PBR on the devices must be cleared.
     _ClearPbr();
     _DeletePartitions();
     devMgr_->Clear();
@@ -555,12 +556,7 @@ Array::GetDevices(ArrayDeviceType type)
 int
 Array::_UpdatePbr(void)
 {
-    pbr::AteData* ate = _BuildAteData();
-    int ret = pbrAdapter->Update(_GetPbrDevs(), ate);
-
-    POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "_UpdatePbr(name:{}, uuid:{}, ateuuid:{})",
-        ate->arrayName, uuid, ate->arrayUuid);
-    delete ate;
+    int ret = pbrAdapter->Update(_GetPbrDevs(), _BuildAteData());
     return ret;
 }
 
@@ -587,10 +583,10 @@ Array::_GetPbrDevs(void)
     return devs;
 }
 
-pbr::AteData*
+unique_ptr<pbr::AteData>
 Array::_BuildAteData(void)
 {
-    pbr::AteData* ate = new pbr::AteData();
+    unique_ptr<pbr::AteData> ate = make_unique<pbr::AteData>();
     ate->nodeUuid = NodeInfo::GetUuid();
     ate->arrayName = name_;
     ate->arrayUuid = uuid;

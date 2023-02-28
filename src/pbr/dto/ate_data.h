@@ -47,7 +47,17 @@ const string ATE_SIGNATURE = "ATE";
 class AteData
 {
 public:
-    virtual ~AteData(void) = default;
+    virtual ~AteData(void)
+    {
+        for (auto ade : adeList)
+        {
+            delete ade;
+        }
+        for (auto pte : pteList)
+        {
+            delete pte;
+        }
+    }
     string nodeUuid;
     string arrayUuid;
     string arrayName;

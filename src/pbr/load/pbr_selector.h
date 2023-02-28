@@ -42,6 +42,7 @@ namespace pbr
 class PbrSelector
 {
 public:
-    static int Select(vector<AteData*>& candidates, unique_ptr<PbrVoting> voting = make_unique<PbrVoting>());
+    static int Select(vector<unique_ptr<AteData>>& candidates,
+        unique_ptr<PbrVoting> voting = make_unique<PbrVoting>());
 };
 } // namespace pbr

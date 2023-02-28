@@ -46,9 +46,10 @@ class PbrAdapter
 {
 public:
     virtual ~PbrAdapter() {};
-    virtual int Load(vector<pos::UblockSharedPtr> devs, vector<AteData*>& ateListOut /* OUT PARAM */);
-    virtual int Reset(vector<pos::UblockSharedPtr> devs);
-    virtual int Reset(vector<pos::UblockSharedPtr> devs, string arrayName);
-    virtual int Update(vector<pos::UblockSharedPtr> devs, AteData* ateData);
+    virtual int Load(const vector<pos::UblockSharedPtr>& devs,
+        vector<unique_ptr<pbr::AteData>>& ateListOut /* OUT PARAM */);
+    virtual int Reset(const vector<pos::UblockSharedPtr>& devs);
+    virtual int Reset(const vector<pos::UblockSharedPtr>& devs, string arrayName);
+    virtual int Update(const vector<pos::UblockSharedPtr>& devs, unique_ptr<AteData> ateData);
 };
 } // namespace pbr

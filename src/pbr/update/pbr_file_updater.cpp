@@ -39,16 +39,20 @@
 namespace pbr
 {
 PbrFileUpdater::PbrFileUpdater(uint32_t revision, string filePath)
-: PbrFileUpdater(new HeaderSerializer(), ContentSerializerFactory::GetSerializer(revision),
-    new PbrWriter(), revision, filePath)
+: PbrFileUpdater(make_unique<HeaderSerializer>(),
+    ContentSerializerFactory::GetSerializer(revision),
+    make_unique<PbrWriter>(), revision, filePath)
 {
 }
 
-PbrFileUpdater::PbrFileUpdater(IHeaderSerializer* headerSerializer, IContentSerializer* contentSerializer,
-    IPbrWriter* pbrWriter, uint32_t revision, string filePath)
-: headerSerializer(headerSerializer),
-  contentSerializer(contentSerializer),
-  pbrWriter(pbrWriter),
+PbrFileUpdater::PbrFileUpdater(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IContentSerializer> contentSerializer,
+    unique_ptr<IPbrWriter> pbrWriter,
+    uint32_t revision,
+    string filePath)
+: headerSerializer(move(headerSerializer)),
+  contentSerializer(move(contentSerializer)),
+  pbrWriter(move(pbrWriter)),
   revision(revision),
   filePath(filePath)
 {
@@ -56,9 +60,6 @@ PbrFileUpdater::PbrFileUpdater(IHeaderSerializer* headerSerializer, IContentSeri
 
 PbrFileUpdater::~PbrFileUpdater(void)
 {
-    delete pbrWriter;
-    delete contentSerializer;
-    delete headerSerializer;
 }
 
 int
@@ -66,7 +67,7 @@ PbrFileUpdater::Update(AteData* ateData)
 {
     HeaderElement headerElem { revision };
     uint32_t pbrSize = header::LENGTH + contentSerializer->GetContentSize();
-    char* pbrData = new char[pbrSize];
+    char pbrData[pbrSize];
     memset(pbrData, 0, pbrSize);
     int ret = headerSerializer->Serialize(&headerElem, pbrData, header::LENGTH);
     if (ret == 0)
@@ -78,7 +79,6 @@ PbrFileUpdater::Update(AteData* ateData)
             pbrWriter->Write(filePath, pbrData, 0, pbrSize);
         }
     }
-    delete[] pbrData;
     return ret;
 }
 

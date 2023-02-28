@@ -38,6 +38,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 using namespace std;
 
@@ -47,16 +48,16 @@ class PbrFileLoader : public IPbrLoader
 {
 public:
     PbrFileLoader(vector<string> fileList);
-    PbrFileLoader(IHeaderSerializer* headerSerializer,
-        IPbrReader* pbrReader, vector<string> fileList);
+    PbrFileLoader(unique_ptr<IHeaderSerializer> headerSerializer,
+        unique_ptr<IPbrReader> pbrReader, vector<string> fileList);
     virtual ~PbrFileLoader(void);
 
 protected:
-    virtual int Load(vector<AteData*>& ateListOut /* OUT PARAM */) override;
+    virtual int Load(vector<unique_ptr<AteData>>& ateListOut /* OUT PARAM */) override;
 
 private:
-    IHeaderSerializer* headerSerializer = nullptr;
-    IPbrReader* pbrReader = nullptr;
+    unique_ptr<IHeaderSerializer> headerSerializer = nullptr;
+    unique_ptr<IPbrReader> pbrReader = nullptr;
     vector<string> fileList;
 };
 } // namespace pbr

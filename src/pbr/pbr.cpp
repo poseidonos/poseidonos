@@ -36,11 +36,11 @@
 #include "src/pbr/load/pbr_selector.h"
 #include "src/pbr/update/pbr_updater.h"
 
-
 namespace pbr
 {
 int
-Pbr::Load(vector<pos::UblockSharedPtr> devs, vector<AteData*>& ateListOut)
+Pbr::Load(const vector<pos::UblockSharedPtr>& devs,
+    vector<unique_ptr<pbr::AteData>>& ateListOut)
 {
     unique_ptr<IPbrLoader> loader = make_unique<PbrLoader>(devs);
     int ret = loader->Load(ateListOut);
@@ -52,7 +52,7 @@ Pbr::Load(vector<pos::UblockSharedPtr> devs, vector<AteData*>& ateListOut)
 }
 
 int
-Pbr::Reset(vector<pos::UblockSharedPtr> devs)
+Pbr::Reset(const vector<pos::UblockSharedPtr>& devs)
 {
     unique_ptr<IPbrUpdater> updater = make_unique<PbrUpdater>(REVISION, devs);
     int ret = updater->Clear();
@@ -60,7 +60,7 @@ Pbr::Reset(vector<pos::UblockSharedPtr> devs)
 }
 
 int
-Pbr::Update(vector<pos::UblockSharedPtr> devs, AteData* ateData)
+Pbr::Update(const vector<pos::UblockSharedPtr>& devs, AteData* ateData)
 {
     unique_ptr<IPbrUpdater> updater = make_unique<PbrUpdater>(REVISION, devs);
     int ret = updater->Update(ateData);

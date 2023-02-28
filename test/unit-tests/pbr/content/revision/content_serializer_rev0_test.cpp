@@ -15,16 +15,13 @@ TEST(ContentSerializerRev0, Deserialize_testIfReturnErrorWhenInvalidSignatureIsD
     // Given
     ContentSerializerRev0 serializer;
     char rawData[serializer.GetContentSize()];
-    AteData* ateData = nullptr;
+    unique_ptr<AteData> ateData = nullptr;
 
     // When
     int ret = serializer.Deserialize(ateData, rawData);
 
     // Then
     ASSERT_EQ(EID(ATE_UNKNOWN_SIGNATURE), ret);
-
-    // Clean up
-    delete ateData;
 }
 
 TEST(ContentSerializerRev0, Deserialize_testIfReturnErrorWhenChecksumIsInvalid)
@@ -32,7 +29,7 @@ TEST(ContentSerializerRev0, Deserialize_testIfReturnErrorWhenChecksumIsInvalid)
     // Given
     ContentSerializerRev0 serializer;
     char rawData[serializer.GetContentSize()];
-    AteData* ateData = nullptr;
+    unique_ptr<AteData> ateData = nullptr;
     uint32_t backupAteOffset = 24 * 1024;
     uint32_t signatureAbsoluteOffset1 = 0;
     uint32_t signatureAbsoluteOffset2 = backupAteOffset;
@@ -46,9 +43,6 @@ TEST(ContentSerializerRev0, Deserialize_testIfReturnErrorWhenChecksumIsInvalid)
 
     // Then
     ASSERT_EQ(EID(PBR_CHECKSUM_INVALID), ret);
-
-    // Clean up
-    delete ateData;
 }
 
 }  // namespace pbr

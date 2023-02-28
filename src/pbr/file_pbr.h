@@ -36,6 +36,7 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 using namespace std;
 
@@ -45,7 +46,7 @@ namespace pbr
 class FilePbr
 {
 public:
-    static int Load(vector<AteData*>& ateListOut /* OUT PARAM */);
+    static int Load(vector<unique_ptr<AteData>>& ateListOut /* OUT PARAM */);
     static int Reset(void);
     static int Reset(string arrayName);
     static int Update(AteData* ateData);

@@ -27,17 +27,17 @@ TEST(PbrSerializerTest, Serialize_testIfResultsOfSerializingSamplePbr)
     string dirPath(buff);
     string samplePbr = dirPath + "/integration-tests/pbr/sample_pbr.pbr";
     string testPbr = dirPath + "/integration-tests/pbr/test_pbr.pbr";
-    IPbrLoader* loader = new PbrFileLoader(vector<string>{ samplePbr });
-    IPbrUpdater* updater = new PbrFileUpdater(revision, testPbr);
-    vector<AteData*> ateList;
+    unique_ptr<IPbrLoader> loader = make_unique<PbrFileLoader>(vector<string>{ samplePbr });
+    unique_ptr<IPbrUpdater> updater = make_unique<PbrFileUpdater>(revision, testPbr);
+    vector<unique_ptr<AteData>> ateList;
 
     // When
     int ret = loader->Load(ateList);
     ASSERT_EQ(1, ateList.size());
     ASSERT_EQ(0, ret);
 
-    AteData* ateData = ateList.front();
-    ret = updater->Update(ateData);
+    auto& ateData = ateList.front();
+    ret = updater->Update(ateData.get());
     ASSERT_EQ(0, ret);
 
     // Read original sample to compare
@@ -65,8 +65,6 @@ TEST(PbrSerializerTest, Serialize_testIfResultsOfSerializingSamplePbr)
     // Clean Up
     updater->Clear(); // remove test_pbr.pbr
     delete testPbrReader;
-    delete updater;
-    delete loader;
 }
 
 TEST(PbrSerializerTest, Serialize_testIfPbrRevision0IsUpdatedWellToNextPbr)
@@ -84,71 +82,66 @@ TEST(PbrSerializerTest, Serialize_testIfPbrRevision0IsUpdatedWellToNextPbr)
     string dirPath(buff);
     string samplePbr = dirPath + "/integration-tests/pbr/sample_pbr.pbr";
     string newPbr = dirPath + "/integration-tests/pbr/new_pbr.pbr";
-    IPbrLoader* oldLoader = new PbrFileLoader(vector<string>{ samplePbr });
-    IPbrUpdater* updater = new PbrFileUpdater(newRevision, newPbr);
-    vector<AteData*> ateList;
+    unique_ptr<IPbrLoader> originPbrLoader = make_unique<PbrFileLoader>(vector<string>{ samplePbr });
+    unique_ptr<IPbrUpdater> updater = make_unique<PbrFileUpdater>(newRevision, newPbr);
+    vector<unique_ptr<AteData>> ateList;
 
     // When
     // 1. Load(Deserialize) revision-0 PBR from a sample pbr file.
-    int ret = oldLoader->Load(ateList);
+    int ret = originPbrLoader->Load(ateList);
     ASSERT_EQ(1, ateList.size());
     ASSERT_EQ(0, ret);
-    AteData* oldAteData = ateList.front();
-    FakeAteData* newAteData = new FakeAteData(oldAteData);
+    auto originData = move(ateList.front());
+    FakeAteData* fakeData = new FakeAteData(*originData);
+    ateList.clear();
 
     // 2. Add Fake PBR signature.
-    newAteData->fakeSignature = "FAKE";
+    fakeData->fakeSignature = "FAKE";
 
     // 3. Update(Serializize) to a new PBR revision-uint32_max that includes the Fake PBR signature
-    ret = updater->Update(newAteData);
+    ret = updater->Update(fakeData);
     ASSERT_EQ(0, ret);
 
     // Then
-    IPbrLoader* newLoader = new PbrFileLoader(vector<string>{ newPbr });
-    ateList.clear();
+    unique_ptr<IPbrLoader> newLoader = make_unique<PbrFileLoader>(vector<string>{ newPbr });
     ret = newLoader->Load(ateList);
     ASSERT_EQ(1, ateList.size());
     ASSERT_EQ(0, ret);
-    FakeAteData* reloadedNewAteData = dynamic_cast<FakeAteData*>(ateList.front());
-    ASSERT_EQ(reloadedNewAteData->fakeSignature, newAteData->fakeSignature);
-    ASSERT_EQ(reloadedNewAteData->nodeUuid, newAteData->nodeUuid);
-    ASSERT_EQ(reloadedNewAteData->arrayName, newAteData->arrayName);
-    ASSERT_EQ(reloadedNewAteData->arrayUuid, newAteData->arrayUuid);
-    ASSERT_EQ(reloadedNewAteData->createdDateTime, newAteData->createdDateTime);
-    ASSERT_EQ(reloadedNewAteData->lastUpdatedDateTime, newAteData->lastUpdatedDateTime);
-    ASSERT_EQ(reloadedNewAteData->adeList.size(), newAteData->adeList.size());
-    ASSERT_EQ(reloadedNewAteData->pteList.size(), newAteData->pteList.size());
-    for (size_t i = 0; i < reloadedNewAteData->adeList.size(); i++)
+    auto reloadedFakeData = dynamic_cast<FakeAteData*>(move(ateList.front()).get());
+    ASSERT_EQ(reloadedFakeData->fakeSignature, fakeData->fakeSignature);
+    ASSERT_EQ(reloadedFakeData->nodeUuid, fakeData->nodeUuid);
+    ASSERT_EQ(reloadedFakeData->arrayName, fakeData->arrayName);
+    ASSERT_EQ(reloadedFakeData->arrayUuid, fakeData->arrayUuid);
+    ASSERT_EQ(reloadedFakeData->createdDateTime, fakeData->createdDateTime);
+    ASSERT_EQ(reloadedFakeData->lastUpdatedDateTime, fakeData->lastUpdatedDateTime);
+    ASSERT_EQ(reloadedFakeData->adeList.size(), fakeData->adeList.size());
+    ASSERT_EQ(reloadedFakeData->pteList.size(), fakeData->pteList.size());
+    for (size_t i = 0; i < reloadedFakeData->adeList.size(); i++)
     {
-        ASSERT_EQ(reloadedNewAteData->adeList[i]->devIndex,
-            newAteData->adeList[i]->devIndex);
-        ASSERT_EQ(reloadedNewAteData->adeList[i]->devSn,
-            newAteData->adeList[i]->devSn);
-        ASSERT_EQ(reloadedNewAteData->adeList[i]->devState,
-            newAteData->adeList[i]->devState);
-        ASSERT_EQ(reloadedNewAteData->adeList[i]->devType,
-            newAteData->adeList[i]->devType);
+        ASSERT_EQ(reloadedFakeData->adeList[i]->devIndex,
+            fakeData->adeList[i]->devIndex);
+        ASSERT_EQ(reloadedFakeData->adeList[i]->devSn,
+            fakeData->adeList[i]->devSn);
+        ASSERT_EQ(reloadedFakeData->adeList[i]->devState,
+            fakeData->adeList[i]->devState);
+        ASSERT_EQ(reloadedFakeData->adeList[i]->devType,
+            fakeData->adeList[i]->devType);
     }
 
-    for (size_t i = 0; i < reloadedNewAteData->pteList.size(); i++)
+    for (size_t i = 0; i < reloadedFakeData->pteList.size(); i++)
     {
-        ASSERT_EQ(reloadedNewAteData->pteList[i]->partType,
-            newAteData->pteList[i]->partType);
-        ASSERT_EQ(reloadedNewAteData->pteList[i]->raidType,
-            newAteData->pteList[i]->raidType);
-        ASSERT_EQ(reloadedNewAteData->pteList[i]->startLba,
-            newAteData->pteList[i]->startLba);
-        ASSERT_EQ(reloadedNewAteData->pteList[i]->lastLba,
-            newAteData->pteList[i]->lastLba);
+        ASSERT_EQ(reloadedFakeData->pteList[i]->partType,
+            fakeData->pteList[i]->partType);
+        ASSERT_EQ(reloadedFakeData->pteList[i]->raidType,
+            fakeData->pteList[i]->raidType);
+        ASSERT_EQ(reloadedFakeData->pteList[i]->startLba,
+            fakeData->pteList[i]->startLba);
+        ASSERT_EQ(reloadedFakeData->pteList[i]->lastLba,
+            fakeData->pteList[i]->lastLba);
     }
 
     // Clean Up
-    updater->Clear(); // remove test_pbr.pbr
-    delete reloadedNewAteData;
-    delete newLoader;
-    delete newAteData;
-    delete oldAteData;
-    delete updater;
-    delete oldLoader;
+    ateList.clear();
+    updater->Clear(); // remove test0_pbr.pbr
 }
 }  // namespace pbr
