@@ -1,7 +1,7 @@
 ---
 Root:
   Event:
-  # General: 0 - 999
+  # General: 0 - 899
   -
     Id: 0
     Name: SUCCESS
@@ -18,54 +18,111 @@ Root:
     Solution:
   -
     Id: 2
-    Name: POS_TERMINATION_TRIGGERED
-    Severity:
-    Description: PoseidonOS termination has been requested. Entering a termination process..
-    Cause:
-    Solution:
-  -
-    Id: 3
-    Name: POS_STOP_FAILURE_BEING_TERMINATED
-    Severity:
-    Description: Failed to stop PoseidonOS.
-    Cause: PoseidonOS is already in termination process.
-    Solution: Please wait a moment.
-  -
-    Id: 4
     Name: POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS
     Severity:
     Description: Failed to terminate PoseidonOS.
     Cause: An array is mounted.
     Solution: Please try the command after a while.
   -
-    Id: 5
-    Name: POS_TERMINATED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 6
+    Id: 3
     Name: POS_SYSTEMINFO_GET_VERSION
     Severity:
     Description: PoseidonOS version has been loaded.
     Cause:
     Solution:
 
+  # POS Finalize(Terminate): 900 - 999
+  -
+    Id: 900
+    Name: POS_SYSTEM_STOP_EXE
+    Severity: Trace
+    Description: PoseidonOS system stop CLI is executing.
+    Cause:
+    Solution:
+  -
+    Id: 901
+    Name: POS_TERMINATION_TRIGGERED
+    Severity: Trace
+    Description: PoseidonOS termination has been requested. Entering a termination process..
+    Cause:
+    Solution:
+  -
+    Id: 902
+    Name: POS_TERMINATION_FAILED_ALREADY_IN_PROGRESS
+    Severity: Trace
+    Description: Failed to stop PoseidonOS.
+    Cause: PoseidonOS is already in termination process.
+    Solution: Please wait a moment.
+  -
+    Id: 903
+    Name: POS_TRACE_TERMINATE_START
+    Severity: Trace
+    Description: The PoseidonOS is shutting down.
+    Cause:
+    Solution:
+  -
+    Id: 904
+    Name: POS_TRACE_TERMINATE_SUCCESS
+    Severity: Trace
+    Description: The PoseidonOS successfully terminated.
+    Cause:
+    Solution:
+  -
+    Id: 905
+    Name: POS_TRACE_TERMINATE_PHASE_1
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 1 progress.
+    Cause:
+    Solution:
+  -
+    Id: 906
+    Name: POS_TRACE_TERMINATE_PHASE_2
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 2 progress.
+    Cause:
+    Solution:
+  -
+    Id: 907
+    Name: POS_TRACE_TERMINATE_PHASE_3
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 3 progress.
+    Cause:
+    Solution:
+  -
+    Id: 908
+    Name: POS_TRACE_TERMINATE_PHASE_4
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 4 progress.
+    Cause:
+    Solution:
+  -
+    Id: 909
+    Name: POS_TRACE_TERMINATE_PHASE_5
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 5 progress.
+    Cause:
+    Solution:
+  -
+    Id: 910
+    Name: POS_TRACE_TERMINATE_PHASE_6
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 6 progress.
+    Cause:
+    Solution:
 
   # Trace: 1000 - 1099
   -
     Id: 1000
-    Name: POS_TRACE_STARTED
+    Name: POS_TRACE_INIT_START
     Severity: Trace
-    Description: The Poseidon OS started.
+    Description: The PoseidonOS started.
     Cause:
     Solution:
   -
     Id: 1001
     Name: POS_TRACE_INIT_SUCCESS
     Severity: Trace
-    Description: The Poseidon OS successfully initialized.
+    Description: The PoseidonOS successfully initialized.
     Cause:
     Solution:
   -
@@ -79,21 +136,7 @@ Root:
     Id: 1003
     Name: POS_TRACE_INIT_FAIL
     Severity: Trace
-    Description: The Poseidon OS Failed to initialize.
-    Cause:
-    Solution:
-  -
-    Id: 1004
-    Name: POS_TRACE_TERMINATING
-    Severity: Trace
-    Description: The Poseidon OS is shutting down.
-    Cause:
-    Solution:
-  -
-    Id: 1005
-    Name: POS_TRACE_TERMINATED
-    Severity: Trace
-    Description: The Poseidon OS successfully terminated.
+    Description: The PoseidonOS Failed to initialize.
     Cause:
     Solution:
   -

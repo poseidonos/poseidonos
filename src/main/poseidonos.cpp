@@ -86,32 +86,43 @@ namespace pos
 int
 Poseidonos::Init(int argc, char** argv)
 {
-    POS_TRACE_TRACE(EID(POS_TRACE_STARTED), "");
+    POS_REPORT_TRACE(EID(POS_TRACE_INIT_START), "POS Initialize Sequence Start, total remaining steps: {}", total_init_seq_cnt);
     int ret = _LoadConfiguration();
     if (ret == 0)
     {
-        POS_TRACE_TRACE(EID(POS_CONFIG_LOADED), "{}", ConfigManagerSingleton::Instance()->RawData());
-        POS_TRACE_INFO(EID(POS_INITIALIZING_VERSION), "");
+        POS_REPORT_TRACE(EID(POS_CONFIG_LOADED), "POS Initialize Sequence Loaded Config: {}", ConfigManagerSingleton::Instance()->RawData());
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_VERSION), "POS Initialize Sequence In Progress({}/{}): POS Version...", curr_init_seq_num, total_init_seq_cnt);
         _LoadVersion();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_SPDK), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_SPDK), "POS Initialize Sequence In Progress({}/{}): SPDK...", curr_init_seq_num, total_init_seq_cnt);
         _InitSpdk(argc, argv);
-        POS_TRACE_INFO(EID(POS_INITIALIZING_SIG_HANDLER), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_SIG_HANDLER), "POS Initialize Sequence In Progress({}/{}): Signal Handler...", curr_init_seq_num, total_init_seq_cnt);
         _InitSignalHandler();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_CPU_AFFINITY), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_CPU_AFFINITY), "POS Initialize Sequence In Progress({}/{}): Affinity...", curr_init_seq_num, total_init_seq_cnt);
         _InitAffinity();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_THREAD_MODEL), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_THREAD_MODEL), "POS Initialize Sequence In Progress({}/{}): Thread Model...", curr_init_seq_num, total_init_seq_cnt);
         _SetupThreadModel();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_QOS_POLICY), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_QOS_POLICY), "POS Initialize Sequence In Progress({}/{}): Perf Impact...", curr_init_seq_num, total_init_seq_cnt);
         _SetPerfImpact();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_DEBUG_MODULES), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_DEBUG_MODULES), "POS Initialize Sequence In Progress({}/{}): Debug Info...", curr_init_seq_num, total_init_seq_cnt);
         _InitDebugInfo();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_AIR), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_AIR), "POS Initialize Sequence In Progress({}/{}): AIR...", curr_init_seq_num, total_init_seq_cnt);
         _InitAIR();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_IO_MODULES), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_IO_MODULES), "POS Initialize Sequence In Progress({}/{}): IO Interface...", curr_init_seq_num, total_init_seq_cnt);
         _InitIOInterface();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_MEMORY_CHECKER), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_MEMORY_CHECKER), "POS Initialize Sequence In Progress({}/{}): Memory Checker...", curr_init_seq_num, total_init_seq_cnt);
         _InitMemoryChecker();
-        POS_TRACE_INFO(EID(POS_INITIALIZING_RESOURCE_CHECKER), "");
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_RESOURCE_CHECKER), "POS Initialize Sequence In Progress({}/{}): Resource Checker...", curr_init_seq_num, total_init_seq_cnt);
         _InitResourceChecker();
 #ifdef IBOF_CONFIG_REPLICATOR
         _InitReplicatorManager();
@@ -119,12 +130,13 @@ Poseidonos::Init(int argc, char** argv)
 #else
         POS_TRACE_INFO((EID(HA_DEBUG_MSG)), "ReplicatorManager is excluded from POS. Skip initializing Replicator Manager");
 #endif
+        curr_init_seq_num++;
+        POS_REPORT_TRACE(EID(POS_INITIALIZING_EXPORTER), "POS Initialize Sequence In Progress({}/{}): Trace Exporter...", curr_init_seq_num, total_init_seq_cnt);
         _InitTraceExporter(argv[0], pos::ConfigManagerSingleton::Instance(), pos::VersionProviderSingleton::Instance(), pos::TraceExporterSingleton::Instance(new OtlpFactory()));
-        POS_TRACE_INFO(EID(POS_INITIALIZING_EXPORTER), "");
     }
     else
     {
-        POS_TRACE_TRACE(EID(POS_TRACE_INIT_FAIL), "{}", ConfigManagerSingleton::Instance()->RawData());
+        POS_REPORT_TRACE(EID(POS_TRACE_INIT_FAIL), "POS Initialize Sequence Failed, LoadConfig Failed, {}", ConfigManagerSingleton::Instance()->RawData());
     }
     return ret;
 }
@@ -155,16 +167,20 @@ Poseidonos::_InitReplicatorManager(void)
 void
 Poseidonos::Run(void)
 {
-    POS_TRACE_INFO(EID(POS_INITIALIZING_CLI_SERVER), "");
+    curr_init_seq_num++;
+    POS_REPORT_TRACE(EID(POS_INITIALIZING_CLI_SERVER), "POS Initialize Sequence In Progress({}/{}): CLI Server...", curr_init_seq_num, total_init_seq_cnt);
     _RunCLIService();
-    POS_TRACE_TRACE(EID(POS_TRACE_INIT_SUCCESS), "");
+    POS_REPORT_TRACE(EID(POS_TRACE_INIT_SUCCESS), "POS Initialize Sequence Success!");
     pos_cli::Wait();
 }
 
 void
 Poseidonos::Terminate(void)
 {
-    POS_TRACE_TRACE(EID(POS_TRACE_TERMINATING), "");
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_START), "POS Terminate Sequence Start, total remaining steps: {}", total_term_seq_cnt);
+
+    curr_term_seq_num++;
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_1), "POS Terminate Sequence In Progress({}/{}): Phase 1(Memory Checker & Singleton Group 1)...", curr_term_seq_num, total_term_seq_cnt);
     MemoryChecker::Enable(false);
     EventSchedulerSingleton::Instance()->SetTerminate(true);
     NvmfTargetSingleton::ResetInstance();
@@ -175,6 +191,9 @@ Poseidonos::Terminate(void)
     QosManagerSingleton::ResetInstance();
     FlushCmdManagerSingleton::ResetInstance();
     SmartLogMgrSingleton::ResetInstance();
+
+    curr_term_seq_num++;
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_2), "POS Terminate Sequence In Progress({}/{}): Phase 2(Singleton Group 2)...", curr_term_seq_num, total_term_seq_cnt);
     delete singletonInfo;
     IOSubmitHandler* submitHandler = static_cast<IOSubmitHandler*>(IIOSubmitHandler::GetInstance());
     delete submitHandler;
@@ -189,10 +208,8 @@ Poseidonos::Terminate(void)
     SpdkSingleton::ResetInstance();
     IoTimeoutCheckerSingleton::ResetInstance();
 
-    IoTimeoutCheckerSingleton::ResetInstance();
-
-    IoTimeoutCheckerSingleton::ResetInstance();
-
+    curr_term_seq_num++;
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_3), "POS Terminate Sequence In Progress({}/{}): Phase 3(AIR)...", curr_term_seq_num, total_term_seq_cnt);
     air_deactivate();
     POS_TRACE_INFO(EID(AIR_DEACTIVATE_SUCCEED), "");
     air_finalize();
@@ -210,22 +227,29 @@ Poseidonos::Terminate(void)
         delete telemtryPublisherForAir;
         telemtryPublisherForAir = nullptr;
     }
+
+    curr_term_seq_num++;
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_4), "POS Terminate Sequence In Progress({}/{}): Phase 4(Signal Handler)...", curr_term_seq_num, total_term_seq_cnt);
     if (nullptr != signalHandler)
     {
         signalHandler->Deregister();
         UserSignalInterface::Enable(false);
     }
     SignalHandlerSingleton::ResetInstance();
-    ResourceCheckerSingleton::ResetInstance();
-    SmartCollectorSingleton::ResetInstance();
 
+    curr_term_seq_num++;
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_5), "POS Terminate Sequence In Progress({}/{}): Phase 5(Resource Checker)...", curr_term_seq_num, total_term_seq_cnt);
+    ResourceCheckerSingleton::ResetInstance();
+
+    curr_term_seq_num++;
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_6), "POS Terminate Sequence In Progress({}/{}): Phase 6(Singleton Group 3 & CLI Server)...", curr_term_seq_num, total_term_seq_cnt);
+    SmartCollectorSingleton::ResetInstance();
     TraceExporterSingleton::ResetInstance();
     ConfigManagerSingleton::ResetInstance();
     VersionProviderSingleton::ResetInstance();
-
     free(GrpcCliServerThread);
 
-    POS_TRACE_TRACE(EID(POS_TRACE_TERMINATED), "");
+    POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_SUCCESS), "POS Terminate Sequence Success!");
 }
 
 void
