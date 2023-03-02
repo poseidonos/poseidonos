@@ -339,6 +339,14 @@ jobs:
         chmod +x .github/workflows/script/unit/ut_build_run_precommit.sh
         .github/workflows/script/unit/ut_build_run_precommit.sh ${{github.workspace}}
 
+    - name: Upload SPDK build log
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: SPDK_Build_Log
+        path: |
+          ${{github.workspace}}/lib/spdk-prefix/src/spdk-stamp
+
     - name: Copy UT Result to CI Server
       if: always()
       working-directory: ${{github.workspace}}
