@@ -83,6 +83,14 @@ if [ -f /etc/debian_version ]; then
     apt install -y libboost-dev
     # for opentelemetry
     apt install -y libssl-dev
+
+    python -m pip install --upgrade pip
+    python3 -m pip install --upgrade pip
+    pip3 install scikit-build
+    pip install scikit-build
+    pip3 install cmake
+    pip install cmake
+
 elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
     set -e # exit immediately on any fail
 
@@ -188,6 +196,12 @@ elif echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rocky 8'; then
 
     python3 -m pip install py-markdown-table pyyaml
 
+    python -m pip install --upgrade pip
+    python3 -m pip install --upgrade pip
+    pip3 install scikit-build
+    pip install scikit-build
+    pip3 install cmake
+    pip install cmake
     # jsoncpp-devel installed in different directory: link it
     mkdir -p /usr/include/jsoncpp
     ln -s /usr/include/json /usr/include/jsoncpp/json
