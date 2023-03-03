@@ -8225,6 +8225,63 @@ Root:
     Cause:
     Solution:
 
+  # Restore: 5800 - 5899
+  -
+    Id: 5900
+    Name: RESTORE_JSON_OBJECT_DUPLICATE
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5901
+    Name: RESTORE_JSON_OBJECT_EMPTY
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5902
+    Name: RESTORE_JSON_WRITE_SUCCESS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5903
+    Name: RESTORE_JSON_WRITE_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5904
+    Name: RESTORE_MSG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5905
+    Name: RESTORE_JSON_READ_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5906
+    Name: RESTORE_JSON_SUCCESS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5907
+    Name: RESTORE_JSON_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
 
   # RocksDBMetaFS: 6000 - 6099
   -

@@ -80,7 +80,7 @@ RestoreManager::ArrayCreate(string name)
     {
         if (arr["array-name"].GetString() == name)
         {
-            POS_TRACE_INFO(9999, "The same array already exists. The current CLI command was not saved.");
+            POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_DUPLICATE), "The same array already exists. The current CLI command was not saved.");
             return false;
         }
     }
@@ -119,7 +119,7 @@ RestoreManager::ArrayDelete(string name)
     }
     if (!arrayErased)
     {
-        POS_TRACE_INFO(9999, "There is no array to delete.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no array to delete.");
         return false;
     }
 
@@ -151,7 +151,7 @@ RestoreManager::ArrayMount(string name, bool isMount, bool isWt, string trAddr)
     }
     if (!arrayMount)
     {
-        POS_TRACE_INFO(9999, "There is no array to mount.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no array to mount.");
         return false;
     }
 
@@ -168,7 +168,7 @@ RestoreManager::VolumeCreate(string arrayName, string volName, int32_t nsid)
 
     if (!jsonDocument->HasMember("array"))
     {
-        POS_TRACE_INFO(9999, "There is no array to create volume.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no array to create volume.");
         return false;
     }
 
@@ -187,7 +187,7 @@ RestoreManager::VolumeCreate(string arrayName, string volName, int32_t nsid)
             {
                 if (volArr["volume-name"] == volName)
                 {
-                    POS_TRACE_INFO(9999, "The same volume already exists. The current CLI command was not saved.");
+                    POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_DUPLICATE), "The same volume already exists. The current CLI command was not saved.");
                     return false;
                 }
             }
@@ -205,7 +205,7 @@ RestoreManager::VolumeCreate(string arrayName, string volName, int32_t nsid)
 
     if (!volumeCreated)
     {
-        POS_TRACE_INFO(9999, "There is no array to create volume.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no array to create volume.");
         return false;
     }
     return _WriteJson();
@@ -244,7 +244,7 @@ RestoreManager::VolumeDelete(string arrayName, string volName)
 
     if (!volumeErased)
     {
-        POS_TRACE_INFO(9999, "There is no volume to delete.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no volume to delete.");
         return false;
     }
 
@@ -286,7 +286,7 @@ RestoreManager::VolumeMount(string arrayName, string volName, bool isMount, stri
 
     if (!volumeMount)
     {
-        POS_TRACE_INFO(9999, "There is no volume to mount.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no volume to mount.");
         return false;
     }
 
@@ -326,7 +326,7 @@ RestoreManager::VolumeRename(string arrayName, string volOldName, string volNewN
 
     if (!volumeRename)
     {
-        POS_TRACE_INFO(9999, "There is no volume to rename.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no volume to rename.");
         return false;
     }
 
@@ -351,7 +351,7 @@ RestoreManager::TransportCreate(string trType, uint32_t bufCacheSize, uint32_t n
 
     if ((*jsonDocument)["transport"].HasMember(trType.c_str()))
     {
-        POS_TRACE_INFO(9999, "The same transport already exists.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_DUPLICATE), "The same transport already exists.");
         return false;
     }
 
@@ -388,7 +388,7 @@ RestoreManager::DeviceCreate(string name, string type, uint32_t blockSize, uint3
     {
         if (arr["device-name"].GetString() == name)
         {
-            POS_TRACE_INFO(9999, "The same device already exists. The current CLI command was not saved.");
+            POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_DUPLICATE), "The same device already exists. The current CLI command was not saved.");
             return false;
         }
     }
@@ -422,7 +422,7 @@ RestoreManager::SubsystemCreate(string subnqn, string serialNumber, string model
     {
         if (arr["subnqn"].GetString() == subnqn)
         {
-            POS_TRACE_INFO(9999, "The same subsystem already exists. The current CLI command was not saved.");
+            POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_DUPLICATE), "The same subsystem already exists. The current CLI command was not saved.");
             return false;
         }
     }
@@ -463,7 +463,7 @@ RestoreManager::SubsystemDelete(string subnqn)
     }
     if (!subsystemErased)
     {
-        POS_TRACE_INFO(9999, "There is no subsystem to delete.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no subsystem to delete.");
         return false;
     }
 
@@ -480,7 +480,7 @@ RestoreManager::ListenerAdd(string subnqn, string trType, string trAddr, string 
 
     if (!jsonDocument->HasMember("subsystem"))
     {
-        POS_TRACE_INFO(9999, "There is no subsystem to add listener. The current CLI command was not saved.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no subsystem to add listener. The current CLI command was not saved.");
         return false;
     }
 
@@ -493,7 +493,7 @@ RestoreManager::ListenerAdd(string subnqn, string trType, string trAddr, string 
         {
             if (arr.HasMember("listener"))
             {
-                POS_TRACE_INFO(9999, "This subsystem already has listener. The current CLI command was not saved.");
+                POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_DUPLICATE), "This subsystem already has listener. The current CLI command was not saved.");
                 return false;
             }
             else
@@ -511,7 +511,7 @@ RestoreManager::ListenerAdd(string subnqn, string trType, string trAddr, string 
 
     if (!listenerAdded)
     {
-        POS_TRACE_INFO(9999, "There is no subsystem to add listener.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no subsystem to add listener.");
         return false;
     }
     return _WriteJson();
@@ -543,7 +543,7 @@ RestoreManager::ListenerRemove(string subnqn, string trType, string trAddr, stri
     }
     if (!listenerRemoved)
     {
-        POS_TRACE_INFO(9999, "There is no listener in subsystem({}) to remove.", subnqn);
+        POS_TRACE_INFO(EID(RESTORE_JSON_OBJECT_EMPTY), "There is no listener in subsystem({}) to remove.", subnqn);
         return false;
     }
 
@@ -556,11 +556,11 @@ RestoreManager::ClearRestoreState()
     jsonDocument->RemoveAllMembers();
     if (_WriteJson())
     {
-        POS_TRACE_INFO(9999, "Clear saved state.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_WRITE_SUCCESS), "Clear saved state.");
     }
     else
     {
-        POS_TRACE_INFO(9999, "Failed to clear saved state.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_WRITE_FAIL), "Failed to clear saved state.");
     }
 }
 
@@ -577,7 +577,7 @@ void
 RestoreManager::EnableStateSave()
 {
     saveEnabled = true;
-    POS_TRACE_INFO(9999, "Saving state enabled.");
+    POS_TRACE_INFO(EID(RESTORE_MSG), "Saving state enabled.");
 }
 
 bool
@@ -588,7 +588,7 @@ RestoreManager::_ReadJson(void)
     ifstream ifs(restore_file);
     if (!ifs.is_open())
     {
-        POS_TRACE_INFO(9999, "Failed to open restore.json file. We'll create new one if possible.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_READ_FAIL), "Failed to open restore.json file. We'll create new one if possible.");
         return true;
     }
 
@@ -596,7 +596,7 @@ RestoreManager::_ReadJson(void)
     jsonDocument->ParseStream(isw);
     if (jsonDocument->HasParseError())
     {
-        POS_TRACE_INFO(9999, "Failed to parse restore.json file. Check the file is in JSON format");
+        POS_TRACE_INFO(EID(RESTORE_JSON_READ_FAIL), "Failed to parse restore.json file. Check the file is in JSON format");
         return false;
     }
 
@@ -604,7 +604,7 @@ RestoreManager::_ReadJson(void)
 
     if (!jsonDocument->IsObject())
     {
-        POS_TRACE_INFO(9999, "Failed to parse restore.json. Restore.json must be object.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_READ_FAIL), "Failed to parse restore.json. Restore.json must be object.");
         return false;
     }
     return true;
@@ -616,7 +616,7 @@ RestoreManager::_WriteJson(void)
     ofstream ofs(restore_file);
     if (!ofs.is_open())
     {
-        POS_TRACE_INFO(9999, "Failed to open(create) restore.json file. The current CLI command was not saved.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_WRITE_FAIL), "Failed to open(create) restore.json file. The current CLI command was not saved.");
         return false;
     }
     OStreamWrapper osw(ofs);
@@ -630,30 +630,30 @@ RestoreManager::Restore()
 {
     if (!_ReadJson())
     {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_READ_FAIL), "There was an error opening the restore.json file.");
         return false;
     }
     if (jsonDocument->ObjectEmpty())
     {
         return true;
     }
-    POS_TRACE_INFO(9999, "Checked for the correct files needed for restore(/etc/pos/restore.json). Starting to restore state");
+    POS_TRACE_INFO(EID(RESTORE_MSG), "Checked for the correct files needed for restore(/etc/pos/restore.json). Starting to restore state");
 
     if (!_TransportRestore())
     {
-        POS_TRACE_INFO(9999, "Failed to restore transport. Saving state is disabled.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_FAIL), "Failed to restore transport. Saving state is disabled.");
         return false;
     }
 
     if (!_SubsystemRestore())
     {
-        POS_TRACE_INFO(9999, "Failed to restore transport. Saving state is disabled.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_FAIL), "Failed to restore transport. Saving state is disabled.");
         return false;
     }
 
     if (!_DeviceRestore())
     {
-        POS_TRACE_INFO(9999, "Failed to restore device. Saving state is disabled.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_FAIL), "Failed to restore device. Saving state is disabled.");
         return false;
     }
 
@@ -661,17 +661,17 @@ RestoreManager::Restore()
 
     if (!_ArrayRestore())
     {
-        POS_TRACE_INFO(9999, "Failed to restore array. Saving state is disabled.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_FAIL), "Failed to restore array. Saving state is disabled.");
         return false;
     }
 
     if (!_VolumeRestore())
     {
-        POS_TRACE_INFO(9999, "Failed to restore volume. Saving state is disabled.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_FAIL), "Failed to restore volume. Saving state is disabled.");
         return false;
     }
 
-    POS_TRACE_INFO(9999, "The state restore succeeded.");
+    POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "The state restore succeeded.");
     return true;
 }
 
@@ -699,7 +699,7 @@ RestoreManager::_ArrayRestore(void)
                 }
                 else
                 {
-                    POS_TRACE_INFO(9999, "Array({}) is mounted.", arr["array-name"].GetString());
+                    POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "Array({}) is mounted.", arr["array-name"].GetString());
                 }
             }
         }
@@ -738,7 +738,7 @@ RestoreManager::_VolumeRestore(void)
                         }
                         else
                         {
-                            POS_TRACE_INFO(9999, "Volume({}) is mounted on array({})", volumeName, arrayName);
+                            POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "Volume({}) is mounted on array({})", volumeName, arrayName);
                         }
                     }
                 }
@@ -771,7 +771,7 @@ RestoreManager::_TransportRestore(void)
             }
             else
             {
-                POS_TRACE_INFO(9999, "Transport({}) is created.", obj.name.GetString());
+                POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "Transport({}) is created.", obj.name.GetString());
             }
         }
     }
@@ -803,7 +803,7 @@ RestoreManager::_DeviceRestore(void)
                 }
                 else
                 {
-                    POS_TRACE_INFO(9999, "Device({}) is created.", arr["device-name"].GetString());
+                    POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "Device({}) is created.", arr["device-name"].GetString());
                 }
             }
         }
@@ -836,7 +836,7 @@ RestoreManager::_SubsystemRestore(void)
             }
             else
             {
-                POS_TRACE_INFO(9999, "Subsystem({}) is created.", arr["subnqn"].GetString());
+                POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "Subsystem({}) is created.", arr["subnqn"].GetString());
             }
 
             if (arr.HasMember("listener"))
@@ -857,7 +857,7 @@ RestoreManager::_SubsystemRestore(void)
                 }
                 else
                 {
-                    POS_TRACE_INFO(9999, "Listener({}) is added to {})", arr["listener"]["trtype"].GetString(), arr["subnqn"].GetString());
+                    POS_TRACE_INFO(EID(RESTORE_JSON_SUCCESS), "Listener({}) is added to {})", arr["listener"]["trtype"].GetString(), arr["subnqn"].GetString());
                 }
             }
         }
@@ -886,9 +886,11 @@ RestoreManager::_CheckJsonWrite(void)
 
     if (!_ReadJson())
     {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
+        POS_TRACE_INFO(EID(RESTORE_JSON_READ_FAIL), "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
+
+    return true;
 }
 
 } // namespace pos
