@@ -523,7 +523,8 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"AddressCount\t"+
 				globals.FieldSeparator+"SerialNumber(SN)\t"+
 				globals.FieldSeparator+"ModelNumber(MN)\t"+
-				globals.FieldSeparator+"NamespaceCount")
+				globals.FieldSeparator+"NamespaceCount\t"+
+				globals.FieldSeparator+"Uuid")
 
 		// Horizontal line
 		fmt.Fprintln(w,
@@ -532,7 +533,8 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"------------\t"+
 				globals.FieldSeparator+"---------------------\t"+
 				globals.FieldSeparator+"---------------------\t"+
-				globals.FieldSeparator+"--------------")
+				globals.FieldSeparator+"--------------\t"+
+				globals.FieldSeparator+"-------------------------------------")
 
 		// Data
 		for _, subsystem := range res.GetResult().GetData().GetSubsystemlist() {
@@ -542,7 +544,8 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetListenAddresses()))+"\t"+
 					globals.FieldSeparator+subsystem.GetSerialNumber()+"\t"+
 					globals.FieldSeparator+subsystem.GetModelNumber()+"\t"+
-					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetNamespaces())))
+					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetNamespaces()))+"\t"+
+					globals.FieldSeparator+subsystem.GetUuid())
 		}
 		w.Flush()
 
@@ -563,6 +566,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"Addr.adrfam\t"+
 				globals.FieldSeparator+"Addr.traddr\t"+
 				globals.FieldSeparator+"Addr.trsvcid\t"+
+				globals.FieldSeparator+"Addr.uuid\t"+
 				globals.FieldSeparator+"ana_state")
 
 		// Horizontal line
@@ -571,6 +575,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"------------\t"+
 				globals.FieldSeparator+"------------------\t"+
 				globals.FieldSeparator+"--------------\t"+
+				globals.FieldSeparator+"-------------------------------------\t"+
 				globals.FieldSeparator+"---------------")
 
 		// Data
@@ -580,6 +585,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 					globals.FieldSeparator+listener.GetAddress().GetAdrfam()+"\t"+
 					globals.FieldSeparator+listener.GetAddress().GetTraddr()+"\t"+
 					globals.FieldSeparator+listener.GetAddress().GetTrsvcid()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetUuid()+"\t"+
 					globals.FieldSeparator+listener.GetAnaState())
 		}
 		w.Flush()
@@ -659,6 +665,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				fmt.Fprintln(w, "\t    adrfam : "+address.GetAddressFamily())
 				fmt.Fprintln(w, "\t    traddr : "+address.GetTargetAddress())
 				fmt.Fprintln(w, "\t    trsvcid : "+address.GetTransportServiceId())
+				fmt.Fprintln(w, "\t    uuid : "+address.GetUuid())
 				fmt.Fprint(w, "\t  }")
 			}
 			fmt.Fprintln(w, "")
@@ -671,6 +678,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				fmt.Fprintln(w, "serial_number\t: "+subsystem.GetSerialNumber())
 				fmt.Fprintln(w, "model_number\t: "+subsystem.GetModelNumber())
 				fmt.Fprintln(w, "max_namespaces\t:", subsystem.GetMaxNamespaces())
+				fmt.Fprintln(w, "uuid\t:", subsystem.GetUuid())
 				fmt.Fprint(w, "namespaces\t: ")
 				for _, namespace := range subsystem.GetNamespaces() {
 					fmt.Fprintln(w, "")

@@ -104,6 +104,8 @@ ListSubsystemCommand::Execute(json& doc, string rid)
                 JsonAttribute("targetAddress", "\"" + address["traddr"].asString() + "\""));
             elemAddr.SetAttribute(
                 JsonAttribute("transportServiceId", "\"" + address["trsvcid"].asString() + "\""));
+            elemAddr.SetAttribute(
+                JsonAttribute("listenerUuid", "\"" + address["uuid"].asString() + "\""));
             addressArray.AddElement(elemAddr);
         }
         elem.SetArray(addressArray);
@@ -126,6 +128,8 @@ ListSubsystemCommand::Execute(json& doc, string rid)
                 JsonAttribute("modelNumber", "\"" + subsystem["model_number"].asString() + "\""));
             elem.SetAttribute(
                 JsonAttribute("maxNamespaces", to_string(subsystem["max_namespaces"].asInt())));
+            elem.SetAttribute(
+                JsonAttribute("subsystemUuid", "\"" + subsystem["uuid"].asString() + "\""));
 
             JsonArray namespaceArray("namespaces");
             for (const auto& nameSpace : subsystem["namespaces"])

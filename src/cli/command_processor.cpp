@@ -1469,6 +1469,7 @@ CommandProcessor::ExecuteListListenerCommand(const ListListenerRequest* request,
         addr->set_traddr(listener["address"]["traddr"].asString());
         addr->set_trsvcid(listener["address"]["trsvcid"].asString());
         addr->set_trtype(listener["address"]["trtype"].asString());
+        addr->set_uuid(listener["address"]["uuid"].asString());
     }
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
@@ -1549,6 +1550,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
             addressInfoListItem->set_addressfamily(address["adrfam"].asString());
             addressInfoListItem->set_targetaddress(address["traddr"].asString());
             addressInfoListItem->set_transportserviceid(address["trsvcid"].asString());
+            addressInfoListItem->set_uuid(address["uuid"].asString());
         }
 
         for (const auto& host : subsystem["hosts"])
@@ -1563,6 +1565,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
             subsystemListItem->set_serialnumber(subsystem["serial_number"].asString());
             subsystemListItem->set_modelnumber(subsystem["model_number"].asString());
             subsystemListItem->set_maxnamespaces(subsystem["max_namespaces"].asInt());
+            subsystemListItem->set_uuid(subsystem["uuid"].asString());
         }
 
         for (const auto& ns : subsystem["namespaces"])
@@ -1611,6 +1614,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
                 addressInfoListItem->set_addressfamily(address["adrfam"].asString());
                 addressInfoListItem->set_targetaddress(address["traddr"].asString());
                 addressInfoListItem->set_transportserviceid(address["trsvcid"].asString());
+                addressInfoListItem->set_uuid(address["uuid"].asString());
             }
 
             for (const auto& host : subsystem["hosts"])
@@ -1625,6 +1629,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
                 subsystemListItem->set_serialnumber(subsystem["serial_number"].asString());
                 subsystemListItem->set_modelnumber(subsystem["model_number"].asString());
                 subsystemListItem->set_maxnamespaces(subsystem["max_namespaces"].asInt());
+                subsystemListItem->set_uuid(subsystem["uuid"].asString());
             }
 
             for (const auto& ns : subsystem["namespaces"])

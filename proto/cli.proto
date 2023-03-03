@@ -1241,6 +1241,7 @@ message AddListenerRequest {
 		string transportType = 2;
 		string targetAddress = 3;
 		string transportServiceId = 4;
+		string uuid = 5;
 	}
 	Param param = 4;
 }
@@ -1308,6 +1309,7 @@ message Listener {
 		string adrfam = 2;
 		string traddr = 3;
 		string trsvcid = 4;
+		string uuid = 5;
 	}
 	Address address = 1;
 	string anaState = 2;
@@ -1345,6 +1347,7 @@ message Subsystem {
 		string addressFamily = 2;
 		string targetAddress = 3;
 		string transportServiceId = 4;
+		string uuid = 5;
 	}
 	repeated AddressInfo listenAddresses = 3;
 	int32 allowAnyHost = 4;
@@ -1355,6 +1358,7 @@ message Subsystem {
 	string serialNumber = 6;
 	string modelNumber = 7;
 	int32 maxNamespaces = 8;
+	string uuid = 10;
 	message Namespace {
 		int32 nsid = 1;
 		string bdevName = 2;
