@@ -55,7 +55,6 @@ private:
     const PartitionLogicalSize* addrInfo;
     ISegmentCtx* activeSegmentCtx;
     IVersionedSegmentContext* versionedContext;
-    pthread_rwlock_t lock;
 };
 
 } // namespace pos
