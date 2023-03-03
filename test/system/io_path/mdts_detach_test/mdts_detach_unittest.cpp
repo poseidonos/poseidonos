@@ -39,7 +39,6 @@
 #include <vector>
 
 #include "spdk/nvme_spec.h"
-#include "src/array/array.h"
 #include "src/device/device_manager.h"
 #include "src/spdk_wrapper/nvme.hpp"
 #include "src/device/unvme/unvme_drv.h"

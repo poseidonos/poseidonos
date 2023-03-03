@@ -32,8 +32,8 @@
 
 #pragma once
 
+#include <mutex>
 #include <signal.h>
-
 namespace pos
 {
 
@@ -42,7 +42,10 @@ class SignalMask
 public:
     static void MaskSignal(sigset_t* oldset);
     static void MaskSignal(int AllowedSignalNo, sigset_t* oldset);
+    static void MaskQuitSignal(sigset_t* oldset);
     static void RestoreSignal(sigset_t* oldset);
+private:
+    static std::mutex signalMutex;
 };
 
 } // namespace pos

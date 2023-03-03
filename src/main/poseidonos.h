@@ -32,7 +32,9 @@
 
 #pragma once
 
+#include <condition_variable>
 #include <cstdint>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -40,6 +42,7 @@
 #include "src/singleton_info/singleton_info.h"
 #include "src/master_context/config_manager.h"
 #include "src/master_context/version_provider.h"
+#include "src/include/poseidonos_interface.h"
 #include "src/trace/trace_exporter.h"
 
 namespace pos
@@ -49,11 +52,12 @@ class TelemetryAirDelegator;
 class TelemetryPublisher;
 class SignalHandler;
 
-class Poseidonos
+class Poseidonos : public PoseidonosInterface
 {
 public:
     int Init(int argc, char** argv);
     void Run(void);
+    void TriggerTerminate(void) override;
     void Terminate(void);
     // This function should be private. But being public for only UT
     int _InitTraceExporter(char* procFullName,
@@ -79,6 +83,7 @@ private:
     void _SetPerfImpact(void);
     int _LoadConfiguration(void);
     void _RunCLIService(void);
+    void _StopCLIService(void);
     void _SetupThreadModel(void);
 
     static const uint32_t EVENT_THREAD_CORE_RATIO = 1;
@@ -93,5 +98,10 @@ private:
     SignalHandler* signalHandler = nullptr;
 
     std::thread *GrpcCliServerThread = nullptr;
+    std::condition_variable systemStopWait;
+    std::mutex systemStopMutex;
+    std::mutex cliMutex;
+    sigset_t oldSet;
+    bool cliEnabled;
 };
 } // namespace pos

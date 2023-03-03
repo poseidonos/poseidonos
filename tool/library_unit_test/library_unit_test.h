@@ -5,6 +5,7 @@
 #include <future>
 #include <thread>
 #include <string>
+#include "src/main/poseidonos.h"
 
 namespace pos
 {
@@ -18,6 +19,7 @@ namespace pos
             void TestStart(int i);
             void TestResult(int i, bool success);
         private:
+            pos::Poseidonos _pos;
             std::future<void> f;
     };
 }
