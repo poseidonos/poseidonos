@@ -65,14 +65,8 @@ RestoreManager::~RestoreManager()
 bool
 RestoreManager::ArrayCreate(string name)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -105,14 +99,8 @@ RestoreManager::ArrayCreate(string name)
 bool
 RestoreManager::ArrayDelete(string name)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -141,14 +129,8 @@ RestoreManager::ArrayDelete(string name)
 bool
 RestoreManager::ArrayMount(string name, bool isMount, bool isWt, string trAddr)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -179,14 +161,8 @@ RestoreManager::ArrayMount(string name, bool isMount, bool isWt, string trAddr)
 bool
 RestoreManager::VolumeCreate(string arrayName, string volName, int32_t nsid)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file.");
         return false;
     }
 
@@ -238,14 +214,8 @@ RestoreManager::VolumeCreate(string arrayName, string volName, int32_t nsid)
 bool
 RestoreManager::VolumeDelete(string arrayName, string volName)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file.");
         return false;
     }
 
@@ -284,14 +254,8 @@ RestoreManager::VolumeDelete(string arrayName, string volName)
 bool
 RestoreManager::VolumeMount(string arrayName, string volName, bool isMount, string subNqn, int32_t nsid)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -332,14 +296,8 @@ RestoreManager::VolumeMount(string arrayName, string volName, bool isMount, stri
 bool
 RestoreManager::VolumeRename(string arrayName, string volOldName, string volNewName)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -378,14 +336,8 @@ RestoreManager::VolumeRename(string arrayName, string volOldName, string volNewN
 bool
 RestoreManager::TransportCreate(string trType, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -415,14 +367,8 @@ RestoreManager::TransportCreate(string trType, uint32_t bufCacheSize, uint32_t n
 bool
 RestoreManager::DeviceCreate(string name, string type, uint32_t blockSize, uint32_t numBlocks, uint32_t numa)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -461,14 +407,8 @@ RestoreManager::DeviceCreate(string name, string type, uint32_t blockSize, uint3
 bool
 RestoreManager::SubsystemCreate(string subnqn, string serialNumber, string modelNumber, uint32_t maxNamespaces, bool allowAnyHost, bool anaReporting)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -503,14 +443,8 @@ RestoreManager::SubsystemCreate(string subnqn, string serialNumber, string model
 bool
 RestoreManager::SubsystemDelete(string subnqn)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -539,14 +473,8 @@ RestoreManager::SubsystemDelete(string subnqn)
 bool
 RestoreManager::ListenerAdd(string subnqn, string trType, string trAddr, string trSvcid)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -592,14 +520,8 @@ RestoreManager::ListenerAdd(string subnqn, string trType, string trAddr, string 
 bool
 RestoreManager::ListenerRemove(string subnqn, string trType, string trAddr, string trSvcid)
 {
-    if (!saveEnabled)
+    if (!_CheckJsonWrite())
     {
-        return false;
-    }
-
-    if (!_ReadJson())
-    {
-        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
         return false;
     }
 
@@ -953,4 +875,20 @@ RestoreManager::_ScanDevice(void)
 
     return true;
 }
+
+bool
+RestoreManager::_CheckJsonWrite(void)
+{
+    if (!saveEnabled)
+    {
+        return false;
+    }
+
+    if (!_ReadJson())
+    {
+        POS_TRACE_INFO(9999, "There was an error opening the restore.json file. The current CLI command was not saved.");
+        return false;
+    }
+}
+
 } // namespace pos

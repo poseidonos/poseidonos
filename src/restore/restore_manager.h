@@ -86,6 +86,7 @@ private:
     bool _DeviceRestore(void);
     bool _SubsystemRestore(void);
     bool _ScanDevice(void);
+    bool _CheckJsonWrite(void);
 
     bool saveEnabled;
     Document* jsonDocument;
