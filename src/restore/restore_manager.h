@@ -66,10 +66,10 @@ public:
     bool DeviceCreate(string name, string type, uint32_t blockSize, uint32_t numBlocks, uint32_t numa);
     bool ArrayCreate(string name);
     bool ArrayDelete(string name);
-    bool ArrayMount(string name, bool isMount, bool isWt, string trAddr = "");
+    bool SetArrayMountState(string name, bool isMount, bool isWt, string trAddr = "");
     bool VolumeCreate(string arrayName, string volName, int32_t nsid);
     bool VolumeDelete(string arrayName, string volName);
-    bool VolumeMount(string arrayName, string volName, bool isMount, string subNqn = "", int32_t nsid = -1);
+    bool SetVolumeMountState(string arrayName, string volName, bool isMount, string subNqn = "", int32_t nsid = -1);
     bool VolumeRename(string arrayName, string volOldName, string volNewName);
 
     void ClearRestoreState();

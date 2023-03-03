@@ -719,7 +719,7 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
     QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-    RestoreManagerSingleton::Instance()->ArrayMount(arrayName, true, isWTenabled, targetAddress);
+    RestoreManagerSingleton::Instance()->SetArrayMountState(arrayName, true, isWTenabled, targetAddress);
     return grpc::Status::OK;
 }
 
@@ -739,7 +739,7 @@ CommandProcessor::ExecuteUnmountArrayCommand(const UnmountArrayRequest* request,
     QosManagerSingleton::Instance()->DeleteEntryArrayMap(arrayName);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
-    RestoreManagerSingleton::Instance()->ArrayMount(arrayName, false, false);
+    RestoreManagerSingleton::Instance()->SetArrayMountState(arrayName, false, false);
     return grpc::Status::OK;
 }
 
@@ -1904,7 +1904,7 @@ CommandProcessor::ExecuteMountVolumeCommand(const MountVolumeRequest* request, M
             _SetPosInfo(reply->mutable_info());
             IVolumeInfoManager* volInfoMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
             VolumeBase* vol = volInfoMgr->GetVolume(volInfoMgr->GetVolumeID(volumeName));
-            RestoreManagerSingleton::Instance()->VolumeMount(arrayName, volumeName, true, vol->GetSubnqn(), vol->GetNsid());
+            RestoreManagerSingleton::Instance()->SetVolumeMountState(arrayName, volumeName, true, vol->GetSubnqn(), vol->GetNsid());
             return grpc::Status::OK;
         }
         else
@@ -1965,7 +1965,7 @@ CommandProcessor::ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* reques
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
-            RestoreManagerSingleton::Instance()->VolumeMount(arrayName, volumeName, false);
+            RestoreManagerSingleton::Instance()->SetVolumeMountState(arrayName, volumeName, false);
             return grpc::Status::OK;
         }
         else

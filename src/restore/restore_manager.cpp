@@ -127,7 +127,7 @@ RestoreManager::ArrayDelete(string name)
 }
 
 bool
-RestoreManager::ArrayMount(string name, bool isMount, bool isWt, string trAddr)
+RestoreManager::SetArrayMountState(string name, bool isMount, bool isWt, string trAddr)
 {
     if (!_CheckJsonWrite())
     {
@@ -252,7 +252,7 @@ RestoreManager::VolumeDelete(string arrayName, string volName)
 }
 
 bool
-RestoreManager::VolumeMount(string arrayName, string volName, bool isMount, string subNqn, int32_t nsid)
+RestoreManager::SetVolumeMountState(string arrayName, string volName, bool isMount, string subNqn, int32_t nsid)
 {
     if (!_CheckJsonWrite())
     {
