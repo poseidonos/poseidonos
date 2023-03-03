@@ -1600,7 +1600,7 @@ index 28c552f3e..7ad44ab8a 100644
  	if (!qpair_ctx) {
  		SPDK_ERRLOG("Unable to allocate context for nvmf_qpair_disconnect\n");
 diff --git lib/nvmf/nvmf_internal.h lib/nvmf/nvmf_internal.h
-index e5842b03f..1ad89d7db 100644
+index e5842b03f..9fda53f6f 100644
 --- lib/nvmf/nvmf_internal.h
 +++ lib/nvmf/nvmf_internal.h
 @@ -53,6 +53,8 @@
@@ -1612,7 +1612,23 @@ index e5842b03f..1ad89d7db 100644
  
  enum spdk_nvmf_subsystem_state {
  	SPDK_NVMF_SUBSYSTEM_INACTIVE = 0,
-@@ -424,6 +426,8 @@ void nvmf_subsystem_remove_all_listeners(struct spdk_nvmf_subsystem *subsystem,
+@@ -108,6 +110,7 @@ struct spdk_nvmf_subsystem_listener {
+ 	uint64_t					ana_state_change_count;
+ 	uint16_t					id;
+ 	TAILQ_ENTRY(spdk_nvmf_subsystem_listener)	link;
++	struct spdk_uuid	uuid;
+ };
+ 
+ /* Maximum number of registrants supported per namespace */
+@@ -363,6 +366,7 @@ struct spdk_nvmf_subsystem {
+ 	 * It will be enough for ANA group to use the same size as namespaces.
+ 	 */
+ 	uint32_t					*ana_group;
++	struct spdk_uuid			uuid;
+ };
+ 
+ int nvmf_poll_group_add_transport(struct spdk_nvmf_poll_group *group,
+@@ -424,6 +428,8 @@ void nvmf_subsystem_remove_all_listeners(struct spdk_nvmf_subsystem *subsystem,
  		bool stop);
  struct spdk_nvmf_ctrlr *nvmf_subsystem_get_ctrlr(struct spdk_nvmf_subsystem *subsystem,
  		uint16_t cntlid);
@@ -1621,6 +1637,94 @@ index e5842b03f..1ad89d7db 100644
  struct spdk_nvmf_subsystem_listener *nvmf_subsystem_find_listener(
  	struct spdk_nvmf_subsystem *subsystem,
  	const struct spdk_nvme_transport_id *trid);
+diff --git lib/nvmf/nvmf_rpc.c lib/nvmf/nvmf_rpc.c
+index 5a6bc80fb..e4354e8b5 100644
+--- lib/nvmf/nvmf_rpc.c
++++ lib/nvmf/nvmf_rpc.c
+@@ -217,6 +217,7 @@ dump_nvmf_subsystem(struct spdk_json_write_ctx *w, struct spdk_nvmf_subsystem *s
+ 	     listener = spdk_nvmf_subsystem_get_next_listener(subsystem, listener)) {
+ 		const struct spdk_nvme_transport_id *trid;
+ 		const char *adrfam;
++		char listener_uuid_str[SPDK_UUID_STRING_LEN];
+ 
+ 		trid = spdk_nvmf_subsystem_listener_get_trid(listener);
+ 
+@@ -231,6 +232,8 @@ dump_nvmf_subsystem(struct spdk_json_write_ctx *w, struct spdk_nvmf_subsystem *s
+ 		spdk_json_write_named_string(w, "adrfam", adrfam);
+ 		spdk_json_write_named_string(w, "traddr", trid->traddr);
+ 		spdk_json_write_named_string(w, "trsvcid", trid->trsvcid);
++		spdk_uuid_fmt_lower(listener_uuid_str, sizeof(listener_uuid_str), &listener->uuid);
++		spdk_json_write_named_string(w, "uuid", listener_uuid_str);
+ 		spdk_json_write_object_end(w);
+ 	}
+ 	spdk_json_write_array_end(w);
+@@ -252,6 +255,7 @@ dump_nvmf_subsystem(struct spdk_json_write_ctx *w, struct spdk_nvmf_subsystem *s
+ 		struct spdk_nvmf_ns *ns;
+ 		struct spdk_nvmf_ns_opts ns_opts;
+ 		uint32_t max_namespaces;
++		char subsystem_uuid_str[SPDK_UUID_STRING_LEN];
+ 
+ 		spdk_json_write_named_string(w, "serial_number", spdk_nvmf_subsystem_get_sn(subsystem));
+ 
+@@ -265,6 +269,9 @@ dump_nvmf_subsystem(struct spdk_json_write_ctx *w, struct spdk_nvmf_subsystem *s
+ 		spdk_json_write_named_uint32(w, "min_cntlid", spdk_nvmf_subsystem_get_min_cntlid(subsystem));
+ 		spdk_json_write_named_uint32(w, "max_cntlid", spdk_nvmf_subsystem_get_max_cntlid(subsystem));
+ 
++		spdk_uuid_fmt_lower(subsystem_uuid_str, sizeof(subsystem_uuid_str), &subsystem->uuid);
++		spdk_json_write_named_string(w, "uuid", subsystem_uuid_str);
++
+ 		spdk_json_write_named_array_begin(w, "namespaces");
+ 		for (ns = spdk_nvmf_subsystem_get_first_ns(subsystem); ns != NULL;
+ 		     ns = spdk_nvmf_subsystem_get_next_ns(subsystem, ns)) {
+@@ -374,6 +381,7 @@ struct rpc_subsystem_create {
+ 	bool ana_reporting;
+ 	uint16_t min_cntlid;
+ 	uint16_t max_cntlid;
++	struct spdk_uuid uuid;
+ };
+ 
+ static const struct spdk_json_object_decoder rpc_subsystem_create_decoders[] = {
+@@ -386,6 +394,7 @@ static const struct spdk_json_object_decoder rpc_subsystem_create_decoders[] = {
+ 	{"ana_reporting", offsetof(struct rpc_subsystem_create, ana_reporting), spdk_json_decode_bool, true},
+ 	{"min_cntlid", offsetof(struct rpc_subsystem_create, min_cntlid), spdk_json_decode_uint16, true},
+ 	{"max_cntlid", offsetof(struct rpc_subsystem_create, max_cntlid), spdk_json_decode_uint16, true},
++	{"uuid", offsetof(struct rpc_subsystem_create, uuid), decode_ns_uuid, true},
+ };
+ 
+ static void
+@@ -610,6 +619,7 @@ struct rpc_listen_address {
+ 	char *adrfam;
+ 	char *traddr;
+ 	char *trsvcid;
++	struct spdk_uuid uuid;
+ };
+ 
+ static const struct spdk_json_object_decoder rpc_listen_address_decoders[] = {
+@@ -619,6 +629,7 @@ static const struct spdk_json_object_decoder rpc_listen_address_decoders[] = {
+ 	{"adrfam", offsetof(struct rpc_listen_address, adrfam), spdk_json_decode_string, true},
+ 	{"traddr", offsetof(struct rpc_listen_address, traddr), spdk_json_decode_string},
+ 	{"trsvcid", offsetof(struct rpc_listen_address, trsvcid), spdk_json_decode_string, true},
++	{"uuid", offsetof(struct rpc_listen_address, uuid), decode_ns_uuid, true},
+ };
+ 
+ static int
+@@ -2301,6 +2312,7 @@ dump_nvmf_subsystem_listener(struct spdk_json_write_ctx *w,
+ 	const struct spdk_nvme_transport_id *trid = listener->trid;
+ 	const char *adrfam;
+ 	uint32_t i;
++	char uuid_str[SPDK_UUID_STRING_LEN];
+ 
+ 	spdk_json_write_object_begin(w);
+ 
+@@ -2313,6 +2325,8 @@ dump_nvmf_subsystem_listener(struct spdk_json_write_ctx *w,
+ 	spdk_json_write_named_string(w, "adrfam", adrfam);
+ 	spdk_json_write_named_string(w, "traddr", trid->traddr);
+ 	spdk_json_write_named_string(w, "trsvcid", trid->trsvcid);
++	spdk_uuid_fmt_lower(uuid_str, sizeof(uuid_str), &listener->uuid);
++	spdk_json_write_named_string(w, "uuid", uuid_str);
+ 	spdk_json_write_object_end(w);
+ 
+ 	if (nvmf_subsystem_get_ana_reporting(listener->subsystem)) {
 diff --git lib/nvmf/pos_nvmf.c lib/nvmf/pos_nvmf.c
 new file mode 100644
 index 000000000..0bfb871a9
@@ -1921,10 +2025,19 @@ index 819638725..573a968d8 100644
  		SPDK_ERRLOG("Error polling CQ! (%d): %s\n",
  			    errno, spdk_strerror(errno));
 diff --git lib/nvmf/subsystem.c lib/nvmf/subsystem.c
-index 29cbef097..07110bb8c 100644
+index 29cbef097..003565e10 100644
 --- lib/nvmf/subsystem.c
 +++ lib/nvmf/subsystem.c
-@@ -502,7 +502,7 @@ nvmf_subsystem_get_intermediate_state(enum spdk_nvmf_subsystem_state current_sta
+@@ -333,6 +333,8 @@ spdk_nvmf_subsystem_create(struct spdk_nvmf_tgt *tgt,
+ 
+ 	tgt->subsystems[sid] = subsystem;
+ 
++	spdk_uuid_generate(&subsystem->uuid);
++
+ 	SPDK_DTRACE_PROBE1(nvmf_subsystem_create, subsystem->subnqn);
+ 
+ 	return subsystem;
+@@ -502,7 +504,7 @@ nvmf_subsystem_get_intermediate_state(enum spdk_nvmf_subsystem_state current_sta
  	}
  }
  
@@ -1933,7 +2046,7 @@ index 29cbef097..07110bb8c 100644
  nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
  			 enum spdk_nvmf_subsystem_state state)
  {
-@@ -563,7 +563,6 @@ nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
+@@ -563,7 +565,6 @@ nvmf_subsystem_set_state(struct spdk_nvmf_subsystem *subsystem,
  		__atomic_compare_exchange_n(&subsystem->state, &actual_old_state, state, false,
  					    __ATOMIC_RELAXED, __ATOMIC_RELAXED);
  	}
@@ -1941,7 +2054,16 @@ index 29cbef097..07110bb8c 100644
  	return actual_old_state - expected_old_state;
  }
  
-@@ -1600,7 +1599,9 @@ spdk_nvmf_subsystem_add_ns_ext(struct spdk_nvmf_subsystem *subsystem, const char
+@@ -1154,6 +1155,8 @@ spdk_nvmf_subsystem_add_listener(struct spdk_nvmf_subsystem *subsystem,
+ 		listener->ana_state[i] = SPDK_NVME_ANA_OPTIMIZED_STATE;
+ 	}
+ 
++	spdk_uuid_generate(&listener->uuid);
++	
+ 	if (transport->ops->listen_associate != NULL) {
+ 		rc = transport->ops->listen_associate(transport, subsystem, trid);
+ 	}
+@@ -1600,7 +1603,9 @@ spdk_nvmf_subsystem_add_ns_ext(struct spdk_nvmf_subsystem *subsystem, const char
  	int rc;
  
  	if (!(subsystem->state == SPDK_NVMF_SUBSYSTEM_INACTIVE ||
@@ -4250,19 +4372,6 @@ index b6573a237..0f1a8e119 100644
  			/* Create poll group threads, and send a message to each thread
  			 * and create a poll group.
  			 */
-diff --git scripts/pkgdep/rhel.sh scripts/pkgdep/rhel.sh
-index d307d1bce..212b1e907 100755
---- scripts/pkgdep/rhel.sh
-+++ scripts/pkgdep/rhel.sh
-@@ -83,7 +83,7 @@ fi
- 
- yum install -y gcc gcc-c++ make cmake CUnit-devel libaio-devel openssl-devel \
- 	libuuid-devel libiscsi-devel ncurses-devel json-c-devel libcmocka-devel
--if echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rhel 8'; then
-+if echo "$ID $VERSION_ID" | grep -E -q 'centos 8|rhel 8|rocky 8'; then
- 	yum install -y python36
- 	#Create hard link to use in SPDK as python
- 	if [[ ! -e /usr/bin/python && -e /etc/alternatives/python3 ]]; then
 diff --git scripts/rpc.py scripts/rpc.py
 index ab034142b..3f3358a7a 100755
 --- scripts/rpc.py

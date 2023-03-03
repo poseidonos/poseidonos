@@ -76,6 +76,8 @@ ListListenerCommand::Execute(json& doc, string rid)
         JsonElement elem("");
         elem.SetAttribute(
             JsonAttribute("ana_state", "\"" + listener["ana_state"].asString() + "\""));
+        elem.SetAttribute(
+            JsonAttribute("listenerUuid", "\"" + listener["uuid"].asString() + "\""));
 
         array.AddElement(elem);
     }

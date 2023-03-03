@@ -30518,6 +30518,7 @@ class AddListenerRequest_Param PROTOBUF_FINAL :
     kTransportTypeFieldNumber = 2,
     kTargetAddressFieldNumber = 3,
     kTransportServiceIdFieldNumber = 4,
+    kUuidFieldNumber = 5,
   };
   // string subnqn = 1;
   void clear_subnqn();
@@ -30583,6 +30584,22 @@ class AddListenerRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_transportserviceid();
   public:
 
+  // string uuid = 5;
+  void clear_uuid();
+  const std::string& uuid() const;
+  void set_uuid(const std::string& value);
+  void set_uuid(std::string&& value);
+  void set_uuid(const char* value);
+  void set_uuid(const char* value, size_t size);
+  std::string* mutable_uuid();
+  std::string* release_uuid();
+  void set_allocated_uuid(std::string* uuid);
+  private:
+  const std::string& _internal_uuid() const;
+  void _internal_set_uuid(const std::string& value);
+  std::string* _internal_mutable_uuid();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.AddListenerRequest.Param)
  private:
   class _Internal;
@@ -30594,6 +30611,7 @@ class AddListenerRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr transporttype_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr targetaddress_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr transportserviceid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uuid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -32786,6 +32804,7 @@ class Listener_Address PROTOBUF_FINAL :
     kAdrfamFieldNumber = 2,
     kTraddrFieldNumber = 3,
     kTrsvcidFieldNumber = 4,
+    kUuidFieldNumber = 5,
   };
   // string trtype = 1;
   void clear_trtype();
@@ -32851,6 +32870,22 @@ class Listener_Address PROTOBUF_FINAL :
   std::string* _internal_mutable_trsvcid();
   public:
 
+  // string uuid = 5;
+  void clear_uuid();
+  const std::string& uuid() const;
+  void set_uuid(const std::string& value);
+  void set_uuid(std::string&& value);
+  void set_uuid(const char* value);
+  void set_uuid(const char* value, size_t size);
+  std::string* mutable_uuid();
+  std::string* release_uuid();
+  void set_allocated_uuid(std::string* uuid);
+  private:
+  const std::string& _internal_uuid() const;
+  void _internal_set_uuid(const std::string& value);
+  std::string* _internal_mutable_uuid();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.Listener.Address)
  private:
   class _Internal;
@@ -32862,6 +32897,7 @@ class Listener_Address PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr adrfam_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr traddr_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr trsvcid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uuid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -34014,6 +34050,7 @@ class Subsystem_AddressInfo PROTOBUF_FINAL :
     kAddressFamilyFieldNumber = 2,
     kTargetAddressFieldNumber = 3,
     kTransportServiceIdFieldNumber = 4,
+    kUuidFieldNumber = 5,
   };
   // string transportType = 1;
   void clear_transporttype();
@@ -34079,6 +34116,22 @@ class Subsystem_AddressInfo PROTOBUF_FINAL :
   std::string* _internal_mutable_transportserviceid();
   public:
 
+  // string uuid = 5;
+  void clear_uuid();
+  const std::string& uuid() const;
+  void set_uuid(const std::string& value);
+  void set_uuid(std::string&& value);
+  void set_uuid(const char* value);
+  void set_uuid(const char* value, size_t size);
+  std::string* mutable_uuid();
+  std::string* release_uuid();
+  void set_allocated_uuid(std::string* uuid);
+  private:
+  const std::string& _internal_uuid() const;
+  void _internal_set_uuid(const std::string& value);
+  std::string* _internal_mutable_uuid();
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.Subsystem.AddressInfo)
  private:
   class _Internal;
@@ -34090,6 +34143,7 @@ class Subsystem_AddressInfo PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr addressfamily_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr targetaddress_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr transportserviceid_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uuid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -34536,6 +34590,7 @@ class Subsystem PROTOBUF_FINAL :
     kSubtypeFieldNumber = 2,
     kSerialNumberFieldNumber = 6,
     kModelNumberFieldNumber = 7,
+    kUuidFieldNumber = 10,
     kAllowAnyHostFieldNumber = 4,
     kMaxNamespacesFieldNumber = 8,
   };
@@ -34657,6 +34712,22 @@ class Subsystem PROTOBUF_FINAL :
   std::string* _internal_mutable_modelnumber();
   public:
 
+  // string uuid = 10;
+  void clear_uuid();
+  const std::string& uuid() const;
+  void set_uuid(const std::string& value);
+  void set_uuid(std::string&& value);
+  void set_uuid(const char* value);
+  void set_uuid(const char* value, size_t size);
+  std::string* mutable_uuid();
+  std::string* release_uuid();
+  void set_allocated_uuid(std::string* uuid);
+  private:
+  const std::string& _internal_uuid() const;
+  void _internal_set_uuid(const std::string& value);
+  std::string* _internal_mutable_uuid();
+  public:
+
   // int32 allowAnyHost = 4;
   void clear_allowanyhost();
   ::PROTOBUF_NAMESPACE_ID::int32 allowanyhost() const;
@@ -34689,6 +34760,7 @@ class Subsystem PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subtype_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr serialnumber_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr modelnumber_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr uuid_;
   ::PROTOBUF_NAMESPACE_ID::int32 allowanyhost_;
   ::PROTOBUF_NAMESPACE_ID::int32 maxnamespaces_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
@@ -83158,6 +83230,67 @@ inline void AddListenerRequest_Param::set_allocated_transportserviceid(std::stri
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.AddListenerRequest.Param.transportServiceId)
 }
 
+// string uuid = 5;
+inline void AddListenerRequest_Param::clear_uuid() {
+  uuid_.ClearToEmpty();
+}
+inline const std::string& AddListenerRequest_Param::uuid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.AddListenerRequest.Param.uuid)
+  return _internal_uuid();
+}
+inline void AddListenerRequest_Param::set_uuid(const std::string& value) {
+  _internal_set_uuid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.AddListenerRequest.Param.uuid)
+}
+inline std::string* AddListenerRequest_Param::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.AddListenerRequest.Param.uuid)
+  return _internal_mutable_uuid();
+}
+inline const std::string& AddListenerRequest_Param::_internal_uuid() const {
+  return uuid_.Get();
+}
+inline void AddListenerRequest_Param::_internal_set_uuid(const std::string& value) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void AddListenerRequest_Param::set_uuid(std::string&& value) {
+  
+  uuid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.AddListenerRequest.Param.uuid)
+}
+inline void AddListenerRequest_Param::set_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.AddListenerRequest.Param.uuid)
+}
+inline void AddListenerRequest_Param::set_uuid(const char* value,
+    size_t size) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.AddListenerRequest.Param.uuid)
+}
+inline std::string* AddListenerRequest_Param::_internal_mutable_uuid() {
+  
+  return uuid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* AddListenerRequest_Param::release_uuid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.AddListenerRequest.Param.uuid)
+  return uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void AddListenerRequest_Param::set_allocated_uuid(std::string* uuid) {
+  if (uuid != nullptr) {
+    
+  } else {
+    
+  }
+  uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.AddListenerRequest.Param.uuid)
+}
+
 // -------------------------------------------------------------------
 
 // AddListenerRequest
@@ -85910,6 +86043,67 @@ inline void Listener_Address::set_allocated_trsvcid(std::string* trsvcid) {
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.Listener.Address.trsvcid)
 }
 
+// string uuid = 5;
+inline void Listener_Address::clear_uuid() {
+  uuid_.ClearToEmpty();
+}
+inline const std::string& Listener_Address::uuid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Listener.Address.uuid)
+  return _internal_uuid();
+}
+inline void Listener_Address::set_uuid(const std::string& value) {
+  _internal_set_uuid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Listener.Address.uuid)
+}
+inline std::string* Listener_Address::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Listener.Address.uuid)
+  return _internal_mutable_uuid();
+}
+inline const std::string& Listener_Address::_internal_uuid() const {
+  return uuid_.Get();
+}
+inline void Listener_Address::_internal_set_uuid(const std::string& value) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Listener_Address::set_uuid(std::string&& value) {
+  
+  uuid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Listener.Address.uuid)
+}
+inline void Listener_Address::set_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Listener.Address.uuid)
+}
+inline void Listener_Address::set_uuid(const char* value,
+    size_t size) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Listener.Address.uuid)
+}
+inline std::string* Listener_Address::_internal_mutable_uuid() {
+  
+  return uuid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Listener_Address::release_uuid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Listener.Address.uuid)
+  return uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Listener_Address::set_allocated_uuid(std::string* uuid) {
+  if (uuid != nullptr) {
+    
+  } else {
+    
+  }
+  uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Listener.Address.uuid)
+}
+
 // -------------------------------------------------------------------
 
 // Listener
@@ -87146,6 +87340,67 @@ inline void Subsystem_AddressInfo::set_allocated_transportserviceid(std::string*
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.Subsystem.AddressInfo.transportServiceId)
 }
 
+// string uuid = 5;
+inline void Subsystem_AddressInfo::clear_uuid() {
+  uuid_.ClearToEmpty();
+}
+inline const std::string& Subsystem_AddressInfo::uuid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Subsystem.AddressInfo.uuid)
+  return _internal_uuid();
+}
+inline void Subsystem_AddressInfo::set_uuid(const std::string& value) {
+  _internal_set_uuid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Subsystem.AddressInfo.uuid)
+}
+inline std::string* Subsystem_AddressInfo::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Subsystem.AddressInfo.uuid)
+  return _internal_mutable_uuid();
+}
+inline const std::string& Subsystem_AddressInfo::_internal_uuid() const {
+  return uuid_.Get();
+}
+inline void Subsystem_AddressInfo::_internal_set_uuid(const std::string& value) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Subsystem_AddressInfo::set_uuid(std::string&& value) {
+  
+  uuid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Subsystem.AddressInfo.uuid)
+}
+inline void Subsystem_AddressInfo::set_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Subsystem.AddressInfo.uuid)
+}
+inline void Subsystem_AddressInfo::set_uuid(const char* value,
+    size_t size) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Subsystem.AddressInfo.uuid)
+}
+inline std::string* Subsystem_AddressInfo::_internal_mutable_uuid() {
+  
+  return uuid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Subsystem_AddressInfo::release_uuid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Subsystem.AddressInfo.uuid)
+  return uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Subsystem_AddressInfo::set_allocated_uuid(std::string* uuid) {
+  if (uuid != nullptr) {
+    
+  } else {
+    
+  }
+  uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Subsystem.AddressInfo.uuid)
+}
+
 // -------------------------------------------------------------------
 
 // Subsystem_Host
@@ -87721,6 +87976,67 @@ inline void Subsystem::_internal_set_maxnamespaces(::PROTOBUF_NAMESPACE_ID::int3
 inline void Subsystem::set_maxnamespaces(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_maxnamespaces(value);
   // @@protoc_insertion_point(field_set:grpc_cli.Subsystem.maxNamespaces)
+}
+
+// string uuid = 10;
+inline void Subsystem::clear_uuid() {
+  uuid_.ClearToEmpty();
+}
+inline const std::string& Subsystem::uuid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.Subsystem.uuid)
+  return _internal_uuid();
+}
+inline void Subsystem::set_uuid(const std::string& value) {
+  _internal_set_uuid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.Subsystem.uuid)
+}
+inline std::string* Subsystem::mutable_uuid() {
+  // @@protoc_insertion_point(field_mutable:grpc_cli.Subsystem.uuid)
+  return _internal_mutable_uuid();
+}
+inline const std::string& Subsystem::_internal_uuid() const {
+  return uuid_.Get();
+}
+inline void Subsystem::_internal_set_uuid(const std::string& value) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Subsystem::set_uuid(std::string&& value) {
+  
+  uuid_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:grpc_cli.Subsystem.uuid)
+}
+inline void Subsystem::set_uuid(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:grpc_cli.Subsystem.uuid)
+}
+inline void Subsystem::set_uuid(const char* value,
+    size_t size) {
+  
+  uuid_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:grpc_cli.Subsystem.uuid)
+}
+inline std::string* Subsystem::_internal_mutable_uuid() {
+  
+  return uuid_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Subsystem::release_uuid() {
+  // @@protoc_insertion_point(field_release:grpc_cli.Subsystem.uuid)
+  return uuid_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Subsystem::set_allocated_uuid(std::string* uuid) {
+  if (uuid != nullptr) {
+    
+  } else {
+    
+  }
+  uuid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), uuid,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:grpc_cli.Subsystem.uuid)
 }
 
 // repeated .grpc_cli.Subsystem.Namespace namespaces = 9;
