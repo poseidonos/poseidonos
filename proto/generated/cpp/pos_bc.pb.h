@@ -47,7 +47,7 @@ struct TableStruct_pos_5fbc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[2]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -56,6 +56,12 @@ struct TableStruct_pos_5fbc_2eproto {
 extern const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5fbc_2eproto;
 ::PROTOBUF_NAMESPACE_ID::Metadata descriptor_table_pos_5fbc_2eproto_metadata_getter(int index);
 namespace pos_bc {
+class AllocatorCtxExtendedProto;
+struct AllocatorCtxExtendedProtoDefaultTypeInternal;
+extern AllocatorCtxExtendedProtoDefaultTypeInternal _AllocatorCtxExtendedProto_default_instance_;
+class RebuildCtxExtendedProto;
+struct RebuildCtxExtendedProtoDefaultTypeInternal;
+extern RebuildCtxExtendedProtoDefaultTypeInternal _RebuildCtxExtendedProto_default_instance_;
 class SegmentCtxExtendedProto;
 struct SegmentCtxExtendedProtoDefaultTypeInternal;
 extern SegmentCtxExtendedProtoDefaultTypeInternal _SegmentCtxExtendedProto_default_instance_;
@@ -64,6 +70,8 @@ struct SegmentInfoDataProtoDefaultTypeInternal;
 extern SegmentInfoDataProtoDefaultTypeInternal _SegmentInfoDataProto_default_instance_;
 }  // namespace pos_bc
 PROTOBUF_NAMESPACE_OPEN
+template<> ::pos_bc::AllocatorCtxExtendedProto* Arena::CreateMaybeMessage<::pos_bc::AllocatorCtxExtendedProto>(Arena*);
+template<> ::pos_bc::RebuildCtxExtendedProto* Arena::CreateMaybeMessage<::pos_bc::RebuildCtxExtendedProto>(Arena*);
 template<> ::pos_bc::SegmentCtxExtendedProto* Arena::CreateMaybeMessage<::pos_bc::SegmentCtxExtendedProto>(Arena*);
 template<> ::pos_bc::SegmentInfoDataProto* Arena::CreateMaybeMessage<::pos_bc::SegmentInfoDataProto>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
@@ -380,6 +388,254 @@ class SegmentCtxExtendedProto PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_pos_5fbc_2eproto;
 };
+// -------------------------------------------------------------------
+
+class AllocatorCtxExtendedProto PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.AllocatorCtxExtendedProto) */ {
+ public:
+  inline AllocatorCtxExtendedProto() : AllocatorCtxExtendedProto(nullptr) {}
+  virtual ~AllocatorCtxExtendedProto();
+  explicit constexpr AllocatorCtxExtendedProto(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  AllocatorCtxExtendedProto(const AllocatorCtxExtendedProto& from);
+  AllocatorCtxExtendedProto(AllocatorCtxExtendedProto&& from) noexcept
+    : AllocatorCtxExtendedProto() {
+    *this = ::std::move(from);
+  }
+
+  inline AllocatorCtxExtendedProto& operator=(const AllocatorCtxExtendedProto& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline AllocatorCtxExtendedProto& operator=(AllocatorCtxExtendedProto&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const AllocatorCtxExtendedProto& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const AllocatorCtxExtendedProto* internal_default_instance() {
+    return reinterpret_cast<const AllocatorCtxExtendedProto*>(
+               &_AllocatorCtxExtendedProto_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    2;
+
+  friend void swap(AllocatorCtxExtendedProto& a, AllocatorCtxExtendedProto& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(AllocatorCtxExtendedProto* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(AllocatorCtxExtendedProto* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline AllocatorCtxExtendedProto* New() const final {
+    return CreateMaybeMessage<AllocatorCtxExtendedProto>(nullptr);
+  }
+
+  AllocatorCtxExtendedProto* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<AllocatorCtxExtendedProto>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const AllocatorCtxExtendedProto& from);
+  void MergeFrom(const AllocatorCtxExtendedProto& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(AllocatorCtxExtendedProto* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.AllocatorCtxExtendedProto";
+  }
+  protected:
+  explicit AllocatorCtxExtendedProto(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:pos_bc.AllocatorCtxExtendedProto)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class RebuildCtxExtendedProto PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.RebuildCtxExtendedProto) */ {
+ public:
+  inline RebuildCtxExtendedProto() : RebuildCtxExtendedProto(nullptr) {}
+  virtual ~RebuildCtxExtendedProto();
+  explicit constexpr RebuildCtxExtendedProto(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  RebuildCtxExtendedProto(const RebuildCtxExtendedProto& from);
+  RebuildCtxExtendedProto(RebuildCtxExtendedProto&& from) noexcept
+    : RebuildCtxExtendedProto() {
+    *this = ::std::move(from);
+  }
+
+  inline RebuildCtxExtendedProto& operator=(const RebuildCtxExtendedProto& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline RebuildCtxExtendedProto& operator=(RebuildCtxExtendedProto&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const RebuildCtxExtendedProto& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const RebuildCtxExtendedProto* internal_default_instance() {
+    return reinterpret_cast<const RebuildCtxExtendedProto*>(
+               &_RebuildCtxExtendedProto_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    3;
+
+  friend void swap(RebuildCtxExtendedProto& a, RebuildCtxExtendedProto& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(RebuildCtxExtendedProto* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(RebuildCtxExtendedProto* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline RebuildCtxExtendedProto* New() const final {
+    return CreateMaybeMessage<RebuildCtxExtendedProto>(nullptr);
+  }
+
+  RebuildCtxExtendedProto* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<RebuildCtxExtendedProto>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const RebuildCtxExtendedProto& from);
+  void MergeFrom(const RebuildCtxExtendedProto& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(RebuildCtxExtendedProto* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.RebuildCtxExtendedProto";
+  }
+  protected:
+  explicit RebuildCtxExtendedProto(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:pos_bc.RebuildCtxExtendedProto)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
 // ===================================================================
 
 
@@ -455,9 +711,21 @@ inline void SegmentInfoDataProto::set_state(::pos_bc::SegmentState value) {
 
 // SegmentCtxExtendedProto
 
+// -------------------------------------------------------------------
+
+// AllocatorCtxExtendedProto
+
+// -------------------------------------------------------------------
+
+// RebuildCtxExtendedProto
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 
