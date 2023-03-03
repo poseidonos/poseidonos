@@ -30,36 +30,60 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
-#include <string>
-#include <math.h>
-
-#include "src/logger/logger.h"
+#include "array_mount_progress.h"
 
 namespace pos
 {
-enum class MountProgressType
+void ArrayMountProgress::Init(string name, MountProgressType type, int progTotal)
 {
-    MOUNT,
-    UNMOUNT,
-};
+    arrayName = name;
+    progressType = type;
+    progressTotal = progTotal; 
+}
 
-class ArrayMountProgress
+void ArrayMountProgress::Update(int prog)
+{ 
+    _UpdateProgress(progress + prog); 
+}
+
+int ArrayMountProgress::Get(void)
 {
-public:
-    void Init(string arrayName, MountProgressType type, int progTotal);
-    void Update(int prog);
-    int Get(void);
-    void Set(void);
-    void Reset(void);
+    if (progress < 0 || progressTotal == 0)
+    {
+        return progress;
+    }
+    return (ceil(progress * 100 / progressTotal)); 
+}
 
-private:
-    void _UpdateProgress(int prog);
-    const static int NO_ACTIVE_PROGRESS = -1;
-    int progress = NO_ACTIVE_PROGRESS;
-    string arrayName;
-    MountProgressType progressType = MountProgressType::MOUNT;
-    int progressTotal = 0;
-};
+void ArrayMountProgress::Set(void)
+{
+    _UpdateProgress(0);
+}
+
+void ArrayMountProgress::Reset(void)
+{
+    progress = NO_ACTIVE_PROGRESS;
+}
+
+void ArrayMountProgress::_UpdateProgress(int prog)
+{
+    progress = prog;
+    if (progressType == MountProgressType::MOUNT)
+    {
+        int eid = EID(ARRAY_MOUNT_PROGRESS);
+        string msg = "ARRAY_MOUNT_PROGRESS";
+        POS_REPORT_TRACE(eid, "{}, [{}], array_name:{}", msg, Get(), arrayName);
+    }
+    else if (progressType == MountProgressType::UNMOUNT)
+    {
+        int eid = EID(ARRAY_UNMOUNT_PROGRESS);
+        string msg = "ARRAY_UNMOUNT_PROGRESS";
+        POS_REPORT_TRACE(eid, "{}, [{}], array_name:{}", msg, Get(), arrayName);
+    }
+    else
+    {
+        assert(false);
+        POS_TRACE_ERROR(EID(ARRAY_MOUNT_PROGRESS), "unsupported progress type");
+    }
+}
 } // namespace pos

@@ -75,8 +75,8 @@ ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
         mountProgressTotal += item->GetEstMountTimeSec();
         unmountProgressTotal += item->GetEstUnmountTimeSec();
     }
-    mountProgress.Init(MountProgressType::MOUNT, mountProgressTotal);
-    unmountProgress.Init(MountProgressType::UNMOUNT, unmountProgressTotal);
+    mountProgress.Init(arrayName, MountProgressType::MOUNT, mountProgressTotal);
+    unmountProgress.Init(arrayName, MountProgressType::UNMOUNT, unmountProgressTotal);
 }
 
 ArrayMountSequence::~ArrayMountSequence(void)

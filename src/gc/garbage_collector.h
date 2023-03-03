@@ -69,7 +69,7 @@ public:
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
     virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
-    virtual uint32_t GetEstUnmountTimeSec(void) override { return 4; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 4; }; // GC Unmount time (second) estimate
 
     virtual void Pause(void);
     virtual void Resume(void);
