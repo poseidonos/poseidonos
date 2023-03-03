@@ -108,10 +108,12 @@ public:
     Mapper(IArrayInfo* iarrayInfo, MetaFs* metaFs_);
     virtual ~Mapper(void);
 
-    virtual int Init(void);
-    virtual void Dispose(void);
-    virtual void Shutdown(void);
-    virtual void Flush(void);
+    virtual int Init(void) override;
+    virtual void Dispose(void) override;
+    virtual void Shutdown(void) override;
+    virtual void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
 
     virtual VSAMapManager* GetVSAMapManager(void) { return vsaMapManager; }
     virtual StripeMapManager* GetStripeMapManager(void) { return stripeMapManager; }

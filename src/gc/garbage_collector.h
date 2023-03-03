@@ -68,6 +68,8 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 4; };
 
     virtual void Pause(void);
     virtual void Resume(void);

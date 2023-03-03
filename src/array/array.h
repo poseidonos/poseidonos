@@ -94,6 +94,9 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
+
     virtual int Delete(void);
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);

@@ -56,6 +56,8 @@ public:
     void Dispose(void) override;
     void Shutdown(void) override;
     void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
     void SetuNVMfIOHandler(unvmf_io_handler handler);
 
     virtual int VolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo) override;
