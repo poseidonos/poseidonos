@@ -38,8 +38,6 @@
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/context/context.h"
 #include "src/allocator/context_manager/context/context_section.h"
-#include "src/allocator/context_manager/context/context_section_segment_info_data.h"
-#include "src/allocator/context_manager/context/context_section_segment_ctx_extended.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"

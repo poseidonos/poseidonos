@@ -31,24 +31,48 @@
 */
 
 #pragma once
-
-#include <string.h>
-
-#include "src/allocator/context_manager/context/context.h"
-#include "src/allocator/context_manager/context/context_section.h"
-#include "src/allocator/context_manager/segment_ctx/segment_info.h"
-#include "src/allocator/context_manager/context/context_section_base.h"
 namespace pos
 {
-
-template<>
-class ContextSection<SegmentInfoData*> : public ContextSectionBase<SegmentInfoData*>
+template<typename T>
+class ContextSectionInProto
 {
 public:
-    ContextSection(SegmentInfoData* target)
+    T data;
+    
+    void InitAddressInfo(uint64_t offset, uint64_t size)
     {
-        // this copy constructor enables SegmentCtx keeps SegmentInfoData items in vector
-        data = target;
+        info.offset = offset;
+        info.size = size;
     }
+
+    /**
+     * "buf" points to the start address of the continguous memory region passed in to "SegmentCtx::BeforeFlush()"
+     */
+    virtual void CopyTo(char* buf)
+    {
+        char* destBuf = buf + this->info.offset;
+        data->ToBytes(destBuf);
+    }
+
+    /**
+     * "buf" points to the start address of the continguous memory region passed in to "SegmentCtx::AfterLoad()"
+     */
+    virtual void CopyFrom(char* buf)
+    {
+        char* srcBuf = buf + this->info.offset;
+        data->FromBytes(srcBuf);
+    }
+
+    virtual uint64_t GetSectionSize(void)
+    {
+        return data->SerializedSize();
+    }
+
+    ContextSectionAddr GetSectionInfo(void)
+    {
+        return info;
+    }
+protected:
+    ContextSectionAddr info;
 };
-} // namespace pos
+}

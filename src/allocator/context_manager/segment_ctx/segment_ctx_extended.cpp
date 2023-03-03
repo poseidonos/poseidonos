@@ -21,12 +21,6 @@ SegmentCtxExtended::ToBytes(char* destBuf)
             return false;
         }
 
-        // fill zeros up to ONSSD_SIZE bytes-position
-        for(unsigned int bytePos = effectiveSize; bytePos < ONSSD_SIZE; bytePos ++)
-        {
-            destBuf[bytePos] = 0;
-        }
-
         return true;
     }
     else
