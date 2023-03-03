@@ -35,32 +35,53 @@
 namespace pos
 {
 
+std::mutex SignalMask::signalMutex;
+
 void
 SignalMask::MaskSignal(int AllowedSignalNo, sigset_t* oldset)
 {
+    std::lock_guard<std::mutex> lock(signalMutex);
     sigset_t set;
     sigemptyset(&set);
+    sigaddset(&set, SIGINT);
     sigaddset(&set, SIGSEGV);
     sigaddset(&set, SIGABRT);
-    sigaddset(&set, SIGUSR1);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGQUIT);
     sigdelset(&set, AllowedSignalNo);
+    pthread_sigmask(SIG_BLOCK, &set, oldset);
+}
+
+
+void
+SignalMask::MaskQuitSignal(sigset_t* oldset)
+{
+    std::lock_guard<std::mutex> lock(signalMutex);
+    sigset_t set;
+    sigemptyset(&set);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGQUIT);
     pthread_sigmask(SIG_BLOCK, &set, oldset);
 }
 
 void
 SignalMask::RestoreSignal(sigset_t* oldset)
 {
+    std::lock_guard<std::mutex> lock(signalMutex);
     pthread_sigmask(SIG_SETMASK, oldset, nullptr);
 }
 
 void
 SignalMask::MaskSignal(sigset_t* oldset)
 {
+    std::lock_guard<std::mutex> lock(signalMutex);
     sigset_t set;
     sigemptyset(&set);
+    sigaddset(&set, SIGINT);
     sigaddset(&set, SIGSEGV);
     sigaddset(&set, SIGABRT);
-    sigaddset(&set, SIGUSR1);
+    sigaddset(&set, SIGTERM);
+    sigaddset(&set, SIGQUIT);
     pthread_sigmask(SIG_BLOCK, &set, oldset);
 }
 

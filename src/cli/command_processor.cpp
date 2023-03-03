@@ -17,6 +17,7 @@
 #include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/include/array_config.h"
 #include "src/include/nvmf_const.h"
+#include "src/include/poseidonos_interface.h"
 #include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
 #include "src/logger/preferences.h"
@@ -88,12 +89,19 @@ CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, Sto
 
     Status status = grpc::Status::OK;
     int eventId = 0;
-    ArrayMgr()->UnmountAllArrayAndStop();
     if (!_IsPosTerminating())
     {
         _SetPosTerminating(true);
         POS_REPORT_TRACE(EID(POS_TERMINATION_TRIGGERED), "Entering a termination process...");
-        pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
+        PoseidonosInterface* interface = PoseidonosInterface::GetInterface();
+        if (interface != nullptr)
+        {
+            // Destroy cli server should done outside cli context 
+            // If cli server shutdown is called in this context, dead lock happend
+            // This context waits cli server's exit, but cli server's exit waits all cli done.
+            // So, we just send the signal to main() thread can waits all cli done.
+            interface->TriggerTerminate();
+        }
         eventId = EID(SUCCESS);
     }
     else

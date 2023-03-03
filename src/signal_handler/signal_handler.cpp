@@ -43,12 +43,11 @@
 #include <iostream>
 #include <string>
 
-#include "src/include/pos_event_id.h"
-#include "src/lib/system_timeout_checker.h"
-#include "src/logger/logger.h"
-#include "src/array/array.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
+#include "src/include/poseidonos_interface.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 #define gettid() syscall(SYS_gettid)
 #define tgkill(tgid, tid, sig) syscall(SYS_tgkill, tgid, tid, sig)
 
@@ -150,9 +149,11 @@ SignalHandler::_Log(std::string logMsg, bool printTimeStamp)
 void
 SignalHandler::_ShutdownProcess(void)
 {
-    IArrayMgmt* array = ArrayMgr();
-    array->UnmountAllArrayAndStop();
-    pos_cli::Exit();
+    PoseidonosInterface* interface = PoseidonosInterface::GetInterface();
+    if (interface != nullptr)
+    {
+        interface->TriggerTerminate();
+    }
 }
 
 void
@@ -163,7 +164,10 @@ SignalHandler::_ExceptionHandler(int sig)
         case SIGTERM:
         case SIGQUIT:
         {
-            shutdownTask = new std::thread(&SignalHandler::_ShutdownProcess, this);
+            _Log("Quit Signal Handling!");
+            sigset_t oldset;
+            SignalMask::MaskQuitSignal(&oldset);
+            _ShutdownProcess();
             break;
         }
         default:

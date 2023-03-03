@@ -39,6 +39,7 @@
 #include <string>
 #include <vector>
 
+#include "src/array/array.h"
 #include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
 #include "src/cli/grpc_cli_server.h"
@@ -56,6 +57,7 @@
 #include "src/io/general_io/io_submit_handler.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/io_submit_interface/i_io_submit_handler.h"
+#include "src/lib/signal_mask.h"
 #include "src/logger/logger.h"
 #include "src/master_context/config_manager.h"
 #include "src/master_context/version_provider.h"
@@ -82,9 +84,13 @@
 
 namespace pos
 {
+
+PoseidonosInterface* PoseidonosInterface::instance;
+
 int
 Poseidonos::Init(int argc, char** argv)
 {
+    PoseidonosInterface::instance = this;
     POS_REPORT_TRACE(EID(POS_TRACE_INIT_START), "POS Initialize Sequence Start, total remaining steps: {}", total_init_seq_cnt);
     int ret = _LoadConfiguration();
     if (ret == 0)
@@ -98,6 +104,9 @@ Poseidonos::Init(int argc, char** argv)
         _InitSpdk(argc, argv);
         curr_init_seq_num++;
         POS_REPORT_TRACE(EID(POS_INITIALIZING_SIG_HANDLER), "POS Initialize Sequence In Progress({}/{}): Signal Handler...", curr_init_seq_num, total_init_seq_cnt);
+        // InitSpdk has signal handling initialize,
+        // To give signal configuration from poseidonos,
+        // InitSignalHandler should be done after InitSpdk.
         _InitSignalHandler();
         curr_init_seq_num++;
         POS_REPORT_TRACE(EID(POS_INITIALIZING_CPU_AFFINITY), "POS Initialize Sequence In Progress({}/{}): Affinity...", curr_init_seq_num, total_init_seq_cnt);
@@ -171,10 +180,26 @@ Poseidonos::Run(void)
     curr_init_seq_num++;
     POS_REPORT_TRACE(EID(POS_INITIALIZING_CLI_SERVER), "POS Initialize Sequence In Progress({}/{}): CLI Server...", curr_init_seq_num, total_init_seq_cnt);
     _RunCLIService();
+
     POS_REPORT_TRACE(EID(POS_TRACE_INIT_SUCCESS), "POS Initialize Sequence Success!");
-    pos_cli::Wait();
+    {
+        std::unique_lock<std::mutex> lock(systemStopMutex);
+        // Signal masking should be unmasked within systemStopMutex
+        // to avoid signal processs happend right before systemStopWait happend.
+        SignalMask::RestoreSignal(&oldSet);
+        systemStopWait.wait(lock);
+    }
+    // Stop CLI Service if CLI server is still alive (For SystemStop command).
+    _StopCLIService();
+    IArrayMgmt* array = ArrayMgr();
+    array->UnmountAllArrayAndStop();
 }
 
+void
+Poseidonos::TriggerTerminate(void)
+{
+    systemStopWait.notify_all();
+}
 void
 Poseidonos::Terminate(void)
 {
@@ -208,7 +233,6 @@ Poseidonos::Terminate(void)
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
     IoTimeoutCheckerSingleton::ResetInstance();
-
     curr_term_seq_num++;
     POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_PHASE_3), "POS Terminate Sequence In Progress({}/{}): Phase 3(AIR)...", curr_term_seq_num, total_term_seq_cnt);
     air_deactivate();
@@ -248,10 +272,9 @@ Poseidonos::Terminate(void)
     TraceExporterSingleton::ResetInstance();
     ConfigManagerSingleton::ResetInstance();
     VersionProviderSingleton::ResetInstance();
-
-    free(GrpcCliServerThread);
-
+    delete GrpcCliServerThread;
     POS_REPORT_TRACE(EID(POS_TRACE_TERMINATE_SUCCESS), "POS Terminate Sequence Success!");
+    PoseidonosInterface::instance = nullptr;
 }
 
 void
@@ -358,6 +381,8 @@ Poseidonos::_InitSignalHandler(void)
     {
         POS_TRACE_WARN(EID(POS_INIT_EXCEPTIONS), "SignalHandler: Failed to get a value of user_signal_ignore_timeout_sec from config.");
     }
+    // It should be released when CLI can be serviced.
+    SignalMask::MaskQuitSignal(&oldSet);
 }
 
 void
@@ -516,8 +541,26 @@ Poseidonos::_SetPerfImpact(void)
 void
 Poseidonos::_RunCLIService(void)
 {
+    std::lock_guard<std::mutex> lock(cliMutex);
+    cliEnabled = true;
     pos_cli::CLIServerMain();
     GrpcCliServerThread = new std::thread(RunGrpcServer);
+}
+
+void
+Poseidonos::_StopCLIService(void)
+{
+    std::lock_guard<std::mutex> lock(cliMutex);
+    if (cliEnabled == true)
+    {
+        if (GrpcCliServerThread != nullptr)
+        {
+            ShutdownGrpcServer();
+            GrpcCliServerThread->join();
+        }
+        pos_cli::Exit();
+        cliEnabled = false;
+    }
 }
 
 int
