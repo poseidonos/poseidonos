@@ -54,19 +54,19 @@ VersionedSegmentInfo::Reset(void)
 void
 VersionedSegmentInfo::IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    changedValidBlockCount[segId] += cnt;
+    changedValidBlockCount[segId].fetch_and_add(cnt);
 }
 
 void
 VersionedSegmentInfo::DecreaseValidBlockCount(SegmentId segId, uint32_t cnt)
 {
-    changedValidBlockCount[segId] -= cnt;
+    changedValidBlockCount[segId].fetch_and_add(-1 * (int)cnt);
 }
 
 void
 VersionedSegmentInfo::IncreaseOccupiedStripeCount(SegmentId segId)
 {
-    changedOccupiedStripeCount[segId]++;
+    changedOccupiedStripeCount[segId].fetch_and_add(1);
 }
 
 void
@@ -81,13 +81,13 @@ VersionedSegmentInfo::ResetValidBlockCount(SegmentId segId)
     changedValidBlockCount[segId] = 0;
 }
 
-tbb::concurrent_unordered_map<SegmentId, int>
+const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>& 
 VersionedSegmentInfo::GetChangedValidBlockCount(void)
 {
     return this->changedValidBlockCount;
 }
 
-tbb::concurrent_unordered_map<SegmentId, uint32_t>
+const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>& 
 VersionedSegmentInfo::GetChangedOccupiedStripeCount(void)
 {
     return this->changedOccupiedStripeCount;

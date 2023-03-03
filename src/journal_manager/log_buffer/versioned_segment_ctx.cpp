@@ -151,7 +151,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
     _CheckLogGroupIdValidity(logGroupId);
 
     shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
-    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
     {
         auto segmentId = it->first;
@@ -175,7 +175,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         }
     }
 
-    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
     for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
     {
         auto segmentId = it->first;

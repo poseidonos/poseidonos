@@ -493,7 +493,7 @@ SET(DEP_LIBRARIES
     stdc++fs
     isal
 )
-
+find_package(Boost COMPONENTS system thread REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(PROTOBUF REQUIRED protobuf)
 pkg_check_modules(GRPC REQUIRED grpc++)
@@ -501,7 +501,7 @@ pkg_check_modules(GRPC REQUIRED grpc++)
 list(APPEND DEP_LIBRARIES opentelemetry_common opentelemetry_trace opentelemetry_exporter_otlp_http opentelemetry_exporter_otlp_http_client opentelemetry_otlp_recordable opentelemetry_proto opentelemetry_resources opentelemetry_http_client_curl pthread curl)
 list(APPEND DEP_LIBRARIES ${PROTOBUF_LIBRARIES} ${GRPC_LIBRARIES})
 list(APPEND DEP_LIBRARIES grpc++_reflection)
-
+list(APPEND DEP_LIBRARIES boost_system boost_thread)
 
 # For on-demand execution
 add_custom_target(
