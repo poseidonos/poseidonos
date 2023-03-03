@@ -69,7 +69,7 @@ public:
     bool SetArrayMountState(string name, bool isMount, bool isWt, string trAddr = "");
     bool VolumeCreate(string arrayName, string volName, int32_t nsid);
     bool VolumeDelete(string arrayName, string volName);
-    bool SetVolumeMountState(string arrayName, string volName, bool isMount, string subNqn = "", int32_t nsid = -1);
+    bool SetVolumeMountState(string arrayName, string volName, bool isMount, string subNqn = "", int32_t nsid = 0);
     bool VolumeRename(string arrayName, string volOldName, string volNewName);
 
     void ClearRestoreState();

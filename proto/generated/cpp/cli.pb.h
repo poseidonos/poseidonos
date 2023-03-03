@@ -40497,6 +40497,7 @@ class MountVolumeRequest_Param PROTOBUF_FINAL :
     kNameFieldNumber = 1,
     kSubnqnFieldNumber = 2,
     kArrayFieldNumber = 3,
+    kNsidFieldNumber = 4,
   };
   // string name = 1;
   void clear_name();
@@ -40546,6 +40547,15 @@ class MountVolumeRequest_Param PROTOBUF_FINAL :
   std::string* _internal_mutable_array();
   public:
 
+  // uint32 nsid = 4;
+  void clear_nsid();
+  ::PROTOBUF_NAMESPACE_ID::uint32 nsid() const;
+  void set_nsid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_nsid() const;
+  void _internal_set_nsid(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:grpc_cli.MountVolumeRequest.Param)
  private:
   class _Internal;
@@ -40556,6 +40566,7 @@ class MountVolumeRequest_Param PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr name_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr subnqn_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr array_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 nsid_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_cli_2eproto;
 };
@@ -94140,6 +94151,26 @@ inline void MountVolumeRequest_Param::set_allocated_array(std::string* array) {
   array_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), array,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:grpc_cli.MountVolumeRequest.Param.array)
+}
+
+// uint32 nsid = 4;
+inline void MountVolumeRequest_Param::clear_nsid() {
+  nsid_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MountVolumeRequest_Param::_internal_nsid() const {
+  return nsid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MountVolumeRequest_Param::nsid() const {
+  // @@protoc_insertion_point(field_get:grpc_cli.MountVolumeRequest.Param.nsid)
+  return _internal_nsid();
+}
+inline void MountVolumeRequest_Param::_internal_set_nsid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  nsid_ = value;
+}
+inline void MountVolumeRequest_Param::set_nsid(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_nsid(value);
+  // @@protoc_insertion_point(field_set:grpc_cli.MountVolumeRequest.Param.nsid)
 }
 
 // -------------------------------------------------------------------

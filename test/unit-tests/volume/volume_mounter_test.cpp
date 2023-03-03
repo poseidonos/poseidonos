@@ -354,7 +354,7 @@ TEST(VolumeMounter, _RollBackVolumeMount_)
 
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeMounted(_, _, _)).WillByDefault(Return(true));
 
-    ON_CALL(mockNvmfTarget, TryToAttachNamespace(_, _, _, _)).WillByDefault(Return(false));
+    ON_CALL(mockNvmfTarget, TryToAttachNamespace(_, _, _, _, _)).WillByDefault(Return(false));
 
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeUnmounted(_, _)).WillByDefault(Return(false));
 
