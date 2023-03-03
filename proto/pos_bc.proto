@@ -24,3 +24,13 @@ message SegmentInfoDataProto {
 message SegmentCtxExtendedProto {
     reserved 1 to 1000;
 }
+
+// MAX: 128 KB
+message AllocatorCtxExtendedProto {
+    reserved 1 to 1000;
+}
+
+// MAX: 128 KB
+message RebuildCtxExtendedProto {
+    reserved 1 to 1000;
+}

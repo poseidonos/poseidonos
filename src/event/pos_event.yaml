@@ -4619,7 +4619,48 @@ Root:
     Description: Protobuf has failed to serialize into byte stream.
     Cause: There may be an issue with protobuf version/usage.
     Solution: Developers must analyze the issue.
-
+  -
+    Id: 3243
+    Name: ALLOCATORCTX_EXTENDED_SERIALIZE_OVERFLOW
+    Severity: ERROR
+    Description: The size of serialized AllocatorCtxExtended is too large to be stored on disk.
+    Cause: There may have been disruptive metadata layout changes checked in without getting caught by unit/integration/system tests.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3244
+    Name: ALLOCATORCTX_EXTENDED_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3245
+    Name: ALLOCATORCTX_EXTENDED_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3246
+    Name: REBUILDCTX_EXTENDED_SERIALIZE_OVERFLOW
+    Severity: ERROR
+    Description: The size of serialized RebuildCtxExtended is too large to be stored on disk.
+    Cause: There may have been disruptive metadata layout changes checked in without getting caught by unit/integration/system tests.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3247
+    Name: REBUILDCTX_EXTENDED_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3248
+    Name: REBUILDCTX_EXTENDED_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
   # Metadata: 3300 - 3399
   -
     Id: 3300

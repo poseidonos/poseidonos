@@ -42,6 +42,9 @@
 #include "src/allocator/context_manager/context/context_section.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/state/interface/i_state_control.h"
+#include "src/allocator/context_manager/context/context_section_rebuild_ctx_extended.h"
+#include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx_extended.h"
+
 
 namespace pos
 {
@@ -78,9 +81,12 @@ private:
     void _UpdateRebuildList(std::set<SegmentId> list); // for test
     void _UpdateSectionInfo(void);
 
-    // Data to be stored
+    // Data to be stored 1 ~ 2
     ContextSection<RebuildCtxHeader> ctxHeader;
     ContextSection<SegmentId*> segmentList;
+
+    // Data to be stored with Protobuf: Section 3
+    ContextSection<RebuildCtxExtended*> ctxExtended;
 
     uint64_t totalDataSize;
 
