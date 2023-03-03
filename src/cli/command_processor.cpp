@@ -1729,7 +1729,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     uint64_t maxBw = 0;
     bool isWalVol = false;
     string uuid = "";
-    int32_t nsid = -1;
+    int32_t nsid = 0;
     bool isPrimary = true;
     bool isAnaNonoptimized = false;
 
@@ -1875,10 +1875,12 @@ CommandProcessor::ExecuteMountVolumeCommand(const MountVolumeRequest* request, M
     string volumeName = "";
     string subnqn = "";
     string arrayName = "";
+    uint32_t nsid = 0;
 
     volumeName = (request->param()).name();
     subnqn = (request->param()).subnqn();
     arrayName = (request->param()).array();
+    nsid = (request->param()).nsid();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
@@ -1904,7 +1906,7 @@ CommandProcessor::ExecuteMountVolumeCommand(const MountVolumeRequest* request, M
 
     if (volMgr != nullptr)
     {
-        int ret = volMgr->Mount(volumeName, subnqn);
+        int ret = volMgr->Mount(volumeName, subnqn, nsid);
         if (ret == SUCCESS)
         {
             int eventId = EID(SUCCESS);

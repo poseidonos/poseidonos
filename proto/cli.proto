@@ -1544,6 +1544,7 @@ message MountVolumeRequest {
 		string name = 1;
 		string subnqn = 2;
 		string array = 3;
+		uint32 nsid = 4;
 	}
 	Param param = 4;
 }

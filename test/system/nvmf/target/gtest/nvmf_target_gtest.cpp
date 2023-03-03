@@ -188,13 +188,14 @@ void testCreateIBoFBdev4(void* cb_arg, int status){
 
 void testAttachNamespace1(void* cb_arg, int status){
 	EXPECT_EQ(0, status);
-	bool ret = target->AttachNamespace(nqn1, ibof_bdev1, testAttachNamespace2, target);
+    uint32_t nsid = 0;
+	bool ret = target->AttachNamespace(nqn1, ibof_bdev1, nsid, testAttachNamespace2, target);
 	EXPECT_NE(false, ret);
 }
 
 void testAttachNamespace2(void* cb_arg, int nsid){
 	EXPECT_EQ(1, nsid);
-       bool ret = target->AttachNamespace(nqn1, ibof_bdev1, testAttachNamespace3, target);
+       bool ret = target->AttachNamespace(nqn1, ibof_bdev1, nsid, testAttachNamespace3, target);
 	EXPECT_NE(false, ret);
 }
 
@@ -206,7 +207,7 @@ void testAttachNamespace3(void* cb_arg, int nsid){
 
 void testAttachNamespace4(void* cb_arg, int nsid){
 	EXPECT_EQ(10, nsid);
-	bool ret = target->AttachNamespace(nqn1, ibof_bdev1, testAttachNamespaceDone, target);
+	bool ret = target->AttachNamespace(nqn1, ibof_bdev1, nsid, testAttachNamespaceDone, target);
 	EXPECT_NE(false, ret);
 }
 

@@ -47,6 +47,7 @@ struct VolumeEventBase
     string volName;
     string uuid;
     string subnqn;
+    uint32_t nsid;
     bool isPrimaryRole;
 };
 

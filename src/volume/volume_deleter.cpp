@@ -94,6 +94,7 @@ VolumeDeleter::Do(string name)
 
         vol->SetValid(false); // remove tempo.
         vol->SetSubnqn("");
+        vol->SetNsid(0);
 
         int ret = _SaveVolumes();
         if (ret == EID(SUCCESS))
@@ -104,10 +105,11 @@ VolumeDeleter::Do(string name)
         {
             vol->SetValid(true); // undo remove
             vol->SetSubnqn(volumeEventBase.subnqn);
+            vol->SetNsid(volumeEventBase.nsid);
             throw ret;
         }
     }
-    catch(int& exceptionEvent)
+    catch (int& exceptionEvent)
     {
         return exceptionEvent;
     }
