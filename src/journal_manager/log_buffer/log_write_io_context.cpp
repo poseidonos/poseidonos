@@ -66,10 +66,13 @@ LogWriteIoContext::GetLogGroupId(void)
 void
 LogWriteIoContext::IoDone(void)
 {
+    // Should call LogBufferIoContext::IoDone first
+    // to update in-memory meta data update
+    // and then notify journal sub-modules that log write is done
+    LogBufferIoContext::IoDone();
+
     auto dirty = logWriteContext->GetDirtyMapList();
     logFilledNotifier->NotifyLogFilled(logWriteContext->GetLogGroupId(), dirty);
-
-    LogBufferIoContext::IoDone();
 }
 
 } // namespace pos
