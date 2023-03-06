@@ -43,6 +43,7 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx_extended.h"
 #include "src/allocator/i_segment_ctx.h"
 #include "src/include/address_type.h"
 
@@ -140,11 +141,16 @@ private:
 
     void _UpdateSectionInfo(void);
 
-    // Data to be stored
+    // Data to be stored: Section 1
     ContextSection<SegmentCtxHeader> ctxHeader;
-    ContextSection<SegmentInfoData*> segmentInfoData;
 
-    uint64_t totalDataSize;
+    // Data to be stored: Section 2 ~ N
+    std::vector<ContextSection<SegmentInfoData*>> segmentInfoDataSections;
+
+    // Data to be stored: Section N+1
+    ContextSection<SegmentCtxExtended*> ctxExtended;
+
+    uint64_t totalDataSize; // SectionSize(1) + SectionSize(2) + ... + SectionSize(N) + SectionSize(N+1)
 
     // In-memory data structures
     std::atomic<uint64_t> ctxDirtyVersion;

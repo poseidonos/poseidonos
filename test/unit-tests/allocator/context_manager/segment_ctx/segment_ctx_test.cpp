@@ -519,7 +519,7 @@ TEST_F(SegmentCtxTestFixture, GetSectionInfo_TestSimpleGetter)
     // when 2.
     ret = segCtx->GetSectionInfo(SC_SEGMENT_INFO);
     EXPECT_EQ(expectedOffset, ret.offset);
-    EXPECT_EQ(sizeof(SegmentInfoData), ret.size);
+    EXPECT_EQ(1 /* == numSegments */ * SegmentInfoData::ONSSD_SIZE, ret.size);
 }
 
 TEST_F(SegmentCtxTestFixture, GetStoredVersion_TestSimpleGetter)
