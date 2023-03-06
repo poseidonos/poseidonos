@@ -282,23 +282,22 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
         c = tolower(c);
     });
 
+    if(0 == (bufCacheSize && numSharedBuf))
+    {
+        POS_EVENT_ID eventId = EID(IONVMF_TRANSPORT_INVALID_VALUE);
+        POS_TRACE_INFO(static_cast<int>(eventId), "Transport Value(bufCacheSize or numSharedBuf) was wrong");
+        return make_pair(FAIL, "");
+    }
+
     uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
     uint32_t minSharedBuffers = coreCount * bufCacheSize;
     if (minSharedBuffers > numSharedBuf)
     {
-        uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
-        uint32_t minSharedBuffers = coreCount * bufCacheSize;
-        if (minSharedBuffers > numSharedBuf)
-        {
-            POS_EVENT_ID eventId =
-                EID(IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED);
-            POS_TRACE_INFO(static_cast<int>(eventId),
+        POS_EVENT_ID eventId = EID(IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED);
+        POS_TRACE_INFO(static_cast<int>(eventId),
             "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system",
             numSharedBuf, minSharedBuffers);
-            numSharedBuf = minSharedBuffers;
-        }
-        param["buf_cache_size"] = bufCacheSize;
-        param["num_shared_buffers"] = numSharedBuf;
+        numSharedBuf = minSharedBuffers;
     }
     param["buf_cache_size"] = bufCacheSize;
     param["num_shared_buffers"] = numSharedBuf;

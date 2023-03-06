@@ -6670,6 +6670,13 @@ Root:
     Description:
     Cause:
     Solution:
+  -
+    Id: 5033
+    Name: IONVMF_TRANSPORT_INVALID_VALUE
+    Severity:
+    Description:
+    Cause:
+    Solution:
 
 
   # IOPathFrontend: 5100 - 5299

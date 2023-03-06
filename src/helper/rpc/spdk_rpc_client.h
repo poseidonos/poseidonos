@@ -67,6 +67,7 @@ private:
     jsonrpc::Client* client;
     jsonrpc::IClientConnector* connector;
     static const int SUCCESS = 0;
+    static const int FAIL = -1;
 
     SpdkEnvCaller* spdkEnvCaller;
 };

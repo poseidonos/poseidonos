@@ -1663,8 +1663,8 @@ CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* re
     uint32_t ioUnitSize = DEFAULT_IO_UNIT_SIZE;
 
     trType = (request->param()).transporttype();
-    bufCacheSize = (request->param()).bufcachesize();
-    numSharedBuf = (request->param()).numsharedbuf();
+    bufCacheSize = ((request->param()).bufcachesize()) != 0 ? (request->param()).bufcachesize() : DEFAULT_BUF_CACHE_SIZE;
+    numSharedBuf = ((request->param()).numsharedbuf()) != 0 ? (request->param()).numsharedbuf() : DEFAULT_NUM_SHARED_BUF;
 
     SpdkRpcClient rpcClient;
 
