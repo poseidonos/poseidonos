@@ -21,6 +21,10 @@
 
 using ::testing::NiceMock;
 using ::testing::Return;
+using ::testing::ByMove;
+using ::testing::ByRef;
+using ::testing::WithArg;
+using ::testing::_;
 namespace pos
 {
 TEST(ArrayManager, ArrayManager_testUsingShortConstructor)
@@ -127,12 +131,10 @@ TEST(ArrayManager, Create_testIfArrayObjectIsFreedAndArrayMapNotUpdatedWhenCreat
     };
     int CREATION_FAILURE = 1234;
     auto mockArraybuilder = std::make_shared<MockArrayBuilderAdapter>();
-    auto mockArrayBuildInfo = new MockArrayBuildInfo();
-    mockArrayBuildInfo->buildResult = CREATION_FAILURE;
     auto arrayMgr = new ArrayManager(nullptr, nullptr, nullptr, mockArrayComponentFactory, mockArraybuilder.get());
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
-    EXPECT_CALL(*mockArraybuilder, Create).WillOnce(Return(mockArrayBuildInfo));
+    EXPECT_CALL(*mockArraybuilder, Create).WillOnce(Return(CREATION_FAILURE));
 
     // When
     int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "RAID10", "RAID5");
@@ -154,16 +156,18 @@ TEST(ArrayManager, Create_testIfArrayMapUpdatedWhenCreationSucceeds)
         return mockArrayComp.get();
     };
     auto mockArraybuilder = std::make_shared<MockArrayBuilderAdapter>();
-    auto mockArrayBuildInfo = new MockArrayBuildInfo();
-    mockArrayBuildInfo->buildResult = 0;
 
     auto arrayMgr = new ArrayManager(nullptr, nullptr, mockTelClient.get(), mockArrayComponentFactory, mockArraybuilder.get());
     arrayMgr->SetArrayComponentMap(emptyArrayMap);
 
-    EXPECT_CALL(*mockArraybuilder, Create).WillOnce(Return(mockArrayBuildInfo));            // success
     EXPECT_CALL(*mockArrayComp, Import).WillOnce(Return(0));            // success
-    // EXPECT_CALL(*mockTelClient, RegisterPublisher).WillOnce(Return(0)); // success
-
+    EXPECT_CALL(*mockArraybuilder, Create).WillOnce(
+        [](string name, const DeviceSet<string>& devs, string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo) -> int {
+            buildInfo = make_unique<ArrayBuildInfo>(ArrayBuildType::CREATE, "POSARRAY", "ANYUUID",
+                1234, 1234, vector<ArrayDevice*>(), vector<Partition*>());
+            return 0;
+        }
+    );
     // When
     int actual = arrayMgr->Create(arrayName, DeviceSet<string>(), "RAID10", "RAID5");
 

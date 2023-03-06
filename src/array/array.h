@@ -89,7 +89,7 @@ public:
         PartitionManager* ptnMgr, ArrayState* arrayState, PartitionServices* svc, EventScheduler* eventScheduler,
         ArrayServiceLayer* arrayservice, pbr::PbrAdapter* pbrAdapter = nullptr);
     virtual ~Array(void);
-    virtual int Import(ArrayBuildInfo* buildInfo);
+    virtual int Import(ArrayBuildInfo* buildInfo, uint32_t arrayIndex);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;

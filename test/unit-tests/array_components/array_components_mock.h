@@ -12,7 +12,7 @@ class MockArrayComponents : public ArrayComponents
 {
 public:
     using ArrayComponents::ArrayComponents;
-    MOCK_METHOD(int, Import, (ArrayBuildInfo* buildInfo), (override));
+    MOCK_METHOD(int, Import, (ArrayBuildInfo* buildInfo, uint32_t arrayIndex), (override));
     MOCK_METHOD(int, Mount, (bool isWT), (override));
     MOCK_METHOD(int, Unmount, (), (override));
     MOCK_METHOD(int, Delete, (), (override));

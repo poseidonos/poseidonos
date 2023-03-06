@@ -36,6 +36,8 @@
 #include "src/array_models/dto/device_set.h"
 #include "src/pbr/dto/ate_data.h"
 
+#include <memory.h>
+
 using namespace std;
 
 namespace pos
@@ -44,10 +46,10 @@ class ArrayBuilder
 {
 public:
     //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
-    static ArrayBuildInfo* Load(pbr::AteData* ateData);
+    static int Load(pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
     //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
-    static ArrayBuildInfo* Create(string name, const DeviceSet<string>& devs,
-        string metaRaid, string dataRaid);
+    static int Create(string name, const DeviceSet<string>& devs,
+        string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
 };
 
 } // namespace pos
