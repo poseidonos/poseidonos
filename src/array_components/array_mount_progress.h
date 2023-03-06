@@ -30,24 +30,36 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdint>
-#include <string>
-
 #pragma once
+
+#include <string>
+#include <math.h>
+
+#include "src/logger/logger.h"
 
 namespace pos
 {
-
-class IMountSequence
+enum class MountProgressType
 {
-public:
-    virtual int Init(void) = 0;
-    virtual void Dispose(void) = 0;
-    virtual void Shutdown(void) = 0;
-    virtual void Flush(void) = 0;
-
-    virtual uint32_t GetEstMountTimeSec(void) = 0;
-    virtual uint32_t GetEstUnmountTimeSec(void) = 0;
+    MOUNT,
+    UNMOUNT,
 };
 
+class ArrayMountProgress
+{
+public:
+    void Init(string arrayName, MountProgressType type, int progTotal);
+    void Update(int prog);
+    int Get(void);
+    void Set(void);
+    void Reset(void);
+
+private:
+    void _UpdateProgress(int prog);
+    const static int NO_ACTIVE_PROGRESS = -1;
+    int progress = NO_ACTIVE_PROGRESS;
+    string arrayName;
+    MountProgressType progressType = MountProgressType::MOUNT;
+    int progressTotal = 0;
+};
 } // namespace pos

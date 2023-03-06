@@ -67,6 +67,16 @@ ArrayMountSequence::ArrayMountSequence(vector<IMountSequence*> seq,
     sequence.assign(seq.begin(), seq.end());
     string sender = typeid(*this).name();
     state->Subscribe(this, sender);
+
+    uint32_t mountProgressTotal = MOUNT_PROGRESS_DEFAULT_OVERHEAD;
+    uint32_t unmountProgressTotal = UNMOUNT_PROGRESS_DEFAULT_OVERHEAD;
+    for (auto item : sequence)
+    {
+        mountProgressTotal += item->GetEstMountTimeSec();
+        unmountProgressTotal += item->GetEstUnmountTimeSec();
+    }
+    mountProgress.Init(arrayName, MountProgressType::MOUNT, mountProgressTotal);
+    unmountProgress.Init(arrayName, MountProgressType::UNMOUNT, unmountProgressTotal);
 }
 
 ArrayMountSequence::~ArrayMountSequence(void)
@@ -112,8 +122,11 @@ ArrayMountSequence::Mount(void)
     }
 
     // mount array
+    mountProgress.Set();
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Initializing the first mount sequence for {}", arrayName);
+    mountProgress.Update(MOUNT_PROGRESS_DEFAULT_OVERHEAD);
     ret = (*it)->Init();
+    mountProgress.Update((*it)->GetEstMountTimeSec());
     if (ret != 0)
     {
         goto error;
@@ -126,6 +139,7 @@ ArrayMountSequence::Mount(void)
     {
         POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Initializing one of the remaining sequences for {}", arrayName);
         ret = (*it)->Init();
+        mountProgress.Update((*it)->GetEstMountTimeSec());
         if (ret != EID(SUCCESS))
         {
             break;
@@ -140,6 +154,7 @@ ArrayMountSequence::Mount(void)
     state->Invoke(normalState);
     state->Remove(mountState);
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Returning from ArrayMountSequence.Mount for {}", arrayName);
+    mountProgress.Reset();
     return ret;
 
 error:
@@ -156,6 +171,7 @@ error:
         }
     }
     state->Remove(mountState);
+    mountProgress.Reset();
     return ret;
 }
 
@@ -188,7 +204,10 @@ ArrayMountSequence::Unmount(void)
     }
 
     POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Detaching volumes for {}", arrayName);
+    unmountProgress.Set();
     volMgr->DetachVolumes();
+    unmountProgress.Update(UNMOUNT_PROGRESS_DEFAULT_OVERHEAD);
+    // UNMOUNT_PROGRESS_DEFAULT_OVERHEAD covers progress of detaching volume operation
     for (auto it = sequence.rbegin(); it != sequence.rend(); ++it)
     {
         // do array->dispose after unmount2
@@ -199,14 +218,16 @@ ArrayMountSequence::Unmount(void)
 
         POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Disposing one of IMountSequence for {}", arrayName);
         (*it)->Dispose();
+        unmountProgress.Update((*it)->GetEstUnmountTimeSec());
         POS_TRACE_DEBUG(EID(MOUNT_ARRAY_DEBUG_MSG), "Disposed the IMountSequence for {}", arrayName);
     }
     // do array-dispose finally.
     sequence.front()->Flush();
     sequence.front()->Dispose();
+    unmountProgress.Update(sequence.front()->GetEstUnmountTimeSec());
     state->Remove(normalState);
     state->Remove(unmountState);
-
+    unmountProgress.Reset();
     return EID(SUCCESS);
 }
 

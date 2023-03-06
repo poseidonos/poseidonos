@@ -68,6 +68,8 @@ public:
     void Dispose(void) override;
     void Shutdown(void) override;
     void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
 
     int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
                 int32_t nsid, bool isPrimary, bool isAnaNonoptimized, std::string uuid) override;

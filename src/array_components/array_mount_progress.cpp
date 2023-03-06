@@ -30,24 +30,60 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstdint>
-#include <string>
-
-#pragma once
+#include "array_mount_progress.h"
 
 namespace pos
 {
-
-class IMountSequence
+void ArrayMountProgress::Init(string name, MountProgressType type, int progTotal)
 {
-public:
-    virtual int Init(void) = 0;
-    virtual void Dispose(void) = 0;
-    virtual void Shutdown(void) = 0;
-    virtual void Flush(void) = 0;
+    arrayName = name;
+    progressType = type;
+    progressTotal = progTotal; 
+}
 
-    virtual uint32_t GetEstMountTimeSec(void) = 0;
-    virtual uint32_t GetEstUnmountTimeSec(void) = 0;
-};
+void ArrayMountProgress::Update(int prog)
+{ 
+    _UpdateProgress(progress + prog); 
+}
 
+int ArrayMountProgress::Get(void)
+{
+    if (progress < 0 || progressTotal == 0)
+    {
+        return progress;
+    }
+    return (ceil(progress * 100 / progressTotal)); 
+}
+
+void ArrayMountProgress::Set(void)
+{
+    _UpdateProgress(0);
+}
+
+void ArrayMountProgress::Reset(void)
+{
+    progress = NO_ACTIVE_PROGRESS;
+}
+
+void ArrayMountProgress::_UpdateProgress(int prog)
+{
+    progress = prog;
+    if (progressType == MountProgressType::MOUNT)
+    {
+        int eid = EID(ARRAY_MOUNT_PROGRESS);
+        string msg = "ARRAY_MOUNT_PROGRESS";
+        POS_REPORT_TRACE(eid, "{}, [{}], array_name:{}", msg, Get(), arrayName);
+    }
+    else if (progressType == MountProgressType::UNMOUNT)
+    {
+        int eid = EID(ARRAY_UNMOUNT_PROGRESS);
+        string msg = "ARRAY_UNMOUNT_PROGRESS";
+        POS_REPORT_TRACE(eid, "{}, [{}], array_name:{}", msg, Get(), arrayName);
+    }
+    else
+    {
+        assert(false);
+        POS_TRACE_ERROR(EID(ARRAY_MOUNT_PROGRESS), "unsupported progress type");
+    }
+}
 } // namespace pos

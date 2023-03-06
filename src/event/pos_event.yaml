@@ -2579,6 +2579,20 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2650
+    Name: ARRAY_MOUNT_PROGRESS
+    Severity:
+    Description: ARRAY_MOUNT_PROGRESS
+    Cause:
+    Solution:
+  -
+    Id: 2651
+    Name: ARRAY_UNMOUNT_PROGRESS
+    Severity:
+    Description: ARRAY_UNMOUNT_PROGRESS
+    Cause:
+    Solution:
+  -
     Id: 2701
     Name: REBUILD_STOPPED_OTHER_DEVS_DETACHMENT
     Severity:
