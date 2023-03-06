@@ -55,7 +55,7 @@ class GcMapUpdate : public MetaUpdateCallback
 public:
     GcMapUpdate(void);
     GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        SegmentContextUpdater* segmentCtx_, IContextManager* contextManager,
+        SegmentContextUpdater* segmentCtxUpdater_, IContextManager* contextManager,
         IArrayInfo* arrayInfo, StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList,
         std::map<SegmentId, uint32_t> invalidSegCnt);
     virtual ~GcMapUpdate(void);

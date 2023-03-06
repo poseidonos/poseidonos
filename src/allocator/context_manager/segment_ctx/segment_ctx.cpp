@@ -676,7 +676,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
     }
 
     // Should notify subscriber before add it to the free list
-    _NotifySegmentFreedToSubscribers(segmentId);
+    _NotifySubscribersOfSegmentFreed(segmentId);
     segmentList[SegmentState::FREE]->AddToList(segmentId);
 
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
@@ -971,21 +971,23 @@ SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* src
 }
 
 SegmentInfoData*
-SegmentCtx::GetSegmentInfos(void)
+SegmentCtx::GetSegmentInfoDataArray(void)
 {
-    return segmentInfoData.data;
+    // NOTE: we assume that the elements of "segmentInfoDataSections[i].data"
+    // are contiguous on heap in the ascending order.
+    return segmentInfoDataSections[0].data;
 }
 
 void
 SegmentCtx::AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber)
 {
-    freeSubscribers.push_back(subscriber);
+    segmentFreedSubscribers.push_back(subscriber);
 }
 
 void
-SegmentCtx::_NotifySegmentFreedToSubscribers(SegmentId segmentId)
+SegmentCtx::_NotifySubscribersOfSegmentFreed(SegmentId segmentId)
 {
-    for (auto sub : freeSubscribers)
+    for (auto sub : segmentFreedSubscribers)
     {
         sub->NotifySegmentFreed(segmentId);
     }

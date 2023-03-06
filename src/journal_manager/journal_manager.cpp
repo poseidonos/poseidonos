@@ -497,7 +497,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();
         if (nullptr != segmentCtx)
         {
-            loadedSegmentInfos = segmentCtx->GetSegmentInfos();
+            loadedSegmentInfos = segmentCtx->GetSegmentInfoDataArray();
         }
     }
     versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);

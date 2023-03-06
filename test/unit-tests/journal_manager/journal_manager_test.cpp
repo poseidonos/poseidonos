@@ -123,6 +123,8 @@ public:
         EXPECT_CALL(*arrayInfo, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
         EXPECT_CALL(*contextManager, GetSegmentCtx()).WillRepeatedly(Return(segmentCtxManager));
 
+        ON_CALL(*segmentCtxManager, GetSegmentInfoDataArray).WillByDefault(Return(nullptr));
+
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, logBufferIoContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,

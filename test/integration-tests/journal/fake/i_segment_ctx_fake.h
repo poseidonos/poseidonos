@@ -56,7 +56,7 @@ public:
     void LoadContext(void);
     int FlushContexts(SegmentInfoData* vscSegmentInfoDatas);
     uint64_t GetStoredVersion(void);
-    virtual SegmentInfo* GetSegmentInfos(void);
+    virtual SegmentInfo* GetSegmentInfoDataArray(void);
 
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));

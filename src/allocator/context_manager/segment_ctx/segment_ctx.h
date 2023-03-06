@@ -114,7 +114,7 @@ public:
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
     virtual void AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber) override;
 
-    virtual SegmentInfoData* GetSegmentInfos(void);
+    virtual SegmentInfoData* GetSegmentInfoDataArray(void);
 
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
@@ -137,7 +137,7 @@ private:
     int _OnNumFreeSegmentChanged(void);
 
     void _UpdateSectionInfo(void);
-    void _NotifySegmentFreedToSubscribers(SegmentId segmentId);
+    void _NotifySubscribersOfSegmentFreed(SegmentId segmentId);
 
     // Data to be stored: Section 1
     ContextSection<SegmentCtxHeader> ctxHeader;
@@ -170,7 +170,7 @@ private:
     RebuildCtx* rebuildCtx;
     GcCtx* gcCtx;
     TelemetryPublisher* tp;
-    std::vector<ISegmentFreeSubscriber*> freeSubscribers;
+    std::vector<ISegmentFreeSubscriber*> segmentFreedSubscribers;
 };
 
 } // namespace pos

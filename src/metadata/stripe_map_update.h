@@ -43,7 +43,7 @@ class SegmentContextUpdater;
 class StripeMapUpdate : public MetaUpdateCallback
 {
 public:
-    StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap, SegmentContextUpdater* segmentCtx_);
+    StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap, SegmentContextUpdater* segmentCtxUpdater_);
     virtual ~StripeMapUpdate(void);
 
 private:

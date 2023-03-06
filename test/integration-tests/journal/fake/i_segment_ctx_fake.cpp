@@ -166,7 +166,7 @@ ISegmentCtxFake::GetStoredVersion(void)
 }
 
 SegmentInfo*
-ISegmentCtxFake::GetSegmentInfos(void)
+ISegmentCtxFake::GetSegmentInfoDataArray(void)
 {
     return segmentInfos;
 }

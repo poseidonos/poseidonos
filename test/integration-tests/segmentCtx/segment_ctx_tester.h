@@ -48,7 +48,7 @@ public:
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
-    MOCK_METHOD(SegmentInfoData*, GetSegmentInfos, (), (override));
+    MOCK_METHOD(SegmentInfoData*, GetSegmentInfoDataArray, (), (override));
 
     inline uint32_t GetNumOfSegment(void) { return addressInfo->GetnumUserAreaSegments(); }
     inline uint32_t GetNumOfBlksPerStripe(void) { return addressInfo->GetblksPerStripe(); }
@@ -155,9 +155,9 @@ private:
 
     virtual void GetSegmentInfosStub(void)
     {
-        ON_CALL(*this, GetSegmentInfos).WillByDefault([this]()
+        ON_CALL(*this, GetSegmentInfoDataArray).WillByDefault([this]()
         {
-            return realCtx->GetSegmentInfos();
+            return realCtx->GetSegmentInfoDataArray();
         });
     };
 

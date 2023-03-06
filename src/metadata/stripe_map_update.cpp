@@ -39,8 +39,8 @@
 namespace pos
 {
 StripeMapUpdate::StripeMapUpdate(StripeSmartPtr stripe, IStripeMap* stripeMap,
-    SegmentContextUpdater* segmentCtx_)
-: MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtx_),
+    SegmentContextUpdater* segmentCtxUpdater_)
+: MetaUpdateCallback(EventFrameworkApiSingleton::Instance()->IsReactorNow(), segmentCtxUpdater_),
   stripe(stripe),
   stripeMap(stripeMap)
 {
