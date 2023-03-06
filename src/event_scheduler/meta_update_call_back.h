@@ -50,7 +50,7 @@ class MetaUpdateCallback : public Callback, public ISegmentCtx
 {
 public:
     MetaUpdateCallback(void);
-    MetaUpdateCallback(bool isFrontEnd, SegmentContextUpdater* segmentCtx_,
+    MetaUpdateCallback(bool isFrontEnd, SegmentContextUpdater* segmentCtxUpdater_,
         CallbackType type = CallbackType_Unknown, uint32_t weight = 1,
         SystemTimeoutChecker* timeoutChecker = nullptr, EventScheduler* eventscheduler = nullptr);
     virtual ~MetaUpdateCallback(void);
@@ -63,7 +63,7 @@ protected:
     virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
 
-    SegmentContextUpdater* segmentCtx;
+    SegmentContextUpdater* segmentCtxUpdater;
     int logGroupId;
 };
 } // namespace pos

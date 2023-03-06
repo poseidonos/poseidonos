@@ -47,9 +47,9 @@ class BlockMapUpdate : public MetaUpdateCallback
 {
 public:
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator);
+        SegmentContextUpdater* segmentCtxUpdater_, IWBStripeAllocator* wbStripeAllocator);
     BlockMapUpdate(VolumeIoSmartPtr volumeIo, IVSAMap* vsaMap,
-        SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+        SegmentContextUpdater* segmentCtxUpdater_, IWBStripeAllocator* wbStripeAllocator,
         VsaRangeMaker* vsaRangeMaker);
     virtual ~BlockMapUpdate(void);
 

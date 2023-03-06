@@ -51,7 +51,7 @@ class MetaEventFactory
 public:
     MetaEventFactory(void) = default;
     MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+        SegmentContextUpdater* segmentCtxUpdater_, IWBStripeAllocator* wbStripeAllocator,
         IContextManager* contextManager, IArrayInfo* arrayInfo);
     virtual ~MetaEventFactory(void) = default;
 
@@ -62,7 +62,7 @@ public:
 private:
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
-    SegmentContextUpdater* segmentCtx;
+    SegmentContextUpdater* segmentCtxUpdater;
     IWBStripeAllocator* wbStripeAllocator;
     IContextManager* contextManager;
     IArrayInfo* arrayInfo;

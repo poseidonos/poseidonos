@@ -119,7 +119,7 @@ TEST_F(SegmentCtxIntegrationTest, LifeCycleTest)
     uint32_t occupiedStripeCount = segmentCtx->GetOccupiedStripeCount(segId);
     EXPECT_EQ(occupiedStripeCount, segmentCtx->GetStripesPerSegment());
 
-    SegmentInfoData* retSegmentInfo = segmentCtx->GetSegmentInfos();
+    SegmentInfoData* retSegmentInfo = segmentCtx->GetSegmentInfoDataArray();
     EXPECT_EQ(retSegmentInfo[segId].state, SegmentState::SSD);
 }
 

@@ -44,11 +44,11 @@
 namespace pos
 {
 MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    SegmentContextUpdater* segmentCtx_, IWBStripeAllocator* wbStripeAllocator,
+    SegmentContextUpdater* segmentCtxUpdater_, IWBStripeAllocator* wbStripeAllocator,
     IContextManager* contextManager, IArrayInfo* arrayInfo)
 : vsaMap(vsaMap),
   stripeMap(stripeMap),
-  segmentCtx(segmentCtx_),
+  segmentCtxUpdater(segmentCtxUpdater_),
   wbStripeAllocator(wbStripeAllocator),
   contextManager(contextManager),
   arrayInfo(arrayInfo)
@@ -58,21 +58,21 @@ MetaEventFactory::MetaEventFactory(IVSAMap* vsaMap, IStripeMap* stripeMap,
 CallbackSmartPtr
 MetaEventFactory::CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo)
 {
-    CallbackSmartPtr callback(new BlockMapUpdate(volumeIo, vsaMap, segmentCtx, wbStripeAllocator));
+    CallbackSmartPtr callback(new BlockMapUpdate(volumeIo, vsaMap, segmentCtxUpdater, wbStripeAllocator));
     return callback;
 }
 
 CallbackSmartPtr
 MetaEventFactory::CreateStripeMapUpdateEvent(StripeSmartPtr stripe)
 {
-    CallbackSmartPtr callback(new StripeMapUpdate(stripe, stripeMap, segmentCtx));
+    CallbackSmartPtr callback(new StripeMapUpdate(stripe, stripeMap, segmentCtxUpdater));
     return callback;
 }
 
 CallbackSmartPtr
 MetaEventFactory::CreateGcMapUpdateEvent(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt)
 {
-    CallbackSmartPtr callback(new GcMapUpdate(vsaMap, stripeMap, segmentCtx, contextManager, arrayInfo, stripe, mapUpdateInfoList, invalidSegCnt));
+    CallbackSmartPtr callback(new GcMapUpdate(vsaMap, stripeMap, segmentCtxUpdater, contextManager, arrayInfo, stripe, mapUpdateInfoList, invalidSegCnt));
     return callback;
 }
 

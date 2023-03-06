@@ -51,5 +51,6 @@ public:
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(SegmentInfoData*, GetSegmentInfoDataArray, (), (override));
 };
 } // namespace pos
