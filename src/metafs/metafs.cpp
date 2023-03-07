@@ -540,6 +540,7 @@ MetaFs::_MakeMetaStorageMediaInfo(PartitionType ptnType)
 {
     const PartitionLogicalSize* ptnSize = arrayInfo_->GetSizeInfo(ptnType);
     const auto partition = MetaFileUtil::ConvertToMediaType(ptnType);
+    assert(partition != MetaStorageType::Max);
     std::shared_ptr<MetaStorageInfo> newInfo = std::make_shared<MetaStorageInfo>(partition);
 
     if (ptnSize)
