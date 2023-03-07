@@ -214,9 +214,9 @@ std::vector<std::vector<int64_t>>
 IoStatistics::GetIssueCountByStorage(void)
 {
     std::vector<std::vector<int64_t>> arr(NUM_STORAGE_TYPE, std::vector<int64_t>(NUM_IO_TYPE, 0));
-    for (int i = 0; i < NUM_STORAGE_TYPE; ++i)
+    for (uint32_t i = 0; i < NUM_STORAGE_TYPE; ++i)
     {
-        for (int j = 0; j < NUM_IO_TYPE; ++j)
+        for (uint32_t j = 0; j < NUM_IO_TYPE; ++j)
         {
             arr[i][j] = issueCountByStorage[i][j];
         }
@@ -228,9 +228,9 @@ std::vector<std::vector<int64_t>>
 IoStatistics::GetIssueCountByFileType(void)
 {
     std::vector<std::vector<int64_t>> arr(NUM_FILE_TYPE, std::vector<int64_t>(NUM_IO_TYPE, 0));
-    for (int i = 0; i < NUM_FILE_TYPE; ++i)
+    for (uint32_t i = 0; i < NUM_FILE_TYPE; ++i)
     {
-        for (int j = 0; j < NUM_IO_TYPE; ++j)
+        for (uint32_t j = 0; j < NUM_IO_TYPE; ++j)
         {
             arr[i][j] = issueCountByFileType[i][j];
         }
