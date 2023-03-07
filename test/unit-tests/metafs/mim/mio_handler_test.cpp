@@ -42,6 +42,7 @@
 #include "test/unit-tests/metafs/config/metafs_config_manager_mock.h"
 #include "test/unit-tests/metafs/include/metafs_mock.h"
 #include "test/unit-tests/metafs/lib/metafs_pool_mock.h"
+#include "test/unit-tests/metafs/lib/metafs_time_interval_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_file_control_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_io_api_mock.h"
 #include "test/unit-tests/metafs/mai/metafs_management_api_mock.h"
@@ -52,6 +53,7 @@
 #include "test/unit-tests/metafs/mim/mfs_io_range_overlap_chker_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_allocator_mock.h"
 #include "test/unit-tests/metafs/mim/mpio_handler_mock.h"
+#include "test/unit-tests/metafs/mim/io_statistics_mock.h"
 #include "test/unit-tests/metafs/storage/mss_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
@@ -77,6 +79,8 @@ public:
       mss(nullptr),
       tp(nullptr),
       conf(nullptr),
+      interval(nullptr),
+      stat(nullptr),
       arrayInfo(nullptr),
       mgmt(nullptr),
       ctrl(nullptr),
@@ -107,6 +111,11 @@ public:
         EXPECT_CALL(*conf, GetMpioPoolCapacity).WillRepeatedly(Return(1024));
         EXPECT_CALL(*conf, GetWriteMpioCacheCapacity).WillRepeatedly(Return(10));
         EXPECT_CALL(*conf, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
+        interval = new NiceMock<MockMetaFsTimeInterval>(conf->GetTimeIntervalInMillisecondsForMetric());
+        stat = new NiceMock<MockIoStatistics>(conf, interval, tp);
+        EXPECT_CALL(*stat, UpdateSubmissionMetricsConditionally).WillRepeatedly(Return());
+        EXPECT_CALL(*stat, UpdateCompletionMetricsConditionally).WillRepeatedly(Return());
+        EXPECT_CALL(*stat, PublishPeriodicMetrics).WillRepeatedly(Return());
 
         ioSQ = new NiceMock<MockMetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>>(weight);
         ioCQ = new NiceMock<MockMetaFsIoQ<Mio*>>;
@@ -118,17 +127,16 @@ public:
         EXPECT_CALL(*arrayInfo, GetName).WillRepeatedly(Return("TESTARRAY"));
         EXPECT_CALL(*arrayInfo, GetIndex).WillRepeatedly(Return(0));
 
-        ConcurrentMetaFsTimeInterval* concurrentMetaFsTimeInterval = new ConcurrentMetaFsTimeInterval(5000);
         mss = new NiceMock<MockMetaStorageSubsystem>(arrayInfo->GetIndex());
 
         mgmt = new MockMetaFsManagementApi(arrayInfo->GetIndex(), mss);
         ctrl = new MockMetaFsFileControlApi();
         wbt = new MockMetaFsWBTApi(arrayInfo->GetIndex(), ctrl);
-        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp, concurrentMetaFsTimeInterval, false);
+        io = new MockMetaFsIoApi(arrayInfo->GetIndex(), ctrl, mss, tp, new ConcurrentMetaFsTimeInterval(5000), false);
 
         metaFs = new MockMetaFs(arrayInfo, false, mgmt, ctrl, io, wbt, mss, nullptr);
 
-        handler = new MioHandler(0, 0, conf, ioSQ, ioCQ, mpioAllocator, mioPool, tp);
+        handler = new MioHandler(0, 0, conf, ioSQ, ioCQ, mpioAllocator, mioPool, stat, tp);
     }
 
     virtual void
@@ -154,6 +162,8 @@ protected:
     NiceMock<MockMetaStorageSubsystem>* mss;
     NiceMock<MockTelemetryPublisher>* tp;
     NiceMock<MockMetaFsConfigManager>* conf;
+    NiceMock<MockMetaFsTimeInterval>* interval;
+    NiceMock<MockIoStatistics>* stat;
 
     MockIArrayInfo* arrayInfo;
     MockMetaFsManagementApi* mgmt;
