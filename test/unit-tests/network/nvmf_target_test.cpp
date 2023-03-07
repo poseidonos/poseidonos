@@ -1107,12 +1107,15 @@ TEST(NvmfTarget, AttachNamespaceWithPause_Success)
     NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
     NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
     void* arg1 = nullptr;
-    void* arg2 = nullptr;
+    struct EventContext arg2;
+    char* nsid = "0";
+    arg2.eventArg2 = static_cast<void*>(nsid);
+
     NvmfTargetSpy nvmfTarget(nullptr, false, nullptr);
     EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncFourParams>(_), _, _)).Times(1);
 
-    nvmfTarget.AttachNamespaceWithPause(arg1, arg2, mockEventFrameworkApi, mockSpdkNvmfCaller);
+    nvmfTarget.AttachNamespaceWithPause(arg1, static_cast<void*>(&arg2), mockEventFrameworkApi, mockSpdkNvmfCaller);
     delete mockEventFrameworkApi;
 }
 
