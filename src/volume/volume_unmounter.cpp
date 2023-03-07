@@ -100,6 +100,7 @@ VolumeUnmounter::Do(string name)
     string subnqn = vol->GetSubnqn();
     nvmfTarget->RemoveSubsystemArrayName(subnqn);
     vol->SetSubnqn("");
+    vol->SetNsid(0);
     return ret;
 }
 } // namespace pos

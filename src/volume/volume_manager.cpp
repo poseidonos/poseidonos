@@ -299,7 +299,7 @@ VolumeManager::CancelVolumeReplay(int volId)
 }
 
 int
-VolumeManager::Mount(std::string name, std::string subnqn)
+VolumeManager::Mount(std::string name, std::string subnqn, uint32_t nsId)
 {
     int ret = _CheckPrerequisite();
     if (ret != EID(SUCCESS))
@@ -320,7 +320,7 @@ VolumeManager::Mount(std::string name, std::string subnqn)
     }
 
     VolumeMounter volumeMounter(volumes, arrayInfo->GetName(), arrayInfo->GetIndex());
-    ret = volumeMounter.Do(name, subnqn);
+    ret = volumeMounter.Do(name, subnqn, nsId);
 
     if (EID(SUCCESS) == ret)
     {

@@ -58,7 +58,8 @@ namespace pos
 {
 struct NvmfTargetCallbacks NvmfTarget::nvmfCallbacks;
 const char* NvmfTarget::BDEV_NAME_PREFIX = "bdev_";
-std::atomic<int> NvmfTarget::attachedNsid;
+std::atomic<int> NvmfTarget::attachedNsStatus;
+std::atomic<int> NvmfTarget::requestNsid;
 std::atomic<int> NvmfTarget::deletedBdev;
 std::atomic<bool> NvmfTarget::deleteDone;
 
@@ -267,7 +268,7 @@ NvmfTarget::_DeleteDone(void* cbArg, int status)
 void
 NvmfTarget::_AttachDone(void* cbArg, int status)
 {
-    attachedNsid = status;
+    attachedNsStatus = status;
 }
 
 void
@@ -276,11 +277,11 @@ NvmfTarget::_TryAttachHandler(void* arg1, void* arg2)
     string subnqn = *static_cast<string*>(arg1);
     string bdevName = *static_cast<string*>(arg2);
 
-    int ret = _AttachNamespaceWithNsid(subnqn, bdevName.c_str(), 0, _AttachDone, nullptr);
+    int ret = _AttachNamespaceWithNsid(subnqn, bdevName.c_str(), requestNsid, _AttachDone, nullptr);
     if (ret == false)
     {
-        SPDK_ERRLOG("failed to try attach namespace(bdev: %s) to %s\n", bdevName.c_str(), subnqn.c_str());
-        attachedNsid = NvmfCallbackStatus::FAILED;
+        SPDK_ERRLOG("failed to try attach namespace(bdev: %s, nsid: %d) to %s\n", bdevName.c_str(), requestNsid.load(), subnqn.c_str());
+        attachedNsStatus = NvmfCallbackStatus::FAILED;
     }
 
     delete (static_cast<string*>(arg1));
@@ -288,13 +289,14 @@ NvmfTarget::_TryAttachHandler(void* arg1, void* arg2)
 }
 
 bool
-NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint64_t time)
+NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint32_t& nsId, uint64_t time)
 {
     int yetAttached = -1;
-    attachedNsid = -1;
+    attachedNsStatus = -1;
 
     string* bdevName = new string(GetBdevName(volId, arrayName));
     string* subnqn = new string(nqn);
+    requestNsid = nsId;
 
     eventFrameworkApi->SendSpdkEvent(eventFrameworkApi->GetFirstReactor(),
         _TryAttachHandler, static_cast<void*>(subnqn), static_cast<void*>(bdevName));
@@ -302,11 +304,11 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
     SystemTimeoutChecker timeChecker;
     timeChecker.SetTimeout(time);
 
-    while (attachedNsid == yetAttached)
+    while (attachedNsStatus == yetAttached)
     {
         if (true == timeChecker.CheckTimeout())
         {
-            attachedNsid = NvmfCallbackStatus::FAILED;
+            attachedNsStatus = NvmfCallbackStatus::FAILED;
             POS_EVENT_ID eventId =
                 EID(IONVMF_VOL_MOUNT_TIMEOUT);
             POS_TRACE_WARN(static_cast<int>(eventId),
@@ -316,19 +318,24 @@ NvmfTarget::TryToAttachNamespace(const string& nqn, int volId, string& arrayName
         }
         usleep(1);
     }
-    if (attachedNsid == NvmfCallbackStatus::FAILED)
+    if (attachedNsStatus == NvmfCallbackStatus::FAILED)
     {
         SPDK_ERRLOG("failed to try attach namespace(vol:%d) to %s\n", volId, nqn.c_str());
         return false;
     }
+
+    struct spdk_nvmf_subsystem* subsystem = FindSubsystem(nqn.c_str());
+    struct spdk_nvmf_ns* ns = GetNamespace(subsystem, GetBdevName(volId, arrayName));
+    nsId = spdkNvmfCaller->SpdkNvmfNsGetId(ns);
+
     return true;
 }
 
 bool
-NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName,
+NvmfTarget::AttachNamespace(const string& nqn, const string& bdevName, uint32_t& nsId,
     PosNvmfEventDoneCallback_t callback, void* arg)
 {
-    return _AttachNamespaceWithNsid(nqn, bdevName, 0, callback, arg);
+    return _AttachNamespaceWithNsid(nqn, bdevName, nsId, callback, arg);
 }
 
 bool
@@ -390,7 +397,10 @@ NvmfTarget::_AttachNamespaceWithPause(void* arg1, void* arg2, EventFrameworkApi*
     if (nullptr != spdkNvmfCaller)
     {
         struct spdk_nvmf_subsystem* subsystem = (struct spdk_nvmf_subsystem*)arg1;
-        int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, 0, nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
+        struct EventContext* ctx = static_cast<EventContext*>(arg2);
+        string nsidString(static_cast<char*>(ctx->eventArg2));
+
+        int ret = spdkNvmfCaller->SpdkNvmfSubsystemPause(subsystem, std::stoi(nsidString), nvmfCallbacks.attachNamespacePauseDone, (void*)arg2);
         if (ret != 0)
         {
             SPDK_NOTICELOG("failed to pause subsystem during attaching namespace : retrying \n");

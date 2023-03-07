@@ -57,7 +57,7 @@ VolumeInterface::VolumeInterface(VolumeList& volumeList, std::string arrayName, 
         eventPublisher = volumeEventPublisher;
     }
 
-    volumeEventBase = {0, 0, "", "", ""};
+    volumeEventBase = {0, 0, "", "", "", 0};
     volumeEventPerf = {0, 0};
     volumeArrayInfo = {0, ""};
 }
@@ -159,6 +159,7 @@ VolumeInterface::_SetVolumeEventBase(VolumeBase* volume, std::string subnqn)
         volumeEventBase.subnqn = volume->GetSubnqn();
     }
     volumeEventBase.uuid = volume->GetUuid();
+    volumeEventBase.nsid = volume->GetNsid();
 }
 
 void

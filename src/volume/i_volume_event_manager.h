@@ -49,7 +49,7 @@ public:
     virtual int Create(std::string name, uint64_t size, uint64_t maxiops, uint64_t maxbw, bool checkWalVolume,
                         int32_t nsid, bool isPrimary, bool isAnaNonoptimized, std::string uuid = "") = 0;
     virtual int Delete(std::string name) = 0;
-    virtual int Mount(std::string name, std::string subnqn) = 0;
+    virtual int Mount(std::string name, std::string subnqn, uint32_t nsId) = 0;
     virtual int Unmount(std::string name) = 0;
     virtual int Unmount(int volId) = 0;
     virtual int UpdateQoSProperty(std::string name, uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw) = 0;

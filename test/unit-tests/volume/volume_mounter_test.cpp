@@ -52,7 +52,7 @@ TEST(VolumeMounter, _CheckIfExistVolume_)
 
     VolumeMounter volumeMounter(volumes, arrayName, arrayID);
 
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -87,7 +87,7 @@ TEST(VolumeMounter, _CheckIfExistSubsystem_)
     ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(false));
     ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(nullptr));
 
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then
     ASSERT_EQ(actual, expected);
@@ -130,7 +130,7 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_)
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(false));
 
     expected = EID(MOUNT_VOL_SUBSYSTEM_ALREADY_OCCUPIED);
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then 1
     ASSERT_EQ(actual, expected);
@@ -173,7 +173,7 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_1)
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(true));
 
     expected = EID(MOUNT_VOL_SUBSYSTEM_MISMATCH);
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then 1
     ASSERT_EQ(actual, expected);
@@ -218,7 +218,7 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_2)
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeMounted(_, _, _)).WillByDefault(Return(false));
 
     expected = EID(MOUNT_VOL_SUBSYSTEM_MISMATCH);
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then 1
     ASSERT_EQ(actual, expected);
@@ -265,7 +265,7 @@ TEST(VolumeMounter, _MountVolume_)
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeMounted(_, _, _)).WillByDefault(Return(false));
 
     expected = EID(MOUNT_VOL_ALREADY_MOUNTED);
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then 1
     ASSERT_EQ(actual, expected);
@@ -310,7 +310,7 @@ TEST(VolumeMounter, _MountVolume_1)
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeMounted(_, _, _)).WillByDefault(Return(false));
 
     expected = EID(VOL_REQ_PROCESSED_BUT_ERROR_OCCURED);
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then 1
     ASSERT_EQ(actual, expected);
@@ -354,12 +354,12 @@ TEST(VolumeMounter, _RollBackVolumeMount_)
 
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeMounted(_, _, _)).WillByDefault(Return(true));
 
-    ON_CALL(mockNvmfTarget, TryToAttachNamespace(_, _, _, _)).WillByDefault(Return(false));
+    ON_CALL(mockNvmfTarget, TryToAttachNamespace(_, _, _, _, _)).WillByDefault(Return(false));
 
     ON_CALL(mockVolumeEventPublisher, NotifyVolumeUnmounted(_, _)).WillByDefault(Return(false));
 
     expected = EID(MOUNT_VOL_UNABLE_TO_ATTACH_TO_NVMF);
-    actual = volumeMounter.Do(name, subnqn);
+    actual = volumeMounter.Do(name, subnqn, 0);
 
     // Then 1
     ASSERT_EQ(actual, expected);

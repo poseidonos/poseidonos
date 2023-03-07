@@ -207,11 +207,12 @@ TEST(NvmfTarget, TryToAttachNamespace_Fail)
     NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
     string nqn{"test_nqn"};
     string arrayName{"array"};
+    uint32_t nsId;
     bool actual, expected{false};
 
     ON_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncTwoParams>(_), _, _)).WillByDefault(Return(true));
     NvmfTarget nvmfTarget(mockSpdkCaller, false, mockEventFrameworkApi);
-    actual = nvmfTarget.TryToAttachNamespace(nqn, 0, arrayName, 500000000ULL);
+    actual = nvmfTarget.TryToAttachNamespace(nqn, 0, arrayName, nsId, 500000000ULL);
     ASSERT_EQ(actual, expected);
     delete mockEventFrameworkApi;
     delete mockSpdkCaller;
@@ -223,9 +224,10 @@ TEST(NvmfTarget, AttachNamespace_TargetDoesNotExist)
     string nqn{"test_nqn"};
     string bdevName{"bdev"};
     bool expected{false};
+    uint32_t nsid = 0;
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr);
-    bool actual = nvmfTarget.AttachNamespace(nqn, bdevName, nullptr, nullptr);
+    bool actual = nvmfTarget.AttachNamespace(nqn, bdevName, nsid, nullptr, nullptr);
 
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
@@ -1105,12 +1107,15 @@ TEST(NvmfTarget, AttachNamespaceWithPause_Success)
     NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
     NiceMock<MockEventFrameworkApi>* mockEventFrameworkApi = new NiceMock<MockEventFrameworkApi>;
     void* arg1 = nullptr;
-    void* arg2 = nullptr;
+    struct EventContext arg2;
+    char* nsid = "0";
+    arg2.eventArg2 = static_cast<void*>(nsid);
+
     NvmfTargetSpy nvmfTarget(nullptr, false, nullptr);
     EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemPause(_, _, _, _)).WillOnce(Return(1));
     EXPECT_CALL(*mockEventFrameworkApi, SendSpdkEvent(_, Matcher<EventFuncFourParams>(_), _, _)).Times(1);
 
-    nvmfTarget.AttachNamespaceWithPause(arg1, arg2, mockEventFrameworkApi, mockSpdkNvmfCaller);
+    nvmfTarget.AttachNamespaceWithPause(arg1, static_cast<void*>(&arg2), mockEventFrameworkApi, mockSpdkNvmfCaller);
     delete mockEventFrameworkApi;
 }
 
