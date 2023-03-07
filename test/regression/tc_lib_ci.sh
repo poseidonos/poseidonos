@@ -355,6 +355,11 @@ normal_shutdown()
                 ps -C poseidonos > /dev/null
             done
             start_pos &
+            ps -C poseidonos > /dev/null
+            while [[ ${?} == 1 ]]
+            do
+                ps -C poseidonos > /dev/null
+            done
             pkill poseidonos
         fi
 
