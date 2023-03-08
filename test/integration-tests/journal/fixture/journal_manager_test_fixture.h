@@ -17,6 +17,7 @@
 
 namespace pos
 {
+class SegmentContextUpdater;
 class JournalManagerTestFixture
 {
 public:
@@ -48,6 +49,7 @@ protected:
     LogWriteTestFixture* writeTester;
     ReplayTestFixture* replayTester;
     TestInfo* testInfo;
+    SegmentContextUpdater* segmentContextUpdater;
 
     const uint64_t INVALID_BUFFER_SIZE = UINT64_MAX;
 

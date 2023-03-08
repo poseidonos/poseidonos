@@ -128,16 +128,14 @@ SegmentCtxFake::LoadContext(void)
         segmentInfoData = buffer;
         for (uint32_t i = 0; i < numSegments; ++i)
         {
-            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
+            segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
         }
     }
     else
     {
         for (uint32_t i = 0; i < numSegments; ++i)
         {
-            segmentInfos[i].SetValidBlockCount(0);
-            segmentInfos[i].SetOccupiedStripeCount(0);
-            segmentInfos[i].SetState(SegmentState::FREE);
+            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
         }
     }
 }
@@ -165,10 +163,10 @@ SegmentCtxFake::GetStoredVersion(void)
     return ctxStoredVersion;
 }
 
-SegmentInfo*
+SegmentInfoData*
 SegmentCtxFake::GetSegmentInfoDataArray(void)
 {
-    return segmentInfos;
+    return segmentInfoData;
 }
 
 void
@@ -189,13 +187,14 @@ SegmentCtxFake::_InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
     auto result = segmentInfos[segId].DecreaseValidBlockCount(blks.numBlks, allowVictimSegRelease);
+    bool segmentFreed = result.first;
     if (result.second == SegmentState::ERROR)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
             "segment_id{}, vsid: {}, offset: {}, decase_count: {}, current_valid_block_count: {}, allow {}", segId, blks.startVsa.stripeId, blks.startVsa.offset, blks.numBlks, segmentInfos[segId].GetValidBlockCount(), allowVictimSegRelease);
         throw std::runtime_error("Assertion failed, An underflow occurred with valid block count");
     }
-    return true;
+    return segmentFreed;
 }
 
 bool
@@ -210,6 +209,12 @@ SegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
             "segment_id:{}, lsid:{}, total_stripe_count_per_segment:{}", segId, lsid, addrInfo->GetstripesPerSegment());
         throw std::runtime_error("Assertion failed, An overflow occurred with occpied stripe count");
     }
+    else if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
+    {
+         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
+            "OccupiedStripeCount has reached the maximum. segment free is required, segment_id:{}, lsid:{}, total_stripe_count_per_segment:{}", segId, lsid, addrInfo->GetstripesPerSegment());
+    }
+    return false;
 }
 
 void

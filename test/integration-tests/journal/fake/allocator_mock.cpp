@@ -6,7 +6,7 @@
 #include "test/integration-tests/journal/fake/wbstripe_allocator_mock.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
-#include "test/integration-tests/journal/fake/i_context_replayer_mock.h"
+#include "test/integration-tests/journal/fake/i_context_replayer_fake.h"
 
 using ::testing::StrictMock;
 namespace pos
@@ -24,7 +24,7 @@ AllocatorMock::AllocatorMock(TestInfo* testInfo, IArrayInfo* info)
     wbStripeAllocatorMock = new StrictMock<WBStripeAllocatorMock>();
     segmentCtxFake = new StrictMock<SegmentCtxFake>(addrInfoMock, new MockFileIntf(GetSegmentContextFileName(), arrayId, MetaFileType::General, MetaVolumeType::SsdVolume));
     contextManagerFake = new StrictMock<IContextManagerFake>(segmentCtxFake, addrInfoMock);
-    contextReplayerFake = new StrictMock<IContextReplayerFake>();
+    contextReplayerFake = new StrictMock<IContextReplayerFake>(segmentCtxFake);
 }
 
 AllocatorMock::~AllocatorMock(void)

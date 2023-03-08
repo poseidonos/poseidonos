@@ -174,4 +174,10 @@ ReplayTestFixture::GetNextBlock(VirtualBlks blks)
     nextVsa.offset += blks.numBlks;
     return nextVsa;
 }
+
+void
+ReplayTestFixture::UpdateMapper(MockMapper* _mapper)
+{
+    mapper = _mapper;
+}
 } // namespace pos

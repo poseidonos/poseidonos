@@ -1,25 +1,26 @@
 #include "vsamap_fake.h"
 #include "src/mapper/include/mapper_const.h"
 
+using ::testing::AtLeast;
+
 namespace pos
 {
 VSAMapFake::VSAMapFake(TestInfo* testInfo)
 : testInfo(testInfo)
 {
     map = new VirtualBlkAddr*[testInfo->maxNumVolume];
-    for (int idx = 0; idx < testInfo->maxNumVolume; idx++)
+    for (int volumeId = 0; volumeId < testInfo->maxNumVolume; volumeId++)
     {
-        map[idx] = new VirtualBlkAddr[testInfo->maxVolumeSizeInBlock];
+        map[volumeId] = new VirtualBlkAddr[testInfo->maxVolumeSizeInBlock];
         for (uint64_t blk = 0; blk < testInfo->maxVolumeSizeInBlock; blk++)
         {
-            map[idx][blk] = UNMAP_VSA;
+            map[volumeId][blk] = UNMAP_VSA;
         }
     }
 
-    ON_CALL(*this, SetVSAsInternal).WillByDefault(::testing::Invoke(this,
-        &VSAMapFake::_SetVSAsInternal));
-    ON_CALL(*this, SetVSAsWithSyncOpen).WillByDefault(::testing::Invoke(this,
-        &VSAMapFake::_SetVSAsWithSyncOpen));
+    ON_CALL(*this, SetVSAsInternal).WillByDefault(::testing::Invoke(this, &VSAMapFake::_SetVSAsInternal));
+    ON_CALL(*this, SetVSAsWithSyncOpen).WillByDefault(::testing::Invoke(this, &VSAMapFake::_SetVSAsWithSyncOpen));
+    EXPECT_CALL(*this, SetVSAsWithSyncOpen).Times(AtLeast(0));
 }
 
 VSAMapFake::~VSAMapFake(void)
@@ -39,6 +40,15 @@ VSAMapFake::GetVSAInternal(int volumeId, BlkAddr rba, int& caller)
 
     caller = OK_READY;
     return map[volumeId][rba];
+}
+
+VirtualBlkAddr
+VSAMapFake::GetVSAWithSyncOpen(int volId, BlkAddr rba)
+{
+    assert(volId < testInfo->maxNumVolume);
+    assert(rba < testInfo->maxVolumeSizeInBlock);
+
+    return map[volId][rba];
 }
 
 MpageList
@@ -62,7 +72,7 @@ int
 VSAMapFake::_SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
     assert(volumeId < testInfo->maxNumVolume);
-
+    std::unique_lock<std::mutex> lock(vsaMapLock);
     for (uint32_t blkCount = 0; blkCount < virtualBlks.numBlks; blkCount++)
     {
         assert(startRba + blkCount < testInfo->maxVolumeSizeInBlock);
@@ -73,42 +83,9 @@ VSAMapFake::_SetVSAsInternal(int volumeId, BlkAddr startRba, VirtualBlks& virtua
 }
 
 int
-VSAMapFake::GetVSAs(int volumeId, BlkAddr startRba, uint32_t numBlks,
-    VsaArray& vsaArray)
-{
-    return 0;
-}
-
-int
-VSAMapFake::SetVSAs(int volumeId, BlkAddr startRba, VirtualBlks& virtualBlks)
-{
-    return 0;
-}
-
-VirtualBlkAddr
-VSAMapFake::GetRandomVSA(BlkAddr rba)
-{
-    return UNMAP_VSA;
-}
-
-int64_t
-VSAMapFake::GetNumUsedBlks(int volId)
-{
-    return 0;
-}
-
-VirtualBlkAddr
-VSAMapFake::GetVSAWithSyncOpen(int volId, BlkAddr rba)
-{
-    assert(volId < testInfo->maxNumVolume);
-    assert(rba < testInfo->maxVolumeSizeInBlock);
-
-    return map[volId][rba];
-}
-
-int
 VSAMapFake::_SetVSAsWithSyncOpen(int volId, BlkAddr startRba, VirtualBlks& virtualBlks)
 {
+    std::unique_lock<std::mutex> lock(vsaMapLock);
     assert(volId < testInfo->maxNumVolume);
     for (uint32_t blkCount = 0; blkCount < virtualBlks.numBlks; blkCount++)
     {

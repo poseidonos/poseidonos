@@ -494,10 +494,10 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     SegmentInfoData* loadedSegmentInfos = nullptr;
     if (nullptr != contextManager)
     {
-        SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();
-        if (nullptr != segmentCtx)
+        SegmentCtx* loadedSegmentCtx = contextManager->GetSegmentCtx();
+        if (nullptr != loadedSegmentCtx)
         {
-            loadedSegmentInfos = segmentCtx->GetSegmentInfoDataArray();
+            loadedSegmentInfos = loadedSegmentCtx->GetSegmentInfoDataArray();
         }
     }
     versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);

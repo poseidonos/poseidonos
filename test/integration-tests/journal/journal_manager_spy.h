@@ -20,6 +20,7 @@ class IJournalStatusProvider;
 class TelemetryPublisher;
 class TelemetryClient;
 class IVersionedSegmentContext;
+class SegmentContextUpdater;
 
 class JournalManagerSpy : public JournalManager
 {
@@ -29,7 +30,7 @@ public:
     virtual ~JournalManagerSpy(void);
 
     int InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator,
-        IVolumeInfoManager* volumeManager);
+        IVolumeInfoManager* volumeManager, SegmentContextUpdater* segmentContextUpdater);
     int DoRecoveryForTest(void);
     void DeleteLogBuffer(void);
     void ResetJournalConfiguration(JournalConfiguration* journalConfig);

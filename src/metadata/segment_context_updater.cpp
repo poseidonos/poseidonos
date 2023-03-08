@@ -61,18 +61,24 @@ bool
 SegmentContextUpdater::InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId)
 {
     SegmentId segmentId = blks.startVsa.stripeId / addrInfo->stripesPerSegment;
-    bool ret = activeSegmentCtx->InvalidateBlks(blks, isForced);
+    bool segmentFreed = activeSegmentCtx->InvalidateBlks(blks, isForced);
     versionedContext->DecreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-    return ret;
+    return segmentFreed;
 }
 
 bool
 SegmentContextUpdater::UpdateOccupiedStripeCountWithGroupId(StripeId lsid, int logGroupId)
 {
     SegmentId segmentId = lsid / addrInfo->stripesPerSegment;
-    bool ret = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
+    bool segmentFreed = activeSegmentCtx->UpdateOccupiedStripeCount(lsid);
     versionedContext->IncreaseOccupiedStripeCount(logGroupId, segmentId);
-    return ret;
+    return segmentFreed;
+}
+
+void
+SegmentContextUpdater::SetVersionedSegmentContext(IVersionedSegmentContext* versionedSegmentContext)
+{
+    versionedContext = versionedSegmentContext;
 }
 
 } // namespace pos
