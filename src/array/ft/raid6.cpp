@@ -192,7 +192,7 @@ Raid6::_AllocChunk()
 {
     if (parityPools.size() == 0)
     {
-        POS_TRACE_CRITICAL(EID(RAID_DEBUG_MSG), "No paritypools available");
+        POS_TRACE_ERROR(EID(INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL), "No paritypools available");
         assert(false);
     }
     
@@ -202,7 +202,7 @@ Raid6::_AllocChunk()
 
     if (mem == nullptr)
     {
-        POS_TRACE_CRITICAL(EID(RAID_DEBUG_MSG), "No free buffers available");
+        POS_TRACE_ERROR(EID(INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL), "No free buffers available");
         assert(false);
     }
 

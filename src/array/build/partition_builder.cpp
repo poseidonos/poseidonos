@@ -106,6 +106,7 @@ PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& par
 {
     uint32_t blksPerStripeOfMetaPart = 0;
     uint32_t blksPerStripeOfDataPart = 0;
+    int ret = 0;
 
     for (Partition* part : partitions)
     {
@@ -118,9 +119,17 @@ PartitionBuilder::_CreateNvmPartitions(ArrayDevice* nvm, vector<Partition*>& par
             blksPerStripeOfDataPart = part->GetLogicalSize()->blksPerStripe;
         }
     }
-
-    int ret = PartitionFactory::CreateNvmPartitions(nvm, partitions,
-        blksPerStripeOfMetaPart, blksPerStripeOfDataPart);
+    if (blksPerStripeOfMetaPart == 0 || blksPerStripeOfDataPart == 0)
+    {
+        ret = EID(BUILD_NVM_PARTITIONS_ERROR);
+        POS_TRACE_ERROR(ret, "blksPerStripeOfMetaPart:{}, blksPerStripeOfDataPart:{}",
+            blksPerStripeOfMetaPart, blksPerStripeOfDataPart);
+    }
+    if (ret == 0)
+    {
+        ret = PartitionFactory::CreateNvmPartitions(nvm, partitions,
+            blksPerStripeOfMetaPart, blksPerStripeOfDataPart);
+    }
     return ret;
 }
 
