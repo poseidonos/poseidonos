@@ -29,6 +29,8 @@ public:
 
     static VirtualBlkAddr GetNextBlock(VirtualBlks blks);
 
+    void UpdateMapper(MockMapper* _mapper);
+
 private:
     VirtualBlks _GetBlock(VirtualBlks blks, uint32_t offset);
 

@@ -7,11 +7,13 @@
 
 namespace pos
 {
-class ISegmentCtx;
+class SegmentCtxFake;
 class IContextReplayerFake : public IContextReplayer
 {
 public:
-    using IContextReplayer::IContextReplayer;
+    explicit IContextReplayerFake(SegmentCtxFake* segmentCtx);
+    ~IContextReplayerFake(void) = default;
+
     MOCK_METHOD(void, ResetDirtyContextVersion, (int owner), (override));
     MOCK_METHOD(void, ReplaySsdLsid, (StripeId currentSsdLsid), (override));
     MOCK_METHOD(void, ReplaySegmentAllocation, (StripeId userLsid), (override));
@@ -26,7 +28,9 @@ public:
     virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
 
 private:
-    ISegmentCtx* segmentCtx;
+    void _ReplayStripeFlushed(StripeId userLsid);
+
+    SegmentCtxFake* segmentCtx;
 };
 
 } // namespace pos

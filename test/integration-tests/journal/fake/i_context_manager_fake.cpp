@@ -3,6 +3,7 @@
 #include <thread>
 
 #include "src/allocator/address/allocator_address_info.h"
+#include "src/metadata/segment_context_updater.h"
 #include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 
 namespace pos
@@ -18,17 +19,17 @@ IContextManagerFake::~IContextManagerFake(void)
 {
 }
 
-IVersionedSegmentContext*
-IContextManagerFake::GetVersionedSegmentContext(void)
-{
-    return versionedSegCtx;
-}
-
 uint64_t
 IContextManagerFake::GetStoredContextVersion(int owner)
 {
     uint64_t contextVersion = segmentCtx->GetStoredVersion();
     return contextVersion;
+}
+
+SegmentCtx*
+IContextManagerFake::GetSegmentCtx(void)
+{
+    return dynamic_cast<SegmentCtx*>(segmentCtx);
 }
 
 int

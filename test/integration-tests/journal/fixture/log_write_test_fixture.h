@@ -1,5 +1,11 @@
 #pragma once
 
+#include <unordered_map>
+#include <mutex>
+#include <utility>
+#include <vector>
+
+#include "src/include/address_type.h"
 #include "test/integration-tests/journal/fake/allocator_mock.h"
 #include "test/integration-tests/journal/fake/array_info_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
@@ -11,12 +17,13 @@
 
 namespace pos
 {
+class SegmentContextUpdater;
 class LogWriteTestFixture
 {
 public:
     LogWriteTestFixture(void) = delete;
     LogWriteTestFixture(MockMapper* _mapper, AllocatorMock* _allocator, ArrayInfoMock* _array,
-        JournalManagerSpy* _journal, TestInfo* _testInfo);
+        JournalManagerSpy* _journal, TestInfo* _testInfo, SegmentContextUpdater* _segmentContextUpdater);
     virtual ~LogWriteTestFixture(void);
 
     void Reset(void);
@@ -31,6 +38,7 @@ public:
 
     void GenerateLogsForStripe(StripeTestFixture& stripe, uint32_t startOffset, int numBlks);
     void WriteLogsForStripe(StripeTestFixture& stripe);
+    void WriteLogsForStripeWithOverwrittenBlock(StripeTestFixture& stripe, StripeTestFixture& targetStripe);
     void WriteBlockLogsForStripe(StripeTestFixture& stripe);
 
     void WriteOverwrittenBlockLogs(StripeTestFixture& stripe,
@@ -41,6 +49,8 @@ public:
 
     void CompareLogs(void);
     MapList GetDirtyMap(void);
+
+    void UpdateMapper(MockMapper* _mapper);
 
 private:
     BlockMapList _GenerateBlocksInStripe(StripeId vsid, uint32_t startOffset, int numBlks);
@@ -58,5 +68,6 @@ private:
     ArrayInfoMock* array;
     AllocatorMock* allocator;
     JournalManagerSpy* journal;
+    SegmentContextUpdater* segmentContextUpdater;
 };
 } // namespace pos
