@@ -30,51 +30,67 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-#include <map>
+#include "load_replayed_segment_context.h"
 
-#include "src/journal_manager/replay/task_progress.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/i_segment_ctx.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-enum class ReplayTaskId
+LoadReplayedSegmentContext::LoadReplayedSegmentContext(SegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx, ReplayProgressReporter* reporter)
+: ReplayTask(reporter),
+  segmentCtx(segmentCtx),
+  versionedSegCtx(versionedSegCtx)
 {
-    READ_LOG_BUFFER,
-    FILTER_LOGS,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES,
-    LOAD_REPLAYED_SEGMENT_CONTEXT
-};
+}
 
-class ReplayProgressReporter
+LoadReplayedSegmentContext::~LoadReplayedSegmentContext(void)
 {
-public:
-    ReplayProgressReporter(void);
-    virtual ~ReplayProgressReporter(void) = default;
-    virtual void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+}
 
-    void CompleteAll(void);
+int
+LoadReplayedSegmentContext::GetNumSubTasks(void)
+{
+    return 1;
+}
 
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+int
+LoadReplayedSegmentContext::Start(void)
+{
+    int ret = 0;
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
+    POS_TRACE_INFO(eventId, "[ReplayTask] Load versioned segment context");
 
-private:
-    void _ReportProgress(void);
+    SegmentInfoData* loadedSegmentInfos = nullptr;
+    if (nullptr != segmentCtx)
+    {
+        loadedSegmentInfos = segmentCtx->GetSegmentInfoDataArray();
+    }
+    else
+    {
+        // reachable only in UT context
+    }
 
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
+    versionedSegCtx->Load(loadedSegmentInfos);
 
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
-};
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    return ret;
+}
+
+ReplayTaskId
+LoadReplayedSegmentContext::GetId(void)
+{
+    return ReplayTaskId::LOAD_REPLAYED_SEGMENT_CONTEXT;
+}
+
+int
+LoadReplayedSegmentContext::GetWeight(void)
+{
+    return 10;
+}
 
 } // namespace pos

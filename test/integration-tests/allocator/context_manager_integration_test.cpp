@@ -73,8 +73,6 @@ protected:
     JournalManager* journal;
     SegmentInfoData* segInfoDataForSegCtx;
     SegmentCtx* segCtx;
-    SegmentInfo* loadedSegInfos;
-    SegmentInfoData* loadedSegInfoDataForSegCtx;
     ContextManager* ctxManager;
     CheckpointHandler* cpHandler;
 
@@ -174,14 +172,6 @@ ContextManagerIntegrationTest::SetUp(void)
         nullptr, dirtyMapManager, logFilledNotifier,
         callbackSequenceController, replayHandler, arrayInfo, tp);
 
-    loadedSegInfos = new SegmentInfo[numOfSegment];
-    loadedSegInfoDataForSegCtx = new SegmentInfoData[numOfSegment];
-    for(int i=0;i<numOfSegment;++i)
-    {
-        loadedSegInfoDataForSegCtx[i].Set(0, 0, SegmentState::FREE);
-        loadedSegInfos[i].AllocateAndInitSegmentInfoData(&loadedSegInfoDataForSegCtx[i]);
-    }
-
     ctxManager = new ContextManager(tp, allocCtx, segCtx, reCtx,
         gcCtx, blockAllocStatus, ioManager, nullptr, nullptr, 0);
 
@@ -197,9 +187,6 @@ ContextManagerIntegrationTest::SetUp(void)
 void
 ContextManagerIntegrationTest::TearDown(void)
 {
-    delete [] loadedSegInfos;
-    delete [] loadedSegInfoDataForSegCtx;
-
     if (nullptr != arrayInfo)
     {
         delete arrayInfo;

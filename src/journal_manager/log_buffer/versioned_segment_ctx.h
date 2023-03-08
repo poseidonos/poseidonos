@@ -51,7 +51,8 @@ public:
     DummyVersionedSegmentCtx(void) = default;
     virtual ~DummyVersionedSegmentCtx(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfos, uint32_t numSegments) override {}
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override {}
+    virtual void Load(SegmentInfoData* loadedSegmentInfos) override {}
     virtual void Dispose(void) override {}
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
@@ -59,7 +60,7 @@ public:
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override { return nullptr; }
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
 
     // LogBufferWriteDoneEvent
@@ -76,11 +77,12 @@ public:
     VersionedSegmentCtx(void);
     virtual ~VersionedSegmentCtx(void);
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfos, uint32_t numSegments) override;
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override;
+    virtual void Load(SegmentInfoData* loadedSegmentInfos) override;
     virtual void Dispose(void) override;
 
     // For UT
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo);
 
     // Implementation of IVersionedSegmentContext interface
@@ -100,7 +102,7 @@ public:
     virtual void NotifySegmentFreed(SegmentId segmentId) override;
 
 private:
-    void _Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_);
+    void _Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_);
     void _UpdateSegmentContext(int logGroupId);
     void _CheckLogGroupIdValidity(int logGroupId);
     void _CheckSegIdValidity(int segId);

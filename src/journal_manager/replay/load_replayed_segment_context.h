@@ -31,50 +31,28 @@
  */
 
 #pragma once
-#include <map>
 
-#include "src/journal_manager/replay/task_progress.h"
+#include "replay_task.h"
 
 namespace pos
 {
-enum class ReplayTaskId
-{
-    READ_LOG_BUFFER,
-    FILTER_LOGS,
-    REPLAY_LOGS,
-    REPLAY_VOLUME_DELETION,
-    FLUSH_METADATA,
-    RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES,
-    LOAD_REPLAYED_SEGMENT_CONTEXT
-};
+class SegmentCtx;
+class IVersionedSegmentContext;
 
-class ReplayProgressReporter
+class LoadReplayedSegmentContext : public ReplayTask
 {
 public:
-    ReplayProgressReporter(void);
-    virtual ~ReplayProgressReporter(void) = default;
-    virtual void RegisterTask(ReplayTaskId taskId, int taskWeight);
-    void TaskStarted(ReplayTaskId taskId, int numSubTasks);
-    void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
-    void TaskCompleted(ReplayTaskId taskId);
+    LoadReplayedSegmentContext(SegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx, ReplayProgressReporter* reporter);
+    virtual ~LoadReplayedSegmentContext(void);
 
-    void CompleteAll(void);
-
-    int GetProgress(void);
-    int GetReportedProgress(void);
-    int GetTotalWeight(void);
-    const TaskProgress GetTaskProgress(ReplayTaskId taskId);
+    virtual int Start(void) override;
+    virtual ReplayTaskId GetId(void);
+    virtual int GetWeight(void) override;
+    virtual int GetNumSubTasks(void) override;
 
 private:
-    void _ReportProgress(void);
-
-    std::map<ReplayTaskId, TaskProgress> taskProgressList;
-    int totalWeight;
-
-    int progress;
-    int currentTaskProgress;
-    int reportedProgress;
+    SegmentCtx* segmentCtx;
+    IVersionedSegmentContext* versionedSegCtx;
 };
 
 } // namespace pos
