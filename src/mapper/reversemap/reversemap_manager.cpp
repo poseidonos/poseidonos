@@ -241,30 +241,25 @@ int
 ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint64_t totalRbaNum, uint32_t wblsid, uint32_t vsid, uint64_t blockCount, std::map<uint64_t, BlkAddr> revMapInfos)
 {
     int ret = 0;
-    BlkAddr lastFoundRba = UINT64_MAX;
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA), "[ReconstructMap] START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}", volumeId, wblsid, vsid, blockCount);
 
+    // construct the map of stripe id to offset to rba
+    if (!invertedMap.size())
+    {
+        _ConstructInvertedMap(volumeId, totalRbaNum);
+    }
+
+    // verify
+    _CheckInvertedMapValid(vsid, revMapInfos);
+
+    // look up rba
     for (uint64_t offset = 0; offset < blockCount; offset++)
     {
-        if (revMapInfos.find(offset) == revMapInfos.end())
+        auto foundRba = _FindRba({vsid, offset});
+        if (foundRba.first)
         {
-            // Set the RBA to start finding
-            BlkAddr rbaStart = 0;
-            if (lastFoundRba != UINT64_MAX)
-            {
-                rbaStart = lastFoundRba + 1;
-            }
-
-            BlkAddr foundRba = INVALID_RBA;
-            bool found = _FindRba(volumeId, totalRbaNum, vsid, wblsid, offset, rbaStart, foundRba);
-            if (found == false)
-            {
-                continue;
-            }
-            revMapInfos.insert(make_pair(offset, foundRba));
-            lastFoundRba = foundRba;
+            revMapPacks[wblsid].SetReverseMapEntry(offset, foundRba.second, volumeId);
         }
-        revMapPacks[wblsid].SetReverseMapEntry(offset, revMapInfos[offset], volumeId);
     }
 
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA), "[ReconstructMap] {}/{} blocks are reconstructed for Stripe(wbLsid:{})", revMapInfos.size(), blockCount, wblsid);
@@ -297,45 +292,48 @@ ReverseMapManager::GetReverseMapPtrForWBT(void)
     return revMapPacks[0].GetRevMapPtrForWBT();
 }
 
-bool
-ReverseMapManager::_FindRba(uint32_t volumeId, uint64_t totalRbaNum, StripeId vsid, StripeId wblsid, uint64_t offset, BlkAddr rbaStart, BlkAddr& foundRba)
+std::pair<bool, BlkAddr>
+ReverseMapManager::_FindRba(const VirtualBlkAddr addr)
 {
-    assert(totalRbaNum > 0);
-
-    bool looped = false;
-    for (BlkAddr rbaToCheck = rbaStart; rbaToCheck <= totalRbaNum; ++rbaToCheck)
+    auto result = invertedMap[addr.stripeId].find((uint64_t)addr.offset);
+    if (result == invertedMap[addr.stripeId].end())
     {
-        // If rbaToCheck exceeds more than totalRbaNum, looped would be set as TRUE
-        if (rbaToCheck == totalRbaNum)
-        {
-            rbaToCheck = 0;
-            looped = true;
-        }
-
-        if ((rbaToCheck == rbaStart) && looped)
-        {
-            return false;
-        }
-
-        // Usually map is opened before, but exception exists in replay time.
-        // Map will be opened synchronously here only in replay time which is okay.
-        VirtualBlkAddr vsaToCheck = iVSAMap->GetVSAWithSyncOpen(volumeId, rbaToCheck);
-        if (vsaToCheck == UNMAP_VSA || vsaToCheck.offset != offset || vsaToCheck.stripeId != vsid)
-        {
-            continue;
-        }
-
-        StripeAddr lsaToCheck = iStripeMap->GetLSA(vsaToCheck.stripeId);
-        if (iStripeMap->IsInUserDataArea(lsaToCheck) || lsaToCheck.stripeId != wblsid)
-        {
-            continue;
-        }
-
-        foundRba = rbaToCheck;
-        return true;
+        return {false, -1};
     }
+    return {true, result->second};
+}
 
-    return false;
+void
+ReverseMapManager::_ConstructInvertedMap(const uint32_t volumeId, const uint64_t totalRbaNum)
+{
+    for (uint64_t rba = 0; rba < totalRbaNum; rba++)
+    {
+        auto vsaToCheck = iVSAMap->GetVSAWithSyncOpen(volumeId, rba);
+        if (vsaToCheck == UNMAP_VSA)
+        {
+            continue;
+        }
+        invertedMap[vsaToCheck.stripeId].insert({(uint64_t)vsaToCheck.offset, rba});
+    }
+}
+
+void
+ReverseMapManager::_CheckInvertedMapValid(const uint32_t vsid, const std::map<uint64_t, BlkAddr> revMapInfos)
+{
+    auto iter = revMapInfos.begin();
+    while (iter != revMapInfos.end())
+    {
+        auto rbaInLog = iter->second;
+        auto result = invertedMap[vsid].find(iter->first);
+        if (result != invertedMap[vsid].end() && result->second != rbaInLog)
+        {
+            POS_TRACE_ERROR(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
+                "RBA cannot be found, vsid:{}, result->second:{}, rbaInLog:{}",
+                vsid, result->second, rbaInLog);
+            assert(false);
+        }
+        ++iter;
+    }
 }
 
 void
