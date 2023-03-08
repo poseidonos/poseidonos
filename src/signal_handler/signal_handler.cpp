@@ -84,7 +84,7 @@ SignalHandler::Register(void)
     signal(SIGABRT, SignalHandler::ExceptionHandler);
     signal(SIGTERM, SignalHandler::ExceptionHandler);
     signal(SIGQUIT, SignalHandler::ExceptionHandler);
-    signal(SIGUSR1, SIG_DFL);
+    signal(SIGUSR1, SignalHandler::ExceptionHandler);
 }
 
 void
@@ -169,6 +169,18 @@ SignalHandler::_ExceptionHandler(int sig)
             std::lock_guard<std::mutex> lock(signalMutex);
             _Log("Quit Signal Handling!");
             _ShutdownProcess();
+            break;
+        }
+        case SIGUSR1:
+        {
+            sigset_t oldset;
+            SignalMask::MaskSignal(&oldset);
+            {
+                std::lock_guard<std::mutex> lock(signalMutex);
+                _Log("May be stuck on the below backtrace ");
+                _BacktraceAndInvokeNextThread(sig);
+            }
+            SignalMask::RestoreSignal(&oldset);
             break;
         }
         default:

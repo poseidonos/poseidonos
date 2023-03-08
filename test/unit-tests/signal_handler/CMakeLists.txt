@@ -1,2 +1,3 @@
 POS_ADD_UNIT_TEST(user_signal_interface_ut user_signal_interface_test.cpp)
 POS_ADD_UNIT_TEST(signal_handler_ut signal_handler_test.cpp)
+POS_ADD_UNIT_TEST(deadlock_checker_ut deadlock_checker_test.cpp)
