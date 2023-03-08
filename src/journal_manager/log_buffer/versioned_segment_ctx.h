@@ -51,7 +51,7 @@ public:
     DummyVersionedSegmentCtx(void) = default;
     virtual ~DummyVersionedSegmentCtx(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override {}
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment) override {}
     virtual void Load(SegmentInfoData* loadedSegmentInfos) override {}
     virtual void Dispose(void) override {}
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
@@ -77,7 +77,7 @@ public:
     VersionedSegmentCtx(void);
     virtual ~VersionedSegmentCtx(void);
 
-    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override;
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment) override;
     virtual void Load(SegmentInfoData* loadedSegmentInfos) override;
     virtual void Dispose(void) override;
 

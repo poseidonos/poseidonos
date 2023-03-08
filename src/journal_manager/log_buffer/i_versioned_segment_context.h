@@ -48,7 +48,7 @@ class IVersionedSegmentContext: public LogBufferWriteDoneEvent, public ISegmentF
 public:
     virtual ~IVersionedSegmentContext(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) = 0;
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment) = 0;
     virtual void Load(SegmentInfoData* loadedSegmentInfos) = 0;
     virtual void Dispose(void) = 0;
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;

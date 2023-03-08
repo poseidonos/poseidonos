@@ -33,16 +33,19 @@
 #pragma once
 
 #include <atomic>
+
+#include "src/allocator/i_segment_ctx.h"
 #include "src/include/address_type.h"
-#include "tbb/concurrent_unordered_map.h"
 #include "tbb/atomic.h"
+#include "tbb/concurrent_unordered_map.h"
 
 namespace pos
 {
-class VersionedSegmentInfo
+class VersionedSegmentInfo : public ISegmentCtx
 {
 public:
-    VersionedSegmentInfo(void);
+    VersionedSegmentInfo(void) = default;
+    VersionedSegmentInfo(uint32_t numStripesPerSegment);
     virtual ~VersionedSegmentInfo(void);
 
     virtual void Reset(void);
@@ -51,13 +54,24 @@ public:
     virtual void IncreaseOccupiedStripeCount(SegmentId segId);
     virtual void ResetOccupiedStripeCount(SegmentId segId);
     virtual void ResetValidBlockCount(SegmentId segId);
-    
+
+    // This will be used in volume deletion
+    virtual void ValidateBlks(VirtualBlks blks) override;
+    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced) override;
+    virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
+
     virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&  GetChangedValidBlockCount(void);
     virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>&  GetChangedOccupiedStripeCount(void);
 
 private:
     tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlockCount;
     tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
+
+    inline SegmentId _StripeIdToSegmentId(StripeId stripeId)
+    {
+        return stripeId / numStripesPerSegment;
+    }
+    uint32_t numStripesPerSegment;
 };
 
 } // namespace pos

@@ -490,7 +490,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         sequenceController, dirtyMapManager, versionedSegCtx, telemetryPublisher);
 
     const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-    versionedSegCtx->Init(config, udSize->totalSegments);
+    versionedSegCtx->Init(config, udSize->totalSegments, udSize->stripesPerSegment);
 
     logWriteContextFactory->Init(config);
     logBufferIoContextFactory->Init(config, logFilledNotifier, sequenceController);
@@ -509,7 +509,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
     logWriteHandler->Init(bufferAllocator, logBuffer, config, EasyTelemetryPublisherSingleton::Instance(),
         arrayInfo->GetIndex(), new ConcurrentMetaFsTimeInterval(config->GetIntervalForMetric()));
     volumeEventHandler->Init(logWriteContextFactory, checkpointManager, dirtyMapManager, logWriteHandler,
-        config, contextManager, eventScheduler);
+        config, contextManager, eventScheduler, udSize->stripesPerSegment);
     journalWriter->Init(logWriteHandler, logWriteContextFactory, eventFactory, &journalingStatus, eventScheduler);
 
     replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx, versionedSegCtx,

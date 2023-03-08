@@ -120,7 +120,17 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     }
 
     // Invalidate all blocks in the volume
-    result = mapper->InvalidateAllBlocksTo(volEventBase->volId, allocator->GetISegmentCtx());
+    auto segmentCtxToUse = allocator->GetISegmentCtx();
+    if (journal != nullptr)
+    {
+        auto toUse = journal->AllocateSegmentCtxToUse();
+        if (toUse != nullptr)
+        {
+            segmentCtxToUse = toUse;
+        }
+    }
+
+    result = mapper->InvalidateAllBlocksTo(volEventBase->volId, segmentCtxToUse);
     if (result != 0)
     {
         return result;

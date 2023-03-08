@@ -42,7 +42,7 @@ class MockDummyVersionedSegmentCtx : public DummyVersionedSegmentCtx
 {
 public:
     using DummyVersionedSegmentCtx::DummyVersionedSegmentCtx;
-    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration, uint32_t numSegments), (override));
+    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment), (override));
     MOCK_METHOD(void, Load, (SegmentInfoData* loadedSegmentInfos), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));
@@ -60,7 +60,7 @@ class MockVersionedSegmentCtx : public VersionedSegmentCtx
 {
 public:
     using VersionedSegmentCtx::VersionedSegmentCtx;
-    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration, uint32_t numSegments), (override));
+    MOCK_METHOD(void, Init, (JournalConfiguration * journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment), (override));
     MOCK_METHOD(void, Load, (SegmentInfoData* loadedSegmentInfos), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, IncreaseValidBlockCount, (int logGroupId, SegmentId segId, uint32_t cnt), (override));

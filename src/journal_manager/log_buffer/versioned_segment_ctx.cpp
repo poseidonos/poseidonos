@@ -55,13 +55,13 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_, uint32_t numStripesPerSegment)
 {
     _Init(journalConfiguration, numSegments_);
 
     for (int index = 0; index < config->GetNumLogGroups(); index++)
     {
-        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
+        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo(numStripesPerSegment));
         segmentInfoDiffs.push_back(segmentInfo);
     }
 }

@@ -47,7 +47,7 @@ namespace pos
 TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncreasedDecreasedAndReseted)
 {
     // Given
-    VersionedSegmentInfo versionedSegInfo;
+    VersionedSegmentInfo versionedSegInfo(1024);
 
     // When
     versionedSegInfo.IncreaseValidBlockCount(2, 3);
@@ -74,7 +74,7 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
 TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCountIsIncreasedAndReseted)
 {
     // Given
-    VersionedSegmentInfo versionedSegInfo;
+    VersionedSegmentInfo versionedSegInfo(1024);
 
     // When
     tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> expectChangedOccupiedCount;
@@ -115,7 +115,7 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
     std::vector<std::thread> threadList;
     boost::barrier barrierToWait(numThread);
 
-    VersionedSegmentInfo versionedSegInfo;
+    VersionedSegmentInfo versionedSegInfo(1024);
     SegmentId targetSegmentId = 0;
 
     // When
@@ -157,7 +157,7 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
     std::vector<std::thread> threadList;
     boost::barrier barrierToWait(numThread);
 
-    VersionedSegmentInfo versionedSegInfo;
+    VersionedSegmentInfo versionedSegInfo(1024);
     SegmentId targetSegmentId = 0;
 
     // When
@@ -192,5 +192,58 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
 
     // Then
     EXPECT_EQ(true, versionedSegInfo.GetChangedValidBlockCount().empty());
+}
+
+TEST(VersionedSegmentInfo, ISegmentCtx_testIfCountChangesWhenCalledByISegmentCtxInterfaces)
+{
+    // Given
+    VersionedSegmentInfo versionedSegInfo(1024);
+
+    {
+        // When 1. Update Valid Block Count
+        {
+            auto blks = VirtualBlks{
+                .startVsa = {.stripeId = 100, .offset = 0},
+                .numBlks = 5};
+            versionedSegInfo.ValidateBlks(blks);
+        }
+
+        {
+            auto blks = VirtualBlks{
+                .startVsa = {.stripeId = 2030, .offset = 0},
+                .numBlks = 10};
+            versionedSegInfo.InvalidateBlks(blks, false);
+        }
+
+        // Then
+        tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> expectChangedValidCount;
+        expectChangedValidCount[0] = 5;
+        expectChangedValidCount[1] = -10;
+
+        auto var = versionedSegInfo.GetChangedValidBlockCount();
+
+        EXPECT_EQ(expectChangedValidCount[0], var[0]);
+        EXPECT_EQ(expectChangedValidCount[1], var[1]);
+    }
+
+    {
+        // When 2. Update Occupied Stripe Count
+        versionedSegInfo.UpdateOccupiedStripeCount(10);
+        versionedSegInfo.UpdateOccupiedStripeCount(11);
+        versionedSegInfo.UpdateOccupiedStripeCount(12);
+
+        versionedSegInfo.UpdateOccupiedStripeCount(1026);
+        versionedSegInfo.UpdateOccupiedStripeCount(1027);
+
+        // Then
+        tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> expectChangedOccupiedStripeCount;
+        expectChangedOccupiedStripeCount[0] = 3;
+        expectChangedOccupiedStripeCount[1] = 2;
+
+        auto var = versionedSegInfo.GetChangedOccupiedStripeCount();
+
+        EXPECT_EQ(expectChangedOccupiedStripeCount[0], var[0]);
+        EXPECT_EQ(expectChangedOccupiedStripeCount[1], var[1]);
+    }
 }
 } // namespace pos

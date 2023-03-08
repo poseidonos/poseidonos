@@ -79,7 +79,7 @@ protected:
 TEST_F(VersionedSegmentCtxTestFixture, Init_testIfInitWhenNumberOfLogGroupsIsTwo)
 {
     // When
-    versionedSegCtx.Init(&config, 3);
+    versionedSegCtx.Init(&config, 3, 1024 /* not interested */);
 }
 
 TEST_F(VersionedSegmentCtxTestFixture, Dispose_testIfContextIsDeleted)
@@ -88,7 +88,7 @@ TEST_F(VersionedSegmentCtxTestFixture, Dispose_testIfContextIsDeleted)
     versionedSegCtx.Dispose();
 
     // When : Init and Dispose
-    versionedSegCtx.Init(&config, 3);
+    versionedSegCtx.Init(&config, 3, 1024 /*not interested*/);
     versionedSegCtx.Dispose();
 }
 

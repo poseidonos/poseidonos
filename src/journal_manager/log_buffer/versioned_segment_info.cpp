@@ -35,7 +35,8 @@
 
 namespace pos
 {
-VersionedSegmentInfo::VersionedSegmentInfo(void)
+VersionedSegmentInfo::VersionedSegmentInfo(uint32_t numStripesPerSegment_)
+: numStripesPerSegment(numStripesPerSegment_)
 {
 }
 
@@ -91,5 +92,30 @@ const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>&
 VersionedSegmentInfo::GetChangedOccupiedStripeCount(void)
 {
     return this->changedOccupiedStripeCount;
+}
+
+void
+VersionedSegmentInfo::ValidateBlks(VirtualBlks blks)
+{
+    SegmentId segmentId = _StripeIdToSegmentId(blks.startVsa.stripeId);
+    changedValidBlockCount[segmentId].fetch_and_add(blks.numBlks);
+}
+
+bool
+VersionedSegmentInfo::InvalidateBlks(VirtualBlks blks, bool isForced)
+{
+    SegmentId segmentId = _StripeIdToSegmentId(blks.startVsa.stripeId);
+    changedValidBlockCount[segmentId].fetch_and_add(-1 * (int)blks.numBlks);
+
+    return false;
+}
+
+bool
+VersionedSegmentInfo::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    SegmentId segmentId = _StripeIdToSegmentId(lsid);
+    changedOccupiedStripeCount[segmentId].fetch_and_add(1);
+
+    return false;
 }
 } // namespace pos
