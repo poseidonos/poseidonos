@@ -4,6 +4,7 @@
 
 #include "src/include/pos_event_id.h"
 #include "test/unit-tests/allocator/allocator_mock.h"
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/journal_manager/log_write/i_journal_volume_event_handler_mock.h"
@@ -328,6 +329,72 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalE
     {
         InSequence s;
         EXPECT_CALL(mapper, PrepareVolumeDelete(volumeEvent.volId)).WillOnce(Return(0));
+        EXPECT_CALL(journal, WriteVolumeDeletedLog(volumeEvent.volId)).WillOnce(Return(0));
+        EXPECT_CALL(journal, TriggerMetadataFlush).WillOnce(Return(0));
+        EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).WillOnce(Return(0));
+    }
+
+    int result = handler.VolumeDeleted(&volumeEvent, nullptr);
+    int expected = EID(VOL_EVENT_OK);
+    EXPECT_EQ(result, expected);
+}
+
+TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalAndVscDisabled)
+{
+    NiceMock<MockIArrayInfo> info;
+    NiceMock<MockIMapperVolumeEventHandler> mapper;
+    NiceMock<MockAllocator> allocator;
+    NiceMock<MockIJournalVolumeEventHandler> journal;
+    MetaVolumeEventHandler handler(&info, &mapper, &allocator, &journal);
+
+    VolumeEventBase volumeEvent = {
+        .volId = 2,
+        .volSizeByte = 100,
+        .volName = "testVolume",
+        .uuid = "",
+        .subnqn = ""};
+
+    NiceMock<MockISegmentCtx> segmentCtx;
+    EXPECT_CALL(allocator, GetISegmentCtx).WillOnce(Return(&segmentCtx));
+    EXPECT_CALL(journal, AllocateSegmentCtxToUse).WillOnce(Return(nullptr));
+
+    {
+        InSequence s;
+        EXPECT_CALL(mapper, PrepareVolumeDelete(volumeEvent.volId)).WillOnce(Return(0));
+        EXPECT_CALL(mapper, InvalidateAllBlocksTo(_, &segmentCtx)).WillOnce(Return(0));
+        EXPECT_CALL(journal, WriteVolumeDeletedLog(volumeEvent.volId)).WillOnce(Return(0));
+        EXPECT_CALL(journal, TriggerMetadataFlush).WillOnce(Return(0));
+        EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).WillOnce(Return(0));
+    }
+
+    int result = handler.VolumeDeleted(&volumeEvent, nullptr);
+    int expected = EID(VOL_EVENT_OK);
+    EXPECT_EQ(result, expected);
+}
+
+TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalAndVscEnabled)
+{
+    NiceMock<MockIArrayInfo> info;
+    NiceMock<MockIMapperVolumeEventHandler> mapper;
+    NiceMock<MockAllocator> allocator;
+    NiceMock<MockIJournalVolumeEventHandler> journal;
+    MetaVolumeEventHandler handler(&info, &mapper, &allocator, &journal);
+
+    VolumeEventBase volumeEvent = {
+        .volId = 2,
+        .volSizeByte = 100,
+        .volName = "testVolume",
+        .uuid = "",
+        .subnqn = ""};
+
+    NiceMock<MockISegmentCtx> segmentCtx, targetSegmentCtx;
+    EXPECT_CALL(allocator, GetISegmentCtx).WillOnce(Return(&segmentCtx));
+    EXPECT_CALL(journal, AllocateSegmentCtxToUse).WillOnce(Return(&targetSegmentCtx));
+
+    {
+        InSequence s;
+        EXPECT_CALL(mapper, PrepareVolumeDelete(volumeEvent.volId)).WillOnce(Return(0));
+        EXPECT_CALL(mapper, InvalidateAllBlocksTo(_, &targetSegmentCtx)).WillOnce(Return(0));
         EXPECT_CALL(journal, WriteVolumeDeletedLog(volumeEvent.volId)).WillOnce(Return(0));
         EXPECT_CALL(journal, TriggerMetadataFlush).WillOnce(Return(0));
         EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).WillOnce(Return(0));

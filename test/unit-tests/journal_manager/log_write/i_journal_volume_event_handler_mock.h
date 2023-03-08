@@ -12,6 +12,7 @@ public:
     using IJournalVolumeEventHandler::IJournalVolumeEventHandler;
     MOCK_METHOD(int, WriteVolumeDeletedLog, (int volId), (override));
     MOCK_METHOD(int, TriggerMetadataFlush, (), (override));
+    MOCK_METHOD(ISegmentCtx*, AllocateSegmentCtxToUse, (), (override));
 };
 
 } // namespace pos

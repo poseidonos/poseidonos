@@ -13,6 +13,7 @@ public:
     MOCK_METHOD(void, Init, (bool isWriteThroughEnabled), (override));
     MOCK_METHOD(int, SetLogBufferSize, (uint64_t loadedLogBufferSize, MetaFs* metaFs), (override));
     MOCK_METHOD(bool, IsEnabled, (), (override));
+    MOCK_METHOD(bool, IsVscEnabled, (), (override));
     MOCK_METHOD(bool, IsDebugEnabled, (), (override));
     MOCK_METHOD(bool, AreReplayWbStripesInUserArea, (), (override));
     MOCK_METHOD(bool, IsRocksdbEnabled, (), (override));
