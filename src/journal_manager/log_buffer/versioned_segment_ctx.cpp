@@ -35,7 +35,6 @@
 #include <unordered_map>
 
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
-#include "src/array_models/interface/i_array_info.h"
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
@@ -43,9 +42,8 @@
 
 namespace pos
 {
-VersionedSegmentCtx::VersionedSegmentCtx(IArrayInfo* arrayInfo)
+VersionedSegmentCtx::VersionedSegmentCtx(void)
 : config(nullptr),
-  arrayInfo(arrayInfo),
   numSegments(0),
   segmentInfoData(nullptr)
 {
@@ -57,13 +55,13 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_, uint32_t numStripesPerSegment)
 {
     _Init(journalConfiguration, numSegments_);
 
     for (int index = 0; index < config->GetNumLogGroups(); index++)
     {
-        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo(arrayInfo));
+        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo(numStripesPerSegment));
         segmentInfoDiffs.push_back(segmentInfo);
     }
 }

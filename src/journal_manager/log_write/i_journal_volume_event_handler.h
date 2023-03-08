@@ -34,11 +34,14 @@
 
 namespace pos
 {
+class ISegmentCtx;
+
 class IJournalVolumeEventHandler
 {
 public:
     virtual int WriteVolumeDeletedLog(int volId) = 0;
     virtual int TriggerMetadataFlush(void) = 0;
+    virtual ISegmentCtx* AllocateSegmentCtxToUse(void) = 0;
 };
 
 } // namespace pos

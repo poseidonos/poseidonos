@@ -43,6 +43,7 @@
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/journal_log_buffer.h"
 #include "src/journal_manager/log_buffer/log_write_context_factory.h"
+#include "src/journal_manager/log_buffer/versioned_segment_info.h"
 #include "src/journal_manager/log_write/log_write_handler.h"
 #include "src/journal_manager/log_write/log_write_request.h"
 #include "src/journal_manager/log_write/volume_deleted_log_write_callback.h"
@@ -60,19 +61,26 @@ JournalVolumeEventHandler::JournalVolumeEventHandler(void)
   dirtyMapManager(nullptr),
   logWriteHandler(nullptr),
   logWriteInProgress(false),
-  flushInProgress(false)
+  flushInProgress(false),
+  numStripesPerSegment(0),
+  versionedSegmentInfo(nullptr)
 {
 }
 
 JournalVolumeEventHandler::~JournalVolumeEventHandler(void)
 {
+    if (versionedSegmentInfo != nullptr)
+    {
+        delete versionedSegmentInfo;
+    }
 }
 
 void
 JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
     CheckpointManager* cpManager, DirtyMapManager* dirtyManager,
     LogWriteHandler* writter, JournalConfiguration* journalConfiguration,
-    IContextManager* contextManagerToUse, EventScheduler* scheduler)
+    IContextManager* contextManagerToUse, EventScheduler* scheduler,
+    uint32_t numStripesPerSegment_)
 {
     config = journalConfiguration;
     logFactory = factory;
@@ -82,6 +90,8 @@ JournalVolumeEventHandler::Init(LogWriteContextFactory* factory,
 
     contextManager = contextManagerToUse;
     eventScheduler = scheduler;
+
+    numStripesPerSegment = numStripesPerSegment_;
 
     isInitialized = true;
 }
@@ -171,6 +181,20 @@ JournalVolumeEventHandler::_WaitForAllocatorContextFlushCompleted(void)
     flushCondVar.wait(lock, [&] {
         return (flushInProgress == false);
     });
+}
+
+ISegmentCtx*
+JournalVolumeEventHandler::AllocateSegmentCtxToUse(void)
+{
+    if (config->IsVscEnabled() == true)
+    {
+        versionedSegmentInfo = new VersionedSegmentInfo(numStripesPerSegment);
+        return versionedSegmentInfo;
+    }
+    else
+    {
+        return nullptr;
+    }
 }
 
 void

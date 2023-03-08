@@ -39,7 +39,6 @@
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
-#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 
 using testing::NiceMock;
 using testing::Return;
@@ -51,19 +50,13 @@ const static int NUM_STRIPES_PER_SEGMENT = 1024;
 class VersionedSegmentCtxTestFixture : public testing::Test
 {
 public:
-    VersionedSegmentCtxTestFixture(void)
-    : versionedSegCtx(&arrayInfo)
-    {
-    };
+    VersionedSegmentCtxTestFixture(void) = default;
     virtual ~VersionedSegmentCtxTestFixture(void) {};
 
     virtual void SetUp(void)
     {
         numLogGroups = 2;
         ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
-
-        sizeInfo.stripesPerSegment = NUM_STRIPES_PER_SEGMENT;
-        ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&sizeInfo));
 
         int numSegInfos = 3;
         segmentInfoData = new SegmentInfoData[numSegInfos];
@@ -78,8 +71,6 @@ public:
     }
 
 protected:
-    PartitionLogicalSize sizeInfo;
-    NiceMock<MockIArrayInfo> arrayInfo;
     SegmentInfoData* segmentInfoData;
     VersionedSegmentCtx versionedSegCtx;
     NiceMock<MockJournalConfiguration> config;
@@ -89,7 +80,7 @@ protected:
 TEST_F(VersionedSegmentCtxTestFixture, Init_testIfInitWhenNumberOfLogGroupsIsTwo)
 {
     // When
-    versionedSegCtx.Init(&config, 3);
+    versionedSegCtx.Init(&config, 3, 1024 /* not interested */);
 }
 
 TEST_F(VersionedSegmentCtxTestFixture, Dispose_testIfContextIsDeleted)
@@ -98,7 +89,7 @@ TEST_F(VersionedSegmentCtxTestFixture, Dispose_testIfContextIsDeleted)
     versionedSegCtx.Dispose();
 
     // When : Init and Dispose
-    versionedSegCtx.Init(&config, 3);
+    versionedSegCtx.Init(&config, 3, 1024 /*not interested*/);
     versionedSegCtx.Dispose();
 }
 
@@ -279,7 +270,7 @@ TEST_F(VersionedSegmentCtxTestFixture, NotifySegmentFreed_testIfSegmentFreed)
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
-        std::shared_ptr<VersionedSegmentInfo> input(new VersionedSegmentInfo(&arrayInfo));
+        std::shared_ptr<VersionedSegmentInfo> input(new VersionedSegmentInfo(NUM_STRIPES_PER_SEGMENT));
         versionedSegmentInfo.push_back(input);
     }
     versionedSegCtx.Init(&config, 3, versionedSegmentInfo);

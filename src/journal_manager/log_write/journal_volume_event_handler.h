@@ -60,10 +60,12 @@ public:
     virtual void Init(LogWriteContextFactory* logFactory,
         CheckpointManager* cpManager, DirtyMapManager* dirtyManager,
         LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration,
-        IContextManager* contextManager, EventScheduler* scheduler);
+        IContextManager* contextManager, EventScheduler* scheduler,
+        uint32_t numStripesPerSegment);
 
     virtual int WriteVolumeDeletedLog(int volId) override;
     virtual int TriggerMetadataFlush(void) override;
+    virtual ISegmentCtx* AllocateSegmentCtxToUse(void) override;
 
     virtual void MetaFlushed(void) override;
 
@@ -94,6 +96,9 @@ private:
     std::mutex flushMutex;
     std::condition_variable flushCondVar;
     bool flushInProgress;
+
+    uint32_t numStripesPerSegment;
+    VersionedSegmentInfo* versionedSegmentInfo;
 };
 
 } // namespace pos

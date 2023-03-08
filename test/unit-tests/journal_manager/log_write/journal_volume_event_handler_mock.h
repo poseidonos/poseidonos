@@ -10,7 +10,7 @@ class MockJournalVolumeEventHandler : public JournalVolumeEventHandler
 {
 public:
     using JournalVolumeEventHandler::JournalVolumeEventHandler;
-    MOCK_METHOD(void, Init, (LogWriteContextFactory* logFactory, CheckpointManager* cpManager, DirtyMapManager* dirtyManager, LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration, IContextManager* contextManager, EventScheduler* scheduler), (override));
+    MOCK_METHOD(void, Init, (LogWriteContextFactory * logFactory, CheckpointManager* cpManager, DirtyMapManager* dirtyManager, LogWriteHandler* logWritter, JournalConfiguration* journalConfiguration, IContextManager* contextManager, EventScheduler* scheduler, uint32_t numStripesPerSegment), (override));
     MOCK_METHOD(int, WriteVolumeDeletedLog, (int volId), (override));
     MOCK_METHOD(int, TriggerMetadataFlush, (), (override));
     MOCK_METHOD(void, MetaFlushed, (), (override));

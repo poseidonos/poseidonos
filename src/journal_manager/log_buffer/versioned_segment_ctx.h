@@ -41,7 +41,6 @@
 
 namespace pos
 {
-class IArrayInfo;
 class VersionedSegmentInfo;
 class JournalConfiguration;
 class SegmentInfoData;
@@ -49,10 +48,9 @@ class DummyVersionedSegmentCtx : public IVersionedSegmentContext
 {
 public:
     DummyVersionedSegmentCtx(void) = default;
-    DummyVersionedSegmentCtx(IArrayInfo* arrayInfo) {}
     virtual ~DummyVersionedSegmentCtx(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override {}
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment) override {}
     virtual void Load(SegmentInfoData* loadedSegmentInfos) override {}
     virtual void Dispose(void) override {}
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
@@ -75,11 +73,10 @@ public:
 class VersionedSegmentCtx : public IVersionedSegmentContext
 {
 public:
-    VersionedSegmentCtx(void) = default;
-    VersionedSegmentCtx(IArrayInfo* arrayInfo);
+    VersionedSegmentCtx(void);
     virtual ~VersionedSegmentCtx(void);
 
-    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override;
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments, uint32_t numStripesPerSegment) override;
     virtual void Load(SegmentInfoData* loadedSegmentInfos) override;
     virtual void Dispose(void) override;
 
@@ -110,7 +107,6 @@ private:
     void _CheckSegIdValidity(int segId);
 
     JournalConfiguration* config;
-    IArrayInfo* arrayInfo;
     uint32_t numSegments;
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
     SegmentInfoData* segmentInfoData;
