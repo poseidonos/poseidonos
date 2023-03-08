@@ -35,11 +35,14 @@
 #include <functional>
 #include <string>
 
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log_buffer/i_journal_log_buffer.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 #include "src/journal_manager/replay/filter_logs.h"
 #include "src/journal_manager/replay/flush_metadata.h"
 #include "src/journal_manager/replay/flush_pending_stripes.h"
+#include "src/journal_manager/replay/load_replayed_segment_context.h"
 #include "src/journal_manager/replay/read_log_buffer.h"
 #include "src/journal_manager/replay/replay_logs.h"
 #include "src/journal_manager/replay/replay_volume_deletion.h"
@@ -49,20 +52,27 @@
 namespace pos
 {
 ReplayHandler::ReplayHandler(IStateControl* iState)
+: ReplayHandler(iState, 
+    new LogDeleteChecker(),
+    new ReplayProgressReporter())
+{
+}
+
+ReplayHandler::ReplayHandler(IStateControl* iState, LogDeleteChecker* logDeleteChecker, ReplayProgressReporter* reporter)
 : replayState(iState),
+  logDeleteChecker(logDeleteChecker),
   config(nullptr),
   logBuffer(nullptr),
+  reporter(reporter),
   telemetryPublisher(nullptr),
   timeCount(std::chrono::system_clock::now())
 {
-    reporter = new ReplayProgressReporter();
-    logDeleteChecker = new LogDeleteChecker();
 }
 
 void
 ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     IJournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
+    IMapFlush* mapFlush, ISegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager, TelemetryPublisher* tp)
 {
@@ -72,13 +82,13 @@ ReplayHandler::Init(JournalConfiguration* journalConfiguration,
 
     logList.Init(config->GetNumLogGroups());
 
-    _InitializeTaskList(vsaMap, stripeMap, mapFlush, segmentCtx,
+    _InitializeTaskList(vsaMap, stripeMap, mapFlush, segmentCtx, versionedSegCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager);
 }
 
 void
 ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
-    IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
+    IMapFlush* mapFlush, ISegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager)
 {
@@ -89,6 +99,9 @@ ReplayHandler::_InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
     _AddTask(new ReplayVolumeDeletion(logDeleteChecker, contextManager, volumeManager, reporter));
     _AddTask(new FlushMetadata(mapFlush, contextManager, reporter));
     _AddTask(new ResetLogBuffer(logBuffer, reporter));
+    // This task should be added after all segment contexts have finished replaying.
+    _AddTask(new LoadReplayedSegmentContext((SegmentCtx*)segmentCtx, versionedSegCtx, reporter));
+
     _AddTask(new FlushPendingStripes(config, pendingWbStripes, wbStripeAllocator, reporter));
 }
 
