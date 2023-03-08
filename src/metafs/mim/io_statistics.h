@@ -53,7 +53,7 @@ public:
     IoStatistics(MetaFsConfigManager* configManager, MetaFsTimeInterval* interval, TelemetryPublisher* tp);
     virtual ~IoStatistics(void);
 
-    virtual void UpdateSubmissionMetricsConditionally(const Mio* mio);
+    virtual void UpdateSubmissionMetrics(const Mio* mio);
     virtual void UpdateCompletionMetricsConditionally(const Mio* mio);
     virtual void PublishPeriodicMetrics(const size_t freeMioCount, const size_t cacheSize);
 

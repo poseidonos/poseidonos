@@ -44,7 +44,7 @@ class MockIoStatistics : public IoStatistics
 {
 public:
     using IoStatistics::IoStatistics;
-    MOCK_METHOD(void, UpdateSubmissionMetricsConditionally, (const Mio* mio));
+    MOCK_METHOD(void, UpdateSubmissionMetrics, (const Mio* mio));
     MOCK_METHOD(void, UpdateCompletionMetricsConditionally, (const Mio* mio));
     MOCK_METHOD(void, PublishPeriodicMetrics, (const size_t freeMioCount, const size_t cacheSize));
 };

@@ -113,7 +113,7 @@ public:
         EXPECT_CALL(*conf, GetTimeIntervalInMillisecondsForMetric).WillRepeatedly(Return(1000));
         interval = new NiceMock<MockMetaFsTimeInterval>(conf->GetTimeIntervalInMillisecondsForMetric());
         stat = new NiceMock<MockIoStatistics>(conf, interval, tp);
-        EXPECT_CALL(*stat, UpdateSubmissionMetricsConditionally).WillRepeatedly(Return());
+        EXPECT_CALL(*stat, UpdateSubmissionMetrics).WillRepeatedly(Return());
         EXPECT_CALL(*stat, UpdateCompletionMetricsConditionally).WillRepeatedly(Return());
         EXPECT_CALL(*stat, PublishPeriodicMetrics).WillRepeatedly(Return());
 

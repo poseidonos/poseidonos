@@ -141,7 +141,7 @@ TEST_F(IoStatisticsTestFixture, UpdateSubmission_testIfCountsOfReadIncresesCorre
     EXPECT_CALL(*mio, GetTargetStorage).WillOnce(Return(STORAGE_TYPE));
     EXPECT_CALL(*mio, GetFileType).WillOnce(Return(FILE_TYPE));
 
-    stat->UpdateSubmissionMetricsConditionally(mio);
+    stat->UpdateSubmissionMetrics(mio);
 
     auto countOfStorage = stat->GetIssueCountByStorage();
     EXPECT_EQ(countOfStorage[(int)STORAGE_TYPE][(int)IS_READ], 1);
@@ -160,7 +160,7 @@ TEST_F(IoStatisticsTestFixture, UpdateSubmission_testIfCountsOfWriteIncresesCorr
     EXPECT_CALL(*mio, GetTargetStorage).WillOnce(Return(STORAGE_TYPE));
     EXPECT_CALL(*mio, GetFileType).WillOnce(Return(FILE_TYPE));
 
-    stat->UpdateSubmissionMetricsConditionally(mio);
+    stat->UpdateSubmissionMetrics(mio);
 
     auto countOfStorage = stat->GetIssueCountByStorage();
     EXPECT_EQ(countOfStorage[(int)STORAGE_TYPE][(int)IS_READ], 1);

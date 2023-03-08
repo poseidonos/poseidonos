@@ -445,7 +445,7 @@ MioHandler::_FreeLockContext(Mio* mio)
 void
 MioHandler::ExecuteMio(Mio* mio)
 {
-    statistics->UpdateSubmissionMetricsConditionally(mio);
+    statistics->UpdateSubmissionMetrics(mio);
     mio->ExecuteAsyncState();
 }
 

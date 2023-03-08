@@ -73,7 +73,7 @@ IoStatistics::~IoStatistics(void)
 }
 
 void
-IoStatistics::UpdateSubmissionMetricsConditionally(const Mio* mio)
+IoStatistics::UpdateSubmissionMetrics(const Mio* mio)
 {
     uint32_t ioType = mio->IsRead() ? (uint32_t)MetaIoRequestType::Read : (uint32_t)MetaIoRequestType::Write;
     issueCountByStorage[(int)mio->GetTargetStorage()][ioType]++;
