@@ -155,17 +155,17 @@ MetaFsMBRManager::CreateMBR(void)
 void
 MetaFsMBRManager::RegisterVolumeGeometry(std::shared_ptr<MetaStorageInfo> mediaInfo)
 {
-    if (mediaInfo->media >= MetaStorageType::Max)
+    if (mediaInfo->GetType() >= MetaStorageType::Max)
     {
         POS_TRACE_INFO(EID(MFS_ERROR_MESSAGE),
-            "Given media {} is not supported.", (int)mediaInfo->media);
+            "Given media {} is not supported.", (int)mediaInfo->GetType());
     }
 
     MetaFsMBRContent* content = mbr->GetContent();
     MetaFsStorageIoInfo info;
-    info.mediaType = mediaInfo->media;
-    info.totalCapacity = mediaInfo->mediaCapacity;
-    info.valid = mediaInfo->valid;
+    info.mediaType = mediaInfo->GetType();
+    info.totalCapacity = mediaInfo->GetCapacity();
+    info.valid = mediaInfo->IsValid();
     memcpy(&content->geometry.mediaPartitionInfo[content->geometry.volumeInfo.totalFilesystemVolumeCnt], &info, sizeof(MetaFsStorageIoInfo));
     content->geometry.volumeInfo.totalFilesystemVolumeCnt++;
     assert(content->geometry.volumeInfo.totalFilesystemVolumeCnt <= MetaFsGeometryInfo::MAX_INFO_COUNT);
