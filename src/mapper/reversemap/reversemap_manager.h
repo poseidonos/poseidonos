@@ -100,6 +100,7 @@ private:
     TelemetryPublisher* telemetryPublisher;
     bool rocksDbEnabled;
 
+    /* { vsid, { offset in vsid, rba }} */
     std::unordered_map<uint32_t, std::unordered_map<uint64_t, uint64_t>> invertedMap;
 };
 

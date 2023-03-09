@@ -324,10 +324,11 @@ ReverseMapManager::_CheckInvertedMapValid(const uint32_t vsid, const std::map<ui
     while (iter != revMapInfos.end())
     {
         auto rbaInLog = iter->second;
-        auto result = invertedMap[vsid].find(iter->first);
+        auto blockOffsetInTheStripe = iter->first;
+        auto result = invertedMap[vsid].find(blockOffsetInTheStripe);
         if (result != invertedMap[vsid].end() && result->second != rbaInLog)
         {
-            POS_TRACE_ERROR(EID(REVMAP_RECONSTRUCT_FOUND_RBA),
+            POS_TRACE_ERROR(EID(REVMAP_RBA_MISMATCH_BETWEEN_LOG_AND_INVMAP),
                 "RBA cannot be found, vsid:{}, result->second:{}, rbaInLog:{}",
                 vsid, result->second, rbaInLog);
             assert(false);
