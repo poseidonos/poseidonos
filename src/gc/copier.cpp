@@ -357,9 +357,6 @@ Copier::_CleanUpVictimSegments(void)
             bool succeed = segmentCtx->MoveToFreeState(victimSegId);
             if (succeed == true)
             {
-                // TODO check if VSC can be called inside segment context
-                SegmentContextUpdater* segmentCtxUpdater = (SegmentContextUpdater*)iContextManager->GetSegmentContextUpdaterPtr();
-                segmentCtxUpdater->ResetInfos(victimSegId);
                 POS_TRACE_INFO(EID(GC_RELEASE_VICTIM_SEGMENT),
                     "victim_segment_id:{}, count:{}", victimSegId, validCount);
             }

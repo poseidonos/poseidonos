@@ -34,32 +34,32 @@
 
 #include <vector>
 #include "src/include/address_type.h"
+#include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
+#include "src/allocator/context_manager/segment_ctx/i_segment_free_subscriber.h"
 
 namespace pos
 {
 class JournalConfiguration;
-class SegmentInfo;
 class SegmentInfoData;
 class VersionedSegmentInfo;
 
-class IVersionedSegmentContext
+class IVersionedSegmentContext: public LogBufferWriteDoneEvent, public ISegmentFreeSubscriber
 {
 public:
     virtual ~IVersionedSegmentContext(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) = 0;
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) = 0;
+    virtual void Load(SegmentInfoData* loadedSegmentInfos) = 0;
     virtual void Dispose(void) = 0;
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) = 0;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) = 0;
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) = 0;
-    virtual void ResetFlushedInfo(int logGroupId) = 0;
     virtual int GetNumSegments(void) = 0;
     virtual int GetNumLogGroups(void) = 0;
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) = 0;
 
     // For UT
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) = 0;
 };
 

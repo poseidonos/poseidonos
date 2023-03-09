@@ -35,7 +35,6 @@
 #include <map>
 #include <string>
 
-#include "src/allocator/i_segment_ctx.h"
 #include "src/event_scheduler/callback.h"
 #include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
@@ -48,7 +47,7 @@ namespace pos
 class IVSAMap;
 class IStripeMap;
 class IContextManager;
-class ISegmentCtx;
+class SegmentContextUpdater;
 class IArrayInfo;
 
 class GcMapUpdate : public MetaUpdateCallback
@@ -56,7 +55,7 @@ class GcMapUpdate : public MetaUpdateCallback
 public:
     GcMapUpdate(void);
     GcMapUpdate(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        ISegmentCtx* segmentCtx_, IContextManager* contextManager,
+        SegmentContextUpdater* segmentCtxUpdater_, IContextManager* contextManager,
         IArrayInfo* arrayInfo, StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList,
         std::map<SegmentId, uint32_t> invalidSegCnt);
     virtual ~GcMapUpdate(void);

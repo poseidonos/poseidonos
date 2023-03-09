@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -31,27 +31,27 @@
  */
 
 #pragma once
-
-#include <string>
-
-#include "src/event_scheduler/event.h"
-#include "src/event_scheduler/event_scheduler.h"
+#include <cstddef>
 
 namespace pos
 {
-class ContextManager;
 
-class ContextFlushCompletion : public Event
+// This contains the extended set of metadata/attributes of SegmentCtx that requires persistence.
+// Internally, it is mapped to SegmentCtxExtendedProto to meet backward compatibility.
+class SegmentCtxExtended
 {
 public:
-    ContextFlushCompletion(ContextManager* contextManager_, EventSmartPtr callback_, int logGroupId_);
-    virtual ~ContextFlushCompletion(void);
 
-    virtual bool Execute(void) override;
+    // Serialize a single SegmentInfoData
+    bool ToBytes(char* destBuf);
 
-private:
-    ContextManager* contextManager;
-    EventSmartPtr callback;
-    int logGroupId;
+    // Deserialize a single SegmentInfoData
+    bool FromBytes(char* srcBuf);
+
+    size_t SerializedSize();
+    
+    // The fixed size for a single SegmentInfoDataProto
+    const static size_t ONSSD_SIZE = 128 * 1024; // in bytes
+
 };
-} // namespace pos
+}

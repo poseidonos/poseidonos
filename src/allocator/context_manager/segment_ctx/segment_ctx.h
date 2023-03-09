@@ -43,11 +43,13 @@
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/allocator/context_manager/segment_ctx/segment_list.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx_extended.h"
 #include "src/allocator/i_segment_ctx.h"
 #include "src/include/address_type.h"
 
 namespace pos
 {
+class ISegmentFreeSubscriber;
 class TelemetryPublisher;
 class SegmentCtx : public IAllocatorFileIoClient, public ISegmentCtx
 {
@@ -110,13 +112,9 @@ public:
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
+    virtual void AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber) override;
 
-    virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
-    virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
-    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
-
-    virtual SegmentInfo* GetSegmentInfos(void);
-    virtual void ResetInfos(SegmentId segId);
+    virtual SegmentInfoData* GetSegmentInfoDataArray(void);
 
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
@@ -139,12 +137,18 @@ private:
     int _OnNumFreeSegmentChanged(void);
 
     void _UpdateSectionInfo(void);
+    void _NotifySubscribersOfSegmentFreed(SegmentId segmentId);
 
-    // Data to be stored
+    // Data to be stored: Section 1
     ContextSection<SegmentCtxHeader> ctxHeader;
-    ContextSection<SegmentInfoData*> segmentInfoData;
 
-    uint64_t totalDataSize;
+    // Data to be stored: Section 2 ~ N
+    std::vector<ContextSection<SegmentInfoData*>> segmentInfoDataSections;
+
+    // Data to be stored: Section N+1
+    ContextSection<SegmentCtxExtended*> ctxExtended;
+
+    uint64_t totalDataSize; // SectionSize(1) + SectionSize(2) + ... + SectionSize(N) + SectionSize(N+1)
 
     // In-memory data structures
     std::atomic<uint64_t> ctxDirtyVersion;
@@ -166,6 +170,7 @@ private:
     RebuildCtx* rebuildCtx;
     GcCtx* gcCtx;
     TelemetryPublisher* tp;
+    std::vector<ISegmentFreeSubscriber*> segmentFreedSubscribers;
 };
 
 } // namespace pos

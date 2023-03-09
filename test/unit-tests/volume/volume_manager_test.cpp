@@ -128,7 +128,7 @@ TEST(VolumeManager, Mount_)
     volumeManager->StateChanged(nullptr, &nextState);
 
     int expected = EID(VOL_MGR_NOT_INITIALIZED);
-    int actual = volumeManager->Mount(name, subnqn);
+    int actual = volumeManager->Mount(name, subnqn, 0);
 
     ASSERT_EQ(actual, expected);
 

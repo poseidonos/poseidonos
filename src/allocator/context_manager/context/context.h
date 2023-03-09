@@ -63,6 +63,7 @@ enum SegmentCtxSection
 {
     SC_HEADER = 0,
     SC_SEGMENT_INFO,
+    SC_EXTENDED,
     NUM_SEGMENT_CTX_SECTION,
 };
 

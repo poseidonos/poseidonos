@@ -31,9 +31,12 @@
  */
 
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
-#include "tbb/concurrent_unordered_map.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <tbb/concurrent_unordered_map.h>
+#include <thread>
+#include <boost/thread/barrier.hpp>
 
 using testing::_;
 using testing::NiceMock;
@@ -52,7 +55,7 @@ TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncrea
     versionedSegInfo.IncreaseValidBlockCount(1, 4);
 
     // Then
-    tbb::concurrent_unordered_map<SegmentId, int> expectChangedValidCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> expectChangedValidCount;
     expectChangedValidCount[2] = 2;
     expectChangedValidCount[1] = 4;
 
@@ -74,7 +77,7 @@ TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCount
     VersionedSegmentInfo versionedSegInfo;
 
     // When
-    tbb::concurrent_unordered_map<SegmentId, uint32_t> expectChangedOccupiedCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> expectChangedOccupiedCount;
     SegmentId targetSegment = 3;
     int increasedOccupiedCount = 5;
     for (int index = 0; index < increasedOccupiedCount; index++)
@@ -104,4 +107,90 @@ TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCount
     EXPECT_EQ(true, versionedSegInfo.GetChangedOccupiedStripeCount().empty());
 }
 
+TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncreasedOnMultiThreads)
+{
+    // Given
+    int numThread = 10;
+    uint32_t numIterations = 1000;
+    std::vector<std::thread> threadList;
+    boost::barrier barrierToWait(numThread);
+
+    VersionedSegmentInfo versionedSegInfo;
+    SegmentId targetSegmentId = 0;
+
+    // When
+    for (int index = 0; index < numThread; index++)
+    {
+        threadList.push_back(std::thread([&](void) -> void {
+            barrierToWait.wait();
+            for (int i = 0; i < numIterations; i++)
+            {
+                versionedSegInfo.IncreaseValidBlockCount(targetSegmentId, 1);
+            }
+        }));
+    }
+
+    for (auto& th : threadList)
+    {
+        th.join();
+    }
+    threadList.clear();
+
+    // Then
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> expectChangedValidCount;
+    expectChangedValidCount[0] = numThread * numIterations;
+    auto actualChangedValidCount = versionedSegInfo.GetChangedValidBlockCount();
+    EXPECT_EQ(expectChangedValidCount[0], actualChangedValidCount[0]);
+
+    // When
+    versionedSegInfo.Reset();
+
+    // Then
+    EXPECT_EQ(true, versionedSegInfo.GetChangedValidBlockCount().empty());
+}
+
+TEST(VersionedSegmentInfo, IncreaseValidBlockCount_testIfValidBlockCountIsIncreasedAndDecreasedOnMultiThreads)
+{
+    // Given
+    int numThread = 10;
+    uint32_t numIterations = 1000;
+    std::vector<std::thread> threadList;
+    boost::barrier barrierToWait(numThread);
+
+    VersionedSegmentInfo versionedSegInfo;
+    SegmentId targetSegmentId = 0;
+
+    // When
+    for (int index = 0; index < numThread; index++)
+    {
+        threadList.push_back(std::thread([&](void) -> void {
+            barrierToWait.wait();
+            for (int i = 0; i < numIterations; i++)
+            {
+                versionedSegInfo.IncreaseValidBlockCount(targetSegmentId, 1);
+                versionedSegInfo.DecreaseValidBlockCount(targetSegmentId, 1);
+            }
+        }));
+    }
+
+    for (auto& th : threadList)
+    {
+        th.join();
+    }
+    threadList.clear();
+
+    // Then
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> expectChangedValidCount;
+    expectChangedValidCount[0] = 0;
+
+    auto actualChangedValidCount = versionedSegInfo.GetChangedValidBlockCount();
+    
+    EXPECT_EQ(expectChangedValidCount[0], actualChangedValidCount[0]);
+
+    // When
+    versionedSegInfo.Reset();
+
+    // Then
+    EXPECT_EQ(true, versionedSegInfo.GetChangedValidBlockCount().empty());
+}
 } // namespace pos

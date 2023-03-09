@@ -91,7 +91,7 @@ MountVolumeCommand::Execute(json& doc, string rid)
         ret = EID(MOUNT_VOL_INTERNAL_ERROR);
         if (volMgr != nullptr)
         {
-            ret = volMgr->Mount(volName, subnqn);
+            ret = volMgr->Mount(volName, subnqn, 0);
             if (ret == SUCCESS)
             {
                 return jFormat.MakeResponse("MOUNTVOLUME", rid, SUCCESS,

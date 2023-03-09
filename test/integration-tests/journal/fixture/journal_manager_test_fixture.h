@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "test/integration-tests/journal/fake/allocator_fake.h"
+#include "test/integration-tests/journal/fake/allocator_mock.h"
 #include "test/integration-tests/journal/fake/array_info_mock.h"
 #include "test/integration-tests/journal/fake/mapper_mock.h"
 #include "test/integration-tests/journal/fake/state_subscription_mock.h"
@@ -17,6 +17,7 @@
 
 namespace pos
 {
+class SegmentContextUpdater;
 class JournalManagerTestFixture
 {
 public:
@@ -39,7 +40,7 @@ public:
 protected:
     JournalManagerSpy* journal;
     MockMapper* testMapper;
-    AllocatorFake* testAllocator;
+    AllocatorMock* testAllocator;
     ArrayInfoMock* arrayInfo;
     StateSubscriptionMock* stateSub;
     IVolumeInfoManager* volumeManager;
@@ -48,6 +49,7 @@ protected:
     LogWriteTestFixture* writeTester;
     ReplayTestFixture* replayTester;
     TestInfo* testInfo;
+    SegmentContextUpdater* segmentContextUpdater;
 
     const uint64_t INVALID_BUFFER_SIZE = UINT64_MAX;
 

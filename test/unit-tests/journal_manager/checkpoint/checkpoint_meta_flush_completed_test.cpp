@@ -15,11 +15,11 @@ TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteSuccessfully)
     NiceMock<MockCheckpointHandler> checkpointHandler(0);
     int mapId = 0;
     int logGroupId = 0;
-    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId, logGroupId);
+    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId);
 
     // Then: Checkpoint handler should be notified with the mapId
     EXPECT_CALL(checkpointHandler,
-        FlushCompleted(mapId, logGroupId))
+        FlushCompleted(mapId))
         .Times(1)
         .WillOnce(Return(0));
 
@@ -36,11 +36,11 @@ TEST(CheckpointMetaFlushCompleted, Execute_testIfExecuteFails)
     NiceMock<MockCheckpointHandler> checkpointHandler(0);
     int mapId = 0;
     int logGroupId = 0;
-    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId, logGroupId);
+    CheckpointMetaFlushCompleted metaFlushCompleted(&checkpointHandler, mapId);
 
     // Then: Checkpoint handler should be notified with the mapId
     EXPECT_CALL(checkpointHandler,
-        FlushCompleted(mapId, logGroupId))
+        FlushCompleted(mapId))
         .Times(1)
         .WillOnce(Return(-1));
 

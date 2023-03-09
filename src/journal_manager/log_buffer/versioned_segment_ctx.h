@@ -43,7 +43,7 @@ namespace pos
 {
 class VersionedSegmentInfo;
 class JournalConfiguration;
-class SegmentInfo;
+class SegmentInfoData;
 
 class DummyVersionedSegmentCtx : public IVersionedSegmentContext
 {
@@ -51,18 +51,24 @@ public:
     DummyVersionedSegmentCtx(void) = default;
     virtual ~DummyVersionedSegmentCtx(void) = default;
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) override {}
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override {}
+    virtual void Load(SegmentInfoData* loadedSegmentInfos) override {}
     virtual void Dispose(void) override {}
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override {}
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override { return nullptr; }
-    virtual void ResetFlushedInfo(int logGroupId) override {}
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo) override {}
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override { return; }
+
+    // LogBufferWriteDoneEvent
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override {}
+    virtual void LogBufferReseted(int logGroupId) override {}
+
+    // ISegmentFreeSubscriber
+    virtual void NotifySegmentFreed(SegmentId segmentId) override {}
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
@@ -71,26 +77,32 @@ public:
     VersionedSegmentCtx(void);
     virtual ~VersionedSegmentCtx(void);
 
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfos, uint32_t numSegments) override;
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override;
+    virtual void Load(SegmentInfoData* loadedSegmentInfos) override;
     virtual void Dispose(void) override;
 
     // For UT
-    virtual void Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments,
+    virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo);
 
+    // Implementation of IVersionedSegmentContext interface
     virtual void IncreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override;
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override;
 
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override;
-    virtual void ResetFlushedInfo(int logGroupId) override;
     virtual int GetNumSegments(void) override;
     virtual int GetNumLogGroups(void) override;
 
-    virtual void ResetInfosAfterSegmentFreed(SegmentId targetSegmentId) override;
+    // Implementation of LogBufferWriteDoneEvent interface
+    virtual void LogFilled(int logGroupId, const MapList& dirty) override;
+    virtual void LogBufferReseted(int logGroupId) override;
+
+    // Implementation of ISegmentFreeSubscriber interface
+    virtual void NotifySegmentFreed(SegmentId segmentId) override;
 
 private:
-    void _Init(JournalConfiguration* journalConfiguration, SegmentInfo* loadedSegmentInfo, uint32_t numSegments_);
+    void _Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_);
     void _UpdateSegmentContext(int logGroupId);
     void _CheckLogGroupIdValidity(int logGroupId);
     void _CheckSegIdValidity(int segId);
@@ -98,8 +110,7 @@ private:
     JournalConfiguration* config;
     uint32_t numSegments;
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
-    SegmentInfo* segmentInfos;
-    SegmentInfoData* segmentInfoDatas;
+    SegmentInfoData* segmentInfoData;
     const int ALL_LOG_GROUP = -1;
 };
 

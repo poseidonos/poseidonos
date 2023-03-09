@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package pos_bc;
+
+enum SegmentState {
+    FREE = 0;
+    NVRAM = 1;
+    SSD = 2;
+    VICTIM = 3;
+    ERROR = 4;
+}
+
+// MAX: 128 bytes
+message SegmentInfoDataProto {
+    uint32 valid_block_count = 1;
+    uint32 occupied_stripe_count = 2;
+    SegmentState state = 3;
+
+    // reserved fields
+    reserved 4 to 20;
+}
+
+// MAX: 128 KB
+message SegmentCtxExtendedProto {
+    reserved 1 to 1000;
+}

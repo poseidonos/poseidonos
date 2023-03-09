@@ -198,7 +198,7 @@ TEST(FlushCmdHandler, FlushCmdHandler_Execute_CaseMetaFlushInProgress_IsStripeMa
     ON_CALL(mockIMapFlush, FlushDirtyMpages(_, _)).WillByDefault(Return(0));
     ON_CALL(mockIBlockAllocator, UnblockAllocating(_)).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, CanFlushMeta(_)).WillByDefault(Return(true));
-    ON_CALL(mockIContextManager, FlushContexts(_, false, _)).WillByDefault(Return(0));
+    ON_CALL(mockIContextManager, FlushContexts(_, false)).WillByDefault(Return(0));
     ON_CALL(mockFlushCmdManager, FinishMetaFlush()).WillByDefault(Return());
     ON_CALL(mockFlushCmdManager, ResetFlushInProgress(_, _)).WillByDefault(Return());
 

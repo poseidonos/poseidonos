@@ -2,10 +2,12 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/event_scheduler/event_mock.h"
 #include "test/unit-tests/journal_manager/log/log_handler_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/buffer_write_done_notifier_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/log_write_context_mock.h"
 
+using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -41,13 +43,21 @@ TEST(LogWriteIoContext, IoDone_testIfNotifierIsCalled)
 {
     NiceMock<MockLogBufferWriteDoneNotifier> notifier;
     NiceMock<MockLogWriteContext> context;
+    auto callbackEvent = std::make_shared<MockEvent>();
+    ON_CALL(context, GetCallback).WillByDefault(Return(callbackEvent));
+    ON_CALL(context, GetLogGroupId).WillByDefault(Return(3));
 
     LogWriteIoContext ioContext(&context, &notifier);
 
-    EXPECT_CALL(context, GetLogGroupId).WillOnce(Return(3));
     const MapList dummy;
     EXPECT_CALL(context, GetDirtyMapList).WillOnce(ReturnRef(dummy));
-    EXPECT_CALL(notifier, NotifyLogFilled(3, dummy)).Times(1);
+
+    {
+        InSequence s;
+
+        EXPECT_CALL(*callbackEvent.get(), Execute).WillOnce(Return(true));
+        EXPECT_CALL(notifier, NotifyLogFilled(3, dummy)).Times(1);
+    }
 
     ioContext.IoDone();
 }

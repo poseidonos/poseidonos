@@ -41,10 +41,10 @@
 #include "src/include/nvmf_const.h"
 #include "src/lib/singleton.h"
 #include "src/network/nvmf_target_spdk.h"
+#include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 #include "src/spdk_wrapper/caller/spdk_caller.h"
 #include "src/spdk_wrapper/caller/spdk_nvmf_caller.h"
 #include "src/spdk_wrapper/event_framework_api.h"
-#include "src/spdk_wrapper/caller/spdk_bdev_caller.h"
 using namespace std;
 class EventFrameworkApi;
 
@@ -89,11 +89,11 @@ public:
     virtual int32_t GetVolumeNqnId(const string& subnqn);
     virtual spdk_nvmf_subsystem* FindSubsystem(const string& subnqn);
     vector<string> GetHostNqn(string subnqn);
-    virtual bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint64_t time = NS_ATTACH_TIMEOUT);
+    virtual bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint32_t& nsId, uint64_t time = NS_ATTACH_TIMEOUT);
     virtual bool CheckSubsystemExistance(void);
     virtual bool CheckVolumeAttached(int volId, string arrayName);
     vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
-    static bool AttachNamespace(const string& nqn, const string& bdevName,
+    static bool AttachNamespace(const string& nqn, const string& bdevName, uint32_t& nsId,
         PosNvmfEventDoneCallback_t cb, void* cbArg);
     string GetPosBdevUuid(uint32_t id, string arrayName);
     virtual bool SetSubsystemArrayName(string& subnqn, string& arrayName);
@@ -120,7 +120,8 @@ protected:
 private:
     uint32_t nrVolumePerSubsystem = 1;
     static const char* BDEV_NAME_PREFIX;
-    static atomic<int> attachedNsid;
+    static atomic<int> attachedNsStatus;
+    static atomic<int> requestNsid;
     static atomic<int> deletedBdev;
     SpdkCaller* spdkCaller;
     bool feQosEnable;

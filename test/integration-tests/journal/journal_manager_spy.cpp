@@ -20,6 +20,7 @@
 #include "test/integration-tests/journal/journal_configuration_spy.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "src/metadata/segment_context_updater.h"
 
 using ::testing::NiceMock;
 
@@ -65,12 +66,19 @@ JournalManagerSpy::~JournalManagerSpy(void)
 }
 
 int
-JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeInfoManager* volumeManager)
+JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeInfoManager* volumeManager, SegmentContextUpdater* segmentContextUpdater)
 {
     int ret = JournalManager::_InitConfigAndPrepareLogBuffer(nullptr);
     if (ret < 0)
     {
         return ret;
+    }
+
+    if (config->IsVscEnabled() == true)
+    {
+        delete versionedSegCtx;
+        versionedSegCtx = JournalManager::_CreateVersionedSegmentCtx();
+        segmentContextUpdater->SetVersionedSegmentContext(versionedSegCtx);
     }
 
     _InitModules(telemetryClient, mapper->GetIVSAMap(), mapper->GetIStripeMap(),

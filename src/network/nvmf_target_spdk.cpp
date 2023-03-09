@@ -188,6 +188,7 @@ AttachNamespacePauseDone(struct spdk_nvmf_subsystem* subsystem, void* arg, int s
             uint32_t newNsid = 0;
             memset((char*)&opt, 0, sizeof(struct spdk_nvmf_ns_opts));
             opt.nsid = atoi(nsid);
+            opt.opts_size = sizeof(opt);
             newNsid = spdkNvmfCaller.SpdkNvmfSubsystemAddNs(subsystem, bdevName, &opt, sizeof(opt), NULL);
             free(ctx->eventArg2);
             ctx->eventArg2 = spdk_sprintf_alloc("%u", newNsid);

@@ -53,6 +53,7 @@ ReplayProgressReporter::RegisterTask(ReplayTaskId taskId, int taskWeight)
     TaskProgress progress(taskWeight);
     taskProgressList.emplace(taskId, progress);
 
+    // TODO (cheolho.kang): Add the task weight table to manage the weight per task while keeping the weight total at 100.
     totalWeight += taskWeight;
 }
 

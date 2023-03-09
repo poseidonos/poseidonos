@@ -35,7 +35,7 @@
 #include <atomic>
 #include <gmock/gmock.h>
 
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 namespace pos
 {
@@ -47,24 +47,20 @@ class AsyncMetaFileIoCtx;
 
 // This class is to fake a flush of ISegmentContext,
 // LoadContext is to simulate a dirty bringup to load Segment Context.
-class ISegmentCtxFake : public ISegmentCtx
+class SegmentCtxFake : public SegmentCtx
 {
 public:
-    explicit ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
-    virtual ~ISegmentCtxFake(void);
+    explicit SegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
+    virtual ~SegmentCtxFake(void);
 
     void LoadContext(void);
     int FlushContexts(SegmentInfoData* vscSegmentInfoDatas);
     uint64_t GetStoredVersion(void);
-    virtual SegmentInfo* GetSegmentInfos(void);
+    virtual SegmentInfoData* GetSegmentInfoDataArray(void) override;
 
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
-    MOCK_METHOD(void, ValidateBlocksWithGroupId, (VirtualBlks blks, int logGroupId), (override));
-    MOCK_METHOD(bool, InvalidateBlocksWithGroupId, (VirtualBlks blks, bool isForced, int logGroupId), (override));
-    MOCK_METHOD(bool, UpdateStripeCount, (StripeId lsid, int logGroupId), (override));
-    MOCK_METHOD(void, ResetInfos, (SegmentId segId), (override));
 
 private:
     void _ValidateBlks(VirtualBlks blks);

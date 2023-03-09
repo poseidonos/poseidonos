@@ -237,7 +237,7 @@ TEST_F(VolumeTest, MountVolumeNormalTest)
     // create
     std::string volName = "testvol";
     volMgr->Create(volName, SIZE, 0, 0, false, -1, true, false);
-    int res = volMgr->Mount(volName, NQN);
+    int res = volMgr->Mount(volName, NQN, 0);
     EXPECT_TRUE(res == EID(SUCCESS));
     // cleanup for next test
     volMgr->Unmount(volName);
@@ -250,7 +250,7 @@ TEST_F(VolumeTest, TryToDeleteMountedVolumeTest)
     // create
     std::string volName = "testvol";
     volMgr->Create(volName, SIZE, 0, 0, false, -1, true, false);
-    volMgr->Mount(volName, NQN);
+    volMgr->Mount(volName, NQN, 0);
     int res = volMgr->Delete(volName);
     EXPECT_TRUE(res == EID(DELETE_VOL_MOUNTED_VOL_CANNOT_BE_DELETED));
 }
@@ -258,7 +258,7 @@ TEST_F(VolumeTest, TryToDeleteMountedVolumeTest)
 TEST_F(VolumeTest, TryToMountInvalidVolumeTest)
 {
     pos::IVolumeManager* volMgr = pos::VolumeServiceSingleton::Instance()->GetVolumeManager(ARRAY_NAME);
-    int res = volMgr->Mount("notexist", NQN);
+    int res = volMgr->Mount("notexist", NQN, 0);
     EXPECT_TRUE(res == EID(VOL_NOT_FOUND));
 }
 
@@ -268,7 +268,7 @@ TEST_F(VolumeTest, UnmountVolumeNormalTest)
     // create
     std::string volName = "testvol";
     volMgr->Create(volName, SIZE, 0, 0, false, -1, true, false);
-    volMgr->Mount(volName, NQN);
+    volMgr->Mount(volName, NQN, 0);
     int res = volMgr->Unmount(volName);
     EXPECT_TRUE(res == EID(SUCCESS));
     // cleanup for next test

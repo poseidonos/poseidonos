@@ -1,47 +1,69 @@
 #include "test_journal_write_completion.h"
 
-#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
-#include "test/integration-tests/journal/fake/i_context_manager_fake.h"
+#include "src/allocator/i_segment_ctx.h"
+#include "src/include/address_type.h"
+#include "test/integration-tests/journal/fake/vsamap_fake.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/integration-tests/journal/utils/written_logs.h"
-#include "src/include/address_type.h"
 
 namespace pos
 {
-TestJournalWriteCompletion::TestJournalWriteCompletion(WrittenLogs* logs, IContextManagerFake* contextManager, TestInfo* testInfo, VirtualBlks blks, LogType eventType)
-: logs(logs),
-  contextManager(contextManager),
-  testInfo(testInfo),
-  blks(blks),
+TestJournalWriteCompletion::TestJournalWriteCompletion(VolumeIoSmartPtr volumeIo, SegmentContextUpdater* segmentContextUpdater, VSAMapFake* vsaMap, WrittenLogs* logs, LogType eventType)
+: volumeIo(volumeIo),
+  segmentContextUpdater(segmentContextUpdater),
+  vsaMap(vsaMap),
+  logs(logs),
   eventType(eventType)
 {
-    segmentCtx = contextManager->GetSegmentContextUpdaterPtr();
-    versionedSegCtx = contextManager->GetVersionedSegmentContext();
 }
 
 bool
 TestJournalWriteCompletion::_DoSpecificJob(void)
 {
-    SegmentId segmentId = blks.startVsa.stripeId / testInfo->numStripesPerSegment;
-    switch (eventType)
+    if (eventType == LogType::BLOCK_WRITE_DONE)
     {
-        case LogType::BLOCK_WRITE_DONE:
-            // TODO (cheolho.kang): Add a process to check RBA to detect if it's an overwrite and then invalidate it. Need to implement this logic in test_fixture
-            segmentCtx->ValidateBlks(blks);
-            versionedSegCtx->IncreaseValidBlockCount(logGroupId, segmentId, blks.numBlks);
-            break;
-        case LogType::STRIPE_MAP_UPDATED:
-            StripeId vsid = VsidToUserLsid(blks.startVsa.stripeId);
-            segmentCtx->UpdateOccupiedStripeCount(vsid);
-            versionedSegCtx->IncreaseOccupiedStripeCount(logGroupId, segmentId);
-            break;
-        case LogType::GC_STRIPE_FLUSHED:
-            // TODO (cheolho.kang): Implement later
-            break;
-        default:
-            break;
+        _InvalidateOldBlock();
+        _UpdateBlockMap();
+    }
+    else if (eventType == LogType::STRIPE_MAP_UPDATED)
+    {
+        StripeId lsid = volumeIo->GetUserLsid();
+        segmentContextUpdater->UpdateOccupiedStripeCountWithGroupId(lsid, logGroupId);
+    }
+    else if (eventType == LogType::GC_STRIPE_FLUSHED)
+    {
     }
     logs->JournalWriteDone();
     return true;
+}
+
+void
+TestJournalWriteCompletion::_InvalidateOldBlock(void)
+{
+    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
+    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
+    for (uint32_t blkCount = 0; blkCount < blockCount; blkCount++)
+    {
+        VirtualBlkAddr oldVsa = vsaMap->GetVSAWithSyncOpen(volumeIo->GetVolumeId(), rba);
+        if (!(oldVsa == UNMAP_VSA))
+        {
+            VirtualBlks oldBlock = {
+                .startVsa = oldVsa,
+                .numBlks = 1};
+            segmentContextUpdater->InvalidateBlocksWithGroupId(oldBlock, false, logGroupId);
+        }
+    }
+}
+
+void
+TestJournalWriteCompletion::_UpdateBlockMap(void)
+{
+    BlkAddr rba = ChangeSectorToBlock(volumeIo->GetSectorRba());
+    uint32_t blockCount = DivideUp(volumeIo->GetSize(), BLOCK_SIZE);
+    VirtualBlks targetVsaRange = {
+        .startVsa = volumeIo->GetVsa(),
+        .numBlks = blockCount};
+    vsaMap->SetVSAsWithSyncOpen(volumeIo->GetVolumeId(), rba, targetVsaRange);
+    segmentContextUpdater->ValidateBlocksWithGroupId(targetVsaRange, logGroupId);
 }
 } // namespace pos

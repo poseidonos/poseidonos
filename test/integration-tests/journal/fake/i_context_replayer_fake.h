@@ -1,18 +1,19 @@
-#include <gmock/gmock.h>
+#include "src/allocator/i_context_replayer.h"
 
-#include <list>
-#include <string>
+#include <gmock/gmock.h>
 #include <vector>
 
-#include "src/allocator/i_context_replayer.h"
 #include "src/allocator/include/allocator_const.h"
 
 namespace pos
 {
-class IContextReplayerMock : public IContextReplayer
+class SegmentCtxFake;
+class IContextReplayerFake : public IContextReplayer
 {
 public:
-    using IContextReplayer::IContextReplayer;
+    explicit IContextReplayerFake(SegmentCtxFake* segmentCtx);
+    ~IContextReplayerFake(void) = default;
+
     MOCK_METHOD(void, ResetDirtyContextVersion, (int owner), (override));
     MOCK_METHOD(void, ReplaySsdLsid, (StripeId currentSsdLsid), (override));
     MOCK_METHOD(void, ReplaySegmentAllocation, (StripeId userLsid), (override));
@@ -22,13 +23,14 @@ public:
     MOCK_METHOD(void, SetActiveStripeTail,
         (int index, VirtualBlkAddr tail, StripeId wbLsid), (override));
     MOCK_METHOD(void, ResetActiveStripeTail, (int index), (override));
+
     virtual void ResetSegmentsStates(void) {}
-    virtual std::vector<VirtualBlkAddr>
-    GetAllActiveStripeTail(void)
-    {
-        std::vector<VirtualBlkAddr> ret(ACTIVE_STRIPE_TAIL_ARRAYLEN, UNMAP_VSA);
-        return ret;
-    }
+    virtual std::vector<VirtualBlkAddr> GetAllActiveStripeTail(void);
+
+private:
+    void _ReplayStripeFlushed(StripeId userLsid);
+
+    SegmentCtxFake* segmentCtx;
 };
 
 } // namespace pos

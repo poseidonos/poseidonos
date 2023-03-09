@@ -37,7 +37,6 @@
 
 #include "src/allocator/context_manager/allocator_ctx/allocator_ctx.h"
 #include "src/allocator/context_manager/context/context.h"
-#include "src/allocator/context_manager/context_flush_completion.h"
 #include "src/allocator/context_manager/context_io_manager.h"
 #include "src/allocator/context_manager/context_replayer.h"
 #include "src/allocator/context_manager/gc_ctx/gc_ctx.h"
@@ -53,20 +52,17 @@
 namespace pos
 {
 ContextManager::ContextManager(TelemetryPublisher* tp,
-    AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_, IVersionedSegmentContext* versionedSegCtx_,
+    AllocatorCtx* allocCtx_, SegmentCtx* segCtx_, RebuildCtx* rebuildCtx_,
     GcCtx* gcCtx_, BlockAllocationStatus* blockAllocStatus_, ContextIoManager* ioManager_,
     ContextReplayer* ctxReplayer_, AllocatorAddressInfo* info_, uint32_t arrayId_)
 : addrInfo(info_),
-  arrayId(arrayId_),
-  logGroupIdInProgress(INVALID_LOG_GROUP_ID),
-  allowDuplicatedFlush(true)
+  arrayId(arrayId_)
 {
     // for UT
     ioManager = ioManager_;
     allocatorCtx = allocCtx_;
     segmentCtx = segCtx_;
     rebuildCtx = rebuildCtx_;
-    versionedSegCtx = versionedSegCtx_;
     gcCtx = gcCtx_;
     blockAllocStatus = blockAllocStatus_;
     contextReplayer = ctxReplayer_;
@@ -75,8 +71,8 @@ ContextManager::ContextManager(TelemetryPublisher* tp,
 }
 
 ContextManager::ContextManager(TelemetryPublisher* tp, AllocatorAddressInfo* info, uint32_t arrayId_)
-: ContextManager(tp, nullptr, nullptr, nullptr, nullptr,
-    nullptr, nullptr, nullptr, nullptr, info, arrayId_)
+: ContextManager(tp, nullptr, nullptr, nullptr,
+      nullptr, nullptr, nullptr, nullptr, info, arrayId_)
 {
     allocatorCtx = new AllocatorCtx(tp, info);
     rebuildCtx = new RebuildCtx(tp, info);
@@ -129,39 +125,17 @@ ContextManager::Dispose(void)
     ioManager->Dispose();
 }
 
-void
-ContextManager::SetAllocateDuplicatedFlush(bool flag)
+int
+ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 {
-    allowDuplicatedFlush = flag;
+    return FlushContexts(callback, sync, INVALID_CONTEXT_SECTION_BUFFER);
 }
 
 int
-ContextManager::FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
-{
-    if ((false == allowDuplicatedFlush) && (logGroupIdInProgress == logGroupId))
-    {
-        POS_TRACE_ERROR(EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID),
-            "Failed to flush contexts, log group {} is already in use",
-            logGroupId);
-        return EID(ALLOCATOR_REQUESTED_FLUSH_WITH_ALREADY_IN_USED_LOG_GROUP_ID);
-    }
-
-    logGroupIdInProgress = logGroupId;
-
-    EventSmartPtr contextFlushCompletion(new ContextFlushCompletion(this,
-     callback, logGroupIdInProgress));
-
-    ContextSectionBuffer segInfoBuffer = INVALID_CONTEXT_SECTION_BUFFER;
-
-    SegmentInfoData* vscSegInfoData = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoDataToFlush(logGroupId);
-    if (vscSegInfoData != nullptr)
-    {
-        segInfoBuffer.owner = SEGMENT_CTX;
-        segInfoBuffer.sectionId = SC_SEGMENT_INFO,
-        segInfoBuffer.buffer = reinterpret_cast<char*>(vscSegInfoData);
-    }
-
-    return ioManager->FlushContexts(contextFlushCompletion, sync, segInfoBuffer);
+ContextManager::FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer)
+{    
+    // Flush all allocator contexts as it is (no external buffer provided)    
+    return ioManager->FlushContexts(callback, sync, buffer);
 }
 
 SegmentId
@@ -255,43 +229,5 @@ uint32_t
 ContextManager::GetRebuildTargetSegmentCount(void)
 {
     return segmentCtx->GetRebuildTargetSegmentCount();
-}
-
-void
-ContextManager::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
-{
-    versionedSegCtx = versionedSegCtx_;
-}
-
-void
-ContextManager::ResetFlushedInfo(int logGroupId)
-{
-    POS_TRACE_INFO(EID(VERSIONED_SEGMENT_INFO), "ResetFlushedInfo, logGroupId:{}", logGroupId);
-
-    if (ALL_LOG_GROUP == logGroupId)
-    {
-        for (int id = 0; id < versionedSegCtx->GetNumLogGroups(); id++)
-        {
-            versionedSegCtx->ResetFlushedInfo(id);
-        }
-    }
-    else
-    {
-        versionedSegCtx->ResetFlushedInfo(logGroupId);
-    }
-
-    logGroupIdInProgress = INVALID_LOG_GROUP_ID;
-}
-
-void
-ContextManager::SetSegmentContextUpdaterPtr(ISegmentCtx *segmentContextUpdater_)
-{
-    segmentContextUpdater = segmentContextUpdater_;
-}
-
-ISegmentCtx*
-ContextManager::GetSegmentContextUpdaterPtr(void)
-{
-    return segmentContextUpdater;
 }
 } // namespace pos

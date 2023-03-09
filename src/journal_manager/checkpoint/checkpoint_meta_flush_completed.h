@@ -41,15 +41,13 @@ class CheckpointHandler;
 class CheckpointMetaFlushCompleted : public Event
 {
 public:
-    CheckpointMetaFlushCompleted(CheckpointHandler* cpHandler, int mapId, int logGroupId_ = ALL_LOG_GROUP);
+    CheckpointMetaFlushCompleted(CheckpointHandler* cpHandler, int mapId);
     virtual ~CheckpointMetaFlushCompleted(void);
     virtual bool Execute(void) override;
 
 private:
     CheckpointHandler* cpHandler;
     int mapId;
-    int logGroupId;
-    static const int ALL_LOG_GROUP = -1;
 };
 
 } // namespace pos

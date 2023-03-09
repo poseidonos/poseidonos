@@ -123,6 +123,8 @@ public:
         EXPECT_CALL(*arrayInfo, GetSizeInfo(_)).WillRepeatedly(Return(&partitionLogicalSize));
         EXPECT_CALL(*contextManager, GetSegmentCtx()).WillRepeatedly(Return(segmentCtxManager));
 
+        ON_CALL(*segmentCtxManager, GetSegmentInfoDataArray).WillByDefault(Return(nullptr));
+
         journal = new JournalManager(config, statusProvider,
             logWriteContextFactory, logBufferIoContextFactory, journalEventFactory, logWriteHandler,
             volumeEventHandler, journalWriter,
@@ -221,6 +223,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferNotExis
         EXPECT_CALL(*logFilledNotifier, Register(dirtyMapManager));
         EXPECT_CALL(*logFilledNotifier, Register(bufferAllocator));
         EXPECT_CALL(*logFilledNotifier, Register(logWriteHandler));
+        EXPECT_CALL(*logFilledNotifier, Register(versionedSegmentCtx));
     }
 
     // When: Journal is initialized
@@ -261,6 +264,7 @@ TEST_F(JournalManagerTestFixture, Init_testWithJournalEnabledAndLogBufferExist)
         EXPECT_CALL(*logFilledNotifier, Register(dirtyMapManager));
         EXPECT_CALL(*logFilledNotifier, Register(bufferAllocator));
         EXPECT_CALL(*logFilledNotifier, Register(logWriteHandler));
+        EXPECT_CALL(*logFilledNotifier, Register(versionedSegmentCtx));
     }
 
     // When: Journal is initialized

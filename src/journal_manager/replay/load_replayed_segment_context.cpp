@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2022 Samsung Electronics Corporation
+ *   Copyright (c) 2021 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,35 +30,67 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "context_flush_completion.h"
-#include "src/event_scheduler/event_scheduler.h"
-#include "src/allocator/context_manager/context_manager.h"
+#include "load_replayed_segment_context.h"
+
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/i_segment_ctx.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-ContextFlushCompletion::ContextFlushCompletion(ContextManager* contextManager_,
-    EventSmartPtr callback_, int logGroupId_)
-: contextManager(contextManager_),
-  callback(callback_),
-  logGroupId(logGroupId_)
+LoadReplayedSegmentContext::LoadReplayedSegmentContext(SegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx, ReplayProgressReporter* reporter)
+: ReplayTask(reporter),
+  segmentCtx(segmentCtx),
+  versionedSegCtx(versionedSegCtx)
 {
 }
 
-ContextFlushCompletion::~ContextFlushCompletion(void)
+LoadReplayedSegmentContext::~LoadReplayedSegmentContext(void)
 {
 }
 
-bool
-ContextFlushCompletion::Execute(void)
+int
+LoadReplayedSegmentContext::GetNumSubTasks(void)
 {
-    contextManager->ResetFlushedInfo(logGroupId);
+    return 1;
+}
 
-    if (callback != nullptr)
+int
+LoadReplayedSegmentContext::Start(void)
+{
+    int ret = 0;
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
+    POS_TRACE_INFO(eventId, "[ReplayTask] Load versioned segment context");
+
+    SegmentInfoData* loadedSegmentInfos = nullptr;
+    if (nullptr != segmentCtx)
     {
-        callback->Execute();
+        loadedSegmentInfos = segmentCtx->GetSegmentInfoDataArray();
+    }
+    else
+    {
+        // reachable only in UT context
     }
 
-    return true;
+    versionedSegCtx->Load(loadedSegmentInfos);
+
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    return ret;
+}
+
+ReplayTaskId
+LoadReplayedSegmentContext::GetId(void)
+{
+    return ReplayTaskId::LOAD_REPLAYED_SEGMENT_CONTEXT;
+}
+
+int
+LoadReplayedSegmentContext::GetWeight(void)
+{
+    return 10;
 }
 
 } // namespace pos

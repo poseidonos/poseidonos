@@ -168,9 +168,9 @@ ArrayComponents::GetInfo(void)
 }
 
 int
-ArrayComponents::Import(ArrayBuildInfo* buildInfo)
+ArrayComponents::Import(ArrayBuildInfo* buildInfo, uint32_t arrayIndex)
 {
-    int ret = array->Import(buildInfo);
+    int ret = array->Import(buildInfo, arrayIndex);
     if (ret != 0)
     {
         return ret;

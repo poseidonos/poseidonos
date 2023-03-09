@@ -77,6 +77,7 @@ void nvmfAttachNamespace1Done(void* cb_arg, int nsid){
 void nvmfCreateSubsystemDone(void* cb_arg, int status){
 	bool ret;
 	NvmfTarget* target = (NvmfTarget*)cb_arg;
+	uint32_t nsid = 0;
 	cout<<"nvmfCreateSubsystemDone status="<<status<<endl;
 
 	ret = target->CreateIBoFBdev(ibof_bdev0, 0, 128, 512, true);
@@ -85,7 +86,7 @@ void nvmfCreateSubsystemDone(void* cb_arg, int status){
 	ret = target->CreateIBoFBdev(ibof_bdev1, 1, 128, 512, true);
 	cout<<"CreateIBoFBdev ret="<<ret<<endl;
 
-	ret = target->AttachNamespace(nqn, ibof_bdev0, nvmfAttachNamespace1Done, target);
+	ret = target->AttachNamespace(nqn, ibof_bdev0, nsid, nvmfAttachNamespace1Done, target);
 	cout<<"AttachNamespace ret="<<ret<<endl;
 }
 

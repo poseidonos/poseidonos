@@ -45,11 +45,10 @@ public:
     MOCK_METHOD(int, GetAllocatedSegmentCount, (), (override));
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
-    MOCK_METHOD(void, ValidateBlocksWithGroupId, (VirtualBlks blks, int logGroupId), (override));
     MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
     MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
-    MOCK_METHOD(SegmentInfo*, GetSegmentInfos, (), (override));
+    MOCK_METHOD(SegmentInfoData*, GetSegmentInfoDataArray, (), (override));
 
     inline uint32_t GetNumOfSegment(void) { return addressInfo->GetnumUserAreaSegments(); }
     inline uint32_t GetNumOfBlksPerStripe(void) { return addressInfo->GetblksPerStripe(); }
@@ -69,7 +68,7 @@ private:
         AllocateFreeSegmentStub();
         GetNumOfFreeSegmentStub();
         GetAllocatedSegmentCountStub();
-        ValidateBlocksWithGroupIdStub();
+        ValidateBlksStub();
         GetValidBlockCountStub();
         GetOccupiedStripeCountStub();
         UpdateOccupiedStripeCountStub();
@@ -119,11 +118,11 @@ private:
         });
     };
 
-    virtual void ValidateBlocksWithGroupIdStub(void)
+    virtual void ValidateBlksStub(void)
     {
-        ON_CALL(*this, ValidateBlocksWithGroupId).WillByDefault([this](VirtualBlks blks, int logGroupId)
+        ON_CALL(*this, ValidateBlks).WillByDefault([this](VirtualBlks blks)
         {
-            realCtx->ValidateBlocksWithGroupId(blks, logGroupId);
+            realCtx->ValidateBlks(blks);
         });
     };
 
@@ -156,10 +155,9 @@ private:
 
     virtual void GetSegmentInfosStub(void)
     {
-        ON_CALL(*this, GetSegmentInfos).WillByDefault([this]()
+        ON_CALL(*this, GetSegmentInfoDataArray).WillByDefault([this]()
         {
-            SegmentInfo* ret = realCtx->GetSegmentInfos();
-            return ret;
+            return realCtx->GetSegmentInfoDataArray();
         });
     };
 

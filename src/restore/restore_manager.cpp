@@ -728,6 +728,7 @@ RestoreManager::_VolumeRestore(void)
                         requestParam->set_name(volumeName);
                         requestParam->set_array(arrayName);
                         requestParam->set_subnqn(volArr["subnqn"].GetString());
+                        requestParam->set_nsid(volArr["nsid"].GetInt());
                         request->set_allocated_param(requestParam);
                         MountVolumeResponse response;
                         grpc::Status status = commandProcessor->ExecuteMountVolumeCommand(request, &response);
@@ -820,6 +821,7 @@ RestoreManager::_SubsystemRestore(void)
         {
             CreateSubsystemRequest* request = new CreateSubsystemRequest;
             grpc_cli::CreateSubsystemRequest_Param* requestParam = new grpc_cli::CreateSubsystemRequest_Param;
+            request->set_command("CREATESUBSYSTEM");
             requestParam->set_nqn(arr["subnqn"].GetString());
             requestParam->set_serialnumber(arr["serial-number"].GetString());
             requestParam->set_modelnumber(arr["model-number"].GetString());

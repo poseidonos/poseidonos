@@ -34,17 +34,16 @@
 
 namespace pos
 {
-ArrayBuildInfo*
-ArrayBuilderAdapter::Load(pbr::AteData* ateData)
+int
+ArrayBuilderAdapter::Load(pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo)
 {
-    return ArrayBuilder::Load(ateData);
+    return ArrayBuilder::Load(ateData, buildInfo);
 }
 
-
-ArrayBuildInfo*
+int
 ArrayBuilderAdapter::Create(string name, const DeviceSet<string>& devs,
-    string metaRaid, string dataRaid)
+    string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo)
 {
-    return ArrayBuilder::Create(name, devs, metaRaid, dataRaid);
+    return ArrayBuilder::Create(name, devs, metaRaid, dataRaid, buildInfo);
 }
 } // namespace pos

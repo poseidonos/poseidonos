@@ -43,9 +43,40 @@ namespace pos
 class MetaStorageInfo
 {
 public:
-    MetaStorageInfo(void) : media(MetaStorageType::Max), mediaCapacity(0), valid(false)
+    MetaStorageInfo(void)
+    : MetaStorageInfo(MetaStorageType::Max)
     {
     }
+    MetaStorageInfo(const MetaStorageType type)
+    : media(type),
+      mediaCapacity(0),
+      valid(false)
+    {
+    }
+    ~MetaStorageInfo(void) = default;
+
+    MetaStorageType GetType(void)
+    {
+        return media;
+    }
+    void SetCapacity(const uint64_t capacity)
+    {
+        mediaCapacity = capacity;
+    }
+    uint64_t GetCapacity(void)
+    {
+        return mediaCapacity;
+    }
+    void SetValid(const bool valid)
+    {
+        this->valid = valid;
+    }
+    bool IsValid(void)
+    {
+        return valid;
+    }
+
+private:
     MetaStorageType media;
     uint64_t mediaCapacity;
     bool valid;

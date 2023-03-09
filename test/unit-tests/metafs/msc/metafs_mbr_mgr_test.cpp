@@ -76,8 +76,7 @@ TEST(MetaFsMBRManager, RegisterVolumeGeometry_Normal)
     MetaFsMBRManager metaFsMBRManagerSUT(arrayId, mockMetaFsMBR);
 
     // When
-    std::shared_ptr<MetaStorageInfo> mediaInfo = std::make_shared<MetaStorageInfo>();
-    mediaInfo->media = MetaStorageType::SSD;
+    std::shared_ptr<MetaStorageInfo> mediaInfo = std::make_shared<MetaStorageInfo>(MetaStorageType::SSD);
     metaFsMBRManagerSUT.RegisterVolumeGeometry(mediaInfo);
 
     // Then

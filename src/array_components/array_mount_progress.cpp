@@ -82,8 +82,8 @@ void ArrayMountProgress::_UpdateProgress(int prog)
     }
     else
     {
-        assert(false);
         POS_TRACE_ERROR(EID(ARRAY_MOUNT_PROGRESS), "unsupported progress type");
+        assert(false);
     }
 }
 } // namespace pos

@@ -81,6 +81,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libasan4-dbg
     # for crc
     apt install -y libboost-dev
+    apt install -y libboost-system-dev 
+    apt install -y libboost-thread-dev 
     # for opentelemetry
     apt install -y libssl-dev
 
