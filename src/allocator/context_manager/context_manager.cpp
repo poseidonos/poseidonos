@@ -138,6 +138,12 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync, ContextSectionB
     return ioManager->FlushContexts(callback, sync, buffer);
 }
 
+int
+ContextManager::FlushContext(EventSmartPtr callback, ContextSectionBuffer buffer)
+{
+    return ioManager->FlushContext(callback, buffer);
+}
+
 SegmentId
 ContextManager::AllocateFreeSegment(void)
 {

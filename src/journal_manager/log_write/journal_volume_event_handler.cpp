@@ -150,7 +150,7 @@ JournalVolumeEventHandler::TriggerMetadataFlush(void)
         "Start checkpoint, triggered by volume deletion");
 
     EventSmartPtr callback(new MetaFlushCompleted(this));
-    int ret = checkpointManager->StartCheckpoint(callback);
+    int ret = checkpointManager->StartCheckpoint(callback, versionedSegmentInfo);
     if (ret == 0)
     {
         _WaitForAllocatorContextFlushCompleted();

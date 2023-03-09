@@ -154,8 +154,12 @@ void
 VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
 {
     _CheckLogGroupIdValidity(logGroupId);
+    _UpdateSegmentContext(segmentInfoDiffs[logGroupId].get());
+}
 
-    shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
+void
+VersionedSegmentCtx::_UpdateSegmentContext(VersionedSegmentInfo* targetSegInfo)
+{
     tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
     {
@@ -166,16 +170,16 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         uint32_t result = getValidCount + validBlockCountDiff;
 
         POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "Before _UpdateSegmentContext, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
-            logGroupId, segmentId, getValidCount, validBlockCountDiff, result);
+            "Before _UpdateSegmentContext, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
+            segmentId, getValidCount, validBlockCountDiff, result);
 
         segmentInfoData[segmentId].validBlockCount = result;
 
         if (0 > (int)getValidCount)
         {
             POS_TRACE_ERROR(EID(JOURNAL_INVALID),
-                "After update underflow occurred, logGroupId {}, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
-                logGroupId, segmentId, getValidCount, validBlockCountDiff);
+                "After update underflow occurred, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
+                segmentId, getValidCount, validBlockCountDiff);
             assert(false);
         }
     }
@@ -208,6 +212,16 @@ VersionedSegmentCtx::GetUpdatedInfoDataToFlush(int logGroupId)
     }
 
     POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_IN_PROGRESS), "Versioned segment info to flush is constructed, logGroup {}", logGroupId);
+
+    return segmentInfoData;
+}
+
+SegmentInfoData*
+VersionedSegmentCtx::GetUpdatedInfoDataToFlush(VersionedSegmentInfo* info)
+{
+    _UpdateSegmentContext(info);
+
+    POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_IN_PROGRESS), "Versioned segment info to flush is constructed using provided info");
 
     return segmentInfoData;
 }

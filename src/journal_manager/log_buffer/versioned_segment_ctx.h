@@ -58,6 +58,10 @@ public:
     virtual void DecreaseValidBlockCount(int logGroupId, SegmentId segId, uint32_t cnt) override {}
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override {}
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override { return nullptr; }
+    virtual SegmentInfoData* GetUpdatedInfoDataToFlush(VersionedSegmentInfo* info)
+    {
+        return nullptr;
+    }
     virtual int GetNumSegments(void) override { return 0; }
     virtual int GetNumLogGroups(void) override { return 0; };
     virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments,
@@ -91,6 +95,7 @@ public:
     virtual void IncreaseOccupiedStripeCount(int logGroupId, SegmentId segId) override;
 
     virtual SegmentInfoData* GetUpdatedInfoDataToFlush(int logGroupId) override;
+    virtual SegmentInfoData* GetUpdatedInfoDataToFlush(VersionedSegmentInfo* info) override;
     virtual int GetNumSegments(void) override;
     virtual int GetNumLogGroups(void) override;
 
@@ -104,6 +109,7 @@ public:
 private:
     void _Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_);
     void _UpdateSegmentContext(int logGroupId);
+    void _UpdateSegmentContext(VersionedSegmentInfo* targetSegInfo);
     void _CheckLogGroupIdValidity(int logGroupId);
     void _CheckSegIdValidity(int segId);
 

@@ -21,6 +21,7 @@ public:
     MOCK_METHOD(int, GetNumSegments, (), (override));
     MOCK_METHOD(int, GetNumLogGroups, (), (override));
     MOCK_METHOD(SegmentInfoData*, GetUpdatedInfoDataToFlush, (int logGroupId), (override));
+    MOCK_METHOD(SegmentInfoData*, GetUpdatedInfoDataToFlush, (VersionedSegmentInfo * info), (override));
     MOCK_METHOD(void, Init, (JournalConfiguration* journalConfiguration, uint32_t numSegments,
         std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo), (override));
     MOCK_METHOD(void, LogFilled, (int logGroupId, const MapList& dirty), (override));

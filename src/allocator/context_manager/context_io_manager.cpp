@@ -125,6 +125,28 @@ ContextIoManager::Dispose(void)
 }
 
 int
+ContextIoManager::FlushContext(EventSmartPtr callback, ContextSectionBuffer buffer)
+{
+    if (flushInProgress.exchange(true) == true)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS");
+        return EID(ALLOCATOR_META_ARCHIVE_FLUSH_IN_PROGRESS);
+    }
+    POS_TRACE_INFO(EID(ALLOCATOR_META_ARCHIVE_STORE), "Started");
+
+    FnAllocatorCtxIoCompletion completion = std::bind(&ContextIoManager::_FlushCompleted, this);
+
+    flushCallback = callback;
+    int ret = fileIo[buffer.owner]->Flush(completion, buffer);
+
+    POSMetricValue v;
+    v.gauge = _GetTotalNumOutstandingFlush();
+    telPublisher->PublishData(TEL30001_ALCT_ALCTX_PENDINGIO_CNT, v, MT_GAUGE);
+
+    return ret;
+}
+
+int
 ContextIoManager::FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer externalBuf)
 {
     if (flushInProgress.exchange(true) == true)

@@ -55,6 +55,7 @@ public:
     virtual void Init(IVersionedSegmentContext* versionedSegCtx, IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler);
 
     virtual int Start(MapList pendingDirtyMaps, EventSmartPtr callback, int logGroupIdInProgress);
+    virtual int StartSegmentCtx(EventSmartPtr callback, VersionedSegmentInfo* versionedSegmentInfo);
     virtual int FlushCompleted(int metaId);
 
     virtual CheckpointStatus GetStatus(void);
