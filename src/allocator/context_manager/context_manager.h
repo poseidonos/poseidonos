@@ -75,6 +75,7 @@ public:
 
     virtual int FlushContexts(EventSmartPtr callback, bool sync);
     virtual int FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer);
+    virtual int FlushContext(EventSmartPtr callback, ContextSectionBuffer buffer);
     virtual SegmentId AllocateFreeSegment(void);
     virtual SegmentId AllocateGCVictimSegment(void);
     virtual SegmentId AllocateRebuildTargetSegment(void);

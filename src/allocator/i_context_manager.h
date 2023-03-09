@@ -47,6 +47,7 @@ class IContextManager
 public:
     virtual int FlushContexts(EventSmartPtr callback, bool sync) = 0;
     virtual int FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer) = 0;
+    virtual int FlushContext(EventSmartPtr callback, ContextSectionBuffer buffer) = 0;
     virtual uint64_t GetStoredContextVersion(int owner) = 0;
 
     virtual SegmentId AllocateFreeSegment(void) = 0;
