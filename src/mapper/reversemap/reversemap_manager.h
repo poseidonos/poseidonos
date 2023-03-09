@@ -44,6 +44,8 @@
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/volume/i_volume_info_manager.h"
 
+using namespace std;
+
 namespace pos
 {
 class TelemetryPublisher;
@@ -74,7 +76,7 @@ public:
     virtual void WaitAllPendingIoDone(void);
 
     // for test
-    std::unordered_map<uint32_t, std::unordered_map<uint64_t, uint64_t>> GetInvertedMap(void)
+    unordered_map<uint32_t, unordered_map<uint32_t, unordered_map<uint64_t, uint64_t>>> GetInvertedMap(void)
     {
         return invertedMap;
     }
@@ -82,8 +84,8 @@ public:
 private:
     int _SetNumMpages(void);
     void _ConstructInvertedMap(const uint32_t volumeId, const uint64_t totalRbaNum);
-    void _CheckInvertedMapValid(const uint32_t vsid, const std::map<uint64_t, BlkAddr> revMapInfos);
-    std::pair<bool, BlkAddr> _FindRba(const VirtualBlkAddr addr);
+    void _CheckInvertedMapValid(const uint32_t volumeId, const uint32_t vsid, const std::map<uint64_t, BlkAddr> revMapInfos);
+    std::pair<bool, BlkAddr> _FindRba(const uint32_t volumeId, const VirtualBlkAddr addr);
 
     uint64_t mpageSize;          // Optimal page size for each FS (MFS, legacy)
     uint64_t numMpagesPerStripe; // It depends on block count per a stripe
@@ -100,8 +102,8 @@ private:
     TelemetryPublisher* telemetryPublisher;
     bool rocksDbEnabled;
 
-    /* { vsid, { offset in vsid, rba }} */
-    std::unordered_map<uint32_t, std::unordered_map<uint64_t, uint64_t>> invertedMap;
+    /* { volid, { vsid, { offset in vsid, rba }}} */
+    unordered_map<uint32_t, unordered_map<uint32_t, unordered_map<uint64_t, uint64_t>>> invertedMap;
 };
 
 } // namespace pos

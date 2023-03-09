@@ -244,18 +244,18 @@ ReverseMapManager::ReconstructReverseMap(uint32_t volumeId, uint64_t totalRbaNum
     POS_TRACE_INFO(EID(REVMAP_RECONSTRUCT_FOUND_RBA), "[ReconstructMap] START, volumeId:{}  wbLsid:{}  vsid:{}  blockCount:{}", volumeId, wblsid, vsid, blockCount);
 
     // construct the map of stripe id to offset to rba
-    if (!invertedMap.size())
+    if (!invertedMap[volumeId].size())
     {
         _ConstructInvertedMap(volumeId, totalRbaNum);
     }
 
     // verify
-    _CheckInvertedMapValid(vsid, revMapInfos);
+    _CheckInvertedMapValid(volumeId, vsid, revMapInfos);
 
     // look up rba
     for (uint64_t offset = 0; offset < blockCount; offset++)
     {
-        auto foundRba = _FindRba({vsid, offset});
+        auto foundRba = _FindRba(volumeId, {vsid, offset});
         if (foundRba.first)
         {
             revMapPacks[wblsid].SetReverseMapEntry(offset, foundRba.second, volumeId);
@@ -293,10 +293,10 @@ ReverseMapManager::GetReverseMapPtrForWBT(void)
 }
 
 std::pair<bool, BlkAddr>
-ReverseMapManager::_FindRba(const VirtualBlkAddr addr)
+ReverseMapManager::_FindRba(const uint32_t volumeId, const VirtualBlkAddr addr)
 {
-    auto result = invertedMap[addr.stripeId].find((uint64_t)addr.offset);
-    if (result == invertedMap[addr.stripeId].end())
+    auto result = invertedMap[volumeId][addr.stripeId].find((uint64_t)addr.offset);
+    if (result == invertedMap[volumeId][addr.stripeId].end())
     {
         return {false, -1};
     }
@@ -313,20 +313,20 @@ ReverseMapManager::_ConstructInvertedMap(const uint32_t volumeId, const uint64_t
         {
             continue;
         }
-        invertedMap[vsaToCheck.stripeId].insert({(uint64_t)vsaToCheck.offset, rba});
+        invertedMap[volumeId][vsaToCheck.stripeId].insert({(uint64_t)vsaToCheck.offset, rba});
     }
 }
 
 void
-ReverseMapManager::_CheckInvertedMapValid(const uint32_t vsid, const std::map<uint64_t, BlkAddr> revMapInfos)
+ReverseMapManager::_CheckInvertedMapValid(const uint32_t volumeId, const uint32_t vsid, const std::map<uint64_t, BlkAddr> revMapInfos)
 {
     auto iter = revMapInfos.begin();
     while (iter != revMapInfos.end())
     {
         auto rbaInLog = iter->second;
         auto blockOffsetInTheStripe = iter->first;
-        auto result = invertedMap[vsid].find(blockOffsetInTheStripe);
-        if (result != invertedMap[vsid].end() && result->second != rbaInLog)
+        auto result = invertedMap[volumeId][vsid].find(blockOffsetInTheStripe);
+        if (result != invertedMap[volumeId][vsid].end() && result->second != rbaInLog)
         {
             POS_TRACE_ERROR(EID(REVMAP_RBA_MISMATCH_BETWEEN_LOG_AND_INVMAP),
                 "RBA cannot be found, vsid:{}, result->second:{}, rbaInLog:{}",

@@ -386,7 +386,7 @@ TEST(ReverseMapManager, ReconstructReverseMap_testIfExecutedSuccesfully)
     int expectRetCode = 0;
     EXPECT_EQ(expectRetCode, revMap.ReconstructReverseMap(volumeId, NUM_BLKS_PER_STRIPE, lsid, vsid, NUM_BLKS_PER_STRIPE, revMapInfos));
 
-    auto invertedMap = revMap.GetInvertedMap();
+    auto invertedMap = revMap.GetInvertedMap()[volumeId];
     size_t size = 0;
     for (const auto& m : invertedMap)
     {
