@@ -136,6 +136,57 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback, int l
     return ret;
 }
 
+int
+CheckpointHandler::StartSegmentCtx(EventSmartPtr callback, VersionedSegmentInfo* versionedSegmentInfo)
+{
+    int ret = 0;
+
+    checkpointCompletionCallback = callback;
+    _SetStatus(STARTED);
+
+    assert(numMapsToFlush == 0);
+
+    numMapsToFlush = 0;
+    numMapsFlushed = 0;
+    mapFlushCompleted = true;
+
+    EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this, ALLOCATOR_META_ID));
+
+    ContextSectionBuffer segInfoBuffer = INVALID_CONTEXT_SECTION_BUFFER;
+    SegmentInfoData* vscSegInfoData = versionedSegmentCtx->GetUpdatedInfoDataToFlush(versionedSegmentInfo);
+    if (vscSegInfoData != nullptr)
+    {
+        segInfoBuffer.owner = SEGMENT_CTX;
+        segInfoBuffer.sectionId = SC_SEGMENT_INFO,
+        segInfoBuffer.buffer = reinterpret_cast<char*>(vscSegInfoData);
+    }
+    else
+    {
+        POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
+            "Failed to start flushing allocator meta pages with versioned segment context, arrayId:{}", arrayId);
+
+        ret = EID(CHECKPOINT_FAILED);
+    }
+
+    if (ret == 0)
+    {
+        ret = contextManager->FlushContext(allocMetaFlushCallback, segInfoBuffer);
+        if (ret != 0)
+        {
+            POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
+                "Failed to start flushing allocator meta pages, arrayId:{}", arrayId);
+        }
+
+        std::unique_lock<std::mutex> lock(completionLock);
+        if (status != COMPLETED)
+        {
+            _SetStatus(WAITING_FOR_FLUSH_DONE);
+        }
+    }
+
+    return ret;
+}
+
 void
 CheckpointHandler::_CheckMapFlushCompleted(void)
 {

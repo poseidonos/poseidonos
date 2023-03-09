@@ -7,8 +7,11 @@
 #include "test/unit-tests/journal_manager/checkpoint/checkpoint_handler_mock.h"
 #include "test/unit-tests/journal_manager/checkpoint/dirty_map_manager_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/callback_sequence_controller_mock.h"
+#include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
 
+using ::testing::_;
 using ::testing::InSequence;
+using ::testing::Matcher;
 using ::testing::NiceMock;
 using ::testing::Return;
 
@@ -230,5 +233,49 @@ TEST(CheckpointManager, UnblockCheckpoint_testIfCheckpointUnblocked)
     cpManager.UnblockCheckpoint();
 
     EXPECT_TRUE(cpManager.IsCheckpointInProgress() == true);
+}
+
+TEST(CheckpointManager, StartCheckpoint_testIfLogGroupCheckpointIsStartedWhenNoBufferProvided)
+{
+    // Given
+    NiceMock<MockCheckpointHandler>* cpHandler = new NiceMock<MockCheckpointHandler>(0);
+
+    NiceMock<MockEventScheduler> eventScheduler;
+    NiceMock<MockDirtyMapManager> dirtyMapManager;
+    NiceMock<MockCallbackSequenceController> seqController;
+    EventSmartPtr callback(new NiceMock<MockEvent>);
+
+    CheckpointManager cpManager(cpHandler);
+    cpManager.Init(nullptr, nullptr, &eventScheduler, &seqController, &dirtyMapManager, nullptr, nullptr);
+
+    // Should block existing checkpoints to run the StartCheckpoint for volume deletion
+    cpManager.BlockCheckpointAndWaitToBeIdle();
+
+    // When versioned segment info is not provided, checkpoint should be LOG_GROUP type
+    EXPECT_CALL(*cpHandler, Start);
+
+    cpManager.StartCheckpoint(callback, nullptr);
+}
+
+TEST(CheckpointManager, StartCheckpoint_testIfSegmentContextOnlyCheckpointIsStartedWhenBufferProvided)
+{
+    // Given
+    NiceMock<MockCheckpointHandler>* cpHandler = new NiceMock<MockCheckpointHandler>(0);
+
+    NiceMock<MockEventScheduler> eventScheduler;
+    NiceMock<MockDirtyMapManager> dirtyMapManager;
+    NiceMock<MockCallbackSequenceController> seqController;
+    NiceMock<MockVersionedSegmentInfo> info;
+    EventSmartPtr callback(new NiceMock<MockEvent>);
+
+    CheckpointManager cpManager(cpHandler);
+    cpManager.Init(nullptr, nullptr, &eventScheduler, &seqController, &dirtyMapManager, nullptr, nullptr);
+
+    // Should block existing checkpoints to run the StartCheckpoint for volume deletion
+    cpManager.BlockCheckpointAndWaitToBeIdle();
+    // When versioned segment info is not provided, checkpoint should be LOG_GROUP type
+    EXPECT_CALL(*cpHandler, StartSegmentCtx(_, &info));
+
+    cpManager.StartCheckpoint(callback, &info);
 }
 } // namespace pos

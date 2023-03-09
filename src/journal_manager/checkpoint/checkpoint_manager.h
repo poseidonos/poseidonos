@@ -49,6 +49,7 @@ class CallbackSequenceController;
 class DirtyMapManager;
 class CheckpointHandler;
 class IVersionedSegmentContext;
+class VersionedSegmentInfo;
 class TelemetryPublisher;
 
 class CheckpointManager
@@ -64,7 +65,7 @@ public:
         DirtyMapManager* dMapManager, IVersionedSegmentContext* versionedSegCtx,
         TelemetryPublisher* tp);
     virtual int RequestCheckpoint(int logGroupId, EventSmartPtr callback);
-    virtual int StartCheckpoint(EventSmartPtr callback);
+    virtual int StartCheckpoint(EventSmartPtr callback, VersionedSegmentInfo* versionedSegmentInfo);
 
     virtual CheckpointStatus GetStatus(void);
 
@@ -78,12 +79,19 @@ public:
     int GetNumPendingCheckpointRequests(void);
 
 private:
+    enum CheckpointType
+    {
+        LOG_GROUP,
+        SEGMENT_CTX_ONLY
+    };
+
     struct CheckpointRequest
     {
-        int groupId;
+        CheckpointType type;
         EventSmartPtr callback;
+        int groupId;                         // only valid when it's LOG_GROUP checkpoint
+        VersionedSegmentInfo* versionedInfo; // only valid when it's SEGMENT_CTX_ONLY checkpoint
     };
-    CheckpointRequest invalid{INT32_MAX, nullptr};
 
     int _TryToStartCheckpoint(CheckpointRequest request);
     int _StartCheckpoint(CheckpointRequest request);

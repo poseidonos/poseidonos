@@ -63,6 +63,7 @@ public:
     virtual int Init(void);
     virtual void Dispose(void);
 
+    virtual int FlushContext(EventSmartPtr callback, ContextSectionBuffer externalBuf);
     virtual int FlushContexts(EventSmartPtr callback, bool sync,
         ContextSectionBuffer externalBuf);
 

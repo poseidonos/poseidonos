@@ -94,8 +94,10 @@ int
 CheckpointManager::RequestCheckpoint(int logGroupId, EventSmartPtr cb)
 {
     CheckpointRequest request = {
+        .type = CheckpointType::LOG_GROUP,
+        .callback = cb,
         .groupId = logGroupId,
-        .callback = cb};
+        .versionedInfo = nullptr};
 
     std::lock_guard<std::mutex> lock(checkpointTriggerLock);
     int ret = 0;
@@ -112,7 +114,7 @@ CheckpointManager::RequestCheckpoint(int logGroupId, EventSmartPtr cb)
 }
 
 int
-CheckpointManager::StartCheckpoint(EventSmartPtr cb)
+CheckpointManager::StartCheckpoint(EventSmartPtr cb, VersionedSegmentInfo* versionedSegmentInfo)
 {
     if (checkpointInProgress == true || checkpointBlocked != true)
     {
@@ -123,7 +125,26 @@ CheckpointManager::StartCheckpoint(EventSmartPtr cb)
     }
 
     checkpointInProgress = true;
-    CheckpointRequest request = {.groupId = ALL_LOG_GROUP, .callback = cb};
+
+    CheckpointRequest request = [&]() -> CheckpointRequest {
+        if (versionedSegmentInfo != nullptr)
+        {
+            return CheckpointRequest{
+                .type = CheckpointType::SEGMENT_CTX_ONLY,
+                .callback = cb,
+                .groupId = ALL_LOG_GROUP,
+                .versionedInfo = versionedSegmentInfo};
+        }
+        else
+        {
+            return CheckpointRequest{
+                .type = CheckpointType::LOG_GROUP,
+                .callback = cb,
+                .groupId = ALL_LOG_GROUP,
+                .versionedInfo = nullptr};
+        }
+    }();
+
     return _StartCheckpoint(request);
 }
 
@@ -256,19 +277,31 @@ CheckpointManager::_StartCheckpoint(CheckpointRequest request)
     clientCallback = request.callback;
     EventSmartPtr completionEvent(new CheckpointCompletion(this));
 
-    MapList dirtyMaps;
-    if (ALL_LOG_GROUP == request.groupId)
+    int ret = 0;
+    if (request.type == CheckpointType::LOG_GROUP)
     {
-        dirtyMaps = dirtyMapManager->GetTotalDirtyList();
+        MapList dirtyMaps = [&]() -> MapList {
+            if (ALL_LOG_GROUP == request.groupId)
+            {
+                return dirtyMapManager->GetTotalDirtyList();
+            }
+            else
+            {
+                return dirtyMapManager->GetDirtyList(request.groupId);
+            }
+        }();
+
+        sequenceController->GetCheckpointExecutionApproval();
+        ret = checkpointHandler->Start(dirtyMaps, completionEvent, request.groupId);
+        sequenceController->AllowCallbackExecution();
     }
-    else
+    else if (request.type == CheckpointType::SEGMENT_CTX_ONLY)
     {
-        dirtyMaps = dirtyMapManager->GetDirtyList(request.groupId);
+        sequenceController->GetCheckpointExecutionApproval();
+        ret = checkpointHandler->StartSegmentCtx(completionEvent, request.versionedInfo);
+        sequenceController->AllowCallbackExecution();
     }
 
-    sequenceController->GetCheckpointExecutionApproval();
-    int ret = checkpointHandler->Start(dirtyMaps, completionEvent, request.groupId);
-    sequenceController->AllowCallbackExecution();
     if (ret != 0)
     {
         // TODO(huijeong.kim): Go to the fail mode - not to journal any more

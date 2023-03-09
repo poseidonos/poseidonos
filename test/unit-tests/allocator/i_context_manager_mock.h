@@ -12,6 +12,7 @@ public:
     using IContextManager::IContextManager;
     MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync), (override));
     MOCK_METHOD(int, FlushContexts, (EventSmartPtr callback, bool sync, ContextSectionBuffer buffer), (override));
+    MOCK_METHOD(int, FlushContext, (EventSmartPtr callback, ContextSectionBuffer buffer), (override));
     MOCK_METHOD(uint64_t, GetStoredContextVersion, (int owner), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(SegmentId, AllocateGCVictimSegment, (), (override));

@@ -26,6 +26,7 @@ public:
     virtual uint64_t GetStoredContextVersion(int owner) override;
     virtual SegmentCtx* GetSegmentCtx(void) override;
 
+    virtual int FlushContext(EventSmartPtr callback, ContextSectionBuffer buffer) { return 0; }
     virtual int FlushContexts(EventSmartPtr callback, bool sync) { return 0; }
     virtual SegmentId AllocateFreeSegment(void) { return 0; }
     virtual SegmentId AllocateGCVictimSegment(void) { return 0; }
