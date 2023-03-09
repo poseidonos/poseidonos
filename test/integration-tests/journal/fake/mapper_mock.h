@@ -6,7 +6,7 @@
 #include "src/mapper/mapper.h"
 #include "test/integration-tests/journal/fake/map_flush_handler_mock.h"
 #include "test/integration-tests/journal/fake/stripemap_mock.h"
-#include "test/integration-tests/journal/fake/vsamap_mock.h"
+#include "test/integration-tests/journal/fake/vsamap_fake.h"
 #include "test/integration-tests/journal/fixture/stripe_test_fixture.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 
@@ -31,7 +31,7 @@ public:
     IStripeMap* GetIStripeMap(void) override;
     IMapFlush* GetIMapFlush(void) override;
 
-    VSAMapMock* GetVSAMapMock(void);
+    VSAMapFake* GetVSAMapFake(void);
     StripeMapMock* GetStripeMapMock(void);
 
     virtual int StoreAll(void) override;
@@ -44,7 +44,7 @@ private:
     std::vector<MapFlushHandlerMock*> flushHandler;
     MapFlushHandlerMock* stripeMapFlushHandler;
 
-    VSAMapMock* vsaMap;
+    VSAMapFake* vsaMap;
     StripeMapMock* stripeMap;
 };
 } // namespace pos

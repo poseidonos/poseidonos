@@ -7,34 +7,34 @@
 namespace pos
 {
 class IContextManagerFake;
-class IContextReplayerMock;
-class ISegmentCtxFake;
+class IContextReplayerFake;
+class SegmentCtxFake;
 class MockAllocatorAddressInfo;
 class TestInfo;
 class WBStripeAllocatorMock;
-class AllocatorFake : public Allocator
+class AllocatorMock : public Allocator
 {
 public:
-    explicit AllocatorFake(TestInfo* testInfo, IArrayInfo* info);
-    virtual ~AllocatorFake(void);
+    explicit AllocatorMock(TestInfo* testInfo, IArrayInfo* info);
+    virtual ~AllocatorMock(void);
 
     virtual IWBStripeAllocator* GetIWBStripeAllocator(void) override;
     WBStripeAllocatorMock* GetWBStripeAllocatorMock(void);
 
     virtual ISegmentCtx* GetISegmentCtx(void) override;
-    ISegmentCtxFake* GetISegmentCtxFake(void);
+    SegmentCtxFake* GetSegmentCtxFake(void);
 
     virtual IContextManager* GetIContextManager(void) override;
     IContextManagerFake* GetIContextManagerFake(void);
 
     virtual IContextReplayer* GetIContextReplayer(void) override;
-    IContextReplayerMock* GetIContextReplayerMock(void);
+    IContextReplayerFake* GetIContextReplayerFake(void);
 
 private:
     WBStripeAllocatorMock* wbStripeAllocatorMock;
-    ISegmentCtxFake* segmentCtxFake;
+    SegmentCtxFake* segmentCtxFake;
     IContextManagerFake* contextManagerFake;
-    IContextReplayerMock* contextReplayerMock;
+    IContextReplayerFake* contextReplayerFake;
     MockAllocatorAddressInfo* addrInfoMock;
     TestInfo* testInfo;
 };

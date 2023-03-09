@@ -5,8 +5,9 @@
 #include <unistd.h>
 
 #include "src/journal_manager/log_buffer/reset_log_group.h"
+#include "src/metadata/segment_context_updater.h"
 #include "test/integration-tests/journal/fake/i_context_manager_fake.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 #include "test/integration-tests/journal/fault_event.h"
 #include "test/unit-tests/volume/i_volume_info_manager_mock.h"
 
@@ -29,11 +30,12 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     telemetryClient = new NiceMock<MockTelemetryClient>;
     testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
-    testAllocator = new StrictMock<AllocatorFake>(testInfo, arrayInfo);
+    testAllocator = new StrictMock<AllocatorMock>(testInfo, arrayInfo);
     volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
-    writeTester = new LogWriteTestFixture(testMapper, testAllocator, arrayInfo, journal, testInfo);
+    segmentContextUpdater = new SegmentContextUpdater(testAllocator->GetSegmentCtxFake(), journal->GetVersionedSegmentContext(), arrayInfo->GetSizeInfo(PartitionType::USER_DATA));
+    writeTester = new LogWriteTestFixture(testMapper, testAllocator, arrayInfo, journal, testInfo, segmentContextUpdater);
     replayTester = new ReplayTestFixture(testMapper, testAllocator, testInfo);
 }
 
@@ -77,11 +79,7 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
 
     if (journal->IsEnabled() == true)
     {
-        if (config->IsVscEnabled() == true)
-        {
-            journal->ResetVersionedSegmentContext();
-        }
-        journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+        journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager, segmentContextUpdater);
     }
 
     _GetLogBufferSizeInfo();
@@ -100,30 +98,26 @@ void
 JournalManagerTestFixture::SimulateSPORWithoutRecovery(void)
 {
     JournalConfigurationBuilder configurationBuilder(testInfo);
-
-    delete journal;
-
-    telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
-    journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, GetLogFileName());
-    journal->ResetJournalConfiguration(configurationBuilder.Build());
-    writeTester->UpdateJournal(journal);
-
-    testAllocator->GetISegmentCtxFake()->LoadContext();
-    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+    SimulateSPORWithoutRecovery(configurationBuilder);
 }
 
 void
 JournalManagerTestFixture::SimulateSPORWithoutRecovery(JournalConfigurationBuilder& configurationBuilder)
 {
     delete journal;
+    delete testMapper;
+
+    testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
+    writeTester->UpdateMapper(testMapper);
+    replayTester->UpdateMapper(testMapper);
 
     telemetryPublisher = new NiceMock<MockTelemetryPublisher>;
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, GetLogFileName());
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    testAllocator->GetISegmentCtxFake()->LoadContext();
-    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+    testAllocator->GetSegmentCtxFake()->LoadContext();
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager, segmentContextUpdater);
 }
 
 void
@@ -141,6 +135,9 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
 
     // Remove Existing Target Directory
     delete journal;
+    delete testMapper;
+    testMapper = new StrictMock<MockMapper>(testInfo, arrayInfo, nullptr);
+
     std::experimental::filesystem::remove_all(targetDirName);
 
     // Use copied SPOR Directory
@@ -149,8 +146,8 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
     journal->ResetJournalConfiguration(configurationBuilder.Build());
     writeTester->UpdateJournal(journal);
 
-    testAllocator->GetISegmentCtxFake()->LoadContext();
-    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
+    testAllocator->GetSegmentCtxFake()->LoadContext();
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager, segmentContextUpdater);
 }
 
 void

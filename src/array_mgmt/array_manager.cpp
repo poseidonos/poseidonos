@@ -111,9 +111,12 @@ ArrayManager::Load(void)
         for (auto& ate : arrayTableEntries)
         {
             POS_TRACE_INFO(EID(LOAD_ARRAY_DEBUG), "array_name:{}", ate->arrayName);
-            ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Load(ate.get());
-            ret = _Import(arrayBuildInfo);
-            delete arrayBuildInfo;
+            unique_ptr<ArrayBuildInfo> arrayBuildInfo;
+            ret = arrayBuilderAdapter->Load(ate.get(), arrayBuildInfo);
+            if (ret == 0 && arrayBuildInfo != nullptr)
+            {
+                ret = _Import(arrayBuildInfo.get());
+            }
             if (ret != 0)
             {
                 break;
@@ -148,9 +151,12 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
     }
     if (ret == 0)
     {
-        ArrayBuildInfo* arrayBuildInfo = arrayBuilderAdapter->Create(name, devs, metaFt, dataFt);
-        ret = _Import(arrayBuildInfo);
-        delete arrayBuildInfo;
+        unique_ptr<ArrayBuildInfo> arrayBuildInfo;
+        ret = arrayBuilderAdapter->Create(name, devs, metaFt, dataFt, arrayBuildInfo);
+        if (ret == 0 && arrayBuildInfo != nullptr)
+        {
+            ret = _Import(arrayBuildInfo.get());
+        }
     }
     pthread_rwlock_unlock(&arrayListLock);
     return ret;
@@ -159,28 +165,24 @@ ArrayManager::Create(string name, DeviceSet<string> devs, string metaFt, string 
 int
 ArrayManager::_Import(ArrayBuildInfo* arrayBuildInfo)
 {
-    int ret = arrayBuildInfo->buildResult;
-    if (ret == 0)
+    int ret = 0;
+    uint32_t arrayIndex = _AllocArrayIndex(arrayBuildInfo->arrayName);
+    if (arrayIndex < ArrayMgmtPolicy::MAX_ARRAY_CNT)
     {
-        arrayBuildInfo->arrayIndex = _AllocArrayIndex(arrayBuildInfo->arrayName);
-        if (arrayBuildInfo->arrayIndex < ArrayMgmtPolicy::MAX_ARRAY_CNT)
+        ArrayComponents* array = arrayComponentsFactory(arrayBuildInfo->arrayName, arrayRebuilder);
+        ret = array->Import(arrayBuildInfo, arrayIndex);
+        if (ret == 0)
         {
-            ArrayComponents* array = arrayComponentsFactory(arrayBuildInfo->arrayName, arrayRebuilder);
-            ret = array->Import(arrayBuildInfo);
-            if (ret == 0)
-            {
-                arrayList.emplace(arrayBuildInfo->arrayName, array);
-            }
-            else
-            {
-                _ReleaseArrayIndex(arrayBuildInfo->arrayName);
-                delete array;
-            }
+            arrayList.emplace(arrayBuildInfo->arrayName, array);
+        }
+        else
+        {
+            _ReleaseArrayIndex(arrayBuildInfo->arrayName);
+            delete array;
         }
     }
     if (ret != 0)
     {
-        arrayBuildInfo->Dispose();
         POS_TRACE_WARN(ret, "array_name:{}", arrayBuildInfo->arrayName);
     }
     else

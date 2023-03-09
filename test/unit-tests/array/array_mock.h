@@ -16,7 +16,7 @@ class MockArray : public Array
 {
 public:
     using Array::Array;
-    MOCK_METHOD(int, Import, (ArrayBuildInfo* buildInfo), (override));
+    MOCK_METHOD(int, Import, (ArrayBuildInfo* buildInfo, uint32_t arrayIndex), (override));
     MOCK_METHOD(int, Init, (), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));

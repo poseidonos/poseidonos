@@ -1948,6 +1948,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2488
+    Name: BUILD_NVM_PARTITIONS_ERROR
+    Severity:
+    Description: NVM partition build failed because unexpected input value was found.
+    Cause:
+    Solution:
+  -
     Id: 2491
     Name: BUILD_SSD_PARTITIONS
     Severity:
@@ -1959,6 +1966,13 @@ Root:
     Name: BUILD_SSD_PARTITIONS_RESULT
     Severity:
     Description:
+    Cause:
+    Solution:
+  -
+    Id: 2493
+    Name: BUILD_SSD_PARTITIONS_ERROR
+    Severity:
+    Description: SSD partition build failed because unexpected input value was found.
     Cause:
     Solution:
   -

@@ -35,7 +35,7 @@
 #include <atomic>
 #include <gmock/gmock.h>
 
-#include "src/allocator/i_segment_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 
 namespace pos
 {
@@ -47,16 +47,16 @@ class AsyncMetaFileIoCtx;
 
 // This class is to fake a flush of ISegmentContext,
 // LoadContext is to simulate a dirty bringup to load Segment Context.
-class ISegmentCtxFake : public ISegmentCtx
+class SegmentCtxFake : public SegmentCtx
 {
 public:
-    explicit ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
-    virtual ~ISegmentCtxFake(void);
+    explicit SegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile);
+    virtual ~SegmentCtxFake(void);
 
     void LoadContext(void);
     int FlushContexts(SegmentInfoData* vscSegmentInfoDatas);
     uint64_t GetStoredVersion(void);
-    virtual SegmentInfo* GetSegmentInfoDataArray(void);
+    virtual SegmentInfoData* GetSegmentInfoDataArray(void) override;
 
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));

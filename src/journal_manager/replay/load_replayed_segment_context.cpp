@@ -30,26 +30,67 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "load_replayed_segment_context.h"
 
-#include "array_build_info.h"
-#include "src/array_models/dto/device_set.h"
-#include "src/pbr/dto/ate_data.h"
-
-#include <memory.h>
-
-using namespace std;
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/allocator/i_segment_ctx.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
+#include "src/logger/logger.h"
 
 namespace pos
 {
-class ArrayBuilder
+LoadReplayedSegmentContext::LoadReplayedSegmentContext(SegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx, ReplayProgressReporter* reporter)
+: ReplayTask(reporter),
+  segmentCtx(segmentCtx),
+  versionedSegCtx(versionedSegCtx)
 {
-public:
-    //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
-    static int Load(pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
-    //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
-    static int Create(string name, const DeviceSet<string>& devs,
-        string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
-};
+}
+
+LoadReplayedSegmentContext::~LoadReplayedSegmentContext(void)
+{
+}
+
+int
+LoadReplayedSegmentContext::GetNumSubTasks(void)
+{
+    return 1;
+}
+
+int
+LoadReplayedSegmentContext::Start(void)
+{
+    int ret = 0;
+    int eventId = static_cast<int>(EID(JOURNAL_REPLAY_STATUS));
+    POS_TRACE_INFO(eventId, "[ReplayTask] Load versioned segment context");
+
+    SegmentInfoData* loadedSegmentInfos = nullptr;
+    if (nullptr != segmentCtx)
+    {
+        loadedSegmentInfos = segmentCtx->GetSegmentInfoDataArray();
+    }
+    else
+    {
+        // reachable only in UT context
+    }
+
+    versionedSegCtx->Load(loadedSegmentInfos);
+
+    reporter->SubTaskCompleted(GetId(), 1);
+
+    return ret;
+}
+
+ReplayTaskId
+LoadReplayedSegmentContext::GetId(void)
+{
+    return ReplayTaskId::LOAD_REPLAYED_SEGMENT_CONTEXT;
+}
+
+int
+LoadReplayedSegmentContext::GetWeight(void)
+{
+    return 10;
+}
 
 } // namespace pos

@@ -38,6 +38,7 @@ namespace pos
 {
 class PartitionLogicalSize;
 class ISegmentCtx;
+class IVersionedSegmentContext;
 
 class SegmentContextUpdater
 {
@@ -51,11 +52,13 @@ public:
     virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
     virtual bool UpdateOccupiedStripeCountWithGroupId(StripeId lsid, int logGroupId);
 
+    // For IT
+    virtual void SetVersionedSegmentContext(IVersionedSegmentContext* versionedSegmentContext);
+
 private:
     const PartitionLogicalSize* addrInfo;
     ISegmentCtx* activeSegmentCtx;
     IVersionedSegmentContext* versionedContext;
-    pthread_rwlock_t lock;
 };
 
 } // namespace pos

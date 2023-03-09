@@ -103,13 +103,13 @@ Array::MakeDebugInfo(ArrayDebugInfo& obj)
 }
 
 int
-Array::Import(ArrayBuildInfo* buildInfo)
+Array::Import(ArrayBuildInfo* buildInfo, uint32_t arrayIndex)
 {
     POS_TRACE_INFO(EID(IMPORT_ARRAY_DEBUG), "array_name:{}, array_index:{}, array_uuid:{}",
-        buildInfo->arrayName, buildInfo->arrayIndex, buildInfo->arrayUuid);
+        buildInfo->arrayName, arrayIndex, buildInfo->arrayUuid);
     pthread_rwlock_wrlock(&stateLock);
     name_ = buildInfo->arrayName;
-    index_ = buildInfo->arrayIndex;
+    index_ = arrayIndex;
     uuid = buildInfo->arrayUuid;
     createdDateTime = buildInfo->createdDateTime;
     lastUpdatedDateTime = buildInfo->lastUpdatedDateTime;
@@ -134,7 +134,7 @@ Array::Import(ArrayBuildInfo* buildInfo)
     if (ret != 0)
     {
         POS_TRACE_WARN(ret, "array_name:{}, array_index:{}, array_uuid:{}",
-        buildInfo->arrayName, buildInfo->arrayIndex, buildInfo->arrayUuid);
+        buildInfo->arrayName, arrayIndex, buildInfo->arrayUuid);
     }
     return ret;
 }

@@ -490,17 +490,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         sequenceController, dirtyMapManager, versionedSegCtx, telemetryPublisher);
 
     const PartitionLogicalSize* udSize = arrayInfo->GetSizeInfo(PartitionType::USER_DATA);
-
-    SegmentInfoData* loadedSegmentInfos = nullptr;
-    if (nullptr != contextManager)
-    {
-        SegmentCtx* segmentCtx = contextManager->GetSegmentCtx();
-        if (nullptr != segmentCtx)
-        {
-            loadedSegmentInfos = segmentCtx->GetSegmentInfoDataArray();
-        }
-    }
-    versionedSegCtx->Init(config, loadedSegmentInfos, udSize->totalSegments);
+    versionedSegCtx->Init(config, udSize->totalSegments);
 
     logWriteContextFactory->Init(config);
     logBufferIoContextFactory->Init(config, logFilledNotifier, sequenceController);
@@ -522,7 +512,7 @@ JournalManager::_InitModules(TelemetryClient* tc, IVSAMap* vsaMap, IStripeMap* s
         config, contextManager, eventScheduler);
     journalWriter->Init(logWriteHandler, logWriteContextFactory, eventFactory, &journalingStatus, eventScheduler);
 
-    replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx,
+    replayHandler->Init(config, logBuffer, vsaMap, stripeMap, mapFlush, segmentCtx, versionedSegCtx,
         wbStripeAllocator, contextManager, contextReplayer, arrayInfo, volumeManager, telemetryPublisher);
 
     statusProvider->Init(bufferAllocator, config, logGroupReleaser);

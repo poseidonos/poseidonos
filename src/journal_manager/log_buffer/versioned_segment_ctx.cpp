@@ -55,9 +55,9 @@ VersionedSegmentCtx::~VersionedSegmentCtx(void)
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_)
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_)
 {
-    _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
+    _Init(journalConfiguration, numSegments_);
 
     for (int index = 0; index < config->GetNumLogGroups(); index++)
     {
@@ -67,17 +67,17 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInf
 }
 
 void
-VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_,
+VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_,
     std::vector<std::shared_ptr<VersionedSegmentInfo>> inputVersionedSegmentInfo)
 {
-    _Init(journalConfiguration, loadedSegmentInfo, numSegments_);
+    _Init(journalConfiguration, numSegments_);
 
     assert((int)inputVersionedSegmentInfo.size() == config->GetNumLogGroups());
     segmentInfoDiffs = inputVersionedSegmentInfo;
 }
 
 void
-VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentInfoData* loadedSegmentInfo, uint32_t numSegments_)
+VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_)
 {
     config = journalConfiguration;
 
@@ -85,26 +85,31 @@ VersionedSegmentCtx::_Init(JournalConfiguration* journalConfiguration, SegmentIn
     segmentInfoData = new SegmentInfoData[numSegments];
     for (uint32_t segId = 0; segId < numSegments; segId++)
     {
-        if (loadedSegmentInfo != nullptr)
-        {
-            segmentInfoData[segId].validBlockCount = loadedSegmentInfo[segId].validBlockCount.load();
-            segmentInfoData[segId].occupiedStripeCount = loadedSegmentInfo[segId].occupiedStripeCount.load();
-            segmentInfoData[segId].state = loadedSegmentInfo[segId].state;
+        segmentInfoData[segId].Set(0, 0, SegmentState::FREE);
+    }
+}
 
-            if (nullptr != loadedSegmentInfo)
-            {
-                POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
-                    segId, loadedSegmentInfo[segId].validBlockCount,
-                    loadedSegmentInfo[segId].occupiedStripeCount,
-                    loadedSegmentInfo[segId].state);
-            }
-        }
-        else
+void
+VersionedSegmentCtx::Load(SegmentInfoData* loadedSegmentInfos)
+{
+    if (nullptr != loadedSegmentInfos)
+    {
+        for (uint32_t segId = 0; segId < numSegments; segId++)
         {
-            // For Unit Test
-            // Test should provide loadedSegmentInfo, but some are not, so initialize it here temporally
-            segmentInfoData[segId].Set(0, 0, SegmentState::FREE);
+            segmentInfoData[segId].validBlockCount = loadedSegmentInfos[segId].validBlockCount.load();
+            segmentInfoData[segId].occupiedStripeCount = loadedSegmentInfos[segId].occupiedStripeCount.load();
+            segmentInfoData[segId].state = loadedSegmentInfos[segId].state;
+            POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Loaded segment: segId {}, validcnt {}, stripeCnt {}, state {}",
+                segId, loadedSegmentInfos[segId].validBlockCount,
+                loadedSegmentInfos[segId].occupiedStripeCount,
+                loadedSegmentInfos[segId].state);
         }
+    }
+    else
+    {
+        // For Unit Test
+        // Test should provide loadedSegmentInfo, but some are not, so initialize it here temporally
+        POS_TRACE_INFO(EID(JOURNAL_MANAGER_INITIALIZED), "Unable to load Versioned Segment Context because a loaded segment context does not exist.");
     }
 }
 
@@ -151,7 +156,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
     _CheckLogGroupIdValidity(logGroupId);
 
     shared_ptr<VersionedSegmentInfo> targetSegInfo = segmentInfoDiffs[logGroupId];
-    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlkCount = targetSegInfo->GetChangedValidBlockCount();
     for (auto it = changedValidBlkCount.begin(); it != changedValidBlkCount.end(); it++)
     {
         auto segmentId = it->first;
@@ -175,7 +180,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         }
     }
 
-    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
     for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
     {
         auto segmentId = it->first;

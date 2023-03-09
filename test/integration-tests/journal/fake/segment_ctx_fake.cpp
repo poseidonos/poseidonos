@@ -30,7 +30,7 @@
 *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "i_segment_ctx_fake.h"
+#include "segment_ctx_fake.h"
 
 #include <unistd.h>
 
@@ -47,7 +47,7 @@ using ::testing::AtLeast;
 
 namespace pos
 {
-ISegmentCtxFake::ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile)
+SegmentCtxFake::SegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* segmentContextFile)
 : addrInfo(addrInfo),
   segmentContextFile(segmentContextFile)
 {
@@ -67,15 +67,15 @@ ISegmentCtxFake::ISegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* s
     segmentContextFile->Create(fileSize);
     segmentContextFile->Open();
 
-    ON_CALL(*this, ValidateBlks).WillByDefault(::testing::Invoke(this, &ISegmentCtxFake::_ValidateBlks));
+    ON_CALL(*this, ValidateBlks).WillByDefault(::testing::Invoke(this, &SegmentCtxFake::_ValidateBlks));
     EXPECT_CALL(*this, ValidateBlks).Times(AtLeast(0));
-    ON_CALL(*this, InvalidateBlks).WillByDefault(::testing::Invoke(this, &ISegmentCtxFake::_InvalidateBlks));
+    ON_CALL(*this, InvalidateBlks).WillByDefault(::testing::Invoke(this, &SegmentCtxFake::_InvalidateBlks));
     EXPECT_CALL(*this, InvalidateBlks).Times(AtLeast(0));
-    ON_CALL(*this, UpdateOccupiedStripeCount).WillByDefault(::testing::Invoke(this, &ISegmentCtxFake::_UpdateOccupiedStripeCount));
+    ON_CALL(*this, UpdateOccupiedStripeCount).WillByDefault(::testing::Invoke(this, &SegmentCtxFake::_UpdateOccupiedStripeCount));
     EXPECT_CALL(*this, UpdateOccupiedStripeCount).Times(AtLeast(0));
 }
 
-ISegmentCtxFake::~ISegmentCtxFake(void)
+SegmentCtxFake::~SegmentCtxFake(void)
 {
     if (segmentInfos != nullptr)
     {
@@ -100,7 +100,7 @@ ISegmentCtxFake::~ISegmentCtxFake(void)
 }
 
 void
-ISegmentCtxFake::LoadContext(void)
+SegmentCtxFake::LoadContext(void)
 {
     if (segmentContextFile->DoesFileExist() == false)
     {
@@ -116,7 +116,7 @@ ISegmentCtxFake::LoadContext(void)
         }
         SegmentInfoData* buffer = new SegmentInfoData[numSegments];
 
-        FnCompleteMetaFileIo callback = std::bind(&ISegmentCtxFake::_CompleteReadSegmentContext, this, std::placeholders::_1);
+        FnCompleteMetaFileIo callback = std::bind(&SegmentCtxFake::_CompleteReadSegmentContext, this, std::placeholders::_1);
         AllocatorIoCtx ctx(nullptr);
         ctx.SetIoInfo(MetaFsIoOpcode::Read, 0, segmentContextFile->GetFileSize(), (char*)buffer);
         ctx.SetFileInfo(segmentContextFile->GetFd(), segmentContextFile->GetIoDoneCheckFunc());
@@ -128,26 +128,24 @@ ISegmentCtxFake::LoadContext(void)
         segmentInfoData = buffer;
         for (uint32_t i = 0; i < numSegments; ++i)
         {
-            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
+            segmentInfos[i].AllocateSegmentInfoData(&segmentInfoData[i]);
         }
     }
     else
     {
         for (uint32_t i = 0; i < numSegments; ++i)
         {
-            segmentInfos[i].SetValidBlockCount(0);
-            segmentInfos[i].SetOccupiedStripeCount(0);
-            segmentInfos[i].SetState(SegmentState::FREE);
+            segmentInfos[i].AllocateAndInitSegmentInfoData(&segmentInfoData[i]);
         }
     }
 }
 
 int
-ISegmentCtxFake::FlushContexts(SegmentInfoData* vscSegmentInfoDatas)
+SegmentCtxFake::FlushContexts(SegmentInfoData* vscSegmentInfoDatas)
 {
     char* targetBuffer = (vscSegmentInfoDatas != nullptr) ? (char*)vscSegmentInfoDatas : (char*)segmentInfoData;
 
-    FnCompleteMetaFileIo callback = std::bind(&ISegmentCtxFake::_CompleteWriteSegmentContext, this, std::placeholders::_1);
+    FnCompleteMetaFileIo callback = std::bind(&SegmentCtxFake::_CompleteWriteSegmentContext, this, std::placeholders::_1);
     AllocatorIoCtx ctx(nullptr);
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, segmentContextFile->GetFileSize(), targetBuffer);
     ctx.SetFileInfo(segmentContextFile->GetFd(), segmentContextFile->GetIoDoneCheckFunc());
@@ -160,19 +158,19 @@ ISegmentCtxFake::FlushContexts(SegmentInfoData* vscSegmentInfoDatas)
 }
 
 uint64_t
-ISegmentCtxFake::GetStoredVersion(void)
+SegmentCtxFake::GetStoredVersion(void)
 {
     return ctxStoredVersion;
 }
 
-SegmentInfo*
-ISegmentCtxFake::GetSegmentInfoDataArray(void)
+SegmentInfoData*
+SegmentCtxFake::GetSegmentInfoDataArray(void)
 {
-    return segmentInfos;
+    return segmentInfoData;
 }
 
 void
-ISegmentCtxFake::_ValidateBlks(VirtualBlks blks)
+SegmentCtxFake::_ValidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
     uint32_t increasedValue = segmentInfos[segId].IncreaseValidBlockCount(blks.numBlks);
@@ -185,21 +183,22 @@ ISegmentCtxFake::_ValidateBlks(VirtualBlks blks)
 }
 
 bool
-ISegmentCtxFake::_InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
+SegmentCtxFake::_InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
     auto result = segmentInfos[segId].DecreaseValidBlockCount(blks.numBlks, allowVictimSegRelease);
+    bool segmentFreed = result.first;
     if (result.second == SegmentState::ERROR)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
             "segment_id{}, vsid: {}, offset: {}, decase_count: {}, current_valid_block_count: {}, allow {}", segId, blks.startVsa.stripeId, blks.startVsa.offset, blks.numBlks, segmentInfos[segId].GetValidBlockCount(), allowVictimSegRelease);
         throw std::runtime_error("Assertion failed, An underflow occurred with valid block count");
     }
-    return true;
+    return segmentFreed;
 }
 
 bool
-ISegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
+SegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
 {
     SegmentId segId = lsid / addrInfo->GetstripesPerSegment();
     uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
@@ -210,22 +209,28 @@ ISegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
             "segment_id:{}, lsid:{}, total_stripe_count_per_segment:{}", segId, lsid, addrInfo->GetstripesPerSegment());
         throw std::runtime_error("Assertion failed, An overflow occurred with occpied stripe count");
     }
+    else if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
+    {
+         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
+            "OccupiedStripeCount has reached the maximum. segment free is required, segment_id:{}, lsid:{}, total_stripe_count_per_segment:{}", segId, lsid, addrInfo->GetstripesPerSegment());
+    }
+    return false;
 }
 
 void
-ISegmentCtxFake::_CompleteReadSegmentContext(AsyncMetaFileIoCtx* ctx)
+SegmentCtxFake::_CompleteReadSegmentContext(AsyncMetaFileIoCtx* ctx)
 {
     segmentContextReadDone = true;
 }
 
 void
-ISegmentCtxFake::_CompleteWriteSegmentContext(AsyncMetaFileIoCtx* ctx)
+SegmentCtxFake::_CompleteWriteSegmentContext(AsyncMetaFileIoCtx* ctx)
 {
     segmentContextWriteDone = true;
 }
 
 void
-ISegmentCtxFake::_WaitForReadDone(void)
+SegmentCtxFake::_WaitForReadDone(void)
 {
     while (segmentContextReadDone != true)
     {
@@ -235,7 +240,7 @@ ISegmentCtxFake::_WaitForReadDone(void)
 }
 
 void
-ISegmentCtxFake::_WaitForWriteDone(void)
+SegmentCtxFake::_WaitForWriteDone(void)
 {
     while (segmentContextWriteDone != true)
     {

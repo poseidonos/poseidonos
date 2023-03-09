@@ -10,6 +10,7 @@ class MockReplayProgressReporter : public ReplayProgressReporter
 {
 public:
     using ReplayProgressReporter::ReplayProgressReporter;
+    MOCK_METHOD(void, RegisterTask, (ReplayTaskId taskId, int taskWeight), (override));
 };
 
 } // namespace pos

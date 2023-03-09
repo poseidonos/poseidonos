@@ -25,7 +25,7 @@ MockMapper::MockMapper(TestInfo* _testInfo, IArrayInfo* info, IStateControl* iSt
     ON_CALL(*this, FlushDirtyMpages).WillByDefault(::testing::Invoke(this,
         &MockMapper::_FlushDirtyMpages));
 
-    vsaMap = new StrictMock<VSAMapMock>(testInfo);
+    vsaMap = new StrictMock<VSAMapFake>(testInfo);
     stripeMap = new StrictMock<StripeMapMock>(testInfo);
 }
 
@@ -53,8 +53,8 @@ MockMapper::GetIStripeMap(void)
     return stripeMap;
 }
 
-VSAMapMock*
-MockMapper::GetVSAMapMock(void)
+VSAMapFake*
+MockMapper::GetVSAMapFake(void)
 {
     return vsaMap;
 }

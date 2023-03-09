@@ -32,24 +32,27 @@
 
 #pragma once
 
-#include "array_build_info.h"
-#include "src/array_models/dto/device_set.h"
-#include "src/pbr/dto/ate_data.h"
-
-#include <memory.h>
-
-using namespace std;
+#include "replay_task.h"
 
 namespace pos
 {
-class ArrayBuilder
+class SegmentCtx;
+class IVersionedSegmentContext;
+
+class LoadReplayedSegmentContext : public ReplayTask
 {
 public:
-    //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
-    static int Load(pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
-    //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
-    static int Create(string name, const DeviceSet<string>& devs,
-        string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
+    LoadReplayedSegmentContext(SegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx, ReplayProgressReporter* reporter);
+    virtual ~LoadReplayedSegmentContext(void);
+
+    virtual int Start(void) override;
+    virtual ReplayTaskId GetId(void);
+    virtual int GetWeight(void) override;
+    virtual int GetNumSubTasks(void) override;
+
+private:
+    SegmentCtx* segmentCtx;
+    IVersionedSegmentContext* versionedSegCtx;
 };
 
 } // namespace pos
