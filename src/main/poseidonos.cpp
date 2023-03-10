@@ -85,7 +85,6 @@
 
 namespace pos
 {
-
 PoseidonosInterface* PoseidonosInterface::instance;
 
 int
@@ -176,8 +175,7 @@ Poseidonos::_InitReplicatorManager(void)
 void
 Poseidonos::Run(void)
 {
-    // Enable after the restore policy decision
-    // _RestoreState();
+    _RestoreState();
     curr_init_seq_num++;
     POS_REPORT_TRACE(EID(POS_INITIALIZING_CLI_SERVER), "POS Initialize Sequence In Progress({}/{}): CLI Server...", curr_init_seq_num, total_init_seq_cnt);
     _RunCLIService();
@@ -424,15 +422,22 @@ Poseidonos::_SetupThreadModel(void)
 void
 Poseidonos::_RestoreState(void)
 {
-    if (RestoreManagerSingleton::Instance()->Restore())
+    bool enabled = false;
+    ConfigManagerSingleton::Instance()->GetValue("save_restore", "enable", &enabled, ConfigType::CONFIG_TYPE_BOOL);
+    if (enabled)
     {
-        cout << "The previous state has been restored.\n";
-        RestoreManagerSingleton::Instance()->EnableStateSave();
+        if (RestoreManagerSingleton::Instance()->Restore())
+        {
+            cout << "The previous state has been restored.\n";
+            RestoreManagerSingleton::Instance()->EnableStateSave();
+            return;
+        }
+        else
+        {
+            cout << "Faild to restore previous state.\n";
+        }
     }
-    else
-    {
-        cout << "Faild to restore previous state.\n";
-    }
+    POS_TRACE_INFO(EID(RESTORE_MSG), "Saving state disabled.");
 }
 
 void
