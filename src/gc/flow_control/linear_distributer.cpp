@@ -70,7 +70,6 @@ LinearDistributer::Init(void)
 
     totalTokenInStripe = flowControlConfiguration->GetTotalTokenInStripe();
     totalToken = flowControlConfiguration->GetTotalToken();
-
     gcThreshold = iContextManager->GetGcThreshold(GcMode::MODE_NORMAL_GC);
     gcUrgentThreshold = iContextManager->GetGcThreshold(GcMode::MODE_URGENT_GC);
 }
