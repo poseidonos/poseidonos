@@ -210,6 +210,12 @@ ReplayLogs::_ReplayFinishedStripes(void)
 
             _MoveToReplayedStripe(stripe);
         }
+        else if (log->GetType() == LogType::SEGMENT_FREED)
+        {
+            SegmentFreedLog* data = (SegmentFreedLog*)log->GetData();
+            POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
+                "UpdatFreedSegment log found. Segment was freed before power cycle. log_type: {}, sequence_number: {}, segment_id: {}", log->GetType(), log->GetSeqNum(), data->targetSegment);
+        }
         else
         {
             POS_TRACE_WARN(EID(JOURNAL_REPLAY_STATUS),

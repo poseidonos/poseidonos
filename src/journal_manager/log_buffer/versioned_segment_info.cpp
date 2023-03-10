@@ -31,11 +31,16 @@
  */
 
 #include "versioned_segment_info.h"
+
+#include<assert.h>
+
+#include "src/array_models/interface/i_array_info.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-VersionedSegmentInfo::VersionedSegmentInfo(void)
+VersionedSegmentInfo::VersionedSegmentInfo(IArrayInfo* arrayInfo)
+: arrayInfo(arrayInfo)
 {
 }
 
@@ -72,13 +77,8 @@ VersionedSegmentInfo::IncreaseOccupiedStripeCount(SegmentId segId)
 void
 VersionedSegmentInfo::ResetOccupiedStripeCount(SegmentId segId)
 {
-    changedOccupiedStripeCount[segId] = 0;
-}
-
-void
-VersionedSegmentInfo::ResetValidBlockCount(SegmentId segId)
-{
-    changedValidBlockCount[segId] = 0;
+    uint32_t numStripesPerSegment = arrayInfo->GetSizeInfo(PartitionType::USER_DATA)->stripesPerSegment;
+    changedOccupiedStripeCount[segId] -= numStripesPerSegment;
 }
 
 const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>& 
@@ -87,7 +87,7 @@ VersionedSegmentInfo::GetChangedValidBlockCount(void)
     return this->changedValidBlockCount;
 }
 
-const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>& 
+const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>& 
 VersionedSegmentInfo::GetChangedOccupiedStripeCount(void)
 {
     return this->changedOccupiedStripeCount;

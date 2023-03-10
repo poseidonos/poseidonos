@@ -161,6 +161,28 @@ JournalWriter::AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmar
 }
 
 int
+JournalWriter::AddSegmentFreedLog(SegmentId targetSegmentId, EventSmartPtr callbackEvent)
+{
+    int result = _CanBeWritten();
+    if (result == 0)
+    {
+        LogWriteContext* logWriteContext =
+            logFactory->CreateSegmentFreedLogWriteContext(targetSegmentId, callbackEvent);
+        result = logWriteHandler->AddLog(logWriteContext);
+        if (result != 0)
+        {
+            delete logWriteContext;
+        }
+
+        return result;
+    }
+    else
+    {
+        return result;
+    }
+}
+
+int
 JournalWriter::_AddGcLogs(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent)
 {
     LogWriteContext* stripeFlushedLogWriteContext =

@@ -1,23 +1,22 @@
-#include "allocator_file_io_integration_test.h"
-
 #include <string>
 
-#include "test/integration-tests/segmentCtx/segment_ctx_tester.h"
-#include "src/logger/logger.h"
+#include "allocator_file_io_integration_test.h"
+#include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/context_io_manager.h"
 #include "src/allocator/context_manager/context_manager.h"
 #include "src/allocator/context_manager/rebuild_ctx/rebuild_ctx.h"
+#include "src/allocator/context_manager/segment_ctx/segment_freed_update_request.h"
 #include "src/include/address_type.h"
+#include "src/logger/logger.h"
 #include "src/meta_file_intf/mock_file_intf.h"
-#include "src/allocator/address/allocator_address_info.h"
-
 #include "test/integration-tests/allocator/allocator_it_common.h"
+#include "test/integration-tests/segmentCtx/segment_ctx_tester.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_file_io_mock.h"
 #include "test/unit-tests/allocator/context_manager/block_allocation_status_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_io_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_replayer_mock.h"
-
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_info_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_list_mock.h"
 #include "test/unit-tests/event_scheduler/event_mock.h"
@@ -25,12 +24,13 @@
 #include "test/unit-tests/lib/bitmap_mock.h"
 #include "test/unit-tests/meta_file_intf/async_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+#include "test/unit-tests/meta_service/i_meta_updater_mock.h"
 
 using ::testing::NiceMock;
 
 namespace pos
 {
-class SegmentCtxIntegrationTest : public ::testing::Test
+class SegmentCtxIntegrationTestFixture : public ::testing::Test
 {
 protected:
     virtual void SetUp(void)
@@ -47,7 +47,7 @@ protected:
 };
 
 // TODO (dh.ihm): Need to checkout handle segfault issue
-TEST_F(SegmentCtxIntegrationTest, DISABLED_MockOverride_Example)
+TEST_F(SegmentCtxIntegrationTestFixture, DISABLED_MockOverride_Example)
 {
     NiceMock<SegmentCtxTesterExample>* seg = new NiceMock<SegmentCtxTesterExample>;
 
@@ -57,14 +57,15 @@ TEST_F(SegmentCtxIntegrationTest, DISABLED_MockOverride_Example)
     delete seg;
 }
 
-TEST_F(SegmentCtxIntegrationTest, LifeCycleTest)
+TEST_F(SegmentCtxIntegrationTestFixture, LifeCycleTest)
 {
     // test init and dispose.
-    segmentCtx->Init();
+    NiceMock<MockEventScheduler> eventScheduler;
+    segmentCtx->Init(&eventScheduler);
     segmentCtx->Dispose();
 
     // re-init
-    segmentCtx->Init();
+    segmentCtx->Init(&eventScheduler);
 
     // allocate free segments.
     uint64_t numOfFreeSegments = segmentCtx->GetNumOfSegment();
@@ -123,7 +124,7 @@ TEST_F(SegmentCtxIntegrationTest, LifeCycleTest)
     EXPECT_EQ(retSegmentInfo[segId].state, SegmentState::SSD);
 }
 
-TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedByUserWrite)
+TEST(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedByUserWrite)
 {
     NiceMock<MockAllocatorAddressInfo> addrInfo;
     NiceMock<MockEventScheduler> eventScheduler;
@@ -162,12 +163,18 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
         segInfos[i].SetState(SegmentState::SSD);
     }
     SegmentCtx* segmentCtx = new SegmentCtx(&tp, rebuildCtx, &addrInfo, gcCtx, segmentInfoData);
+    segmentCtx->SetEventScheduler(&eventScheduler);
 
     ON_CALL(addrInfo, IsUT).WillByDefault(Return(true));
     ON_CALL(addrInfo, GetblksPerSegment).WillByDefault(Return(maxValidBlockCount));
     ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(numOfSegment));
     ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(numOfStripesPerSegment));
     ON_CALL(addrInfo, GetArrayId).WillByDefault(Return(arrayId));
+    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr input) {
+        SegmentFreedUpdateRequest* segmentFreedUpdateEvent = dynamic_cast<SegmentFreedUpdateRequest*>(input.get());
+        SegmentId targetSegmentId = segmentFreedUpdateEvent->GetTargetSegmentId();
+        segmentCtx->SegmentFreeUpdateCompleted(targetSegmentId, 0);
+    });
 
     segmentCtx->SetSegmentList(SegmentState::SSD, &ssdSegmentList);
     segmentCtx->SetSegmentList(SegmentState::VICTIM, &victimSegmentList);
@@ -260,7 +267,7 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     ret = rebuildSegmentList.Contains(victimSegId);
     EXPECT_EQ(true, ret);
 
-    delete [] segmentInfoData;
+    delete[] segmentInfoData;
     delete segmentCtx;
     delete ioManager;
     delete allocatorCtx;
@@ -269,4 +276,4 @@ TEST_F(SegmentCtxIntegrationTest, UpdateSegmentList_IfTargetSegmentInvalidatedBy
     delete blockAllocStatus;
     delete contextReplayer;
 }
-}
+} // namespace pos

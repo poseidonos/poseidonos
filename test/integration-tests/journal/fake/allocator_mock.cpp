@@ -1,12 +1,13 @@
 #include "allocator_mock.h"
 
+#include "src/allocator/i_segment_ctx.h"
 #include "src/meta_file_intf/mock_file_intf.h"
 #include "test/integration-tests/journal/fake/i_context_manager_fake.h"
+#include "test/integration-tests/journal/fake/i_context_replayer_fake.h"
 #include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 #include "test/integration-tests/journal/fake/wbstripe_allocator_mock.h"
 #include "test/integration-tests/journal/utils/test_info.h"
 #include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
-#include "test/integration-tests/journal/fake/i_context_replayer_fake.h"
 
 using ::testing::StrictMock;
 namespace pos
@@ -51,7 +52,7 @@ AllocatorMock::GetWBStripeAllocatorMock(void)
 ISegmentCtx*
 AllocatorMock::GetISegmentCtx(void)
 {
-    return segmentCtxFake;
+    return dynamic_cast<ISegmentCtx*>(segmentCtxFake);
 }
 
 SegmentCtxFake*
@@ -63,7 +64,7 @@ AllocatorMock::GetSegmentCtxFake(void)
 IContextManager*
 AllocatorMock::GetIContextManager(void)
 {
-    return contextManagerFake;
+    return dynamic_cast<IContextManager*>(contextManagerFake);
 }
 
 IContextManagerFake*
@@ -75,7 +76,7 @@ AllocatorMock::GetIContextManagerFake(void)
 IContextReplayer*
 AllocatorMock::GetIContextReplayer(void)
 {
-    return contextReplayerFake;
+    return dynamic_cast<IContextReplayer*>(contextReplayerFake);
 }
 
 IContextReplayerFake*

@@ -8,3 +8,4 @@ POS_ADD_UNIT_TEST(volume_deleted_log_handler_ut volume_deleted_log_handler_test.
 POS_ADD_UNIT_TEST(waiting_log_list_ut waiting_log_list_test.cpp)
 POS_ADD_UNIT_TEST(log_handler_ut log_handler_test.cpp)
 POS_ADD_UNIT_TEST(log_list_ut log_list_test.cpp)
+POS_ADD_UNIT_TEST(segment_freed_log_handler_ut segment_freed_log_handler_test.cpp)

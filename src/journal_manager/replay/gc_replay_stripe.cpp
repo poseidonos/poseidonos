@@ -55,28 +55,28 @@ void
 GcReplayStripe::AddLog(ReplayLog replayLog)
 {
     ReplayStripe::AddLog(replayLog);
-    _AddLog(replayLog.log, replayLog.segInfoFlushed);
+    _AddLog(replayLog);
 }
 
 void
-GcReplayStripe::_AddLog(LogHandlerInterface* log, bool segInfoFlushed)
+GcReplayStripe::_AddLog(ReplayLog replayLog)
 {
-    if (log->GetType() == LogType::GC_BLOCK_WRITE_DONE)
+    if (replayLog.log->GetType() == LogType::GC_BLOCK_WRITE_DONE)
     {
-        GcBlockWriteDoneLogHandler* gcBlockLogHandler = dynamic_cast<GcBlockWriteDoneLogHandler*>(log);
+        GcBlockWriteDoneLogHandler* gcBlockLogHandler = dynamic_cast<GcBlockWriteDoneLogHandler*>(replayLog.log);
         assert(gcBlockLogHandler != nullptr);
 
         GcBlockWriteDoneLog* blockWriteDoneLog = gcBlockLogHandler->GetGcBlockMapWriteDoneLog();
         GcBlockMapUpdate* blockList = gcBlockLogHandler->GetMapList();
 
         status->GcBlockLogFound(blockList, blockWriteDoneLog->numBlockMaps);
-        _CreateBlockWriteReplayEvents(blockList, blockWriteDoneLog->volId, blockWriteDoneLog->numBlockMaps, segInfoFlushed);
+        _CreateBlockWriteReplayEvents(blockList, blockWriteDoneLog->volId, blockWriteDoneLog->numBlockMaps, replayLog.segInfoFlushed);
     }
-    else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
+    else if (replayLog.log->GetType() == LogType::GC_STRIPE_FLUSHED)
     {
-        GcStripeFlushedLog dat = *(reinterpret_cast<GcStripeFlushedLog*>(log->GetData()));
+        GcStripeFlushedLog dat = *(reinterpret_cast<GcStripeFlushedLog*>(replayLog.log->GetData()));
         status->GcStripeLogFound(dat);
-        if (segInfoFlushed)
+        if (replayLog.segInfoFlushed)
         {
             needToReplayStripeFlush = false;
         }
@@ -89,9 +89,10 @@ GcReplayStripe::_CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int v
 {
     for (uint64_t offset = 0; offset < numBlocks; offset++)
     {
+        bool needToReplaySegmentInfo = segInfoFlushed == false ? true : false;
         ReplayEvent* blockWriteEvent =
             replayEventFactory->CreateBlockWriteReplayEvent(volId,
-                blockList[offset].rba, blockList[offset].vsa, 1, segInfoFlushed);
+                blockList[offset].rba, blockList[offset].vsa, 1, needToReplaySegmentInfo);
         replayEvents.push_back(blockWriteEvent);
     }
 }

@@ -35,15 +35,17 @@
 #include <unordered_map>
 
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
+#include "src/array_models/interface/i_array_info.h"
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/config/journal_configuration.h"
+#include "src/journal_manager/log_buffer/versioned_segment_info.h"
 #include "src/logger/logger.h"
-#include "versioned_segment_info.h"
 
 namespace pos
 {
-VersionedSegmentCtx::VersionedSegmentCtx(void)
+VersionedSegmentCtx::VersionedSegmentCtx(IArrayInfo* arrayInfo)
 : config(nullptr),
+  arrayInfo(arrayInfo),
   numSegments(0),
   segmentInfoData(nullptr)
 {
@@ -61,7 +63,7 @@ VersionedSegmentCtx::Init(JournalConfiguration* journalConfiguration, uint32_t n
 
     for (int index = 0; index < config->GetNumLogGroups(); index++)
     {
-        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo());
+        std::shared_ptr<VersionedSegmentInfo> segmentInfo(new VersionedSegmentInfo(arrayInfo));
         segmentInfoDiffs.push_back(segmentInfo);
     }
 }
@@ -180,7 +182,7 @@ VersionedSegmentCtx::_UpdateSegmentContext(int logGroupId)
         }
     }
 
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
     for (auto it = changedOccupiedCount.begin(); it != changedOccupiedCount.end(); it++)
     {
         auto segmentId = it->first;
@@ -252,9 +254,9 @@ VersionedSegmentCtx::LogFilled(int logGroupId, const MapList& dirty)
     // do nothing
 }
 
-void 
+void
 VersionedSegmentCtx::LogBufferReseted(int logGroupId)
-{    
+{
     _CheckLogGroupIdValidity(logGroupId);
     segmentInfoDiffs[logGroupId]->Reset();
 
@@ -262,15 +264,9 @@ VersionedSegmentCtx::LogBufferReseted(int logGroupId)
 }
 
 void
-VersionedSegmentCtx::NotifySegmentFreed(SegmentId segmentId)
+VersionedSegmentCtx::NotifySegmentFreed(SegmentId segmentId, int logGroupId)
 {
-    for (int groupId = 0; groupId < config->GetNumLogGroups(); groupId++)
-    {
-        segmentInfoDiffs[groupId]->ResetOccupiedStripeCount(segmentId);
-        segmentInfoDiffs[groupId]->ResetValidBlockCount(segmentId);
-    }
-    segmentInfoData[segmentId].occupiedStripeCount = 0;
-    segmentInfoData[segmentId].state = SegmentState::FREE;
+    segmentInfoDiffs[logGroupId]->ResetOccupiedStripeCount(segmentId);
 }
 
 } // namespace pos

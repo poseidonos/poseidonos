@@ -77,7 +77,7 @@ TEST(VersionedSegmentInfo, IncreaseOccupiedStripeCount_testIfOccupiedStripeCount
     VersionedSegmentInfo versionedSegInfo;
 
     // When
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> expectChangedOccupiedCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> expectChangedOccupiedCount;
     SegmentId targetSegment = 3;
     int increasedOccupiedCount = 5;
     for (int index = 0; index < increasedOccupiedCount; index++)

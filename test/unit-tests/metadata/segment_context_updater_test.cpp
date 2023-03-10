@@ -1,10 +1,10 @@
 #include "src/metadata/segment_context_updater.h"
 
+#include <gtest/gtest.h>
+
+#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/array_models/dto/partition_logical_size_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/i_versioned_segment_context_mock.h"
-#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
-
-#include <gtest/gtest.h>
 
 using ::testing::NiceMock;
 using ::testing::_;

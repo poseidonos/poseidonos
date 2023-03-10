@@ -19,6 +19,7 @@ public:
     MOCK_METHOD(std::vector<LogWriteContext*>, CreateGcBlockMapLogWriteContexts, (GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(LogWriteContext*, CreateGcStripeFlushedLogWriteContext, (GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(LogWriteContext*, CreateVolumeDeletedLogWriteContext, (int volId, uint64_t contextVersion, EventSmartPtr callback), (override));
+    MOCK_METHOD(LogWriteContext*, CreateSegmentFreedLogWriteContext, (SegmentId targetSegmentId, EventSmartPtr callbackEvent), (override));
 };
 
 } // namespace pos

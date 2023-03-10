@@ -39,10 +39,12 @@
 
 namespace pos
 {
+class IArrayInfo;
 class VersionedSegmentInfo
 {
 public:
-    VersionedSegmentInfo(void);
+    VersionedSegmentInfo(void) = default;
+    VersionedSegmentInfo(IArrayInfo* arrayInfo);
     virtual ~VersionedSegmentInfo(void);
 
     virtual void Reset(void);
@@ -50,14 +52,14 @@ public:
     virtual void DecreaseValidBlockCount(SegmentId segId, uint32_t cnt);
     virtual void IncreaseOccupiedStripeCount(SegmentId segId);
     virtual void ResetOccupiedStripeCount(SegmentId segId);
-    virtual void ResetValidBlockCount(SegmentId segId);
     
     virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&  GetChangedValidBlockCount(void);
-    virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>&  GetChangedOccupiedStripeCount(void);
+    virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&  GetChangedOccupiedStripeCount(void);
 
 private:
+    IArrayInfo* arrayInfo;
     tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlockCount;
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedOccupiedStripeCount;
 };
 
 } // namespace pos

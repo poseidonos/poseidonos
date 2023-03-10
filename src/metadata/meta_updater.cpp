@@ -152,4 +152,31 @@ MetaUpdater::UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateI
     return result;
 }
 
+int
+MetaUpdater::UpdateFreedSegmentContext(SegmentCtx* segmentCtx, SegmentId targetSegmentId)
+{
+    int result = 0;
+
+    CallbackSmartPtr freedSegmentCtxUpdate =
+        metaEventFactory->CreateFreedSegmentCtxUpdateEvent(segmentCtx, targetSegmentId);
+
+    if (journal->IsEnabled() == true)
+    {
+        result = journalWriter->AddSegmentFreedLog(targetSegmentId, freedSegmentCtxUpdate);
+    }
+    else
+    {
+        bool executionSuccessful = freedSegmentCtxUpdate->Execute();
+        if (unlikely(false == executionSuccessful))
+        {
+            POS_EVENT_ID eventId =
+                EID(NFLSH_STRIPE_DEBUG_UPDATE);
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                "Freed Segment Context Update Request: targetSegmentId : {}", targetSegmentId);
+
+            eventScheduler->EnqueueEvent(freedSegmentCtxUpdate);
+        }
+    }
+    return result;
+}
 } // namespace pos

@@ -1,7 +1,9 @@
 #include <gmock/gmock.h>
-#include <string>
+
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/journal_manager/log/log_event.h"
 
 namespace pos
@@ -40,6 +42,12 @@ class MockVolumeDeletedLog : public VolumeDeletedLog
 {
 public:
     using VolumeDeletedLog::VolumeDeletedLog;
+};
+
+class MockSegmentFreeddLog : public SegmentFreedLog
+{
+public:
+    using SegmentFreedLog::SegmentFreedLog;
 };
 
 } // namespace pos

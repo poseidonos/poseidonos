@@ -39,6 +39,7 @@
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
 #include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log_buffer/versioned_segment_info_mock.h"
+#include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 
 using testing::NiceMock;
 using testing::Return;
@@ -46,16 +47,23 @@ using testing::ReturnRef;
 
 namespace pos
 {
+const static int NUM_STRIPES_PER_SEGMENT = 1024;
 class VersionedSegmentCtxTestFixture : public testing::Test
 {
 public:
-    VersionedSegmentCtxTestFixture(void) {};
+    VersionedSegmentCtxTestFixture(void)
+    : versionedSegCtx(&arrayInfo)
+    {
+    };
     virtual ~VersionedSegmentCtxTestFixture(void) {};
 
     virtual void SetUp(void)
     {
         numLogGroups = 2;
         ON_CALL(config, GetNumLogGroups).WillByDefault(Return(numLogGroups));
+
+        sizeInfo.stripesPerSegment = NUM_STRIPES_PER_SEGMENT;
+        ON_CALL(arrayInfo, GetSizeInfo(PartitionType::USER_DATA)).WillByDefault(Return(&sizeInfo));
 
         int numSegInfos = 3;
         segmentInfoData = new SegmentInfoData[numSegInfos];
@@ -70,6 +78,8 @@ public:
     }
 
 protected:
+    PartitionLogicalSize sizeInfo;
+    NiceMock<MockIArrayInfo> arrayInfo;
     SegmentInfoData* segmentInfoData;
     VersionedSegmentCtx versionedSegCtx;
     NiceMock<MockJournalConfiguration> config;
@@ -155,7 +165,7 @@ TEST_F(VersionedSegmentCtxTestFixture, GetUpdatedInfoToFlush_testIfChangedValueI
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
         GetChangedValidBlockCount).WillOnce(ReturnRef(changedValidBlkCount));
 
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedOccupiedStripeCount;
     changedOccupiedStripeCount.emplace(0, 1);
     changedOccupiedStripeCount.emplace(1, 1);
     changedOccupiedStripeCount.emplace(2, 0);
@@ -203,7 +213,7 @@ TEST_F(VersionedSegmentCtxTestFixture, GetUpdatedInfoToFlush_testIfChangedValueI
     changedValidBlkCount.emplace(2, 40);
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]), GetChangedValidBlockCount).WillOnce(ReturnRef(changedValidBlkCount));
 
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedOccupiedStripeCount;
     changedOccupiedStripeCount.emplace(0, 2);
     changedOccupiedStripeCount.emplace(1, 1);
     changedOccupiedStripeCount.emplace(2, 0);
@@ -252,7 +262,7 @@ TEST_F(VersionedSegmentCtxTestFixture, LogBufferReseted_testIfInfoIsResetted)
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
         GetChangedValidBlockCount).WillOnce(ReturnRef(changedValidBlkCount));
 
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedOccupiedStripeCount;
     EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
         GetChangedOccupiedStripeCount).WillOnce(ReturnRef(changedOccupiedStripeCount));
 
@@ -269,39 +279,36 @@ TEST_F(VersionedSegmentCtxTestFixture, NotifySegmentFreed_testIfSegmentFreed)
     std::vector<std::shared_ptr<VersionedSegmentInfo>> versionedSegmentInfo;
     for (int index = 0; index < numLogGroups; index++)
     {
-        std::shared_ptr<VersionedSegmentInfo> input(new NiceMock<MockVersionedSegmentInfo>);
+        std::shared_ptr<VersionedSegmentInfo> input(new VersionedSegmentInfo(&arrayInfo));
         versionedSegmentInfo.push_back(input);
     }
     versionedSegCtx.Init(&config, 3, versionedSegmentInfo);
     
-    segmentInfoData[0].occupiedStripeCount = 100;
-    segmentInfoData[1].occupiedStripeCount = 12; 
+    
+    segmentInfoData[0].occupiedStripeCount = NUM_STRIPES_PER_SEGMENT;
+    segmentInfoData[1].occupiedStripeCount = NUM_STRIPES_PER_SEGMENT; 
     segmentInfoData[2].occupiedStripeCount = 0;
     versionedSegCtx.Load(segmentInfoData);
 
     int targetLogGroup = 0;
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlkCount;
-    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
-    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
-        GetChangedValidBlockCount).WillRepeatedly(ReturnRef(changedValidBlkCount));
-    EXPECT_CALL(*std::static_pointer_cast<MockVersionedSegmentInfo>(versionedSegmentInfo[targetLogGroup]),
-        GetChangedOccupiedStripeCount).WillRepeatedly(ReturnRef(changedOccupiedStripeCount));
-
     SegmentInfoData* result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
 
-    EXPECT_EQ(result[0].occupiedStripeCount, 100);
-    EXPECT_EQ(result[1].occupiedStripeCount, 12);
+    EXPECT_EQ(result[0].occupiedStripeCount, NUM_STRIPES_PER_SEGMENT);
+    EXPECT_EQ(result[1].occupiedStripeCount, NUM_STRIPES_PER_SEGMENT);
     EXPECT_EQ(result[2].occupiedStripeCount, 0);
 
     // Test
-    versionedSegCtx.NotifySegmentFreed(0);
+    versionedSegCtx.NotifySegmentFreed(0, targetLogGroup);
     result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
     EXPECT_EQ(result[0].occupiedStripeCount, 0);
-    EXPECT_EQ(result[1].occupiedStripeCount, 12);
+    EXPECT_EQ(result[1].occupiedStripeCount, NUM_STRIPES_PER_SEGMENT);
+    EXPECT_EQ(result[2].occupiedStripeCount, 0);
 
-    versionedSegCtx.NotifySegmentFreed(1);
+    targetLogGroup = 1;
+    versionedSegCtx.NotifySegmentFreed(1, targetLogGroup);
     result = versionedSegCtx.GetUpdatedInfoDataToFlush(targetLogGroup);
     EXPECT_EQ(result[0].occupiedStripeCount, 0);
     EXPECT_EQ(result[1].occupiedStripeCount, 0);
+    EXPECT_EQ(result[2].occupiedStripeCount, 0);
 }
 } // namespace pos

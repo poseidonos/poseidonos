@@ -18,6 +18,8 @@
 #include "test/unit-tests/allocator/context_manager/context_io_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_replayer_mock.h"
+#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
@@ -44,18 +46,23 @@
 #include "test/unit-tests/lib/bitmap_mock.h"
 #include "test/unit-tests/meta_file_intf/async_context_mock.h"
 #include "test/unit-tests/meta_file_intf/meta_file_intf_mock.h"
+#include "test/unit-tests/meta_service/i_meta_updater_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 
 using namespace ::testing;
 using testing::NiceMock;
+using testing::_;
+using testing::Return;
 
 namespace pos
 {
-class ContextManagerIntegrationTest : public testing::Test
+class ContextManagerIntegrationTestFixture : public testing::Test
 {
 public:
-    ContextManagerIntegrationTest(void) {};
-    virtual ~ContextManagerIntegrationTest(void) {};
+    ContextManagerIntegrationTestFixture(void) {};
+    virtual ~ContextManagerIntegrationTestFixture(void) {};
 
     virtual void SetUp(void);
     virtual void TearDown(void);
@@ -99,6 +106,8 @@ protected:
     NiceMock<MockTelemetryPublisher>* tp;
     NiceMock<MockTelemetryClient>* tc;
     NiceMock<MockContextManager>* contextManager;
+    NiceMock<MockIMetaUpdater>* metaUpdater;
+    NiceMock<MockEventScheduler>* eventScheduler;
 
     NiceMock<MockAllocatorCtx>* allocCtx;
     NiceMock<MockRebuildCtx>* reCtx;
@@ -116,7 +125,7 @@ private:
 };
 
 void
-ContextManagerIntegrationTest::SetUp(void)
+ContextManagerIntegrationTestFixture::SetUp(void)
 {
     _InitializePartitionSize();
 
@@ -147,6 +156,7 @@ ContextManagerIntegrationTest::SetUp(void)
     tp = new NiceMock<MockTelemetryPublisher>;
     tc = new NiceMock<MockTelemetryClient>;
     contextManager = new NiceMock<MockContextManager>;
+    metaUpdater = new NiceMock<MockIMetaUpdater>;
 
     allocCtx = new NiceMock<MockAllocatorCtx>();
     reCtx = new NiceMock<MockRebuildCtx>();
@@ -154,6 +164,7 @@ ContextManagerIntegrationTest::SetUp(void)
     blockAllocStatus = new NiceMock<MockBlockAllocationStatus>();
     ioManager = new NiceMock<MockContextIoManager>;
     addrInfo = new NiceMock<MockAllocatorAddressInfo>;
+    eventScheduler = new NiceMock<MockEventScheduler>;
 
     ON_CALL(*addrInfo, GetArrayId).WillByDefault(Return(arrayId));
     segInfoDataForSegCtx = new SegmentInfoData[numOfSegment];
@@ -164,6 +175,7 @@ ContextManagerIntegrationTest::SetUp(void)
     }
 
     segCtx = new SegmentCtx(tp, reCtx, addrInfo, gcCtx, segInfoDataForSegCtx);
+    segCtx->SetEventScheduler(eventScheduler);
 
     journal = new JournalManager(config, statusProvider,
         logWriteContextFactory, logBufferIoContextFactory, journalEventFactory, logWriteHandler,
@@ -185,7 +197,7 @@ ContextManagerIntegrationTest::SetUp(void)
 }
 
 void
-ContextManagerIntegrationTest::TearDown(void)
+ContextManagerIntegrationTestFixture::TearDown(void)
 {
     if (nullptr != arrayInfo)
     {
@@ -217,11 +229,16 @@ ContextManagerIntegrationTest::TearDown(void)
         delete addrInfo;
     }
 
+    if (nullptr != eventScheduler)
+    {
+        delete eventScheduler;
+    }
+
     delete cpHandler;
 }
 
 void
-ContextManagerIntegrationTest::_InitializePartitionSize(void)
+ContextManagerIntegrationTestFixture::_InitializePartitionSize(void)
 {
     partitionLogicalSize.minWriteBlkCnt = 0;
     partitionLogicalSize.blksPerChunk = 4;
@@ -232,7 +249,7 @@ ContextManagerIntegrationTest::_InitializePartitionSize(void)
     partitionLogicalSize.totalSegments = 300;
 }
 
-TEST_F(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
+TEST_F(ContextManagerIntegrationTestFixture, DISABLED_GetRebuildTargetSegment_FreeUserDataSegment)
 {
     // Constant
     const int TEST_SEG_CNT = 1;
@@ -301,19 +318,18 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_GetRebuildTargetSegment_FreeUserD
     delete allocatorAddressInfo;
 }
 
-TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext)
+TEST_F(ContextManagerIntegrationTestFixture, DISABLED_FlushContexts_FlushRebuildContext)
 {
     NiceMock<MockAllocatorAddressInfo> allocatorAddressInfo;
     NiceMock<MockTelemetryPublisher> telemetryPublisher;
-    NiceMock<MockEventScheduler> eventScheduler;
 
     NiceMock<MockAllocatorFileIo>* segmentCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* allocatorCtxIo = new NiceMock<MockAllocatorFileIo>;
     NiceMock<MockAllocatorFileIo>* rebuildCtxIo = new NiceMock<MockAllocatorFileIo>;
 
-    ContextIoManager ioManager(&allocatorAddressInfo, &telemetryPublisher, &eventScheduler, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
+    ContextIoManager ioManager(&allocatorAddressInfo, &telemetryPublisher, eventScheduler, segmentCtxIo, allocatorCtxIo, rebuildCtxIo);
 
-    ON_CALL(eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
+    ON_CALL(*eventScheduler, EnqueueEvent).WillByDefault([&](EventSmartPtr event) {
         event->Execute();
     });
 
@@ -397,7 +413,7 @@ TEST_F(ContextManagerIntegrationTest, DISABLED_FlushContexts_FlushRebuildContext
     // Then, checkpointCallback should be called
 }
 
-TEST_F(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritten)
+TEST(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwritten)
 {
     // Given
     NiceMock<MockAllocatorAddressInfo> addrInfo;
@@ -423,6 +439,7 @@ TEST_F(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwrit
     ContextManager contextManager(&telemetryPublisher, allocatorCtx, segmentCtx, rebuildCtx,
         gcCtx, blockAllocStatus, ioManager, contextReplayer, &addrInfo, ARRAY_ID);
     contextManager.Init();
+    segmentCtx->SetEventScheduler(&eventScheduler);
 
     // Set valid block count of each segments to 32 for test
     uint32_t maxValidBlkCount = 32;
@@ -466,6 +483,7 @@ TEST_F(ContextManagerIntegrationTest, UpdateSegmentContext_testIfSegmentOverwrit
             .numBlks = maxValidBlkCount,
         };
 
+        EXPECT_CALL(eventScheduler, EnqueueEvent);
         segmentCtx->InvalidateBlks(blks, false);
     }
 

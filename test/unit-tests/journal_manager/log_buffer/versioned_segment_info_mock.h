@@ -34,7 +34,7 @@
 
 #include <list>
 #include <string>
-#include "tbb/concurrent_unordered_map.h"
+#include <tbb/concurrent_unordered_map.h>
 #include <vector>
 
 #include "src/journal_manager/log_buffer/versioned_segment_info.h"
@@ -49,10 +49,9 @@ public:
     MOCK_METHOD(void, IncreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, DecreaseValidBlockCount, (SegmentId segId, uint32_t cnt), (override));
     MOCK_METHOD(void, IncreaseOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD((const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&), GetChangedValidBlockCount, (), (override));
-    MOCK_METHOD((const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>&), GetChangedOccupiedStripeCount, (), (override));
     MOCK_METHOD(void, ResetOccupiedStripeCount, (SegmentId segId), (override));
-    MOCK_METHOD(void, ResetValidBlockCount, (SegmentId segId), (override));
+    MOCK_METHOD((const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&), GetChangedValidBlockCount, (), (override));
+    MOCK_METHOD((const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&), GetChangedOccupiedStripeCount, (), (override));
 };
 
 } // namespace pos

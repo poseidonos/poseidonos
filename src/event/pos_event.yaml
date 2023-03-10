@@ -4210,7 +4210,7 @@ Root:
     Id: 3163
     Name: ALLOCATOR_TARGET_SEGMENT_FREE_DONE
     Severity:
-    Description: Garbage collector has successfully freed a segment.
+    Description: Target segment was successfully freed.
     Cause:
     Solution:
   -
@@ -4766,7 +4766,27 @@ Root:
     Description: Protobuf has failed to serialize into byte stream.
     Cause: There may be an issue with protobuf version/usage.
     Solution: Developers must analyze the issue.
-
+  -
+    Id: 3243
+    Name: ALLOCATOR_TARGET_SEGMENT_FREE_NEED
+    Severity:
+    Description: This segment is used fully. Need to free.
+    Cause:
+    Solution:
+  -
+    Id: 3244
+    Name: ALLOCATOR_SEGMENT_FREE_REQUEST_FAILED
+    Severity:
+    Description: Failed request to update the versioned segment context of freed a segment.
+    Cause:
+    Solution:
+  -
+    Id: 3245
+    Name: ALLOCATOR_SEGMENT_FREE_UPDATE_FAILED
+    Severity:
+    Description: Failed to update the versioned segment context of freed a segment.
+    Cause:
+    Solution:
   # Metadata: 3300 - 3399
   -
     Id: 3300

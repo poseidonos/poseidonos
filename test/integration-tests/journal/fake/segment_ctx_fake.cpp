@@ -38,9 +38,11 @@
 #include "src/allocator/context_manager/io_ctx/allocator_io_ctx.h"
 #include "src/allocator/context_manager/segment_ctx/segment_info.h"
 #include "src/include/address_type.h"
+#include "src/journal_manager/i_journal_writer.h"
 #include "src/logger/logger.h"
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/meta_file_intf/mock_file_intf.h"
+#include "src/metadata/freed_segment_ctx_update.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -170,13 +172,19 @@ SegmentCtxFake::GetSegmentInfoDataArray(void)
 }
 
 void
+SegmentCtxFake::SetJournalWriter(IJournalWriter* _journalWriter)
+{
+    journalWriter = _journalWriter;
+}
+
+void
 SegmentCtxFake::_ValidateBlks(VirtualBlks blks)
 {
     SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
     uint32_t increasedValue = segmentInfos[segId].IncreaseValidBlockCount(blks.numBlks);
     if (increasedValue > addrInfo->GetblksPerSegment())
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_VALID_BLOCK_COUNT_OVERFLOW),
+        POS_TRACE_ERROR(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
             "segment_id:{}, vsid: {}, offset: {}, increase_count:{}, before_validate_block_count: {}, maximum_valid_block_count:{}", segId, blks.startVsa.stripeId, blks.startVsa.offset, blks.numBlks, increasedValue - blks.numBlks, addrInfo->GetblksPerSegment());
         throw std::runtime_error("Assertion failed, An overflow occurred with valid block count");
     }
@@ -193,6 +201,22 @@ SegmentCtxFake::_InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
             "segment_id{}, vsid: {}, offset: {}, decase_count: {}, current_valid_block_count: {}, allow {}", segId, blks.startVsa.stripeId, blks.startVsa.offset, blks.numBlks, segmentInfos[segId].GetValidBlockCount(), allowVictimSegRelease);
         throw std::runtime_error("Assertion failed, An underflow occurred with valid block count");
+    }
+    else if (segmentInfoData[segId].validBlockCount == 0)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_NEED),
+            "ValidBlockCount has reached zero. Segment free will be need. segment_id:{}, lsid:{}, current_valid_block_count:{}, segment_state: {}", segId, blks.startVsa.stripeId, segmentInfoData->validBlockCount, segmentInfoData->state);
+        if (segmentInfoData[segId].occupiedStripeCount == addrInfo->GetstripesPerSegment())
+        {
+            segmentInfoData[segId].validBlockCount = 0;
+            segmentInfoData[segId].occupiedStripeCount = 0;
+            CallbackSmartPtr callback(new FreedSegmentCtxUpdateEvent(dynamic_cast<SegmentCtx*>(this), segId));
+            int ret = journalWriter->AddSegmentFreedLog(segId, callback);
+            if (ret != 0)
+            {
+                POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREE_REQUEST_FAILED), "Failed request to update for freed segment, segmendId:{}", segId);
+            }
+        }
     }
     return segmentFreed;
 }
@@ -211,10 +235,28 @@ SegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
     }
     else if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
     {
-         POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
-            "OccupiedStripeCount has reached the maximum. segment free is required, segment_id:{}, lsid:{}, total_stripe_count_per_segment:{}", segId, lsid, addrInfo->GetstripesPerSegment());
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_NEED),
+            "OccupiedStripeCount has reached maximum. Segment free will be need. segment_id:{}, lsid:{}, current_occupied_stripe_count:{}, segment_state: {}", segId, lsid, segmentInfoData->occupiedStripeCount, segmentInfoData->state);
+        if (segmentInfoData[segId].validBlockCount == 0)
+        {
+            segmentInfoData[segId].validBlockCount = 0;
+            segmentInfoData[segId].occupiedStripeCount = 0;
+            CallbackSmartPtr callback(new FreedSegmentCtxUpdateEvent(dynamic_cast<SegmentCtx*>(this), segId));
+            int ret = journalWriter->AddSegmentFreedLog(segId, callback);
+            if (ret != 0)
+            {
+                POS_TRACE_INFO(EID(ALLOCATOR_SEGMENT_FREE_REQUEST_FAILED), "Failed request to update for freed segment, segmendId:{}", segId);
+            }
+        }
     }
     return false;
+}
+
+void
+SegmentCtxFake::SegmentFreeUpdateCompleted(SegmentId segmentId, int logGroupId)
+{
+    SegmentCtx::_NotifySubscribersOfSegmentFreed(segmentId, logGroupId);
+    POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE), "segment_id:{}", segmentId);
 }
 
 void
