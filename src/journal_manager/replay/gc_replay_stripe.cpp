@@ -55,11 +55,11 @@ void
 GcReplayStripe::AddLog(ReplayLog replayLog)
 {
     ReplayStripe::AddLog(replayLog);
-    _AddLog(replayLog.log);
+    _AddLog(replayLog.log, replayLog.segInfoFlushed);
 }
 
 void
-GcReplayStripe::_AddLog(LogHandlerInterface* log)
+GcReplayStripe::_AddLog(LogHandlerInterface* log, bool segInfoFlushed)
 {
     if (log->GetType() == LogType::GC_BLOCK_WRITE_DONE)
     {
@@ -70,25 +70,28 @@ GcReplayStripe::_AddLog(LogHandlerInterface* log)
         GcBlockMapUpdate* blockList = gcBlockLogHandler->GetMapList();
 
         status->GcBlockLogFound(blockList, blockWriteDoneLog->numBlockMaps);
-        _CreateBlockWriteReplayEvents(blockList, blockWriteDoneLog->volId, blockWriteDoneLog->numBlockMaps);
+        _CreateBlockWriteReplayEvents(blockList, blockWriteDoneLog->volId, blockWriteDoneLog->numBlockMaps, segInfoFlushed);
     }
     else if (log->GetType() == LogType::GC_STRIPE_FLUSHED)
     {
         GcStripeFlushedLog dat = *(reinterpret_cast<GcStripeFlushedLog*>(log->GetData()));
         status->GcStripeLogFound(dat);
-
+        if (segInfoFlushed)
+        {
+            needToReplayStripeFlush = false;
+        }
         totalNumBlocks = dat.totalNumBlockMaps;
     }
 }
 
 void
-GcReplayStripe::_CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int volId, uint64_t numBlocks)
+GcReplayStripe::_CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int volId, uint64_t numBlocks, bool segInfoFlushed)
 {
     for (uint64_t offset = 0; offset < numBlocks; offset++)
     {
         ReplayEvent* blockWriteEvent =
             replayEventFactory->CreateBlockWriteReplayEvent(volId,
-                blockList[offset].rba, blockList[offset].vsa, 1, replaySegmentInfo);
+                blockList[offset].rba, blockList[offset].vsa, 1, segInfoFlushed);
         replayEvents.push_back(blockWriteEvent);
     }
 }
