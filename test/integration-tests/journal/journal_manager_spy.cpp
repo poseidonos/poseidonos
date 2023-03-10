@@ -66,19 +66,12 @@ JournalManagerSpy::~JournalManagerSpy(void)
 }
 
 int
-JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeInfoManager* volumeManager, SegmentContextUpdater* segmentContextUpdater)
+JournalManagerSpy::InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator, IVolumeInfoManager* volumeManager)
 {
     int ret = JournalManager::_InitConfigAndPrepareLogBuffer(nullptr);
     if (ret < 0)
     {
         return ret;
-    }
-
-    if (config->IsVscEnabled() == true)
-    {
-        delete versionedSegCtx;
-        versionedSegCtx = JournalManager::_CreateVersionedSegmentCtx();
-        segmentContextUpdater->SetVersionedSegmentContext(versionedSegCtx);
     }
 
     _InitModules(telemetryClient, mapper->GetIVSAMap(), mapper->GetIStripeMap(),

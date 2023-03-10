@@ -74,15 +74,20 @@ JournalManagerTestFixture::InitializeJournal(void)
 void
 JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
 {
+    // Should reset configuration first
     journal->ResetJournalConfiguration(config);
+
+    journal->ResetVersionedSegmentContext();
     journal->DeleteLogBuffer();
 
     if (journal->IsEnabled() == true)
     {
-        journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager, segmentContextUpdater);
+        journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
     }
 
     _GetLogBufferSizeInfo();
+
+    segmentContextUpdater->SetVersionedSegmentContext(journal->GetVersionedSegmentContext());
     writeTester->Reset();
 }
 
@@ -117,7 +122,7 @@ JournalManagerTestFixture::SimulateSPORWithoutRecovery(JournalConfigurationBuild
     writeTester->UpdateJournal(journal);
 
     testAllocator->GetSegmentCtxFake()->LoadContext();
-    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager, segmentContextUpdater);
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
 void
@@ -147,7 +152,7 @@ JournalManagerTestFixture::SimulateRocksDBSPORWithoutRecovery(void)
     writeTester->UpdateJournal(journal);
 
     testAllocator->GetSegmentCtxFake()->LoadContext();
-    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager, segmentContextUpdater);
+    journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
 }
 
 void

@@ -30,7 +30,7 @@ public:
     virtual ~JournalManagerSpy(void);
 
     int InitializeForTest(TelemetryClient* telemetryClient, Mapper* mapper, Allocator* allocator,
-        IVolumeInfoManager* volumeManager, SegmentContextUpdater* segmentContextUpdater);
+        IVolumeInfoManager* volumeManager);
     int DoRecoveryForTest(void);
     void DeleteLogBuffer(void);
     void ResetJournalConfiguration(JournalConfiguration* journalConfig);
