@@ -34,6 +34,7 @@
 
 #include <map>
 
+#include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 
@@ -45,6 +46,7 @@ class SegmentContextUpdater;
 class IWBStripeAllocator;
 class IContextManager;
 class IArrayInfo;
+class SegmentCtx;
 
 class MetaEventFactory
 {
@@ -58,6 +60,7 @@ public:
     virtual CallbackSmartPtr CreateBlockMapUpdateEvent(VolumeIoSmartPtr volumeIo);
     virtual CallbackSmartPtr CreateStripeMapUpdateEvent(StripeSmartPtr stripe);
     virtual CallbackSmartPtr CreateGcMapUpdateEvent(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt);
+    virtual CallbackSmartPtr CreateFreedSegmentCtxUpdateEvent(SegmentCtx* SegmentCtx, SegmentId targetSegmentId);
 
 private:
     IVSAMap* vsaMap;

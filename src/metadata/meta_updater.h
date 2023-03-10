@@ -37,6 +37,7 @@
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_segment_ctx.h"
 #include "src/allocator/i_wbstripe_allocator.h"
+#include "src/include/address_type.h"
 #include "src/journal_manager/i_journal_manager.h"
 #include "src/journal_manager/i_journal_writer.h"
 #include "src/mapper/i_stripemap.h"
@@ -50,6 +51,7 @@ class MetaEventFactory;
 class GcStripeManager;
 class IArrayInfo;
 class IContextManager;
+class SegmentCtx;
 
 class MetaUpdater : public IMetaUpdater
 {
@@ -63,6 +65,7 @@ public:
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) override;
     virtual int UpdateStripeMap(StripeSmartPtr stripe, CallbackSmartPtr callback) override;
     virtual int UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) override;
+    virtual int UpdateFreedSegmentContext(SegmentCtx* segmentCtx, SegmentId targetSegmentId) override;
 
 private:
     IStripeMap* stripeMap;

@@ -33,7 +33,7 @@ TEST(AllocatorFileIo, InitBeforeFlushAfterLoad_testIfSegmentCtxIsSerializedAndDe
     SegmentCtx* segCtxClient = new SegmentCtx(nullptr, nullptr, segmentInfoDataArray, nullptr, nullptr, &addrInfo, nullptr);
 
     // When 1: the segment context is initialized()
-    segCtxClient->Init();
+    segCtxClient->Init(nullptr);
 
     // Then 1: the total size to flush should be the sum of segmentctx header and the list of segment info data
     auto actual = segCtxClient->GetTotalDataSize();

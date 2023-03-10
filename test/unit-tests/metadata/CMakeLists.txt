@@ -6,3 +6,4 @@ POS_ADD_UNIT_TEST(meta_volume_event_handler_ut meta_volume_event_handler_test.cp
 POS_ADD_UNIT_TEST(meta_updater_ut meta_updater_test.cpp)
 POS_ADD_UNIT_TEST(block_map_update_ut block_map_update_test.cpp)
 POS_ADD_UNIT_TEST(gc_map_update_ut gc_map_update_test.cpp)
+POS_ADD_UNIT_TEST(freed_segment_ctx_update_ut freed_segment_ctx_update_test.cpp)

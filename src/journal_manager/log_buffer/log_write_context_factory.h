@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "src/include/address_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log/log_event.h"
 #include "src/journal_manager/log_buffer/log_write_context.h"
@@ -60,6 +61,7 @@ public:
         GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
     virtual LogWriteContext* CreateVolumeDeletedLogWriteContext(int volId,
         uint64_t contextVersion, EventSmartPtr callback);
+    virtual LogWriteContext* CreateSegmentFreedLogWriteContext(SegmentId targetSegmentId, EventSmartPtr callbackEvent);
 
 private:
     uint64_t _GetMaxNumGcBlockMapUpdateInAContext(void);

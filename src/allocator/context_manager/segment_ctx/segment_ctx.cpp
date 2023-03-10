@@ -36,11 +36,15 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/allocator/context_manager/segment_ctx/i_segment_free_subscriber.h"
+#include "src/allocator/context_manager/segment_ctx/segment_freed_update_request.h"
+#include "src/event_scheduler/event_scheduler.h"
 #include "src/include/meta_const.h"
 #include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
+#include "src/meta_service/i_meta_updater.h"
 #include "src/qos/qos_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
+
 namespace pos
 {
 SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, SegmentInfoData* segmentInfoData_,
@@ -61,7 +65,8 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
   gcCtx(gcCtx_),
-  tp(tp_)
+  tp(tp_),
+  eventScheduler(nullptr)
 {
     for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
     {
@@ -82,10 +87,10 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
             // but just allocate only.
             this->segmentInfos[segId].AllocateSegmentInfoData(infoData);
 
-            // Initialize the context section for segment info data for persistence. 
+            // Initialize the context section for segment info data for persistence.
             // Note that "infoDataSection" does not store/handle memory pointer internally. (hence, no ownership required)
             ContextSection<SegmentInfoData*> infoDataSection(infoData);
-            this->segmentInfoDataSections.push_back( infoDataSection );
+            this->segmentInfoDataSections.push_back(infoDataSection);
         }
     }
     else
@@ -121,6 +126,12 @@ SegmentCtx::~SegmentCtx(void)
 
 // Only for UT
 void
+SegmentCtx::SetEventScheduler(EventScheduler* eventScheduler_)
+{
+    eventScheduler = eventScheduler_;
+}
+
+void
 SegmentCtx::SetSegmentList(SegmentState state, SegmentList* list)
 {
     segmentList[state] = list;
@@ -133,13 +144,13 @@ SegmentCtx::SetRebuildList(SegmentList* list)
 }
 
 void
-SegmentCtx::Init(void)
+SegmentCtx::Init(EventScheduler* eventScheduler_)
 {
     if (initialized == true)
     {
         return;
     }
-
+    eventScheduler = eventScheduler_;
     ctxHeader.data.ctxVersion = 0;
     ctxStoredVersion = 0;
     ctxDirtyVersion = 0;
@@ -150,7 +161,7 @@ SegmentCtx::Init(void)
         uint32_t numSegments = addrInfo->GetnumUserAreaSegments();
         this->segmentInfos = new SegmentInfo[numSegments];
         SegmentInfoData* infoDataArray = new SegmentInfoData[numSegments];
-        for (uint32_t i = 0; i < numSegments ; ++i)
+        for (uint32_t i = 0; i < numSegments; ++i)
         {
             // This time, SegmentInfoData needs to be newly created "and initialized", hence we use AllocateAndInitSegmentInfoData()
             SegmentInfoData* infoData = infoDataArray + i;
@@ -161,7 +172,7 @@ SegmentCtx::Init(void)
             // Initialize context section for SegmentInfoData
             // "infoData" here has been already initialized to (0, 0, FREE) by AllocateAndInitSegmentInfoData() in the above.
             ContextSection<SegmentInfoData*> infoDataSection(infoData);
-            this->segmentInfoDataSections.push_back( infoDataSection );
+            this->segmentInfoDataSections.push_back(infoDataSection);
         }
         POS_TRACE_INFO(EID(SEGMENTCTX_INIT_NEW_SEGMENTINFODATA), "arrayId: {}, numSegments: {}", addrInfo->GetArrayId(), numSegments);
     }
@@ -200,7 +211,7 @@ SegmentCtx::_UpdateSectionInfo(void)
     currentOffset += ctxHeader.GetSectionSize();
 
     // SC_SEGMENT_INFO
-    for(auto& infoDataSection: this->segmentInfoDataSections)
+    for (auto& infoDataSection : this->segmentInfoDataSections)
     {
         uint64_t sectionSize = infoDataSection.GetSectionSize();
         infoDataSection.InitAddressInfo(/* 'dataAddress' isn't being used for SegmentInfoData's ser/deserialization */
@@ -248,7 +259,7 @@ SegmentCtx::Dispose(void)
         delete rebuildList;
         rebuildList = nullptr;
     }
-
+    eventScheduler = nullptr;
     initialized = false;
 }
 
@@ -315,7 +326,7 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
         SegmentState prevState = result.second;
         bool removed = segmentList[prevState]->RemoveFromList(segId);
 
-        POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
+        POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_NEED),
             "segment_id:{}, prev_state:{}, is_removed_from_victim_segment_list:{}, array_id:{}",
             segId, prevState, removed, addrInfo->GetArrayId());
         _SegmentFreed(segId);
@@ -379,7 +390,7 @@ SegmentCtx::AfterLoad(char* buf)
     ctxHeader.CopyFrom(buf);
 
     // SC_SEGMENT_INFO
-    for(auto& infoDataSection: this->segmentInfoDataSections)
+    for (auto& infoDataSection : this->segmentInfoDataSections)
     {
         infoDataSection.CopyFrom(buf);
     }
@@ -426,7 +437,7 @@ SegmentCtx::BeforeFlush(char* buf)
     ctxHeader.CopyTo(buf);
 
     // SC_SEGMENT_INFO
-    for(auto& infoDataSection: this->segmentInfoDataSections)
+    for (auto& infoDataSection : this->segmentInfoDataSections)
     {
         infoDataSection.CopyTo(buf);
     }
@@ -459,7 +470,7 @@ SegmentCtx::GetSectionInfo(int section)
     {
         ContextSectionAddr addr;
         bool firstSectionSeen = false;
-        for (auto& infoDataSection: this->segmentInfoDataSections)
+        for (auto& infoDataSection : this->segmentInfoDataSections)
         {
             if (!firstSectionSeen)
             {
@@ -503,7 +514,7 @@ SegmentCtx::GetTotalDataSize(void)
 {
     uint64_t totalDataSize = 0;
     totalDataSize += ctxHeader.GetSectionSize();
-    for(auto& infoDataSection: this->segmentInfoDataSections)
+    for (auto& infoDataSection : this->segmentInfoDataSections)
     {
         totalDataSize += infoDataSection.GetSectionSize();
     }
@@ -615,8 +626,8 @@ SegmentCtx::_SetVictimSegment(SegmentId victimSegment)
 
     bool stateChanged = segmentInfos[victimSegment].MoveToVictimState();
     POS_TRACE_DEBUG(EID(ALLOCATE_GC_VICTIM),
-                "victim_segment:{}, state_changed:{}",
-                victimSegment, stateChanged);
+        "victim_segment:{}, state_changed:{}",
+        victimSegment, stateChanged);
     if (stateChanged == true)
     {
         // This segment is in SSD LIST or REBUILD LIST
@@ -665,7 +676,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
         {
             _FlushRebuildSegmentList();
             POS_TRACE_DEBUG(EID(ALLOCATOR_TARGET_SEGMENT_FREE_REMOVAL_FROM_REBUILD_LIST_DONE),
-            "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
+                "segmentId:{} in Rebuild Target has been Freed by GC", segmentId);
         }
     }
     else
@@ -675,8 +686,15 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
         return;
     }
 
+    EventSmartPtr segmentFreedUpdateRequest(new SegmentFreedUpdateRequest(this, segmentId, addrInfo->GetArrayId()));
+    eventScheduler->EnqueueEvent(segmentFreedUpdateRequest);
+}
+
+void
+SegmentCtx::SegmentFreeUpdateCompleted(SegmentId segmentId, int logGroupId)
+{
     // Should notify subscriber before add it to the free list
-    _NotifySubscribersOfSegmentFreed(segmentId);
+    _NotifySubscribersOfSegmentFreed(segmentId, logGroupId);
     segmentList[SegmentState::FREE]->AddToList(segmentId);
 
     int numOfFreeSegments = _OnNumFreeSegmentChanged();
@@ -730,7 +748,7 @@ SegmentCtx::ResetSegmentsStates(void)
         else
         {
             POS_TRACE_ERROR(EID(ALLOCATOR_FILE_ERROR), "segment id {}, validCount {}, occupiedStripeCount {}",
-                            segId, validCount, occupiedStripeCount);
+                segId, validCount, occupiedStripeCount);
             assert(false);
         }
     }
@@ -985,11 +1003,11 @@ SegmentCtx::AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber)
 }
 
 void
-SegmentCtx::_NotifySubscribersOfSegmentFreed(SegmentId segmentId)
+SegmentCtx::_NotifySubscribersOfSegmentFreed(SegmentId segmentId, int logGroupId)
 {
     for (auto sub : segmentFreedSubscribers)
     {
-        sub->NotifySegmentFreed(segmentId);
+        sub->NotifySegmentFreed(segmentId, logGroupId);
     }
 }
 } // namespace pos

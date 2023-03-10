@@ -129,6 +129,23 @@ ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe, bool needToR
 }
 
 void
+ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe, bool needToReplaySegmentForBlockMap, bool needToReplaySegmentForStripeMap)
+{
+    BlockMapList blksToWrite = stripe.GetBlockMapList();
+    // FIXME (huijeong.kim) Due to the limitation we have (see _AddLogInternal)
+    // Replaying block map updated log could be non-sequential
+    {
+        InSequence s;
+
+        ExpectReplaySegmentAllocation(stripe.GetUserAddr().stripeId);
+        ExpectReplayStripeAllocation(stripe.GetVsid(), stripe.GetWbAddr().stripeId);
+        ExpectReplayStripeFlush(stripe, needToReplaySegmentForStripeMap);
+    }
+
+    ExpectReplayBlockLogsForStripe(stripe.GetVolumeId(), blksToWrite, needToReplaySegmentForBlockMap);
+}
+
+void
 ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
 {
     BlockMapList writtenVsas = stripe.GetBlockMapList();

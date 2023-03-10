@@ -46,6 +46,8 @@
 #include "src/event_scheduler/event_scheduler.h"
 #include "src/journal_manager/log_buffer/versioned_segment_ctx.h"
 #include "src/logger/logger.h"
+#include "src/meta_service/i_meta_updater.h"
+#include "src/meta_service/meta_service.h"
 #include "src/qos/qos_manager.h"
 #include "src/telemetry/telemetry_client/telemetry_publisher.h"
 
@@ -108,7 +110,7 @@ ContextManager::Init(void)
     int ret = EID(SUCCESS);
 
     allocatorCtx->Init();
-    segmentCtx->Init();
+    segmentCtx->Init(EventSchedulerSingleton::Instance());
     rebuildCtx->Init();
     ret = ioManager->Init();
 
@@ -133,8 +135,8 @@ ContextManager::FlushContexts(EventSmartPtr callback, bool sync)
 
 int
 ContextManager::FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer)
-{    
-    // Flush all allocator contexts as it is (no external buffer provided)    
+{
+    // Flush all allocator contexts as it is (no external buffer provided)
     return ioManager->FlushContexts(callback, sync, buffer);
 }
 

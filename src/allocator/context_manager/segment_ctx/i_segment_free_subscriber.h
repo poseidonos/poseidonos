@@ -39,6 +39,6 @@ namespace pos
 class ISegmentFreeSubscriber
 {
 public:
-    virtual void NotifySegmentFreed(SegmentId segmentId) = 0;
+    virtual void NotifySegmentFreed(SegmentId segmentId, int logGroupId) = 0;
 };
 } // namespace pos

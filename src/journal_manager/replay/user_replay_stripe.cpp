@@ -64,23 +64,23 @@ void
 UserReplayStripe::AddLog(ReplayLog replayLog)
 {
     ReplayStripe::AddLog(replayLog);
-    _AddLog(replayLog.log, replayLog.segInfoFlushed);
+    _AddLog(replayLog);
 }
 
 void
-UserReplayStripe::_AddLog(LogHandlerInterface* log, bool segInfoFlushed)
+UserReplayStripe::_AddLog(ReplayLog replayLog)
 {
-    if (log->GetType() == LogType::BLOCK_WRITE_DONE)
+    if (replayLog.log->GetType() == LogType::BLOCK_WRITE_DONE)
     {
-        BlockWriteDoneLog dat = *(reinterpret_cast<BlockWriteDoneLog*>(log->GetData()));
+        BlockWriteDoneLog dat = *(reinterpret_cast<BlockWriteDoneLog*>(replayLog.log->GetData()));
         status->BlockLogFound(dat);
-        _CreateBlockWriteReplayEvent(dat, segInfoFlushed);
+        _CreateBlockWriteReplayEvent(dat, replayLog.segInfoFlushed);
     }
-    else if (log->GetType() == LogType::STRIPE_MAP_UPDATED)
+    else if (replayLog.log->GetType() == LogType::STRIPE_MAP_UPDATED)
     {
-        StripeMapUpdatedLog dat = *(reinterpret_cast<StripeMapUpdatedLog*>(log->GetData()));
+        StripeMapUpdatedLog dat = *(reinterpret_cast<StripeMapUpdatedLog*>(replayLog.log->GetData()));
         status->StripeLogFound(dat);
-        if (segInfoFlushed)
+        if (replayLog.segInfoFlushed)
         {
             needToReplayStripeFlush = false;
         }
@@ -91,9 +91,10 @@ UserReplayStripe::_AddLog(LogHandlerInterface* log, bool segInfoFlushed)
 void
 UserReplayStripe::_CreateBlockWriteReplayEvent(BlockWriteDoneLog dat, bool segInfoFlushed)
 {
+    bool needToReplaySegmentInfo = segInfoFlushed == false ? true : false;
     ReplayEvent* blockWriteEvent =
         replayEventFactory->CreateBlockWriteReplayEvent(dat.volId, dat.startRba,
-            dat.startVsa, dat.numBlks, segInfoFlushed);
+            dat.startVsa, dat.numBlks, needToReplaySegmentInfo);
     replayEvents.push_back(blockWriteEvent);
 }
 

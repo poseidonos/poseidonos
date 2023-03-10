@@ -34,6 +34,7 @@
 
 #include <map>
 
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/include/address_type.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
@@ -46,5 +47,6 @@ public:
     virtual int UpdateBlockMap(VolumeIoSmartPtr volumeIo, CallbackSmartPtr callback) = 0;
     virtual int UpdateStripeMap(StripeSmartPtr stripe, CallbackSmartPtr callback) = 0;
     virtual int UpdateGcMap(StripeSmartPtr stripe, GcStripeMapUpdateList mapUpdateInfoList, std::map<SegmentId, uint32_t> invalidSegCnt, CallbackSmartPtr callback) = 0;
+    virtual int UpdateFreedSegmentContext(SegmentCtx* segmentCtx, SegmentId targetSegmentId) = 0;
 };
 } // namespace pos

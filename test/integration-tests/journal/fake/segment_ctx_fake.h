@@ -40,10 +40,11 @@
 namespace pos
 {
 class AllocatorAddressInfo;
+class AsyncMetaFileIoCtx;
+class IJournalWriter;
 class MetaFileIntf;
 class SegmentInfo;
 class SegmentInfoData;
-class AsyncMetaFileIoCtx;
 
 // This class is to fake a flush of ISegmentContext,
 // LoadContext is to simulate a dirty bringup to load Segment Context.
@@ -62,6 +63,9 @@ public:
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
 
+    void SetJournalWriter(IJournalWriter* _journalWriter);
+    virtual void SegmentFreeUpdateCompleted(SegmentId segmentId, int logGroupId) override;
+
 private:
     void _ValidateBlks(VirtualBlks blks);
     bool _InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease);
@@ -76,6 +80,7 @@ private:
     std::atomic<uint64_t> ctxStoredVersion;
     SegmentInfo* segmentInfos;
     SegmentInfoData* segmentInfoData;
+    IJournalWriter* journalWriter;
 
     uint32_t numSegments;
     uint64_t fileSize;

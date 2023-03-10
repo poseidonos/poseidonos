@@ -39,6 +39,7 @@
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_map_update_list.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/log/segment_freed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/journal_manager/log_buffer/buffer_write_done_notifier.h"
@@ -169,6 +170,13 @@ LogWriteContextFactory::CreateVolumeDeletedLogWriteContext(int volId,
 {
     LogHandlerInterface* log = new VolumeDeletedLogEntry(volId, contextVersion);
     return new LogWriteContext(log, callback);
+}
+
+LogWriteContext*
+LogWriteContextFactory::CreateSegmentFreedLogWriteContext(SegmentId targetSegmentId, EventSmartPtr callbackEvent)
+{
+    LogHandlerInterface* log = new SegmentFreedLogHandler(targetSegmentId);
+    return new LogWriteContext(log, callbackEvent);
 }
 
 } // namespace pos

@@ -34,9 +34,12 @@ JournalManagerTestFixture::JournalManagerTestFixture(std::string logFileName)
     volumeManager = new NiceMock<MockIVolumeInfoManager>();
     journal = new JournalManagerSpy(telemetryPublisher, arrayInfo, stateSub, logFileName);
 
-    segmentContextUpdater = new SegmentContextUpdater(testAllocator->GetSegmentCtxFake(), journal->GetVersionedSegmentContext(), arrayInfo->GetSizeInfo(PartitionType::USER_DATA));
+    segmentContextUpdater = new SegmentContextUpdater(testAllocator->GetISegmentCtx(), journal->GetVersionedSegmentContext(), arrayInfo->GetSizeInfo(PartitionType::USER_DATA));
     writeTester = new LogWriteTestFixture(testMapper, testAllocator, arrayInfo, journal, testInfo, segmentContextUpdater);
     replayTester = new ReplayTestFixture(testMapper, testAllocator, testInfo);
+
+    SegmentCtxFake* segmentCtx = testAllocator->GetSegmentCtxFake();
+    segmentCtx->SetJournalWriter(journal->GetJournalWriter());
 }
 
 JournalManagerTestFixture::~JournalManagerTestFixture(void)
@@ -85,6 +88,9 @@ JournalManagerTestFixture::InitializeJournal(JournalConfigurationSpy* config)
         journal->InitializeForTest(telemetryClient, testMapper, testAllocator, volumeManager);
     }
 
+    auto freeSubscriber = journal->GetSegmentFreeSubscriber();
+    auto segmentCtx = testAllocator->GetISegmentCtx();
+    segmentCtx->AddSegmentFreeSubscriber(freeSubscriber);
     _GetLogBufferSizeInfo();
 
     segmentContextUpdater->SetVersionedSegmentContext(journal->GetVersionedSegmentContext());
