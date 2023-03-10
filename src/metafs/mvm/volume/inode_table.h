@@ -33,20 +33,217 @@
 #pragma once
 
 #include "meta_file_inode.h"
-#include "on_volume_meta_region.h"
+#include "on_volume_meta_region_proto.h"
 #include "meta_region_type.h"
+#include "proto/generated/cpp/pos_bc.pb.h"
 
 namespace pos
 {
-class InodeTableContent : public MetaRegionContent
+const int InodeTableContentOnSsdSize = INODE_DATA_BYTE_SIZE;  
+class InodeTableContent : public MetaRegionProtoContent
 {
 public:
     static const uint32_t MAX_META_FILE_INODE_NUM = MetaFsConfig::MAX_META_FILE_NUM_SUPPORT;
     std::array<MetaFileInode, InodeTableContent::MAX_META_FILE_INODE_NUM> entries;
+
+    void ToBytes(char* destBuf)
+    {
+        for (int i = 0; i < (int)InodeTableContent::MAX_META_FILE_INODE_NUM; ++i)
+        {
+            pos_bc::MetaFileInodeDataProto metaFileInodeDataProto;
+            metaFileInodeDataProto.set_inuse(entries[i].data.basic.field.inUse);
+            metaFileInodeDataProto.set_age(entries[i].data.basic.field.age);
+            metaFileInodeDataProto.set_ctime(entries[i].data.basic.field.ctime);
+            metaFileInodeDataProto.set_referencecnt(entries[i].data.basic.field.referenceCnt);
+            metaFileInodeDataProto.set_filedescriptortype(entries[i].data.basic.field.fd);
+            metaFileInodeDataProto.set_filename(entries[i].data.basic.field.fileName.ToString());
+            metaFileInodeDataProto.set_filebytesize(entries[i].data.basic.field.fileByteSize);
+            metaFileInodeDataProto.set_datachunksize(entries[i].data.basic.field.dataChunkSize);
+            
+            pos_bc::MetaStorageIoProperty metaStorageIoProperty;
+            metaStorageIoProperty.set_media((pos_bc::MetaStorageIoProperty::MetaStorageType)entries[i].data.basic.field.ioAttribute.media);
+
+            pos_bc::MetaFilePropertySet metaFilePropertySet;
+            metaFilePropertySet.set_integrity((pos_bc::MetaFilePropertySet::MetaFileIntegrityType) entries[i].data.basic.field.ioAttribute.ioSpecfic.integrity);
+            metaFilePropertySet.set_type((pos_bc::MetaFilePropertySet::MetaFileType) entries[i].data.basic.field.ioAttribute.ioSpecfic.type);
+
+            *metaFileInodeDataProto.mutable_ioattribute() = metaStorageIoProperty;
+
+            metaFileInodeDataProto.set_indexininodetable(entries[i].data.basic.field.indexInInodeTable);
+            metaFileInodeDataProto.set_versionsignature(entries[i].data.basic.field.versionSignature);
+            metaFileInodeDataProto.set_version(entries[i].data.basic.field.version);
+            metaFileInodeDataProto.set_pagemapcnt(entries[i].data.basic.field.pagemapCnt);
+            
+            for (int j = 0; j < (int)entries[i].data.basic.field.pagemapCnt ; ++j)
+            {
+                pos_bc::MetaFileExtent* MetaFileExtentProto = metaFileInodeDataProto.add_pagemap();
+                MetaFileExtentProto->set_startlpn(entries[i].data.basic.field.pagemap[j].GetStartLpn());
+                MetaFileExtentProto->set_count(entries[i].data.basic.field.pagemap[j].GetCount());
+            }
+
+            metaFileInodeDataProto.set_ctimecopy(entries[i].data.basic.field.ctimeCopy);
+            metaFileInodeDataProto.set_agecopy(entries[i].data.basic.field.ageCopy);
+
+            int ret = metaFileInodeDataProto.SerializeToArray(destBuf + i * InodeTableContentOnSsdSize, InodeTableContentOnSsdSize);
+            if (ret == 0){
+                // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+                // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+                // The current implementation has a risk of not detecting a parse error when there has been
+                // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+                // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf.
+            }
+        }        
+    }
+
+    void FromBytes(char* srcBuf)
+    {        
+        // Read From Buffer
+        for (int i = 0; i < (int)InodeTableContent::MAX_META_FILE_INODE_NUM; ++i)
+        {
+            pos_bc::MetaFileInodeDataProto deserializedProto;
+            int ret = deserializedProto.ParseFromArray(srcBuf + i * InodeTableContentOnSsdSize, InodeTableContentOnSsdSize);
+            if(ret == 0){
+                // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+                // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+                // The current implementation has a risk of not detecting a parse error when there has been
+                // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+                // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf. 
+            }
+            this->entries[i].data.basic.field.inUse = deserializedProto.inuse();
+            this->entries[i].data.basic.field.age = deserializedProto.age();
+            this->entries[i].data.basic.field.ctime = deserializedProto.ctime();
+            this->entries[i].data.basic.field.referenceCnt = deserializedProto.referencecnt();
+
+            this->entries[i].data.basic.field.fd = deserializedProto.filedescriptortype();
+            this->entries[i].data.basic.field.fileName = deserializedProto.filename();
+            this->entries[i].data.basic.field.fileByteSize = deserializedProto.filebytesize();
+            this->entries[i].data.basic.field.dataChunkSize = deserializedProto.datachunksize();
+
+            this->entries[i].data.basic.field.ioAttribute.ioSpecfic.integrity = (MetaFileIntegrityType) deserializedProto.ioattribute().iospecific().integrity();
+            this->entries[i].data.basic.field.ioAttribute.ioSpecfic.type = (MetaFileType) deserializedProto.ioattribute().iospecific().type();
+            this->entries[i].data.basic.field.ioAttribute.media = (MetaStorageType) deserializedProto.ioattribute().media();
+
+            this->entries[i].data.basic.field.indexInInodeTable = deserializedProto.indexininodetable();
+
+
+            this->entries[i].data.basic.field.versionSignature = deserializedProto.versionsignature();
+            this->entries[i].data.basic.field.version = deserializedProto.version();
+            this->entries[i].data.basic.field.pagemapCnt = deserializedProto.pagemapcnt();
+
+            for(int j = 0; j < deserializedProto.pagemap_size(); ++j)
+            {
+                this->entries[i].data.basic.field.pagemap[j].SetStartLpn(deserializedProto.pagemap(j).startlpn());
+                this->entries[i].data.basic.field.pagemap[j].SetCount(deserializedProto.pagemap(j).count());
+            }
+
+            this->entries[i].data.basic.field.ctimeCopy = deserializedProto.ctimecopy();
+            this->entries[i].data.basic.field.ageCopy = deserializedProto.agecopy();
+        }
+    }
+
+    void ToBytesByIndex(char* destBuf, int entryIdx)
+    {    
+        pos_bc::MetaFileInodeDataProto metaFileInodeDataProto;
+        metaFileInodeDataProto.set_inuse(entries[entryIdx].data.basic.field.inUse);
+        metaFileInodeDataProto.set_age(entries[entryIdx].data.basic.field.age);
+        metaFileInodeDataProto.set_ctime(entries[entryIdx].data.basic.field.ctime);
+        metaFileInodeDataProto.set_referencecnt(entries[entryIdx].data.basic.field.referenceCnt);
+        metaFileInodeDataProto.set_filedescriptortype(entries[entryIdx].data.basic.field.fd);
+        metaFileInodeDataProto.set_filename(entries[entryIdx].data.basic.field.fileName.ToString());
+        metaFileInodeDataProto.set_filebytesize(entries[entryIdx].data.basic.field.fileByteSize);
+        metaFileInodeDataProto.set_datachunksize(entries[entryIdx].data.basic.field.dataChunkSize);
+        
+        //Set IoAtrribute
+        pos_bc::MetaStorageIoProperty metaStorageIoProperty;
+        metaStorageIoProperty.set_media((pos_bc::MetaStorageIoProperty::MetaStorageType)entries[entryIdx].data.basic.field.ioAttribute.media);
+
+        pos_bc::MetaFilePropertySet metaFilePropertySet;
+        metaFilePropertySet.set_integrity((pos_bc::MetaFilePropertySet::MetaFileIntegrityType) entries[entryIdx].data.basic.field.ioAttribute.ioSpecfic.integrity);
+        metaFilePropertySet.set_type((pos_bc::MetaFilePropertySet::MetaFileType) entries[entryIdx].data.basic.field.ioAttribute.ioSpecfic.type);
+        *metaStorageIoProperty.mutable_iospecific() = metaFilePropertySet;
+
+        *metaFileInodeDataProto.mutable_ioattribute() = metaStorageIoProperty;
+
+        metaFileInodeDataProto.set_indexininodetable(entries[entryIdx].data.basic.field.indexInInodeTable);
+        metaFileInodeDataProto.set_versionsignature(entries[entryIdx].data.basic.field.versionSignature);
+        metaFileInodeDataProto.set_version(entries[entryIdx].data.basic.field.version);
+        metaFileInodeDataProto.set_pagemapcnt(entries[entryIdx].data.basic.field.pagemapCnt);
+        
+        for (int j = 0; j < (int)entries[entryIdx].data.basic.field.pagemapCnt ; ++j)
+        {
+            pos_bc::MetaFileExtent* MetaFileExtentProto = metaFileInodeDataProto.add_pagemap();
+            MetaFileExtentProto->set_startlpn(entries[entryIdx].data.basic.field.pagemap[j].GetStartLpn());
+            MetaFileExtentProto->set_count(entries[entryIdx].data.basic.field.pagemap[j].GetCount());
+        }
+
+        metaFileInodeDataProto.set_ctimecopy(entries[entryIdx].data.basic.field.ctimeCopy);
+        metaFileInodeDataProto.set_agecopy(entries[entryIdx].data.basic.field.ageCopy);
+
+        int ret = metaFileInodeDataProto.SerializeToArray(destBuf + entryIdx * InodeTableContentOnSsdSize, InodeTableContentOnSsdSize);
+        if (ret == 0){
+            // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+            // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+            // The current implementation has a risk of not detecting a parse error when there has been
+            // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+            // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf.
+        }
+    }
+
+    void FromBytesByIndex(char* srcBuf, int entryIdx)
+    {
+        pos_bc::MetaFileInodeDataProto deserializedProto;
+        int ret = deserializedProto.ParseFromArray(srcBuf + entryIdx * InodeTableContentOnSsdSize, InodeTableContentOnSsdSize);
+        if(ret == 0){
+            // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+            // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+            // The current implementation has a risk of not detecting a parse error when there has been
+            // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+            // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf. 
+        }
+        this->entries[entryIdx].data.basic.field.inUse = deserializedProto.inuse();
+        this->entries[entryIdx].data.basic.field.age = deserializedProto.age();
+        this->entries[entryIdx].data.basic.field.ctime = deserializedProto.ctime();
+        this->entries[entryIdx].data.basic.field.referenceCnt = deserializedProto.referencecnt();
+
+        this->entries[entryIdx].data.basic.field.fd = deserializedProto.filedescriptortype();
+        this->entries[entryIdx].data.basic.field.fileName = deserializedProto.filename();
+        this->entries[entryIdx].data.basic.field.fileByteSize = deserializedProto.filebytesize();
+        this->entries[entryIdx].data.basic.field.dataChunkSize = deserializedProto.datachunksize();
+
+        this->entries[entryIdx].data.basic.field.ioAttribute.ioSpecfic.integrity = (MetaFileIntegrityType) deserializedProto.ioattribute().iospecific().integrity();
+        this->entries[entryIdx].data.basic.field.ioAttribute.ioSpecfic.type = (MetaFileType) deserializedProto.ioattribute().iospecific().type();
+        this->entries[entryIdx].data.basic.field.ioAttribute.media = (MetaStorageType) deserializedProto.ioattribute().media();
+
+        this->entries[entryIdx].data.basic.field.indexInInodeTable = deserializedProto.indexininodetable();
+
+
+        this->entries[entryIdx].data.basic.field.versionSignature = deserializedProto.versionsignature();
+        this->entries[entryIdx].data.basic.field.version = deserializedProto.version();
+        this->entries[entryIdx].data.basic.field.pagemapCnt = deserializedProto.pagemapcnt();
+
+        for(int j = 0; j < deserializedProto.pagemap_size(); ++j)
+        {
+            this->entries[entryIdx].data.basic.field.pagemap[j].SetStartLpn(deserializedProto.pagemap(j).startlpn());
+            this->entries[entryIdx].data.basic.field.pagemap[j].SetCount(deserializedProto.pagemap(j).count());
+        }
+
+        this->entries[entryIdx].data.basic.field.ctimeCopy = deserializedProto.ctimecopy();
+        this->entries[entryIdx].data.basic.field.ageCopy = deserializedProto.agecopy();
+    }
+
+    size_t GetOnSsdSize()
+    {
+        return InodeTableContentOnSsdSize * MAX_META_FILE_INODE_NUM; // 4 LPN * 1024 = 4096 LPN
+    }
+
+    size_t GetSizeOfEntry()
+    {
+        return InodeTableContentOnSsdSize;
+    }
 };
 using MetaFileInodeArray = std::array<MetaFileInode, InodeTableContent::MAX_META_FILE_INODE_NUM>;
 
-class InodeTable : public OnVolumeMetaRegion<MetaRegionType, InodeTableContent>
+class InodeTable : public OnVolumeMetaRegionProto<MetaRegionType, InodeTableContent>
 {
 public:
     explicit InodeTable(MetaVolumeType volumeType, MetaLpnType startLpn);

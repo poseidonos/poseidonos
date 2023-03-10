@@ -35,7 +35,7 @@
 namespace pos
 {
 InodeTableHeader::InodeTableHeader(MetaVolumeType volumeType, MetaLpnType baseLpn)
-: OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>(volumeType, MetaRegionType::FileInodeHdr, baseLpn),
+: OnVolumeMetaRegionProto<MetaRegionType, InodeTableHeaderContent>(volumeType, MetaRegionType::FileInodeHdr, baseLpn),
   freeInodeEntryIdxQ(new std::queue<uint32_t>)
 {
 }
@@ -158,10 +158,16 @@ InodeTableHeader::GetFileExtentContentSize(void)
     return MetaFsConfig::MAX_VOLUME_CNT;
 }
 
+// void 
+// InodeTableHeader::SetMetaStorage(MetaStorageSubsystem* mss)
+// {
+//     mssIntf = mss;
+// }
+
 bool
 InodeTableHeader::Load(void)
 {
-    bool rc = OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Load();
+    bool rc = OnVolumeMetaRegionProto<MetaRegionType, InodeTableHeaderContent>::Load();
 
     POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Load InodeTableHeader contents");
@@ -182,11 +188,11 @@ bool
 InodeTableHeader::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx,
     MetaLpnType pageCNT)
 {
-    bool rc = OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Load(
+    bool rc = OnVolumeMetaRegionProto<MetaRegionType, InodeTableHeaderContent>::Load(
         media, baseLPN, idx, pageCNT);
-
+    
     POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Load InodeTableHeader contents");
+        "Load InodeTableHeader contents partially");
 
     if (true == rc)
     {
@@ -208,7 +214,7 @@ InodeTableHeader::Store(void)
 
     _PrintLog();
 
-    return OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Store();
+    return OnVolumeMetaRegionProto<MetaRegionType, InodeTableHeaderContent>::Store();
 }
 
 bool
@@ -216,11 +222,11 @@ InodeTableHeader::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx
     MetaLpnType pageCNT)
 {
     POS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Store InodeTableHeader contents");
+        "Store InodeTableHeader partial contents");
 
     _PrintLog();
 
-    return OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>::Store(
+    return OnVolumeMetaRegionProto<MetaRegionType, InodeTableHeaderContent>::Store(
         media, baseLPN, idx, pageCNT);
 }
 

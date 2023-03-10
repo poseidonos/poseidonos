@@ -34,22 +34,106 @@
 
 #include "meta_region_map_info.h"
 #include "meta_vol_basic_info.h"
-#include "on_volume_meta_region.h"
+#include "on_volume_meta_region_proto.h"
 #include "os_header.h"
+
+#include "proto/generated/cpp/pos_bc.pb.h"
 
 namespace pos
 {
 // Meta volume catalog contains baseline information of corresponding volume which are base lpn and size of each regions
 // the contents of this class are buffered in a particular memory space directly, hence please do not define any STL variables here
-class CatalogContent : public MetaRegionContent
+
+// The fixed size for a single CatalogContent
+const int CatalogContentOnSsdSize = 4096; // == 1 LPN
+class CatalogContent : public MetaRegionProtoContent
 {
 public:
     uint64_t signature;
     VolumeBasicInfo volumeInfo;
     MetaRegionMap regionMap[(int)MetaRegionType::Max];
+
+    // Note: if you want to add any field, add variables here and pos_bc.proto::CatalogContentProto
+
+    void ToBytes(char* destBuf)
+    {
+        pos_bc::CatalogContentProto proto;
+
+        // Set Signature value to proto
+        proto.set_signature(this->signature);
+
+        // Set volumeInfo value to proto
+        pos_bc::VolumeBasicInfo volumeInfoProto;
+        volumeInfoProto.set_maxvolpagenum(this->volumeInfo.maxVolPageNum);
+        volumeInfoProto.set_maxfilenumsupport(this->volumeInfo.maxFileNumSupport);
+
+        *proto.mutable_volumeinfo() = volumeInfoProto;
+
+        for (int i = 0 ;i < (int) MetaRegionType::Max; ++i)
+        {
+            pos_bc::MetaRegionMap* metaRegionMapProto = proto.add_regionmap();
+            metaRegionMapProto->set_baselpn(this->regionMap[i].baseLpn);
+            metaRegionMapProto->set_maxlpn(this->regionMap[i].maxLpn);
+        }
+        
+        int ret = proto.SerializeToArray(destBuf, CatalogContentOnSsdSize);    
+        if(ret==0){
+            // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+            // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+            // The current implementation has a risk of not detecting a parse error when there has been
+            // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+            // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf.
+        }
+    }
+
+    void FromBytes(char* srcBuf)
+    {
+        pos_bc::CatalogContentProto deserializedProto;
+        int ret = deserializedProto.ParseFromArray(srcBuf, CatalogContentOnSsdSize);
+        if(ret == 0){
+            // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+            // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+            // The current implementation has a risk of not detecting a parse error when there has been
+            // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+            // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf. 
+        }
+
+        // Read signature, volumeInfo values from buffer
+        this->signature = deserializedProto.signature();
+        this->volumeInfo.maxFileNumSupport = deserializedProto.volumeinfo().maxfilenumsupport();
+        this->volumeInfo.maxVolPageNum = deserializedProto.volumeinfo().maxvolpagenum();
+
+
+        // Read region map values from buffer
+        for(int i = 0; i < deserializedProto.regionmap_size(); ++i)
+        {
+            this->regionMap[i].baseLpn = deserializedProto.regionmap(i).baselpn();
+            this->regionMap[i].maxLpn = deserializedProto.regionmap(i).maxlpn();
+        }
+    }
+
+    void ToBytesByIndex(char* destBuf, int idx)
+    {
+        ToBytes(destBuf);
+    }
+
+    void FromBytesByIndex(char* srcBuf, int idx)
+    {
+        FromBytes(srcBuf);
+    }
+
+    size_t GetOnSsdSize()
+    {
+        return CatalogContentOnSsdSize; // 1 LPN
+    }
+
+    size_t GetSizeOfEntry()
+    {
+        return 4096; // Not used in CatalogContent, must be equal or larger than 4096
+    }
 };
 
-class Catalog : public OnVolumeMetaRegion<MetaRegionType, CatalogContent>
+class Catalog : public OnVolumeMetaRegionProto<MetaRegionType, CatalogContent>
 {
 public:
     explicit Catalog(MetaVolumeType volumeType, MetaLpnType baseLpn);

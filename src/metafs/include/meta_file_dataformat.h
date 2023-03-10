@@ -61,7 +61,7 @@ public:
         memset(data.all, 0, META_FILE_INODE_INFO_BYTE_SIZE);
     }
 
-    static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096 * 2;
+    static const uint32_t META_FILE_INODE_INFO_BYTE_SIZE = 4096 * 4;
 
     union UData {
         UData(void)

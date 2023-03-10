@@ -34,8 +34,6 @@
 
 #include <string.h>
 
-#include "src/allocator/context_manager/context/context_section.h"
-
 namespace pos
 {
 template<typename T>

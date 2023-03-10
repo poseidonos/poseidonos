@@ -50,6 +50,18 @@ public:
     }
 };
 
+static void CheckAndAssertIfNotEqual(CatalogContent& left, CatalogContent& right)
+{   
+    // table1 data and newTable data must be same.
+    EXPECT_EQ(left.signature, right.signature);
+    EXPECT_EQ(left.volumeInfo.maxFileNumSupport, right.volumeInfo.maxFileNumSupport);
+    for(int i = 0; i < (int)MetaRegionType::Max; ++i)
+    {
+        EXPECT_EQ(left.regionMap[i].baseLpn, right.regionMap[i].baseLpn);
+        EXPECT_EQ(left.regionMap[i].maxLpn, right.regionMap[i].maxLpn);
+    }
+}
+
 TEST(Catalog, CreateObject)
 {
     MetaLpnType maxVolumeLpn = 1024;
@@ -92,4 +104,39 @@ TEST(Catalog, RegisterRegion)
 
     delete catalog;
 }
+
+TEST(Catalog, ToBytes_testIfDeserializedObjContainsOriginalData)
+{
+    MetaLpnType maxVolumeLpn = 1024;
+    uint32_t maxFileNumSupport = 30;
+
+    CatalogTester* catalog = new CatalogTester(MetaVolumeType::SsdVolume, 0);
+    CatalogContent* content = catalog->GetContent();
+
+    catalog->Create(maxVolumeLpn, maxFileNumSupport);
+
+    for (int i = 0; i < (int)MetaRegionType::Max; ++i)
+    {
+        catalog->RegisterRegionInfo((MetaRegionType)i, i * 5 + 1, i * 5 + 5);
+    }
+
+    int protoBufSize = CatalogContentOnSsdSize;
+    char ioBuffer[protoBufSize];
+
+    // Write Catalog data to buffer.
+    content->ToBytes(ioBuffer);
+
+    CatalogTester* newCatalog = new CatalogTester(MetaVolumeType::SsdVolume, 0);
+    CatalogContent* newContent = newCatalog->GetContent();
+    
+    // Read Catalog data from buffer.
+    newContent->FromBytes(ioBuffer);
+
+    // Catalog content and newContent data must be same. 
+    CheckAndAssertIfNotEqual(*content, *newContent);
+
+    delete catalog;
+    delete newCatalog;
+}
+
 } // namespace pos

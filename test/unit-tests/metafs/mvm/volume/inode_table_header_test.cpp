@@ -11,6 +11,21 @@ using ::testing::Return;
 
 namespace pos
 {
+static void CheckAndAssertIfNotEqual(InodeTableHeaderContent& left, InodeTableHeaderContent& right)
+{   
+    // table1 data and newTable data must be same.
+    EXPECT_EQ(left.totalInodeNum, right.totalInodeNum);
+    EXPECT_EQ(left.inodeEntryByteSize, right.inodeEntryByteSize);
+    EXPECT_EQ(left.totalFileCreated, right.totalFileCreated);
+    EXPECT_EQ(left.inodeInUseBitmap.bits.to_string(), right.inodeInUseBitmap.bits.to_string());
+    EXPECT_EQ(left.inodeInUseBitmap.allocatedInodeCnt, right.inodeInUseBitmap.allocatedInodeCnt);
+    for(int i = 0; i < (int)MetaFsConfig::MAX_VOLUME_CNT; ++i)
+    {
+        EXPECT_EQ(left.allocExtentsList[i].GetStartLpn(), right.allocExtentsList[i].GetStartLpn());
+        EXPECT_EQ(left.allocExtentsList[i].GetCount(), right.allocExtentsList[i].GetCount());
+    }
+}
+
 TEST(InodeTableHeader, CreateObject)
 {
     InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
@@ -270,5 +285,49 @@ TEST(InodeTableHeader, CheckStore1_Negative)
     EXPECT_FALSE(header->Store(MetaStorageType::SSD, 0, 0, 0));
 
     delete header;
+}
+
+TEST(InodeTableHeader, ToBytes_testIfDeserializedObjContainsOriginalData)
+{
+    InodeTableHeader* header = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    InodeTableHeaderContent* content = header->GetContent();
+
+    header->Create(100);
+    
+    const int MAX_INODE = 20;
+
+    for (int i = 0; i < MAX_INODE; ++i)
+    {
+        header->SetInodeInUse(i);
+    }
+
+    std::vector<MetaFileExtent> extents, copy;
+    const int MAX_EXTENTS = 20;
+    const int FIXED_SIZE = 5;
+
+    for (int i = 0; i < MAX_EXTENTS; ++i)
+    {
+        extents.push_back({(MetaLpnType)(i * FIXED_SIZE + 1), (MetaLpnType)FIXED_SIZE});
+    }
+
+    header->SetFileExtentContent(extents);
+
+    int protoBufSize = InodeTableHeaderOnSsdSize;
+    char ioBuffer[protoBufSize];
+
+    // Write Catalog data to buffer.
+    content->ToBytes(ioBuffer);
+
+    InodeTableHeader* newHeader = new InodeTableHeader(MetaVolumeType::SsdVolume, 0);
+    InodeTableHeaderContent* newContent = header->GetContent();
+    
+    // Read Catalog data from buffer.
+    newContent->FromBytes(ioBuffer);
+
+    // Catalog content and newContent data must be same. 
+    CheckAndAssertIfNotEqual(*content, *newContent);
+
+    delete header;
+    delete newHeader;
 }
 } // namespace pos

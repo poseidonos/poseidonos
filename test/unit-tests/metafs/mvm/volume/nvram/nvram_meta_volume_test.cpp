@@ -103,29 +103,29 @@ TEST_F(NvRamMetaVolumeTestFixture, NVRAM_Meta_Volume_Normal)
     // then
     prop.type = MetaFileType::Map;
     // the maximum size
-    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
-    // expected count of the free lpn: 6136
-    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(4087 * chunkSize, prop));
+    // expected count of the free lpn: 4088
+    EXPECT_TRUE(volume->IsOkayToStore(4088 * chunkSize, prop));
     // more than possible
     // size is smaller than available but the number is not a multiple 8
-    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
+    EXPECT_FALSE(volume->IsOkayToStore(4089 * chunkSize, prop));
 
     // prop is suitable
     prop.type = MetaFileType::General;
-    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
-    // expected count of the free lpn: 6136
-    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(4087 * chunkSize, prop));
+    // expected count of the free lpn: 4088
+    EXPECT_TRUE(volume->IsOkayToStore(4088 * chunkSize, prop));
     // more than possible
     // size is smaller than available but the number is not a multiple 8
-    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
+    EXPECT_FALSE(volume->IsOkayToStore(4089 * chunkSize, prop));
 
     prop.type = MetaFileType::Journal;
-    EXPECT_TRUE(volume->IsOkayToStore(6135 * chunkSize, prop));
-    // expected count of the free lpn: 6136
-    EXPECT_TRUE(volume->IsOkayToStore(6136 * chunkSize, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(4087 * chunkSize, prop));
+    // expected count of the free lpn: 4088
+    EXPECT_TRUE(volume->IsOkayToStore(4088 * chunkSize, prop));
     // more than possible
     // size is smaller than available but the number is not a multiple 8
-    EXPECT_FALSE(volume->IsOkayToStore(6137 * chunkSize, prop));
+    EXPECT_FALSE(volume->IsOkayToStore(4089 * chunkSize, prop));
 }
 
 TEST_F(NvRamMetaVolumeTestFixture, IsOkayToStore_FileSizeZero)

@@ -8,7 +8,7 @@ TEST(MetaFileInodeInfo, BasicInfo)
 {
     MetaFileInodeInfo info;
 
-    EXPECT_EQ(8192, sizeof(info));
+    EXPECT_EQ(16384, sizeof(info));
 }
 
 TEST(MetaFileInodeInfo, Operator)
