@@ -126,7 +126,7 @@ TEST(ReverseMapManager, ReconstructReverseMap_testIfExecutedSuccesfullyWithEmpty
     }
 }
 
-TEST(ReverseMapManager, DISABLED_ReconstructMap_testIfFailToGetMapInfoWithEmptyReverseMapInfo)
+TEST(ReverseMapManager, ReconstructMap_testIfFailToGetMapInfoWithEmptyReverseMapInfo)
 {
     // Given
     NiceMock<MockMapperAddressInfo> addrInfo;
