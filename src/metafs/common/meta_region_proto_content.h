@@ -30,64 +30,30 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "catalog.h"
+#pragma once
 
-#include "metafs_config.h"
-#include "src/logger/logger.h"
+#include "src/include/memory.h"
+#include "src/metafs/common/metafs_type.h"
+#include "src/metafs/config/metafs_config.h"
 
 namespace pos
 {
-Catalog::Catalog(MetaVolumeType volumeType, MetaLpnType baseLpn)
-: OnVolumeMetaRegionProto<MetaRegionType, CatalogContent>(volumeType, MetaRegionType::VolCatalog, baseLpn)
+class MetaRegionProtoContent
 {
-}
-
-Catalog::~Catalog(void)
-{
-    delete content;
-}
-
-void
-Catalog::Create(MetaLpnType maxVolumeLpn, uint32_t maxFileNumSupport)
-{
-    ResetContent();
-
-    _InitVolumeRegionInfo(maxVolumeLpn, maxFileNumSupport);
-
-    content->signature = VOLUME_CATALOG_SIGNATURE;
-
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Volume catalog has been initialized...");
-}
-
-void
-Catalog::_InitVolumeRegionInfo(MetaLpnType maxVolumeLpn, uint32_t maxFileNumSupport)
-{
-    content->volumeInfo.maxVolPageNum = maxVolumeLpn;
-    content->volumeInfo.maxFileNumSupport = maxFileNumSupport;
-}
-
-void
-Catalog::RegisterRegionInfo(MetaRegionType regionType, MetaLpnType baseLpn, MetaLpnType maxLpn)
-{
-    MetaRegionMap regionMap(baseLpn, maxLpn);
-
-    content->regionMap[(int)regionType] = regionMap;
-
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Volume information regiesterd: <regionType={}, {}, {}>",
-        (int)regionType, baseLpn, maxLpn);
-}
-
-bool
-Catalog::CheckValidity(void)
-{
-    if (Catalog::VOLUME_CATALOG_SIGNATURE == content->signature)
-        return true;
-
-    MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CATALOG_INVALID),
-        "The signature({}) in the buffer does not match for VOLUME_CATALOG_SIGNATURE.",
-        content->signature);
-    return false;
-}
+public:
+    void*
+    operator new(size_t size, MetaLpnType lpnCnt)
+    {
+        MetaLpnType memUnitSize = MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
+        size_t contentSize = lpnCnt * memUnitSize;
+        void* buf = pos::Memory<pos::SECTOR_SIZE>::Alloc(pos::ChangeByteToSector(contentSize));
+        assert(buf != nullptr); // please check hugepage preallocation
+        return buf;
+    }
+    void
+    operator delete(void* buf)
+    {
+        pos::Memory<pos::SECTOR_SIZE>::Free(buf);
+    } 
+};
 } // namespace pos

@@ -30,64 +30,28 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "catalog.h"
+#pragma once
 
-#include "metafs_config.h"
-#include "src/logger/logger.h"
+#include "meta_file_util.h"
+#include "meta_region_type.h"
+#include "meta_region_proto.h"
+#include "src/metafs/storage/mss.h"
+
 
 namespace pos
 {
-Catalog::Catalog(MetaVolumeType volumeType, MetaLpnType baseLpn)
-: OnVolumeMetaRegionProto<MetaRegionType, CatalogContent>(volumeType, MetaRegionType::VolCatalog, baseLpn)
+template<typename VolMetaRegionT, typename MetaContentT>
+class OnVolumeMetaRegionProto  : public MetaRegionProto<VolMetaRegionT, MetaContentT>
 {
-}
+public:
+    explicit OnVolumeMetaRegionProto(MetaVolumeType volumeType, VolMetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCnt = 0)
+    : MetaRegionProto<VolMetaRegionT, MetaContentT>(MetaFileUtil::ConvertToMediaType(volumeType), regionType, baseLpn, mirrorCnt)
+    {
+    }
+    virtual ~OnVolumeMetaRegionProto(void)
+    {
+    }
+private:
 
-Catalog::~Catalog(void)
-{
-    delete content;
-}
-
-void
-Catalog::Create(MetaLpnType maxVolumeLpn, uint32_t maxFileNumSupport)
-{
-    ResetContent();
-
-    _InitVolumeRegionInfo(maxVolumeLpn, maxFileNumSupport);
-
-    content->signature = VOLUME_CATALOG_SIGNATURE;
-
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Volume catalog has been initialized...");
-}
-
-void
-Catalog::_InitVolumeRegionInfo(MetaLpnType maxVolumeLpn, uint32_t maxFileNumSupport)
-{
-    content->volumeInfo.maxVolPageNum = maxVolumeLpn;
-    content->volumeInfo.maxFileNumSupport = maxFileNumSupport;
-}
-
-void
-Catalog::RegisterRegionInfo(MetaRegionType regionType, MetaLpnType baseLpn, MetaLpnType maxLpn)
-{
-    MetaRegionMap regionMap(baseLpn, maxLpn);
-
-    content->regionMap[(int)regionType] = regionMap;
-
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Volume information regiesterd: <regionType={}, {}, {}>",
-        (int)regionType, baseLpn, maxLpn);
-}
-
-bool
-Catalog::CheckValidity(void)
-{
-    if (Catalog::VOLUME_CATALOG_SIGNATURE == content->signature)
-        return true;
-
-    MFS_TRACE_ERROR(EID(MFS_META_VOLUME_CATALOG_INVALID),
-        "The signature({}) in the buffer does not match for VOLUME_CATALOG_SIGNATURE.",
-        content->signature);
-    return false;
-}
+};
 } // namespace pos

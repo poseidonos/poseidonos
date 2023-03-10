@@ -47,7 +47,7 @@ struct TableStruct_pos_5fbc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[14]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -59,6 +59,33 @@ namespace pos_bc {
 class AllocatorCtxExtendedProto;
 struct AllocatorCtxExtendedProtoDefaultTypeInternal;
 extern AllocatorCtxExtendedProtoDefaultTypeInternal _AllocatorCtxExtendedProto_default_instance_;
+class CatalogContentProto;
+struct CatalogContentProtoDefaultTypeInternal;
+extern CatalogContentProtoDefaultTypeInternal _CatalogContentProto_default_instance_;
+class InodeInUseBitmap;
+struct InodeInUseBitmapDefaultTypeInternal;
+extern InodeInUseBitmapDefaultTypeInternal _InodeInUseBitmap_default_instance_;
+class InodeTableContent;
+struct InodeTableContentDefaultTypeInternal;
+extern InodeTableContentDefaultTypeInternal _InodeTableContent_default_instance_;
+class InodeTableHeaderContentProto;
+struct InodeTableHeaderContentProtoDefaultTypeInternal;
+extern InodeTableHeaderContentProtoDefaultTypeInternal _InodeTableHeaderContentProto_default_instance_;
+class MetaFileExtent;
+struct MetaFileExtentDefaultTypeInternal;
+extern MetaFileExtentDefaultTypeInternal _MetaFileExtent_default_instance_;
+class MetaFileInodeDataProto;
+struct MetaFileInodeDataProtoDefaultTypeInternal;
+extern MetaFileInodeDataProtoDefaultTypeInternal _MetaFileInodeDataProto_default_instance_;
+class MetaFilePropertySet;
+struct MetaFilePropertySetDefaultTypeInternal;
+extern MetaFilePropertySetDefaultTypeInternal _MetaFilePropertySet_default_instance_;
+class MetaRegionMap;
+struct MetaRegionMapDefaultTypeInternal;
+extern MetaRegionMapDefaultTypeInternal _MetaRegionMap_default_instance_;
+class MetaStorageIoProperty;
+struct MetaStorageIoPropertyDefaultTypeInternal;
+extern MetaStorageIoPropertyDefaultTypeInternal _MetaStorageIoProperty_default_instance_;
 class RebuildCtxExtendedProto;
 struct RebuildCtxExtendedProtoDefaultTypeInternal;
 extern RebuildCtxExtendedProtoDefaultTypeInternal _RebuildCtxExtendedProto_default_instance_;
@@ -68,27 +95,124 @@ extern SegmentCtxExtendedProtoDefaultTypeInternal _SegmentCtxExtendedProto_defau
 class SegmentInfoDataProto;
 struct SegmentInfoDataProtoDefaultTypeInternal;
 extern SegmentInfoDataProtoDefaultTypeInternal _SegmentInfoDataProto_default_instance_;
+class VolumeBasicInfo;
+struct VolumeBasicInfoDefaultTypeInternal;
+extern VolumeBasicInfoDefaultTypeInternal _VolumeBasicInfo_default_instance_;
 }  // namespace pos_bc
 PROTOBUF_NAMESPACE_OPEN
 template<> ::pos_bc::AllocatorCtxExtendedProto* Arena::CreateMaybeMessage<::pos_bc::AllocatorCtxExtendedProto>(Arena*);
+template<> ::pos_bc::CatalogContentProto* Arena::CreateMaybeMessage<::pos_bc::CatalogContentProto>(Arena*);
+template<> ::pos_bc::InodeInUseBitmap* Arena::CreateMaybeMessage<::pos_bc::InodeInUseBitmap>(Arena*);
+template<> ::pos_bc::InodeTableContent* Arena::CreateMaybeMessage<::pos_bc::InodeTableContent>(Arena*);
+template<> ::pos_bc::InodeTableHeaderContentProto* Arena::CreateMaybeMessage<::pos_bc::InodeTableHeaderContentProto>(Arena*);
+template<> ::pos_bc::MetaFileExtent* Arena::CreateMaybeMessage<::pos_bc::MetaFileExtent>(Arena*);
+template<> ::pos_bc::MetaFileInodeDataProto* Arena::CreateMaybeMessage<::pos_bc::MetaFileInodeDataProto>(Arena*);
+template<> ::pos_bc::MetaFilePropertySet* Arena::CreateMaybeMessage<::pos_bc::MetaFilePropertySet>(Arena*);
+template<> ::pos_bc::MetaRegionMap* Arena::CreateMaybeMessage<::pos_bc::MetaRegionMap>(Arena*);
+template<> ::pos_bc::MetaStorageIoProperty* Arena::CreateMaybeMessage<::pos_bc::MetaStorageIoProperty>(Arena*);
 template<> ::pos_bc::RebuildCtxExtendedProto* Arena::CreateMaybeMessage<::pos_bc::RebuildCtxExtendedProto>(Arena*);
 template<> ::pos_bc::SegmentCtxExtendedProto* Arena::CreateMaybeMessage<::pos_bc::SegmentCtxExtendedProto>(Arena*);
 template<> ::pos_bc::SegmentInfoDataProto* Arena::CreateMaybeMessage<::pos_bc::SegmentInfoDataProto>(Arena*);
+template<> ::pos_bc::VolumeBasicInfo* Arena::CreateMaybeMessage<::pos_bc::VolumeBasicInfo>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace pos_bc {
 
+enum MetaFilePropertySet_MetaFileIntegrityType : int {
+  MetaFilePropertySet_MetaFileIntegrityType_Lvl0_Disable = 0,
+  MetaFilePropertySet_MetaFileIntegrityType_Lvl1_CRCcheck = 1,
+  MetaFilePropertySet_MetaFileIntegrityType_Lvl2_CRCnMirror = 2,
+  MetaFilePropertySet_MetaFileIntegrityType_Lvl2_ECC = 3,
+  MetaFilePropertySet_MetaFileIntegrityType_Lvl3_Journal = 4,
+  MetaFilePropertySet_MetaFileIntegrityType_Max = 5,
+  MetaFilePropertySet_MetaFileIntegrityType_MetaFilePropertySet_MetaFileIntegrityType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  MetaFilePropertySet_MetaFileIntegrityType_MetaFilePropertySet_MetaFileIntegrityType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool MetaFilePropertySet_MetaFileIntegrityType_IsValid(int value);
+constexpr MetaFilePropertySet_MetaFileIntegrityType MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_MIN = MetaFilePropertySet_MetaFileIntegrityType_Lvl0_Disable;
+constexpr MetaFilePropertySet_MetaFileIntegrityType MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_MAX = MetaFilePropertySet_MetaFileIntegrityType_Max;
+constexpr int MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_ARRAYSIZE = MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MetaFilePropertySet_MetaFileIntegrityType_descriptor();
+template<typename T>
+inline const std::string& MetaFilePropertySet_MetaFileIntegrityType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, MetaFilePropertySet_MetaFileIntegrityType>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function MetaFilePropertySet_MetaFileIntegrityType_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    MetaFilePropertySet_MetaFileIntegrityType_descriptor(), enum_t_value);
+}
+inline bool MetaFilePropertySet_MetaFileIntegrityType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, MetaFilePropertySet_MetaFileIntegrityType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<MetaFilePropertySet_MetaFileIntegrityType>(
+    MetaFilePropertySet_MetaFileIntegrityType_descriptor(), name, value);
+}
+enum MetaFilePropertySet_MetaFileType : int {
+  MetaFilePropertySet_MetaFileType_SpecialPurposeMap = 0,
+  MetaFilePropertySet_MetaFileType_Journal = 1,
+  MetaFilePropertySet_MetaFileType_Map = 2,
+  MetaFilePropertySet_MetaFileType_General = 3,
+  MetaFilePropertySet_MetaFileType_MAX = 4,
+  MetaFilePropertySet_MetaFileType_MetaFilePropertySet_MetaFileType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  MetaFilePropertySet_MetaFileType_MetaFilePropertySet_MetaFileType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool MetaFilePropertySet_MetaFileType_IsValid(int value);
+constexpr MetaFilePropertySet_MetaFileType MetaFilePropertySet_MetaFileType_MetaFileType_MIN = MetaFilePropertySet_MetaFileType_SpecialPurposeMap;
+constexpr MetaFilePropertySet_MetaFileType MetaFilePropertySet_MetaFileType_MetaFileType_MAX = MetaFilePropertySet_MetaFileType_MAX;
+constexpr int MetaFilePropertySet_MetaFileType_MetaFileType_ARRAYSIZE = MetaFilePropertySet_MetaFileType_MetaFileType_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MetaFilePropertySet_MetaFileType_descriptor();
+template<typename T>
+inline const std::string& MetaFilePropertySet_MetaFileType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, MetaFilePropertySet_MetaFileType>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function MetaFilePropertySet_MetaFileType_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    MetaFilePropertySet_MetaFileType_descriptor(), enum_t_value);
+}
+inline bool MetaFilePropertySet_MetaFileType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, MetaFilePropertySet_MetaFileType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<MetaFilePropertySet_MetaFileType>(
+    MetaFilePropertySet_MetaFileType_descriptor(), name, value);
+}
+enum MetaStorageIoProperty_MetaStorageType : int {
+  MetaStorageIoProperty_MetaStorageType_SSD = 0,
+  MetaStorageIoProperty_MetaStorageType_NVRAM = 1,
+  MetaStorageIoProperty_MetaStorageType_JOURNAL_SSD = 2,
+  MetaStorageIoProperty_MetaStorageType_MetaStorageIoProperty_MetaStorageType_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
+  MetaStorageIoProperty_MetaStorageType_MetaStorageIoProperty_MetaStorageType_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
+};
+bool MetaStorageIoProperty_MetaStorageType_IsValid(int value);
+constexpr MetaStorageIoProperty_MetaStorageType MetaStorageIoProperty_MetaStorageType_MetaStorageType_MIN = MetaStorageIoProperty_MetaStorageType_SSD;
+constexpr MetaStorageIoProperty_MetaStorageType MetaStorageIoProperty_MetaStorageType_MetaStorageType_MAX = MetaStorageIoProperty_MetaStorageType_JOURNAL_SSD;
+constexpr int MetaStorageIoProperty_MetaStorageType_MetaStorageType_ARRAYSIZE = MetaStorageIoProperty_MetaStorageType_MetaStorageType_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* MetaStorageIoProperty_MetaStorageType_descriptor();
+template<typename T>
+inline const std::string& MetaStorageIoProperty_MetaStorageType_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, MetaStorageIoProperty_MetaStorageType>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function MetaStorageIoProperty_MetaStorageType_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    MetaStorageIoProperty_MetaStorageType_descriptor(), enum_t_value);
+}
+inline bool MetaStorageIoProperty_MetaStorageType_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, MetaStorageIoProperty_MetaStorageType* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<MetaStorageIoProperty_MetaStorageType>(
+    MetaStorageIoProperty_MetaStorageType_descriptor(), name, value);
+}
 enum SegmentState : int {
   FREE = 0,
   NVRAM = 1,
   SSD = 2,
   VICTIM = 3,
   ERROR = 4,
+  NUM_STATES = 5,
   SegmentState_INT_MIN_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::min(),
   SegmentState_INT_MAX_SENTINEL_DO_NOT_USE_ = std::numeric_limits<::PROTOBUF_NAMESPACE_ID::int32>::max()
 };
 bool SegmentState_IsValid(int value);
 constexpr SegmentState SegmentState_MIN = FREE;
-constexpr SegmentState SegmentState_MAX = ERROR;
+constexpr SegmentState SegmentState_MAX = NUM_STATES;
 constexpr int SegmentState_ARRAYSIZE = SegmentState_MAX + 1;
 
 const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* SegmentState_descriptor();
@@ -636,6 +760,1865 @@ class RebuildCtxExtendedProto PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_pos_5fbc_2eproto;
 };
+// -------------------------------------------------------------------
+
+class InodeInUseBitmap PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.InodeInUseBitmap) */ {
+ public:
+  inline InodeInUseBitmap() : InodeInUseBitmap(nullptr) {}
+  virtual ~InodeInUseBitmap();
+  explicit constexpr InodeInUseBitmap(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  InodeInUseBitmap(const InodeInUseBitmap& from);
+  InodeInUseBitmap(InodeInUseBitmap&& from) noexcept
+    : InodeInUseBitmap() {
+    *this = ::std::move(from);
+  }
+
+  inline InodeInUseBitmap& operator=(const InodeInUseBitmap& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline InodeInUseBitmap& operator=(InodeInUseBitmap&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const InodeInUseBitmap& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const InodeInUseBitmap* internal_default_instance() {
+    return reinterpret_cast<const InodeInUseBitmap*>(
+               &_InodeInUseBitmap_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(InodeInUseBitmap& a, InodeInUseBitmap& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(InodeInUseBitmap* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(InodeInUseBitmap* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline InodeInUseBitmap* New() const final {
+    return CreateMaybeMessage<InodeInUseBitmap>(nullptr);
+  }
+
+  InodeInUseBitmap* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<InodeInUseBitmap>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const InodeInUseBitmap& from);
+  void MergeFrom(const InodeInUseBitmap& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(InodeInUseBitmap* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.InodeInUseBitmap";
+  }
+  protected:
+  explicit InodeInUseBitmap(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBitsFieldNumber = 1,
+    kAllocatedInodeCntFieldNumber = 2,
+  };
+  // bytes bits = 1;
+  void clear_bits();
+  const std::string& bits() const;
+  void set_bits(const std::string& value);
+  void set_bits(std::string&& value);
+  void set_bits(const char* value);
+  void set_bits(const void* value, size_t size);
+  std::string* mutable_bits();
+  std::string* release_bits();
+  void set_allocated_bits(std::string* bits);
+  private:
+  const std::string& _internal_bits() const;
+  void _internal_set_bits(const std::string& value);
+  std::string* _internal_mutable_bits();
+  public:
+
+  // uint32 allocatedInodeCnt = 2;
+  void clear_allocatedinodecnt();
+  ::PROTOBUF_NAMESPACE_ID::uint32 allocatedinodecnt() const;
+  void set_allocatedinodecnt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_allocatedinodecnt() const;
+  void _internal_set_allocatedinodecnt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.InodeInUseBitmap)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr bits_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 allocatedinodecnt_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MetaFileExtent PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.MetaFileExtent) */ {
+ public:
+  inline MetaFileExtent() : MetaFileExtent(nullptr) {}
+  virtual ~MetaFileExtent();
+  explicit constexpr MetaFileExtent(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MetaFileExtent(const MetaFileExtent& from);
+  MetaFileExtent(MetaFileExtent&& from) noexcept
+    : MetaFileExtent() {
+    *this = ::std::move(from);
+  }
+
+  inline MetaFileExtent& operator=(const MetaFileExtent& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MetaFileExtent& operator=(MetaFileExtent&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MetaFileExtent& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MetaFileExtent* internal_default_instance() {
+    return reinterpret_cast<const MetaFileExtent*>(
+               &_MetaFileExtent_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(MetaFileExtent& a, MetaFileExtent& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MetaFileExtent* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MetaFileExtent* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MetaFileExtent* New() const final {
+    return CreateMaybeMessage<MetaFileExtent>(nullptr);
+  }
+
+  MetaFileExtent* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MetaFileExtent>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MetaFileExtent& from);
+  void MergeFrom(const MetaFileExtent& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MetaFileExtent* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.MetaFileExtent";
+  }
+  protected:
+  explicit MetaFileExtent(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kStartLpnFieldNumber = 1,
+    kCountFieldNumber = 2,
+  };
+  // uint64 startLpn = 1;
+  void clear_startlpn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 startlpn() const;
+  void set_startlpn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_startlpn() const;
+  void _internal_set_startlpn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 count = 2;
+  void clear_count();
+  ::PROTOBUF_NAMESPACE_ID::uint64 count() const;
+  void set_count(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_count() const;
+  void _internal_set_count(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.MetaFileExtent)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 startlpn_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 count_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class InodeTableHeaderContentProto PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.InodeTableHeaderContentProto) */ {
+ public:
+  inline InodeTableHeaderContentProto() : InodeTableHeaderContentProto(nullptr) {}
+  virtual ~InodeTableHeaderContentProto();
+  explicit constexpr InodeTableHeaderContentProto(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  InodeTableHeaderContentProto(const InodeTableHeaderContentProto& from);
+  InodeTableHeaderContentProto(InodeTableHeaderContentProto&& from) noexcept
+    : InodeTableHeaderContentProto() {
+    *this = ::std::move(from);
+  }
+
+  inline InodeTableHeaderContentProto& operator=(const InodeTableHeaderContentProto& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline InodeTableHeaderContentProto& operator=(InodeTableHeaderContentProto&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const InodeTableHeaderContentProto& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const InodeTableHeaderContentProto* internal_default_instance() {
+    return reinterpret_cast<const InodeTableHeaderContentProto*>(
+               &_InodeTableHeaderContentProto_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(InodeTableHeaderContentProto& a, InodeTableHeaderContentProto& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(InodeTableHeaderContentProto* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(InodeTableHeaderContentProto* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline InodeTableHeaderContentProto* New() const final {
+    return CreateMaybeMessage<InodeTableHeaderContentProto>(nullptr);
+  }
+
+  InodeTableHeaderContentProto* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<InodeTableHeaderContentProto>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const InodeTableHeaderContentProto& from);
+  void MergeFrom(const InodeTableHeaderContentProto& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(InodeTableHeaderContentProto* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.InodeTableHeaderContentProto";
+  }
+  protected:
+  explicit InodeTableHeaderContentProto(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kAllocExtentsListFieldNumber = 5,
+    kInodeInUseBitmapFieldNumber = 4,
+    kTotalInodeNumFieldNumber = 1,
+    kInodeEntryByteSizeFieldNumber = 2,
+    kTotalFileCreatedFieldNumber = 3,
+  };
+  // repeated .pos_bc.MetaFileExtent allocExtentsList = 5;
+  int allocextentslist_size() const;
+  private:
+  int _internal_allocextentslist_size() const;
+  public:
+  void clear_allocextentslist();
+  ::pos_bc::MetaFileExtent* mutable_allocextentslist(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >*
+      mutable_allocextentslist();
+  private:
+  const ::pos_bc::MetaFileExtent& _internal_allocextentslist(int index) const;
+  ::pos_bc::MetaFileExtent* _internal_add_allocextentslist();
+  public:
+  const ::pos_bc::MetaFileExtent& allocextentslist(int index) const;
+  ::pos_bc::MetaFileExtent* add_allocextentslist();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >&
+      allocextentslist() const;
+
+  // .pos_bc.InodeInUseBitmap inodeInUseBitmap = 4;
+  bool has_inodeinusebitmap() const;
+  private:
+  bool _internal_has_inodeinusebitmap() const;
+  public:
+  void clear_inodeinusebitmap();
+  const ::pos_bc::InodeInUseBitmap& inodeinusebitmap() const;
+  ::pos_bc::InodeInUseBitmap* release_inodeinusebitmap();
+  ::pos_bc::InodeInUseBitmap* mutable_inodeinusebitmap();
+  void set_allocated_inodeinusebitmap(::pos_bc::InodeInUseBitmap* inodeinusebitmap);
+  private:
+  const ::pos_bc::InodeInUseBitmap& _internal_inodeinusebitmap() const;
+  ::pos_bc::InodeInUseBitmap* _internal_mutable_inodeinusebitmap();
+  public:
+  void unsafe_arena_set_allocated_inodeinusebitmap(
+      ::pos_bc::InodeInUseBitmap* inodeinusebitmap);
+  ::pos_bc::InodeInUseBitmap* unsafe_arena_release_inodeinusebitmap();
+
+  // uint32 totalInodeNum = 1;
+  void clear_totalinodenum();
+  ::PROTOBUF_NAMESPACE_ID::uint32 totalinodenum() const;
+  void set_totalinodenum(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_totalinodenum() const;
+  void _internal_set_totalinodenum(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 inodeEntryByteSize = 2;
+  void clear_inodeentrybytesize();
+  ::PROTOBUF_NAMESPACE_ID::uint32 inodeentrybytesize() const;
+  void set_inodeentrybytesize(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_inodeentrybytesize() const;
+  void _internal_set_inodeentrybytesize(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 totalFileCreated = 3;
+  void clear_totalfilecreated();
+  ::PROTOBUF_NAMESPACE_ID::uint32 totalfilecreated() const;
+  void set_totalfilecreated(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_totalfilecreated() const;
+  void _internal_set_totalfilecreated(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.InodeTableHeaderContentProto)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent > allocextentslist_;
+  ::pos_bc::InodeInUseBitmap* inodeinusebitmap_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 totalinodenum_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 inodeentrybytesize_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 totalfilecreated_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class VolumeBasicInfo PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.VolumeBasicInfo) */ {
+ public:
+  inline VolumeBasicInfo() : VolumeBasicInfo(nullptr) {}
+  virtual ~VolumeBasicInfo();
+  explicit constexpr VolumeBasicInfo(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  VolumeBasicInfo(const VolumeBasicInfo& from);
+  VolumeBasicInfo(VolumeBasicInfo&& from) noexcept
+    : VolumeBasicInfo() {
+    *this = ::std::move(from);
+  }
+
+  inline VolumeBasicInfo& operator=(const VolumeBasicInfo& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline VolumeBasicInfo& operator=(VolumeBasicInfo&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const VolumeBasicInfo& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const VolumeBasicInfo* internal_default_instance() {
+    return reinterpret_cast<const VolumeBasicInfo*>(
+               &_VolumeBasicInfo_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    7;
+
+  friend void swap(VolumeBasicInfo& a, VolumeBasicInfo& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(VolumeBasicInfo* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(VolumeBasicInfo* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline VolumeBasicInfo* New() const final {
+    return CreateMaybeMessage<VolumeBasicInfo>(nullptr);
+  }
+
+  VolumeBasicInfo* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<VolumeBasicInfo>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const VolumeBasicInfo& from);
+  void MergeFrom(const VolumeBasicInfo& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(VolumeBasicInfo* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.VolumeBasicInfo";
+  }
+  protected:
+  explicit VolumeBasicInfo(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kMaxVolPageNumFieldNumber = 1,
+    kMaxFileNumSupportFieldNumber = 2,
+  };
+  // uint64 maxVolPageNum = 1;
+  void clear_maxvolpagenum();
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxvolpagenum() const;
+  void set_maxvolpagenum(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_maxvolpagenum() const;
+  void _internal_set_maxvolpagenum(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 maxFileNumSupport = 2;
+  void clear_maxfilenumsupport();
+  ::PROTOBUF_NAMESPACE_ID::uint32 maxfilenumsupport() const;
+  void set_maxfilenumsupport(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_maxfilenumsupport() const;
+  void _internal_set_maxfilenumsupport(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.VolumeBasicInfo)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxvolpagenum_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 maxfilenumsupport_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MetaRegionMap PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.MetaRegionMap) */ {
+ public:
+  inline MetaRegionMap() : MetaRegionMap(nullptr) {}
+  virtual ~MetaRegionMap();
+  explicit constexpr MetaRegionMap(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MetaRegionMap(const MetaRegionMap& from);
+  MetaRegionMap(MetaRegionMap&& from) noexcept
+    : MetaRegionMap() {
+    *this = ::std::move(from);
+  }
+
+  inline MetaRegionMap& operator=(const MetaRegionMap& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MetaRegionMap& operator=(MetaRegionMap&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MetaRegionMap& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MetaRegionMap* internal_default_instance() {
+    return reinterpret_cast<const MetaRegionMap*>(
+               &_MetaRegionMap_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    8;
+
+  friend void swap(MetaRegionMap& a, MetaRegionMap& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MetaRegionMap* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MetaRegionMap* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MetaRegionMap* New() const final {
+    return CreateMaybeMessage<MetaRegionMap>(nullptr);
+  }
+
+  MetaRegionMap* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MetaRegionMap>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MetaRegionMap& from);
+  void MergeFrom(const MetaRegionMap& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MetaRegionMap* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.MetaRegionMap";
+  }
+  protected:
+  explicit MetaRegionMap(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kBaseLpnFieldNumber = 1,
+    kMaxLpnFieldNumber = 2,
+  };
+  // uint64 baseLpn = 1;
+  void clear_baselpn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 baselpn() const;
+  void set_baselpn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_baselpn() const;
+  void _internal_set_baselpn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 maxLpn = 2;
+  void clear_maxlpn();
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxlpn() const;
+  void set_maxlpn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_maxlpn() const;
+  void _internal_set_maxlpn(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.MetaRegionMap)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 baselpn_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 maxlpn_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CatalogContentProto PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.CatalogContentProto) */ {
+ public:
+  inline CatalogContentProto() : CatalogContentProto(nullptr) {}
+  virtual ~CatalogContentProto();
+  explicit constexpr CatalogContentProto(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  CatalogContentProto(const CatalogContentProto& from);
+  CatalogContentProto(CatalogContentProto&& from) noexcept
+    : CatalogContentProto() {
+    *this = ::std::move(from);
+  }
+
+  inline CatalogContentProto& operator=(const CatalogContentProto& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CatalogContentProto& operator=(CatalogContentProto&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const CatalogContentProto& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CatalogContentProto* internal_default_instance() {
+    return reinterpret_cast<const CatalogContentProto*>(
+               &_CatalogContentProto_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    9;
+
+  friend void swap(CatalogContentProto& a, CatalogContentProto& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(CatalogContentProto* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CatalogContentProto* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline CatalogContentProto* New() const final {
+    return CreateMaybeMessage<CatalogContentProto>(nullptr);
+  }
+
+  CatalogContentProto* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<CatalogContentProto>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const CatalogContentProto& from);
+  void MergeFrom(const CatalogContentProto& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(CatalogContentProto* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.CatalogContentProto";
+  }
+  protected:
+  explicit CatalogContentProto(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kRegionMapFieldNumber = 3,
+    kVolumeInfoFieldNumber = 2,
+    kSignatureFieldNumber = 1,
+  };
+  // repeated .pos_bc.MetaRegionMap regionMap = 3;
+  int regionmap_size() const;
+  private:
+  int _internal_regionmap_size() const;
+  public:
+  void clear_regionmap();
+  ::pos_bc::MetaRegionMap* mutable_regionmap(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaRegionMap >*
+      mutable_regionmap();
+  private:
+  const ::pos_bc::MetaRegionMap& _internal_regionmap(int index) const;
+  ::pos_bc::MetaRegionMap* _internal_add_regionmap();
+  public:
+  const ::pos_bc::MetaRegionMap& regionmap(int index) const;
+  ::pos_bc::MetaRegionMap* add_regionmap();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaRegionMap >&
+      regionmap() const;
+
+  // .pos_bc.VolumeBasicInfo volumeInfo = 2;
+  bool has_volumeinfo() const;
+  private:
+  bool _internal_has_volumeinfo() const;
+  public:
+  void clear_volumeinfo();
+  const ::pos_bc::VolumeBasicInfo& volumeinfo() const;
+  ::pos_bc::VolumeBasicInfo* release_volumeinfo();
+  ::pos_bc::VolumeBasicInfo* mutable_volumeinfo();
+  void set_allocated_volumeinfo(::pos_bc::VolumeBasicInfo* volumeinfo);
+  private:
+  const ::pos_bc::VolumeBasicInfo& _internal_volumeinfo() const;
+  ::pos_bc::VolumeBasicInfo* _internal_mutable_volumeinfo();
+  public:
+  void unsafe_arena_set_allocated_volumeinfo(
+      ::pos_bc::VolumeBasicInfo* volumeinfo);
+  ::pos_bc::VolumeBasicInfo* unsafe_arena_release_volumeinfo();
+
+  // uint64 signature = 1;
+  void clear_signature();
+  ::PROTOBUF_NAMESPACE_ID::uint64 signature() const;
+  void set_signature(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_signature() const;
+  void _internal_set_signature(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.CatalogContentProto)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaRegionMap > regionmap_;
+  ::pos_bc::VolumeBasicInfo* volumeinfo_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 signature_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MetaFilePropertySet PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.MetaFilePropertySet) */ {
+ public:
+  inline MetaFilePropertySet() : MetaFilePropertySet(nullptr) {}
+  virtual ~MetaFilePropertySet();
+  explicit constexpr MetaFilePropertySet(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MetaFilePropertySet(const MetaFilePropertySet& from);
+  MetaFilePropertySet(MetaFilePropertySet&& from) noexcept
+    : MetaFilePropertySet() {
+    *this = ::std::move(from);
+  }
+
+  inline MetaFilePropertySet& operator=(const MetaFilePropertySet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MetaFilePropertySet& operator=(MetaFilePropertySet&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MetaFilePropertySet& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MetaFilePropertySet* internal_default_instance() {
+    return reinterpret_cast<const MetaFilePropertySet*>(
+               &_MetaFilePropertySet_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    10;
+
+  friend void swap(MetaFilePropertySet& a, MetaFilePropertySet& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MetaFilePropertySet* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MetaFilePropertySet* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MetaFilePropertySet* New() const final {
+    return CreateMaybeMessage<MetaFilePropertySet>(nullptr);
+  }
+
+  MetaFilePropertySet* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MetaFilePropertySet>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MetaFilePropertySet& from);
+  void MergeFrom(const MetaFilePropertySet& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MetaFilePropertySet* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.MetaFilePropertySet";
+  }
+  protected:
+  explicit MetaFilePropertySet(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef MetaFilePropertySet_MetaFileIntegrityType MetaFileIntegrityType;
+  static constexpr MetaFileIntegrityType Lvl0_Disable =
+    MetaFilePropertySet_MetaFileIntegrityType_Lvl0_Disable;
+  static constexpr MetaFileIntegrityType Lvl1_CRCcheck =
+    MetaFilePropertySet_MetaFileIntegrityType_Lvl1_CRCcheck;
+  static constexpr MetaFileIntegrityType Lvl2_CRCnMirror =
+    MetaFilePropertySet_MetaFileIntegrityType_Lvl2_CRCnMirror;
+  static constexpr MetaFileIntegrityType Lvl2_ECC =
+    MetaFilePropertySet_MetaFileIntegrityType_Lvl2_ECC;
+  static constexpr MetaFileIntegrityType Lvl3_Journal =
+    MetaFilePropertySet_MetaFileIntegrityType_Lvl3_Journal;
+  static constexpr MetaFileIntegrityType Max =
+    MetaFilePropertySet_MetaFileIntegrityType_Max;
+  static inline bool MetaFileIntegrityType_IsValid(int value) {
+    return MetaFilePropertySet_MetaFileIntegrityType_IsValid(value);
+  }
+  static constexpr MetaFileIntegrityType MetaFileIntegrityType_MIN =
+    MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_MIN;
+  static constexpr MetaFileIntegrityType MetaFileIntegrityType_MAX =
+    MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_MAX;
+  static constexpr int MetaFileIntegrityType_ARRAYSIZE =
+    MetaFilePropertySet_MetaFileIntegrityType_MetaFileIntegrityType_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  MetaFileIntegrityType_descriptor() {
+    return MetaFilePropertySet_MetaFileIntegrityType_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& MetaFileIntegrityType_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, MetaFileIntegrityType>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function MetaFileIntegrityType_Name.");
+    return MetaFilePropertySet_MetaFileIntegrityType_Name(enum_t_value);
+  }
+  static inline bool MetaFileIntegrityType_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
+      MetaFileIntegrityType* value) {
+    return MetaFilePropertySet_MetaFileIntegrityType_Parse(name, value);
+  }
+
+  typedef MetaFilePropertySet_MetaFileType MetaFileType;
+  static constexpr MetaFileType SpecialPurposeMap =
+    MetaFilePropertySet_MetaFileType_SpecialPurposeMap;
+  static constexpr MetaFileType Journal =
+    MetaFilePropertySet_MetaFileType_Journal;
+  static constexpr MetaFileType Map =
+    MetaFilePropertySet_MetaFileType_Map;
+  static constexpr MetaFileType General =
+    MetaFilePropertySet_MetaFileType_General;
+  static constexpr MetaFileType MAX =
+    MetaFilePropertySet_MetaFileType_MAX;
+  static inline bool MetaFileType_IsValid(int value) {
+    return MetaFilePropertySet_MetaFileType_IsValid(value);
+  }
+  static constexpr MetaFileType MetaFileType_MIN =
+    MetaFilePropertySet_MetaFileType_MetaFileType_MIN;
+  static constexpr MetaFileType MetaFileType_MAX =
+    MetaFilePropertySet_MetaFileType_MetaFileType_MAX;
+  static constexpr int MetaFileType_ARRAYSIZE =
+    MetaFilePropertySet_MetaFileType_MetaFileType_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  MetaFileType_descriptor() {
+    return MetaFilePropertySet_MetaFileType_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& MetaFileType_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, MetaFileType>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function MetaFileType_Name.");
+    return MetaFilePropertySet_MetaFileType_Name(enum_t_value);
+  }
+  static inline bool MetaFileType_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
+      MetaFileType* value) {
+    return MetaFilePropertySet_MetaFileType_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIntegrityFieldNumber = 1,
+    kTypeFieldNumber = 2,
+  };
+  // .pos_bc.MetaFilePropertySet.MetaFileIntegrityType integrity = 1;
+  void clear_integrity();
+  ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType integrity() const;
+  void set_integrity(::pos_bc::MetaFilePropertySet_MetaFileIntegrityType value);
+  private:
+  ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType _internal_integrity() const;
+  void _internal_set_integrity(::pos_bc::MetaFilePropertySet_MetaFileIntegrityType value);
+  public:
+
+  // .pos_bc.MetaFilePropertySet.MetaFileType type = 2;
+  void clear_type();
+  ::pos_bc::MetaFilePropertySet_MetaFileType type() const;
+  void set_type(::pos_bc::MetaFilePropertySet_MetaFileType value);
+  private:
+  ::pos_bc::MetaFilePropertySet_MetaFileType _internal_type() const;
+  void _internal_set_type(::pos_bc::MetaFilePropertySet_MetaFileType value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.MetaFilePropertySet)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  int integrity_;
+  int type_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MetaStorageIoProperty PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.MetaStorageIoProperty) */ {
+ public:
+  inline MetaStorageIoProperty() : MetaStorageIoProperty(nullptr) {}
+  virtual ~MetaStorageIoProperty();
+  explicit constexpr MetaStorageIoProperty(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MetaStorageIoProperty(const MetaStorageIoProperty& from);
+  MetaStorageIoProperty(MetaStorageIoProperty&& from) noexcept
+    : MetaStorageIoProperty() {
+    *this = ::std::move(from);
+  }
+
+  inline MetaStorageIoProperty& operator=(const MetaStorageIoProperty& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MetaStorageIoProperty& operator=(MetaStorageIoProperty&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MetaStorageIoProperty& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MetaStorageIoProperty* internal_default_instance() {
+    return reinterpret_cast<const MetaStorageIoProperty*>(
+               &_MetaStorageIoProperty_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    11;
+
+  friend void swap(MetaStorageIoProperty& a, MetaStorageIoProperty& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MetaStorageIoProperty* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MetaStorageIoProperty* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MetaStorageIoProperty* New() const final {
+    return CreateMaybeMessage<MetaStorageIoProperty>(nullptr);
+  }
+
+  MetaStorageIoProperty* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MetaStorageIoProperty>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MetaStorageIoProperty& from);
+  void MergeFrom(const MetaStorageIoProperty& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MetaStorageIoProperty* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.MetaStorageIoProperty";
+  }
+  protected:
+  explicit MetaStorageIoProperty(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  typedef MetaStorageIoProperty_MetaStorageType MetaStorageType;
+  static constexpr MetaStorageType SSD =
+    MetaStorageIoProperty_MetaStorageType_SSD;
+  static constexpr MetaStorageType NVRAM =
+    MetaStorageIoProperty_MetaStorageType_NVRAM;
+  static constexpr MetaStorageType JOURNAL_SSD =
+    MetaStorageIoProperty_MetaStorageType_JOURNAL_SSD;
+  static inline bool MetaStorageType_IsValid(int value) {
+    return MetaStorageIoProperty_MetaStorageType_IsValid(value);
+  }
+  static constexpr MetaStorageType MetaStorageType_MIN =
+    MetaStorageIoProperty_MetaStorageType_MetaStorageType_MIN;
+  static constexpr MetaStorageType MetaStorageType_MAX =
+    MetaStorageIoProperty_MetaStorageType_MetaStorageType_MAX;
+  static constexpr int MetaStorageType_ARRAYSIZE =
+    MetaStorageIoProperty_MetaStorageType_MetaStorageType_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  MetaStorageType_descriptor() {
+    return MetaStorageIoProperty_MetaStorageType_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& MetaStorageType_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, MetaStorageType>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function MetaStorageType_Name.");
+    return MetaStorageIoProperty_MetaStorageType_Name(enum_t_value);
+  }
+  static inline bool MetaStorageType_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
+      MetaStorageType* value) {
+    return MetaStorageIoProperty_MetaStorageType_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kIoSpecificFieldNumber = 2,
+    kMediaFieldNumber = 1,
+  };
+  // .pos_bc.MetaFilePropertySet ioSpecific = 2;
+  bool has_iospecific() const;
+  private:
+  bool _internal_has_iospecific() const;
+  public:
+  void clear_iospecific();
+  const ::pos_bc::MetaFilePropertySet& iospecific() const;
+  ::pos_bc::MetaFilePropertySet* release_iospecific();
+  ::pos_bc::MetaFilePropertySet* mutable_iospecific();
+  void set_allocated_iospecific(::pos_bc::MetaFilePropertySet* iospecific);
+  private:
+  const ::pos_bc::MetaFilePropertySet& _internal_iospecific() const;
+  ::pos_bc::MetaFilePropertySet* _internal_mutable_iospecific();
+  public:
+  void unsafe_arena_set_allocated_iospecific(
+      ::pos_bc::MetaFilePropertySet* iospecific);
+  ::pos_bc::MetaFilePropertySet* unsafe_arena_release_iospecific();
+
+  // .pos_bc.MetaStorageIoProperty.MetaStorageType media = 1;
+  void clear_media();
+  ::pos_bc::MetaStorageIoProperty_MetaStorageType media() const;
+  void set_media(::pos_bc::MetaStorageIoProperty_MetaStorageType value);
+  private:
+  ::pos_bc::MetaStorageIoProperty_MetaStorageType _internal_media() const;
+  void _internal_set_media(::pos_bc::MetaStorageIoProperty_MetaStorageType value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.MetaStorageIoProperty)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::pos_bc::MetaFilePropertySet* iospecific_;
+  int media_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class MetaFileInodeDataProto PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.MetaFileInodeDataProto) */ {
+ public:
+  inline MetaFileInodeDataProto() : MetaFileInodeDataProto(nullptr) {}
+  virtual ~MetaFileInodeDataProto();
+  explicit constexpr MetaFileInodeDataProto(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MetaFileInodeDataProto(const MetaFileInodeDataProto& from);
+  MetaFileInodeDataProto(MetaFileInodeDataProto&& from) noexcept
+    : MetaFileInodeDataProto() {
+    *this = ::std::move(from);
+  }
+
+  inline MetaFileInodeDataProto& operator=(const MetaFileInodeDataProto& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MetaFileInodeDataProto& operator=(MetaFileInodeDataProto&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MetaFileInodeDataProto& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MetaFileInodeDataProto* internal_default_instance() {
+    return reinterpret_cast<const MetaFileInodeDataProto*>(
+               &_MetaFileInodeDataProto_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    12;
+
+  friend void swap(MetaFileInodeDataProto& a, MetaFileInodeDataProto& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MetaFileInodeDataProto* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MetaFileInodeDataProto* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MetaFileInodeDataProto* New() const final {
+    return CreateMaybeMessage<MetaFileInodeDataProto>(nullptr);
+  }
+
+  MetaFileInodeDataProto* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MetaFileInodeDataProto>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MetaFileInodeDataProto& from);
+  void MergeFrom(const MetaFileInodeDataProto& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MetaFileInodeDataProto* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.MetaFileInodeDataProto";
+  }
+  protected:
+  explicit MetaFileInodeDataProto(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kPagemapFieldNumber = 14,
+    kFileNameFieldNumber = 6,
+    kIoAttributeFieldNumber = 9,
+    kInUseFieldNumber = 1,
+    kAgeFieldNumber = 2,
+    kCtimeFieldNumber = 3,
+    kReferenceCntFieldNumber = 4,
+    kFileDescriptorTypeFieldNumber = 5,
+    kFileByteSizeFieldNumber = 7,
+    kDataChunkSizeFieldNumber = 8,
+    kIndexInInodeTableFieldNumber = 10,
+    kVersionSignatureFieldNumber = 11,
+    kVersionFieldNumber = 12,
+    kPagemapCntFieldNumber = 13,
+    kCtimeCopyFieldNumber = 15,
+    kAgeCopyFieldNumber = 16,
+  };
+  // repeated .pos_bc.MetaFileExtent pagemap = 14;
+  int pagemap_size() const;
+  private:
+  int _internal_pagemap_size() const;
+  public:
+  void clear_pagemap();
+  ::pos_bc::MetaFileExtent* mutable_pagemap(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >*
+      mutable_pagemap();
+  private:
+  const ::pos_bc::MetaFileExtent& _internal_pagemap(int index) const;
+  ::pos_bc::MetaFileExtent* _internal_add_pagemap();
+  public:
+  const ::pos_bc::MetaFileExtent& pagemap(int index) const;
+  ::pos_bc::MetaFileExtent* add_pagemap();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >&
+      pagemap() const;
+
+  // string fileName = 6;
+  void clear_filename();
+  const std::string& filename() const;
+  void set_filename(const std::string& value);
+  void set_filename(std::string&& value);
+  void set_filename(const char* value);
+  void set_filename(const char* value, size_t size);
+  std::string* mutable_filename();
+  std::string* release_filename();
+  void set_allocated_filename(std::string* filename);
+  private:
+  const std::string& _internal_filename() const;
+  void _internal_set_filename(const std::string& value);
+  std::string* _internal_mutable_filename();
+  public:
+
+  // .pos_bc.MetaStorageIoProperty ioAttribute = 9;
+  bool has_ioattribute() const;
+  private:
+  bool _internal_has_ioattribute() const;
+  public:
+  void clear_ioattribute();
+  const ::pos_bc::MetaStorageIoProperty& ioattribute() const;
+  ::pos_bc::MetaStorageIoProperty* release_ioattribute();
+  ::pos_bc::MetaStorageIoProperty* mutable_ioattribute();
+  void set_allocated_ioattribute(::pos_bc::MetaStorageIoProperty* ioattribute);
+  private:
+  const ::pos_bc::MetaStorageIoProperty& _internal_ioattribute() const;
+  ::pos_bc::MetaStorageIoProperty* _internal_mutable_ioattribute();
+  public:
+  void unsafe_arena_set_allocated_ioattribute(
+      ::pos_bc::MetaStorageIoProperty* ioattribute);
+  ::pos_bc::MetaStorageIoProperty* unsafe_arena_release_ioattribute();
+
+  // bool inUse = 1;
+  void clear_inuse();
+  bool inuse() const;
+  void set_inuse(bool value);
+  private:
+  bool _internal_inuse() const;
+  void _internal_set_inuse(bool value);
+  public:
+
+  // uint32 age = 2;
+  void clear_age();
+  ::PROTOBUF_NAMESPACE_ID::uint32 age() const;
+  void set_age(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_age() const;
+  void _internal_set_age(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint64 ctime = 3;
+  void clear_ctime();
+  ::PROTOBUF_NAMESPACE_ID::uint64 ctime() const;
+  void set_ctime(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_ctime() const;
+  void _internal_set_ctime(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 referenceCnt = 4;
+  void clear_referencecnt();
+  ::PROTOBUF_NAMESPACE_ID::uint32 referencecnt() const;
+  void set_referencecnt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_referencecnt() const;
+  void _internal_set_referencecnt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 FileDescriptorType = 5;
+  void clear_filedescriptortype();
+  ::PROTOBUF_NAMESPACE_ID::uint32 filedescriptortype() const;
+  void set_filedescriptortype(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_filedescriptortype() const;
+  void _internal_set_filedescriptortype(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint64 fileByteSize = 7;
+  void clear_filebytesize();
+  ::PROTOBUF_NAMESPACE_ID::uint64 filebytesize() const;
+  void set_filebytesize(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_filebytesize() const;
+  void _internal_set_filebytesize(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint64 dataChunkSize = 8;
+  void clear_datachunksize();
+  ::PROTOBUF_NAMESPACE_ID::uint64 datachunksize() const;
+  void set_datachunksize(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_datachunksize() const;
+  void _internal_set_datachunksize(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 indexInInodeTable = 10;
+  void clear_indexininodetable();
+  ::PROTOBUF_NAMESPACE_ID::uint32 indexininodetable() const;
+  void set_indexininodetable(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_indexininodetable() const;
+  void _internal_set_indexininodetable(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 versionSignature = 11;
+  void clear_versionsignature();
+  ::PROTOBUF_NAMESPACE_ID::uint32 versionsignature() const;
+  void set_versionsignature(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_versionsignature() const;
+  void _internal_set_versionsignature(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 version = 12;
+  void clear_version();
+  ::PROTOBUF_NAMESPACE_ID::uint32 version() const;
+  void set_version(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_version() const;
+  void _internal_set_version(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint32 pagemapCnt = 13;
+  void clear_pagemapcnt();
+  ::PROTOBUF_NAMESPACE_ID::uint32 pagemapcnt() const;
+  void set_pagemapcnt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_pagemapcnt() const;
+  void _internal_set_pagemapcnt(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // uint64 ctimeCopy = 15;
+  void clear_ctimecopy();
+  ::PROTOBUF_NAMESPACE_ID::uint64 ctimecopy() const;
+  void set_ctimecopy(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint64 _internal_ctimecopy() const;
+  void _internal_set_ctimecopy(::PROTOBUF_NAMESPACE_ID::uint64 value);
+  public:
+
+  // uint32 ageCopy = 16;
+  void clear_agecopy();
+  ::PROTOBUF_NAMESPACE_ID::uint32 agecopy() const;
+  void set_agecopy(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_agecopy() const;
+  void _internal_set_agecopy(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:pos_bc.MetaFileInodeDataProto)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent > pagemap_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr filename_;
+  ::pos_bc::MetaStorageIoProperty* ioattribute_;
+  bool inuse_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 age_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 ctime_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 referencecnt_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 filedescriptortype_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 filebytesize_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 datachunksize_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 indexininodetable_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 versionsignature_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 version_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 pagemapcnt_;
+  ::PROTOBUF_NAMESPACE_ID::uint64 ctimecopy_;
+  ::PROTOBUF_NAMESPACE_ID::uint32 agecopy_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
+// -------------------------------------------------------------------
+
+class InodeTableContent PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.InodeTableContent) */ {
+ public:
+  inline InodeTableContent() : InodeTableContent(nullptr) {}
+  virtual ~InodeTableContent();
+  explicit constexpr InodeTableContent(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  InodeTableContent(const InodeTableContent& from);
+  InodeTableContent(InodeTableContent&& from) noexcept
+    : InodeTableContent() {
+    *this = ::std::move(from);
+  }
+
+  inline InodeTableContent& operator=(const InodeTableContent& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline InodeTableContent& operator=(InodeTableContent&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const InodeTableContent& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const InodeTableContent* internal_default_instance() {
+    return reinterpret_cast<const InodeTableContent*>(
+               &_InodeTableContent_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    13;
+
+  friend void swap(InodeTableContent& a, InodeTableContent& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(InodeTableContent* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(InodeTableContent* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline InodeTableContent* New() const final {
+    return CreateMaybeMessage<InodeTableContent>(nullptr);
+  }
+
+  InodeTableContent* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<InodeTableContent>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const InodeTableContent& from);
+  void MergeFrom(const InodeTableContent& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(InodeTableContent* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.InodeTableContent";
+  }
+  protected:
+  explicit InodeTableContent(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kEntriesFieldNumber = 1,
+  };
+  // repeated .pos_bc.MetaFileInodeDataProto entries = 1;
+  int entries_size() const;
+  private:
+  int _internal_entries_size() const;
+  public:
+  void clear_entries();
+  ::pos_bc::MetaFileInodeDataProto* mutable_entries(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileInodeDataProto >*
+      mutable_entries();
+  private:
+  const ::pos_bc::MetaFileInodeDataProto& _internal_entries(int index) const;
+  ::pos_bc::MetaFileInodeDataProto* _internal_add_entries();
+  public:
+  const ::pos_bc::MetaFileInodeDataProto& entries(int index) const;
+  ::pos_bc::MetaFileInodeDataProto* add_entries();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileInodeDataProto >&
+      entries() const;
+
+  // @@protoc_insertion_point(class_scope:pos_bc.InodeTableContent)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileInodeDataProto > entries_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
 // ===================================================================
 
 
@@ -719,9 +2702,1219 @@ inline void SegmentInfoDataProto::set_state(::pos_bc::SegmentState value) {
 
 // RebuildCtxExtendedProto
 
+// -------------------------------------------------------------------
+
+// InodeInUseBitmap
+
+// bytes bits = 1;
+inline void InodeInUseBitmap::clear_bits() {
+  bits_.ClearToEmpty();
+}
+inline const std::string& InodeInUseBitmap::bits() const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeInUseBitmap.bits)
+  return _internal_bits();
+}
+inline void InodeInUseBitmap::set_bits(const std::string& value) {
+  _internal_set_bits(value);
+  // @@protoc_insertion_point(field_set:pos_bc.InodeInUseBitmap.bits)
+}
+inline std::string* InodeInUseBitmap::mutable_bits() {
+  // @@protoc_insertion_point(field_mutable:pos_bc.InodeInUseBitmap.bits)
+  return _internal_mutable_bits();
+}
+inline const std::string& InodeInUseBitmap::_internal_bits() const {
+  return bits_.Get();
+}
+inline void InodeInUseBitmap::_internal_set_bits(const std::string& value) {
+  
+  bits_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void InodeInUseBitmap::set_bits(std::string&& value) {
+  
+  bits_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_bc.InodeInUseBitmap.bits)
+}
+inline void InodeInUseBitmap::set_bits(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  bits_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_bc.InodeInUseBitmap.bits)
+}
+inline void InodeInUseBitmap::set_bits(const void* value,
+    size_t size) {
+  
+  bits_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_bc.InodeInUseBitmap.bits)
+}
+inline std::string* InodeInUseBitmap::_internal_mutable_bits() {
+  
+  return bits_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* InodeInUseBitmap::release_bits() {
+  // @@protoc_insertion_point(field_release:pos_bc.InodeInUseBitmap.bits)
+  return bits_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void InodeInUseBitmap::set_allocated_bits(std::string* bits) {
+  if (bits != nullptr) {
+    
+  } else {
+    
+  }
+  bits_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), bits,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_bc.InodeInUseBitmap.bits)
+}
+
+// uint32 allocatedInodeCnt = 2;
+inline void InodeInUseBitmap::clear_allocatedinodecnt() {
+  allocatedinodecnt_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeInUseBitmap::_internal_allocatedinodecnt() const {
+  return allocatedinodecnt_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeInUseBitmap::allocatedinodecnt() const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeInUseBitmap.allocatedInodeCnt)
+  return _internal_allocatedinodecnt();
+}
+inline void InodeInUseBitmap::_internal_set_allocatedinodecnt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  allocatedinodecnt_ = value;
+}
+inline void InodeInUseBitmap::set_allocatedinodecnt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_allocatedinodecnt(value);
+  // @@protoc_insertion_point(field_set:pos_bc.InodeInUseBitmap.allocatedInodeCnt)
+}
+
+// -------------------------------------------------------------------
+
+// MetaFileExtent
+
+// uint64 startLpn = 1;
+inline void MetaFileExtent::clear_startlpn() {
+  startlpn_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileExtent::_internal_startlpn() const {
+  return startlpn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileExtent::startlpn() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileExtent.startLpn)
+  return _internal_startlpn();
+}
+inline void MetaFileExtent::_internal_set_startlpn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  startlpn_ = value;
+}
+inline void MetaFileExtent::set_startlpn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_startlpn(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileExtent.startLpn)
+}
+
+// uint64 count = 2;
+inline void MetaFileExtent::clear_count() {
+  count_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileExtent::_internal_count() const {
+  return count_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileExtent::count() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileExtent.count)
+  return _internal_count();
+}
+inline void MetaFileExtent::_internal_set_count(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  count_ = value;
+}
+inline void MetaFileExtent::set_count(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_count(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileExtent.count)
+}
+
+// -------------------------------------------------------------------
+
+// InodeTableHeaderContentProto
+
+// uint32 totalInodeNum = 1;
+inline void InodeTableHeaderContentProto::clear_totalinodenum() {
+  totalinodenum_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeTableHeaderContentProto::_internal_totalinodenum() const {
+  return totalinodenum_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeTableHeaderContentProto::totalinodenum() const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeTableHeaderContentProto.totalInodeNum)
+  return _internal_totalinodenum();
+}
+inline void InodeTableHeaderContentProto::_internal_set_totalinodenum(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  totalinodenum_ = value;
+}
+inline void InodeTableHeaderContentProto::set_totalinodenum(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_totalinodenum(value);
+  // @@protoc_insertion_point(field_set:pos_bc.InodeTableHeaderContentProto.totalInodeNum)
+}
+
+// uint32 inodeEntryByteSize = 2;
+inline void InodeTableHeaderContentProto::clear_inodeentrybytesize() {
+  inodeentrybytesize_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeTableHeaderContentProto::_internal_inodeentrybytesize() const {
+  return inodeentrybytesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeTableHeaderContentProto::inodeentrybytesize() const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeTableHeaderContentProto.inodeEntryByteSize)
+  return _internal_inodeentrybytesize();
+}
+inline void InodeTableHeaderContentProto::_internal_set_inodeentrybytesize(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  inodeentrybytesize_ = value;
+}
+inline void InodeTableHeaderContentProto::set_inodeentrybytesize(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_inodeentrybytesize(value);
+  // @@protoc_insertion_point(field_set:pos_bc.InodeTableHeaderContentProto.inodeEntryByteSize)
+}
+
+// uint32 totalFileCreated = 3;
+inline void InodeTableHeaderContentProto::clear_totalfilecreated() {
+  totalfilecreated_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeTableHeaderContentProto::_internal_totalfilecreated() const {
+  return totalfilecreated_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 InodeTableHeaderContentProto::totalfilecreated() const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeTableHeaderContentProto.totalFileCreated)
+  return _internal_totalfilecreated();
+}
+inline void InodeTableHeaderContentProto::_internal_set_totalfilecreated(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  totalfilecreated_ = value;
+}
+inline void InodeTableHeaderContentProto::set_totalfilecreated(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_totalfilecreated(value);
+  // @@protoc_insertion_point(field_set:pos_bc.InodeTableHeaderContentProto.totalFileCreated)
+}
+
+// .pos_bc.InodeInUseBitmap inodeInUseBitmap = 4;
+inline bool InodeTableHeaderContentProto::_internal_has_inodeinusebitmap() const {
+  return this != internal_default_instance() && inodeinusebitmap_ != nullptr;
+}
+inline bool InodeTableHeaderContentProto::has_inodeinusebitmap() const {
+  return _internal_has_inodeinusebitmap();
+}
+inline void InodeTableHeaderContentProto::clear_inodeinusebitmap() {
+  if (GetArena() == nullptr && inodeinusebitmap_ != nullptr) {
+    delete inodeinusebitmap_;
+  }
+  inodeinusebitmap_ = nullptr;
+}
+inline const ::pos_bc::InodeInUseBitmap& InodeTableHeaderContentProto::_internal_inodeinusebitmap() const {
+  const ::pos_bc::InodeInUseBitmap* p = inodeinusebitmap_;
+  return p != nullptr ? *p : reinterpret_cast<const ::pos_bc::InodeInUseBitmap&>(
+      ::pos_bc::_InodeInUseBitmap_default_instance_);
+}
+inline const ::pos_bc::InodeInUseBitmap& InodeTableHeaderContentProto::inodeinusebitmap() const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeTableHeaderContentProto.inodeInUseBitmap)
+  return _internal_inodeinusebitmap();
+}
+inline void InodeTableHeaderContentProto::unsafe_arena_set_allocated_inodeinusebitmap(
+    ::pos_bc::InodeInUseBitmap* inodeinusebitmap) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(inodeinusebitmap_);
+  }
+  inodeinusebitmap_ = inodeinusebitmap;
+  if (inodeinusebitmap) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:pos_bc.InodeTableHeaderContentProto.inodeInUseBitmap)
+}
+inline ::pos_bc::InodeInUseBitmap* InodeTableHeaderContentProto::release_inodeinusebitmap() {
+  
+  ::pos_bc::InodeInUseBitmap* temp = inodeinusebitmap_;
+  inodeinusebitmap_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::pos_bc::InodeInUseBitmap* InodeTableHeaderContentProto::unsafe_arena_release_inodeinusebitmap() {
+  // @@protoc_insertion_point(field_release:pos_bc.InodeTableHeaderContentProto.inodeInUseBitmap)
+  
+  ::pos_bc::InodeInUseBitmap* temp = inodeinusebitmap_;
+  inodeinusebitmap_ = nullptr;
+  return temp;
+}
+inline ::pos_bc::InodeInUseBitmap* InodeTableHeaderContentProto::_internal_mutable_inodeinusebitmap() {
+  
+  if (inodeinusebitmap_ == nullptr) {
+    auto* p = CreateMaybeMessage<::pos_bc::InodeInUseBitmap>(GetArena());
+    inodeinusebitmap_ = p;
+  }
+  return inodeinusebitmap_;
+}
+inline ::pos_bc::InodeInUseBitmap* InodeTableHeaderContentProto::mutable_inodeinusebitmap() {
+  // @@protoc_insertion_point(field_mutable:pos_bc.InodeTableHeaderContentProto.inodeInUseBitmap)
+  return _internal_mutable_inodeinusebitmap();
+}
+inline void InodeTableHeaderContentProto::set_allocated_inodeinusebitmap(::pos_bc::InodeInUseBitmap* inodeinusebitmap) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete inodeinusebitmap_;
+  }
+  if (inodeinusebitmap) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(inodeinusebitmap);
+    if (message_arena != submessage_arena) {
+      inodeinusebitmap = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, inodeinusebitmap, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  inodeinusebitmap_ = inodeinusebitmap;
+  // @@protoc_insertion_point(field_set_allocated:pos_bc.InodeTableHeaderContentProto.inodeInUseBitmap)
+}
+
+// repeated .pos_bc.MetaFileExtent allocExtentsList = 5;
+inline int InodeTableHeaderContentProto::_internal_allocextentslist_size() const {
+  return allocextentslist_.size();
+}
+inline int InodeTableHeaderContentProto::allocextentslist_size() const {
+  return _internal_allocextentslist_size();
+}
+inline void InodeTableHeaderContentProto::clear_allocextentslist() {
+  allocextentslist_.Clear();
+}
+inline ::pos_bc::MetaFileExtent* InodeTableHeaderContentProto::mutable_allocextentslist(int index) {
+  // @@protoc_insertion_point(field_mutable:pos_bc.InodeTableHeaderContentProto.allocExtentsList)
+  return allocextentslist_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >*
+InodeTableHeaderContentProto::mutable_allocextentslist() {
+  // @@protoc_insertion_point(field_mutable_list:pos_bc.InodeTableHeaderContentProto.allocExtentsList)
+  return &allocextentslist_;
+}
+inline const ::pos_bc::MetaFileExtent& InodeTableHeaderContentProto::_internal_allocextentslist(int index) const {
+  return allocextentslist_.Get(index);
+}
+inline const ::pos_bc::MetaFileExtent& InodeTableHeaderContentProto::allocextentslist(int index) const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeTableHeaderContentProto.allocExtentsList)
+  return _internal_allocextentslist(index);
+}
+inline ::pos_bc::MetaFileExtent* InodeTableHeaderContentProto::_internal_add_allocextentslist() {
+  return allocextentslist_.Add();
+}
+inline ::pos_bc::MetaFileExtent* InodeTableHeaderContentProto::add_allocextentslist() {
+  // @@protoc_insertion_point(field_add:pos_bc.InodeTableHeaderContentProto.allocExtentsList)
+  return _internal_add_allocextentslist();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >&
+InodeTableHeaderContentProto::allocextentslist() const {
+  // @@protoc_insertion_point(field_list:pos_bc.InodeTableHeaderContentProto.allocExtentsList)
+  return allocextentslist_;
+}
+
+// -------------------------------------------------------------------
+
+// VolumeBasicInfo
+
+// uint64 maxVolPageNum = 1;
+inline void VolumeBasicInfo::clear_maxvolpagenum() {
+  maxvolpagenum_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 VolumeBasicInfo::_internal_maxvolpagenum() const {
+  return maxvolpagenum_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 VolumeBasicInfo::maxvolpagenum() const {
+  // @@protoc_insertion_point(field_get:pos_bc.VolumeBasicInfo.maxVolPageNum)
+  return _internal_maxvolpagenum();
+}
+inline void VolumeBasicInfo::_internal_set_maxvolpagenum(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  maxvolpagenum_ = value;
+}
+inline void VolumeBasicInfo::set_maxvolpagenum(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_maxvolpagenum(value);
+  // @@protoc_insertion_point(field_set:pos_bc.VolumeBasicInfo.maxVolPageNum)
+}
+
+// uint32 maxFileNumSupport = 2;
+inline void VolumeBasicInfo::clear_maxfilenumsupport() {
+  maxfilenumsupport_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 VolumeBasicInfo::_internal_maxfilenumsupport() const {
+  return maxfilenumsupport_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 VolumeBasicInfo::maxfilenumsupport() const {
+  // @@protoc_insertion_point(field_get:pos_bc.VolumeBasicInfo.maxFileNumSupport)
+  return _internal_maxfilenumsupport();
+}
+inline void VolumeBasicInfo::_internal_set_maxfilenumsupport(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  maxfilenumsupport_ = value;
+}
+inline void VolumeBasicInfo::set_maxfilenumsupport(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_maxfilenumsupport(value);
+  // @@protoc_insertion_point(field_set:pos_bc.VolumeBasicInfo.maxFileNumSupport)
+}
+
+// -------------------------------------------------------------------
+
+// MetaRegionMap
+
+// uint64 baseLpn = 1;
+inline void MetaRegionMap::clear_baselpn() {
+  baselpn_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaRegionMap::_internal_baselpn() const {
+  return baselpn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaRegionMap::baselpn() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaRegionMap.baseLpn)
+  return _internal_baselpn();
+}
+inline void MetaRegionMap::_internal_set_baselpn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  baselpn_ = value;
+}
+inline void MetaRegionMap::set_baselpn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_baselpn(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaRegionMap.baseLpn)
+}
+
+// uint64 maxLpn = 2;
+inline void MetaRegionMap::clear_maxlpn() {
+  maxlpn_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaRegionMap::_internal_maxlpn() const {
+  return maxlpn_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaRegionMap::maxlpn() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaRegionMap.maxLpn)
+  return _internal_maxlpn();
+}
+inline void MetaRegionMap::_internal_set_maxlpn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  maxlpn_ = value;
+}
+inline void MetaRegionMap::set_maxlpn(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_maxlpn(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaRegionMap.maxLpn)
+}
+
+// -------------------------------------------------------------------
+
+// CatalogContentProto
+
+// uint64 signature = 1;
+inline void CatalogContentProto::clear_signature() {
+  signature_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CatalogContentProto::_internal_signature() const {
+  return signature_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 CatalogContentProto::signature() const {
+  // @@protoc_insertion_point(field_get:pos_bc.CatalogContentProto.signature)
+  return _internal_signature();
+}
+inline void CatalogContentProto::_internal_set_signature(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  signature_ = value;
+}
+inline void CatalogContentProto::set_signature(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_signature(value);
+  // @@protoc_insertion_point(field_set:pos_bc.CatalogContentProto.signature)
+}
+
+// .pos_bc.VolumeBasicInfo volumeInfo = 2;
+inline bool CatalogContentProto::_internal_has_volumeinfo() const {
+  return this != internal_default_instance() && volumeinfo_ != nullptr;
+}
+inline bool CatalogContentProto::has_volumeinfo() const {
+  return _internal_has_volumeinfo();
+}
+inline void CatalogContentProto::clear_volumeinfo() {
+  if (GetArena() == nullptr && volumeinfo_ != nullptr) {
+    delete volumeinfo_;
+  }
+  volumeinfo_ = nullptr;
+}
+inline const ::pos_bc::VolumeBasicInfo& CatalogContentProto::_internal_volumeinfo() const {
+  const ::pos_bc::VolumeBasicInfo* p = volumeinfo_;
+  return p != nullptr ? *p : reinterpret_cast<const ::pos_bc::VolumeBasicInfo&>(
+      ::pos_bc::_VolumeBasicInfo_default_instance_);
+}
+inline const ::pos_bc::VolumeBasicInfo& CatalogContentProto::volumeinfo() const {
+  // @@protoc_insertion_point(field_get:pos_bc.CatalogContentProto.volumeInfo)
+  return _internal_volumeinfo();
+}
+inline void CatalogContentProto::unsafe_arena_set_allocated_volumeinfo(
+    ::pos_bc::VolumeBasicInfo* volumeinfo) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(volumeinfo_);
+  }
+  volumeinfo_ = volumeinfo;
+  if (volumeinfo) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:pos_bc.CatalogContentProto.volumeInfo)
+}
+inline ::pos_bc::VolumeBasicInfo* CatalogContentProto::release_volumeinfo() {
+  
+  ::pos_bc::VolumeBasicInfo* temp = volumeinfo_;
+  volumeinfo_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::pos_bc::VolumeBasicInfo* CatalogContentProto::unsafe_arena_release_volumeinfo() {
+  // @@protoc_insertion_point(field_release:pos_bc.CatalogContentProto.volumeInfo)
+  
+  ::pos_bc::VolumeBasicInfo* temp = volumeinfo_;
+  volumeinfo_ = nullptr;
+  return temp;
+}
+inline ::pos_bc::VolumeBasicInfo* CatalogContentProto::_internal_mutable_volumeinfo() {
+  
+  if (volumeinfo_ == nullptr) {
+    auto* p = CreateMaybeMessage<::pos_bc::VolumeBasicInfo>(GetArena());
+    volumeinfo_ = p;
+  }
+  return volumeinfo_;
+}
+inline ::pos_bc::VolumeBasicInfo* CatalogContentProto::mutable_volumeinfo() {
+  // @@protoc_insertion_point(field_mutable:pos_bc.CatalogContentProto.volumeInfo)
+  return _internal_mutable_volumeinfo();
+}
+inline void CatalogContentProto::set_allocated_volumeinfo(::pos_bc::VolumeBasicInfo* volumeinfo) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete volumeinfo_;
+  }
+  if (volumeinfo) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(volumeinfo);
+    if (message_arena != submessage_arena) {
+      volumeinfo = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, volumeinfo, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  volumeinfo_ = volumeinfo;
+  // @@protoc_insertion_point(field_set_allocated:pos_bc.CatalogContentProto.volumeInfo)
+}
+
+// repeated .pos_bc.MetaRegionMap regionMap = 3;
+inline int CatalogContentProto::_internal_regionmap_size() const {
+  return regionmap_.size();
+}
+inline int CatalogContentProto::regionmap_size() const {
+  return _internal_regionmap_size();
+}
+inline void CatalogContentProto::clear_regionmap() {
+  regionmap_.Clear();
+}
+inline ::pos_bc::MetaRegionMap* CatalogContentProto::mutable_regionmap(int index) {
+  // @@protoc_insertion_point(field_mutable:pos_bc.CatalogContentProto.regionMap)
+  return regionmap_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaRegionMap >*
+CatalogContentProto::mutable_regionmap() {
+  // @@protoc_insertion_point(field_mutable_list:pos_bc.CatalogContentProto.regionMap)
+  return &regionmap_;
+}
+inline const ::pos_bc::MetaRegionMap& CatalogContentProto::_internal_regionmap(int index) const {
+  return regionmap_.Get(index);
+}
+inline const ::pos_bc::MetaRegionMap& CatalogContentProto::regionmap(int index) const {
+  // @@protoc_insertion_point(field_get:pos_bc.CatalogContentProto.regionMap)
+  return _internal_regionmap(index);
+}
+inline ::pos_bc::MetaRegionMap* CatalogContentProto::_internal_add_regionmap() {
+  return regionmap_.Add();
+}
+inline ::pos_bc::MetaRegionMap* CatalogContentProto::add_regionmap() {
+  // @@protoc_insertion_point(field_add:pos_bc.CatalogContentProto.regionMap)
+  return _internal_add_regionmap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaRegionMap >&
+CatalogContentProto::regionmap() const {
+  // @@protoc_insertion_point(field_list:pos_bc.CatalogContentProto.regionMap)
+  return regionmap_;
+}
+
+// -------------------------------------------------------------------
+
+// MetaFilePropertySet
+
+// .pos_bc.MetaFilePropertySet.MetaFileIntegrityType integrity = 1;
+inline void MetaFilePropertySet::clear_integrity() {
+  integrity_ = 0;
+}
+inline ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType MetaFilePropertySet::_internal_integrity() const {
+  return static_cast< ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType >(integrity_);
+}
+inline ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType MetaFilePropertySet::integrity() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFilePropertySet.integrity)
+  return _internal_integrity();
+}
+inline void MetaFilePropertySet::_internal_set_integrity(::pos_bc::MetaFilePropertySet_MetaFileIntegrityType value) {
+  
+  integrity_ = value;
+}
+inline void MetaFilePropertySet::set_integrity(::pos_bc::MetaFilePropertySet_MetaFileIntegrityType value) {
+  _internal_set_integrity(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFilePropertySet.integrity)
+}
+
+// .pos_bc.MetaFilePropertySet.MetaFileType type = 2;
+inline void MetaFilePropertySet::clear_type() {
+  type_ = 0;
+}
+inline ::pos_bc::MetaFilePropertySet_MetaFileType MetaFilePropertySet::_internal_type() const {
+  return static_cast< ::pos_bc::MetaFilePropertySet_MetaFileType >(type_);
+}
+inline ::pos_bc::MetaFilePropertySet_MetaFileType MetaFilePropertySet::type() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFilePropertySet.type)
+  return _internal_type();
+}
+inline void MetaFilePropertySet::_internal_set_type(::pos_bc::MetaFilePropertySet_MetaFileType value) {
+  
+  type_ = value;
+}
+inline void MetaFilePropertySet::set_type(::pos_bc::MetaFilePropertySet_MetaFileType value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFilePropertySet.type)
+}
+
+// -------------------------------------------------------------------
+
+// MetaStorageIoProperty
+
+// .pos_bc.MetaStorageIoProperty.MetaStorageType media = 1;
+inline void MetaStorageIoProperty::clear_media() {
+  media_ = 0;
+}
+inline ::pos_bc::MetaStorageIoProperty_MetaStorageType MetaStorageIoProperty::_internal_media() const {
+  return static_cast< ::pos_bc::MetaStorageIoProperty_MetaStorageType >(media_);
+}
+inline ::pos_bc::MetaStorageIoProperty_MetaStorageType MetaStorageIoProperty::media() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaStorageIoProperty.media)
+  return _internal_media();
+}
+inline void MetaStorageIoProperty::_internal_set_media(::pos_bc::MetaStorageIoProperty_MetaStorageType value) {
+  
+  media_ = value;
+}
+inline void MetaStorageIoProperty::set_media(::pos_bc::MetaStorageIoProperty_MetaStorageType value) {
+  _internal_set_media(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaStorageIoProperty.media)
+}
+
+// .pos_bc.MetaFilePropertySet ioSpecific = 2;
+inline bool MetaStorageIoProperty::_internal_has_iospecific() const {
+  return this != internal_default_instance() && iospecific_ != nullptr;
+}
+inline bool MetaStorageIoProperty::has_iospecific() const {
+  return _internal_has_iospecific();
+}
+inline void MetaStorageIoProperty::clear_iospecific() {
+  if (GetArena() == nullptr && iospecific_ != nullptr) {
+    delete iospecific_;
+  }
+  iospecific_ = nullptr;
+}
+inline const ::pos_bc::MetaFilePropertySet& MetaStorageIoProperty::_internal_iospecific() const {
+  const ::pos_bc::MetaFilePropertySet* p = iospecific_;
+  return p != nullptr ? *p : reinterpret_cast<const ::pos_bc::MetaFilePropertySet&>(
+      ::pos_bc::_MetaFilePropertySet_default_instance_);
+}
+inline const ::pos_bc::MetaFilePropertySet& MetaStorageIoProperty::iospecific() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaStorageIoProperty.ioSpecific)
+  return _internal_iospecific();
+}
+inline void MetaStorageIoProperty::unsafe_arena_set_allocated_iospecific(
+    ::pos_bc::MetaFilePropertySet* iospecific) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(iospecific_);
+  }
+  iospecific_ = iospecific;
+  if (iospecific) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:pos_bc.MetaStorageIoProperty.ioSpecific)
+}
+inline ::pos_bc::MetaFilePropertySet* MetaStorageIoProperty::release_iospecific() {
+  
+  ::pos_bc::MetaFilePropertySet* temp = iospecific_;
+  iospecific_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::pos_bc::MetaFilePropertySet* MetaStorageIoProperty::unsafe_arena_release_iospecific() {
+  // @@protoc_insertion_point(field_release:pos_bc.MetaStorageIoProperty.ioSpecific)
+  
+  ::pos_bc::MetaFilePropertySet* temp = iospecific_;
+  iospecific_ = nullptr;
+  return temp;
+}
+inline ::pos_bc::MetaFilePropertySet* MetaStorageIoProperty::_internal_mutable_iospecific() {
+  
+  if (iospecific_ == nullptr) {
+    auto* p = CreateMaybeMessage<::pos_bc::MetaFilePropertySet>(GetArena());
+    iospecific_ = p;
+  }
+  return iospecific_;
+}
+inline ::pos_bc::MetaFilePropertySet* MetaStorageIoProperty::mutable_iospecific() {
+  // @@protoc_insertion_point(field_mutable:pos_bc.MetaStorageIoProperty.ioSpecific)
+  return _internal_mutable_iospecific();
+}
+inline void MetaStorageIoProperty::set_allocated_iospecific(::pos_bc::MetaFilePropertySet* iospecific) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete iospecific_;
+  }
+  if (iospecific) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(iospecific);
+    if (message_arena != submessage_arena) {
+      iospecific = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, iospecific, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  iospecific_ = iospecific;
+  // @@protoc_insertion_point(field_set_allocated:pos_bc.MetaStorageIoProperty.ioSpecific)
+}
+
+// -------------------------------------------------------------------
+
+// MetaFileInodeDataProto
+
+// bool inUse = 1;
+inline void MetaFileInodeDataProto::clear_inuse() {
+  inuse_ = false;
+}
+inline bool MetaFileInodeDataProto::_internal_inuse() const {
+  return inuse_;
+}
+inline bool MetaFileInodeDataProto::inuse() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.inUse)
+  return _internal_inuse();
+}
+inline void MetaFileInodeDataProto::_internal_set_inuse(bool value) {
+  
+  inuse_ = value;
+}
+inline void MetaFileInodeDataProto::set_inuse(bool value) {
+  _internal_set_inuse(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.inUse)
+}
+
+// uint32 age = 2;
+inline void MetaFileInodeDataProto::clear_age() {
+  age_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_age() const {
+  return age_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::age() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.age)
+  return _internal_age();
+}
+inline void MetaFileInodeDataProto::_internal_set_age(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  age_ = value;
+}
+inline void MetaFileInodeDataProto::set_age(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_age(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.age)
+}
+
+// uint64 ctime = 3;
+inline void MetaFileInodeDataProto::clear_ctime() {
+  ctime_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::_internal_ctime() const {
+  return ctime_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::ctime() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.ctime)
+  return _internal_ctime();
+}
+inline void MetaFileInodeDataProto::_internal_set_ctime(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  ctime_ = value;
+}
+inline void MetaFileInodeDataProto::set_ctime(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_ctime(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.ctime)
+}
+
+// uint32 referenceCnt = 4;
+inline void MetaFileInodeDataProto::clear_referencecnt() {
+  referencecnt_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_referencecnt() const {
+  return referencecnt_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::referencecnt() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.referenceCnt)
+  return _internal_referencecnt();
+}
+inline void MetaFileInodeDataProto::_internal_set_referencecnt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  referencecnt_ = value;
+}
+inline void MetaFileInodeDataProto::set_referencecnt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_referencecnt(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.referenceCnt)
+}
+
+// uint32 FileDescriptorType = 5;
+inline void MetaFileInodeDataProto::clear_filedescriptortype() {
+  filedescriptortype_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_filedescriptortype() const {
+  return filedescriptortype_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::filedescriptortype() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.FileDescriptorType)
+  return _internal_filedescriptortype();
+}
+inline void MetaFileInodeDataProto::_internal_set_filedescriptortype(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  filedescriptortype_ = value;
+}
+inline void MetaFileInodeDataProto::set_filedescriptortype(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_filedescriptortype(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.FileDescriptorType)
+}
+
+// string fileName = 6;
+inline void MetaFileInodeDataProto::clear_filename() {
+  filename_.ClearToEmpty();
+}
+inline const std::string& MetaFileInodeDataProto::filename() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.fileName)
+  return _internal_filename();
+}
+inline void MetaFileInodeDataProto::set_filename(const std::string& value) {
+  _internal_set_filename(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.fileName)
+}
+inline std::string* MetaFileInodeDataProto::mutable_filename() {
+  // @@protoc_insertion_point(field_mutable:pos_bc.MetaFileInodeDataProto.fileName)
+  return _internal_mutable_filename();
+}
+inline const std::string& MetaFileInodeDataProto::_internal_filename() const {
+  return filename_.Get();
+}
+inline void MetaFileInodeDataProto::_internal_set_filename(const std::string& value) {
+  
+  filename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void MetaFileInodeDataProto::set_filename(std::string&& value) {
+  
+  filename_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:pos_bc.MetaFileInodeDataProto.fileName)
+}
+inline void MetaFileInodeDataProto::set_filename(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  filename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:pos_bc.MetaFileInodeDataProto.fileName)
+}
+inline void MetaFileInodeDataProto::set_filename(const char* value,
+    size_t size) {
+  
+  filename_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:pos_bc.MetaFileInodeDataProto.fileName)
+}
+inline std::string* MetaFileInodeDataProto::_internal_mutable_filename() {
+  
+  return filename_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* MetaFileInodeDataProto::release_filename() {
+  // @@protoc_insertion_point(field_release:pos_bc.MetaFileInodeDataProto.fileName)
+  return filename_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void MetaFileInodeDataProto::set_allocated_filename(std::string* filename) {
+  if (filename != nullptr) {
+    
+  } else {
+    
+  }
+  filename_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), filename,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:pos_bc.MetaFileInodeDataProto.fileName)
+}
+
+// uint64 fileByteSize = 7;
+inline void MetaFileInodeDataProto::clear_filebytesize() {
+  filebytesize_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::_internal_filebytesize() const {
+  return filebytesize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::filebytesize() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.fileByteSize)
+  return _internal_filebytesize();
+}
+inline void MetaFileInodeDataProto::_internal_set_filebytesize(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  filebytesize_ = value;
+}
+inline void MetaFileInodeDataProto::set_filebytesize(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_filebytesize(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.fileByteSize)
+}
+
+// uint64 dataChunkSize = 8;
+inline void MetaFileInodeDataProto::clear_datachunksize() {
+  datachunksize_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::_internal_datachunksize() const {
+  return datachunksize_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::datachunksize() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.dataChunkSize)
+  return _internal_datachunksize();
+}
+inline void MetaFileInodeDataProto::_internal_set_datachunksize(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  datachunksize_ = value;
+}
+inline void MetaFileInodeDataProto::set_datachunksize(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_datachunksize(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.dataChunkSize)
+}
+
+// .pos_bc.MetaStorageIoProperty ioAttribute = 9;
+inline bool MetaFileInodeDataProto::_internal_has_ioattribute() const {
+  return this != internal_default_instance() && ioattribute_ != nullptr;
+}
+inline bool MetaFileInodeDataProto::has_ioattribute() const {
+  return _internal_has_ioattribute();
+}
+inline void MetaFileInodeDataProto::clear_ioattribute() {
+  if (GetArena() == nullptr && ioattribute_ != nullptr) {
+    delete ioattribute_;
+  }
+  ioattribute_ = nullptr;
+}
+inline const ::pos_bc::MetaStorageIoProperty& MetaFileInodeDataProto::_internal_ioattribute() const {
+  const ::pos_bc::MetaStorageIoProperty* p = ioattribute_;
+  return p != nullptr ? *p : reinterpret_cast<const ::pos_bc::MetaStorageIoProperty&>(
+      ::pos_bc::_MetaStorageIoProperty_default_instance_);
+}
+inline const ::pos_bc::MetaStorageIoProperty& MetaFileInodeDataProto::ioattribute() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.ioAttribute)
+  return _internal_ioattribute();
+}
+inline void MetaFileInodeDataProto::unsafe_arena_set_allocated_ioattribute(
+    ::pos_bc::MetaStorageIoProperty* ioattribute) {
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::PROTOBUF_NAMESPACE_ID::MessageLite*>(ioattribute_);
+  }
+  ioattribute_ = ioattribute;
+  if (ioattribute) {
+    
+  } else {
+    
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:pos_bc.MetaFileInodeDataProto.ioAttribute)
+}
+inline ::pos_bc::MetaStorageIoProperty* MetaFileInodeDataProto::release_ioattribute() {
+  
+  ::pos_bc::MetaStorageIoProperty* temp = ioattribute_;
+  ioattribute_ = nullptr;
+  if (GetArena() != nullptr) {
+    temp = ::PROTOBUF_NAMESPACE_ID::internal::DuplicateIfNonNull(temp);
+  }
+  return temp;
+}
+inline ::pos_bc::MetaStorageIoProperty* MetaFileInodeDataProto::unsafe_arena_release_ioattribute() {
+  // @@protoc_insertion_point(field_release:pos_bc.MetaFileInodeDataProto.ioAttribute)
+  
+  ::pos_bc::MetaStorageIoProperty* temp = ioattribute_;
+  ioattribute_ = nullptr;
+  return temp;
+}
+inline ::pos_bc::MetaStorageIoProperty* MetaFileInodeDataProto::_internal_mutable_ioattribute() {
+  
+  if (ioattribute_ == nullptr) {
+    auto* p = CreateMaybeMessage<::pos_bc::MetaStorageIoProperty>(GetArena());
+    ioattribute_ = p;
+  }
+  return ioattribute_;
+}
+inline ::pos_bc::MetaStorageIoProperty* MetaFileInodeDataProto::mutable_ioattribute() {
+  // @@protoc_insertion_point(field_mutable:pos_bc.MetaFileInodeDataProto.ioAttribute)
+  return _internal_mutable_ioattribute();
+}
+inline void MetaFileInodeDataProto::set_allocated_ioattribute(::pos_bc::MetaStorageIoProperty* ioattribute) {
+  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArena();
+  if (message_arena == nullptr) {
+    delete ioattribute_;
+  }
+  if (ioattribute) {
+    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
+      ::PROTOBUF_NAMESPACE_ID::Arena::GetArena(ioattribute);
+    if (message_arena != submessage_arena) {
+      ioattribute = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
+          message_arena, ioattribute, submessage_arena);
+    }
+    
+  } else {
+    
+  }
+  ioattribute_ = ioattribute;
+  // @@protoc_insertion_point(field_set_allocated:pos_bc.MetaFileInodeDataProto.ioAttribute)
+}
+
+// uint32 indexInInodeTable = 10;
+inline void MetaFileInodeDataProto::clear_indexininodetable() {
+  indexininodetable_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_indexininodetable() const {
+  return indexininodetable_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::indexininodetable() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.indexInInodeTable)
+  return _internal_indexininodetable();
+}
+inline void MetaFileInodeDataProto::_internal_set_indexininodetable(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  indexininodetable_ = value;
+}
+inline void MetaFileInodeDataProto::set_indexininodetable(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_indexininodetable(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.indexInInodeTable)
+}
+
+// uint32 versionSignature = 11;
+inline void MetaFileInodeDataProto::clear_versionsignature() {
+  versionsignature_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_versionsignature() const {
+  return versionsignature_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::versionsignature() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.versionSignature)
+  return _internal_versionsignature();
+}
+inline void MetaFileInodeDataProto::_internal_set_versionsignature(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  versionsignature_ = value;
+}
+inline void MetaFileInodeDataProto::set_versionsignature(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_versionsignature(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.versionSignature)
+}
+
+// uint32 version = 12;
+inline void MetaFileInodeDataProto::clear_version() {
+  version_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_version() const {
+  return version_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::version() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.version)
+  return _internal_version();
+}
+inline void MetaFileInodeDataProto::_internal_set_version(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  version_ = value;
+}
+inline void MetaFileInodeDataProto::set_version(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_version(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.version)
+}
+
+// uint32 pagemapCnt = 13;
+inline void MetaFileInodeDataProto::clear_pagemapcnt() {
+  pagemapcnt_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_pagemapcnt() const {
+  return pagemapcnt_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::pagemapcnt() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.pagemapCnt)
+  return _internal_pagemapcnt();
+}
+inline void MetaFileInodeDataProto::_internal_set_pagemapcnt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  pagemapcnt_ = value;
+}
+inline void MetaFileInodeDataProto::set_pagemapcnt(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_pagemapcnt(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.pagemapCnt)
+}
+
+// repeated .pos_bc.MetaFileExtent pagemap = 14;
+inline int MetaFileInodeDataProto::_internal_pagemap_size() const {
+  return pagemap_.size();
+}
+inline int MetaFileInodeDataProto::pagemap_size() const {
+  return _internal_pagemap_size();
+}
+inline void MetaFileInodeDataProto::clear_pagemap() {
+  pagemap_.Clear();
+}
+inline ::pos_bc::MetaFileExtent* MetaFileInodeDataProto::mutable_pagemap(int index) {
+  // @@protoc_insertion_point(field_mutable:pos_bc.MetaFileInodeDataProto.pagemap)
+  return pagemap_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >*
+MetaFileInodeDataProto::mutable_pagemap() {
+  // @@protoc_insertion_point(field_mutable_list:pos_bc.MetaFileInodeDataProto.pagemap)
+  return &pagemap_;
+}
+inline const ::pos_bc::MetaFileExtent& MetaFileInodeDataProto::_internal_pagemap(int index) const {
+  return pagemap_.Get(index);
+}
+inline const ::pos_bc::MetaFileExtent& MetaFileInodeDataProto::pagemap(int index) const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.pagemap)
+  return _internal_pagemap(index);
+}
+inline ::pos_bc::MetaFileExtent* MetaFileInodeDataProto::_internal_add_pagemap() {
+  return pagemap_.Add();
+}
+inline ::pos_bc::MetaFileExtent* MetaFileInodeDataProto::add_pagemap() {
+  // @@protoc_insertion_point(field_add:pos_bc.MetaFileInodeDataProto.pagemap)
+  return _internal_add_pagemap();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileExtent >&
+MetaFileInodeDataProto::pagemap() const {
+  // @@protoc_insertion_point(field_list:pos_bc.MetaFileInodeDataProto.pagemap)
+  return pagemap_;
+}
+
+// uint64 ctimeCopy = 15;
+inline void MetaFileInodeDataProto::clear_ctimecopy() {
+  ctimecopy_ = PROTOBUF_ULONGLONG(0);
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::_internal_ctimecopy() const {
+  return ctimecopy_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint64 MetaFileInodeDataProto::ctimecopy() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.ctimeCopy)
+  return _internal_ctimecopy();
+}
+inline void MetaFileInodeDataProto::_internal_set_ctimecopy(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  
+  ctimecopy_ = value;
+}
+inline void MetaFileInodeDataProto::set_ctimecopy(::PROTOBUF_NAMESPACE_ID::uint64 value) {
+  _internal_set_ctimecopy(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.ctimeCopy)
+}
+
+// uint32 ageCopy = 16;
+inline void MetaFileInodeDataProto::clear_agecopy() {
+  agecopy_ = 0u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::_internal_agecopy() const {
+  return agecopy_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::uint32 MetaFileInodeDataProto::agecopy() const {
+  // @@protoc_insertion_point(field_get:pos_bc.MetaFileInodeDataProto.ageCopy)
+  return _internal_agecopy();
+}
+inline void MetaFileInodeDataProto::_internal_set_agecopy(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  
+  agecopy_ = value;
+}
+inline void MetaFileInodeDataProto::set_agecopy(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+  _internal_set_agecopy(value);
+  // @@protoc_insertion_point(field_set:pos_bc.MetaFileInodeDataProto.ageCopy)
+}
+
+// -------------------------------------------------------------------
+
+// InodeTableContent
+
+// repeated .pos_bc.MetaFileInodeDataProto entries = 1;
+inline int InodeTableContent::_internal_entries_size() const {
+  return entries_.size();
+}
+inline int InodeTableContent::entries_size() const {
+  return _internal_entries_size();
+}
+inline void InodeTableContent::clear_entries() {
+  entries_.Clear();
+}
+inline ::pos_bc::MetaFileInodeDataProto* InodeTableContent::mutable_entries(int index) {
+  // @@protoc_insertion_point(field_mutable:pos_bc.InodeTableContent.entries)
+  return entries_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileInodeDataProto >*
+InodeTableContent::mutable_entries() {
+  // @@protoc_insertion_point(field_mutable_list:pos_bc.InodeTableContent.entries)
+  return &entries_;
+}
+inline const ::pos_bc::MetaFileInodeDataProto& InodeTableContent::_internal_entries(int index) const {
+  return entries_.Get(index);
+}
+inline const ::pos_bc::MetaFileInodeDataProto& InodeTableContent::entries(int index) const {
+  // @@protoc_insertion_point(field_get:pos_bc.InodeTableContent.entries)
+  return _internal_entries(index);
+}
+inline ::pos_bc::MetaFileInodeDataProto* InodeTableContent::_internal_add_entries() {
+  return entries_.Add();
+}
+inline ::pos_bc::MetaFileInodeDataProto* InodeTableContent::add_entries() {
+  // @@protoc_insertion_point(field_add:pos_bc.InodeTableContent.entries)
+  return _internal_add_entries();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::pos_bc::MetaFileInodeDataProto >&
+InodeTableContent::entries() const {
+  // @@protoc_insertion_point(field_list:pos_bc.InodeTableContent.entries)
+  return entries_;
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
@@ -735,6 +3928,21 @@ inline void SegmentInfoDataProto::set_state(::pos_bc::SegmentState value) {
 
 PROTOBUF_NAMESPACE_OPEN
 
+template <> struct is_proto_enum< ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType>() {
+  return ::pos_bc::MetaFilePropertySet_MetaFileIntegrityType_descriptor();
+}
+template <> struct is_proto_enum< ::pos_bc::MetaFilePropertySet_MetaFileType> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::pos_bc::MetaFilePropertySet_MetaFileType>() {
+  return ::pos_bc::MetaFilePropertySet_MetaFileType_descriptor();
+}
+template <> struct is_proto_enum< ::pos_bc::MetaStorageIoProperty_MetaStorageType> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::pos_bc::MetaStorageIoProperty_MetaStorageType>() {
+  return ::pos_bc::MetaStorageIoProperty_MetaStorageType_descriptor();
+}
 template <> struct is_proto_enum< ::pos_bc::SegmentState> : ::std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::pos_bc::SegmentState>() {

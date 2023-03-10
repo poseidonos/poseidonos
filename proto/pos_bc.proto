@@ -8,6 +8,7 @@ enum SegmentState {
     SSD = 2;
     VICTIM = 3;
     ERROR = 4;
+    NUM_STATES = 5;
 }
 
 // MAX: 128 bytes
@@ -33,4 +34,110 @@ message AllocatorCtxExtendedProto {
 // MAX: 128 KB
 message RebuildCtxExtendedProto {
     reserved 1 to 1000;
+}
+
+// Following messages are related to InodeTableHeader
+message InodeInUseBitmap {
+    bytes bits = 1; // 1024 (equals to MAX_META_FILE_NUM_SUPPORT) bits
+    uint32 allocatedInodeCnt = 2;
+}
+
+message MetaFileExtent {
+    uint64 startLpn = 1;
+    uint64 count = 2;
+}
+
+// MAX: 4096 * 3 bytes = 12288 byte (12KB) = 3 LPN sized
+message InodeTableHeaderContentProto {
+    uint32 totalInodeNum = 1;
+    uint32 inodeEntryByteSize = 2;
+    uint32 totalFileCreated = 3;
+    InodeInUseBitmap inodeInUseBitmap = 4;
+    repeated MetaFileExtent allocExtentsList = 5;
+    reserved 6 to 1000; // InodeTableHeaderExtended 
+}
+
+// Following messages are related to VolumeCatalog 
+message VolumeBasicInfo {
+    uint64 maxVolPageNum = 1;
+    uint32 maxFileNumSupport = 2;
+}
+
+message MetaRegionMap {
+    uint64 baseLpn = 1;
+    uint64 maxLpn = 2;
+}
+
+// MAX: 4096 bytes = 1 LPN size
+message CatalogContentProto {
+    uint64 signature = 1;
+    VolumeBasicInfo volumeInfo = 2;
+    repeated MetaRegionMap regionMap = 3;
+    reserved 4 to 500;
+}
+
+// Following messages are related to InodeTableContent
+message MetaFilePropertySet {
+    enum MetaFileIntegrityType {
+        Lvl0_Disable = 0;
+        Lvl1_CRCcheck = 1;
+        Lvl2_CRCnMirror = 2;
+        Lvl2_ECC = 3;
+        Lvl3_Journal = 4;
+        Max = 5;
+    }
+    
+    enum MetaFileType {
+        SpecialPurposeMap = 0;
+        Journal = 1;
+        Map = 2;
+        General = 3;
+        MAX = 4;
+    }
+
+    MetaFileIntegrityType integrity = 1;
+    MetaFileType type = 2;
+}
+
+message MetaStorageIoProperty {
+    enum MetaStorageType {
+        SSD = 0;
+        NVRAM = 1;
+        JOURNAL_SSD = 2;
+    }
+
+    MetaStorageType media = 1;
+    MetaFilePropertySet ioSpecific = 2;   
+}
+
+
+// Synchronized with MetaFileInodeData in meta_file_inode.h
+// MAX: 4096 * 4 bytes = 16394bytes = 4 LPN size = INODE_DATA_BYTE_SIZE in meta_file_inode.h
+message MetaFileInodeDataProto {
+    bool inUse = 1;
+    uint32 age = 2;
+    uint64 ctime = 3;
+    uint32 referenceCnt = 4;
+    uint32 FileDescriptorType = 5;
+
+    string fileName = 6;
+    uint64 fileByteSize = 7;
+    uint64 dataChunkSize = 8;
+
+    MetaStorageIoProperty ioAttribute = 9;
+    uint32 indexInInodeTable = 10;
+
+    uint32 versionSignature = 11;
+    uint32 version = 12;
+    uint32 pagemapCnt = 13;
+
+    repeated MetaFileExtent pagemap = 14;
+    uint64 ctimeCopy = 15;
+    uint32 ageCopy = 16;
+    
+    reserved 17 to 1000;
+}
+
+message InodeTableContent {
+    repeated MetaFileInodeDataProto entries = 1;
 }

@@ -38,8 +38,14 @@
 
 #include "file_descriptor_in_use_map.h"
 #include "metafs_common.h"
-#include "on_volume_meta_region.h"
+
+#include "src/metafs/common/meta_region_content.h"
+#include "on_volume_meta_region_proto.h"
+#include "src/metafs/storage/mss.h"
+
 #include "src/metafs/include/meta_file_extent.h"
+#include "proto/generated/cpp/pos_bc.pb.h"
+
 
 namespace pos
 {
@@ -57,7 +63,9 @@ public:
     uint32_t allocatedInodeCnt;
 };
 
-class InodeTableHeaderContent : public MetaRegionContent
+// The fixed size for a single InodeTableHeaderContent
+const int InodeTableHeaderOnSsdSize = 12288; // == 3LPN
+class InodeTableHeaderContent : public MetaRegionProtoContent
 {
 public:
     uint32_t totalInodeNum;
@@ -65,9 +73,95 @@ public:
     uint32_t totalFileCreated;
     InodeInUseBitmap inodeInUseBitmap;
     std::array<MetaFileExtent, MetaFsConfig::MAX_VOLUME_CNT> allocExtentsList;
+    
+    void ToBytes(char* destBuf)
+    {
+        pos_bc::InodeTableHeaderContentProto proto; 
+        
+        pos_bc::InodeInUseBitmap inodeInUseBitmapProto;
+        inodeInUseBitmapProto.set_bits(this->inodeInUseBitmap.bits.to_string());
+        inodeInUseBitmapProto.set_allocatedinodecnt(this->inodeInUseBitmap.allocatedInodeCnt);    
+        
+        proto.set_totalinodenum(this->totalInodeNum);
+        proto.set_inodeentrybytesize(this->inodeEntryByteSize);
+        proto.set_totalfilecreated(this->totalFileCreated);
+        *proto.mutable_inodeinusebitmap() = inodeInUseBitmapProto;
+
+        for (int i = 0 ;i < (int)this->allocExtentsList.size(); ++i)
+        {
+            pos_bc::MetaFileExtent* metaFileExtentProto = proto.add_allocextentslist();
+            metaFileExtentProto->set_startlpn(this->allocExtentsList[i].GetStartLpn());
+            metaFileExtentProto->set_count(this->allocExtentsList[i].GetCount());
+        }
+    
+        size_t effectiveSize = proto.ByteSizeLong();
+        for(unsigned int bytePos = effectiveSize; bytePos < InodeTableHeaderOnSsdSize; bytePos ++)
+        {
+            destBuf[bytePos] = 0;
+        }
+        
+        int ret = proto.SerializeToArray(destBuf, InodeTableHeaderOnSsdSize);    
+        if(ret==0){
+            // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+            // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+            // The current implementation has a risk of not detecting a parse error when there has been
+            // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+            // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf.
+        }
+    }
+
+    
+    void FromBytes(char* srcBuf)
+    {
+        pos_bc::InodeTableHeaderContentProto deserializedProto;
+        int ret = deserializedProto.ParseFromArray(srcBuf, InodeTableHeaderOnSsdSize);
+        if(ret == 0){
+            // ret == 0 means ParseFromArray ran into an error. It's because we have passed in 
+            // a fixed-size length, i.e., ONSSD_SIZE, regardless of the actual message size.
+            // The current implementation has a risk of not detecting a parse error when there has been
+            // real data corruption, but such data corruption would have put the system in an irrecoverable state anyway, 
+            // so I'd keep the current impl until there's a good way to handle fixed-size message with protobuf. 
+        }
+
+        this->totalInodeNum = deserializedProto.totalinodenum();
+        this->inodeEntryByteSize = deserializedProto.inodeentrybytesize();
+        this->totalFileCreated = deserializedProto.totalfilecreated();
+
+        pos_bc::InodeInUseBitmap deserializedInodeInUseBitmapProto;
+        deserializedInodeInUseBitmapProto = deserializedProto.inodeinusebitmap();
+        bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> tmpbitset(deserializedInodeInUseBitmapProto.bits());
+
+        this->inodeInUseBitmap.bits = tmpbitset;
+        this->inodeInUseBitmap.allocatedInodeCnt = deserializedInodeInUseBitmapProto.allocatedinodecnt();
+        for(int i = 0;i<deserializedProto.allocextentslist_size(); ++i)
+        {
+            this->allocExtentsList[i].SetStartLpn(deserializedProto.allocextentslist(i).startlpn());
+            this->allocExtentsList[i].SetCount(deserializedProto.allocextentslist(i).count());
+        }
+    }
+
+    void ToBytesByIndex(char* destBuf, int unusedIdx)
+    {
+        ToBytes(destBuf);
+    }
+
+    void FromBytesByIndex(char* srcBuf, int unusedIdx)
+    {
+        FromBytes(srcBuf);
+    }
+
+    size_t GetOnSsdSize()
+    {
+        return InodeTableHeaderOnSsdSize; // 3 LPN
+    }
+
+    size_t GetSizeOfEntry()
+    {
+        return 4096; //Not used in InodeTableHeader, must be equal or larger than 4096
+    }
 };
 
-class InodeTableHeader : public OnVolumeMetaRegion<MetaRegionType, InodeTableHeaderContent>
+class InodeTableHeader :  public OnVolumeMetaRegionProto<MetaRegionType, InodeTableHeaderContent>
 {
 public:
     explicit InodeTableHeader(MetaVolumeType volumeType, MetaLpnType baseLpn);
