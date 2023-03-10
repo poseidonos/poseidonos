@@ -60,7 +60,7 @@ ReplayStripe::ReplayStripe(IVSAMap* inputVsaMap, IStripeMap* inputStripeMap,
   userStripeReplayer(userReplayer),
   vsaMap(inputVsaMap),
   stripeMap(inputStripeMap),
-  replaySegmentInfo(true)
+  needToReplayStripeFlush(true)
 {
     if (inputReplayEventList != nullptr)
     {
@@ -83,10 +83,6 @@ ReplayStripe::~ReplayStripe(void)
 void
 ReplayStripe::AddLog(ReplayLog replayLog)
 {
-    if (replayLog.segInfoFlushed == true)
-    {
-        replaySegmentInfo = false;
-    }
     status->RecordLogFoundTime(replayLog.time);
 }
 
@@ -130,7 +126,7 @@ ReplayStripe::_CreateStripeFlushReplayEvent(void)
         replayEventFactory->CreateStripeMapUpdateReplayEvent(status->GetVsid(), dest);
     replayEvents.push_back(stripeMapUpdate);
 
-    if (replaySegmentInfo == true)
+    if (needToReplayStripeFlush == true)
     {
         ReplayEvent* flushEvent =
             replayEventFactory->CreateStripeFlushReplayEvent(status->GetVsid(),

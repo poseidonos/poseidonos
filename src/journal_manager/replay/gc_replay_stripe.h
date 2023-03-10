@@ -49,8 +49,8 @@ public:
     virtual int Replay(void) override;
 
 private:
-    void _AddLog(LogHandlerInterface* log);
-    void _CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int volId, uint64_t numBlocks);
+    void _AddLog(LogHandlerInterface* log, bool segInfoFlushed);
+    void _CreateBlockWriteReplayEvents(GcBlockMapUpdate* blockList, int volId, uint64_t numBlocks, bool segInfoFlushed);
 
     uint64_t totalNumBlocks;
 };
