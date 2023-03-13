@@ -36,21 +36,17 @@
 #include <string>
 #include <vector>
 
-#include "src/metafs/mim/mio_handler.h"
+#include "src/metafs/mim/io_statistics.h"
 
 namespace pos
 {
-class MockMioHandler : public MioHandler
+class MockIoStatistics : public IoStatistics
 {
 public:
-    using MioHandler::MioHandler;
-    MOCK_METHOD(void, TophalfMioProcessing, ());
-    MOCK_METHOD(void, BindPartialMpioHandler, (MpioHandler* ptMpioHandler));
-    MOCK_METHOD(void, EnqueueNewReq, (MetaFsIoRequest* reqMsg));
-    MOCK_METHOD(Mio*, DispatchMio, (MetaFsIoRequest& reqMsg));
-    MOCK_METHOD(void, ExecuteMio, (Mio* mio));
-    MOCK_METHOD(bool, AddArrayInfo, (int arrayId));
-    MOCK_METHOD(bool, RemoveArrayInfo, (int arrayId));
+    using IoStatistics::IoStatistics;
+    MOCK_METHOD(void, UpdateSubmissionMetrics, (const Mio* mio));
+    MOCK_METHOD(void, UpdateCompletionMetricsConditionally, (const Mio* mio));
+    MOCK_METHOD(void, PublishPeriodicMetrics, (const size_t freeMioCount, const size_t cacheSize));
 };
 
 } // namespace pos

@@ -38,6 +38,8 @@
 
 #include "src/metafs/mim/mio.h"
 
+using ::testing::_;
+
 namespace pos
 {
 class MockMioStateExecuteEntry : public MioStateExecuteEntry
@@ -50,7 +52,9 @@ class MockMio : public Mio
 {
 public:
     using Mio::Mio;
-    MOCK_METHOD(void, _InitStateHandler, (), (override));
+    MOCK_METHOD(bool, IsRead, (), (const));
+    MOCK_METHOD(MetaStorageType, GetTargetStorage, (), (const));
+    MOCK_METHOD(MetaFileType, GetFileType, (), (const));
 };
 
 } // namespace pos

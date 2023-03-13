@@ -12,6 +12,7 @@ MIM_SRCS += \
 	write_mpio.cpp \
 	mdpage.cpp \
 	metafs_io_handler_base.cpp \
+	io_statistics.cpp \
 	mio_handler.cpp \
 	scalable_meta_io_worker.cpp \
 	mpio_handler.cpp \

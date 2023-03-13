@@ -52,6 +52,7 @@
 namespace pos
 {
 class MetaFsConfigManager;
+class IoStatistics;
 
 class MioHandler
 {
@@ -63,7 +64,7 @@ public:
         MetaFsConfigManager* configManager,
         MetaFsIoWrrQ<MetaFsIoRequest*, MetaFileType>* ioSQ,
         MetaFsIoQ<Mio*>* ioCQ, MpioAllocator* mpioAllocator,
-        MetaFsPool<Mio*>* mioPool, TelemetryPublisher* tp);
+        MetaFsPool<Mio*>* mioPool, IoStatistics* stat, TelemetryPublisher* tp);
     virtual ~MioHandler(void);
 
     virtual void TophalfMioProcessing(void);
@@ -71,7 +72,7 @@ public:
 
     virtual void EnqueueNewReq(MetaFsIoRequest* reqMsg);
     virtual Mio* DispatchMio(MetaFsIoRequest& reqMsg);
-    virtual void ExecuteMio(Mio& mio);
+    virtual void ExecuteMio(Mio* mio);
 
     virtual bool AddArrayInfo(const int arrayId, const MaxMetaLpnMapPerMetaStorage& map);
     virtual bool RemoveArrayInfo(const int arrayId);
@@ -93,8 +94,6 @@ private:
     void _HandleRetryQDeferred(void);
     void _DiscoverIORangeOverlap(void);
     bool _IsPendedRange(MetaFsIoRequest* reqMsg);
-    void _UpdateSubmissionMetricsConditionally(const Mio& mio);
-    void _UpdateCompletionMetricsConditionally(Mio* mio);
     void _PublishPeriodicMetrics(void);
     void _CreateMioPool(void);
     bool _ExecutePendedIo(MetaFsIoRequest* reqMsg);
@@ -119,19 +118,7 @@ private:
     const size_t WRITE_CACHE_CAPACITY;
     int coreId;
 
-    static const uint32_t NUM_FILE_TYPE = (int)MetaFileType::MAX;
-    static const uint32_t NUM_IO_TYPE = (int)MetaIoRequestType::Max;
-
-    TelemetryPublisher* telemetryPublisher = nullptr;
-    int64_t sampledTimeSpentProcessingAllStages[NUM_IO_TYPE];
-    int64_t sampledTimeSpentFromIssueToComplete[NUM_IO_TYPE];
-    int64_t totalProcessedMioCount[NUM_IO_TYPE];
-    int64_t sampledProcessedMioCount[NUM_IO_TYPE];
-    MetaFsTimeInterval metaFsTimeInterval;
-    size_t skipCount;
-    const size_t SAMPLING_SKIP_COUNT;
-
-    int64_t issueCountByStorage[NUM_STORAGE_TYPE][NUM_IO_TYPE];
-    int64_t issueCountByFileType[NUM_FILE_TYPE][NUM_IO_TYPE];
+    TelemetryPublisher* telemetryPublisher;
+    IoStatistics* statistics;
 };
 } // namespace pos
