@@ -45,6 +45,8 @@
 #include "src/meta_file_intf/meta_file_include.h"
 #include "src/volume/i_volume_info_manager.h"
 
+using namespace std;
+
 namespace pos
 {
 class TelemetryPublisher;
@@ -70,6 +72,12 @@ public:
     virtual int LoadReverseMapForWBT(uint64_t offset, uint64_t fileSize, char* buf);
     virtual int StoreReverseMapForWBT(uint64_t offset, uint64_t fileSize, char* buf);
 
+    // for test
+    unordered_map<uint32_t, unordered_map<uint32_t, unordered_map<uint64_t, uint64_t>>> GetInvertedMap(void)
+    {
+        return invertedMap;
+    }
+
 private:
     struct IoCount
     {
@@ -87,6 +95,9 @@ private:
     uint64_t _GetFileOffset(StripeId vsid);
     ReverseMapIo* _CreateIoContext(ReverseMapPack* rev, EventSmartPtr cb, IoDirection dir);
     void _ReverseMapIoDone(ReverseMapIo* reverseMapIo);
+    void _ConstructInvertedMap(const uint32_t volumeId, const uint64_t totalRbaNum);
+    void _CheckInvertedMapValid(const uint32_t volumeId, const uint32_t vsid, const std::map<uint64_t, BlkAddr> revMapInfos);
+    std::pair<bool, BlkAddr> _FindRba(const uint32_t volumeId, const VirtualBlkAddr addr);
 
     uint64_t numMpagesPerStripe; // It depends on block count per a stripe
     uint64_t fileSizePerStripe;
@@ -102,6 +113,9 @@ private:
     MapperAddressInfo* addrInfo;
     TelemetryPublisher* telemetryPublisher;
     bool rocksDbEnabled;
+
+    /* { volid, { vsid, { offset in vsid, rba }}} */
+    unordered_map<uint32_t, unordered_map<uint32_t, unordered_map<uint64_t, uint64_t>>> invertedMap;
 };
 
 } // namespace pos
