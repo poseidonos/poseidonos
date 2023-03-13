@@ -215,8 +215,19 @@ struct InodeTableContentDefaultTypeInternal {
   };
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT InodeTableContentDefaultTypeInternal _InodeTableContent_default_instance_;
+constexpr MapHeaderExtendedProto::MapHeaderExtendedProto(
+  ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized){}
+struct MapHeaderExtendedProtoDefaultTypeInternal {
+  constexpr MapHeaderExtendedProtoDefaultTypeInternal()
+    : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
+  ~MapHeaderExtendedProtoDefaultTypeInternal() {}
+  union {
+    MapHeaderExtendedProto _instance;
+  };
+};
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT MapHeaderExtendedProtoDefaultTypeInternal _MapHeaderExtendedProto_default_instance_;
 }  // namespace pos_bc
-static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_pos_5fbc_2eproto[14];
+static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_pos_5fbc_2eproto[15];
 static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_pos_5fbc_2eproto[4];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_pos_5fbc_2eproto = nullptr;
 
@@ -331,6 +342,11 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_pos_5fbc_2eproto::offsets[] PR
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::pos_bc::InodeTableContent, entries_),
+  ~0u,  // no _has_bits_
+  PROTOBUF_FIELD_OFFSET(::pos_bc::MapHeaderExtendedProto, _internal_metadata_),
+  ~0u,  // no _extensions_
+  ~0u,  // no _oneof_case_
+  ~0u,  // no _weak_field_map_
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
   { 0, -1, sizeof(::pos_bc::SegmentInfoDataProto)},
@@ -347,6 +363,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOB
   { 76, -1, sizeof(::pos_bc::MetaStorageIoProperty)},
   { 83, -1, sizeof(::pos_bc::MetaFileInodeDataProto)},
   { 104, -1, sizeof(::pos_bc::InodeTableContent)},
+  { 110, -1, sizeof(::pos_bc::MapHeaderExtendedProto)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -364,6 +381,7 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_bc::_MetaStorageIoProperty_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_bc::_MetaFileInodeDataProto_default_instance_),
   reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_bc::_InodeTableContent_default_instance_),
+  reinterpret_cast<const ::PROTOBUF_NAMESPACE_ID::Message*>(&::pos_bc::_MapHeaderExtendedProto_default_instance_),
 };
 
 const char descriptor_table_protodef_pos_5fbc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
@@ -413,14 +431,15 @@ const char descriptor_table_protodef_pos_5fbc_2eproto[] PROTOBUF_SECTION_VARIABL
   "emap\030\016 \003(\0132\026.pos_bc.MetaFileExtent\022\021\n\tct"
   "imeCopy\030\017 \001(\004\022\017\n\007ageCopy\030\020 \001(\rJ\005\010\021\020\351\007\"D\n"
   "\021InodeTableContent\022/\n\007entries\030\001 \003(\0132\036.po"
-  "s_bc.MetaFileInodeDataProto*S\n\014SegmentSt"
-  "ate\022\010\n\004FREE\020\000\022\t\n\005NVRAM\020\001\022\007\n\003SSD\020\002\022\n\n\006VIC"
-  "TIM\020\003\022\t\n\005ERROR\020\004\022\016\n\nNUM_STATES\020\005b\006proto3"
+  "s_bc.MetaFileInodeDataProto\"\037\n\026MapHeader"
+  "ExtendedProtoJ\005\010\001\020\351\007*S\n\014SegmentState\022\010\n\004"
+  "FREE\020\000\022\t\n\005NVRAM\020\001\022\007\n\003SSD\020\002\022\n\n\006VICTIM\020\003\022\t"
+  "\n\005ERROR\020\004\022\016\n\nNUM_STATES\020\005b\006proto3"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_pos_5fbc_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5fbc_2eproto = {
-  false, false, 1960, descriptor_table_protodef_pos_5fbc_2eproto, "pos_bc.proto", 
-  &descriptor_table_pos_5fbc_2eproto_once, nullptr, 0, 14,
+  false, false, 1993, descriptor_table_protodef_pos_5fbc_2eproto, "pos_bc.proto", 
+  &descriptor_table_pos_5fbc_2eproto_once, nullptr, 0, 15,
   schemas, file_default_instances, TableStruct_pos_5fbc_2eproto::offsets,
   file_level_metadata_pos_5fbc_2eproto, file_level_enum_descriptors_pos_5fbc_2eproto, file_level_service_descriptors_pos_5fbc_2eproto,
 };
@@ -3975,6 +3994,163 @@ void InodeTableContent::InternalSwap(InodeTableContent* other) {
 }
 
 
+// ===================================================================
+
+class MapHeaderExtendedProto::_Internal {
+ public:
+};
+
+MapHeaderExtendedProto::MapHeaderExtendedProto(::PROTOBUF_NAMESPACE_ID::Arena* arena)
+  : ::PROTOBUF_NAMESPACE_ID::Message(arena) {
+  SharedCtor();
+  RegisterArenaDtor(arena);
+  // @@protoc_insertion_point(arena_constructor:pos_bc.MapHeaderExtendedProto)
+}
+MapHeaderExtendedProto::MapHeaderExtendedProto(const MapHeaderExtendedProto& from)
+  : ::PROTOBUF_NAMESPACE_ID::Message() {
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  // @@protoc_insertion_point(copy_constructor:pos_bc.MapHeaderExtendedProto)
+}
+
+void MapHeaderExtendedProto::SharedCtor() {
+}
+
+MapHeaderExtendedProto::~MapHeaderExtendedProto() {
+  // @@protoc_insertion_point(destructor:pos_bc.MapHeaderExtendedProto)
+  SharedDtor();
+  _internal_metadata_.Delete<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+void MapHeaderExtendedProto::SharedDtor() {
+  GOOGLE_DCHECK(GetArena() == nullptr);
+}
+
+void MapHeaderExtendedProto::ArenaDtor(void* object) {
+  MapHeaderExtendedProto* _this = reinterpret_cast< MapHeaderExtendedProto* >(object);
+  (void)_this;
+}
+void MapHeaderExtendedProto::RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena*) {
+}
+void MapHeaderExtendedProto::SetCachedSize(int size) const {
+  _cached_size_.Set(size);
+}
+
+void MapHeaderExtendedProto::Clear() {
+// @@protoc_insertion_point(message_clear_start:pos_bc.MapHeaderExtendedProto)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+}
+
+const char* MapHeaderExtendedProto::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) {
+#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
+  while (!ctx->Done(&ptr)) {
+    ::PROTOBUF_NAMESPACE_ID::uint32 tag;
+    ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
+    CHK_(ptr);
+        if ((tag & 7) == 4 || tag == 0) {
+          ctx->SetLastTag(tag);
+          goto success;
+        }
+        ptr = UnknownFieldParse(tag,
+            _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
+            ptr, ctx);
+        CHK_(ptr != nullptr);
+        continue;
+  }  // while
+success:
+  return ptr;
+failure:
+  ptr = nullptr;
+  goto success;
+#undef CHK_
+}
+
+::PROTOBUF_NAMESPACE_ID::uint8* MapHeaderExtendedProto::_InternalSerialize(
+    ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:pos_bc.MapHeaderExtendedProto)
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::InternalSerializeUnknownFieldsToArray(
+        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:pos_bc.MapHeaderExtendedProto)
+  return target;
+}
+
+size_t MapHeaderExtendedProto::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:pos_bc.MapHeaderExtendedProto)
+  size_t total_size = 0;
+
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    return ::PROTOBUF_NAMESPACE_ID::internal::ComputeUnknownFieldsSize(
+        _internal_metadata_, total_size, &_cached_size_);
+  }
+  int cached_size = ::PROTOBUF_NAMESPACE_ID::internal::ToCachedSize(total_size);
+  SetCachedSize(cached_size);
+  return total_size;
+}
+
+void MapHeaderExtendedProto::MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:pos_bc.MapHeaderExtendedProto)
+  GOOGLE_DCHECK_NE(&from, this);
+  const MapHeaderExtendedProto* source =
+      ::PROTOBUF_NAMESPACE_ID::DynamicCastToGenerated<MapHeaderExtendedProto>(
+          &from);
+  if (source == nullptr) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:pos_bc.MapHeaderExtendedProto)
+    ::PROTOBUF_NAMESPACE_ID::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:pos_bc.MapHeaderExtendedProto)
+    MergeFrom(*source);
+  }
+}
+
+void MapHeaderExtendedProto::MergeFrom(const MapHeaderExtendedProto& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:pos_bc.MapHeaderExtendedProto)
+  GOOGLE_DCHECK_NE(&from, this);
+  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
+  (void) cached_has_bits;
+
+}
+
+void MapHeaderExtendedProto::CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:pos_bc.MapHeaderExtendedProto)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MapHeaderExtendedProto::CopyFrom(const MapHeaderExtendedProto& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:pos_bc.MapHeaderExtendedProto)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MapHeaderExtendedProto::IsInitialized() const {
+  return true;
+}
+
+void MapHeaderExtendedProto::InternalSwap(MapHeaderExtendedProto* other) {
+  using std::swap;
+  _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
+}
+
+::PROTOBUF_NAMESPACE_ID::Metadata MapHeaderExtendedProto::GetMetadata() const {
+  return GetMetadataStatic();
+}
+
+
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace pos_bc
 PROTOBUF_NAMESPACE_OPEN
@@ -4019,6 +4195,9 @@ template<> PROTOBUF_NOINLINE ::pos_bc::MetaFileInodeDataProto* Arena::CreateMayb
 }
 template<> PROTOBUF_NOINLINE ::pos_bc::InodeTableContent* Arena::CreateMaybeMessage< ::pos_bc::InodeTableContent >(Arena* arena) {
   return Arena::CreateMessageInternal< ::pos_bc::InodeTableContent >(arena);
+}
+template<> PROTOBUF_NOINLINE ::pos_bc::MapHeaderExtendedProto* Arena::CreateMaybeMessage< ::pos_bc::MapHeaderExtendedProto >(Arena* arena) {
+  return Arena::CreateMessageInternal< ::pos_bc::MapHeaderExtendedProto >(arena);
 }
 PROTOBUF_NAMESPACE_CLOSE
 

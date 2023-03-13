@@ -47,7 +47,7 @@ struct TableStruct_pos_5fbc_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxiliaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[14]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[15]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -71,6 +71,9 @@ extern InodeTableContentDefaultTypeInternal _InodeTableContent_default_instance_
 class InodeTableHeaderContentProto;
 struct InodeTableHeaderContentProtoDefaultTypeInternal;
 extern InodeTableHeaderContentProtoDefaultTypeInternal _InodeTableHeaderContentProto_default_instance_;
+class MapHeaderExtendedProto;
+struct MapHeaderExtendedProtoDefaultTypeInternal;
+extern MapHeaderExtendedProtoDefaultTypeInternal _MapHeaderExtendedProto_default_instance_;
 class MetaFileExtent;
 struct MetaFileExtentDefaultTypeInternal;
 extern MetaFileExtentDefaultTypeInternal _MetaFileExtent_default_instance_;
@@ -105,6 +108,7 @@ template<> ::pos_bc::CatalogContentProto* Arena::CreateMaybeMessage<::pos_bc::Ca
 template<> ::pos_bc::InodeInUseBitmap* Arena::CreateMaybeMessage<::pos_bc::InodeInUseBitmap>(Arena*);
 template<> ::pos_bc::InodeTableContent* Arena::CreateMaybeMessage<::pos_bc::InodeTableContent>(Arena*);
 template<> ::pos_bc::InodeTableHeaderContentProto* Arena::CreateMaybeMessage<::pos_bc::InodeTableHeaderContentProto>(Arena*);
+template<> ::pos_bc::MapHeaderExtendedProto* Arena::CreateMaybeMessage<::pos_bc::MapHeaderExtendedProto>(Arena*);
 template<> ::pos_bc::MetaFileExtent* Arena::CreateMaybeMessage<::pos_bc::MetaFileExtent>(Arena*);
 template<> ::pos_bc::MetaFileInodeDataProto* Arena::CreateMaybeMessage<::pos_bc::MetaFileInodeDataProto>(Arena*);
 template<> ::pos_bc::MetaFilePropertySet* Arena::CreateMaybeMessage<::pos_bc::MetaFilePropertySet>(Arena*);
@@ -2619,6 +2623,130 @@ class InodeTableContent PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_pos_5fbc_2eproto;
 };
+// -------------------------------------------------------------------
+
+class MapHeaderExtendedProto PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:pos_bc.MapHeaderExtendedProto) */ {
+ public:
+  inline MapHeaderExtendedProto() : MapHeaderExtendedProto(nullptr) {}
+  virtual ~MapHeaderExtendedProto();
+  explicit constexpr MapHeaderExtendedProto(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized);
+
+  MapHeaderExtendedProto(const MapHeaderExtendedProto& from);
+  MapHeaderExtendedProto(MapHeaderExtendedProto&& from) noexcept
+    : MapHeaderExtendedProto() {
+    *this = ::std::move(from);
+  }
+
+  inline MapHeaderExtendedProto& operator=(const MapHeaderExtendedProto& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MapHeaderExtendedProto& operator=(MapHeaderExtendedProto&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const MapHeaderExtendedProto& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const MapHeaderExtendedProto* internal_default_instance() {
+    return reinterpret_cast<const MapHeaderExtendedProto*>(
+               &_MapHeaderExtendedProto_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    14;
+
+  friend void swap(MapHeaderExtendedProto& a, MapHeaderExtendedProto& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(MapHeaderExtendedProto* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MapHeaderExtendedProto* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline MapHeaderExtendedProto* New() const final {
+    return CreateMaybeMessage<MapHeaderExtendedProto>(nullptr);
+  }
+
+  MapHeaderExtendedProto* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<MapHeaderExtendedProto>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const MapHeaderExtendedProto& from);
+  void MergeFrom(const MapHeaderExtendedProto& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(MapHeaderExtendedProto* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "pos_bc.MapHeaderExtendedProto";
+  }
+  protected:
+  explicit MapHeaderExtendedProto(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    return ::descriptor_table_pos_5fbc_2eproto_metadata_getter(kIndexInFileMessages);
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:pos_bc.MapHeaderExtendedProto)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_pos_5fbc_2eproto;
+};
 // ===================================================================
 
 
@@ -3892,9 +4020,15 @@ InodeTableContent::entries() const {
   return entries_;
 }
 
+// -------------------------------------------------------------------
+
+// MapHeaderExtendedProto
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -75,8 +75,12 @@ MapHeader::Init(uint64_t numMpages, uint64_t mpageSize)
     touchedMpages = new BitMap(numMpages);
     touchedMpages->ResetBitmap();
 
-    size = sizeof(MpageInfo) + (mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
+    mapHeaderExtended.InitOnSsdSize(mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
+
+    size = sizeof(MpageInfo) + (mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE) + mapHeaderExtended.SerializedSize();
     size = Align(size, mpageSize);
+
+    POS_TRACE_INFO(EID(MAP_HEADER_INITIALIZED), "mapId:{}, mapHeaderExtended size:{} ", mapId, mapHeaderExtended.SerializedSize());
 }
 
 int
@@ -91,6 +95,8 @@ MapHeader::CopyToBuffer(char* buffer)
     header->age = ++age;
     POS_TRACE_INFO(EID(COPY_MAP_HEADER), "mapId:{}, age:{}, numValidPgs:{}, numUsedBlks:{}", mapId, header->age, header->numValidMpages, header->numUsedBlks);
     memcpy((buffer + sizeof(MpageInfo)), (void*)mPageMap->GetMapAddr(), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
+    size_t mapHeaderExtendedOffset = sizeof(MpageInfo) + mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE;
+    mapHeaderExtended.ToBytes(buffer + mapHeaderExtendedOffset);
     return 0;
 }
 
@@ -115,6 +121,8 @@ MapHeader::ApplyHeader(char* buffer)
     mPageMap->SetNumBitsSet(header->numValidMpages);
     POS_TRACE_INFO(EID(MAPPER_INFO), "[Mapper MapHeader] Load, age:{}, numValidPgs:{}, numUsedBlks:{}", header->age, header->numUsedBlks, header->numValidMpages);
     memcpy(mPageMap->GetMapAddr(), buffer + sizeof(MpageInfo), mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE);
+    size_t mapHeaderExtendedOffset = sizeof(MpageInfo) + mPageMap->GetNumEntry() * BITMAP_ENTRY_SIZE;
+    mapHeaderExtended.FromBytes(buffer + mapHeaderExtendedOffset);
 }
 
 void
