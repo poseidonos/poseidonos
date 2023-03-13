@@ -494,7 +494,7 @@ NvmfTarget::DetachNamespace(const string& nqn, uint32_t nsid,
 }
 
 bool
-NvmfTarget::CheckSubsystemExistance(void)
+NvmfTarget::CheckSubsystemExistance(string inputArrayName)
 {
     struct spdk_nvmf_tgt* nvmf_tgt;
     struct spdk_nvmf_subsystem* subsystem;
@@ -504,7 +504,12 @@ NvmfTarget::CheckSubsystemExistance(void)
     {
         if (spdkNvmfCaller->SpdkNvmfSubsystemGetType(subsystem) == SPDK_NVMF_SUBTYPE_NVME)
         {
-            return true;
+            string subnqn = spdkNvmfCaller->SpdkNvmfSubsystemGetNqn(subsystem);
+            string arrayName = GetSubsystemArrayName(subnqn);
+            if (arrayName == inputArrayName || arrayName == "")
+            {
+                return true;
+            }
         }
         subsystem = spdkNvmfCaller->SpdkNvmfSubsystemGetNext(subsystem);
     }
@@ -702,6 +707,24 @@ NvmfTarget::FindSubsystem(const string& subnqn)
     return subsystem;
 }
 
+struct spdk_nvmf_subsystem*
+NvmfTarget::FindSubsystemWithArrayName(const string& inputSubNqn, string inputArrayName)
+{
+    string subnqn = inputSubNqn;
+    struct spdk_nvmf_subsystem* subsystem =
+        spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
+    if (nullptr == subsystem)
+    {
+        SPDK_NOTICELOG("Requested subsystem(%s) does not exist.\n", subnqn.c_str());
+        return nullptr;
+    }
+    string arrayName = GetSubsystemArrayName(subnqn);
+    if (arrayName == inputArrayName || arrayName == "")
+    {
+        return subsystem;
+    }
+    else return nullptr;
+}
 void
 NvmfTarget::QosEnableDone(void* cbArg, int status)
 {

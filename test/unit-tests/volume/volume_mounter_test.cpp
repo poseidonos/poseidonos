@@ -84,8 +84,8 @@ TEST(VolumeMounter, _CheckIfExistSubsystem_)
 
     VolumeMounter volumeMounter(volumes, arrayName, arrayID, &mockVolumeEventPublisher, &mockNvmfTarget);
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(false));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(nullptr));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(false));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(nullptr));
 
     actual = volumeMounter.Do(name, subnqn, 0);
 
@@ -123,8 +123,8 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_)
 
     // When 1
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(true));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(true));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(subsystem[0]));
 
     ON_CALL(mockNvmfTarget, GetSubsystemArrayName(_)).WillByDefault(Return(""));
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(false));
@@ -166,8 +166,8 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_1)
 
     // When 1
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(true));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(true));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(subsystem[0]));
 
     ON_CALL(mockNvmfTarget, GetSubsystemArrayName(_)).WillByDefault(Return("Test"));
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(true));
@@ -209,8 +209,8 @@ TEST(VolumeMounter, _CheckAndSetSubsystemToArray_2)
 
     // When 1
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(true));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(true));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(subsystem[0]));
 
     ON_CALL(mockNvmfTarget, GetSubsystemArrayName(_)).WillByDefault(Return("Test"));
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(false));
@@ -256,8 +256,8 @@ TEST(VolumeMounter, _MountVolume_)
 
     // When 1
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(true));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(true));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(subsystem[0]));
 
     ON_CALL(mockNvmfTarget, GetSubsystemArrayName(_)).WillByDefault(Return("Array"));
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(false));
@@ -301,8 +301,8 @@ TEST(VolumeMounter, _MountVolume_1)
 
     // When 1
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(true));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(true));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(subsystem[0]));
 
     ON_CALL(mockNvmfTarget, GetSubsystemArrayName(_)).WillByDefault(Return("Array"));
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(false));
@@ -346,8 +346,8 @@ TEST(VolumeMounter, _RollBackVolumeMount_)
 
     // When 1
 
-    ON_CALL(mockNvmfTarget, CheckSubsystemExistance()).WillByDefault(Return(true));
-    ON_CALL(mockNvmfTarget, FindSubsystem(_)).WillByDefault(Return(subsystem[0]));
+    ON_CALL(mockNvmfTarget, CheckSubsystemExistance(_)).WillByDefault(Return(true));
+    ON_CALL(mockNvmfTarget, FindSubsystemWithArrayName(_,_)).WillByDefault(Return(subsystem[0]));
 
     ON_CALL(mockNvmfTarget, GetSubsystemArrayName(_)).WillByDefault(Return("Array"));
     ON_CALL(mockNvmfTarget, SetSubsystemArrayName(_, _)).WillByDefault(Return(false));
