@@ -589,11 +589,13 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
             DirectiveCmd* directiveCmd = new DirectiveCmd(dev, ctrlr, ioDispatcher);
             directiveCmd->EnableDirective();
             directiveCmd->AllocateResources();
+            POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
+                "{}: directives are enabled for multistreaming user, meta, journal data.", unvmeSsd->GetName());
         }
         else
         {
             POS_TRACE_INFO(EID(UNVME_OPERATION_NOT_SUPPORTED),
-                "uNVMe Device does not support Directives: {}", unvmeSsd->GetName());
+                "{} does not support directives.", unvmeSsd->GetName());
         }
     }
 }
