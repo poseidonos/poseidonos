@@ -31,64 +31,26 @@
  */
 
 #pragma once
-
-#include "src/include/address_type.h"
-#include "src/lib/bitmap.h"
-#include "map_header_extended.h"
-
-#include <atomic>
+#include <cstddef>
 
 namespace pos
 {
 
-class MpageInfo
+// This contains the extended set of metadata/attributes of MapHeader that requires persistence.
+// Internally, it is mapped to MapHeaderExtended to meet backward compatibility.
+class MapHeaderExtended
 {
 public:
-    MpageInfo(void) : numValidMpages(UINT64_MAX), numTotalMpages(UINT64_MAX), numUsedBlks(0), age(0) {}
-    uint64_t numValidMpages;
-    uint64_t numTotalMpages;
-    uint64_t numUsedBlks;
-    uint64_t age;
+    // Initialize 
+    void InitOnSsdSize(int targetSize);
+    // Serialize a single MapHeaderExtended
+    bool ToBytes(char* destBuf);
+
+    // Deserialize a single MapHeaderExtended
+    bool FromBytes(char* srcBuf);
+
+    // Note : The dynamic size for each map headers, extended size is depend on number of mPages in each Map.
+    size_t SerializedSize();
+    size_t ONSSD_SIZE = 0;
 };
-
-class MapHeader
-{
-public:
-    explicit MapHeader(int mapId);
-    MapHeader(BitMap* mPageMap_, BitMap* touchedMpages_, int mapId_);
-    virtual ~MapHeader(void);
-    virtual void Init(uint64_t numMpages, uint64_t mpageSize);
-
-    virtual int CopyToBuffer(char* buffer);
-    virtual BitMap* GetBitmapFromTempBuffer(char* buffer);
-
-    virtual uint64_t GetSize(void) { return size; }
-    virtual void ApplyHeader(char* srcBuf);
-    virtual uint64_t GetNumValidMpages(void) { return mPageMap->GetNumBitsSet(); }
-
-    virtual BitMap* GetMpageMap(void) { return mPageMap; }
-    virtual void SetMapAllocated(int pageNr);
-    virtual BitMap* GetTouchedMpages(void) { return touchedMpages; }
-
-    virtual void UpdateNumUsedBlks(VirtualBlkAddr vsa);
-    virtual uint64_t GetNumUsedBlks(void) { return numUsedBlks; }
-
-    virtual int GetMapId(void) { return mapId; }
-    virtual uint32_t GetNumTouchedMpagesSet(void);
-    virtual uint32_t GetNumTotalTouchedMpages(void);
-    virtual void SetTouchedMpageBit(uint64_t pageNr);
-
-private:
-    std::mutex mpageHeaderLock;
-
-    uint64_t age;
-    uint64_t size;
-    std::atomic<uint64_t> numUsedBlks;
-    BitMap* mPageMap;
-    BitMap* touchedMpages;
-
-    int mapId;
-    MapHeaderExtended mapHeaderExtended;
-};
-
-}   // namespace pos
+}

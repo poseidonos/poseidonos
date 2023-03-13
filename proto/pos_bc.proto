@@ -141,3 +141,8 @@ message MetaFileInodeDataProto {
 message InodeTableContent {
     repeated MetaFileInodeDataProto entries = 1;
 }
+
+// Following messages are for MapHeader reserved area.
+message MapHeaderExtendedProto {
+    reserved 1 to 1000;
+}
