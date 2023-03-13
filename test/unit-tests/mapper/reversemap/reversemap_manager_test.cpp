@@ -360,4 +360,50 @@ TEST(ReverseMapManager, ReconstructMap_testIfExecutedSuccesfullyWithSeveralParti
     }
 }
 
+TEST(ReverseMapManager, ReconstructReverseMap_testIfExecutedSuccesfully)
+{
+    // Given
+    NiceMock<MockMapperAddressInfo> addrInfo;
+    NiceMock<MockIVolumeInfoManager> volumeManager;
+    NiceMock<MockIVSAMap> ivsaMap;
+    NiceMock<MockIStripeMap> iStripeMap;
+    ReverseMapManager revMap(&ivsaMap, &iStripeMap, &volumeManager, &addrInfo, nullptr);
+    EXPECT_CALL(addrInfo, IsUT).WillOnce(Return(true));
+    EXPECT_CALL(addrInfo, GetNumWbStripes).WillOnce(Return(1003));
+    EXPECT_CALL(addrInfo, GetMaxVSID).WillOnce(Return(103));
+    EXPECT_CALL(addrInfo, GetArrayId).WillOnce(Return(0));
+    EXPECT_CALL(addrInfo, GetBlksPerStripe).WillOnce(Return(344400));
+    EXPECT_CALL(addrInfo, GetMpageSize).WillOnce(Return(4032));
+    revMap.Init();
+
+    // When: ReverseMapInfo is set partially
+    std::map<uint64_t, BlkAddr> revMapInfos;
+    uint32_t volumeId = 1;
+    StripeId vsid = 100;
+    StripeId lsid = 1000;
+    ExpectGetMapInfo(volumeManager, ivsaMap, iStripeMap, volumeId, vsid, lsid);
+
+    int expectRetCode = 0;
+    EXPECT_EQ(expectRetCode, revMap.ReconstructReverseMap(volumeId, NUM_BLKS_PER_STRIPE, lsid, vsid, NUM_BLKS_PER_STRIPE, revMapInfos));
+
+    auto invertedMap = revMap.GetInvertedMap()[volumeId];
+    size_t size = 0;
+    for (const auto& m : invertedMap)
+    {
+        size += m.second.size();
+    }
+    ASSERT_EQ(NUM_BLKS_PER_STRIPE, size);
+
+    for (uint64_t offset = 0, expectRba = 0; offset < NUM_BLKS_PER_STRIPE; ++offset, ++expectRba)
+    {
+        auto result = invertedMap[vsid].find((uint64_t)offset);
+        ASSERT_NE(result, invertedMap[vsid].end());
+        EXPECT_EQ(expectRba, result->second);
+
+        auto entry = revMap.GetReverseMapEntry(nullptr, lsid, offset);
+        EXPECT_EQ(expectRba, std::get<0>(entry));
+        EXPECT_EQ(volumeId, std::get<1>(entry));
+    }
+}
+
 } // namespace pos

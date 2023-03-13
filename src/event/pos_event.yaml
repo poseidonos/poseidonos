@@ -4114,6 +4114,13 @@ Root:
     Message:
     Cause:
     Solution:
+  -
+    Id: 3217
+    Name: REVMAP_RBA_MISMATCH_BETWEEN_LOG_AND_INVMAP
+    Severity:
+    Message:
+    Cause:
+    Solution:
   # Metadata: 3300 - 3399
   -
     Id: 3300
