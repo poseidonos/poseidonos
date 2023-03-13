@@ -55,23 +55,25 @@ class IVSAMap;
 class IStripeMap;
 class IMapFlush;
 class ISegmentCtx;
+class IVersionedSegmentContext;
 class IWBStripeAllocator;
 class IContextManager;
 class IContextReplayer;
 class IArrayInfo;
 class IVolumeInfoManager;
 class TelemetryPublisher;
-
 class ReplayHandler
 {
 public:
     ReplayHandler(void) = default;
     explicit ReplayHandler(IStateControl* iState);
+    explicit ReplayHandler(IStateControl* iState, LogDeleteChecker* logDeleteChecker, ReplayProgressReporter* reporter);
+
     virtual ~ReplayHandler(void);
 
     virtual void Init(JournalConfiguration* journalConfiguration,
         IJournalLogBuffer* journalLogBuffer, IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
+        IMapFlush* mapFlush, ISegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager, TelemetryPublisher* tp);
     virtual void Dispose(void);
@@ -80,7 +82,7 @@ public:
 
 private:
     void _InitializeTaskList(IVSAMap* vsaMap, IStripeMap* stripeMap,
-        IMapFlush* mapFlush, ISegmentCtx* segmentCtx,
+        IMapFlush* mapFlush, ISegmentCtx* segmentCtx, IVersionedSegmentContext* versionedSegCtx,
         IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager);
     void _AddTask(ReplayTask* task);

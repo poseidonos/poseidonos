@@ -8,6 +8,7 @@
 
 #include "src/debug_lib/debug_info_maker.h"
 #include "src/debug_lib/debug_info_maker.hpp"
+#include "src/lib/signal_mask.h"
 
 using namespace pos;
 #define MAX_NUM_CONCURRENT_CLIENTS 1
@@ -689,6 +690,60 @@ class PosCliServiceImpl final : public PosCli::Service
     }
 
     grpc::Status
+    RemoveListener(ServerContext* context, const RemoveListenerRequest* request,
+        RemoveListenerResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteRemoveListenerCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
+    ListListener(ServerContext* context, const ListListenerRequest* request,
+        ListListenerResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteListListenerCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
+    SetListenerAnaState(ServerContext* context, const SetListenerAnaStateRequest* request,
+        SetListenerAnaStateResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteSetListenerAnaStateCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
     ListSubsystem(ServerContext* context, const ListSubsystemRequest* request,
         ListSubsystemResponse* reply) override
     {
@@ -731,6 +786,24 @@ class PosCliServiceImpl final : public PosCli::Service
         _LogCliRequest(request, request->command());
 
         grpc::Status status = pc->ExecuteCreateTransportCommand(request, reply);
+        if (context->IsCancelled())
+        {
+            _LogGrpcTimeout(request, reply);
+            return Status(StatusCode::CANCELLED, GRPC_TIMEOUT_MESSAGE);
+        }
+
+        _LogCliResponse(reply, status, reply->result().status().code(), request->command());
+
+        return status;
+    }
+
+    grpc::Status
+    ListTransport(ServerContext* context, const ListTransportRequest* request,
+        ListTransportResponse* reply) override
+    {
+        _LogCliRequest(request, request->command());
+
+        grpc::Status status = pc->ExecuteListTransportCommand(request, reply);
         if (context->IsCancelled())
         {
             _LogGrpcTimeout(request, reply);
@@ -960,9 +1033,12 @@ _LogGrpcTimeout(const google::protobuf::Message* request, const google::protobuf
         reqJson, replyJson);
 }
 
+sigset_t signalOriginMask;
+
 void
 _LogCliRequest(const google::protobuf::Message* request, std::string command)
 {
+    SignalMask::MaskQuitSignal(&signalOriginMask);
     pos::cliDebugInfo.info.sendReceive = "ReceiveCLI";
     pos::cliDebugInfo.info.message = request->ShortDebugString();
     pos::cliDebugInfo.info.errorCode = grpc::StatusCode::OK;
@@ -975,7 +1051,6 @@ _LogCliRequest(const google::protobuf::Message* request, std::string command)
 void
 _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status status, uint32_t jsonStatusCode, std::string command)
 {
-
     std::string replyJson = "";
     google::protobuf::util::JsonOptions printOptions;
     printOptions.always_print_primitive_fields = true;
@@ -989,6 +1064,15 @@ _LogCliResponse(const google::protobuf::Message* reply, const grpc::Status statu
     POS_TRACE_TRACE(EID(CLI_MSG_SENT), "response: {}, gRPC_error_code: {}, gRPC_error_details: {}, gRPC_error_essage: {}",
         replyJson, status.error_code(), status.error_details(), status.error_message());
     logger()->SetCommand("");
+    SignalMask::RestoreSignal(&signalOriginMask);
+}
+
+unique_ptr<Server> grpcCLIServer;
+
+void
+ShutdownGrpcServer()
+{
+    grpcCLIServer->Shutdown();
 }
 
 void
@@ -1011,11 +1095,11 @@ RunGrpcServer()
     // clients. In this case it corresponds to an *synchronous* service.
     builder.RegisterService(&service);
     // Finally assemble the server.
-    std::unique_ptr<Server> server(builder.BuildAndStart());
+    grpcCLIServer = builder.BuildAndStart();
     std::cout << "Grpc CLI server listening on " << server_address << std::endl;
 
     // Wait for the server to shutdown. Note that some other thread must be
     // responsible for shutting down the server for this call to ever return.
-    server->Wait();
+    grpcCLIServer->Wait();
     delete pos::debugCliInfoMaker;
 }

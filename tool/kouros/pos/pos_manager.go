@@ -140,6 +140,18 @@ type POSManager interface {
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	AddListener(param *pb.AddListenerRequest_Param) (*pb.AddListenerResponse, *pb.AddListenerRequest, error)
 
+	// Remove a listener to an NVMe-oF subsystem
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	RemoveListener(param *pb.RemoveListenerRequest_Param) (*pb.RemoveListenerResponse, *pb.RemoveListenerRequest, error)
+
+	// List a listener to an NVMe-oF subsystem
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	ListListener(param *pb.ListListenerRequest_Param) (*pb.ListListenerResponse, *pb.ListListenerRequest, error)
+
+	// Set a listener's ana state to an NVMe-oF subsystem
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	SetListenerAnaState(param *pb.SetListenerAnaStateRequest_Param) (*pb.SetListenerAnaStateResponse, *pb.SetListenerAnaStateRequest, error)
+
 	// Create an NVMe-oF subsystem to PoseidonOS.
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	CreateSubsystem(param *pb.CreateSubsystemRequest_Param) (*pb.CreateSubsystemResponse, *pb.CreateSubsystemRequest, error)
@@ -149,6 +161,10 @@ type POSManager interface {
 	// Create NVMf transport to PoseidonOS
 	// The function takes a protobuf format as parameter and returns response in protobuf format
 	CreateTransport(param *pb.CreateTransportRequest_Param) (*pb.CreateTransportResponse, *pb.CreateTransportRequest, error)
+
+	// List NVMf transport to PoseidonOS
+	// The function takes a protobuf format as parameter and returns response in protobuf format
+	ListTransport() (*pb.ListTransportResponse, *pb.ListTransportRequest, error)
 
 	// Delete a subsystem from PoseidonOS
 	// The function takes a protobuf format as parameter and returns response in protobuf format

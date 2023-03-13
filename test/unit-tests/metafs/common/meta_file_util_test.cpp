@@ -101,7 +101,7 @@ TEST(MetaFileUtil, Check_EpochSignature)
     EXPECT_NE(0, result);
 }
 
-TEST(MetaFileUtil, ConvertToMediaTypeName_testIfMetaVolumeTypesMatcheToTheirNames)
+TEST(MetaFileUtil, ConvertToMediaTypeName_testIfMetaVolumeTypesMatchToTheirNames)
 {
     std::unordered_map<MetaVolumeType, std::string> expectedResult =
     {
@@ -118,7 +118,7 @@ TEST(MetaFileUtil, ConvertToMediaTypeName_testIfMetaVolumeTypesMatcheToTheirName
             MetaFileUtil::ConvertToMediaTypeName(MetaVolumeType::Max));
 }
 
-TEST(MetaFileUtil, ConvertToFileTypeName_testIfFileTypesMatcheToTheirNames)
+TEST(MetaFileUtil, ConvertToFileTypeName_testIfFileTypesMatchToTheirNames)
 {
     std::unordered_map<MetaFileType, std::string> expectedResult =
     {
@@ -136,10 +136,27 @@ TEST(MetaFileUtil, ConvertToFileTypeName_testIfFileTypesMatcheToTheirNames)
             MetaFileUtil::ConvertToFileTypeName(MetaFileType::MAX));
 }
 
-TEST(MetaFileUtil, ConvertToDirectionName_testIfDirectionTypesMatchedToTheirNames)
+TEST(MetaFileUtil, ConvertToDirectionName_testIfDirectionTypesMatchToTheirNames)
 {
     EXPECT_EQ("write", MetaFileUtil::ConvertToDirectionName(0));
     EXPECT_EQ("read", MetaFileUtil::ConvertToDirectionName(1));
     EXPECT_DEATH(MetaFileUtil::ConvertToDirectionName(2), "");
+}
+
+TEST(MetaFileUtil, ConvertToMediaType_testIfPartitionTypesMatchToStorageType)
+{
+    std::unordered_map<PartitionType, MetaStorageType> expectedResult =
+    {
+        {PartitionType::META_NVM, MetaStorageType::NVRAM},
+        {PartitionType::WRITE_BUFFER, MetaStorageType::SSD},
+        {PartitionType::META_SSD, MetaStorageType::SSD},
+        {PartitionType::USER_DATA, MetaStorageType::Max},
+        {PartitionType::JOURNAL_SSD, MetaStorageType::JOURNAL_SSD}};
+
+    for (int i = 0; i < (int)PartitionType::TYPE_COUNT; i++)
+    {
+        PartitionType type = (PartitionType)i;
+        EXPECT_EQ(expectedResult[type], MetaFileUtil::ConvertToMediaType(type));
+    }
 }
 } // namespace pos

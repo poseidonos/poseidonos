@@ -3,7 +3,7 @@
 #include <experimental/filesystem>
 
 #include "test/integration-tests/journal/fake/i_context_manager_fake.h"
-#include "test/integration-tests/journal/fake/i_context_replayer_mock.h"
+#include "test/integration-tests/journal/fake/i_context_replayer_fake.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -67,7 +67,7 @@ void
 RocksDBJournalVolumeIntegrationTest::DeleteVolumes(Volumes& volumesToDelete)
 {
     EXPECT_CALL(*testMapper, FlushDirtyMpages).Times(AtLeast(1));
-    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()), FlushContexts(_, false, _)).Times(volumesToDelete.size());
+    EXPECT_CALL(*(testAllocator->GetIContextManagerFake()), FlushContexts).Times(volumesToDelete.size());
     for (auto volId : volumesToDelete)
     {
         EXPECT_TRUE(journal->VolumeDeleted(volId) == 0);
@@ -130,11 +130,11 @@ RocksDBJournalVolumeIntegrationTest::ExpectReplayTail(int numVolumesWritten)
 {
     for (int volId = 0; volId < numVolumesWritten; volId++)
     {
-        EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()),
+        EXPECT_CALL(*(testAllocator->GetIContextReplayerFake()),
             ResetActiveStripeTail(volId))
             .Times(1);
     }
-    EXPECT_CALL(*(testAllocator->GetIContextReplayerMock()), ReplaySsdLsid).Times(1);
+    EXPECT_CALL(*(testAllocator->GetIContextReplayerFake()), ReplaySsdLsid).Times(1);
 }
 
 TEST_F(RocksDBJournalVolumeIntegrationTest, DisableJournalAndNotifyVolumeDeleted)

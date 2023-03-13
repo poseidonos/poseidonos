@@ -34,6 +34,11 @@
 
 #include <string.h>
 
+#include "src/allocator/context_manager/context/context_section.h"
+#include "src/allocator/context_manager/context/context_section_in_proto.h"
+#include "src/allocator/context_manager/segment_ctx/segment_ctx_extended.h"
+#include "src/allocator/context_manager/segment_ctx/segment_info.h"
+
 namespace pos
 {
 template<typename T>
@@ -88,4 +93,22 @@ protected:
     char* dataAddress = nullptr;
     ContextSectionAddr info;
 };
+
+template<>
+class ContextSection<SegmentCtxExtended*> : public ContextSectionInProto<SegmentCtxExtended*>
+{
+    // nothing to override at the moment
+};
+
+template<>
+class ContextSection<SegmentInfoData*> : public ContextSectionInProto<SegmentInfoData*>
+{
+public:
+    ContextSection(SegmentInfoData* target)
+    {
+        // this copy constructor enables SegmentCtx keeps SegmentInfoData items in vector
+        data = target;
+    }
+};
+
 } // namespace pos

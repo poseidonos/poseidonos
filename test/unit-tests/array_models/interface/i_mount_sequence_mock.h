@@ -16,6 +16,8 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, Flush, (), (override));
+    MOCK_METHOD(uint32_t, GetEstMountTimeSec, (), (override));
+    MOCK_METHOD(uint32_t, GetEstUnmountTimeSec, (), (override));
 };
 
 } // namespace pos

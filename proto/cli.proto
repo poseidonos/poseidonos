@@ -205,6 +205,24 @@ service PosCli {
     	};
 	}
 
+	rpc RemoveListener (RemoveListenerRequest) returns (RemoveListenerResponse) {
+		option (google.api.http) = {
+			post: "/v1/removelistener"
+		};
+	}
+
+	rpc ListListener (ListListenerRequest) returns (ListListenerResponse) {
+		option (google.api.http) = {
+			post: "/v1/listlistener"
+		};
+	}
+
+	rpc SetListenerAnaState (SetListenerAnaStateRequest) returns (SetListenerAnaStateResponse) {
+		option (google.api.http) = {
+			post: "/v1/setlisteneranastate"
+		};
+	}
+
 	rpc ListSubsystem (ListSubsystemRequest) returns (ListSubsystemResponse) {
 		option (google.api.http) = {
       		post: "/v1/listsubsystem"
@@ -221,6 +239,12 @@ service PosCli {
 		option (google.api.http) = {
       		post: "/v1/createtransport"
     	};
+	}
+
+	rpc ListTransport (ListTransportRequest) returns (ListTransportResponse) {
+		option (google.api.http) = {
+			post: "/v1/listtransport"
+		};
 	}
 
     // Volume Commands
@@ -1217,6 +1241,7 @@ message AddListenerRequest {
 		string transportType = 2;
 		string targetAddress = 3;
 		string transportServiceId = 4;
+		string uuid = 5;
 	}
 	Param param = 4;
 }
@@ -1231,6 +1256,89 @@ message AddListenerResponse {
 	PosInfo info = 4;
 }
 
+message RemoveListenerRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string transportType = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+	}
+	Param param = 4;
+}
+
+message RemoveListenerResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message SetListenerAnaStateRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+		string transportType = 2;
+		string targetAddress = 3;
+		string transportServiceId = 4;
+		string anaState = 5;
+	}
+	Param param = 4;
+}
+
+message SetListenerAnaStateResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message Listener {
+	message Address {
+		string trtype = 1;
+		string adrfam = 2;
+		string traddr = 3;
+		string trsvcid = 4;
+		string uuid = 5;
+	}
+	Address address = 1;
+	string anaState = 2;
+}
+
+message ListListenerRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+	message Param {
+		string subnqn = 1;
+	}
+	Param param = 4;
+}
+
+message ListListenerResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message ListenerList {
+			repeated Listener listenerlist = 1;
+		}
+		ListenerList data = 2;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
 message Subsystem {
 	string nqn = 1;
 	string subtype = 2;
@@ -1239,6 +1347,7 @@ message Subsystem {
 		string addressFamily = 2;
 		string targetAddress = 3;
 		string transportServiceId = 4;
+		string uuid = 5;
 	}
 	repeated AddressInfo listenAddresses = 3;
 	int32 allowAnyHost = 4;
@@ -1249,6 +1358,7 @@ message Subsystem {
 	string serialNumber = 6;
 	string modelNumber = 7;
 	int32 maxNamespaces = 8;
+	string uuid = 10;
 	message Namespace {
 		int32 nsid = 1;
 		string bdevName = 2;
@@ -1318,6 +1428,38 @@ message CreateTransportResponse {
 	string rid = 2;
 	message Result {
 		Status status = 1;
+	}
+	Result result = 3;
+	PosInfo info = 4;
+}
+
+message ListTransportRequest {
+	string command = 1;
+	string rid = 2;
+	string requestor = 3;
+}
+
+message Transport {
+	string type = 1;
+	int32 maxQueueDepth = 2;
+	int32 maxIoQpairsPerCtrlr = 3;
+	int32 inCapsuleDataSize = 4;
+	int32 maxIoSize = 5;
+	int32 ioUnitSize = 6;
+	int32 abortTimeoutSec = 7;
+	int32 bufCacheSize = 8;
+	int32 numSharedBuf = 9;
+}
+
+message ListTransportResponse {
+	string command = 1;
+	string rid = 2;
+	message Result {
+		Status status = 1;
+		message TransportList {
+			repeated Transport transportlist = 1;
+		}
+		TransportList data = 2;
 	}
 	Result result = 3;
 	PosInfo info = 4;
@@ -1406,6 +1548,7 @@ message MountVolumeRequest {
 		string name = 1;
 		string subnqn = 2;
 		string array = 3;
+		uint32 nsid = 4;
 	}
 	Param param = 4;
 }

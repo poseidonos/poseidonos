@@ -32,6 +32,7 @@
 
 #pragma once
 
+#include "array_mount_progress.h"
 #include "src/state/interface/i_state_observer.h"
 #include "src/state/interface/i_state_control.h"
 #include "src/volume/i_volume_manager.h"
@@ -83,5 +84,10 @@ private:
     string arrayName = "";
     IVolumeManager* volMgr = nullptr;
     IArrayRebuilder* rebuilder = nullptr;
+
+    ArrayMountProgress mountProgress;
+    ArrayMountProgress unmountProgress;
+    const static uint32_t MOUNT_PROGRESS_DEFAULT_OVERHEAD = 1;
+    const static uint32_t UNMOUNT_PROGRESS_DEFAULT_OVERHEAD = 60; // for detach volumes
 };
 } // namespace pos

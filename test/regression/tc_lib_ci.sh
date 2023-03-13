@@ -33,6 +33,8 @@ blk_offset=`shuf -i 0-${max_io_boundary_blk} -n 1`
 
 connectList=(0)
 
+complex_cnt=0
+
 #######################################################################
 # Section A
 #######################################################################
@@ -242,7 +244,9 @@ unmount_array()
     result=$(<result.txt)
 
     if [ "$result" == "" ]; then
-        print_result "there is a problem" 1
+        if [ -z $1 ]; then
+            print_result "there is a problem" 1
+        fi
         iexecc cat unmount_array.txt
         iexecc rm -rf unmount_array.txt result.txt
         return 1
@@ -318,21 +322,55 @@ normal_shutdown()
     print_info "Shutting down normally"
 
     iexecc rm -rf shutdown.txt result.txt
-    if [ $1 == "signal" ];then
+    arg="$1"
+    if [ -z $arg ];then
+        arg="normal"
+    fi
+    if [ $arg == "signal" ];then
         print_info "Shutdown as signal"
         pkill poseidonos
-    elif [ $1 == "stoponly" ];then
+    elif [ $arg == "stoponly" ];then
         texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
         print_info "Shutdown as system stop"
+    elif [ $arg == "complex" ];then
+        print_info "Shutdown as complex pattern"
+        complex_cnt=$((complex_cnt+1))
+        complex_number=$(($complex_cnt%3))
+        if [ $complex_number -eq "1" ];then
+            print_info "cli happend right after signal"
+            pkill poseidonos
+            unmount_array complex;
+            result=$?
+        elif [ $complex_number -eq "2" ];then
+            print_info "signal happend right after cli"
+            unmount_array complex &
+            pkill poseidonos
+        else
+            print_info "turn on POS, but kill right away"
+            pkill poseidonos
+            ps -C poseidonos > /dev/null
+            while [[ ${?} == 0 ]]
+            do
+                sleep 1s
+                ps -C poseidonos > /dev/null
+            done
+            start_pos &
+            ps -C poseidonos > /dev/null
+            while [[ ${?} == 1 ]]
+            do
+                ps -C poseidonos > /dev/null
+            done
+            pkill poseidonos
+        fi
+
+        pkill poseidonos
     else
         unmount_array;
         result=$?
-
         if [ $result != 0 ]; then
             print_result "failed to unmount array." 1
             return 1
         fi
-
         texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
     fi
     ps -C poseidonos > /dev/null
@@ -342,7 +380,7 @@ normal_shutdown()
         ps -C poseidonos > /dev/null
     done
 
-    if [ $1 != "signal" ];then
+    if [ $arg != "signal" ] && [ $arg != "complex" ];then
         iexecc cat shutdown.txt | jq ".Response.result.status.code" > result.txt
         result=$(<result.txt)
 
@@ -379,11 +417,14 @@ graceful_shutdown()
     do
         disconnect_nvmf_contollers ${i}
     done
-
-    if [ $1 == "signal" ];then
+    arg="$1"
+    if [ -z $arg ];then
+        arg="normal"
+    fi
+    if [ $arg == "signal" ];then
         print_info "Shutdown as signal"
         pkill poseidonos
-    elif [ $1 == "stoponly" ];then
+    elif [ $arg == "stoponly" ];then
         print_info "Shutdown as system stop"
         texecc ./bin/poseidonos-cli system stop --force --json-res --force > shutdown.txt
     else

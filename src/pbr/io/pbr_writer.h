@@ -41,7 +41,7 @@ namespace pbr
 class PbrWriter : public IPbrWriter
 {
 protected:
-    virtual int Write(pos::UblockSharedPtr dev, char* data, uint64_t startLba, uint32_t length) override;
+    virtual int Write(pos::UblockSharedPtr dev, char* data, uint64_t startOffset, uint32_t length) override;
     virtual int Write(string filePath, char* data, uint64_t startOffset, uint32_t length) override;
 };
 } // namespace pbr

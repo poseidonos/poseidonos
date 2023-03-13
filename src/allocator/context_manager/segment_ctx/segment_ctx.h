@@ -51,6 +51,7 @@
 
 namespace pos
 {
+class ISegmentFreeSubscriber;
 class TelemetryPublisher;
 class SegmentCtx : public IAllocatorFileIoClient, public ISegmentCtx
 {
@@ -113,13 +114,9 @@ public:
     virtual void ValidateBlks(VirtualBlks blks) override;
     virtual bool InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease) override;
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
+    virtual void AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber) override;
 
-    virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
-    virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
-    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
-
-    virtual SegmentInfo* GetSegmentInfos(void);
-    virtual void ResetInfos(SegmentId segId);
+    virtual SegmentInfoData* GetSegmentInfoDataArray(void);
 
 private:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
@@ -142,6 +139,7 @@ private:
     int _OnNumFreeSegmentChanged(void);
 
     void _UpdateSectionInfo(void);
+    void _NotifySubscribersOfSegmentFreed(SegmentId segmentId);
 
     // Data to be stored: Section 1
     ContextSection<SegmentCtxHeader> ctxHeader;
@@ -174,6 +172,7 @@ private:
     RebuildCtx* rebuildCtx;
     GcCtx* gcCtx;
     TelemetryPublisher* tp;
+    std::vector<ISegmentFreeSubscriber*> segmentFreedSubscribers;
 };
 
 } // namespace pos

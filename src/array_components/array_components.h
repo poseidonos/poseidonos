@@ -85,7 +85,7 @@ public:
         ArrayMountSequence* mountSequence = nullptr);
     virtual ~ArrayComponents(void);
     virtual ComponentsInfo* GetInfo(void);
-    virtual int Import(ArrayBuildInfo* buildInfo);
+    virtual int Import(ArrayBuildInfo* buildInfo, uint32_t arrayIndex);
     virtual int Mount(bool isWTEnabled);
     virtual int Unmount(void);
     virtual int Delete(void);

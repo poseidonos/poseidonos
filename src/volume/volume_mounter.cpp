@@ -61,7 +61,7 @@ VolumeMounter::~VolumeMounter(void)
 }
 
 int
-VolumeMounter::Do(string name, string subnqn)
+VolumeMounter::Do(string name, string subnqn, uint32_t nsId)
 {
     int ret = EID(UNMOUNT_VOL_DEBUG_MSG);
     VolumeBase* vol = volumeList.GetVolume(name);
@@ -109,13 +109,14 @@ VolumeMounter::Do(string name, string subnqn)
         return ret;
     }
 
-    if (nvmfTarget->TryToAttachNamespace(subnqn, vol->ID, arrayName) == false)
+    if (nvmfTarget->TryToAttachNamespace(subnqn, vol->ID, arrayName, nsId) == false)
     {
         ret = _RollBackVolumeMount(vol, subnqn);
     }
     else
     {
         vol->SetSubnqn(subnqn);
+        vol->SetNsid(nsId);
     }
 
     return ret;

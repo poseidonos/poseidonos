@@ -40,8 +40,8 @@ namespace pbr
 {
 class PbrReader : public IPbrReader
 {
-protected:
-    virtual int Read(pos::UblockSharedPtr dev, char* dataOut /* OUT PARAM */, uint64_t startLba, uint32_t length) override;
+public:
+    virtual int Read(pos::UblockSharedPtr dev, char* dataOut /* OUT PARAM */, uint64_t startOffset, uint32_t length) override;
     virtual int Read(string filePath, char* dataOut /* OUT PARAM */, uint64_t startOffset, uint32_t length) override;
 };
 } // namespace pbr

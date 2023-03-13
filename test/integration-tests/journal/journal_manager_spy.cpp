@@ -20,6 +20,7 @@
 #include "test/integration-tests/journal/journal_configuration_spy.h"
 #include "test/unit-tests/event_scheduler/event_scheduler_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
+#include "src/metadata/segment_context_updater.h"
 
 using ::testing::NiceMock;
 

@@ -31,50 +31,57 @@
  */
 
 #include "pbr_file_loader.h"
-#include "src/pbr/header/header_loader.h"
-#include "src/pbr/content/content_loader.h"
+#include "src/pbr/header/header_serializer.h"
 #include "src/pbr/content/content_serializer_factory.h"
-#include "src/include/pos_event_id.h"
+#include "src/pbr/io/pbr_reader.h"
+#include "src/logger/logger.h"
+
+#include <memory.h>
 
 namespace pbr
 {
 PbrFileLoader::PbrFileLoader(vector<string> fileList)
-: PbrFileLoader(new HeaderLoader(), fileList)
+: PbrFileLoader(make_unique<HeaderSerializer>(),
+    make_unique<PbrReader>(), fileList)
 {
 }
 
-PbrFileLoader::PbrFileLoader(IHeaderLoader* headerLoader,
-    vector<string> fileList)
-: headerLoader(headerLoader),
+PbrFileLoader::PbrFileLoader(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IPbrReader> pbrReader, vector<string> fileList)
+: headerSerializer(move(headerSerializer)),
+  pbrReader(move(pbrReader)),
   fileList(fileList)
 {
 }
 
 PbrFileLoader::~PbrFileLoader(void)
 {
-    delete headerLoader;
 }
 
 int
-PbrFileLoader::Load(vector<AteData*>& ateListOut)
+PbrFileLoader::Load(vector<unique_ptr<AteData>>& ateListOut)
 {
     int ret = 0;
+    uint32_t pbrSize = header::TOTAL_PBR_SIZE;
+    char pbrData[pbrSize];
     for (auto filePath : fileList)
     {
-        HeaderElement header;
-        ret = headerLoader->Load(&header, filePath);
+        memset(pbrData, 0, pbrSize);
+        int ret = pbrReader->Read(filePath, pbrData, 0, pbrSize);
         if (ret == 0)
         {
-            AteData* ateData;
-            ContentLoader contentLoader(ContentSerializerFactory::GetSerializer(header.revision));
-            ret = contentLoader.Load(ateData, filePath);
+            HeaderElement headerElem;
+            ret = headerSerializer->Deserialize(pbrData, header::LENGTH, &headerElem);
             if (ret == 0)
             {
-                ateListOut.push_back(ateData);
-            }
-            else
-            {
-                delete ateData;
+                auto serializer = ContentSerializerFactory::GetSerializer(headerElem.revision);
+                uint64_t startOffset = serializer->GetContentStartLba();
+                unique_ptr<AteData> ateData = nullptr;
+                ret = serializer->Deserialize(ateData, &pbrData[startOffset]);
+                if (ret == 0)
+                {
+                    ateListOut.push_back(move(ateData));
+                }
             }
         }
     }

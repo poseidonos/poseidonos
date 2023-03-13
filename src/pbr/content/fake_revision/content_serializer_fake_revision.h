@@ -46,7 +46,7 @@ public:
     ContentSerializerFakeRevision(void) = default;
     virtual ~ContentSerializerFakeRevision(void) = default;
     virtual int Serialize(char* dataOut /* OUT PARAM */, AteData* ateData) override;
-    virtual int Deserialize(AteData*& ateOut /* OUT PARAM */, char* rawData) override;
+    virtual int Deserialize(unique_ptr<AteData>& ateOut /* OUT PARAM */, char* rawData) override;
     virtual uint32_t GetContentSize(void) override;
     virtual uint64_t GetContentStartLba(void) override;
 
@@ -57,9 +57,8 @@ private:
     static uint64_t _GetBackupAteOffset(void);
     // REVISION CHANGED
     static const uint32_t revision = UINT32_MAX;
-    static const uint32_t TOTAL_PBR_SIZE = 64 * 1024;
     static const uint64_t PBR_CONTENT_START_LBA = header::LENGTH;
-    static const uint32_t PBR_CONTENT_SIZE = TOTAL_PBR_SIZE - PBR_CONTENT_START_LBA;
+    static const uint32_t PBR_CONTENT_SIZE = header::TOTAL_PBR_SIZE - PBR_CONTENT_START_LBA;
     static const uint64_t ATE_START_OFFSET = 0;
     static const uint64_t ATE_SIZE = 24 * 1024;
     static const uint64_t BACKUP_ATE_START_OFFSET = ATE_START_OFFSET + ATE_SIZE;

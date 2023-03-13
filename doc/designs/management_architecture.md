@@ -12,7 +12,7 @@ graph LR
 
     Admin --- |Manage PoseidonOS using Command| CliClient
     Admin --- |Read sysmlog| syslog
-    Admin --- |Manage PoseidonOS using GUI| POS-GUI
+    Admin --- |Manage PoseidonOS using GUI| PosGUI
     K8SAdmin --- K8S
     Developer --- |Troubleshooting| TelemetryDashboard
     Developer --- |Troubleshooting| Kibana
@@ -25,11 +25,10 @@ graph LR
     Prom --> |Telemetry, IPMI, and Log Data via REST API| 3rdParty
 
 
-
+    K8S[Kubernetes]
     CliClient[CLI Client]
     Prom[PromethesDB]
-    Prom --- Exporter
-    
+    Prom --- Exporter      
     
     
     subgraph ARION
@@ -42,11 +41,10 @@ graph LR
 
     ARION --- CliClient
     Trident --- CliClient
-    CliClient --- |CLI Request/Response via gRPC| CliServer
+    CliClient --- |gRPC Request/Response| CliServer
     Exporter --- Telemetry
     Exporter --- |IPMI Request/Response| IPMI
-    POS-GUI --- |Manage PoseidonOS| DAgent
-    Prom --> |Telemetry & IPMI Metric| POS-GUI
+    Prom --> |Telemetry & IPMI Metric| PosGUI
     pos.log --> Exporter
 
 
@@ -56,6 +54,7 @@ graph LR
     ElasticSearch[Elastic Search]
     TelemetryDashboard[Telemetry Dashboard]
     ElasticSearch --> Kibana
+    Exporter[Exporter]
     end
 
     pos.log --> |Event Log - Plain-text or Structured| ElasticSearch
@@ -65,27 +64,24 @@ graph LR
     subgraph M9K[Management Stack]
     DAgent[D-Agent]
     K8SDriver[Kubernetes CSI Driver]
-    MagnumIODriver[GPU Direct Storage Driver]
     PosGUI[PoseidonOS-GUI]
 
-    DAgent --- |REST API| K8S
+    DAgent --- |REST API| K8SDriver
+    PosGUI --- |REST API| DAgent
     end
 
     CliServer --- |gRPC request/response| DAgent
-    MagnumIODriver --- GPU
     K8SDriver --- K8S
 
 
 
     subgraph PoseidonOS
     Air[AIR]
-    Exporter[Exporter]
     CliServer[CLI Server]
     Telemetry[Telemetry Publisher]
     PosModule[PoseidonOS Modules]
     SPDK[SPDK]
     Logger[Logger]
-    K8S[Kubernetes]
     CliServer --- |NVMe Admin Request/Response| SPDK
     CliServer --- |PoseidonOS Command| PosModule
     PosModule --> |Metric| Telemetry
@@ -100,7 +96,7 @@ graph LR
 
 
     subgraph Pos[Poseidon Server Hardware]
-    SSDs[SSDs]
+    SSDs[NVMe SSDs]
     BMC[BMC]
     CPU
     Memory
@@ -114,8 +110,9 @@ graph LR
 
 
     subgraph OS
-    MagnumIO[GPU Direct Storage Interface Driver]
     IPMI[IPMI-Tools]
+    pos.log[pos.log]
+    syslog[sysmlog]
     end
     IPMI --- BMC
     GPU --- MagnumIO

@@ -45,15 +45,16 @@ enum class ReplayTaskId
     REPLAY_VOLUME_DELETION,
     FLUSH_METADATA,
     RESET_LOG_BUFFER,
-    FLUSH_PENDING_STRIPES
+    FLUSH_PENDING_STRIPES,
+    LOAD_REPLAYED_SEGMENT_CONTEXT
 };
 
 class ReplayProgressReporter
 {
 public:
     ReplayProgressReporter(void);
-
-    void RegisterTask(ReplayTaskId taskId, int taskWeight);
+    virtual ~ReplayProgressReporter(void) = default;
+    virtual void RegisterTask(ReplayTaskId taskId, int taskWeight);
     void TaskStarted(ReplayTaskId taskId, int numSubTasks);
     void SubTaskCompleted(ReplayTaskId taskId, int numCompleted = 1);
     void TaskCompleted(ReplayTaskId taskId);

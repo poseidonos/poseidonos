@@ -1,7 +1,7 @@
 ---
 Root:
   Event:
-  # General: 0 - 999
+  # General: 0 - 899
   -
     Id: 0
     Name: SUCCESS
@@ -18,54 +18,111 @@ Root:
     Solution:
   -
     Id: 2
-    Name: POS_TERMINATION_TRIGGERED
-    Severity:
-    Description: PoseidonOS termination has been requested. Entering a termination process..
-    Cause:
-    Solution:
-  -
-    Id: 3
-    Name: POS_STOP_FAILURE_BEING_TERMINATED
-    Severity:
-    Description: Failed to stop PoseidonOS.
-    Cause: PoseidonOS is already in termination process.
-    Solution: Please wait a moment.
-  -
-    Id: 4
     Name: POS_STOP_FAIULRE_MOUNTED_ARRAY_EXISTS
     Severity:
     Description: Failed to terminate PoseidonOS.
     Cause: An array is mounted.
     Solution: Please try the command after a while.
   -
-    Id: 5
-    Name: POS_TERMINATED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 6
+    Id: 3
     Name: POS_SYSTEMINFO_GET_VERSION
     Severity:
     Description: PoseidonOS version has been loaded.
     Cause:
     Solution:
 
+  # POS Finalize(Terminate): 900 - 999
+  -
+    Id: 900
+    Name: POS_SYSTEM_STOP_EXE
+    Severity: Trace
+    Description: PoseidonOS system stop CLI is executing.
+    Cause:
+    Solution:
+  -
+    Id: 901
+    Name: POS_TERMINATION_TRIGGERED
+    Severity: Trace
+    Description: PoseidonOS termination has been requested. Entering a termination process..
+    Cause:
+    Solution:
+  -
+    Id: 902
+    Name: POS_TERMINATION_FAILED_ALREADY_IN_PROGRESS
+    Severity: Trace
+    Description: Failed to stop PoseidonOS.
+    Cause: PoseidonOS is already in termination process.
+    Solution: Please wait a moment.
+  -
+    Id: 903
+    Name: POS_TRACE_TERMINATE_START
+    Severity: Trace
+    Description: The PoseidonOS is shutting down.
+    Cause:
+    Solution:
+  -
+    Id: 904
+    Name: POS_TRACE_TERMINATE_SUCCESS
+    Severity: Trace
+    Description: The PoseidonOS successfully terminated.
+    Cause:
+    Solution:
+  -
+    Id: 905
+    Name: POS_TRACE_TERMINATE_PHASE_1
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 1 progress.
+    Cause:
+    Solution:
+  -
+    Id: 906
+    Name: POS_TRACE_TERMINATE_PHASE_2
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 2 progress.
+    Cause:
+    Solution:
+  -
+    Id: 907
+    Name: POS_TRACE_TERMINATE_PHASE_3
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 3 progress.
+    Cause:
+    Solution:
+  -
+    Id: 908
+    Name: POS_TRACE_TERMINATE_PHASE_4
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 4 progress.
+    Cause:
+    Solution:
+  -
+    Id: 909
+    Name: POS_TRACE_TERMINATE_PHASE_5
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 5 progress.
+    Cause:
+    Solution:
+  -
+    Id: 910
+    Name: POS_TRACE_TERMINATE_PHASE_6
+    Severity: Trace
+    Description: The PoseidonOS is in termination phase 6 progress.
+    Cause:
+    Solution:
 
   # Trace: 1000 - 1099
   -
     Id: 1000
-    Name: POS_TRACE_STARTED
+    Name: POS_TRACE_INIT_START
     Severity: Trace
-    Description: The Poseidon OS started.
+    Description: The PoseidonOS started.
     Cause:
     Solution:
   -
     Id: 1001
     Name: POS_TRACE_INIT_SUCCESS
     Severity: Trace
-    Description: The Poseidon OS successfully initialized.
+    Description: The PoseidonOS successfully initialized.
     Cause:
     Solution:
   -
@@ -79,21 +136,7 @@ Root:
     Id: 1003
     Name: POS_TRACE_INIT_FAIL
     Severity: Trace
-    Description: The Poseidon OS Failed to initialize.
-    Cause:
-    Solution:
-  -
-    Id: 1004
-    Name: POS_TRACE_TERMINATING
-    Severity: Trace
-    Description: The Poseidon OS is shutting down.
-    Cause:
-    Solution:
-  -
-    Id: 1005
-    Name: POS_TRACE_TERMINATED
-    Severity: Trace
-    Description: The Poseidon OS successfully terminated.
+    Description: The PoseidonOS Failed to initialize.
     Cause:
     Solution:
   -
@@ -636,6 +679,48 @@ Root:
     Name: CLI_MEMORY_SNAPSHOT_DUMP_DONE
     Severity:
     Description: Memory snapshot dump has been done.
+    Cause:
+    Solution:
+  -
+    Id: 1253
+    Name: CLI_REMOVE_LISTENER_FAILURE
+    Severity:
+    Description: Failed to remove a listener.
+    Cause:
+    Solution:
+  -
+    Id: 1254
+    Name: CLI_REMOVE_LISTENER_SUCCESS
+    Severity:
+    Description: A listener has been removed.
+    Cause:
+    Solution:
+  -
+    Id: 1255
+    Name: CLI_LIST_LISTENER_FAILURE
+    Severity:
+    Description: Failed to list a listener.
+    Cause:
+    Solution:
+  -
+    Id: 1256
+    Name: CLI_LIST_LISTENER_SUCCESS
+    Severity:
+    Description: A listener has been listed.
+    Cause:
+    Solution:
+  -
+    Id: 1257
+    Name: CLI_SET_LISTENER_ANA_STATE_FAILURE
+    Severity:
+    Description: Failed to set a listener ana state.
+    Cause:
+    Solution:
+  -
+    Id: 1258
+    Name: CLI_SET_LISTENER_ANA_STATE_SUCCESS
+    Severity:
+    Description: A listener's ana state has been set.
     Cause:
     Solution:
   -
@@ -1333,7 +1418,41 @@ Root:
     Description: Failed to add a transport.
     Cause: An error occurred during RPC to SPDK.
     Solution:
-
+  -
+    Id: 2210
+    Name: REMOVE_LISTENER_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to remove a listener.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2211
+    Name: REMOVE_LISTENER_FAILURE_SPDK_FAILURE
+    Severity:
+    Description: Failed to remove a listener.
+    Cause: An error occurred during RPC to SPDK.
+    Solution:
+  -
+    Id: 2212
+    Name: LIST_LISTENER_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to list a listener.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2213
+    Name: SET_LISTENER_ANA_STATE_FAILURE_NO_SUBNQN
+    Severity:
+    Description: Failed to set a listener ana state.
+    Cause: Could not find the subsystem with the subnqn.
+    Solution:
+  -
+    Id: 2214
+    Name: SET_LISTENER_ANA_STATE_FAILURE_SPDK_FAILURE
+    Severity:
+    Description: Failed to set a listener ana state.
+    Cause: An error occurred during RPC to SPDK.
+    Solution:
 
     # PBR: 2300 - 2499
   -
@@ -1829,6 +1948,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2488
+    Name: BUILD_NVM_PARTITIONS_ERROR
+    Severity:
+    Description: NVM partition build failed because unexpected input value was found.
+    Cause:
+    Solution:
+  -
     Id: 2491
     Name: BUILD_SSD_PARTITIONS
     Severity:
@@ -1840,6 +1966,13 @@ Root:
     Name: BUILD_SSD_PARTITIONS_RESULT
     Severity:
     Description:
+    Cause:
+    Solution:
+  -
+    Id: 2493
+    Name: BUILD_SSD_PARTITIONS_ERROR
+    Severity:
+    Description: SSD partition build failed because unexpected input value was found.
     Cause:
     Solution:
   -
@@ -2457,6 +2590,20 @@ Root:
     Name: RAID_BUFFER_POOL_ALLOCATED
     Severity:
     Description: Buffer pool for RAID is allocated
+    Cause:
+    Solution:
+  -
+    Id: 2650
+    Name: ARRAY_MOUNT_PROGRESS
+    Severity:
+    Description: ARRAY_MOUNT_PROGRESS
+    Cause:
+    Solution:
+  -
+    Id: 2651
+    Name: ARRAY_UNMOUNT_PROGRESS
+    Severity:
+    Description: ARRAY_UNMOUNT_PROGRESS
     Cause:
     Solution:
   -
@@ -4690,6 +4837,7 @@ Root:
     Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
     Cause: There may have been on-disk bits corruption.
     Solution: Developers must analyze the issue.
+    
   # Metadata: 3300 - 3399
   -
     Id: 3300
@@ -6052,9 +6200,66 @@ Root:
     Cause:
     Solution:
 
+  # Volume: 4500 - 4599
   -
     Id: 4500
     Name: VOLUME_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4500
+    Name: VOLUME_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4501
+    Name: VOLUME_CREATE_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4502
+    Name: VOLUME_DELETE_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+    -
+    Id: 4503
+    Name: VOLUME_DETACH_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+    -
+    Id: 4504
+    Name: VOLUME_LOAD_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4505
+    Name: VOLUME_MOUNT_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4506
+    Name: VOLUME_UNMOUNT_EVENT
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4507
+    Name: VOLUME_UPDATE_EVENT
     Severity:
     Description:
     Cause:
@@ -6074,37 +6279,7 @@ Root:
     Cause:
     Solution:
 
-  -
-    Id: 4580
-    Name: LOGGER_FILTER_POLICY_DECODE_FAIL
-    Severity:
-    Description: Failed to decode logger filter policy.
-    Cause:
-    Solution:
-  -
-    Id: 4581
-    Name: LOGGER_FILTER_POLICY_FILE_NOT_FOUND
-    Severity:
-    Description: Failed to find a logger filter policy file.
-    Cause:
-    Solution: Check out the instructions in the help message of the command.
-  -
-    Id: 4582
-    Name: LOGGER_SET_LEVEL_FAILED
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
-    Id: 4583
-    Name: LOGGER_FILTER_APPLY_SUCCESS
-    Severity:
-    Description: Log filter has been applied.
-    Cause:
-    Solution:
-
-
-  # QoS: 4600 - 4999
+  # QoS: 4600 - 4699
   -
     Id: 4600
     Name: QOS_CLI_WRONG_MISSING_PARAMETER
@@ -6210,6 +6385,36 @@ Root:
     Description: Failed to find a array with the given name
     Cause: Wrong Array Name parameter provided
     Solution: Provide valid existing array name
+
+  # Apply Logger: 4700 - 4999
+  -
+    Id: 4700
+    Name: LOGGER_FILTER_POLICY_DECODE_FAIL
+    Severity:
+    Description: Failed to decode logger filter policy.
+    Cause:
+    Solution:
+  -
+    Id: 4701
+    Name: LOGGER_FILTER_POLICY_FILE_NOT_FOUND
+    Severity:
+    Description: Failed to find a logger filter policy file.
+    Cause:
+    Solution: Check out the instructions in the help message of the command.
+  -
+    Id: 4702
+    Name: LOGGER_SET_LEVEL_FAILED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 4703
+    Name: LOGGER_FILTER_APPLY_SUCCESS
+    Severity:
+    Description: Log filter has been applied.
+    Cause:
+    Solution:
 
   # IOPath nvmf: 5000 - 5099
   -
@@ -8211,6 +8416,63 @@ Root:
     Cause:
     Solution:
 
+  # Restore: 5800 - 5899
+  -
+    Id: 5900
+    Name: RESTORE_JSON_OBJECT_DUPLICATE
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5901
+    Name: RESTORE_JSON_OBJECT_EMPTY
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5902
+    Name: RESTORE_JSON_WRITE_SUCCESS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5903
+    Name: RESTORE_JSON_WRITE_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5904
+    Name: RESTORE_MSG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5905
+    Name: RESTORE_JSON_READ_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5906
+    Name: RESTORE_JSON_SUCCESS
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
+    Id: 5907
+    Name: RESTORE_JSON_FAIL
+    Severity:
+    Description:
+    Cause:
+    Solution:
 
   # RocksDBMetaFS: 6000 - 6099
   -

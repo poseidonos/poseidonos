@@ -76,6 +76,7 @@
   - [_**VolumeUsageBlockCount**_](#volumeusageblockcount)
 - [**Resource**](#resource)
   - [_**AvailableMemorySize**_](#availablememorysize)
+  - [_**ReactorUtilization**_](#reactorutilization)
 - [**Disk**](#disk)
   - [_**softMediaErrorLower**_](#softmediaerrorlower)
   - [_**softMediaErrorUpper**_](#softmediaerrorupper)
@@ -1273,6 +1274,21 @@ Resource group contains the metrics of the pos resource.
 **Introduced**: v0.10.0
 
 Available memory size
+
+---
+### _**ReactorUtilization**_
+
+**ID**: 100010
+
+**Type**: Gauge
+
+**Monitoring**: Mandatory
+
+**Labels**: {"index": Integer, "thread_id": Integer, "thread_name": String}
+
+**Introduced**: v0.13.0
+
+Reactor Utilization by CPU tick (idle, busy)
 
 ---
 ## **Disk**

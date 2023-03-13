@@ -103,13 +103,13 @@ Array::MakeDebugInfo(ArrayDebugInfo& obj)
 }
 
 int
-Array::Import(ArrayBuildInfo* buildInfo)
+Array::Import(ArrayBuildInfo* buildInfo, uint32_t arrayIndex)
 {
     POS_TRACE_INFO(EID(IMPORT_ARRAY_DEBUG), "array_name:{}, array_index:{}, array_uuid:{}",
-        buildInfo->arrayName, buildInfo->arrayIndex, buildInfo->arrayUuid);
+        buildInfo->arrayName, arrayIndex, buildInfo->arrayUuid);
     pthread_rwlock_wrlock(&stateLock);
     name_ = buildInfo->arrayName;
-    index_ = buildInfo->arrayIndex;
+    index_ = arrayIndex;
     uuid = buildInfo->arrayUuid;
     createdDateTime = buildInfo->createdDateTime;
     lastUpdatedDateTime = buildInfo->lastUpdatedDateTime;
@@ -134,7 +134,7 @@ Array::Import(ArrayBuildInfo* buildInfo)
     if (ret != 0)
     {
         POS_TRACE_WARN(ret, "array_name:{}, array_index:{}, array_uuid:{}",
-        buildInfo->arrayName, buildInfo->arrayIndex, buildInfo->arrayUuid);
+        buildInfo->arrayName, arrayIndex, buildInfo->arrayUuid);
     }
     return ret;
 }
@@ -227,9 +227,10 @@ Array::Delete(void)
         goto error;
     }
 
+    // Before removing the device list, PBR on the devices must be cleared.
+    _ClearPbr();
     _DeletePartitions();
     devMgr_->Clear();
-    _ClearPbr();
     state->SetDelete();
 
     pthread_rwlock_unlock(&stateLock);
@@ -555,25 +556,37 @@ Array::GetDevices(ArrayDeviceType type)
 int
 Array::_UpdatePbr(void)
 {
-    pbr::AteData* ate = _BuildAteData();
-    int ret = pbrAdapter->Update(ate);
-
-    POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "_UpdatePbr(name:{}, uuid:{}, ateuuid:{})",
-        ate->arrayName, uuid, ate->arrayUuid);
-    delete ate;
+    int ret = pbrAdapter->Update(_GetPbrDevs(), _BuildAteData());
     return ret;
 }
 
 void
 Array::_ClearPbr(void)
 {
-    pbrAdapter->Reset(name_);
+    pbrAdapter->Reset(_GetPbrDevs(), name_);
 }
 
-pbr::AteData*
+vector<UblockSharedPtr>
+Array::_GetPbrDevs(void)
+{
+    vector<pos::UblockSharedPtr> devs;
+    for (auto d : devMgr_->GetDevs())
+    {
+        if (d->GetState() != ArrayDeviceState::FAULT &&
+            d->GetType() == ArrayDeviceType::DATA)
+        {
+            devs.push_back(d->GetUblock());
+            POS_TRACE_INFO(EID(PBR_DEBUG_MSG), "_GetPbrDevs, sn:{}",
+                d->GetSerial());
+        }
+    }
+    return devs;
+}
+
+unique_ptr<pbr::AteData>
 Array::_BuildAteData(void)
 {
-    pbr::AteData* ate = new pbr::AteData();
+    unique_ptr<pbr::AteData> ate = make_unique<pbr::AteData>();
     ate->nodeUuid = NodeInfo::GetUuid();
     ate->arrayName = name_;
     ate->arrayUuid = uuid;

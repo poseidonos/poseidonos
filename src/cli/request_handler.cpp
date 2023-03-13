@@ -56,8 +56,10 @@
 #include "src/cli/handle_wbt_command.h"
 #include "src/cli/list_array_command.h"
 #include "src/cli/list_device_command.h"
+#include "src/cli/list_listener_command.h"
 #include "src/cli/list_qos_policies_command.h"
 #include "src/cli/list_subsystem_command.h"
+#include "src/cli/list_transport_command.h"
 #include "src/cli/list_volume_command.h"
 #include "src/cli/volume_info_command.h"
 #include "src/cli/list_wbt_command.h"
@@ -66,10 +68,12 @@
 #include "src/cli/mount_volume_command.h"
 #include "src/cli/rebuild_perf_impact_command.h"
 #include "src/cli/remove_device_command.h"
+#include "src/cli/remove_listener_command.h"
 #include "src/cli/rename_volume_command.h"
 #include "src/cli/reset_mbr_command.h"
 #include "src/cli/reset_qos_volume_policy_command.h"
 #include "src/cli/scan_device_command.h"
+#include "src/cli/set_listener_ana_state_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_log_command.h"
 #include "src/cli/set_log_preference_command.h"
@@ -108,7 +112,11 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["LISTSUBSYSTEM"] = new ListSubsystemCommand();
     cmdDictionary["SUBSYSTEMINFO"] = new ListSubsystemCommand();
     cmdDictionary["ADDLISTENER"] = new AddListenerCommand();
+    cmdDictionary["REMOVELISTENER"] = new RemoveListenerCommand();
+    cmdDictionary["SETLISTENERANASTATE"] = new SetListenerAnaStateCommand();
+    cmdDictionary["LISTLISTENER"] = new ListListenerCommand();
     cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
+    cmdDictionary["LISTTRANSPORT"] = new ListTransportCommand();
     cmdDictionary["CREATEVOLUME"] = new CreateVolumeCommand();
     cmdDictionary["DELETEVOLUME"] = new DeleteVolumeCommand();
     cmdDictionary["MOUNTVOLUME"] = new MountVolumeCommand();

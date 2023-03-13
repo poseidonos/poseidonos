@@ -45,7 +45,7 @@ public:
     explicit VolumeMounter(VolumeList& volumeList, std::string arrayName, int arrayID, VolumeEventPublisher* volumeEventPublisher = nullptr, NvmfTarget* nvmfTarget_ = nullptr);
     ~VolumeMounter(void) override;
 
-    int Do(string name, string subnqn);
+    int Do(string name, string subnqn, uint32_t nsId);
 
 private:
     NvmfTarget* nvmfTarget;

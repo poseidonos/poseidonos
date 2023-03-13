@@ -31,20 +31,30 @@
  */
 
 #include "pbr_updater.h"
-#include "src/pbr/header/header_writer.h"
-#include "src/pbr/content/content_writer.h"
+#include "src/pbr/header/header_serializer.h"
+#include "src/pbr/content/content_serializer_factory.h"
+#include "src/pbr/io/pbr_writer.h"
+#include "src/logger/logger.h"
+#include <memory.h>
+#include <rte_malloc.h>
 
 namespace pbr
 {
-PbrUpdater::PbrUpdater(uint32_t revision, vector<pos::UblockSharedPtr> devs)
-: PbrUpdater(new HeaderWriter(), new ContentWriter(revision), revision, devs)
+PbrUpdater::PbrUpdater(uint32_t revision, const vector<pos::UblockSharedPtr>& devs)
+: PbrUpdater(make_unique<HeaderSerializer>(),
+    ContentSerializerFactory::GetSerializer(revision),
+    make_unique<PbrWriter>(), revision, devs)
 {
 }
 
-PbrUpdater::PbrUpdater(IHeaderWriter* headerWriter, IContentWriter* contentWriter,
-    uint32_t revision, vector<pos::UblockSharedPtr> devs)
-: headerWriter(headerWriter),
-  contentWriter(contentWriter),
+PbrUpdater::PbrUpdater(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IContentSerializer> contentSerializer,
+    unique_ptr<IPbrWriter> pbrWriter,
+    uint32_t revision,
+    const vector<pos::UblockSharedPtr>& devs)
+: headerSerializer(move(headerSerializer)),
+  contentSerializer(move(contentSerializer)),
+  pbrWriter(move(pbrWriter)),
   revision(revision),
   devs(devs)
 {
@@ -52,41 +62,48 @@ PbrUpdater::PbrUpdater(IHeaderWriter* headerWriter, IContentWriter* contentWrite
 
 PbrUpdater::~PbrUpdater(void)
 {
-    delete contentWriter;
-    delete headerWriter;
+    for (auto dev : devs)
+    {
+        dev = nullptr;
+    }
+    devs.clear();
 }
 
 int
 PbrUpdater::Update(AteData* ateData)
 {
-    HeaderElement header { revision };
-    for (auto dev : devs)
+    HeaderElement headerElem { revision };
+    uint32_t pbrSize = header::LENGTH + contentSerializer->GetContentSize();
+    void* pbrData = rte_malloc(nullptr, pbrSize, pbrSize);
+    memset(pbrData, 0, pbrSize);
+    int ret = headerSerializer->Serialize(&headerElem, (char*)pbrData, header::LENGTH);
+    if (ret == 0)
     {
-        int ret = headerWriter->Write(&header, dev);
+        uint32_t contentOffset = contentSerializer->GetContentStartLba();
+        ret = contentSerializer->Serialize(&((char*)pbrData)[contentOffset], ateData);
         if (ret == 0)
         {
-            ret = contentWriter->Write(ateData, dev);
-        }
-        if (ret != 0)
-        {
-            return ret;
+            for (auto dev : devs)
+            {
+                pbrWriter->Write(dev, (char*)pbrData, 0, pbrSize);
+            }
         }
     }
-    return 0;
+    rte_free(pbrData);
+    return ret;
 }
 
 int
 PbrUpdater::Clear(void)
 {
+    uint32_t pbrSize = header::LENGTH + contentSerializer->GetContentSize();
+    void* pbrData = rte_malloc(nullptr, pbrSize, pbrSize);
+    memset(pbrData, 0, pbrSize);
     for (auto dev : devs)
     {
-        HeaderElement header { 0, "" };
-        int ret = headerWriter->Write(&header, dev);
-        if (ret != 0)
-        {
-            return ret;
-        }
+        pbrWriter->Write(dev, (char*)pbrData, 0, pbrSize);
     }
+    rte_free(pbrData);
     return 0;
 }
 } // namespace pbr

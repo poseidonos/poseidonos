@@ -523,7 +523,8 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"AddressCount\t"+
 				globals.FieldSeparator+"SerialNumber(SN)\t"+
 				globals.FieldSeparator+"ModelNumber(MN)\t"+
-				globals.FieldSeparator+"NamespaceCount")
+				globals.FieldSeparator+"NamespaceCount\t"+
+				globals.FieldSeparator+"Uuid")
 
 		// Horizontal line
 		fmt.Fprintln(w,
@@ -532,7 +533,8 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				globals.FieldSeparator+"------------\t"+
 				globals.FieldSeparator+"---------------------\t"+
 				globals.FieldSeparator+"---------------------\t"+
-				globals.FieldSeparator+"--------------")
+				globals.FieldSeparator+"--------------\t"+
+				globals.FieldSeparator+"-------------------------------------")
 
 		// Data
 		for _, subsystem := range res.GetResult().GetData().GetSubsystemlist() {
@@ -542,7 +544,99 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetListenAddresses()))+"\t"+
 					globals.FieldSeparator+subsystem.GetSerialNumber()+"\t"+
 					globals.FieldSeparator+subsystem.GetModelNumber()+"\t"+
-					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetNamespaces())))
+					globals.FieldSeparator+strconv.Itoa(len(subsystem.GetNamespaces()))+"\t"+
+					globals.FieldSeparator+subsystem.GetUuid())
+		}
+		w.Flush()
+
+	case "LISTLISTENER":
+		res := &pb.ListListenerResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w,
+			"Addr.trtype\t"+
+				globals.FieldSeparator+"Addr.adrfam\t"+
+				globals.FieldSeparator+"Addr.traddr\t"+
+				globals.FieldSeparator+"Addr.trsvcid\t"+
+				globals.FieldSeparator+"Addr.uuid\t"+
+				globals.FieldSeparator+"ana_state")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"------------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"------------------\t"+
+				globals.FieldSeparator+"--------------\t"+
+				globals.FieldSeparator+"-------------------------------------\t"+
+				globals.FieldSeparator+"---------------")
+
+		// Data
+		for _, listener := range res.GetResult().GetData().GetListenerlist() {
+			fmt.Fprintln(w,
+				listener.GetAddress().GetTrtype()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetAdrfam()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetTraddr()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetTrsvcid()+"\t"+
+					globals.FieldSeparator+listener.GetAddress().GetUuid()+"\t"+
+					globals.FieldSeparator+listener.GetAnaState())
+		}
+		w.Flush()
+
+	case "LISTTRANSPORT":
+		res := &pb.ListTransportResponse{}
+		protojson.Unmarshal([]byte(resJson), res)
+
+		status := res.GetResult().GetStatus()
+		if isFailed(*status) {
+			printEvent(*status)
+			return
+		}
+
+		w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, ' ', 0)
+
+		fmt.Fprintln(w,
+			"TR type\t"+
+				globals.FieldSeparator+"max QD\t"+
+				globals.FieldSeparator+"max IO Qpairs/ctrlr\t"+
+				globals.FieldSeparator+"incapsule data sz\t"+
+				globals.FieldSeparator+"max IO sz\t"+
+				globals.FieldSeparator+"IO unit sz\t"+
+				globals.FieldSeparator+"abort TO sec\t"+
+				globals.FieldSeparator+"buf cache sz\t"+
+				globals.FieldSeparator+"num shared buf")
+
+		// Horizontal line
+		fmt.Fprintln(w,
+			"-------\t"+
+				globals.FieldSeparator+"------\t"+
+				globals.FieldSeparator+"-------------------\t"+
+				globals.FieldSeparator+"-----------------\t"+
+				globals.FieldSeparator+"---------\t"+
+				globals.FieldSeparator+"----------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"------------\t"+
+				globals.FieldSeparator+"--------------")
+
+		// Data
+		for _, transport := range res.GetResult().GetData().GetTransportlist() {
+			fmt.Fprintln(w,
+				transport.GetType()+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetMaxQueueDepth()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetMaxIoQpairsPerCtrlr()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetInCapsuleDataSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetMaxIoSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetIoUnitSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetAbortTimeoutSec()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetBufCacheSize()), 10)+"\t"+
+					globals.FieldSeparator+strconv.FormatInt(int64(transport.GetNumSharedBuf()), 10))
 		}
 		w.Flush()
 
@@ -571,6 +665,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				fmt.Fprintln(w, "\t    adrfam : "+address.GetAddressFamily())
 				fmt.Fprintln(w, "\t    traddr : "+address.GetTargetAddress())
 				fmt.Fprintln(w, "\t    trsvcid : "+address.GetTransportServiceId())
+				fmt.Fprintln(w, "\t    uuid : "+address.GetUuid())
 				fmt.Fprint(w, "\t  }")
 			}
 			fmt.Fprintln(w, "")
@@ -583,6 +678,7 @@ func printResToHumanReadable(command string, resJson string, displayUnit bool) {
 				fmt.Fprintln(w, "serial_number\t: "+subsystem.GetSerialNumber())
 				fmt.Fprintln(w, "model_number\t: "+subsystem.GetModelNumber())
 				fmt.Fprintln(w, "max_namespaces\t:", subsystem.GetMaxNamespaces())
+				fmt.Fprintln(w, "uuid\t:", subsystem.GetUuid())
 				fmt.Fprint(w, "namespaces\t: ")
 				for _, namespace := range subsystem.GetNamespaces() {
 					fmt.Fprintln(w, "")

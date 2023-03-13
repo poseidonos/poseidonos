@@ -3,44 +3,20 @@
 #include <thread>
 
 #include "src/allocator/address/allocator_address_info.h"
-#include "test/integration-tests/journal/fake/i_segment_ctx_fake.h"
+#include "src/metadata/segment_context_updater.h"
+#include "test/integration-tests/journal/fake/segment_ctx_fake.h"
 
 namespace pos
 {
-IContextManagerFake::IContextManagerFake(ISegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo)
+IContextManagerFake::IContextManagerFake(SegmentCtxFake* segmentCtx, AllocatorAddressInfo* addrInfo)
 : segmentCtx(segmentCtx),
   addrInfo(addrInfo)
 {
     ON_CALL(*this, FlushContexts).WillByDefault(::testing::Invoke(this, &IContextManagerFake::_FlushContexts));
-    EXPECT_CALL(*this, FlushContexts(_, true, _)).Times(AtLeast(0));
 }
 
 IContextManagerFake::~IContextManagerFake(void)
 {
-}
-
-void
-IContextManagerFake::SetSegmentContextUpdaterPtr(ISegmentCtx* segmentContextUpdater_)
-{
-    segmentCtx = (ISegmentCtxFake*)segmentContextUpdater_;
-}
-
-ISegmentCtx*
-IContextManagerFake::GetSegmentContextUpdaterPtr(void)
-{
-    return segmentCtx;
-}
-
-void
-IContextManagerFake::PrepareVersionedSegmentCtx(IVersionedSegmentContext* versionedSegCtx_)
-{
-    versionedSegCtx = versionedSegCtx_;
-}
-
-IVersionedSegmentContext*
-IContextManagerFake::GetVersionedSegmentContext(void)
-{
-    return versionedSegCtx;
 }
 
 uint64_t
@@ -50,11 +26,16 @@ IContextManagerFake::GetStoredContextVersion(int owner)
     return contextVersion;
 }
 
-int
-IContextManagerFake::_FlushContexts(EventSmartPtr callback, bool sync, int logGroupId)
+SegmentCtx*
+IContextManagerFake::GetSegmentCtx(void)
 {
-    SegmentInfoData* vscSegInfoData = (true == sync) ? nullptr : versionedSegCtx->GetUpdatedInfoDataToFlush(logGroupId);
-    segmentCtx->FlushContexts(vscSegInfoData);
+    return dynamic_cast<SegmentCtx*>(segmentCtx);
+}
+
+int
+IContextManagerFake::_FlushContexts(EventSmartPtr callback, bool sync, ContextSectionBuffer buffer)
+{
+    segmentCtx->FlushContexts(reinterpret_cast<SegmentInfoData*>(buffer.buffer));
     if (callback != nullptr)
     {
         std::thread eventExecution(&Event::Execute, callback);

@@ -32,6 +32,8 @@
 
 #include "meta_update_call_back.h"
 
+#include "src/metadata/segment_context_updater.h"
+
 namespace pos
 {
 
@@ -41,11 +43,11 @@ MetaUpdateCallback::MetaUpdateCallback(void)
 {
 }
 
-MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, ISegmentCtx* segmentCtx_,
+MetaUpdateCallback::MetaUpdateCallback(bool isFrontEnd, SegmentContextUpdater* segmentCtxUpdater_,
     CallbackType type, uint32_t weight, SystemTimeoutChecker* timeoutCheckerArg,
     EventScheduler* eventSchedulerArg)
 : Callback(isFrontEnd, type, weight, timeoutCheckerArg, eventSchedulerArg),
-  segmentCtx(segmentCtx_),
+  segmentCtxUpdater(segmentCtxUpdater_),
   logGroupId(UINT32_MAX)
 {
 }
@@ -71,18 +73,18 @@ MetaUpdateCallback::GetLogGroupId(void)
 void
 MetaUpdateCallback::ValidateBlks(VirtualBlks blks)
 {
-    segmentCtx->ValidateBlocksWithGroupId(blks, logGroupId);
+    segmentCtxUpdater->ValidateBlocksWithGroupId(blks, logGroupId);
 }
 
 bool
 MetaUpdateCallback::InvalidateBlks(VirtualBlks blks, bool isForced)
 {
-    return segmentCtx->InvalidateBlocksWithGroupId(blks, isForced, logGroupId);
+    return segmentCtxUpdater->InvalidateBlocksWithGroupId(blks, isForced, logGroupId);
 }
 
 bool
 MetaUpdateCallback::UpdateOccupiedStripeCount(StripeId lsid)
 {
-    return segmentCtx->UpdateStripeCount(lsid, logGroupId);
+    return segmentCtxUpdater->UpdateOccupiedStripeCountWithGroupId(lsid, logGroupId);
 }
 } // namespace pos

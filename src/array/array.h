@@ -35,6 +35,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "src/array/partition/partition_services.h"
 #include "src/array/device/array_device_manager.h"
@@ -88,11 +89,14 @@ public:
         PartitionManager* ptnMgr, ArrayState* arrayState, PartitionServices* svc, EventScheduler* eventScheduler,
         ArrayServiceLayer* arrayservice, pbr::PbrAdapter* pbrAdapter = nullptr);
     virtual ~Array(void);
-    virtual int Import(ArrayBuildInfo* buildInfo);
+    virtual int Import(ArrayBuildInfo* buildInfo, uint32_t arrayIndex);
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
+
     virtual int Delete(void);
     virtual int AddSpare(string devName);
     virtual int RemoveSpare(string devName);
@@ -132,7 +136,8 @@ private:
     void _DeletePartitions(void);
     int _UpdatePbr(void);
     void _ClearPbr(void);
-    pbr::AteData* _BuildAteData(void);
+    vector<UblockSharedPtr> _GetPbrDevs(void);
+    unique_ptr<pbr::AteData> _BuildAteData(void);
     void _RebuildDone(vector<IArrayDevice*> dst, vector<IArrayDevice*> src, RebuildResult result);
     void _DetachSpare(IArrayDevice* target);
     void _DetachData(IArrayDevice* target);

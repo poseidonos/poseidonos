@@ -31,24 +31,28 @@
  */
 
 #include "pbr_file_updater.h"
-#include "src/pbr/header/header_writer.h"
-#include "src/pbr/content/content_writer.h"
+#include "src/pbr/header/header_serializer.h"
+#include "src/pbr/content/content_serializer_factory.h"
+#include "src/pbr/io/pbr_writer.h"
 #include "src/logger/logger.h"
-#include "src/include/pos_event_id.h"
-
-#include <iostream>
 
 namespace pbr
 {
 PbrFileUpdater::PbrFileUpdater(uint32_t revision, string filePath)
-: PbrFileUpdater(new HeaderWriter(), new ContentWriter(revision), revision, filePath)
+: PbrFileUpdater(make_unique<HeaderSerializer>(),
+    ContentSerializerFactory::GetSerializer(revision),
+    make_unique<PbrWriter>(), revision, filePath)
 {
 }
 
-PbrFileUpdater::PbrFileUpdater(IHeaderWriter* headerWriter, IContentWriter* contentWriter,
-    uint32_t revision, string filePath)
-: headerWriter(headerWriter),
-  contentWriter(contentWriter),
+PbrFileUpdater::PbrFileUpdater(unique_ptr<IHeaderSerializer> headerSerializer,
+    unique_ptr<IContentSerializer> contentSerializer,
+    unique_ptr<IPbrWriter> pbrWriter,
+    uint32_t revision,
+    string filePath)
+: headerSerializer(move(headerSerializer)),
+  contentSerializer(move(contentSerializer)),
+  pbrWriter(move(pbrWriter)),
   revision(revision),
   filePath(filePath)
 {
@@ -56,18 +60,24 @@ PbrFileUpdater::PbrFileUpdater(IHeaderWriter* headerWriter, IContentWriter* cont
 
 PbrFileUpdater::~PbrFileUpdater(void)
 {
-    delete contentWriter;
-    delete headerWriter;
 }
 
 int
 PbrFileUpdater::Update(AteData* ateData)
 {
-    HeaderElement header{ revision };
-    int ret = headerWriter->Write(&header, filePath);
+    HeaderElement headerElem { revision };
+    uint32_t pbrSize = header::LENGTH + contentSerializer->GetContentSize();
+    char pbrData[pbrSize];
+    memset(pbrData, 0, pbrSize);
+    int ret = headerSerializer->Serialize(&headerElem, pbrData, header::LENGTH);
     if (ret == 0)
     {
-        ret = contentWriter->Write(ateData, filePath);
+        uint32_t contentOffset = contentSerializer->GetContentStartLba();
+        ret = contentSerializer->Serialize(&pbrData[contentOffset], ateData);
+        if (ret == 0)
+        {
+            pbrWriter->Write(filePath, pbrData, 0, pbrSize);
+        }
     }
     return ret;
 }

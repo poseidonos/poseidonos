@@ -51,25 +51,18 @@ enum class ArrayBuildType
 class ArrayBuildInfo
 {
 public:
-    void Dispose(void)
+    ArrayBuildInfo(ArrayBuildType buildType, string arrayName,
+        string arrayUuid, uint64_t createdDateTime, uint64_t lastUpdatedDateTime,
+        vector<ArrayDevice*> devices, vector<Partition*> partitions)
+    : buildType(buildType), arrayName(arrayName), arrayUuid(arrayUuid),
+      createdDateTime(createdDateTime), lastUpdatedDateTime(lastUpdatedDateTime),
+      devices(devices), partitions(partitions)
     {
-        for (auto i : devices)
-        {
-            delete i;
-        }
-        devices.clear();
-        for (auto i : partitions)
-        {
-            delete i;
-        }
-        partitions.clear();
     }
     virtual ~ArrayBuildInfo() {};
-    int buildResult;
     ArrayBuildType buildType;
     string arrayName;
     string arrayUuid;
-    uint32_t arrayIndex;
     uint64_t createdDateTime;
     uint64_t lastUpdatedDateTime;
     vector<ArrayDevice*> devices;

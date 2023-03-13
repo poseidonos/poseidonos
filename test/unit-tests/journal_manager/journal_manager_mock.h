@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, Shutdown, (), (override));
     MOCK_METHOD(void, Flush, (), (override));
+    MOCK_METHOD(ISegmentFreeSubscriber*, GetSegmentFreeSubscriber, (), (override));
 };
 
 } // namespace pos

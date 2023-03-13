@@ -32,33 +32,33 @@
 
 #pragma once
 
-#include "src/allocator/i_segment_ctx.h"
 #include "src/journal_manager/log_buffer/i_versioned_segment_context.h"
 
 namespace pos
 {
 class PartitionLogicalSize;
+class ISegmentCtx;
+class IVersionedSegmentContext;
 
-class SegmentContextUpdater : public ISegmentCtx
+class SegmentContextUpdater
 {
 public:
+    SegmentContextUpdater(void) = default;
     SegmentContextUpdater(ISegmentCtx* segmentCtx_, IVersionedSegmentContext* versionedContext_,
         const PartitionLogicalSize* addrInfo_);
     virtual ~SegmentContextUpdater(void);
 
-    virtual void ValidateBlks(VirtualBlks blks);
-    virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
-    virtual bool UpdateOccupiedStripeCount(StripeId lsid);
     virtual void ValidateBlocksWithGroupId(VirtualBlks blks, int logGroupId);
     virtual bool InvalidateBlocksWithGroupId(VirtualBlks blks, bool isForced, int logGroupId);
-    virtual bool UpdateStripeCount(StripeId lsid, int logGroupId);
-    virtual void ResetInfos(SegmentId segId);
-    
+    virtual bool UpdateOccupiedStripeCountWithGroupId(StripeId lsid, int logGroupId);
+
+    // For IT
+    virtual void SetVersionedSegmentContext(IVersionedSegmentContext* versionedSegmentContext);
+
 private:
     const PartitionLogicalSize* addrInfo;
     ISegmentCtx* activeSegmentCtx;
     IVersionedSegmentContext* versionedContext;
-    pthread_rwlock_t lock;
 };
 
 } // namespace pos

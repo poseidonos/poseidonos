@@ -11,7 +11,7 @@ namespace pbr
 TEST(PbrSelector, Select_testIfNoCandidatesReturnsError)
 {
     // Given
-    vector<AteData*> emptyCandidates;
+    vector<unique_ptr<AteData>> emptyCandidates;
 
     // When
     int actual = PbrSelector::Select(emptyCandidates);
@@ -23,11 +23,11 @@ TEST(PbrSelector, Select_testIfNoCandidatesReturnsError)
 TEST(PbrSelector, Select_testIfNoneOfCandidatesElected)
 {
     // Given
-    vector<AteData*> candidates;
-    AteData* ateData = new AteData();
+    vector<unique_ptr<AteData>> candidates;
+    unique_ptr<AteData> ateData = make_unique<AteData>();
     ateData->lastUpdatedDateTime = 10000; // not interesting
     ateData->arrayUuid = "uuid"; // not interesting
-    candidates.push_back(ateData);
+    candidates.push_back(move(ateData));
 
     unique_ptr<MockPbrVoting> mockPbrVoting = make_unique<MockPbrVoting>();
     map<string, AteData*> emptyWinner;
@@ -46,22 +46,22 @@ TEST(PbrSelector, Select_testIfOnlyWinnersRemainAmongCandidates)
 {
     // Given
     // the candidate whose arrayName is "winner" wins with a majority of the votes.
-    vector<AteData*> candidates;
-    AteData* ateData1 = new AteData();
+    vector<unique_ptr<AteData>> candidates;
+    unique_ptr<AteData> ateData1 = make_unique<AteData>();
     ateData1->lastUpdatedDateTime = 50000;
     ateData1->arrayUuid = "uuid";
     ateData1->arrayName = "loser";
-    AteData* ateData2 = new AteData();
+    unique_ptr<AteData> ateData2 = make_unique<AteData>();
     ateData2->lastUpdatedDateTime = 30000;
     ateData2->arrayUuid = "uuid";
     ateData2->arrayName = "winner";
-    AteData* ateData3 = new AteData();
+    unique_ptr<AteData> ateData3 = make_unique<AteData>();
     ateData3->lastUpdatedDateTime = 30000;
     ateData3->arrayUuid = "uuid";
     ateData3->arrayName = "winner";
-    candidates.push_back(ateData1);
-    candidates.push_back(ateData2);
-    candidates.push_back(ateData3);
+    candidates.push_back(move(ateData1));
+    candidates.push_back(move(ateData2));
+    candidates.push_back(move(ateData3));
 
     // When
     int actual = PbrSelector::Select(candidates);
@@ -70,9 +70,6 @@ TEST(PbrSelector, Select_testIfOnlyWinnersRemainAmongCandidates)
     ASSERT_EQ(1, candidates.size()); // candidates who failed to win should be removed
     ASSERT_EQ("winner", candidates.front()->arrayName);
     ASSERT_EQ(30000, candidates.front()->lastUpdatedDateTime);
-
-    // Clean up
-    delete candidates.front();
 }
 
 }  // namespace pbr

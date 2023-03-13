@@ -20,13 +20,6 @@ SegmentCtxExtended::ToBytes(char* destBuf)
             POS_TRACE_ERROR(EID(SEGMENTCTX_EXTENDED_FAILED_TO_SERIALIZE), "");
             return false;
         }
-
-        // fill zeros up to ONSSD_SIZE bytes-position
-        for(unsigned int bytePos = effectiveSize; bytePos < ONSSD_SIZE; bytePos ++)
-        {
-            destBuf[bytePos] = 0;
-        }
-
         return true;
     }
     else

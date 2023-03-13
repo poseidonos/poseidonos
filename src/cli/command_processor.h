@@ -91,10 +91,14 @@ using grpc_cli::ListArrayRequest;
 using grpc_cli::ListArrayResponse;
 using grpc_cli::ListDeviceRequest;
 using grpc_cli::ListDeviceResponse;
+using grpc_cli::ListListenerRequest;
+using grpc_cli::ListListenerResponse;
 using grpc_cli::ListQOSPolicyRequest;
 using grpc_cli::ListQOSPolicyResponse;
 using grpc_cli::ListSubsystemRequest;
 using grpc_cli::ListSubsystemResponse;
+using grpc_cli::ListTransportRequest;
+using grpc_cli::ListTransportResponse;
 using grpc_cli::ListVolumeRequest;
 using grpc_cli::ListVolumeResponse;
 using grpc_cli::LoggerInfoRequest;
@@ -111,6 +115,8 @@ using grpc_cli::QosResetVolumePolicyResponse;
 using grpc_cli::QosVolumeNameParam;
 using grpc_cli::RebuildArrayRequest;
 using grpc_cli::RebuildArrayResponse;
+using grpc_cli::RemoveListenerRequest;
+using grpc_cli::RemoveListenerResponse;
 using grpc_cli::RemoveSpareRequest;
 using grpc_cli::RemoveSpareResponse;
 using grpc_cli::ReplaceArrayDeviceRequest;
@@ -121,6 +127,8 @@ using grpc_cli::ResetMbrRequest;
 using grpc_cli::ResetMbrResponse;
 using grpc_cli::ScanDeviceRequest;
 using grpc_cli::ScanDeviceResponse;
+using grpc_cli::SetListenerAnaStateRequest;
+using grpc_cli::SetListenerAnaStateResponse;
 using grpc_cli::SetLogLevelRequest;
 using grpc_cli::SetLogLevelResponse;
 using grpc_cli::SetLogPreferenceRequest;
@@ -217,9 +225,15 @@ public:
     grpc::Status ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* request, CreateSubsystemResponse* reply);
     grpc::Status ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* request, DeleteSubsystemResponse* reply);
     grpc::Status ExecuteAddListenerCommand(const AddListenerRequest* request, AddListenerResponse* reply);
+    grpc::Status ExecuteRemoveListenerCommand(const RemoveListenerRequest* request, RemoveListenerResponse* reply);
+    grpc::Status ExecuteListListenerCommand(const ListListenerRequest* request, ListListenerResponse* reply);
+    grpc::Status ExecuteSetListenerAnaStateCommand(const SetListenerAnaStateRequest* request, SetListenerAnaStateResponse* reply);
     grpc::Status ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply);
     grpc::Status ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* request, SubsystemInfoResponse* reply);
+
+    // Transport Commands
     grpc::Status ExecuteCreateTransportCommand(const CreateTransportRequest* request, CreateTransportResponse* reply);
+    grpc::Status ExecuteListTransportCommand(const ListTransportRequest* request, ListTransportResponse* reply);
 
     // Volume Commands
     grpc::Status ExecuteCreateVolumeCommand(const CreateVolumeRequest* request, CreateVolumeResponse* reply);

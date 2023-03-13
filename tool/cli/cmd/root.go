@@ -23,6 +23,7 @@ import (
 	"cli/cmd/subsystemcmds"
 	"cli/cmd/systemcmds"
 	"cli/cmd/telemetrycmds"
+	"cli/cmd/transportcmds"
 	"cli/cmd/volumecmds"
 	"pnconnector/src/log"
 	"pnconnector/src/routers/m9k/model"
@@ -146,6 +147,7 @@ func addCmd() {
 	RootCmd.AddCommand(WbtCmd)
 	RootCmd.AddCommand(qoscmds.QosCmd)
 	RootCmd.AddCommand(telemetrycmds.TelemetryCmd)
+	RootCmd.AddCommand(transportcmds.TransportCmd)
 	RootCmd.AddCommand(completionCmd)
 	RootCmd.AddCommand(clustercmds.ClusterCmd)
 }

@@ -17,6 +17,7 @@
 #include "src/helper/rpc/spdk_rpc_client.h"
 #include "src/include/array_config.h"
 #include "src/include/nvmf_const.h"
+#include "src/include/poseidonos_interface.h"
 #include "src/io_scheduler/io_dispatcher_submission.h"
 #include "src/logger/logger.h"
 #include "src/logger/preferences.h"
@@ -24,12 +25,11 @@
 #include "src/qos/qos_common.h"
 #include "src/qos/qos_manager.h"
 #include "src/resource_checker/smart_collector.h"
+#include "src/restore/restore_manager.h"
 #include "src/sys_info/space_info.h"
 #include "src/volume/volume_base.h"
 #include "src/volume/volume_manager.h"
 #include "src/volume/volume_status_property.h"
-#include "src/volume/volume_base.h"
-#include "src/include/array_config.h"
 #include "src/wbt/wbt_cmd_handler.h"
 
 CommandProcessor::CommandProcessor(void)
@@ -83,21 +83,31 @@ CommandProcessor::ExecuteSystemInfoCommand(const SystemInfoRequest* request, Sys
 grpc::Status
 CommandProcessor::ExecuteStopSystemCommand(const StopSystemRequest* request, StopSystemResponse* reply)
 {
+    POS_REPORT_TRACE(EID(POS_SYSTEM_STOP_EXE), "system stop CLI is executing...");
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
     Status status = grpc::Status::OK;
     int eventId = 0;
-    ArrayMgr()->UnmountAllArrayAndStop();
     if (!_IsPosTerminating())
     {
         _SetPosTerminating(true);
-        pos_cli::Exit(); // ToDo (mj): gRPC CLI server temporarily uses pos_cli::Exit()
+        POS_REPORT_TRACE(EID(POS_TERMINATION_TRIGGERED), "Entering a termination process...");
+        PoseidonosInterface* interface = PoseidonosInterface::GetInterface();
+        if (interface != nullptr)
+        {
+            // Destroy cli server should done outside cli context 
+            // If cli server shutdown is called in this context, dead lock happend
+            // This context waits cli server's exit, but cli server's exit waits all cli done.
+            // So, we just send the signal to main() thread can waits all cli done.
+            interface->TriggerTerminate();
+        }
         eventId = EID(SUCCESS);
     }
     else
     {
-        eventId = EID(POS_STOP_FAILURE_BEING_TERMINATED);
+        POS_REPORT_TRACE(EID(POS_TERMINATION_FAILED_ALREADY_IN_PROGRESS), "already in termination process");
+        eventId = EID(POS_TERMINATION_FAILED_ALREADY_IN_PROGRESS);
     }
     _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -268,7 +278,7 @@ CommandProcessor::ExecuteGetTelemetryPropertyCommand(const GetTelemetryPropertyR
     TelemetryClient* tc = TelemetryClientSingleton::Instance();
 
     bool isRunning = tc->IsRunning();
-    std::string publicationListPath = tc->GetPublicationList();    
+    std::string publicationListPath = tc->GetPublicationList();
 
     reply->mutable_result()->mutable_data()->set_status(isRunning);
     reply->mutable_result()->mutable_data()->set_publicationlistpath(publicationListPath);
@@ -572,6 +582,7 @@ CommandProcessor::ExecuteCreateArrayCommand(const CreateArrayRequest* request, C
     {
         _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
+        RestoreManagerSingleton::Instance()->ArrayCreate(arrayName);
         return grpc::Status::OK;
     }
 }
@@ -631,6 +642,7 @@ CommandProcessor::ExecuteAutocreateArrayCommand(const AutocreateArrayRequest* re
         POS_TRACE_INFO(EID(CLI_AUTOCREATE_ARRAY_SUCCESS), "");
         _SetEventStatus(ret, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
+        RestoreManagerSingleton::Instance()->ArrayCreate(arrayName);
         return grpc::Status::OK;
     }
 }
@@ -662,6 +674,7 @@ CommandProcessor::ExecuteDeleteArrayCommand(const DeleteArrayRequest* request, D
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->ArrayDelete(arrayName);
     return grpc::Status::OK;
 }
 
@@ -708,12 +721,13 @@ CommandProcessor::ExecuteMountArrayCommand(const MountArrayRequest* request, Mou
             return grpc::Status::OK;
         }
 
-        array->SetTargetAddress(arrayName,targetAddress);
+        array->SetTargetAddress(arrayName, targetAddress);
     }
 
     QosManagerSingleton::Instance()->UpdateArrayMap(arrayName);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->SetArrayMountState(arrayName, true, isWTenabled, targetAddress);
     return grpc::Status::OK;
 }
 
@@ -733,6 +747,7 @@ CommandProcessor::ExecuteUnmountArrayCommand(const UnmountArrayRequest* request,
     QosManagerSingleton::Instance()->DeleteEntryArrayMap(arrayName);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->SetArrayMountState(arrayName, false, false);
     return grpc::Status::OK;
 }
 
@@ -866,7 +881,7 @@ CommandProcessor::ExecuteRebuildArrayCommand(const RebuildArrayRequest* request,
     reply->set_rid(request->rid());
 
     string arrayName = (request->param()).name();
-    IArrayMgmt* array =  ArrayMgr();
+    IArrayMgmt* array = ArrayMgr();
     int ret = array->Rebuild(arrayName);
     _SetEventStatus(ret, reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -1002,7 +1017,7 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
         {
             delete spdkRpcClient;
         }
-        
+
         int eventId = EID(CLI_CREATE_DEVICE_FAILURE_NUMA_COUNT_EQGT_TOTAL);
         _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
@@ -1021,7 +1036,7 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
             numa);
 
         delete spdkRpcClient;
-        
+
         if (ret.first != 0)
         {
             int eventId = EID(CLI_CREATE_DEVICE_FAILURE);
@@ -1034,6 +1049,7 @@ CommandProcessor::ExecuteCreateDeviceCommand(const CreateDeviceRequest* request,
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->DeviceCreate(name, devType, blockSize, numBlocks, numa);
     return grpc::Status::OK;
 }
 
@@ -1185,7 +1201,7 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     NvmfTarget target;
 
     subnqn = (request->param()).nqn();
-    
+
     if (command == "CREATESUBSYSTEMAUTO")
     {
         if (nullptr != target.FindSubsystem(subnqn))
@@ -1237,7 +1253,7 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     if (ret.first != SUCCESS)
     {
         POS_TRACE_INFO(EID(CREATE_SUBSYSTEM_FAILURE), "subnqn:{}, serialNumber:{}, modelNumber:{}, maxNamespaces:{}, allowAnyHost:{}, anaReporting:{}, spdkRpcMsg:{}",
-            subnqn, serialNumber, modelNumber, maxNamespaces,allowAnyHost, anaReporting, ret.second);
+            subnqn, serialNumber, modelNumber, maxNamespaces, allowAnyHost, anaReporting, ret.second);
         _SetEventStatus(EID(CREATE_SUBSYSTEM_FAILURE), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1246,6 +1262,7 @@ CommandProcessor::ExecuteCreateSubsystemCommand(const CreateSubsystemRequest* re
     POS_TRACE_INFO(EID(SUCCESS), "subnqn:{}", subnqn);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->SubsystemCreate(subnqn, serialNumber, modelNumber, maxNamespaces, allowAnyHost, anaReporting);
     return grpc::Status::OK;
 }
 
@@ -1326,6 +1343,7 @@ CommandProcessor::ExecuteDeleteSubsystemCommand(const DeleteSubsystemRequest* re
     POS_TRACE_INFO(EID(SUCCESS), "subnqn:{}", subnqn);
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->SubsystemDelete(subnqn);
     return grpc::Status::OK;
 }
 
@@ -1370,6 +1388,138 @@ CommandProcessor::ExecuteAddListenerCommand(const AddListenerRequest* request, A
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->ListenerAdd(subnqn, transportType, targetAddress, transportServiceId);
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteRemoveListenerCommand(const RemoveListenerRequest* request, RemoveListenerResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    const char* DEFAULT_ADRFAM = "IPv4";
+    string subnqn = (request->param()).subnqn();
+    string transportType = (request->param()).transporttype();
+    string targetAddress = (request->param()).targetaddress();
+    string transportServiceId = (request->param()).transportserviceid();
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        POS_TRACE_INFO(EID(REMOVE_LISTENER_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
+        _SetEventStatus(EID(REMOVE_LISTENER_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    auto ret = rpcClient.SubsystemRemoveListener(
+        subnqn,
+        transportType,
+        DEFAULT_ADRFAM,
+        targetAddress,
+        transportServiceId);
+
+    if (ret.first != SUCCESS)
+    {
+        POS_TRACE_INFO(EID(REMOVE_LISTENER_FAILURE_SPDK_FAILURE), "subnqn:{}, rpc_return:{}", subnqn, ret.second);
+        _SetEventStatus(EID(REMOVE_LISTENER_FAILURE_SPDK_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->ListenerRemove(subnqn, transportType, targetAddress, transportServiceId);
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteListListenerCommand(const ListListenerRequest* request, ListListenerResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    string subnqn = (request->param()).subnqn();
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        POS_TRACE_INFO(EID(LIST_LISTENER_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
+        _SetEventStatus(EID(LIST_LISTENER_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    auto list = rpcClient.SubsystemListListener(subnqn);
+
+    for (const auto& listener : list)
+    {
+        grpc_cli::Listener* listenerListItem =
+            reply->mutable_result()->mutable_data()->add_listenerlist();
+        listenerListItem->set_anastate(listener["ana_state"].asString());
+        auto addr = listenerListItem->mutable_address();
+        addr->set_adrfam(listener["address"]["adrfam"].asString());
+        addr->set_traddr(listener["address"]["traddr"].asString());
+        addr->set_trsvcid(listener["address"]["trsvcid"].asString());
+        addr->set_trtype(listener["address"]["trtype"].asString());
+        addr->set_uuid(listener["address"]["uuid"].asString());
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteSetListenerAnaStateCommand(const SetListenerAnaStateRequest* request, SetListenerAnaStateResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+    NvmfTarget target;
+
+    const char* DEFAULT_ADRFAM = "IPv4";
+    string subnqn = (request->param()).subnqn();
+    string transportType = (request->param()).transporttype();
+    string targetAddress = (request->param()).targetaddress();
+    string transportServiceId = (request->param()).transportserviceid();
+    string anaState = (request->param()).anastate();
+
+    if (nullptr == target.FindSubsystem(subnqn))
+    {
+        POS_TRACE_INFO(EID(SET_LISTENER_ANA_STATE_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
+        _SetEventStatus(EID(SET_LISTENER_ANA_STATE_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    auto ret = rpcClient.SubsystemSetListenerAnaState(
+        subnqn,
+        transportType,
+        DEFAULT_ADRFAM,
+        targetAddress,
+        transportServiceId,
+        anaState);
+
+    if (ret.first != SUCCESS)
+    {
+        POS_TRACE_INFO(EID(SET_LISTENER_ANA_STATE_FAILURE_SPDK_FAILURE), "subnqn:{}, rpc_return:{}", subnqn, ret.second);
+        _SetEventStatus(EID(SET_LISTENER_ANA_STATE_FAILURE_SPDK_FAILURE), reply->mutable_result()->mutable_status());
+        _SetPosInfo(reply->mutable_info());
+        return grpc::Status::OK;
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }
 
@@ -1400,6 +1550,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
             addressInfoListItem->set_addressfamily(address["adrfam"].asString());
             addressInfoListItem->set_targetaddress(address["traddr"].asString());
             addressInfoListItem->set_transportserviceid(address["trsvcid"].asString());
+            addressInfoListItem->set_uuid(address["uuid"].asString());
         }
 
         for (const auto& host : subsystem["hosts"])
@@ -1414,6 +1565,7 @@ CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* reques
             subsystemListItem->set_serialnumber(subsystem["serial_number"].asString());
             subsystemListItem->set_modelnumber(subsystem["model_number"].asString());
             subsystemListItem->set_maxnamespaces(subsystem["max_namespaces"].asInt());
+            subsystemListItem->set_uuid(subsystem["uuid"].asString());
         }
 
         for (const auto& ns : subsystem["namespaces"])
@@ -1462,6 +1614,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
                 addressInfoListItem->set_addressfamily(address["adrfam"].asString());
                 addressInfoListItem->set_targetaddress(address["traddr"].asString());
                 addressInfoListItem->set_transportserviceid(address["trsvcid"].asString());
+                addressInfoListItem->set_uuid(address["uuid"].asString());
             }
 
             for (const auto& host : subsystem["hosts"])
@@ -1476,6 +1629,7 @@ CommandProcessor::ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* reques
                 subsystemListItem->set_serialnumber(subsystem["serial_number"].asString());
                 subsystemListItem->set_modelnumber(subsystem["model_number"].asString());
                 subsystemListItem->set_maxnamespaces(subsystem["max_namespaces"].asInt());
+                subsystemListItem->set_uuid(subsystem["uuid"].asString());
             }
 
             for (const auto& ns : subsystem["namespaces"])
@@ -1531,6 +1685,38 @@ CommandProcessor::ExecuteCreateTransportCommand(const CreateTransportRequest* re
 
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
+    RestoreManagerSingleton::Instance()->TransportCreate(trType, bufCacheSize, numSharedBuf, ioUnitSize);
+    return grpc::Status::OK;
+}
+
+grpc::Status
+CommandProcessor::ExecuteListTransportCommand(const ListTransportRequest* request, ListTransportResponse* reply)
+{
+    string command = request->command();
+    reply->set_command(command);
+    reply->set_rid(request->rid());
+
+    SpdkRpcClient rpcClient;
+
+    auto list = rpcClient.TransportList();
+
+    for (const auto& transport : list)
+    {
+        grpc_cli::Transport* trListItem =
+            reply->mutable_result()->mutable_data()->add_transportlist();
+        trListItem->set_type(transport["trtype"].asString());
+        trListItem->set_maxqueuedepth(transport["max_queue_depth"].asInt());
+        trListItem->set_maxioqpairsperctrlr(transport["max_io_qpairs_per_ctrlr"].asInt());
+        trListItem->set_incapsuledatasize(transport["in_capsule_data_size"].asInt());
+        trListItem->set_maxiosize(transport["max_io_size"].asInt());
+        trListItem->set_iounitsize(transport["io_unit_size"].asInt());
+        trListItem->set_aborttimeoutsec(transport["abort_timeout_sec"].asInt());
+        trListItem->set_bufcachesize(transport["buf_cache_size"].asInt());
+        trListItem->set_numsharedbuf(transport["num_shared_buffers"].asInt());
+    }
+
+    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
+    _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
 }
 
@@ -1548,7 +1734,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
     uint64_t maxBw = 0;
     bool isWalVol = false;
     string uuid = "";
-    int32_t nsid = -1;
+    int32_t nsid = 0;
     bool isPrimary = true;
     bool isAnaNonoptimized = false;
 
@@ -1605,6 +1791,7 @@ CommandProcessor::ExecuteCreateVolumeCommand(const CreateVolumeRequest* request,
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
+            RestoreManagerSingleton::Instance()->VolumeCreate(arrayName, volumeName, nsid);
             return grpc::Status::OK;
         }
         else
@@ -1665,6 +1852,7 @@ CommandProcessor::ExecuteDeleteVolumeCommand(const DeleteVolumeRequest* request,
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
+            RestoreManagerSingleton::Instance()->VolumeDelete(arrayName, volumeName);
             return grpc::Status::OK;
         }
         else
@@ -1692,10 +1880,12 @@ CommandProcessor::ExecuteMountVolumeCommand(const MountVolumeRequest* request, M
     string volumeName = "";
     string subnqn = "";
     string arrayName = "";
+    uint32_t nsid = 0;
 
     volumeName = (request->param()).name();
     subnqn = (request->param()).subnqn();
     arrayName = (request->param()).array();
+    nsid = (request->param()).nsid();
 
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
@@ -1721,12 +1911,15 @@ CommandProcessor::ExecuteMountVolumeCommand(const MountVolumeRequest* request, M
 
     if (volMgr != nullptr)
     {
-        int ret = volMgr->Mount(volumeName, subnqn);
+        int ret = volMgr->Mount(volumeName, subnqn, nsid);
         if (ret == SUCCESS)
         {
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
+            IVolumeInfoManager* volInfoMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
+            VolumeBase* vol = volInfoMgr->GetVolume(volInfoMgr->GetVolumeID(volumeName));
+            RestoreManagerSingleton::Instance()->SetVolumeMountState(arrayName, volumeName, true, vol->GetSubnqn(), vol->GetNsid());
             return grpc::Status::OK;
         }
         else
@@ -1787,6 +1980,7 @@ CommandProcessor::ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* reques
             int eventId = EID(SUCCESS);
             _SetEventStatus(eventId, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
+            RestoreManagerSingleton::Instance()->SetVolumeMountState(arrayName, volumeName, false);
             return grpc::Status::OK;
         }
         else
@@ -1804,7 +1998,8 @@ CommandProcessor::ExecuteUnmountVolumeCommand(const UnmountVolumeRequest* reques
     return grpc::Status::OK;
 }
 
-grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply)
+grpc::Status
+CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest* request, ListVolumeResponse* reply)
 {
     string command = request->command();
     string volumeName = "";
@@ -1833,8 +2028,7 @@ grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest*
         return grpc::Status::OK;
     }
 
-
-    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName); 
+    IVolumeInfoManager* volMgr = VolumeServiceSingleton::Instance()->GetVolumeManager(arrayName);
 
     int vol_cnt = 0;
 
@@ -1858,11 +2052,11 @@ grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest*
                 break;
             }
             grpc_cli::Volume* volume = reply->mutable_result()->mutable_data()->add_volumes();
-			volume->set_name(vol->GetVolumeName());
-			volume->set_index(idx);
-			volume->set_uuid(vol->GetUuid());
-			volume->set_total(vol->GetTotalSize());
-            
+            volume->set_name(vol->GetVolumeName());
+            volume->set_index(idx);
+            volume->set_uuid(vol->GetUuid());
+            volume->set_total(vol->GetTotalSize());
+
             VolumeMountStatus volumeStatus = vol->GetVolumeMountStatus();
             if (Mounted == volumeStatus)
             {
@@ -1874,7 +2068,7 @@ grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest*
             volume->set_maxbw(vol->GetMaxBW());
             volume->set_minbw(vol->GetMinBW());
         }
-        
+
         _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1882,10 +2076,10 @@ grpc::Status CommandProcessor::ExecuteListVolumeCommand(const ListVolumeRequest*
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
-
 }
 
-grpc::Status CommandProcessor::ExecuteVolumeInfoCommand(const VolumeInfoRequest* request, VolumeInfoResponse* reply)
+grpc::Status
+CommandProcessor::ExecuteVolumeInfoCommand(const VolumeInfoRequest* request, VolumeInfoResponse* reply)
 {
     string volumeName = "";
     string arrayName = "";
@@ -1904,7 +2098,7 @@ grpc::Status CommandProcessor::ExecuteVolumeInfoCommand(const VolumeInfoRequest*
     if (volMgr == nullptr)
     {
         int event = EID(VOL_NOT_FOUND);
-        POS_TRACE_WARN(event,"Failed to get an IVolumeInfoManager instance. array name: " + arrayName +" volume name: "+ volumeName);
+        POS_TRACE_WARN(event, "Failed to get an IVolumeInfoManager instance. array name: " + arrayName + " volume name: " + volumeName);
         _SetEventStatus(event, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1914,7 +2108,7 @@ grpc::Status CommandProcessor::ExecuteVolumeInfoCommand(const VolumeInfoRequest*
     if (vol == nullptr)
     {
         int event = EID(VOL_NOT_FOUND);
-        POS_TRACE_WARN(event,"No such volume exists in array. array name: " + arrayName);
+        POS_TRACE_WARN(event, "No such volume exists in array. array name: " + arrayName);
         _SetEventStatus(event, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
@@ -1939,17 +2133,17 @@ grpc::Status CommandProcessor::ExecuteVolumeInfoCommand(const VolumeInfoRequest*
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
-
 }
 
-grpc::Status CommandProcessor::ExecuteVolumeRenameCommand(const VolumeRenameRequest* request, VolumeRenameResponse* reply)
+grpc::Status
+CommandProcessor::ExecuteVolumeRenameCommand(const VolumeRenameRequest* request, VolumeRenameResponse* reply)
 {
     string volumeOldName = "";
     string volumeNewName = "";
     string arrayName = "";
     arrayName = (request->param()).array();
     volumeOldName = (request->param()).name();
-    volumeNewName = (request->param()).newname(); 
+    volumeNewName = (request->param()).newname();
     ComponentsInfo* info = ArrayMgr()->GetInfo(arrayName);
     if (info == nullptr)
     {
@@ -1977,6 +2171,7 @@ grpc::Status CommandProcessor::ExecuteVolumeRenameCommand(const VolumeRenameRequ
         {
             _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
+            RestoreManagerSingleton::Instance()->VolumeRename(arrayName, volumeOldName, volumeNewName);
             return grpc::Status::OK;
         }
         else
@@ -1994,8 +2189,9 @@ grpc::Status CommandProcessor::ExecuteVolumeRenameCommand(const VolumeRenameRequ
     }
 }
 
-grpc::Status CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRequest* request, ListQOSPolicyResponse* reply)
-    {
+grpc::Status
+CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRequest* request, ListQOSPolicyResponse* reply)
+{
     std::vector<string> volumeNames;
     std::vector<uint32_t> volumeIds;
     string errorMsg;
@@ -2038,14 +2234,14 @@ grpc::Status CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRe
     if (volMgr == nullptr)
     {
         int event = EID(VOL_NOT_FOUND);
-        POS_TRACE_WARN(event,"Failed to get an IVolumeInfoManager instance. array name: " + arrayName);
+        POS_TRACE_WARN(event, "Failed to get an IVolumeInfoManager instance. array name: " + arrayName);
         _SetEventStatus(event, reply->mutable_result()->mutable_status());
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
     grpc_cli::QOSResult* qosResult = reply->mutable_result()->mutable_data()->add_qosresult();
     grpc_cli::QOSResult_RebuildPolicy* rebuildpolicy = qosResult->add_rebuildpolicy();
-	grpc_cli::QOSResult_Arrays* arrays = qosResult->add_arrayname();
+    grpc_cli::QOSResult_Arrays* arrays = qosResult->add_arrayname();
     arrays->set_arrayname(arrayName);
     rebuildpolicy->set_rebuild(impact);
     for (int i = 0; i < request->param().vol().size(); i++)
@@ -2055,13 +2251,13 @@ grpc::Status CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRe
         if (EID(SUCCESS) != validVol)
         {
             int event = EID(QOS_CLI_WRONG_MISSING_PARAMETER);
-            POS_TRACE_WARN(event,"Invalid Volume Name " + volName);
+            POS_TRACE_WARN(event, "Invalid Volume Name " + volName);
             _SetEventStatus(event, reply->mutable_result()->mutable_status());
             _SetPosInfo(reply->mutable_info());
             return grpc::Status::OK;
         }
         int volId = volMgr->GetVolumeID(volName);
-		grpc_cli::QOSResult_VolumePolicies* volumepolicies = qosResult->add_volumepolicies();
+        grpc_cli::QOSResult_VolumePolicies* volumepolicies = qosResult->add_volumepolicies();
         volPolicy = QosManagerSingleton::Instance()->GetVolumePolicy(volId, arrayName);
         volMgr->GetVolumeName(volId, volName);
         volumepolicies->set_name(volName);
@@ -2070,7 +2266,7 @@ grpc::Status CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRe
         volumepolicies->set_maxiops(to_string(volPolicy.maxIops));
         volumepolicies->set_miniops(to_string(volPolicy.minIops));
         volumepolicies->set_minbw(to_string(volPolicy.minBw));
-        if (true == volPolicy.minBwGuarantee) 
+        if (true == volPolicy.minBwGuarantee)
             volumepolicies->set_min_bw_guarantee("Yes");
         else
             volumepolicies->set_min_bw_guarantee("No");
@@ -2078,7 +2274,6 @@ grpc::Status CommandProcessor::ExecuteListQOSPolicyCommand(const ListQOSPolicyRe
             volumepolicies->set_min_iops_guarantee("Yes");
         else
             volumepolicies->set_min_iops_guarantee("No");
-
     }
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
@@ -2137,6 +2332,7 @@ CommandProcessor::ExecuteSetVolumePropertyCommand(const SetVolumePropertyRequest
                 _SetPosInfo(reply->mutable_info());
                 return grpc::Status::OK;
             }
+            RestoreManagerSingleton::Instance()->VolumeRename(arrayName, volumeName, newVolumeName);
         }
 
         if (updatePrimaryVol == true)
@@ -2210,7 +2406,7 @@ CommandProcessor::ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolic
     {
         minBw = (request->param()).minbw();
     }
-    if((request->param()).maxbw() != -1)
+    if ((request->param()).maxbw() != -1)
     {
         maxBw = (request->param()).maxbw();
     }
@@ -2218,7 +2414,7 @@ CommandProcessor::ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolic
     {
         minIops = (request->param()).miniops();
     }
-    if((request->param()).maxiops() != -1)
+    if ((request->param()).maxiops() != -1)
     {
         maxIops = (request->param()).maxiops();
     }
@@ -2248,7 +2444,6 @@ CommandProcessor::ExecuteQosCreateVolumePolicyCommand(const QosCreateVolumePolic
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
     return grpc::Status::OK;
-
 }
 
 grpc::Status
@@ -2347,7 +2542,7 @@ CommandProcessor::ExecuteListWBTCommand(const ListWBTRequest* request, ListWBTRe
         for (it = testlist.begin(); it != testlist.end(); it++)
         {
             grpc_cli::WBTTest* test =
-            reply->mutable_result()->mutable_data()->add_testlist();
+                reply->mutable_result()->mutable_data()->add_testlist();
             test->set_testname(*it);
         }
 
@@ -2379,15 +2574,16 @@ CommandProcessor::ExecuteWBTCommand(const WBTRequest* request, WBTResponse* repl
     JsonElement retElem("json");
     string errMsg = "fail";
 
-    try {
+    try
+    {
         if (wbtCmdHandler.VerifyWbtCommand())
         {
             cmdRetValue = wbtCmdHandler(argv, retElem);
         }
         else
         {
-           ret = -1;
-           errMsg = "invalid wbt command";
+            ret = -1;
+            errMsg = "invalid wbt command";
         }
 
         if (ret != 0)
@@ -2400,7 +2596,8 @@ CommandProcessor::ExecuteWBTCommand(const WBTRequest* request, WBTResponse* repl
         {
             retElem.SetAttribute(JsonAttribute("returnCode", to_string(cmdRetValue)));
 
-            if (cmdRetValue == pos_cli::FAIL) {
+            if (cmdRetValue == pos_cli::FAIL)
+            {
                 reply->mutable_result()->mutable_data()->set_testdata(retElem.ToJson());
                 _SetEventStatus(cmdRetValue, reply->mutable_result()->mutable_status());
                 _SetPosInfo(reply->mutable_info());
@@ -2420,7 +2617,6 @@ CommandProcessor::ExecuteWBTCommand(const WBTRequest* request, WBTResponse* repl
         _SetPosInfo(reply->mutable_info());
         return grpc::Status::OK;
     }
-
 }
 
 std::string
@@ -2526,7 +2722,7 @@ CommandProcessor::_GetGCMode(pos::IGCInfo* gc, std::string arrayName)
 
 void
 CommandProcessor::_FillSmartData(
-    struct spdk_nvme_health_information_page *payload,
+    struct spdk_nvme_health_information_page* payload,
     grpc_cli::SmartLog* data)
 {
     char cString[128];
@@ -2745,7 +2941,7 @@ CommandProcessor::_ExecuteLinuxCmd(std::string command)
 }
 
 bool
-CommandProcessor::_IsValidIpAddress(const std::string &ipAddress)
+CommandProcessor::_IsValidIpAddress(const std::string& ipAddress)
 {
     struct sockaddr_in sa;
     int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
@@ -2757,13 +2953,14 @@ CommandProcessor::_IsValidFile(const std::string& path)
 {
     std::string extension = path.substr(path.find_last_of(".") + 1);
     std::transform(extension.begin(), extension.end(), extension.begin(),
-    [](unsigned char c){ return std::tolower(c); });
+        [](unsigned char c) { return std::tolower(c); });
 
-    if(extension != "yaml") {
+    if (extension != "yaml")
+    {
         return false;
-    } 
+    }
 
-    if (FILE *file = fopen(path.c_str(), "r"))
+    if (FILE* file = fopen(path.c_str(), "r"))
     {
         fclose(file);
         return true;
@@ -2787,13 +2984,13 @@ CommandProcessor::_HandleInputVolumes(
     volumeNames.clear();
     validVolumes.clear();
 
-
     if (0 == arrayName.compare(""))
     {
         return EID(CLI_ARRAY_INFO_ARRAY_NOT_EXIST);
     }
 
-    for(int i = 0; i < volumes.size(); i++) {
+    for (int i = 0; i < volumes.size(); i++)
+    {
         string volName = volumes[i].volumename();
         volumeNames.push_back(volName);
     }

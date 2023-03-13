@@ -33,6 +33,7 @@
 #pragma once
 
 #include "array_builder.h"
+#include <memory.h>
 
 using namespace std;
 
@@ -42,8 +43,8 @@ class ArrayBuilderAdapter
 {
 public:
     virtual ~ArrayBuilderAdapter() {};
-    virtual ArrayBuildInfo* Load(pbr::AteData* ateData);
-    virtual ArrayBuildInfo* Create(string name, const DeviceSet<string>& devs,
-        string metaRaid, string dataRaid);
+    virtual int Load(pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
+    virtual int Create(string name, const DeviceSet<string>& devs,
+        string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
 };
 } // namespace pos

@@ -24,7 +24,7 @@ public:
     MOCK_METHOD(string, GetBdevName, (uint32_t id, string arrayName), (override));
     MOCK_METHOD(int32_t, GetVolumeNqnId, (const string& subnqn), (override));
     MOCK_METHOD(spdk_nvmf_subsystem*, FindSubsystem, (const string& subnqn), (override));
-    MOCK_METHOD(bool, TryToAttachNamespace, (const string& nqn, int volId, string& arrayName, uint64_t time), (override));
+    MOCK_METHOD(bool, TryToAttachNamespace, (const string& nqn, int volId, string& arrayName, uint32_t& nsId, uint64_t time), (override));
     MOCK_METHOD(bool, CheckSubsystemExistance, (), (override));
     MOCK_METHOD(bool, CheckVolumeAttached, (int volId, string arrayName), (override));
     MOCK_METHOD(bool, SetSubsystemArrayName, (string & subnqn, string& arrayName), (override));

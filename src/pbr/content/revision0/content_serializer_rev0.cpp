@@ -57,15 +57,15 @@ ContentSerializerRev0::Serialize(char* dataOut, AteData* ateData)
 }
 
 int
-ContentSerializerRev0::Deserialize(AteData*& ateOut, char* rawData)
+ContentSerializerRev0::Deserialize(unique_ptr<AteData>& ateOut, char* rawData)
 {
-    ateOut = new AteData();
     POS_TRACE_DEBUG(EID(PBR_DESERIALIZE_DEBUG), "revision:0");
-    int ret = _DeserializeAte(ATE_START_OFFSET, ateOut, rawData);
+    ateOut = make_unique<AteData>();
+    int ret = _DeserializeAte(ATE_START_OFFSET, ateOut.get(), rawData);
     if (ret != 0)
     {
         uint64_t backupAteOffset = _GetBackupAteOffset();
-        ret = _DeserializeAte(backupAteOffset, ateOut, rawData);
+        ret = _DeserializeAte(backupAteOffset, ateOut.get(), rawData);
     }
     POS_TRACE_DEBUG(EID(PBR_DESERIALIZE_RESULT), "revision:0, ret:{}", ret);
     return ret;
@@ -86,7 +86,6 @@ ContentSerializerRev0::GetContentStartLba(void)
 int
 ContentSerializerRev0::_SerializeAte(uint64_t startOffset, char* dataOut, AteData* ateData)
 {
-    memset(&dataOut[startOffset], 0, ATE_SIZE);
     strncpy(&dataOut[startOffset + SIGNATURE_OFFSET], ATE_SIGNATURE.c_str(), SIGNATURE_LENGTH);
     UuidHelper::UuidToByte(ateData->nodeUuid, &dataOut[startOffset + NODE_UUID_OFFSET]);
     UuidHelper::UuidToByte(ateData->arrayUuid, &dataOut[startOffset + ARRAY_UUID_OFFSET]);
@@ -183,7 +182,7 @@ int ContentSerializerRev0::_DeserializeAte(uint64_t startOffset, AteData* ateOut
         ateOut->adeList.push_back(ade);
         adeOffset += ADE_LENGTH;
     }
-    uint32_t pteCnt = hex_to_uint32( &rawData[startOffset + PTE_COUNT_OFFSET], PTE_COUNT_LENGTH);
+    uint32_t pteCnt = hex_to_uint32(&rawData[startOffset + PTE_COUNT_OFFSET], PTE_COUNT_LENGTH);
     uint64_t pteOffset = startOffset + PTE_START_OFFSET;
     for (uint32_t i = 0; i < pteCnt; i++)
     {

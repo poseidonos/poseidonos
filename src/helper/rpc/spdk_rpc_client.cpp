@@ -184,6 +184,78 @@ SpdkRpcClient::SubsystemAddListener(std::string subnqn, std::string trtype, std:
     return make_pair(SUCCESS, "");
 }
 
+pair<int, std::string>
+SpdkRpcClient::SubsystemRemoveListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid)
+{
+    const int SUCCESS = 0;
+    const string method = "nvmf_subsystem_remove_listener";
+
+    Json::Value listen_address;
+    listen_address["trtype"] = trtype;
+    listen_address["adrfam"] = adrfam;
+    listen_address["traddr"] = traddr;
+    listen_address["trsvcid"] = trsvcid;
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+    param["listen_address"] = listen_address;
+
+    Json::Value ret;
+    try
+    {
+        client->CallMethod(method, param);
+    }
+    catch (jsonrpc::JsonRpcException const& e)
+    {
+        return make_pair(e.GetCode(), e.GetMessage());
+    }
+
+    return make_pair(SUCCESS, "");
+}
+
+pair<int, std::string>
+SpdkRpcClient::SubsystemSetListenerAnaState(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid, std::string anastate)
+{
+    const int SUCCESS = 0;
+    const string method = "nvmf_subsystem_listener_set_ana_state";
+
+    Json::Value listen_address;
+    listen_address["trtype"] = trtype;
+    listen_address["adrfam"] = adrfam;
+    listen_address["traddr"] = traddr;
+    listen_address["trsvcid"] = trsvcid;
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+    param["listen_address"] = listen_address;
+    param["ana_state"] = anastate;
+
+    Json::Value ret;
+    try
+    {
+        client->CallMethod(method, param);
+    }
+    catch (jsonrpc::JsonRpcException const& e)
+    {
+        return make_pair(e.GetCode(), e.GetMessage());
+    }
+
+    return make_pair(SUCCESS, "");
+}
+
+Json::Value
+SpdkRpcClient::SubsystemListListener(std::string subnqn)
+{
+    const string method = "nvmf_subsystem_get_listeners";
+
+    Json::Value param;
+    param["nqn"] = subnqn;
+
+    Json::Value ret = client->CallMethod(method, param);
+
+    return ret;
+}
+
 Json::Value
 SpdkRpcClient::SubsystemList(void)
 {
@@ -242,4 +314,16 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
     }
 
     return make_pair(SUCCESS, "");
+}
+
+Json::Value
+SpdkRpcClient::TransportList(void)
+{
+    const string method = "nvmf_get_transports";
+
+    Json::Value param;
+
+    Json::Value ret = client->CallMethod(method, param);
+
+    return ret;
 }

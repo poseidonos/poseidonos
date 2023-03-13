@@ -73,6 +73,8 @@ public:
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
 
     virtual int PrepareRebuild(void);
 
@@ -90,7 +92,6 @@ public:
     virtual IContextManager* GetIContextManager(void);
     virtual IContextReplayer* GetIContextReplayer(void);
     virtual ISegmentCtx* GetISegmentCtx(void);
-    void PrepareVersionedSegmentCtx(IVersionedSegmentContext* vscSegCtx);
 
 private:
     void _CreateSubmodules(void);

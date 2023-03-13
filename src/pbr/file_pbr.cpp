@@ -45,7 +45,7 @@ namespace pbr
 const string FilePbr::dirPath = "/etc/pos/pbr/";
 
 int
-FilePbr::Load(vector<AteData*>& ateListOut)
+FilePbr::Load(vector<unique_ptr<AteData>>& ateListOut)
 {
     vector<string> files;
     GetFilesInTheDirectory(dirPath, files);
@@ -132,11 +132,6 @@ FilePbr::Reset(string arrayName)
 int
 FilePbr::Update(AteData* ateData)
 {
-    if (DirExists(dirPath) == false)
-    {
-        MakeDir(dirPath);
-    }
-
     string filePath = _GetFullPath(ateData->arrayName + ".pbr");
     unique_ptr<IPbrUpdater> updater = make_unique<PbrFileUpdater>(REVISION, filePath);
     int ret = updater->Update(ateData);

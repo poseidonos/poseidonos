@@ -9,7 +9,6 @@
 #include "src/metadata/block_map_update.h"
 #include "src/metadata/meta_event_factory.h"
 #include "test/unit-tests/allocator/i_context_manager_mock.h"
-#include "test/unit-tests/allocator/i_segment_ctx_mock.h"
 #include "test/unit-tests/allocator/i_wbstripe_allocator_mock.h"
 #include "test/unit-tests/array_models/interface/i_array_info_mock.h"
 #include "test/unit-tests/bio/volume_io_mock.h"
@@ -23,6 +22,7 @@
 #include "test/unit-tests/journal_manager/log_write/log_write_statistics_mock.h"
 #include "test/unit-tests/mapper/i_stripemap_mock.h"
 #include "test/unit-tests/mapper/i_vsamap_mock.h"
+#include "test/unit-tests/metadata/segment_context_updater_mock.h"
 
 using testing::InSequence;
 using testing::NiceMock;
@@ -88,7 +88,7 @@ TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessf
 {
     NiceMock<MockIVSAMap> vsaMap;
     NiceMock<MockIStripeMap> stripeMap;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentContextUpdater> segmentCtxUpdater;
     NiceMock<MockIWBStripeAllocator> wbStripeAllocator;
     NiceMock<MockIContextManager> contextManager;
     NiceMock<MockIArrayInfo> arrayInfo;
@@ -113,7 +113,7 @@ TEST_F(LogWriteHandlerTestFixture, BlockMapUpdateAddLog_testIfLogUpdatedSuccessf
     int arrayId = 2;
     MapperServiceSingleton::Instance()->RegisterMapper("", arrayId, &vsaMap,
         nullptr, nullptr, nullptr, nullptr);
-    MetaEventFactory metaEventFactory(&vsaMap, &stripeMap, &segmentCtx,
+    MetaEventFactory metaEventFactory(&vsaMap, &stripeMap, &segmentCtxUpdater,
         &wbStripeAllocator, &contextManager, &arrayInfo);
 
     ON_CALL(*mockVolumeIo, GetArrayId).WillByDefault(Return(arrayId));

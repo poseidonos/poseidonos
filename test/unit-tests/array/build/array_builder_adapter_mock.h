@@ -10,8 +10,8 @@ class MockArrayBuilderAdapter : public ArrayBuilderAdapter
 {
 public:
     using ArrayBuilderAdapter::ArrayBuilderAdapter;
-    MOCK_METHOD(ArrayBuildInfo*, Load, (pbr::AteData* ateData), (override));
-    MOCK_METHOD(ArrayBuildInfo*, Create, (string name, const DeviceSet<string>& devs,
-        string metaRaid, string dataRaid), (override));
+    MOCK_METHOD(int, Load, (pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo), (override));
+    MOCK_METHOD(int, Create, (string name, const DeviceSet<string>& devs,
+        string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo), (override));
 };
 } // namespace pos

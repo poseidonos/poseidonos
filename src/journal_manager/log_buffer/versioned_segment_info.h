@@ -35,6 +35,7 @@
 #include <atomic>
 #include "src/include/address_type.h"
 #include "tbb/concurrent_unordered_map.h"
+#include "tbb/atomic.h"
 
 namespace pos
 {
@@ -51,12 +52,12 @@ public:
     virtual void ResetOccupiedStripeCount(SegmentId segId);
     virtual void ResetValidBlockCount(SegmentId segId);
     
-    virtual tbb::concurrent_unordered_map<SegmentId, int> GetChangedValidBlockCount(void);
-    virtual tbb::concurrent_unordered_map<SegmentId, uint32_t> GetChangedOccupiedStripeCount(void);
+    virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>>&  GetChangedValidBlockCount(void);
+    virtual const tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>>&  GetChangedOccupiedStripeCount(void);
 
 private:
-    tbb::concurrent_unordered_map<SegmentId, int> changedValidBlockCount;
-    tbb::concurrent_unordered_map<SegmentId, uint32_t> changedOccupiedStripeCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedValidBlockCount;
+    tbb::concurrent_unordered_map<SegmentId, tbb::atomic<uint32_t>> changedOccupiedStripeCount;
 };
 
 } // namespace pos

@@ -97,6 +97,7 @@ VolumeDetacher::DoAll(void)
         string subnqn = vol->GetSubnqn();
         nvmfTarget->RemoveSubsystemArrayName(subnqn);
         vol->SetSubnqn("");
+        vol->SetNsid(0);
     }
 }
 } // namespace pos

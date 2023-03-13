@@ -47,7 +47,6 @@ namespace pbr
 int
 HeaderSerializer::Serialize(HeaderElement* headerElem, char* dataOut, uint32_t length)
 {
-    memset(dataOut, 0, length);
     strncpy(&dataOut[header::SIGNATURE_OFFSET], headerElem->signature.c_str(), header::SIGNATURE_LENGTH);
     uint32_to_hex(headerElem->revision, &dataOut[header::REVISION_OFFSET], header::REVISION_LENGTH);
     uint32_t checksum = MakePbrChecksum(dataOut, length, header::CHECKSUM_OFFSET, header::CHECKSUM_LENGTH);

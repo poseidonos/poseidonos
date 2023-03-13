@@ -860,6 +860,72 @@ func SendAddListener(posConn POSGRPCConnection, req *pb.AddListenerRequest) (*pb
 	return res, err
 }
 
+func SendRemoveListener(posConn POSGRPCConnection, req *pb.RemoveListenerRequest) (*pb.RemoveListenerResponse, error) {
+	conn, err := dialToCliServer(posConn)
+	if err != nil {
+		log.Print(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(posConn.ReqTimeout))
+	defer cancel()
+
+	res, err := c.RemoveListener(ctx, req)
+	if err != nil {
+		log.Print("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendListListener(posConn POSGRPCConnection, req *pb.ListListenerRequest) (*pb.ListListenerResponse, error) {
+	conn, err := dialToCliServer(posConn)
+	if err != nil {
+		log.Print(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(posConn.ReqTimeout))
+	defer cancel()
+
+	res, err := c.ListListener(ctx, req)
+	if err != nil {
+		log.Print("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendSetListenerAnaState(posConn POSGRPCConnection, req *pb.SetListenerAnaStateRequest) (*pb.SetListenerAnaStateResponse, error) {
+	conn, err := dialToCliServer(posConn)
+	if err != nil {
+		log.Print(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(posConn.ReqTimeout))
+	defer cancel()
+
+	res, err := c.SetListenerAnaState(ctx, req)
+	if err != nil {
+		log.Print("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
 func SendListSubsystem(posConn POSGRPCConnection, req *pb.ListSubsystemRequest) (*pb.ListSubsystemResponse, error) {
 	conn, err := dialToCliServer(posConn)
 	if err != nil {
@@ -918,6 +984,28 @@ func SendCreateTransport(posConn POSGRPCConnection, req *pb.CreateTransportReque
 	defer cancel()
 
 	res, err := c.CreateTransport(ctx, req)
+	if err != nil {
+		log.Print("error: ", err.Error())
+		return nil, err
+	}
+
+	return res, err
+}
+
+func SendListTransport(posConn POSGRPCConnection, req *pb.ListTransportRequest) (*pb.ListTransportResponse, error) {
+	conn, err := dialToCliServer(posConn)
+	if err != nil {
+		log.Print(err)
+		errToReturn := errors.New(dialErrorMsg)
+		return nil, errToReturn
+	}
+	defer conn.Close()
+
+	c := pb.NewPosCliClient(conn)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*time.Duration(posConn.ReqTimeout))
+	defer cancel()
+
+	res, err := c.ListTransport(ctx, req)
 	if err != nil {
 		log.Print("error: ", err.Error())
 		return nil, err

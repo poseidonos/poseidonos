@@ -33,24 +33,22 @@
 #pragma once
 
 #include <atomic>
-#include <tuple>
 #include <cstdint>
-#include <unordered_map>
 #include <mutex>
 #include <string>
+#include <tuple>
+#include <unordered_map>
 
-#include "src/lib/singleton.h"
 #include "src/array_models/interface/i_mount_sequence.h"
-#include "src/gc/flow_control/flow_control_configuration.h"
-
 #include "src/debug_lib/debug_info_maker.h"
 #include "src/debug_lib/debug_info_maker.hpp"
 #include "src/debug_lib/debug_info_queue.h"
 #include "src/debug_lib/debug_info_queue.hpp"
+#include "src/gc/flow_control/flow_control_configuration.h"
+#include "src/lib/singleton.h"
 
 namespace pos
 {
-
 enum FlowControlType : uint32_t
 {
     USER = 0,
@@ -101,17 +99,19 @@ class FlowControl : public IMountSequence, public DebugInfoMaker<FlowControlDebu
 public:
     explicit FlowControl(IArrayInfo* arrayInfo);
     FlowControl(IArrayInfo* arrayInfo,
-                IContextManager* inputIContextManager,
-                SystemTimeoutChecker* inputSystemTimeoutChecker,
-                FlowControlService* inputFlowControlService,
-                TokenDistributer* inputTokenDistributer,
-                FlowControlConfiguration* inputFlowControlConfiguration);
+        IContextManager* inputIContextManager,
+        SystemTimeoutChecker* inputSystemTimeoutChecker,
+        FlowControlService* inputFlowControlService,
+        TokenDistributer* inputTokenDistributer,
+        FlowControlConfiguration* inputFlowControlConfiguration);
     virtual ~FlowControl(void);
 
     virtual int Init(void) override;
     virtual void Dispose(void) override;
     virtual void Shutdown(void) override;
     virtual void Flush(void) override;
+    virtual uint32_t GetEstMountTimeSec(void) override { return 1; };
+    virtual uint32_t GetEstUnmountTimeSec(void) override { return 1; };
 
     virtual int GetToken(FlowControlType type, int token);
     virtual void ReturnToken(FlowControlType type, int token);
@@ -120,8 +120,7 @@ public:
     virtual void MakeDebugInfo(FlowControlDebugInfo& obj) final;
 
 private:
-    bool _RefillToken(FlowControlType type);
-    bool _TryForceResetToken(FlowControlType type);
+    void _ResetAndRefillToken(void);
     std::tuple<uint32_t, uint32_t> _DistributeToken(void);
     void _ReadConfig(void);
 

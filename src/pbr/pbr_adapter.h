@@ -33,6 +33,7 @@
 #pragma once
 
 #include "src/pbr/dto/ate_data.h"
+#include "src/include/smart_ptr_type.h"
 
 #include <string>
 #include <vector>
@@ -45,9 +46,10 @@ class PbrAdapter
 {
 public:
     virtual ~PbrAdapter() {};
-    virtual int Load(vector<AteData*>& ateListOut /* OUT PARAM */);
-    virtual int Reset(void);
-    virtual int Reset(string arrayName);
-    virtual int Update(AteData* ateData);
+    virtual int Load(const vector<pos::UblockSharedPtr>& devs,
+        vector<unique_ptr<pbr::AteData>>& ateListOut /* OUT PARAM */);
+    virtual int Reset(const vector<pos::UblockSharedPtr>& devs);
+    virtual int Reset(const vector<pos::UblockSharedPtr>& devs, string arrayName);
+    virtual int Update(const vector<pos::UblockSharedPtr>& devs, unique_ptr<AteData> ateData);
 };
 } // namespace pbr

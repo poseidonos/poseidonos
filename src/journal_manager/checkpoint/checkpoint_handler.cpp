@@ -59,28 +59,22 @@ CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, Eve
   allocatorMetaFlushCompleted(false),
   mapFlushCompleted(false),
   checkpointCompletionCallback(callback),
-  arrayId(arrayId),
-  logGroupIdInProgress(INT32_MAX)
+  arrayId(arrayId)
 {
 }
 
 void
-CheckpointHandler::Init(IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler)
+CheckpointHandler::Init(IVersionedSegmentContext* segCtx,
+    IMapFlush* mapFlushToUse, IContextManager* contextManagerToUse, EventScheduler* eventScheduler)
 {
+    versionedSegmentCtx = segCtx;
     mapFlush = mapFlushToUse;
     contextManager = contextManagerToUse;
     scheduler = eventScheduler;
-    logGroupIdInProgress = INT32_MAX;
-}
-
-void
-CheckpointHandler::UpdateLogGroupInProgress(int logGroupId)
-{
-    logGroupIdInProgress = logGroupId;
 }
 
 int
-CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
+CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback, int logGroupIdInProgress)
 {
     int ret = 0;
 
@@ -103,7 +97,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
 
         for (auto mapId : pendingDirtyMaps)
         {
-            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId, logGroupIdInProgress));
+            EventSmartPtr eventMapFlush(new CheckpointMetaFlushCompleted(this, mapId));
             ret = mapFlush->FlushDirtyMpages(mapId, eventMapFlush);
             if (ret != 0)
             {
@@ -115,11 +109,18 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback)
         }
     }
 
-    EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this,
-        ALLOCATOR_META_ID, logGroupIdInProgress));
+    EventSmartPtr allocMetaFlushCallback(new CheckpointMetaFlushCompleted(this, ALLOCATOR_META_ID));
 
-    ret = contextManager->FlushContexts(allocMetaFlushCallback, false,
-        logGroupIdInProgress);
+    ContextSectionBuffer segInfoBuffer = INVALID_CONTEXT_SECTION_BUFFER;
+    SegmentInfoData* vscSegInfoData = versionedSegmentCtx->GetUpdatedInfoDataToFlush(logGroupIdInProgress);
+    if (vscSegInfoData != nullptr)
+    {
+        segInfoBuffer.owner = SEGMENT_CTX;
+        segInfoBuffer.sectionId = SC_SEGMENT_INFO,
+        segInfoBuffer.buffer = reinterpret_cast<char*>(vscSegInfoData);
+    }
+
+    ret = contextManager->FlushContexts(allocMetaFlushCallback, false, segInfoBuffer);
     if (ret != 0)
     {
         POS_TRACE_ERROR(EID(JOURNAL_CHECKPOINT_FAILED),
@@ -146,7 +147,7 @@ CheckpointHandler::_CheckMapFlushCompleted(void)
 }
 
 int
-CheckpointHandler::FlushCompleted(int metaId, int logGroupId)
+CheckpointHandler::FlushCompleted(int metaId)
 {
     if (metaId == ALLOCATOR_META_ID)
     {
@@ -174,8 +175,7 @@ CheckpointHandler::_TryToComplete(void)
     if ((mapFlushCompleted == true) && (allocatorMetaFlushCompleted == true)
         && (status != COMPLETED))
     {
-        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED),
-            "logGroupId:{}, arrayId:{}", logGroupIdInProgress, arrayId);
+        POS_TRACE_INFO(EID(JOURNAL_CHECKPOINT_COMPLETED), "arrayId:{}", arrayId);
 
         // check status to complete checkpoint only once
         _SetStatus(COMPLETED);

@@ -48,6 +48,7 @@ class EventScheduler;
 class CallbackSequenceController;
 class DirtyMapManager;
 class CheckpointHandler;
+class IVersionedSegmentContext;
 class TelemetryPublisher;
 
 class CheckpointManager
@@ -60,7 +61,8 @@ public:
 
     virtual void Init(IMapFlush* mapFlush, IContextManager* ctxManager,
         EventScheduler* scheduler, CallbackSequenceController* seqController,
-        DirtyMapManager* dMapManager, TelemetryPublisher* tp);
+        DirtyMapManager* dMapManager, IVersionedSegmentContext* versionedSegCtx,
+        TelemetryPublisher* tp);
     virtual int RequestCheckpoint(int logGroupId, EventSmartPtr callback);
     virtual int StartCheckpoint(EventSmartPtr callback);
 

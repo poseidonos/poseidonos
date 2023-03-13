@@ -31,25 +31,23 @@
  */
 
 #include "content_serializer_factory.h"
-// #include "src/pbr/content/fake_revision/content_serializer_fake.h"
 #include "src/pbr/content/revision0/content_serializer_rev0.h"
 #include "src/pbr/content/fake_revision/content_serializer_fake_revision.h"
 
 namespace pbr
 {
-IContentSerializer*
+unique_ptr<IContentSerializer>
 ContentSerializerFactory::GetSerializer(uint32_t revision)
 {
-    IContentSerializer* serializer = nullptr;
+    unique_ptr<IContentSerializer> serializer = nullptr;
     if (revision == 0)
     {
-        serializer = new ContentSerializerRev0();
+        serializer = make_unique<ContentSerializerRev0>();
     }
     else if (revision == UINT32_MAX)
     {
-        serializer = new ContentSerializerFakeRevision();
+        serializer = make_unique<ContentSerializerFakeRevision>();
     }
-
     return serializer;
 }
 

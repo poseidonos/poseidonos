@@ -305,37 +305,48 @@ TEST_F(FlowControlTestFixture, GetToken_testForceRefill)
     int expected, token, actual;
     token = 30;
     expected = 0;
-    actual = flowControl->GetToken(type, token); // fill up buckets bucket=(0,100), oldBucket=(0,0)
-    EXPECT_EQ(expected, actual);
-
-    actual = flowControl->GetToken(type, token); // fill up old bucket bucket=(0,100), oldBucket=(0,100)
-    EXPECT_EQ(expected, actual);
-
-    EXPECT_CALL(*mockSystemTimeoutChecker, SetTimeout(_)).WillOnce(Return());
-    actual = flowControl->GetToken(type, token); // start systemTimeoutChecker bucket=(0,100), oldBucket=(0,100)
+    actual = flowControl->GetToken(type, token); // fill up buckets. bucket=(0,100), oldBucket=(0,0)
     EXPECT_EQ(expected, actual);
 
     FlowControlType otherType = FlowControlType::GC;
     expected = 30;
-    actual = flowControl->GetToken(otherType, token); // other type gets token bucket=(0,70), oldBucket=(0,100)
-    EXPECT_EQ(expected, actual);
-
-    expected = 0;
-    actual = flowControl->GetToken(type, token); // as bucket != oldBucket, force reset fails once bucket=(0,70), oldBucket=(0,70)
-    EXPECT_EQ(expected, actual);
-
-    EXPECT_CALL(*mockSystemTimeoutChecker, SetTimeout(_)).WillOnce(Return());
-    actual = flowControl->GetToken(type, token); // start systemTimeoutChecker bucket=(0,70), oldBucket=(0,70)
-    EXPECT_EQ(expected, actual);
-
+    token = 30;
     EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(false));
-    actual = flowControl->GetToken(type, token); // fail to pass CheckTimeOut
+    actual = flowControl->GetToken(otherType, token); // other type gets token. bucket=(0,70), oldBucket=(0,100)
     EXPECT_EQ(expected, actual);
 
-    EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(true));
+    expected = 30;
+    token = 30;
+    EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(false));
+    actual = flowControl->GetToken(otherType, token); // other type gets token. bucket=(0,40), oldBucket=(0,70)
+    EXPECT_EQ(expected, actual);
+
+    expected = 50;
+    token = 50;
+    EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(false));
+    actual = flowControl->GetToken(otherType, token); // other type gets token. bucket=(0,-10), oldBucket=(0,40)
+    EXPECT_EQ(expected, actual);
+
+    expected = 50;
+    token = 50;
+    EXPECT_CALL(*mockTokenDistributer, Distribute(15)).WillOnce(Return(std::make_tuple(100, 100))); // token gets refilled=(100, 90), oldBucket=(0,-10)
+    EXPECT_CALL(*mockSystemTimeoutChecker, SetTimeout(_)).WillOnce(Return());
+    EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(false)).WillOnce(Return(false));
+    actual = flowControl->GetToken(type, token); // token gets refilled as couterType token <=0. bucket=(50, 90), oldBucket=(0,-10)
+    EXPECT_EQ(expected, actual);
+
+    token = 80;
+    expected = 80;
+    EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(false));
+    actual = flowControl->GetToken(otherType, token); // other type gets token. bucket=(50, 10), oldBucket=(50, 90)
+    EXPECT_EQ(expected, actual);
+
+    token = 150;
+    expected = 150;
+    EXPECT_CALL(*mockSystemTimeoutChecker, CheckTimeout()).WillOnce(Return(true)).WillOnce(Return(false));
     EXPECT_CALL(*mockTokenDistributer, Distribute(15)).WillOnce(Return(std::make_tuple(100, 100)));
-    expected = token;
-    actual = flowControl->GetToken(type, token); // force reset triggered & token refilled
+    EXPECT_CALL(*mockSystemTimeoutChecker, SetTimeout(_)).WillOnce(Return());
+    actual = flowControl->GetToken(type, token); // token gets refilled as timeout. bucket=(0,100), oldBucket=(50,10)
     EXPECT_EQ(expected, actual);
 }
 

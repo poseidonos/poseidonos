@@ -30,6 +30,9 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdint>
+#include <string>
+
 #pragma once
 
 namespace pos
@@ -42,6 +45,9 @@ public:
     virtual void Dispose(void) = 0;
     virtual void Shutdown(void) = 0;
     virtual void Flush(void) = 0;
+
+    virtual uint32_t GetEstMountTimeSec(void) = 0;
+    virtual uint32_t GetEstUnmountTimeSec(void) = 0;
 };
 
 } // namespace pos

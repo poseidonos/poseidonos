@@ -37,18 +37,16 @@
 #include <sched.h>
 #include <signal.h>
 #include <sys/syscall.h>
-#include <unistd.h>
 
 #include <cstdlib>
 #include <iostream>
 #include <string>
 
-#include "src/include/pos_event_id.h"
-#include "src/lib/system_timeout_checker.h"
-#include "src/logger/logger.h"
-#include "src/array/array.h"
-#include "src/array_mgmt/array_manager.h"
 #include "src/cli/cli_server.h"
+#include "src/include/poseidonos_interface.h"
+#include "src/include/pos_event_id.h"
+#include "src/logger/logger.h"
+
 #define gettid() syscall(SYS_gettid)
 #define tgkill(tgid, tid, sig) syscall(SYS_tgkill, tgid, tid, sig)
 
@@ -150,9 +148,11 @@ SignalHandler::_Log(std::string logMsg, bool printTimeStamp)
 void
 SignalHandler::_ShutdownProcess(void)
 {
-    IArrayMgmt* array = ArrayMgr();
-    array->UnmountAllArrayAndStop();
-    pos_cli::Exit();
+    PoseidonosInterface* interface = PoseidonosInterface::GetInterface();
+    if (interface != nullptr)
+    {
+        interface->TriggerTerminate();
+    }
 }
 
 void
@@ -163,14 +163,26 @@ SignalHandler::_ExceptionHandler(int sig)
         case SIGTERM:
         case SIGQUIT:
         {
-            shutdownTask = new std::thread(&SignalHandler::_ShutdownProcess, this);
+            sigset_t oldset;
+            // This mask will not restored, this is irreversible.
+            SignalMask::MaskQuitSignal(&oldset);
+            std::lock_guard<std::mutex> lock(signalMutex);
+            _Log("Quit Signal Handling!");
+            _ShutdownProcess();
             break;
         }
         default:
         {
-            _BacktraceAndInvokeNextThread(sig);
-            signal(sig, SIG_DFL);
-            raise(sig);
+            sigset_t oldset;
+            SignalMask::MaskSignal(&oldset);
+            {
+                std::lock_guard<std::mutex> lock(signalMutex);
+                _Log("Signal Handling! num : " + std::to_string(sig));
+                _BacktraceAndInvokeNextThread(sig);
+                signal(sig, SIG_DFL);
+                raise(sig);
+            }
+            SignalMask::RestoreSignal(&oldset);
         }
     }
 }
@@ -221,10 +233,47 @@ SignalHandler::_BacktraceAndInvokeNextThread(int sig)
     }
 }
 
+bool
+SignalHandler::_RunSystemCmdAndGetResult(char* cmdStr, char* resultStr)
+{
+    char cmdStrTmp[FILE_NAME_LINE];
+    sprintf(cmdStrTmp, "%s > tmpBackTrace", cmdStr);
+    int retValue = system(cmdStrTmp);
+    if (retValue != 0)
+    {
+        return false;
+    }
+    FILE* fp = fopen("tmpBackTrace", "r");
+    if (fp == NULL)
+    {
+        return false;
+    }
+    char *ret;
+    ret = fgets(resultStr, FILE_NAME_LINE - 1, fp);
+    fclose(fp);
+    unlink("tmpBackTrace");
+    // ret will be NULL if file is read to end pointer.
+    if (ret == NULL)
+    {
+        return false;
+    }
+    resultStr[strcspn(resultStr, "\r\n")] = 0;
+    if (!strncmp(resultStr, "??", 2))
+    {
+        resultStr[0] = '\0';
+    }
+    return true;
+}
+
+// This stacktrace mechanism will be supported from c++23
+// So, we just use glibc implmentation.
 void
 SignalHandler::_Backtrace(void)
 {
     void* buffer[MAX_CALL_STACK];
+    char cmdStr[FILE_NAME_LINE + 1];
+    char fileLine[FILE_NAME_LINE + 1];
+    char executeBinary[FILE_NAME_LINE + 1];
     char** strings;
     int nptrs;
     nptrs = backtrace(buffer, MAX_CALL_STACK);
@@ -236,9 +285,26 @@ SignalHandler::_Backtrace(void)
     coreInfoString += " tid : ";
     coreInfoString += std::to_string(gettid());
     _Log(coreInfoString);
+
+    ssize_t result = readlink("/proc/self/exe", executeBinary, FILE_NAME_LINE);
+    executeBinary[result] = '\0';
     for (int index = 0; index < nptrs; index++)
     {
-        _Log(strings[index]);
+        std::string symbolString = "";
+        symbolString += strings[index];
+        if (result > 0 && result < FILE_NAME_LINE)
+        {
+            sprintf(cmdStr, "addr2line %p -e %s", buffer[index], executeBinary);
+            bool ret = _RunSystemCmdAndGetResult(cmdStr, fileLine);
+            if (ret == false)
+            {
+                break;
+            }
+            symbolString += " ";
+            symbolString += fileLine;
+        }
+        _Log(symbolString);
+        
     }
     _Log("", false);
     fflush(btLogFilePtr);

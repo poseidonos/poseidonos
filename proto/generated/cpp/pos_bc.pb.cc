@@ -440,6 +440,7 @@ static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_pos_5fbc_2e
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_pos_5fbc_2eproto = {
   false, false, 1993, descriptor_table_protodef_pos_5fbc_2eproto, "pos_bc.proto", 
   &descriptor_table_pos_5fbc_2eproto_once, nullptr, 0, 15,
+
   schemas, file_default_instances, TableStruct_pos_5fbc_2eproto::offsets,
   file_level_metadata_pos_5fbc_2eproto, file_level_enum_descriptors_pos_5fbc_2eproto, file_level_service_descriptors_pos_5fbc_2eproto,
 };
@@ -4156,6 +4157,7 @@ void MapHeaderExtendedProto::InternalSwap(MapHeaderExtendedProto* other) {
 PROTOBUF_NAMESPACE_OPEN
 template<> PROTOBUF_NOINLINE ::pos_bc::SegmentInfoDataProto* Arena::CreateMaybeMessage< ::pos_bc::SegmentInfoDataProto >(Arena* arena) {
   return Arena::CreateMessageInternal< ::pos_bc::SegmentInfoDataProto >(arena);
+
 }
 template<> PROTOBUF_NOINLINE ::pos_bc::SegmentCtxExtendedProto* Arena::CreateMaybeMessage< ::pos_bc::SegmentCtxExtendedProto >(Arena* arena) {
   return Arena::CreateMessageInternal< ::pos_bc::SegmentCtxExtendedProto >(arena);

@@ -32,30 +32,39 @@
 
 #include "pbr_adapter.h"
 #include "file_pbr.h"
+#include "pbr.h"
 
 namespace pbr
 {
 int
-PbrAdapter::Load(vector<AteData*>& ateListOut)
+PbrAdapter::Load(const vector<pos::UblockSharedPtr>& devs,
+    vector<unique_ptr<pbr::AteData>>& ateListOut)
 {
-    return FilePbr::Load(ateListOut);
+    int ret = Pbr::Load(devs, ateListOut);
+    return ret;
 }
 
 int
-PbrAdapter::Reset(void)
+PbrAdapter::Reset(const vector<pos::UblockSharedPtr>& devs)
 {
-    return FilePbr::Reset();
+    int ret = Pbr::Reset(devs);
+    FilePbr::Reset();
+    return ret;
 }
 
 int
-PbrAdapter::Reset(string arrayName)
+PbrAdapter::Reset(const vector<pos::UblockSharedPtr>& devs, string arrayName)
 {
-    return FilePbr::Reset(arrayName);
+    int ret = Pbr::Reset(devs);
+    FilePbr::Reset(arrayName);
+    return ret;
 }
 
 int
-PbrAdapter::Update(AteData* ateData)
+PbrAdapter::Update(const vector<pos::UblockSharedPtr>& devs, unique_ptr<AteData> ateData)
 {
-    return FilePbr::Update(ateData);
+    int ret = Pbr::Update(devs, ateData.get());
+    FilePbr::Update(ateData.get());
+    return ret;
 }
 } // namespace pbr
