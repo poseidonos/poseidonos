@@ -134,6 +134,11 @@ TEST_F(NvRamMetaVolumeTestFixture, IsOkayToStore_FileSizeZero)
     EXPECT_TRUE(volume->IsFreeSpaceEnough(0));
 }
 
+TEST_F(NvRamMetaVolumeTestFixture, CheckBaseLpn)
+{
+    EXPECT_EQ(volume->GetBaseLpn(), 0);
+}
+
 TEST(NvRamMetaVolume, IsOkayToStore_Negative)
 {
     NiceMock<MockInodeManager>* inodeMgr = new NiceMock<MockInodeManager>(0);

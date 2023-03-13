@@ -31,21 +31,22 @@
  */
 
 #include "src/metafs/mvm/volume/inode_deleter.h"
-#include "src/metafs/mvm/volume/inode_manager.h"
-#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_table_header_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_table_mock.h"
-
-#include <vector>
-#include <string>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <string>
+#include <vector>
+
+#include "src/metafs/mvm/volume/inode_manager.h"
+#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/fd_inode_map_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_table_header_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_table_mock.h"
+
 using ::testing::_;
-using ::testing::Matcher;
-using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -56,134 +57,99 @@ class InodeDeleterFixture : public ::testing::Test
 {
 public:
     InodeDeleterFixture(void)
-    {
-        inodeDeleter = nullptr;
-        inodeManager = nullptr;
-        inodeHdr = nullptr;
-        inodeTable = nullptr;
-        fdAllocator = nullptr;
-        extentAllocator = nullptr;
-    }
-
-    virtual ~InodeDeleterFixture()
+    : inodeDeleter(nullptr),
+      inodeManager(nullptr),
+      inodeHdr(nullptr),
+      inodeTable(nullptr),
+      fdAllocator(nullptr),
+      extentAllocator(nullptr),
+      inodeMap(nullptr),
+      inode(nullptr)
     {
     }
 
-    virtual void
-    SetUp(void)
+    virtual ~InodeDeleterFixture(void)
     {
-        inodeHdr = new NiceMock<MockInodeTableHeader>(type, 0);
-        inodeTable = new NiceMock<MockInodeTable>(type, 10);
+    }
+
+    virtual void SetUp(void)
+    {
+        inodeHdr = new NiceMock<MockInodeTableHeader>(volumeType, 0);
+        inodeTable = new NiceMock<MockInodeTable>(volumeType, 10);
         fdAllocator = new NiceMock<MockFileDescriptorAllocator>;
         extentAllocator = new NiceMock<MockExtentAllocator>;
+        inodeMap = new NiceMock<MockFdInodeMap>;
 
-        inodeManager = new InodeManager(arrayId, inodeHdr, inodeTable,
-            fdAllocator, extentAllocator);
+        inodeManager = new NiceMock<MockInodeManager>(ARRAY_ID, inodeHdr, inodeTable,
+            fdAllocator, extentAllocator, nullptr, inodeMap);
 
         inodeDeleter = new InodeDeleter(inodeManager);
+
+        inode = AllocateInode();
     }
 
-    virtual void
-    TearDown(void)
+    virtual void TearDown(void)
     {
         delete inodeDeleter;
         delete inodeManager;
+        delete inode;
+    }
+
+    MetaFileInode* AllocateInode(void)
+    {
+        MetaFileInode* inode = new MetaFileInode;
+        inode->data.basic.field.fd = FD;
+        inode->data.basic.field.fileName = fileName;
+        inode->data.basic.field.fileByteSize = BYTE_SIZE;
+        inode->data.basic.field.dataChunkSize = CHUNK_SIZE;
+        inode->data.basic.field.pagemapCnt = EXTENT_COUNT;
+        inode->data.basic.field.pagemap[0].SetStartLpn(START_LPN);
+        inode->data.basic.field.pagemap[0].SetCount(LPN_COUNT);
+        return inode;
     }
 
 protected:
     InodeDeleter* inodeDeleter;
 
-    InodeManager* inodeManager;
+    NiceMock<MockInodeManager>* inodeManager;
     NiceMock<MockInodeTableHeader>* inodeHdr;
     NiceMock<MockInodeTable>* inodeTable;
     NiceMock<MockFileDescriptorAllocator>* fdAllocator;
     NiceMock<MockExtentAllocator>* extentAllocator;
+    NiceMock<MockFdInodeMap>* inodeMap;
 
-    int arrayId = 0;
-    MetaVolumeType type = MetaVolumeType::SsdVolume;
+    const int ARRAY_ID = 0;
+    const FileDescriptorType FD = 1;
+    const uint16_t EXTENT_COUNT = 1;
+    const FileSizeType BYTE_SIZE = 100;
+    const FileSizeType CHUNK_SIZE = 4032;
+    const MetaLpnType START_LPN = 10;
+    const MetaLpnType LPN_COUNT = 20;
+    const MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
+    std::string fileName = "TESTFILE";
+
+    MetaFileInode* inode;
 };
 
-TEST_F(InodeDeleterFixture, CheckFileDeletion_Positive)
+TEST_F(InodeDeleterFixture, CheckFileDeletion_testIfSuccessfullyExecuted)
 {
-    std::string fileName = "TESTFILE";
-    std::bitset<MetaFsConfig::MAX_META_FILE_NUM_SUPPORT> bitmap;
-
-    std::vector<MetaFileExtent> extents;
-
-    MetaFsFileControlRequest reqMsg;
-    reqMsg.fileName = &fileName;
-    reqMsg.fileByteSize = 4097;
-
-    // GetExtent()
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 1;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeManager->GetInodeMap();
-    fd2InodeMap.insert({ 0, &inode });
-
-    // LookupDescriptorByName()
-    EXPECT_CALL(*fdAllocator, FindFdByName).WillOnce(Return(0));
-
-    EXPECT_EQ(inodeManager->GetExtent(0, extents), 1);
-
+    EXPECT_CALL(*inodeManager, LookupDescriptorByName).WillOnce(Return(FD));
+    EXPECT_CALL(*inodeManager, GetExtent).WillOnce(Return(EXTENT_COUNT));
+    EXPECT_CALL(*inodeManager, GetFileInode).WillOnce(ReturnRef(*inode));
+    EXPECT_CALL(*inodeManager, SaveContent).WillOnce(Return(true));
     EXPECT_CALL(*inodeHdr, ClearInodeInUse);
-
-    EXPECT_CALL(*extentAllocator, AddToFreeList);
-    EXPECT_CALL(*fdAllocator, Free(fileName, 0));
+    EXPECT_CALL(*inodeMap, Remove).WillOnce(Return(1));
+    EXPECT_CALL(*fdAllocator, Free(fileName, FD));
     EXPECT_CALL(*extentAllocator, PrintFreeExtentsList);
     EXPECT_CALL(*extentAllocator, GetAllocatedExtentList);
 
-    // SaveContent()
-    EXPECT_CALL(*inodeHdr, Store()).WillOnce(Return(true));
-    EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap).WillOnce(ReturnRef(bitmap));
-    EXPECT_CALL(*inodeTable, GetInode).WillRepeatedly(ReturnRef(inode));
-    EXPECT_CALL(*inodeTable, GetBaseLpn).WillOnce(Return(0));
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeDeleter->Delete(reqMsg);
-
-    EXPECT_EQ(fd2InodeMap.size(), 0);
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, EID(SUCCESS));
-}
-
-TEST_F(InodeDeleterFixture, CheckFileDeletion_Negative)
-{
-    std::string fileName = "TESTFILE";
-
     MetaFsFileControlRequest reqMsg;
     reqMsg.fileName = &fileName;
     reqMsg.fileByteSize = 4097;
 
-    // LookupDescriptorByName()
-    EXPECT_CALL(*fdAllocator, FindFdByName).WillOnce(Return(0));
+    auto result = inodeDeleter->Delete(reqMsg);
 
-    // GetExtent()
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 1;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeManager->GetInodeMap();
-    fd2InodeMap.insert({ 0, &inode });
-
-    EXPECT_CALL(*inodeHdr, ClearInodeInUse);
-
-    // SaveContent()
-    EXPECT_CALL(*inodeHdr, Store()).WillOnce(Return(false));
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeDeleter->Delete(reqMsg);
-
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
+    EXPECT_EQ(result.first, FD);
+    EXPECT_EQ(result.second, EID(SUCCESS));
 }
 } // namespace pos

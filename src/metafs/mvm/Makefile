@@ -20,6 +20,8 @@ VPATH += $(MFS_INCLUDE_PATH)
 SRCS += $(wildcard *.cpp) \
 	file_descriptor_allocator.cpp \
 	meta_volume.cpp \
+	active_file_list.cpp \
+	fd_inode_map.cpp \
 	catalog.cpp \
 	catalog_manager.cpp \
 	extent_allocator.cpp \

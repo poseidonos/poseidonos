@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,28 +30,23 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
 #include <string>
 
-#include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/metafs/mvm/volume/fd_inode_map.h"
 
 namespace pos
 {
-class SsdMetaVolume : public MetaVolume
+class MockFdInodeMap : public FdInodeMap
 {
 public:
-    SsdMetaVolume(void) = delete;
-    SsdMetaVolume(int arrayId, const MetaVolumeType volType, const MetaLpnType maxVolumePageNum,
-        InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
-    ~SsdMetaVolume(void);
-    virtual void InitVolumeBaseLpn(void) override;
-    virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;
-
-    bool IsFreeSpaceEnough(FileSizeType fileByteSize);
-
-private:
-    virtual void _SetupExtraRegionInfo(void);
-    static const MetaLpnType SSD_VOLUME_BASE_LPN = 1; // due to filesystem MBR
+    using FdInodeMap::FdInodeMap;
+    MOCK_METHOD(void, Add, (const FileDescriptorType fd, MetaFileInode* inode));
+    MOCK_METHOD(size_t, Remove, (const FileDescriptorType fd));
+    MOCK_METHOD(MetaFileInode*, GetInode, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(std::string, GetFileName, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(void, Reset, ());
 };
+
 } // namespace pos

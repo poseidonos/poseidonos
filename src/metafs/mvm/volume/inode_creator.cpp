@@ -53,7 +53,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
 {
     MetaLpnType totalLpnCount = 0;
     FileDescriptorType fd = inodeMgr->fdAllocator_->Alloc(*reqMsg.fileName);
-    MetaFileInode& newInode = _AllocNewInodeEntry(fd);
+    MetaFileInode& newInode = _AllocNewInodeEntry();
 
     FileSizeType userDataChunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     MetaLpnType requestLpnCnt = (reqMsg.fileByteSize + userDataChunkSize - 1) / userDataChunkSize;
@@ -75,7 +75,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
 
     newInode.BuildNewEntry(inodeReq, MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE);
 
-    inodeMgr->fd2InodeMap_.insert(std::make_pair(fd, &newInode));
+    inodeMgr->fd2InodeMap_->Add(fd, &newInode);
 
     totalLpnCount = 0;
     for (auto& extent : extents)
@@ -112,7 +112,7 @@ InodeCreator::Create(MetaFsFileControlRequest& reqMsg)
 }
 
 MetaFileInode&
-InodeCreator::_AllocNewInodeEntry(FileDescriptorType& newFd)
+InodeCreator::_AllocNewInodeEntry(void)
 {
     const uint32_t entryIdx = inodeMgr->inodeHdr_->GetFreeInodeEntryIdx();
     inodeMgr->inodeHdr_->SetInodeInUse(entryIdx);

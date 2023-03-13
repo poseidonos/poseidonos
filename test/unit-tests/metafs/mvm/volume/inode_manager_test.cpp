@@ -31,20 +31,21 @@
  */
 
 #include "src/metafs/mvm/volume/inode_manager.h"
-#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_table_header_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_table_mock.h"
-
-#include <vector>
-#include <string>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <string>
+#include <vector>
+
+#include "test/unit-tests/metafs/mvm/volume/active_file_list_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_table_header_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_table_mock.h"
+
 using ::testing::_;
 using ::testing::Matcher;
-using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -55,21 +56,22 @@ class InodeManagerFixture : public ::testing::Test
 {
 public:
     InodeManagerFixture(void)
+    : activeList(nullptr),
+      inodeHdr(nullptr),
+      inodeTable(nullptr),
+      fdAllocator(nullptr),
+      extentAllocator(nullptr),
+      inodes(nullptr)
     {
-        inodeHdr = nullptr;
-        inodeTable = nullptr;
-        fdAllocator = nullptr;
-        extentAllocator = nullptr;
-        inodes = nullptr;
     }
 
     virtual ~InodeManagerFixture()
     {
     }
 
-    virtual void
-    SetUp(void)
+    virtual void SetUp(void)
     {
+        activeList = new NiceMock<MockActiveFileList>;
         inodeHdr = new NiceMock<MockInodeTableHeader>(type, 0);
         inodeTable = new NiceMock<MockInodeTable>(type, 10);
         fdAllocator = new NiceMock<MockFileDescriptorAllocator>;
@@ -88,8 +90,7 @@ public:
         inodeMgr->Init(type, baseLpn, maxLpn);
     }
 
-    virtual void
-    TearDown(void)
+    virtual void TearDown(void)
     {
         delete inodeMgr;
     }
@@ -97,6 +98,7 @@ public:
 protected:
     InodeManager* inodeMgr;
 
+    NiceMock<MockActiveFileList>* activeList;
     NiceMock<MockInodeTableHeader>* inodeHdr;
     NiceMock<MockInodeTable>* inodeTable;
     NiceMock<MockFileDescriptorAllocator>* fdAllocator;
@@ -180,41 +182,6 @@ TEST_F(InodeManagerFixture, CheckMss)
     EXPECT_CALL(*inodeTable, SetMss);
 
     inodeMgr->SetMss(nullptr);
-}
-
-TEST_F(InodeManagerFixture, CheckInodeInformation)
-{
-    FileDescriptorType fd = 0;
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 2;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-    inode.data.basic.field.pagemap[1].SetStartLpn(110);
-    inode.data.basic.field.pagemap[1].SetCount(210);
-
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeMgr->GetInodeMap();
-
-    fd2InodeMap.insert({ 0, &inode });
-
-    EXPECT_EQ(inodeMgr->GetFileSize(fd), 100);
-    EXPECT_EQ(inodeMgr->GetDataChunkSize(fd), 4032);
-    EXPECT_EQ(inodeMgr->GetFileBaseLpn(fd), 10);
-
-    std::vector<MetaFileExtent> extents;
-    uint32_t count = inodeMgr->GetExtent(0, extents);
-
-    EXPECT_EQ(count, 2);
-    if (count == 2)
-    {
-        EXPECT_EQ(extents[0].GetStartLpn(), 10);
-        EXPECT_EQ(extents[0].GetCount(), 20);
-        EXPECT_EQ(extents[1].GetStartLpn(), 110);
-        EXPECT_EQ(extents[1].GetCount(), 210);
-    }
 }
 
 TEST_F(InodeManagerFixture, CreateInodeContents)
@@ -354,45 +321,6 @@ TEST_F(InodeManagerFixture, CheckAvailableSpaceInByteSize2)
     EXPECT_EQ(inodeMgr->GetAvailableSpace(), 8 * 4032);
 }
 
-TEST_F(InodeManagerFixture, CheckFileInActive)
-{
-    std::unordered_set<FileDescriptorType>& set = inodeMgr->GetActiveFiles();
-    set.insert(0);
-
-    EXPECT_EQ(inodeMgr->CheckFileInActive(0), true);
-    EXPECT_EQ(inodeMgr->CheckFileInActive(1), false);
-}
-
-TEST_F(InodeManagerFixture, CheckAddedFileInActive)
-{
-    EXPECT_EQ(inodeMgr->AddFileInActiveList(0),
-                    EID(SUCCESS));
-    EXPECT_EQ(inodeMgr->AddFileInActiveList(0),
-                    EID(MFS_FILE_OPEN_REPETITIONARY));
-}
-
-TEST_F(InodeManagerFixture, RemoveFileInActive)
-{
-    std::unordered_set<FileDescriptorType>& set = inodeMgr->GetActiveFiles();
-    set.insert(0);
-
-    EXPECT_EQ(set.size(), 1);
-
-    inodeMgr->RemoveFileFromActiveList(0);
-}
-
-TEST_F(InodeManagerFixture, GetFileCountInActive)
-{
-    std::unordered_set<FileDescriptorType>& set = inodeMgr->GetActiveFiles();
-    set.insert(0);
-
-    EXPECT_EQ(inodeMgr->GetFileCountInActive(), 1);
-
-    set.erase(0);
-
-    EXPECT_EQ(inodeMgr->GetFileCountInActive(), 0);
-}
-
 TEST_F(InodeManagerFixture, SetMetaFileBase)
 {
     EXPECT_CALL(*extentAllocator, SetFileBaseLpn);
@@ -403,7 +331,7 @@ TEST_F(InodeManagerFixture, SetMetaFileBase)
 TEST_F(InodeManagerFixture, GetMetaFileBase)
 {
     EXPECT_CALL(*extentAllocator, GetFileBaseLpn)
-            .WillOnce(Return(123));
+        .WillOnce(Return(123));
 
     EXPECT_EQ(inodeMgr->GetMetaFileBaseLpn(), 123);
 }
@@ -411,7 +339,7 @@ TEST_F(InodeManagerFixture, GetMetaFileBase)
 TEST_F(InodeManagerFixture, CheckFileCreated)
 {
     EXPECT_CALL(*fdAllocator, IsGivenFileCreated(Matcher<StringHashType>(_)))
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(inodeMgr->IsGivenFileCreated(123), true);
 }
@@ -421,50 +349,9 @@ TEST_F(InodeManagerFixture, CheckFileCreated0)
     std::string fileName = "TESTFILE";
 
     EXPECT_CALL(*fdAllocator, FindFdByName)
-            .WillOnce(Return(10));
+        .WillOnce(Return(10));
 
     EXPECT_EQ(inodeMgr->LookupDescriptorByName(fileName), 10);
-}
-
-TEST_F(InodeManagerFixture, CheckFileCreated1)
-{
-    std::string fileName = "TESTFILE";
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileName = fileName;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 1;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeMgr->GetInodeMap();
-    fd2InodeMap.insert({ 0, &inode });
-
-    EXPECT_EQ(inodeMgr->LookupNameByDescriptor(1), "");
-    EXPECT_EQ(inodeMgr->LookupNameByDescriptor(0), fileName);
-}
-
-TEST_F(InodeManagerFixture, CheckInode0)
-{
-    std::string fileName = "TESTFILE";
-    MetaFileInode inode;
-    inode.data.basic.field.fd = 0;
-    inode.data.basic.field.fileName = fileName;
-    inode.data.basic.field.fileByteSize = 100;
-    inode.data.basic.field.dataChunkSize = 4032;
-    inode.data.basic.field.pagemapCnt = 1;
-    inode.data.basic.field.pagemap[0].SetStartLpn(10);
-    inode.data.basic.field.pagemap[0].SetCount(20);
-
-    std::unordered_map<FileDescriptorType, MetaFileInode*>& fd2InodeMap =
-        inodeMgr->GetInodeMap();
-    fd2InodeMap.insert({ 0, &inode });
-
-    MetaFileInode& obj = inodeMgr->GetFileInode(0);
-
-    EXPECT_EQ(&obj, &inode);
 }
 
 TEST_F(InodeManagerFixture, CheckInode1)
@@ -480,7 +367,7 @@ TEST_F(InodeManagerFixture, CheckInode1)
     inode.data.basic.field.pagemap[0].SetCount(20);
 
     EXPECT_CALL(*inodeTable, GetInode)
-            .WillOnce(ReturnRef(inode));
+        .WillOnce(ReturnRef(inode));
 
     MetaFileInode& obj = inodeMgr->GetInodeEntry(0);
 
@@ -490,7 +377,7 @@ TEST_F(InodeManagerFixture, CheckInode1)
 TEST_F(InodeManagerFixture, CheckInUseFlag)
 {
     EXPECT_CALL(*inodeHdr, IsFileInodeInUse)
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     EXPECT_EQ(inodeMgr->IsFileInodeInUse(0), true);
 }
@@ -502,11 +389,11 @@ TEST_F(InodeManagerFixture, BackupContent_Positive)
     MetaVolumeType type = MetaVolumeType::NvRamVolume;
 
     EXPECT_CALL(*inodeHdr, Store(_, _, _, _))
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     // _StoreInodeToMedia()
     EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap)
-            .WillOnce(ReturnRef(bitmap));
+        .WillOnce(ReturnRef(bitmap));
 
     EXPECT_EQ(inodeMgr->BackupContent(type, 0, 0, 0), true);
 }
@@ -516,7 +403,7 @@ TEST_F(InodeManagerFixture, BackupContent_Negative0)
     MetaVolumeType type = MetaVolumeType::NvRamVolume;
 
     EXPECT_CALL(*inodeHdr, Store(_, _, _, _))
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(inodeMgr->BackupContent(type, 0, 0, 0), false);
 }
@@ -528,13 +415,13 @@ TEST_F(InodeManagerFixture, BackupContent_Negative1)
     MetaVolumeType type = MetaVolumeType::NvRamVolume;
 
     EXPECT_CALL(*inodeHdr, Store(_, _, _, _))
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     // _StoreInodeToMedia()
     EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap)
-            .WillOnce(ReturnRef(bitmap));
+        .WillOnce(ReturnRef(bitmap));
     EXPECT_CALL(*inodeTable, Store(_, _, _, _))
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(inodeMgr->BackupContent(type, 0, 0, 0), false);
 }
@@ -545,11 +432,11 @@ TEST_F(InodeManagerFixture, RestoreContent_Positive)
     MetaVolumeType type = MetaVolumeType::NvRamVolume;
 
     EXPECT_CALL(*inodeHdr, Load(_, _, _, _))
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     // _LoadInodeFromMedia()
     EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap)
-            .WillOnce(ReturnRef(bitmap));
+        .WillOnce(ReturnRef(bitmap));
 
     EXPECT_EQ(inodeMgr->RestoreContent(type, 0, 0, 0), true);
 }
@@ -559,7 +446,7 @@ TEST_F(InodeManagerFixture, RestoreContent_Negative0)
     MetaVolumeType type = MetaVolumeType::NvRamVolume;
 
     EXPECT_CALL(*inodeHdr, Load(_, _, _, _))
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(inodeMgr->RestoreContent(type, 0, 0, 0), false);
 }
@@ -571,13 +458,13 @@ TEST_F(InodeManagerFixture, RestoreContent_Negative1)
     MetaVolumeType type = MetaVolumeType::NvRamVolume;
 
     EXPECT_CALL(*inodeHdr, Load(_, _, _, _))
-            .WillOnce(Return(true));
+        .WillOnce(Return(true));
 
     // _LoadInodeFromMedia()
     EXPECT_CALL(*inodeHdr, GetInodeInUseBitmap)
-            .WillOnce(ReturnRef(bitmap));
+        .WillOnce(ReturnRef(bitmap));
     EXPECT_CALL(*inodeTable, Load(_, _, _, _))
-            .WillOnce(Return(false));
+        .WillOnce(Return(false));
 
     EXPECT_EQ(inodeMgr->RestoreContent(type, 0, 0, 0), false);
 }
@@ -588,22 +475,32 @@ TEST_F(InodeManagerFixture, RestoreContent_CheckTheLastLpn)
     std::vector<pos::MetaFileExtent> extentList;
 
     EXPECT_CALL(*inodeHdr, GetFileExtentContent)
-            .WillOnce(Return(extentList));
+        .WillOnce(Return(extentList));
 
     EXPECT_EQ(inodeMgr->GetTheLastValidLpn(), 0);
 
-    extentList.push_back({0, 100});     // 0 to 99
+    extentList.push_back({0, 100}); // 0 to 99
 
     EXPECT_CALL(*inodeHdr, GetFileExtentContent)
-            .WillOnce(Return(extentList));
+        .WillOnce(Return(extentList));
 
     EXPECT_EQ(inodeMgr->GetTheLastValidLpn(), 99);
 
-    extentList.push_back({200, 100});   // 200 to 299
+    extentList.push_back({200, 100}); // 200 to 299
 
     EXPECT_CALL(*inodeHdr, GetFileExtentContent)
-            .WillOnce(Return(extentList));
+        .WillOnce(Return(extentList));
 
     EXPECT_EQ(inodeMgr->GetTheLastValidLpn(), 299);
+}
+
+TEST_F(InodeManagerFixture, AllocateCreator_testIfInodeCreatorIsCreated)
+{
+    auto creator = inodeMgr->AllocateCreator();
+}
+
+TEST_F(InodeManagerFixture, AllocateDeletor_testIfInodeDeleterIsCreated)
+{
+    auto deleter = inodeMgr->AllocateDeleter();
 }
 } // namespace pos

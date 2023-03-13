@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,72 +30,50 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ssd_meta_volume.h"
+#include "src/metafs/mvm/volume/active_file_list.h"
 
-#include <string>
+#include <gtest/gtest.h>
 
-#include "src/logger/logger.h"
 namespace pos
 {
-SsdMetaVolume::SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
-    InodeManager* inodeMgr, CatalogManager* catalogMgr)
-: MetaVolume(arrayId, volType, maxVolumePageNum, inodeMgr, catalogMgr)
+TEST(ActiveFileList, CheckFileInActive)
 {
+    ActiveFileList activeFiles;
+    std::unordered_set<FileDescriptorType>& set = activeFiles.GetActiveFiles();
+    set.insert(0);
+
+    EXPECT_EQ(activeFiles.CheckFileInActive(0), true);
+    EXPECT_EQ(activeFiles.CheckFileInActive(1), false);
 }
 
-SsdMetaVolume::~SsdMetaVolume(void)
+TEST(ActiveFileList, CheckAddedFileInActive)
 {
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "SSD Meta Vol. destructed...");
+    ActiveFileList activeFiles;
+    EXPECT_EQ(activeFiles.AddFileInActiveList(0), EID(SUCCESS));
+    EXPECT_EQ(activeFiles.AddFileInActiveList(0), EID(MFS_FILE_OPEN_REPETITIONARY));
 }
 
-void
-SsdMetaVolume::InitVolumeBaseLpn(void)
+TEST(ActiveFileList, RemoveFileInActive)
 {
-    volumeBaseLpn_ = SSD_VOLUME_BASE_LPN;
+    ActiveFileList activeFiles;
+    std::unordered_set<FileDescriptorType>& set = activeFiles.GetActiveFiles();
+    set.insert(0);
+
+    EXPECT_EQ(set.size(), 1);
+
+    activeFiles.RemoveFileFromActiveList(0);
 }
 
-bool
-SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
+TEST(ActiveFileList, GetFileCountInActive)
 {
-    if (GetAvailableSpace() >= fileByteSize)
-    {
-        return true;
-    }
+    ActiveFileList activeFiles;
+    std::unordered_set<FileDescriptorType>& set = activeFiles.GetActiveFiles();
+    set.insert(0);
 
-    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-        "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetAvailableSpace(), fileByteSize);
-    return false;
-}
+    EXPECT_EQ(activeFiles.GetFileCountInActive(), 1);
 
-bool
-SsdMetaVolume::IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop)
-{
-    if (GetUtilizationInPercent() >= META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT)
-    {
-        MFS_TRACE_WARN(EID(MFS_META_VOLUME_ALMOST_FULL),
-            "Volume is almost full,");
-        return false;
-    }
+    set.erase(0);
 
-    if (IsFreeSpaceEnough(fileByteSize) == true)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-void
-SsdMetaVolume::_SetupExtraRegionInfo(void)
-{
-    // The NVRAM meta saves after SSD volume meta on shutdown process.
-    sumOfRegionBaseLpns_ = inodeMgr_->GetMetaFileBaseLpn();
-    MetaLpnType newTargetBaseLpn = catalogMgr_->GetRegionSizeInLpn() +
-        inodeMgr_->GetRegionSizeInLpn() +
-        inodeMgr_->GetMetaFileBaseLpn();
-    inodeMgr_->SetMetaFileBaseLpn(newTargetBaseLpn);
+    EXPECT_EQ(activeFiles.GetFileCountInActive(), 0);
 }
 } // namespace pos

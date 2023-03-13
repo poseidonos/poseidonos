@@ -43,10 +43,12 @@ namespace pos
 {
 InodeManager::InodeManager(const int arrayId, InodeTableHeader* inodeHdr,
     InodeTable* inodeTable, FileDescriptorAllocator* fdAllocator,
-    ExtentAllocator* extentAllocator)
+    ExtentAllocator* extentAllocator, ActiveFileList* activeFiles, FdInodeMap* fd2InodeMap)
 : OnVolumeMetaRegionManager(arrayId),
   inodeHdr_(inodeHdr),
   inodeTable_(inodeTable),
+  fd2InodeMap_(fd2InodeMap),
+  activeFiles_(activeFiles),
   metaStorage_(nullptr),
   fdAllocator_(fdAllocator),
   extentAllocator_(extentAllocator)
@@ -55,29 +57,23 @@ InodeManager::InodeManager(const int arrayId, InodeTableHeader* inodeHdr,
 
 InodeManager::~InodeManager(void)
 {
-    if (inodeHdr_)
-    {
-        delete inodeHdr_;
-        inodeHdr_ = nullptr;
-    }
+    delete inodeHdr_;
+    inodeHdr_ = nullptr;
 
-    if (inodeTable_)
-    {
-        delete inodeTable_;
-        inodeTable_ = nullptr;
-    }
+    delete inodeTable_;
+    inodeTable_ = nullptr;
 
-    if (fdAllocator_)
-    {
-        delete fdAllocator_;
-        fdAllocator_ = nullptr;
-    }
+    delete fdAllocator_;
+    fdAllocator_ = nullptr;
 
-    if (extentAllocator_)
-    {
-        delete extentAllocator_;
-        extentAllocator_ = nullptr;
-    }
+    delete extentAllocator_;
+    extentAllocator_ = nullptr;
+
+    delete fd2InodeMap_;
+    fd2InodeMap_ = nullptr;
+
+    delete activeFiles_;
+    activeFiles_ = nullptr;
 }
 
 void
@@ -85,6 +81,12 @@ InodeManager::Init(MetaVolumeType volumeType, MetaLpnType baseLpn, MetaLpnType m
 {
     OnVolumeMetaRegionManager::Init(volumeType, baseLpn, maxLpn);
     MetaLpnType targetBaseLpn = baseLpn;
+
+    if (!fd2InodeMap_)
+        fd2InodeMap_ = new FdInodeMap();
+
+    if (!activeFiles_)
+        activeFiles_ = new ActiveFileList();
 
     if (!inodeHdr_)
         inodeHdr_ = new InodeTableHeader(volumeType, targetBaseLpn);
@@ -165,7 +167,7 @@ InodeManager::_BuildF2InodeMap(void)
         if (inodeInUseBitmap.test(idx))
         {
             MetaFileInode& inode = inodeTable_->GetInode(idx);
-            fd2InodeMap_.insert({inode.data.basic.field.fd, &inode});
+            fd2InodeMap_->Add(inode.data.basic.field.fd, &inode);
         }
     }
 }
@@ -342,7 +344,7 @@ InodeManager::_StoreInodeToMedia(const MetaStorageType media, const MetaLpnType 
 void
 InodeManager::Finalize(void)
 {
-    fd2InodeMap_.clear();
+    fd2InodeMap_->Reset();
     fdAllocator_->Reset();
 }
 
@@ -368,71 +370,6 @@ InodeManager::GetAvailableSpace(void) const
     maxSize -= maxSize % MetaFsConfig::LPN_COUNT_PER_EXTENT;
 
     return maxSize * MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
-}
-
-bool
-InodeManager::CheckFileInActive(const FileDescriptorType fd) const
-{
-    if (activeFiles_.find(fd) == activeFiles_.end())
-    {
-        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-            "File descriptor {} is not found in active fd list", fd);
-        return false;
-    }
-    return true;
-}
-
-POS_EVENT_ID
-InodeManager::AddFileInActiveList(const FileDescriptorType fd)
-{
-    POS_EVENT_ID rc = EID(SUCCESS);
-
-    if (activeFiles_.find(fd) != activeFiles_.end())
-    {
-        rc = EID(MFS_FILE_OPEN_REPETITIONARY);
-        POS_TRACE_ERROR((int)rc,
-            "You attempt to open fd {} file twice. It is not allowed", fd);
-    }
-    else
-    {
-        activeFiles_.insert(fd);
-        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-            "File descriptor {} is added in active fd list", fd);
-    }
-
-    return rc;
-}
-
-void
-InodeManager::RemoveFileFromActiveList(const FileDescriptorType fd)
-{
-    if (activeFiles_.find(fd) == activeFiles_.end())
-    {
-        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
-            "File descriptor {} is not active file.", fd);
-        assert(false);
-    }
-
-    activeFiles_.erase(fd);
-    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-        "File descriptor {} is removed from active fd list, remained active file count: {}",
-        fd, activeFiles_.size());
-}
-
-size_t
-InodeManager::GetFileCountInActive(void) const
-{
-    return activeFiles_.size();
-}
-
-std::string
-InodeManager::LookupNameByDescriptor(const FileDescriptorType fd) const
-{
-    auto item = fd2InodeMap_.find(fd);
-    if (item == fd2InodeMap_.end())
-        return "";
-
-    return item->second->data.basic.field.fileName.ToString();
 }
 
 FileSizeType
@@ -465,19 +402,6 @@ InodeManager::GetExtent(const FileDescriptorType fd, std::vector<MetaFileExtent>
     }
 
     return extentCnt;
-}
-
-MetaFileInode&
-InodeManager::GetFileInode(const FileDescriptorType fd) const
-{
-    auto item = fd2InodeMap_.find(fd);
-    if (item == fd2InodeMap_.end())
-    {
-        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
-            "File descriptor {} is not existed.", fd);
-        assert(false);
-    }
-    return *item->second;
 }
 
 void
@@ -558,5 +482,17 @@ InodeManager::GetTheLastValidLpn(void) const
     lpn += extents[extents.size() - 1].GetCount() - 1;
 
     return lpn;
+}
+
+InodeCreator*
+InodeManager::AllocateCreator(void)
+{
+    return new InodeCreator(this);
+}
+
+InodeDeleter*
+InodeManager::AllocateDeleter(void)
+{
+    return new InodeDeleter(this);
 }
 } // namespace pos
