@@ -360,7 +360,7 @@ DeviceManager::_Rescan()
     std::vector<UblockSharedPtr>::iterator it;
 
     vector<UblockSharedPtr> devicesLocal = _GetDeviceListLocal();
- 
+
     for (it = devicesLocal.begin(); it != devicesLocal.end(); it++)
     {
         if ((*it)->GetType() != DeviceType::NVRAM)
@@ -576,7 +576,13 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
     if (DeviceType::SSD == deviceType)
     {
         UnvmeSsdSharedPtr unvmeSsd = static_pointer_cast<UnvmeSsd>(dev);
-        struct spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(unvmeSsd->GetNs());
+        struct spdk_nvme_ns* ns = unvmeSsd->GetNs();
+        if (ns == nullptr)
+        {
+            return;
+        }
+
+        struct spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(ns);
         uint64_t flags = spdk_nvme_ctrlr_get_flags(ctrlr);
         if (SPDK_NVME_CTRLR_DIRECTIVES_SUPPORTED & flags)
         {
