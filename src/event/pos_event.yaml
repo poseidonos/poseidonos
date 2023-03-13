@@ -4836,6 +4836,13 @@ Root:
     Description: Protobuf has failed to serialize into byte stream.
     Cause: There may be an issue with protobuf version/usage.
     Solution: Developers must analyze the issue.
+  -
+    Id: 3252
+    Name: REVMAP_RBA_MISMATCH_BETWEEN_LOG_AND_INVMAP
+    Severity:
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause:
+    Solution:
   
   # MapHeaderExtended: 3290 - 3299
   -
