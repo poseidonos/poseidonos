@@ -77,7 +77,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdated)
     EXPECT_EQ(result, 0);
 }
 
-TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
+TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdatedWhenMapIsLatest)
 {
     // Given
     NiceMock<MockIVSAMap> vsaMap;
@@ -129,7 +129,8 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
     for (uint32_t offset = numBlks / 2; offset < numBlks; offset++)
     {
         BlkAddr currentRba = startRba + offset;
-        EXPECT_CALL(vsaMap, SetVSAsWithSyncOpen(volId, currentRba, _)).Times(0);
+        EXPECT_CALL(vsaMap, SetVSAsWithSyncOpen(volId, currentRba, _)).Times(1);
+        EXPECT_CALL(stripeReplayStatus, BlockWritten(startVsa.offset + offset, 1));
     }
 
     int result = blockMapUpdateEvent.Replay();

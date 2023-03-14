@@ -86,9 +86,8 @@ ReplayBlockMapUpdate::Replay(void)
             {
                 _InvalidateOldBlock(offset);
             }
-
-            result = _UpdateMap(offset);
         }
+        result = _UpdateMap(offset);
     }
 
     if (status->IsFlushed() == false)
