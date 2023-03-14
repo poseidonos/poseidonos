@@ -36,6 +36,7 @@
 #include "src/admin/disk_query_manager.h"
 #include "src/bio/ubio.h"
 #include "src/device/directive_cmd.h"
+#include "src/include/branch_prediction.h"
 #include "src/include/pos_error_code.hpp"
 #include "src/logger/logger.h"
 #include "src/spdk_wrapper/abort_context.h"
@@ -83,7 +84,11 @@ UnvmeCmd::RequestIO(UnvmeDeviceContext* deviceContext,
         }
         case UbioDir::Write:
         {
-            uint64_t flags = spdk_nvme_ctrlr_get_flags(spdk_nvme_ns_get_ctrlr(ns));
+            uint64_t flags = 0;
+            if (likely(ns != nullptr))
+            {
+                flags = spdk_nvme_ctrlr_get_flags(spdk_nvme_ns_get_ctrlr(ns));
+            }
 
             if (SPDK_NVME_CTRLR_DIRECTIVES_SUPPORTED & flags)
             {

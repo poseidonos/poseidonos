@@ -170,13 +170,13 @@ int
 SpdkNvmeCaller::SpdkNvmeCtrlrCmdDirectiveReceive(
     struct spdk_nvme_ctrlr *ctrlr,
     uint32_t nsid,
-	uint32_t doper,
+    uint32_t doper,
     uint32_t dtype,
     uint32_t dspec,
     void *payload,
     uint32_t payload_size,
     uint32_t cdw12,
-	uint32_t cdw13,
+    uint32_t cdw13,
     spdk_nvme_cmd_cb cb_fn,
     void *cb_arg)
 {
@@ -188,13 +188,13 @@ int
 SpdkNvmeCaller::SpdkNvmeCtrlrCmdDirectiveSend(
     struct spdk_nvme_ctrlr *ctrlr,
     uint32_t nsid,
-	uint32_t doper,
+    uint32_t doper,
     uint32_t dtype,
     uint32_t dspec,
     void *payload,
     uint32_t payload_size,
     uint32_t cdw12,
-	uint32_t cdw13,
+    uint32_t cdw13,
     spdk_nvme_cmd_cb cb_fn,
     void *cb_arg)
 {
