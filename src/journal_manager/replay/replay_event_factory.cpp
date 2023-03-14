@@ -55,10 +55,10 @@ ReplayEventFactory::ReplayEventFactory(StripeReplayStatus* status,
 
 ReplayEvent*
 ReplayEventFactory::CreateBlockWriteReplayEvent(int volId, BlkAddr startRba,
-    VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo)
+    VirtualBlkAddr startVsa, uint64_t numBlks, bool segInfoFlushed)
 {
     ReplayBlockMapUpdate* blockMapUpdate = new ReplayBlockMapUpdate(vsaMap, segmentCtx, status,
-        wbReplayer, volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        wbReplayer, volId, startRba, startVsa, numBlks, segInfoFlushed);
     return blockMapUpdate;
 }
 

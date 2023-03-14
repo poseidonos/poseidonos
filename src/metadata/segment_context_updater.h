@@ -53,7 +53,7 @@ public:
     virtual bool UpdateOccupiedStripeCountWithGroupId(StripeId lsid, int logGroupId);
 
     // For IT
-    virtual void SetVersionedSegmentContext(IVersionedSegmentContext* versionedSegmentContext);
+    void SetVersionedSegmentContext(IVersionedSegmentContext* versionedSegmentContext);
 
 private:
     const PartitionLogicalSize* addrInfo;

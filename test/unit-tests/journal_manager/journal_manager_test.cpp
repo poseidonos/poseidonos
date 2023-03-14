@@ -58,6 +58,7 @@
 #include "test/unit-tests/journal_manager/replay/replay_handler_mock.h"
 #include "test/unit-tests/journal_manager/status/journal_status_provider_mock.h"
 #include "test/unit-tests/telemetry/telemetry_client/telemetry_client_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using ::testing::_;
 using ::testing::DoAll;

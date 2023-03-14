@@ -95,7 +95,7 @@ protected:
     IVSAMap* vsaMap;
     IStripeMap* stripeMap;
 
-    bool replaySegmentInfo;
+    bool needToReplayStripeFlush;
 };
 
 } // namespace pos

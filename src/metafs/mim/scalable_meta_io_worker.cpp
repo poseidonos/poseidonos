@@ -58,6 +58,7 @@ ScalableMetaIoWorker::ScalableMetaIoWorker(const int threadId, const int coreId,
     if (!tp_)
     {
         tp_ = new TelemetryPublisher("metafs_io_" + to_string(coreId_));
+        tp_->AddDefaultLabel("thread_name", std::to_string(coreId_));
         TelemetryClientSingleton::Instance()->RegisterPublisher(tp_);
         needToDeleteTp_ = true;
     }

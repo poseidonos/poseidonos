@@ -153,9 +153,10 @@ ReplayLogList::PrintLogStatistics(void)
             int numStripeMapUpdatedLogs = logsFoundPerType[(int)LogType::STRIPE_MAP_UPDATED];
             int numGcStripeFlushedLogs = logsFoundPerType[(int)LogType::GC_STRIPE_FLUSHED];
             int numVolumeDeletedLogs = logsFoundPerType[(int)LogType::VOLUME_DELETED];
+            int numSegmentFreedLogs = logsFoundPerType[(int)LogType::SEGMENT_FREED];
             POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
-                "Logs found: logGroupId:{}, SeqNum: {}, total: {}, block_map: {}, stripe_map: {}, gc_stripes: {}, volumes_deleted: {}",
-                id, sequenceNumber, seqNumGroup.second.logs.size(), numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs);
+                "Logs found: logGroupId:{}, SeqNum: {}, total: {}, block_map: {}, stripe_map: {}, gc_stripes: {}, volumes_deleted: {}, segment_freed: {}",
+                id, sequenceNumber, seqNumGroup.second.logs.size(), numBlockMapUpdatedLogs, numStripeMapUpdatedLogs, numGcStripeFlushedLogs, numVolumeDeletedLogs, numSegmentFreedLogs);
         }
     }
 }

@@ -49,7 +49,7 @@ public:
     ReplayBlockMapUpdate(IVSAMap* ivsaMa, ISegmentCtx* segmentCtx,
         StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer,
         int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
-        bool replaySegmentInfo);
+        bool needToReplaySegmentInfo);
     virtual ~ReplayBlockMapUpdate(void);
 
     virtual int Replay(void) override;
@@ -91,7 +91,7 @@ private:
 
     std::vector<VirtualBlkAddr> readMap;
 
-    bool replaySegmentInfo;
+    bool needToReplaySegmentInfo;
     ActiveWBStripeReplayer* wbStripeReplayer;
 };
 } // namespace pos

@@ -57,6 +57,7 @@ public:
     virtual int AddBlockMapUpdatedLog(VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent);
     virtual int AddStripeMapUpdatedLog(StripeSmartPtr stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent);
     virtual int AddGcStripeFlushedLog(GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent);
+    virtual int AddSegmentFreedLog(SegmentId targetSegmentId, EventSmartPtr callbackEvent);
 
 private:
     int _CanBeWritten(void);

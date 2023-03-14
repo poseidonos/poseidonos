@@ -38,6 +38,7 @@
 #include "src/journal_manager/log/block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_block_write_done_log_handler.h"
 #include "src/journal_manager/log/gc_stripe_flushed_log_handler.h"
+#include "src/journal_manager/log/segment_freed_log_handler.h"
 #include "src/journal_manager/log/stripe_map_updated_log_handler.h"
 #include "src/journal_manager/log/volume_deleted_log_handler.h"
 #include "src/logger/logger.h"
@@ -139,7 +140,10 @@ LogBufferParser::_GetLogHandler(char* ptr)
     {
         foundLog = new VolumeDeletedLogEntry(*reinterpret_cast<VolumeDeletedLog*>(ptr));
     }
-
+    else if (logPtr->type == LogType::SEGMENT_FREED)
+    {
+        foundLog = new SegmentFreedLogHandler(*reinterpret_cast<SegmentFreedLog*>(ptr));
+    }
     return foundLog;
 }
 

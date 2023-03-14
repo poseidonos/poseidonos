@@ -15,6 +15,7 @@ public:
     MOCK_METHOD(int, AddBlockMapUpdatedLog, (VolumeIoSmartPtr volumeIo, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(int, AddStripeMapUpdatedLog, (StripeSmartPtr stripe, StripeAddr oldAddr, EventSmartPtr callbackEvent), (override));
     MOCK_METHOD(int, AddGcStripeFlushedLog, (GcStripeMapUpdateList mapUpdates, EventSmartPtr callbackEvent), (override));
+    MOCK_METHOD(int, AddSegmentFreedLog, (SegmentId targetSegmentId, EventSmartPtr callbackEvent), (override));
 };
 
 } // namespace pos

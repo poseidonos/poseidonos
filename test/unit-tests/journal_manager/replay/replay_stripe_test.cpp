@@ -21,10 +21,11 @@ public:
     {
         return replayEvents;
     }
+
     bool
-    GetReplaySegmentInfo(void)
+    SetNeedToReplayStripeFlush(bool val)
     {
-        return replaySegmentInfo;
+        needToReplayStripeFlush = val;
     }
 
     void
@@ -81,9 +82,6 @@ TEST(ReplayStripe, AddLog_testAddLogWhenSegInfoFlushed)
 
     // When
     stripe.AddLog(replayLog);
-
-    // Then
-    EXPECT_EQ(stripe.GetReplaySegmentInfo(), false);
 }
 
 TEST(ReplayStripe, AddLog_testAddLogWhenSegInfoNotFlushed)
@@ -102,9 +100,6 @@ TEST(ReplayStripe, AddLog_testAddLogWhenSegInfoNotFlushed)
 
     // When
     stripe.AddLog(replayLog);
-
-    // Then
-    EXPECT_EQ(stripe.GetReplaySegmentInfo(), true);
 }
 
 TEST(ReplayStripe, Replay_testWhenAllReplayEventSuccess)
@@ -326,6 +321,7 @@ TEST(ReplayStripe, _CreateStripeFlushReplayEvent_testIfStripeFlushEventIsNotAdde
         .log = nullptr,
         .segInfoFlushed = true};
     stripe.AddLog(replayLog);
+    stripe.SetNeedToReplayStripeFlush(false);
 
     // When
     stripe.CreateStripeFlushReplayEvent();

@@ -45,6 +45,7 @@ enum class LogType
     GC_BLOCK_WRITE_DONE,
     GC_STRIPE_FLUSHED,
     VOLUME_DELETED,
+    SEGMENT_FREED,
     NUM_LOG_TYPE,
     COUNT
 };
@@ -96,6 +97,11 @@ struct VolumeDeletedLog : Log
 {
     int volId;
     uint64_t allocatorContextVersion;
+};
+
+struct SegmentFreedLog : Log
+{
+    SegmentId targetSegment;
 };
 
 #pragma pack(pop)

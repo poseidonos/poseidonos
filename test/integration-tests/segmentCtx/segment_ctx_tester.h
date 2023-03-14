@@ -1,17 +1,22 @@
 #pragma once
 
 #include <gmock/gmock.h>
-#include <string>
 #include <list>
+#include <string>
 #include <vector>
+
 #include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
-#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/integration-tests/allocator/address/allocator_address_info_tester.h"
+#include "test/unit-tests/allocator/context_manager/gc_ctx/gc_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
+#include "test/unit-tests/telemetry/telemetry_client/telemetry_publisher_mock.h"
 
 using testing::NiceMock;
 
 namespace pos
 {
+class EventScheduler;
 class SegmentCtxTester : public SegmentCtx
 {
 public:
@@ -25,7 +30,6 @@ public:
         ON_CALL(*addressInfo, GetArrayId).WillByDefault(Return(arrayId));
 
         realCtx = new SegmentCtx(tp, rebuildContext, addressInfo, gcContext, nullptr);
-
         MakeStubs();
     };
 
@@ -38,7 +42,7 @@ public:
         delete tp;
     };
 
-    MOCK_METHOD(void, Init, (), (override));
+    MOCK_METHOD(void, Init, (EventScheduler* eventScheduler_), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(SegmentId, AllocateFreeSegment, (), (override));
     MOCK_METHOD(uint64_t, GetNumOfFreeSegment, (), (override));
@@ -103,9 +107,9 @@ private:
 
     virtual void InitStubs(void)
     {
-        ON_CALL(*this, Init).WillByDefault([this]()
+        ON_CALL(*this, Init).WillByDefault([this](EventScheduler* eventScheduler_)
         {
-            realCtx->Init();
+            realCtx->Init(eventScheduler);
         });
     };
 

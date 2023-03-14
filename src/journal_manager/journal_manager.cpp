@@ -240,7 +240,7 @@ JournalManager::_CreateVersionedSegmentCtx(void)
 {
     if ((true == config->IsEnabled()) && (true == config->IsVscEnabled()))
     {
-        return new VersionedSegmentCtx();
+        return new VersionedSegmentCtx(arrayInfo);
     }
     else
     {
