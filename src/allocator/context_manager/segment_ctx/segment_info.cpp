@@ -90,7 +90,7 @@ std::pair<bool, SegmentState>
 SegmentInfo::DecreaseValidBlockCount(int dec, bool allowVictimSegRelease)
 {
     std::lock_guard<std::mutex> lock(seglock);
-    int32_t decreased = data->validBlockCount.fetch_sub(dec) - dec;
+    int decreased = data->validBlockCount.fetch_sub(dec) - dec;
 
     if (decreased == 0)
     {

@@ -65,7 +65,14 @@ ReplayBlockMapUpdate::_ReadBlockMap(void)
 
     for (uint32_t offset = 0; offset < numBlks; offset++)
     {
-        readMap[offset] = vsaMap->GetVSAWithSyncOpen(volId, startRba + offset);
+        if (needToReplayBlockMap == true)
+        {
+            readMap[offset] = vsaMap->GetVSAWithSyncOpen(volId, startRba + offset);
+        }
+        else
+        {
+            readMap[offset] = UNMAP_VSA;
+        }
     }
 }
 
@@ -91,7 +98,7 @@ ReplayBlockMapUpdate::Replay(void)
         result = _UpdateMapAndValidate(offset);
     }
 
-    if (status->IsFlushed() == false)
+    if (status->IsFlushed() == false && needToReplayBlockMap == true)
     {
         for (uint32_t offset = 0; offset < numBlks; offset++)
         {
