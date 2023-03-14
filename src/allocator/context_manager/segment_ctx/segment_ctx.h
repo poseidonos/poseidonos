@@ -83,8 +83,8 @@ public:
     virtual uint64_t GetTotalDataSize(void) override;
 
     virtual bool MoveToFreeState(SegmentId segId);
-    virtual uint32_t GetValidBlockCount(SegmentId segId);
-    virtual uint32_t GetOccupiedStripeCount(SegmentId segId);
+    virtual int GetValidBlockCount(SegmentId segId);
+    virtual int GetOccupiedStripeCount(SegmentId segId);
     virtual SegmentState GetSegmentState(SegmentId segId);
     virtual void ResetSegmentsStates(void);
 
@@ -133,8 +133,8 @@ protected:
     void _BuildRebuildSegmentListFromTheList(SegmentState state);
     void _UpdateTelemetryOnVictimSegmentAllocation(SegmentId victimSegment);
 
-    void _IncreaseValidBlockCount(SegmentId segId, uint32_t cnt);
-    bool _DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease);
+    void _IncreaseValidBlockCount(SegmentId segId, int cnt);
+    bool _DecreaseValidBlockCount(SegmentId segId, int cnt, bool allowVictimSegRelease);
     bool _IncreaseOccupiedStripeCount(SegmentId segId);
 
     int _OnNumFreeSegmentChanged(void);

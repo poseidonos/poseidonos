@@ -12,18 +12,18 @@ class MockSegmentInfo : public SegmentInfo
 public:
     using SegmentInfo::SegmentInfo;
     MOCK_METHOD(void, AllocateAndInitSegmentInfoData, (SegmentInfoData* segmentInfoData), (override));
-    MOCK_METHOD(uint32_t, GetValidBlockCount, (), (override));
-    MOCK_METHOD(void, SetValidBlockCount, (uint32_t cnt), (override));
-    MOCK_METHOD(uint32_t, IncreaseValidBlockCount, (uint32_t inc), (override));
-    MOCK_METHOD((std::pair<bool, SegmentState>), DecreaseValidBlockCount, (uint32_t dec, bool allowVictimSegRelease), (override));
-    MOCK_METHOD(void, SetOccupiedStripeCount, (uint32_t cnt), (override));
-    MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (), (override));
-    MOCK_METHOD(uint32_t, IncreaseOccupiedStripeCount, (), (override));
+    MOCK_METHOD(int, GetValidBlockCount, (), (override));
+    MOCK_METHOD(void, SetValidBlockCount, (int cnt), (override));
+    MOCK_METHOD(int, IncreaseValidBlockCount, (int inc), (override));
+    MOCK_METHOD((std::pair<bool, SegmentState>), DecreaseValidBlockCount, (int dec, bool allowVictimSegRelease), (override));
+    MOCK_METHOD(void, SetOccupiedStripeCount, (int cnt), (override));
+    MOCK_METHOD(int, GetOccupiedStripeCount, (), (override));
+    MOCK_METHOD(int, IncreaseOccupiedStripeCount, (), (override));
     MOCK_METHOD(SegmentState, GetState, (), (override));
     MOCK_METHOD(void, MoveToNvramState, (), (override));
     MOCK_METHOD(bool, MoveToSsdStateOrFreeStateIfItBecomesEmpty, (), (override));
     MOCK_METHOD(bool, MoveToVictimState, (), (override));
-    MOCK_METHOD(uint32_t, GetValidBlockCountIfSsdState, (), (override));
+    MOCK_METHOD(int, GetValidBlockCountIfSsdState, (), (override));
 };
 
 } // namespace pos

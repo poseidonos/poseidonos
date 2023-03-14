@@ -13,8 +13,8 @@ enum SegmentState {
 
 // MAX: 128 bytes
 message SegmentInfoDataProto {
-    uint32 valid_block_count = 1;
-    uint32 occupied_stripe_count = 2;
+    int32 valid_block_count = 1;
+    int32 occupied_stripe_count = 2;
     SegmentState state = 3;
 
     // reserved fields

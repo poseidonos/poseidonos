@@ -19,8 +19,8 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace pos_bc {
 constexpr SegmentInfoDataProto::SegmentInfoDataProto(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
-  : valid_block_count_(0u)
-  , occupied_stripe_count_(0u)
+  : valid_block_count_(0)
+  , occupied_stripe_count_(0)
   , state_(0)
 {}
 struct SegmentInfoDataProtoDefaultTypeInternal {
@@ -386,8 +386,8 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_pos_5fbc_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\014pos_bc.proto\022\006pos_bc\"{\n\024SegmentInfoDat"
-  "aProto\022\031\n\021valid_block_count\030\001 \001(\r\022\035\n\025occ"
-  "upied_stripe_count\030\002 \001(\r\022#\n\005state\030\003 \001(\0162"
+  "aProto\022\031\n\021valid_block_count\030\001 \001(\005\022\035\n\025occ"
+  "upied_stripe_count\030\002 \001(\005\022#\n\005state\030\003 \001(\0162"
   "\024.pos_bc.SegmentStateJ\004\010\004\020\025\" \n\027SegmentCt"
   "xExtendedProtoJ\005\010\001\020\351\007\"\"\n\031AllocatorCtxExt"
   "endedProtoJ\005\010\001\020\351\007\" \n\027RebuildCtxExtendedP"
@@ -617,17 +617,17 @@ const char* SegmentInfoDataProto::_InternalParse(const char* ptr, ::PROTOBUF_NAM
     ptr = ::PROTOBUF_NAMESPACE_ID::internal::ReadTag(ptr, &tag);
     CHK_(ptr);
     switch (tag >> 3) {
-      // uint32 valid_block_count = 1;
+      // int32 valid_block_count = 1;
       case 1:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 8)) {
-          valid_block_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          valid_block_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // uint32 occupied_stripe_count = 2;
+      // int32 occupied_stripe_count = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          occupied_stripe_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr);
+          occupied_stripe_count_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -667,16 +667,16 @@ failure:
   ::PROTOBUF_NAMESPACE_ID::uint32 cached_has_bits = 0;
   (void) cached_has_bits;
 
-  // uint32 valid_block_count = 1;
+  // int32 valid_block_count = 1;
   if (this->valid_block_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(1, this->_internal_valid_block_count(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(1, this->_internal_valid_block_count(), target);
   }
 
-  // uint32 occupied_stripe_count = 2;
+  // int32 occupied_stripe_count = 2;
   if (this->occupied_stripe_count() != 0) {
     target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteUInt32ToArray(2, this->_internal_occupied_stripe_count(), target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(2, this->_internal_occupied_stripe_count(), target);
   }
 
   // .pos_bc.SegmentState state = 3;
@@ -702,17 +702,17 @@ size_t SegmentInfoDataProto::ByteSizeLong() const {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // uint32 valid_block_count = 1;
+  // int32 valid_block_count = 1;
   if (this->valid_block_count() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_valid_block_count());
   }
 
-  // uint32 occupied_stripe_count = 2;
+  // int32 occupied_stripe_count = 2;
   if (this->occupied_stripe_count() != 0) {
     total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::UInt32Size(
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
         this->_internal_occupied_stripe_count());
   }
 

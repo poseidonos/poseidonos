@@ -352,22 +352,22 @@ class SegmentInfoDataProto PROTOBUF_FINAL :
     kOccupiedStripeCountFieldNumber = 2,
     kStateFieldNumber = 3,
   };
-  // uint32 valid_block_count = 1;
+  // int32 valid_block_count = 1;
   void clear_valid_block_count();
-  ::PROTOBUF_NAMESPACE_ID::uint32 valid_block_count() const;
-  void set_valid_block_count(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 valid_block_count() const;
+  void set_valid_block_count(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_valid_block_count() const;
-  void _internal_set_valid_block_count(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_valid_block_count() const;
+  void _internal_set_valid_block_count(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
-  // uint32 occupied_stripe_count = 2;
+  // int32 occupied_stripe_count = 2;
   void clear_occupied_stripe_count();
-  ::PROTOBUF_NAMESPACE_ID::uint32 occupied_stripe_count() const;
-  void set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 occupied_stripe_count() const;
+  void set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::int32 value);
   private:
-  ::PROTOBUF_NAMESPACE_ID::uint32 _internal_occupied_stripe_count() const;
-  void _internal_set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::uint32 value);
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_occupied_stripe_count() const;
+  void _internal_set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::int32 value);
   public:
 
   // .pos_bc.SegmentState state = 3;
@@ -386,8 +386,8 @@ class SegmentInfoDataProto PROTOBUF_FINAL :
   template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
   typedef void InternalArenaConstructable_;
   typedef void DestructorSkippable_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 valid_block_count_;
-  ::PROTOBUF_NAMESPACE_ID::uint32 occupied_stripe_count_;
+  ::PROTOBUF_NAMESPACE_ID::int32 valid_block_count_;
+  ::PROTOBUF_NAMESPACE_ID::int32 occupied_stripe_count_;
   int state_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_pos_5fbc_2eproto;
@@ -2758,42 +2758,42 @@ class MapHeaderExtendedProto PROTOBUF_FINAL :
 #endif  // __GNUC__
 // SegmentInfoDataProto
 
-// uint32 valid_block_count = 1;
+// int32 valid_block_count = 1;
 inline void SegmentInfoDataProto::clear_valid_block_count() {
-  valid_block_count_ = 0u;
+  valid_block_count_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SegmentInfoDataProto::_internal_valid_block_count() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SegmentInfoDataProto::_internal_valid_block_count() const {
   return valid_block_count_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SegmentInfoDataProto::valid_block_count() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SegmentInfoDataProto::valid_block_count() const {
   // @@protoc_insertion_point(field_get:pos_bc.SegmentInfoDataProto.valid_block_count)
   return _internal_valid_block_count();
 }
-inline void SegmentInfoDataProto::_internal_set_valid_block_count(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void SegmentInfoDataProto::_internal_set_valid_block_count(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   valid_block_count_ = value;
 }
-inline void SegmentInfoDataProto::set_valid_block_count(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void SegmentInfoDataProto::set_valid_block_count(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_valid_block_count(value);
   // @@protoc_insertion_point(field_set:pos_bc.SegmentInfoDataProto.valid_block_count)
 }
 
-// uint32 occupied_stripe_count = 2;
+// int32 occupied_stripe_count = 2;
 inline void SegmentInfoDataProto::clear_occupied_stripe_count() {
-  occupied_stripe_count_ = 0u;
+  occupied_stripe_count_ = 0;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SegmentInfoDataProto::_internal_occupied_stripe_count() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SegmentInfoDataProto::_internal_occupied_stripe_count() const {
   return occupied_stripe_count_;
 }
-inline ::PROTOBUF_NAMESPACE_ID::uint32 SegmentInfoDataProto::occupied_stripe_count() const {
+inline ::PROTOBUF_NAMESPACE_ID::int32 SegmentInfoDataProto::occupied_stripe_count() const {
   // @@protoc_insertion_point(field_get:pos_bc.SegmentInfoDataProto.occupied_stripe_count)
   return _internal_occupied_stripe_count();
 }
-inline void SegmentInfoDataProto::_internal_set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void SegmentInfoDataProto::_internal_set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::int32 value) {
   
   occupied_stripe_count_ = value;
 }
-inline void SegmentInfoDataProto::set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::uint32 value) {
+inline void SegmentInfoDataProto::set_occupied_stripe_count(::PROTOBUF_NAMESPACE_ID::int32 value) {
   _internal_set_occupied_stripe_count(value);
   // @@protoc_insertion_point(field_set:pos_bc.SegmentInfoDataProto.occupied_stripe_count)
 }
