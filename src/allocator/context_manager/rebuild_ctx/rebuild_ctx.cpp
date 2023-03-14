@@ -157,7 +157,7 @@ RebuildCtx::AfterLoad(char* buf)
 }
 
 void
-RebuildCtx::BeforeFlush(char* buf)
+RebuildCtx::BeforeFlush(char* buf, ContextSectionBuffer externalBuf)
 {
     // RC_HEADER
     ctxHeader.data.numTargetSegments = listSize;

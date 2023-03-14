@@ -191,7 +191,7 @@ AllocatorCtx::AfterLoad(char* buf)
 }
 
 void
-AllocatorCtx::BeforeFlush(char* buf)
+AllocatorCtx::BeforeFlush(char* buf, ContextSectionBuffer externalBuf)
 {
     std::lock_guard<std::mutex> lock(allocCtxLock);
 

@@ -428,7 +428,7 @@ SegmentCtx::_RebuildSegmentList(void)
 }
 
 void
-SegmentCtx::BeforeFlush(char* buf)
+SegmentCtx::BeforeFlush(char* buf, ContextSectionBuffer externalBuf)
 {
     ctxHeader.data.ctxVersion = ctxDirtyVersion++;
 
@@ -437,9 +437,26 @@ SegmentCtx::BeforeFlush(char* buf)
     ctxHeader.CopyTo(buf);
 
     // SC_SEGMENT_INFO
-    for (auto& infoDataSection : this->segmentInfoDataSections)
+    if (externalBuf.owner == FileOwner::SEGMENT_CTX &&
+        externalBuf.sectionId == SegmentCtxSection::SC_SEGMENT_INFO)
     {
-        infoDataSection.CopyTo(buf);
+        SegmentInfoData* infosToFlush = reinterpret_cast<SegmentInfoData*>(externalBuf.buffer);
+        for (uint32_t segId = 0; segId < addrInfo->GetnumUserAreaSegments(); segId++)
+        {
+            ContextSection<SegmentInfoData*> infoDataSection(infosToFlush + segId);
+            auto sectionInfo = this->segmentInfoDataSections[segId].GetSectionInfo();
+            infoDataSection.InitAddressInfo(sectionInfo.offset, sectionInfo.size);
+            infoDataSection.CopyTo(buf);
+        }
+        POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE), "Copied external buf to segment ctx, owner:{}, sectionId:{}, buffer:{}",
+            externalBuf.owner, externalBuf.sectionId, (void*)externalBuf.buffer);
+    }
+    else
+    {
+        for (auto& infoDataSection : this->segmentInfoDataSections)
+        {
+            infoDataSection.CopyTo(buf);
+        }
     }
 
     // SC_EXTENDED
