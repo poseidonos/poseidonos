@@ -67,27 +67,27 @@ SegmentInfo::AllocateAndInitSegmentInfoData(SegmentInfoData* segmentInfoData)
     SetState(SegmentState::FREE);
 }
 
-uint32_t
+int
 SegmentInfo::GetValidBlockCount(void)
 {
     return data->validBlockCount;
 }
 
 void
-SegmentInfo::SetValidBlockCount(uint32_t cnt)
+SegmentInfo::SetValidBlockCount(int cnt)
 {
     // for wbt
     data->validBlockCount = cnt;
 }
 
-uint32_t
-SegmentInfo::IncreaseValidBlockCount(uint32_t inc)
+int
+SegmentInfo::IncreaseValidBlockCount(int inc)
 {
     return data->validBlockCount.fetch_add(inc) + inc;
 }
 
 std::pair<bool, SegmentState>
-SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
+SegmentInfo::DecreaseValidBlockCount(int dec, bool allowVictimSegRelease)
 {
     std::lock_guard<std::mutex> lock(seglock);
     int32_t decreased = data->validBlockCount.fetch_sub(dec) - dec;
@@ -126,18 +126,18 @@ SegmentInfo::DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease)
 }
 
 void
-SegmentInfo::SetOccupiedStripeCount(uint32_t cnt)
+SegmentInfo::SetOccupiedStripeCount(int cnt)
 {
     data->occupiedStripeCount = cnt;
 }
 
-uint32_t
+int
 SegmentInfo::GetOccupiedStripeCount(void)
 {
     return data->occupiedStripeCount;
 }
 
-uint32_t
+int
 SegmentInfo::IncreaseOccupiedStripeCount(void)
 {
     // ++ is equivalent to fetch_add(1) + 1
@@ -259,7 +259,7 @@ SegmentInfo::MoveToVictimState(void)
     }
 }
 
-uint32_t
+int
 SegmentInfo::GetValidBlockCountIfSsdState(void)
 {
     std::lock_guard<std::mutex> lock(seglock);

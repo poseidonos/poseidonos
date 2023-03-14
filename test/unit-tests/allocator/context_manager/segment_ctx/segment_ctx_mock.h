@@ -23,8 +23,8 @@ public:
     MOCK_METHOD(int, GetNumSections, (), (override));
     MOCK_METHOD(uint64_t, GetTotalDataSize, (), (override));
     MOCK_METHOD(bool, MoveToFreeState, (SegmentId segId), (override));
-    MOCK_METHOD(uint32_t, GetValidBlockCount, (SegmentId segId), (override));
-    MOCK_METHOD(uint32_t, GetOccupiedStripeCount, (SegmentId segId), (override));
+    MOCK_METHOD(int, GetValidBlockCount, (SegmentId segId), (override));
+    MOCK_METHOD(int, GetOccupiedStripeCount, (SegmentId segId), (override));
     MOCK_METHOD(SegmentState, GetSegmentState, (SegmentId segId), (override));
     MOCK_METHOD(void, ResetSegmentsStates, (), (override));
     MOCK_METHOD(void, AllocateSegment, (SegmentId segId), (override));

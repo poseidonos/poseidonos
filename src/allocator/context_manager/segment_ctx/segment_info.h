@@ -55,8 +55,8 @@ enum SegmentState : int
 struct SegmentInfoData
 {
 public:
-    std::atomic<uint32_t> validBlockCount;
-    std::atomic<uint32_t> occupiedStripeCount;
+    std::atomic<int> validBlockCount;
+    std::atomic<int> occupiedStripeCount;
     SegmentState state;
     // TODO(sang7.park) : add reserved field here.
     // DO NOT ADD ANY VIRTUAL METHODS HERE TO SUPPORT BACKWARD COMPATIBILITY
@@ -69,12 +69,12 @@ public:
         SegmentInfoData(target.validBlockCount, target.occupiedStripeCount, target.state);
     }
 
-    SegmentInfoData(uint32_t validBlockCount, uint32_t occupiedStripeCount, SegmentState segmentState)
+    SegmentInfoData(int validBlockCount, int occupiedStripeCount, SegmentState segmentState)
     {
         this->Set(validBlockCount, occupiedStripeCount, segmentState);
     }
 
-    void Set(uint32_t validBlockCount, uint32_t occupiedStripeCount, SegmentState segmentState)
+    void Set(int validBlockCount, int occupiedStripeCount, SegmentState segmentState)
     {
         this->validBlockCount = validBlockCount;
         this->occupiedStripeCount = occupiedStripeCount;
@@ -104,14 +104,14 @@ public:
 
     virtual void AllocateSegmentInfoData(SegmentInfoData* segmentInfoData);
     virtual void AllocateAndInitSegmentInfoData(SegmentInfoData* segmentInfoData);
-    virtual uint32_t GetValidBlockCount(void);
-    virtual void SetValidBlockCount(uint32_t cnt);
-    virtual uint32_t IncreaseValidBlockCount(uint32_t inc);
-    virtual std::pair<bool, SegmentState> DecreaseValidBlockCount(uint32_t dec, bool allowVictimSegRelease);
+    virtual int GetValidBlockCount(void);
+    virtual void SetValidBlockCount(int cnt);
+    virtual int IncreaseValidBlockCount(int inc);
+    virtual std::pair<bool, SegmentState> DecreaseValidBlockCount(int dec, bool allowVictimSegRelease);
 
-    virtual void SetOccupiedStripeCount(uint32_t cnt);
-    virtual uint32_t GetOccupiedStripeCount(void);
-    virtual uint32_t IncreaseOccupiedStripeCount(void);
+    virtual void SetOccupiedStripeCount(int cnt);
+    virtual int GetOccupiedStripeCount(void);
+    virtual int IncreaseOccupiedStripeCount(void);
 
     virtual void SetState(SegmentState newState);
     virtual SegmentState GetState(void);
@@ -125,7 +125,7 @@ public:
     virtual bool MoveToVictimState(void);
     virtual bool MoveVictimToFree(void);
 
-    virtual uint32_t GetValidBlockCountIfSsdState(void);
+    virtual int GetValidBlockCountIfSsdState(void);
     virtual void UpdateFrom(SegmentInfo &segmentInfo);
     static std::string ToSegmentStateString(SegmentState state);
 

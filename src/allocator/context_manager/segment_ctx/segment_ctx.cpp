@@ -290,10 +290,10 @@ SegmentCtx::ValidateBlks(VirtualBlks blks)
 }
 
 void
-SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, uint32_t cnt)
+SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, int cnt)
 {
-    uint32_t increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
-    if (increasedValue > addrInfo->GetblksPerSegment())
+    int increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
+    if ((uint32_t)increasedValue > addrInfo->GetblksPerSegment())
     {
         POS_TRACE_CRITICAL(EID(ALLOCATOR_VALID_BLOCK_COUNT_OVERFLOW),
             "segment_id:{} increase_count:{} total_valid_block_count:{}", segId, cnt, increasedValue);
@@ -309,7 +309,7 @@ SegmentCtx::InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease)
 }
 
 bool
-SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVictimSegRelease)
+SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, int cnt, bool allowVictimSegRelease)
 {
     auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, allowVictimSegRelease);
 
@@ -335,7 +335,7 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, uint32_t cnt, bool allowVi
     return segmentFreed;
 }
 
-uint32_t
+int
 SegmentCtx::GetValidBlockCount(SegmentId segId)
 {
     return segmentInfos[segId].GetValidBlockCount();
@@ -351,10 +351,10 @@ SegmentCtx::UpdateOccupiedStripeCount(StripeId lsid)
 bool
 SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
 {
-    uint32_t occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
+    int occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
     bool segmentFreed = false;
 
-    if (occupiedStripeCount == addrInfo->GetstripesPerSegment())
+    if ((uint32_t)occupiedStripeCount == addrInfo->GetstripesPerSegment())
     {
         // Only 1 thread reaches here
         SegmentState prevState = segmentInfos[segId].GetState();
@@ -374,7 +374,7 @@ SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
     return segmentFreed;
 }
 
-uint32_t
+int
 SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
 {
     return segmentInfos[segId].GetOccupiedStripeCount();
@@ -973,7 +973,7 @@ void
 SegmentCtx::CopySegmentInfoToBufferforWBT(WBTAllocatorMetaType type, char* dstBuf)
 {
     uint32_t numSegs = addrInfo->GetnumUserAreaSegments(); // for ut
-    uint32_t* dst = reinterpret_cast<uint32_t*>(dstBuf);
+    int* dst = reinterpret_cast<int*>(dstBuf);
     for (uint32_t segId = 0; segId < numSegs; segId++)
     {
         if (type == WBT_SEGMENT_VALID_COUNT)
@@ -991,7 +991,7 @@ void
 SegmentCtx::CopySegmentInfoFromBufferforWBT(WBTAllocatorMetaType type, char* srcBuf)
 {
     uint32_t numSegs = addrInfo->GetnumUserAreaSegments(); // for ut
-    uint32_t* src = reinterpret_cast<uint32_t*>(srcBuf);
+    int* src = reinterpret_cast<int*>(srcBuf);
     for (uint32_t segId = 0; segId < numSegs; segId++)
     {
         if (type == WBT_SEGMENT_VALID_COUNT)
