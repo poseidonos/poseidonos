@@ -49,6 +49,7 @@ ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, ISegmentCtx* segment
   startVsa(startVsa),
   numBlks(numBlks),
   needToReplaySegmentInfo(needToReplaySegmentInfo),
+  needToReplayBlockMap(true),
   wbStripeReplayer(wbReplayer)
 {
 }
@@ -87,7 +88,7 @@ ReplayBlockMapUpdate::Replay(void)
                 _InvalidateOldBlock(offset);
             }
         }
-        result = _UpdateMap(offset);
+        result = _UpdateMapAndValidate(offset);
     }
 
     if (status->IsFlushed() == false)
@@ -98,6 +99,12 @@ ReplayBlockMapUpdate::Replay(void)
         }
     }
     return result;
+}
+
+void
+ReplayBlockMapUpdate::MarkNotToReplayMap(void)
+{
+    needToReplayBlockMap = false;
 }
 
 void
@@ -123,15 +130,20 @@ ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
 }
 
 int
-ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
+ReplayBlockMapUpdate::_UpdateMapAndValidate(uint32_t offset)
 {
     BlkAddr rba = _GetRba(offset);
     VirtualBlks virtualBlks = {
         .startVsa = _GetVsa(offset),
         .numBlks = 1};
 
-    int result = vsaMap->SetVSAsWithSyncOpen(volId, rba, virtualBlks);
-    assert(result >= 0);
+    int result = 0;
+
+    if (needToReplayBlockMap == true)
+    {
+        result = vsaMap->SetVSAsWithSyncOpen(volId, rba, virtualBlks);
+        assert(result >= 0);
+    }    
 
     if (needToReplaySegmentInfo == true)
     {

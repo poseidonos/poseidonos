@@ -75,7 +75,7 @@ public:
     int GetVolumeId(void) { return status->GetVolumeId(); }
     bool IsFlushed(void) { return status->IsFlushed(); }
 
-    void DeleteBlockMapReplayEvents(void);
+    void MarkBlockMapUpdateToSkip(void);
 
 protected:
     void _CreateSegmentAllocationEvent(void);
