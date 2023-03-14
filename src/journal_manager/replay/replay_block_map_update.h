@@ -46,6 +46,7 @@ class ActiveWBStripeReplayer;
 class ReplayBlockMapUpdate : public ReplayEvent
 {
 public:
+    ReplayBlockMapUpdate(void) = default;
     ReplayBlockMapUpdate(IVSAMap* ivsaMa, ISegmentCtx* segmentCtx,
         StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer,
         int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
@@ -60,11 +61,13 @@ public:
         return ReplayEventType::BLOCK_MAP_UPDATE;
     }
 
+    virtual void MarkNotToReplayMap(void);
+
 private:
     void _ReadBlockMap(void);
 
     void _InvalidateOldBlock(uint32_t offset);
-    int _UpdateMap(uint32_t offset);
+    int _UpdateMapAndValidate(uint32_t offset);
     void _UpdateReverseMap(uint32_t offset);
 
     inline VirtualBlkAddr
@@ -92,6 +95,7 @@ private:
     std::vector<VirtualBlkAddr> readMap;
 
     bool needToReplaySegmentInfo;
+    bool needToReplayBlockMap;
     ActiveWBStripeReplayer* wbStripeReplayer;
 };
 } // namespace pos

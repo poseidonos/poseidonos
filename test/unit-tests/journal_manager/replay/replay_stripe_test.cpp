@@ -5,6 +5,7 @@
 #include "test/unit-tests/journal_manager/replay/replay_event_factory_mock.h"
 #include "test/unit-tests/journal_manager/replay/replay_event_mock.h"
 #include "test/unit-tests/journal_manager/statistics/stripe_replay_status_mock.h"
+#include "test/unit-tests/journal_manager/replay/replay_block_map_update_mock.h"
 
 using ::testing::NiceMock;
 using ::testing::Return;
@@ -191,7 +192,7 @@ TEST(ReplayStripe, GetVolumeId_testIfExecutedSuccessfully)
     EXPECT_EQ(expected, actual);
 }
 
-TEST(ReplayStripe, DeleteBlockMapReplayEvents_testIfAllBlockEventsDeleted)
+TEST(ReplayStripe, MarkBlockMapUpdateToSkip_testIfAllBlockEventsDeleted)
 {
     // Given
     NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
@@ -200,8 +201,9 @@ TEST(ReplayStripe, DeleteBlockMapReplayEvents_testIfAllBlockEventsDeleted)
 
     for (int count = 0; count < 5; count++)
     {
-        NiceMock<MockReplayEvent>* replayEvent = new NiceMock<MockReplayEvent>;
+        NiceMock<MockReplayBlockMapUpdate>* replayEvent = new NiceMock<MockReplayBlockMapUpdate>;
         EXPECT_CALL(*replayEvent, GetType).WillOnce(Return(ReplayEventType::BLOCK_MAP_UPDATE));
+        EXPECT_CALL(*replayEvent, MarkNotToReplayMap).Times(1);
         replayEvents.push_back(replayEvent);
     }
 
@@ -211,12 +213,11 @@ TEST(ReplayStripe, DeleteBlockMapReplayEvents_testIfAllBlockEventsDeleted)
 
     // When
     ReplayStripeSpy stripe(nullptr, nullptr, nullptr, nullptr, status, factory, &replayEvents);
-    stripe.DeleteBlockMapReplayEvents();
+    stripe.MarkBlockMapUpdateToSkip();
 
     // Then
     auto actual = stripe.GetReplayEventList();
-    EXPECT_EQ(actual.size(), 1);
-    EXPECT_EQ(actual.front(), stripeFlushReplayEvent);
+    EXPECT_EQ(actual.back(), stripeFlushReplayEvent);
 }
 
 TEST(ReplayStripe, _CreateSegmentAllocationEvent_testIfEventAddedToTheFront)

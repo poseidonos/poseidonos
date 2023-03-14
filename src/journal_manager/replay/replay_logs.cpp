@@ -234,7 +234,7 @@ ReplayLogs::_ReplayStripe(ReplayStripe* stripe)
 {
     if (logDeleteChecker->IsDeleted(stripe->GetVolumeId()))
     {
-        stripe->DeleteBlockMapReplayEvents();
+        stripe->MarkBlockMapUpdateToSkip();
     }
 
     return stripe->Replay();

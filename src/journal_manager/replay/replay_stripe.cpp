@@ -35,6 +35,7 @@
 #include "src/include/pos_event_id.h"
 #include "src/journal_manager/replay/replay_event_factory.h"
 #include "src/logger/logger.h"
+#include "src/journal_manager/replay/replay_block_map_update.h"
 
 namespace pos
 {
@@ -152,30 +153,26 @@ ReplayStripe::_ReplayEvents(void)
 }
 
 void
-ReplayStripe::DeleteBlockMapReplayEvents(void)
+ReplayStripe::MarkBlockMapUpdateToSkip(void)
 {
-    int numErasedLogs = 0;
+    int numSkippedLogs = 0;
 
-    for (auto it = replayEvents.begin(); it != replayEvents.end();)
+    for (auto it = replayEvents.begin(); it != replayEvents.end(); it++)
     {
         ReplayEvent* replayEvent = *it;
 
         if (replayEvent->GetType() == ReplayEventType::BLOCK_MAP_UPDATE)
         {
-            it = replayEvents.erase(it);
-            delete replayEvent;
+            auto blockMapUpdateReplayEvent = dynamic_cast<ReplayBlockMapUpdate*>(replayEvent);
+            blockMapUpdateReplayEvent->MarkNotToReplayMap();
 
-            numErasedLogs++;
-        }
-        else
-        {
-            it++;
+            numSkippedLogs++;
         }
     }
 
     int eventId = static_cast<int>(EID(JOURNAL_REPLAY_VOLUME_EVENT));
     POS_TRACE_DEBUG(eventId, "[Replay] {} block log of volume {} is skipped",
-        numErasedLogs, status->GetVolumeId());
+        numSkippedLogs, status->GetVolumeId());
 }
 
 } // namespace pos
