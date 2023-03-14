@@ -44,8 +44,8 @@ class ActiveFileList
 public:
     ActiveFileList(void);
     virtual ~ActiveFileList(void);
-    virtual bool CheckFileInActive(const FileDescriptorType fd) const;
-    virtual POS_EVENT_ID AddFileInActiveList(const FileDescriptorType fd);
+    virtual bool Contains(const FileDescriptorType fd) const;
+    virtual POS_EVENT_ID AddFdToActiveList(const FileDescriptorType fd);
     virtual void RemoveFileFromActiveList(const FileDescriptorType fd);
     virtual size_t GetFileCountInActive(void) const;
 

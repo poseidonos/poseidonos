@@ -43,7 +43,7 @@ ActiveFileList::~ActiveFileList(void)
 }
 
 bool
-ActiveFileList::CheckFileInActive(const FileDescriptorType fd) const
+ActiveFileList::Contains(const FileDescriptorType fd) const
 {
     if (activeFiles_.find(fd) == activeFiles_.end())
     {
@@ -55,7 +55,7 @@ ActiveFileList::CheckFileInActive(const FileDescriptorType fd) const
 }
 
 POS_EVENT_ID
-ActiveFileList::AddFileInActiveList(const FileDescriptorType fd)
+ActiveFileList::AddFdToActiveList(const FileDescriptorType fd)
 {
     POS_EVENT_ID rc = EID(SUCCESS);
 
@@ -63,7 +63,7 @@ ActiveFileList::AddFileInActiveList(const FileDescriptorType fd)
     {
         rc = EID(MFS_FILE_OPEN_REPETITIONARY);
         POS_TRACE_ERROR((int)rc,
-            "You attempt to open fd {} file twice. It is not allowed", fd);
+            "Failed to add fd {} to active file list because it was already there", fd);
     }
     else
     {

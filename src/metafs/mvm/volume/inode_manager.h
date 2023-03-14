@@ -96,11 +96,11 @@ public:
 
     virtual bool CheckFileInActive(const FileDescriptorType fd) const
     {
-        return activeFiles_->CheckFileInActive(fd);
+        return activeFiles_->Contains(fd);
     }
     virtual POS_EVENT_ID AddFileInActiveList(const FileDescriptorType fd)
     {
-        return activeFiles_->AddFileInActiveList(fd);
+        return activeFiles_->AddFdToActiveList(fd);
     }
     virtual void RemoveFileFromActiveList(const FileDescriptorType fd)
     {

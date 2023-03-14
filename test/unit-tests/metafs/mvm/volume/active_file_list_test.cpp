@@ -36,35 +36,42 @@
 
 namespace pos
 {
-TEST(ActiveFileList, CheckFileInActive)
+TEST(ActiveFileList, Contains_testIfGivenFdIsActiveOrNot)
 {
     ActiveFileList activeFiles;
     std::unordered_set<FileDescriptorType>& set = activeFiles.GetActiveFiles();
     set.insert(0);
 
-    EXPECT_EQ(activeFiles.CheckFileInActive(0), true);
-    EXPECT_EQ(activeFiles.CheckFileInActive(1), false);
+    EXPECT_EQ(activeFiles.Contains(0), true);
+    EXPECT_EQ(activeFiles.Contains(1), false);
 }
 
-TEST(ActiveFileList, CheckAddedFileInActive)
+TEST(ActiveFileList, AddFdToActiveList_testIfSuccessfullyOpened)
 {
     ActiveFileList activeFiles;
-    EXPECT_EQ(activeFiles.AddFileInActiveList(0), EID(SUCCESS));
-    EXPECT_EQ(activeFiles.AddFileInActiveList(0), EID(MFS_FILE_OPEN_REPETITIONARY));
+    EXPECT_EQ(activeFiles.AddFdToActiveList(0), EID(SUCCESS));
 }
 
-TEST(ActiveFileList, RemoveFileInActive)
+TEST(ActiveFileList, AddFdToActiveList_testToPreventOpeningTwice)
+{
+    ActiveFileList activeFiles;
+    EXPECT_EQ(activeFiles.AddFdToActiveList(0), EID(SUCCESS));
+    EXPECT_EQ(activeFiles.AddFdToActiveList(0), EID(MFS_FILE_OPEN_REPETITIONARY));
+}
+
+TEST(ActiveFileList, RemoveFileFromActiveList_testIfFdCanBeErased)
 {
     ActiveFileList activeFiles;
     std::unordered_set<FileDescriptorType>& set = activeFiles.GetActiveFiles();
-    set.insert(0);
 
+    set.insert(0);
     EXPECT_EQ(set.size(), 1);
 
     activeFiles.RemoveFileFromActiveList(0);
+    EXPECT_EQ(set.size(), 0);
 }
 
-TEST(ActiveFileList, GetFileCountInActive)
+TEST(ActiveFileList, GetFileCountInActive_testIfItIsWellReflectedInCount)
 {
     ActiveFileList activeFiles;
     std::unordered_set<FileDescriptorType>& set = activeFiles.GetActiveFiles();
