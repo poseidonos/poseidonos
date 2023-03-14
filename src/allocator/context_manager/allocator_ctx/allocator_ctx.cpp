@@ -127,6 +127,11 @@ AllocatorCtx::_UpdateSectionInfo(void)
     activeStripeTail.InitAddressInfoWithItsData(currentOffset);
     currentOffset += activeStripeTail.GetSectionSize();
 
+    // AC_EXTENDED
+    uint64_t sectionSize = this->ctxExtended.GetSectionSize();
+    this->ctxExtended.InitAddressInfo(currentOffset, sectionSize);
+    currentOffset += sectionSize;
+
     totalDataSize = currentOffset;
 }
 
@@ -183,11 +188,15 @@ AllocatorCtx::AfterLoad(char* buf)
     // AC_ACTIVE_STRIPE_TAIL
     activeStripeTail.CopyFrom(buf);
 
+    // AC_EXTENDED
+    this->ctxExtended.CopyFrom(buf);
+
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "AllocatorCtx file loaded:{}", ctxHeader.data.ctxVersion);
     ctxStoredVersion = ctxHeader.data.ctxVersion;
     ctxDirtyVersion = ctxHeader.data.ctxVersion + 1;
 
     allocWbLsidBitmap.data->SetNumBitsSet(header->numValidWbLsid);
+
 }
 
 void
@@ -216,6 +225,9 @@ AllocatorCtx::BeforeFlush(char* buf, ContextSectionBuffer externalBuf)
         std::lock_guard<std::mutex> lock(activeStripeTailLock[index]);
         activeStripeTail.CopyToListElement(buf, index);
     }
+    
+    // AC_EXTENDED
+    this->ctxExtended.CopyTo(buf);
 }
 void
 AllocatorCtx::AfterFlush(char* buf)
@@ -248,6 +260,10 @@ AllocatorCtx::GetSectionInfo(int section)
     else if (section == AC_ACTIVE_STRIPE_TAIL)
     {
         return activeStripeTail.GetSectionInfo();
+    }
+    else if (section == AC_EXTENDED)
+    {
+        return this->ctxExtended.GetSectionInfo();
     }
     else
     {
@@ -381,6 +397,6 @@ uint64_t
 AllocatorCtx::GetTotalDataSize(void)
 {
     return ctxHeader.GetSectionSize() + currentSsdLsid.GetSectionSize()
-        + allocWbLsidBitmap.GetSectionSize() + activeStripeTail.GetSectionSize();
+        + allocWbLsidBitmap.GetSectionSize() + activeStripeTail.GetSectionSize() + this->ctxExtended.GetSectionSize();
 }
 }  // namespace pos

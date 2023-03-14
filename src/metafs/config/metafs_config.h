@@ -47,8 +47,8 @@ public:
     static const uint32_t MAX_VOLUME_CNT = 256 + 18;
     // the number of LPN per extent = 8, sizeof(extent) = 8 * 4K = 32K
     static const uint32_t LPN_COUNT_PER_EXTENT = 8;
-    // inode size = 8K = LPN * 2
-    static const uint32_t LPN_COUNT_PER_INODE = 2;
+    // inode size = 16K = LPN * 4
+    static const uint32_t LPN_COUNT_PER_INODE = 4;
     // the number of extents per inode
     static const uint32_t MAX_PAGE_MAP_CNT = 384;
     // char: A55A

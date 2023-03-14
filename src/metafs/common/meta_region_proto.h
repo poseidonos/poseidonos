@@ -33,7 +33,7 @@
 #pragma once
 
 #include <string>
-#include "meta_region_content.h"
+#include "meta_region_proto_content.h"
 #include "metafs_config.h"
 #include "metafs_log.h"
 #include "src/metafs/storage/mss.h"
@@ -41,18 +41,19 @@
 namespace pos
 {
 template<typename MetaRegionT, typename MetaContentT>
-class MetaRegion
+class MetaRegionProto
 {
 public:
-    MetaRegion(void);     // Ctor for UT code
-    MetaRegion(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount = 0);
-    virtual ~MetaRegion(void);
+    MetaRegionProto(void);     // Ctor for UT code
+    MetaRegionProto(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount = 0);
+    virtual ~MetaRegionProto(void);
     virtual MetaContentT* GetContent(void);
     virtual void SetContent(MetaContentT* content_);
     virtual const size_t GetSizeOfContent(void);
     virtual const MetaLpnType GetBaseLpn(void);
     virtual void* GetDataBuf(void);
     virtual void* GetDataBuf(MetaLpnType pageOffset);
+    virtual void* GetProtoBuf(MetaLpnType pageOffset);
     virtual const MetaLpnType GetLpnCntOfRegion(void);
     virtual void ResetContent(void);
     virtual void SetMss(MetaStorageSubsystem* mss);
@@ -63,10 +64,12 @@ public:
     virtual bool Store(MetaStorageType targetMedia, MetaLpnType startLPN, uint32_t idx, MetaLpnType pageCNT);
 
     virtual const MetaLpnType GetLpnCntOfContent(void);
+    virtual const MetaLpnType GetOnSsdLpnCntOfContent(void);
 
 protected:
     MetaContentT* content;
     MetaRegionT regionType;
+    MetaContentT* protoBuf;
 
 private:
     MetaStorageType mediaType;
@@ -78,15 +81,16 @@ private:
 };
 
 template<typename MetaRegionT, typename MetaContentT>
-MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::MetaRegionProto(void)
 : content(nullptr)
 {
 }
 
 template<typename MetaRegionT, typename MetaContentT>
-MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount)
+MetaRegionProto<MetaRegionT, MetaContentT>::MetaRegionProto(MetaStorageType mediaType, MetaRegionT regionType, MetaLpnType baseLpn, uint32_t mirrorCount)
 : content(new (GetLpnCntOfContent()) MetaContentT),
   regionType(regionType),
+  protoBuf(new (GetLpnCntOfContent()) MetaContentT),
   mediaType(mediaType),
   startLpn(baseLpn),
   totalLpnCnt(GetLpnCntOfContent()),
@@ -94,17 +98,17 @@ MetaRegion<MetaRegionT, MetaContentT>::MetaRegion(MetaStorageType mediaType, Met
   mssIntf(nullptr)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "MetaRegion(constructed): media={}, region={}, sizeof={}, baseLpn={}, lpn count={}",
+        "MetaRegionProto(constructed): media={}, region={}, sizeof={}, baseLpn={}, lpn count={}",
         (int)mediaType, (int)regionType, GetSizeOfContent(),
         baseLpn, GetLpnCntOfContent());
 }
 
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
-MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::~MetaRegionProto(void)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "MetaRegion(destructed): media={}, region={}",
+        "MetaRegionProto(destructed): media={}, region={}",
         (int)mediaType, (int)regionType);
 }
 // LCOV_EXCL_STOP
@@ -112,7 +116,7 @@ MetaRegion<MetaRegionT, MetaContentT>::~MetaRegion(void)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 MetaContentT*
-MetaRegion<MetaRegionT, MetaContentT>::GetContent(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::GetContent(void)
 {
     return content;
 }
@@ -121,7 +125,7 @@ MetaRegion<MetaRegionT, MetaContentT>::GetContent(void)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void
-MetaRegion<MetaRegionT, MetaContentT>::SetContent(MetaContentT* content_)
+MetaRegionProto<MetaRegionT, MetaContentT>::SetContent(MetaContentT* content_)
 {
     content = content_;
 }
@@ -129,15 +133,15 @@ MetaRegion<MetaRegionT, MetaContentT>::SetContent(MetaContentT* content_)
 
 template<typename MetaRegionT, typename MetaContentT>
 const size_t
-MetaRegion<MetaRegionT, MetaContentT>::GetSizeOfContent(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::GetSizeOfContent(void)
 {
-    return sizeof(MetaContentT);
+    return content->GetOnSsdSize();
 }
 
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 const MetaLpnType
-MetaRegion<MetaRegionT, MetaContentT>::GetBaseLpn(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::GetBaseLpn(void)
 {
     return startLpn;
 }
@@ -146,16 +150,16 @@ MetaRegion<MetaRegionT, MetaContentT>::GetBaseLpn(void)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void*
-MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(void) 
-{ 
-    return content; 
+MetaRegionProto<MetaRegionT, MetaContentT>::GetDataBuf(void) 
+{
+    return content;
 }
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void*
-MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(MetaLpnType pageOffset)
+MetaRegionProto<MetaRegionT, MetaContentT>::GetDataBuf(MetaLpnType pageOffset)
 {
     uint8_t* buf = (uint8_t*)GetDataBuf() + (MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * pageOffset);
     return buf;
@@ -163,8 +167,16 @@ MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(MetaLpnType pageOffset)
 // LCOV_EXCL_STOP
 
 template<typename MetaRegionT, typename MetaContentT>
+void* 
+MetaRegionProto<MetaRegionT, MetaContentT>::GetProtoBuf(MetaLpnType pageOffset)
+{
+    uint8_t* buf = (uint8_t*)protoBuf + (MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES * pageOffset);
+    return buf;
+}
+
+template<typename MetaRegionT, typename MetaContentT>
 const MetaLpnType
-MetaRegion<MetaRegionT, MetaContentT>::GetLpnCntOfRegion(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::GetLpnCntOfRegion(void)
 {
     return totalLpnCnt;
 }
@@ -172,7 +184,7 @@ MetaRegion<MetaRegionT, MetaContentT>::GetLpnCntOfRegion(void)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void
-MetaRegion<MetaRegionT, MetaContentT>::ResetContent(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::ResetContent(void)
 {
     memset((void*)content, 0, totalLpnCnt * MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
@@ -182,7 +194,7 @@ MetaRegion<MetaRegionT, MetaContentT>::ResetContent(void)
 
 template<typename MetaRegionT, typename MetaContentT>
 void
-MetaRegion<MetaRegionT, MetaContentT>::SetMss(MetaStorageSubsystem* mss)
+MetaRegionProto<MetaRegionT, MetaContentT>::SetMss(MetaStorageSubsystem* mss)
 {
     mssIntf = mss;
 }
@@ -190,41 +202,53 @@ MetaRegion<MetaRegionT, MetaContentT>::SetMss(MetaStorageSubsystem* mss)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Load(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::Load(void)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Do meta load <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
-
-    // The Data in GetDataBuf() is contents of each regions in the  mediaType.
-    POS_EVENT_ID rc = mssIntf->ReadPage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
-    return (rc == EID(SUCCESS)) ? true : false;
+    
+    POS_EVENT_ID rc = mssIntf->ReadPage(mediaType, startLpn, protoBuf, GetOnSsdLpnCntOfContent()); 
+    if(rc == EID(SUCCESS)){
+        content->FromBytes((char*)protoBuf);
+        return true;
+    }else{
+        return false;
+    }
 }
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
+MetaRegionProto<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Do meta load<mediaType, startLpn, totalLpn>={}, {}, {},",
-        (int)media, baseLPN, pageCNT);
+        "Do meta load by buf index <mediaType, startLpn, totalLpn>={}, {}, {}, and buf idx : {}",
+        (int)media, baseLPN + idx, pageCNT, idx);
 
-    POS_EVENT_ID rc = mssIntf->ReadPage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
-    return (rc == EID(SUCCESS)) ? true : false;
+    POS_EVENT_ID rc = mssIntf->ReadPage(media, baseLPN + idx, GetProtoBuf(idx), pageCNT);
+    if(rc == EID(SUCCESS)){
+        int pageEntryIndex = idx / (content->GetSizeOfEntry() / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+        content->FromBytesByIndex((char*)protoBuf, pageEntryIndex /* This value is valid only for InodeTableContent */);
+        return true;
+    }else{
+        return false;
+    }
 }
 // LCOV_EXCL_STOP
 
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Store(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::Store(void)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
         "Do meta store <mediaType, startLpn, totalLpn>={}, {}, {}",
         (int)mediaType, startLpn, totalLpnCnt);
-    POS_EVENT_ID rc = mssIntf->WritePage(mediaType, startLpn, GetDataBuf(), totalLpnCnt);
+
+    content->ToBytes((char*)protoBuf);
+    POS_EVENT_ID rc = mssIntf->WritePage(mediaType, startLpn, protoBuf, GetOnSsdLpnCntOfContent());
     return (rc == EID(SUCCESS)) ? true : false;
 }
 // LCOV_EXCL_STOP
@@ -232,23 +256,35 @@ MetaRegion<MetaRegionT, MetaContentT>::Store(void)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 bool
-MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
+MetaRegionProto<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Do meta store <mediaType, startLpn, totalLpn>={}, {}, {},",
-        (int)media, baseLPN, pageCNT);
-
-    POS_EVENT_ID rc = mssIntf->WritePage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
+        "Do meta store by buf index <mediaType, startLpn, totalLpn>={}, {}, {}, and buf LPN idx : {} ",
+        (int)media, baseLPN + idx, pageCNT, idx);
+    int pageEntryIndex = idx / (content->GetSizeOfEntry() / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES);
+    content->ToBytesByIndex((char*)protoBuf, pageEntryIndex /* This value is valid only for InodeTableContent */);
+    POS_EVENT_ID rc = mssIntf->WritePage(media, baseLPN + idx, GetProtoBuf(idx), pageCNT); 
     return (rc == EID(SUCCESS)) ? true : false;
 }
 // LCOV_EXCL_STOP
 
 template<typename MetaRegionT, typename MetaContentT>
 const MetaLpnType
-MetaRegion<MetaRegionT, MetaContentT>::GetLpnCntOfContent(void)
+MetaRegionProto<MetaRegionT, MetaContentT>::GetLpnCntOfContent(void)
 {
-    size_t contentSize = GetSizeOfContent();
+    size_t contentSize = GetSizeOfContent(); //ONSSD_SIZE
     MetaLpnType lpnCntOfContent = (contentSize + MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES - 1) / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
     return lpnCntOfContent;
 }
+
+template<typename MetaRegionT, typename MetaContentT>
+const MetaLpnType 
+MetaRegionProto<MetaRegionT, MetaContentT>::GetOnSsdLpnCntOfContent(void)
+{ 
+    size_t contentSize = content->GetOnSsdSize();
+    MetaLpnType lpnCntOfContent = (contentSize + MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES - 1) / MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES;
+    return lpnCntOfContent;
+}
+
+
 } // namespace pos

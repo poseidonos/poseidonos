@@ -4114,7 +4114,14 @@ Root:
     Description:
     Cause:
     Solution:
-  # Allocator: 3150 - 3299
+  -
+    Id: 3149
+    Name: MAP_HEADER_INITIALIZED
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  # Allocator: 3150 - 3289
   -
     Id: 3150
     Name: ALLOCATOR_META_ARCHIVE_STORE
@@ -4786,7 +4793,73 @@ Root:
     Severity:
     Description: Failed to update the versioned segment context of freed a segment.
     Cause:
-    Solution:
+    Solution:    
+  -
+    Id: 3246
+    Name: REBUILDCTX_EXTENDED_SERIALIZE_OVERFLOW
+    Severity: ERROR
+    Description: The size of serialized RebuildCtxExtended is too large to be stored on disk.
+    Cause: There may have been disruptive metadata layout changes checked in without getting caught by unit/integration/system tests.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3247
+    Name: REBUILDCTX_EXTENDED_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3248
+    Name: REBUILDCTX_EXTENDED_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3249
+    Name: ALLOCATORCTX_EXTENDED_SERIALIZE_OVERFLOW
+    Severity: ERROR
+    Description: The size of serialized AllocatorCtxExtended is too large to be stored on disk.
+    Cause: There may have been disruptive metadata layout changes checked in without getting caught by unit/integration/system tests.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3250
+    Name: ALLOCATORCTX_EXTENDED_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3251
+    Name: ALLOCATORCTX_EXTENDED_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+  
+  # MapHeaderExtended: 3290 - 3299
+  -
+    Id: 3290
+    Name: MAPHEADER_EXTENDED_FAILED_TO_SERIALIZE
+    Severity: WARN
+    Description: Protobuf has failed to serialize into byte stream.
+    Cause: There may be an issue with protobuf version/usage.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3291
+    Name: MAPHEADER_EXTENDED_SERIALIZE_OVERFLOW
+    Severity: ERROR
+    Description: The size of serialized MapHeaderExtended is too large to be stored on disk.
+    Cause: There may have been disruptive metadata layout changes checked in without getting caught by unit/integration/system tests.
+    Solution: Developers must analyze the issue.
+  -
+    Id: 3292
+    Name: MAPHEADER_EXTENDED_DESERIALIZE_CORRUPTION
+    Severity: WARN
+    Description: Protobuf has used more bytes than the threshold ONSSD_SIZE to deserialize an object.
+    Cause: There may have been on-disk bits corruption.
+    Solution: Developers must analyze the issue.
+    
   # Metadata: 3300 - 3399
   -
     Id: 3300
