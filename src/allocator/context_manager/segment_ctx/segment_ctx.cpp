@@ -166,9 +166,9 @@ SegmentCtx::Init(EventScheduler* eventScheduler_)
         {
             // This time, SegmentInfoData needs to be newly created "and initialized", hence we use AllocateAndInitSegmentInfoData()
             SegmentInfoData* infoData = infoDataArray + i;
-            this->segmentInfos[i].AllocateAndInitSegmentInfoData(infoData);
             this->segmentInfos[i].SetArrayId(addrInfo->GetArrayId());
             this->segmentInfos[i].SetSegmentId((SegmentId)i);
+            this->segmentInfos[i].AllocateAndInitSegmentInfoData(infoData);
 
             // Initialize context section for SegmentInfoData
             // "infoData" here has been already initialized to (0, 0, FREE) by AllocateAndInitSegmentInfoData() in the above.
@@ -294,7 +294,7 @@ void
 SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, int cnt)
 {
     int increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
-    if (segmentStateRebuilt == true && (uint32_t)increasedValue > addrInfo->GetblksPerSegment())
+    if (segmentStateRebuilt == true && increasedValue > (int)(addrInfo->GetblksPerSegment()))
     {
         POS_TRACE_CRITICAL(EID(ALLOCATOR_VALID_BLOCK_COUNT_OVERFLOW),
             "segment_id:{} increase_count:{} total_valid_block_count:{}", segId, cnt, increasedValue);
@@ -355,7 +355,7 @@ SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
     int occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
     bool segmentFreed = false;
 
-    if ((uint32_t)occupiedStripeCount == addrInfo->GetstripesPerSegment())
+    if (occupiedStripeCount == (int)(addrInfo->GetstripesPerSegment()))
     {
         // Only 1 thread reaches here
         SegmentState prevState = segmentInfos[segId].GetState();

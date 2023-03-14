@@ -92,7 +92,7 @@ TEST(RebuildCtx, AfterFlush_TestSimpleSetter)
     NiceMock<MockAllocatorAddressInfo> addrInfo;
     RebuildCtx rebuildCtx(nullptr, &addrInfo);
     AsyncMetaFileIoCtx ctx;
-    char buf[sizeof(RebuildCtxHeader)];
+    char buf[rebuildCtx.GetTotalDataSize()];
     InitializeRebuildCtxHeader(buf);
     ctx.SetIoInfo(MetaFsIoOpcode::Write, 0, sizeof(buf), buf);
     // when
@@ -164,7 +164,7 @@ TEST(RebuildCtx, AfterLoad_testIfSegmentSignatureSuccessAndSetBuf)
     RebuildCtx rebuildCtx(nullptr, &header, &addrInfo);
     rebuildCtx.Init();
 
-    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char buf[rebuildCtx.GetTotalDataSize()];
     InitializeRebuildCtxHeader(buf, 3);
 
     // when 1.
@@ -184,7 +184,7 @@ TEST(RebuildCtx, AfterLoad_testIfStoredVersionIsUpdated)
     RebuildCtx rebuildCtx(nullptr, &header, &addrInfo);
     rebuildCtx.Init();
 
-    char buf[sizeof(RebuildCtxHeader) + 3 * sizeof(int)];
+    char buf[rebuildCtx.GetTotalDataSize()];
     InitializeRebuildCtxHeader(buf, 3, header.ctxVersion + 1);
 
     // when 1.

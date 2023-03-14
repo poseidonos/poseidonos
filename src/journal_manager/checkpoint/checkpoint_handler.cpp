@@ -78,6 +78,7 @@ CheckpointHandler::Start(MapList pendingDirtyMaps, EventSmartPtr callback, int l
 {
     int ret = 0;
 
+    assert(checkpointCompletionCallback == nullptr);
     checkpointCompletionCallback = callback;
     _SetStatus(STARTED);
 
@@ -141,6 +142,7 @@ CheckpointHandler::StartSegmentCtx(EventSmartPtr callback, VersionedSegmentInfo*
 {
     int ret = 0;
 
+    assert(checkpointCompletionCallback == nullptr);
     checkpointCompletionCallback = callback;
     _SetStatus(STARTED);
 
