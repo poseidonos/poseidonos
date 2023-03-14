@@ -62,6 +62,7 @@ SegmentCtx::SegmentCtx(TelemetryPublisher* tp_, SegmentCtxHeader* header, Segmen
   rebuildList(rebuildSegmentList),
   rebuildingSegment(UNMAP_SEGMENT),
   initialized(false),
+  segmentStateRebuilt(false),
   addrInfo(addrInfo_),
   rebuildCtx(rebuildCtx_),
   gcCtx(gcCtx_),
@@ -293,7 +294,7 @@ void
 SegmentCtx::_IncreaseValidBlockCount(SegmentId segId, int cnt)
 {
     int increasedValue = segmentInfos[segId].IncreaseValidBlockCount(cnt);
-    if ((uint32_t)increasedValue > addrInfo->GetblksPerSegment())
+    if (segmentStateRebuilt == true && (uint32_t)increasedValue > addrInfo->GetblksPerSegment())
     {
         POS_TRACE_CRITICAL(EID(ALLOCATOR_VALID_BLOCK_COUNT_OVERFLOW),
             "segment_id:{} increase_count:{} total_valid_block_count:{}", segId, cnt, increasedValue);
@@ -313,7 +314,7 @@ SegmentCtx::_DecreaseValidBlockCount(SegmentId segId, int cnt, bool allowVictimS
 {
     auto result = segmentInfos[segId].DecreaseValidBlockCount(cnt, allowVictimSegRelease);
 
-    if (result.second == SegmentState::ERROR)
+    if (segmentStateRebuilt == true && result.second == SegmentState::ERROR)
     {
         POS_TRACE_ERROR(EID(VALID_COUNT_UNDERFLOWED),
             "segId{} cnt:{} , allow {}", segId, cnt, allowVictimSegRelease);
@@ -402,7 +403,8 @@ SegmentCtx::AfterLoad(char* buf)
         "SegmentCtx file loaded:{}", ctxHeader.data.ctxVersion);
     ctxStoredVersion = ctxHeader.data.ctxVersion;
     ctxDirtyVersion = ctxHeader.data.ctxVersion + 1;
-    _RebuildSegmentList();
+
+    // Loaded segment infos should be rebuilt after journal replay (ResetSegmentsStates)
 }
 
 void
@@ -756,7 +758,7 @@ SegmentCtx::ResetSegmentsStates(void)
         }
         else if ((0 <= validCount) && (occupiedStripeCount == (int)addrInfo->GetstripesPerSegment()))
         {
-            segmentInfos[segId].SetState(SegmentState::SSD);
+            segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
         }
         else if ((0 <= validCount) && (0 <= occupiedStripeCount))
         {
@@ -772,6 +774,8 @@ SegmentCtx::ResetSegmentsStates(void)
 
     _RebuildSegmentList();
     _OnNumFreeSegmentChanged();
+
+    segmentStateRebuilt = true;
 }
 
 SegmentId

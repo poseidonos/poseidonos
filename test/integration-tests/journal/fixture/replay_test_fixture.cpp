@@ -158,7 +158,7 @@ ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
         for (uint32_t blockOffset = 0; blockOffset < (*vsa).second.numBlks; blockOffset++)
         {
             VirtualBlks blks = _GetBlock((*vsa).second, blockOffset);
-            EXPECT_CALL(*(allocator->GetSegmentCtxFake()), InvalidateBlks(blks, true));
+            EXPECT_CALL(*(allocator->GetSegmentCtxFake()), InvalidateBlks(blks, false));
         }
     }
 }

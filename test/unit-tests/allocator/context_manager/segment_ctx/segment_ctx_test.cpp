@@ -109,41 +109,6 @@ TEST(SegmentCtx, AfterLoad_testIfSegmentSignatureSuccess)
     EXPECT_EQ(segCtx.GetStoredVersion(), 6);
 }
 
-TEST(SegmentCtx, AfterLoad_testIfSegmentListIsRebuilt)
-{
-    // given
-    NiceMock<MockAllocatorAddressInfo> addrInfo;
-    int numSegments = 4;
-    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(4));
-
-    SegmentCtxHeader header;
-
-    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegments];
-    for (int i = 0; i < numSegments; i++)
-    {
-        segmentInfoData[i].Set(0, 0, SegmentState::FREE);
-    }
-    SegmentCtx segCtx(nullptr, &header, segmentInfoData, nullptr, nullptr, &addrInfo, nullptr);
-    segCtx.Init(nullptr);
-
-    NiceMock<MockSegmentList>* segmentList[SegmentState::NUM_STATES];
-    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
-    {
-        segmentList[state] = new NiceMock<MockSegmentList>();
-        segCtx.SetSegmentList((SegmentState)state, segmentList[state]);
-    }
-
-    EXPECT_CALL(*segmentList[SegmentState::FREE], AddToList).Times(numSegments);
-
-    // when
-    char buf[segCtx.GetTotalDataSize()];
-    SegmentCtxHeader* headerPtr = reinterpret_cast<SegmentCtxHeader*>(buf);
-    headerPtr->sig = SIG_SEGMENT_CTX;
-    memcpy(buf + sizeof(SegmentCtxHeader), segmentInfoData, sizeof(SegmentInfoData) * numSegments);
-
-    segCtx.AfterLoad(buf);
-}
-
 TEST_F(SegmentCtxTestFixture, BeforeFlush_TestSimpleSetter)
 {
     // given
@@ -727,12 +692,13 @@ TEST(SegmentCtx, AllocateGCVictimSegment_testWhenVictimSegmentIsNotFound)
     EXPECT_EQ(victimSegment, UNMAP_SEGMENT);
 }
 
-TEST(SegmentCtx, DISABLED_ResetSegmentState_testIfSegmentStateChangedAsIntended)
+TEST(SegmentCtx, ResetSegmentState_testIfSegmentStateChangedAsIntended)
 {
     // given
     NiceMock<MockAllocatorAddressInfo> addrInfo;
     NiceMock<MockSegmentList> segmentList[SegmentState::NUM_STATES];
-    EXPECT_CALL(addrInfo, GetnumUserAreaSegments).WillRepeatedly(Return(1));
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(1));
+    ON_CALL(addrInfo, GetstripesPerSegment).WillByDefault(Return(10));
 
     NiceMock<MockGcCtx> gcCtx;
     NiceMock<MockTelemetryPublisher> tp;
@@ -749,7 +715,7 @@ TEST(SegmentCtx, DISABLED_ResetSegmentState_testIfSegmentStateChangedAsIntended)
         EXPECT_EQ(segmentInfoData->state, SegmentState::SSD);
     }
     {
-        SegmentInfoData* segmentInfoData = new SegmentInfoData(100, 10, SegmentState::SSD);
+        SegmentInfoData* segmentInfoData = new SegmentInfoData(100, 5, SegmentState::SSD);
         SegmentCtx segCtx(&tp, nullptr, segmentInfoData, nullptr, nullptr, &addrInfo, &gcCtx);
         for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
         {
@@ -757,7 +723,7 @@ TEST(SegmentCtx, DISABLED_ResetSegmentState_testIfSegmentStateChangedAsIntended)
         }
 
         segCtx.ResetSegmentsStates();
-        EXPECT_EQ(segmentInfoData->state, SegmentState::SSD);
+        EXPECT_EQ(segmentInfoData->state, SegmentState::NVRAM);
     }
     {
         SegmentInfoData* segmentInfoData = new SegmentInfoData(0, 10, SegmentState::SSD);
@@ -768,7 +734,7 @@ TEST(SegmentCtx, DISABLED_ResetSegmentState_testIfSegmentStateChangedAsIntended)
         }
 
         segCtx.ResetSegmentsStates();
-        EXPECT_EQ(segmentInfoData->state, SegmentState::NVRAM);
+        EXPECT_EQ(segmentInfoData->state, SegmentState::FREE);
     }
     {
         SegmentInfoData* segmentInfoData = new SegmentInfoData(0, 0, SegmentState::FREE);
@@ -781,6 +747,38 @@ TEST(SegmentCtx, DISABLED_ResetSegmentState_testIfSegmentStateChangedAsIntended)
         segCtx.ResetSegmentsStates();
         EXPECT_EQ(segmentInfoData->state, SegmentState::FREE);
     }
+}
+
+TEST(SegmentCtx, ResetSegmentState_testIfSegmentListIsRebuilt)
+{
+    // given
+    NiceMock<MockGcCtx> gcCtx;
+    NiceMock<MockTelemetryPublisher> tp;
+    NiceMock<MockAllocatorAddressInfo> addrInfo;
+    int numSegments = 4;
+    ON_CALL(addrInfo, GetnumUserAreaSegments).WillByDefault(Return(4));
+
+    SegmentCtxHeader header;
+
+    SegmentInfoData* segmentInfoData = new SegmentInfoData[numSegments];
+    for (int i = 0; i < numSegments; i++)
+    {
+        segmentInfoData[i].Set(0, 0, SegmentState::FREE);
+    }
+    SegmentCtx segCtx(&tp, &header, segmentInfoData, nullptr, nullptr, &addrInfo, &gcCtx);
+    segCtx.Init(nullptr);
+
+    NiceMock<MockSegmentList>* segmentList[SegmentState::NUM_STATES];
+    for (int state = SegmentState::START; state < SegmentState::NUM_STATES; state++)
+    {
+        segmentList[state] = new NiceMock<MockSegmentList>();
+        segCtx.SetSegmentList((SegmentState)state, segmentList[state]);
+    }
+
+    EXPECT_CALL(*segmentList[SegmentState::FREE], AddToList).Times(numSegments);
+
+    // when
+    segCtx.ResetSegmentsStates();
 }
 
 TEST_F(SegmentCtxTestFixture, GetNumOfFreeSegment_TestSimpleGetter)
