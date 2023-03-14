@@ -44,7 +44,7 @@ class IAllocatorFileIoClient
 {
 public:
     virtual void AfterLoad(char* buf) = 0;
-    virtual void BeforeFlush(char* buf) = 0;
+    virtual void BeforeFlush(char* buf, ContextSectionBuffer externalBuf = INVALID_CONTEXT_SECTION_BUFFER) = 0;
     virtual void AfterFlush(char* buf) = 0;
     virtual ContextSectionAddr GetSectionInfo(int section) = 0;
     virtual uint64_t GetStoredVersion(void) = 0;

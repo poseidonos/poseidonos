@@ -58,7 +58,7 @@ public:
     virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf) override;
-    virtual void BeforeFlush(char* buf) override;
+    virtual void BeforeFlush(char* buf, ContextSectionBuffer externalBuf = INVALID_CONTEXT_SECTION_BUFFER) override;
     virtual void AfterFlush(char* buf) override;
     virtual ContextSectionAddr GetSectionInfo(int section) override;
     virtual uint64_t GetStoredVersion(void) override;
