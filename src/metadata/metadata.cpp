@@ -195,8 +195,10 @@ Metadata::Init(void)
         return result;
     }
 
+    auto segmentCtx = allocator->GetIContextManager()->GetSegmentCtx();
+    segmentCtx->ResetSegmentsStates();
+
     auto freeSubscriber = journal->GetSegmentFreeSubscriber();
-    auto segmentCtx = allocator->GetISegmentCtx();
     segmentCtx->AddSegmentFreeSubscriber(freeSubscriber);    
 
     return result;

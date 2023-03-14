@@ -14,6 +14,7 @@
 #include "test/unit-tests/metafs/include/metafs_mock.h"
 #include "test/unit-tests/state/interface/i_state_control_mock.h"
 #include "test/unit-tests/allocator/i_segment_ctx_mock.h"
+#include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 
 using ::testing::_;
 using ::testing::InSequence;
@@ -94,12 +95,12 @@ TEST(Metadata, Init_testIfEverySequenceIsInitialized)
     NiceMock<MockMetaFs> metaFs;
     NiceMock<MockMetaService> metaService;
     NiceMock<MockIContextManager> contextManager;
-    NiceMock<MockISegmentCtx> segmentCtx;
+    NiceMock<MockSegmentCtx> segmentCtx;
 
     ON_CALL(arrayInfo, GetName).WillByDefault(Return("POSArray"));
     ON_CALL(arrayInfo, GetIndex).WillByDefault(Return(0));
     ON_CALL(*allocator, GetIContextManager).WillByDefault(Return(&contextManager));
-    ON_CALL(*allocator, GetISegmentCtx).WillByDefault(Return(&segmentCtx));
+    ON_CALL(contextManager, GetSegmentCtx).WillByDefault(Return(&segmentCtx));
 
     Metadata meta(&arrayInfo, mapper, allocator, journal, &metaFs, &metaService);
 

@@ -166,6 +166,7 @@ protected:
     std::mutex segCtxLock;
 
     bool initialized;
+    bool segmentStateRebuilt;
 
     // Dependencies
     AllocatorAddressInfo* addrInfo;
