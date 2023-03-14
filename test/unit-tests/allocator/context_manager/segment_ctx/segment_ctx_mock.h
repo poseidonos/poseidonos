@@ -15,7 +15,7 @@ public:
     MOCK_METHOD(void, Init, (EventScheduler* eventScheduler_), (override));
     MOCK_METHOD(void, Dispose, (), (override));
     MOCK_METHOD(void, AfterLoad, (char* buf), (override));
-    MOCK_METHOD(void, BeforeFlush, (char* buf), (override));
+    MOCK_METHOD(void, BeforeFlush, (char* buf, ContextSectionBuffer externalBuf), (override));
     MOCK_METHOD(void, AfterFlush, (char* buf), (override));
     MOCK_METHOD(ContextSectionAddr, GetSectionInfo, (int section), (override));
     MOCK_METHOD(uint64_t, GetStoredVersion, (), (override));

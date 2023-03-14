@@ -188,7 +188,7 @@ TEST(AllocatorFileIo, Flush_testFlushAndCallback)
     headerPtr->ctxVersion = 5;
 
     EXPECT_CALL(client, BeforeFlush)
-        .WillOnce([&](char* buf) {
+        .WillOnce([&](char* buf, ContextSectionBuffer buffer) {
             memset(buf, 0, testDataSize);
             SegmentCtxHeader* headerPtr = reinterpret_cast<SegmentCtxHeader*>(buf);
             headerPtr->sig = SIG_SEGMENT_CTX;
