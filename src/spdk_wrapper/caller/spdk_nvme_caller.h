@@ -72,6 +72,16 @@ public:
         spdk_nvme_cmd_cb cb_fn,
         void* cb_arg,
         uint32_t io_flags);
+    virtual int SpdkNvmeNsCmdWriteWithStream(
+        struct spdk_nvme_ns* ns,
+        struct spdk_nvme_qpair* qpair,
+        void* buffer,
+        uint64_t lba,
+        uint32_t lba_count,
+        spdk_nvme_cmd_cb cb_fn,
+        void* cb_arg,
+        uint32_t io_flags,
+        uint16_t stream_id);
     virtual int SpdkNvmeCtrlrCmdAbort(
         struct spdk_nvme_ctrlr* ctrlr,
         struct spdk_nvme_qpair* qpair,
@@ -102,6 +112,30 @@ public:
         uint64_t offset,
         spdk_nvme_cmd_cb cb_fn,
         void* cb_arg);
+    virtual int SpdkNvmeCtrlrCmdDirectiveReceive(
+        struct spdk_nvme_ctrlr *ctrlr,
+        uint32_t nsid,
+        uint32_t doper,
+        uint32_t dtype,
+        uint32_t dspec,
+        void *payload,
+        uint32_t payload_size,
+        uint32_t cdw12,
+        uint32_t cdw13,
+        spdk_nvme_cmd_cb cb_fn,
+        void *cb_arg);
+    virtual int SpdkNvmeCtrlrCmdDirectiveSend(
+        struct spdk_nvme_ctrlr *ctrlr,
+        uint32_t nsid,
+        uint32_t doper,
+        uint32_t dtype,
+        uint32_t dspec,
+        void *payload,
+        uint32_t payload_size,
+        uint32_t cdw12,
+        uint32_t cdw13,
+        spdk_nvme_cmd_cb cb_fn,
+        void *cb_arg);
     virtual bool SpdkNvmeCtrlrIsFailed(struct spdk_nvme_ctrlr* ctrlr);
     virtual int32_t SpdkNvmeCtrlrProcessAdminCompletions(
         struct spdk_nvme_ctrlr* ctrlr);

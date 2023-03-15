@@ -43,6 +43,7 @@
 #include "src/spdk_wrapper/nvme.hpp"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/device/base/device_driver.h"
+#include "src/device/directive_cmd.h"
 #include "src/include/branch_prediction.h"
 #include "src/io_scheduler/io_dispatcher.h"
 #include "src/logger/logger.h"
@@ -359,7 +360,7 @@ DeviceManager::_Rescan()
     std::vector<UblockSharedPtr>::iterator it;
 
     vector<UblockSharedPtr> devicesLocal = _GetDeviceListLocal();
- 
+
     for (it = devicesLocal.begin(); it != devicesLocal.end(); it++)
     {
         if ((*it)->GetType() != DeviceType::NVRAM)
@@ -570,6 +571,39 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
     cpu_set_t ioWorkerCpuSet = affinityManager->GetCpuSet(CoreType::UDD_IO_WORKER);
     ioDispatcher->AddDeviceForIOWorker(dev, ioWorkerCpuSet);
     dev->WrapupOpenDeviceSpecific();
+
+    DeviceType deviceType = dev->GetType();
+    UnvmeSsdSharedPtr unvmeSsd = nullptr;
+    struct spdk_nvme_ns* ns = nullptr;
+
+    if (DeviceType::SSD == deviceType)
+    {
+        unvmeSsd = static_pointer_cast<UnvmeSsd>(dev);
+        ns = unvmeSsd->GetNs();
+        if (ns == nullptr)
+        {
+            POS_TRACE_INFO(EID(UNVME_OPERATION_NOT_SUPPORTED),
+                "{} does not have namespace.", unvmeSsd->GetName());
+        }
+    }
+    if (DeviceType::SSD == deviceType && ns != nullptr)
+    {
+        struct spdk_nvme_ctrlr* ctrlr = spdkNvmeCaller->SpdkNvmeNsGetCtrlr(ns);
+        uint64_t flags = spdk_nvme_ctrlr_get_flags(ctrlr);
+        if (SPDK_NVME_CTRLR_DIRECTIVES_SUPPORTED & flags)
+        {
+            DirectiveCmd* directiveCmd = new DirectiveCmd(dev, ctrlr, ioDispatcher);
+            directiveCmd->EnableDirective();
+            directiveCmd->AllocateResources();
+            POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
+                "{}: directives are enabled for multistreaming user, meta, journal data.", unvmeSsd->GetName());
+        }
+        else
+        {
+            POS_TRACE_INFO(EID(UNVME_OPERATION_NOT_SUPPORTED),
+                "{} does not support directives.", unvmeSsd->GetName());
+        }
+    }
 }
 
 } // namespace pos

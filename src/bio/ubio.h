@@ -66,7 +66,8 @@ enum class UbioDir
     Abort,
     NvmeCli,
     AdminPassTh,
-    GetLogPage
+    GetLogPage,
+    Directive
 };
 
 struct DeviceLba;

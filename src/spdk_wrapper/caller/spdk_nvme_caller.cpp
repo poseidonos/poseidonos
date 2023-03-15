@@ -99,6 +99,22 @@ SpdkNvmeCaller::SpdkNvmeNsCmdWrite(
 }
 
 int
+SpdkNvmeCaller::SpdkNvmeNsCmdWriteWithStream(
+    struct spdk_nvme_ns* ns,
+    struct spdk_nvme_qpair* qpair,
+    void* buffer,
+    uint64_t lba,
+    uint32_t lba_count,
+    spdk_nvme_cmd_cb cb_fn,
+    void* cb_arg,
+    uint32_t io_flags,
+    uint16_t stream_id)
+{
+    return spdk_nvme_ns_cmd_write_with_stream_id(
+        ns, qpair, buffer, lba, lba_count, cb_fn, cb_arg, io_flags, stream_id);
+}
+
+int
 SpdkNvmeCaller::SpdkNvmeCtrlrCmdAbort(
     struct spdk_nvme_ctrlr* ctrlr,
     struct spdk_nvme_qpair* qpair,
@@ -148,6 +164,42 @@ SpdkNvmeCaller::SpdkNvmeCtrlrCmdGetLogPage(
 {
     return spdk_nvme_ctrlr_cmd_get_log_page(
         ctrlr, log_page, nsid, payload, payload_size, offset, cb_fn, cb_arg);
+}
+
+int
+SpdkNvmeCaller::SpdkNvmeCtrlrCmdDirectiveReceive(
+    struct spdk_nvme_ctrlr *ctrlr,
+    uint32_t nsid,
+    uint32_t doper,
+    uint32_t dtype,
+    uint32_t dspec,
+    void *payload,
+    uint32_t payload_size,
+    uint32_t cdw12,
+    uint32_t cdw13,
+    spdk_nvme_cmd_cb cb_fn,
+    void *cb_arg)
+{
+    return spdk_nvme_ctrlr_cmd_directive_receive(
+        ctrlr, nsid, doper, dtype, dspec, payload, payload_size, cdw12, cdw13, cb_fn, cb_arg);
+}
+
+int
+SpdkNvmeCaller::SpdkNvmeCtrlrCmdDirectiveSend(
+    struct spdk_nvme_ctrlr *ctrlr,
+    uint32_t nsid,
+    uint32_t doper,
+    uint32_t dtype,
+    uint32_t dspec,
+    void *payload,
+    uint32_t payload_size,
+    uint32_t cdw12,
+    uint32_t cdw13,
+    spdk_nvme_cmd_cb cb_fn,
+    void *cb_arg)
+{
+    return spdk_nvme_ctrlr_cmd_directive_send(
+        ctrlr, nsid, doper, dtype, dspec, payload, payload_size, cdw12, cdw13, cb_fn, cb_arg);
 }
 
 bool
