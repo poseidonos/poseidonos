@@ -702,7 +702,8 @@ NvmfTarget::FindSubsystem(const string& subnqn)
         spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
     if (nullptr == subsystem)
     {
-        SPDK_NOTICELOG("Requested subsystem(%s) does not exist.\n", subnqn.c_str());
+        int eventId = EID(IONVMF_FAIL_TO_FIND_SUBSYSTEM);
+        POS_TRACE_WARN(eventId, "Requested subsystem:{} does not exist", subnqn);
     }
     return subsystem;
 }
@@ -715,7 +716,8 @@ NvmfTarget::FindSubsystemWithArrayName(const string& inputSubNqn, string inputAr
         spdkNvmfCaller->SpdkNvmfTgtFindSubsystem(g_spdk_nvmf_tgt, subnqn.c_str());
     if (nullptr == subsystem)
     {
-        SPDK_NOTICELOG("Requested subsystem(%s) does not exist.\n", subnqn.c_str());
+        int eventId = EID(IONVMF_FAIL_TO_FIND_SUBSYSTEM);
+        POS_TRACE_ERROR(eventId, "Requested subsystem:{} does not exist", subnqn);
         return nullptr;
     }
     string arrayName = GetSubsystemArrayName(subnqn);
@@ -723,7 +725,12 @@ NvmfTarget::FindSubsystemWithArrayName(const string& inputSubNqn, string inputAr
     {
         return subsystem;
     }
-    else return nullptr;
+    else
+    {
+        int eventId = EID(IONVMF_FAIL_TO_FIND_SUBSYSTEM);
+        POS_TRACE_ERROR(eventId, "Requested subsystem:{} already blongs to other array:{}", subnqn, arrayName);
+        return nullptr;
+    }
 }
 void
 NvmfTarget::QosEnableDone(void* cbArg, int status)
