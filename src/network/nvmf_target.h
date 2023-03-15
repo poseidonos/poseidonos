@@ -88,9 +88,10 @@ public:
     string GetVolumeNqn(struct spdk_nvmf_subsystem* subsystem);
     virtual int32_t GetVolumeNqnId(const string& subnqn);
     virtual spdk_nvmf_subsystem* FindSubsystem(const string& subnqn);
+    virtual spdk_nvmf_subsystem* FindSubsystemWithArrayName(const string& subnqn, string arrayName);
     vector<string> GetHostNqn(string subnqn);
     virtual bool TryToAttachNamespace(const string& nqn, int volId, string& arrayName, uint32_t& nsId, uint64_t time = NS_ATTACH_TIMEOUT);
-    virtual bool CheckSubsystemExistance(void);
+    virtual bool CheckSubsystemExistance(string arrayName);
     virtual bool CheckVolumeAttached(int volId, string arrayName);
     vector<pair<int, string>> GetAttachedVolumeList(string& nqn);
     static bool AttachNamespace(const string& nqn, const string& bdevName, uint32_t& nsId,

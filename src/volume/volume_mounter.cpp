@@ -154,8 +154,8 @@ VolumeMounter::_CheckIfExistSubsystem(string subnqn)
 {
     int ret = EID(SUCCESS);
 
-    if ((subnqn.empty() && nvmfTarget->CheckSubsystemExistance() == false) ||
-        (!subnqn.empty() && nvmfTarget->FindSubsystem(subnqn) == nullptr))
+    if ((subnqn.empty() && nvmfTarget->CheckSubsystemExistance(arrayName) == false) ||
+        (!subnqn.empty() && nvmfTarget->FindSubsystemWithArrayName(subnqn, arrayName) == nullptr))
     {
         ret = EID(MOUNT_VOL_SUBSYSTEM_NOT_FOUND);
         POS_TRACE_WARN(ret, "subnqn: {}, array_name: {}", subnqn, arrayName);

@@ -422,14 +422,25 @@ TEST(NvmfTarget, CheckSubsystemExistance_Success)
     struct spdk_nvmf_tgt* nvmf_tgt;
     struct spdk_nvmf_subsystem subsystem;
     memset(&subsystem, 0, sizeof(subsystem));
+    string registeredSubnqn = "subsystem1";
+    string unregisteredSubnqn = "subsystem2";
+    string arrayName = "array1";
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfGetTgt(_)).WillByDefault(Return(nvmf_tgt));
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(&subsystem));
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetType(_)).WillByDefault(Return(SPDK_NVMF_SUBTYPE_NVME));
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetNqn(_)).WillOnce(Return(registeredSubnqn.c_str()))
+                                                                .WillOnce(Return(unregisteredSubnqn.c_str()));
     bool expected{true};
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr, mockSpdkNvmfCaller);
-    bool actual = nvmfTarget.CheckSubsystemExistance();
+    nvmfTarget.SetSubsystemArrayName(registeredSubnqn, arrayName);
+    // Find subsystem that belongs to an array already.
+    bool actual = nvmfTarget.CheckSubsystemExistance(arrayName);
     ASSERT_EQ(actual, expected);
+    
+    // Find subsystem that is not belong to any array yet.
+    bool result = nvmfTarget.CheckSubsystemExistance(arrayName);
+    ASSERT_EQ(result, expected);
     delete mockSpdkCaller;
 }
 
@@ -438,12 +449,13 @@ TEST(NvmfTarget, CheckSubsystemExistance_FailedToGetSubsystem)
     NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
     NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
     struct spdk_nvmf_tgt* nvmf_tgt;
+    string arrayName = "array1";
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfGetTgt(_)).WillByDefault(Return(nvmf_tgt));
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(nullptr));
     bool expected{false};
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr, mockSpdkNvmfCaller);
-    bool actual = nvmfTarget.CheckSubsystemExistance();
+    bool actual = nvmfTarget.CheckSubsystemExistance(arrayName);
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
 }
@@ -455,6 +467,8 @@ TEST(NvmfTarget, CheckSubsystemExistance_IterSubsystem)
     struct spdk_nvmf_tgt* nvmf_tgt;
     struct spdk_nvmf_subsystem subsystem;
     memset(&subsystem, 0, sizeof(subsystem));
+    string arrayName = "array1";
+    string subnqn = "subsystem1";
 
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfGetTgt(_)).WillByDefault(Return(nvmf_tgt));
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetFirst(_)).WillByDefault(Return(&subsystem));
@@ -462,10 +476,11 @@ TEST(NvmfTarget, CheckSubsystemExistance_IterSubsystem)
         .WillOnce(Return(SPDK_NVMF_SUBTYPE_DISCOVERY))
         .WillOnce(Return(SPDK_NVMF_SUBTYPE_NVME));
     ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetNext(_)).WillByDefault(Return(&subsystem));
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfSubsystemGetNqn(_)).WillOnce(Return(subnqn.c_str()));
     bool expected{true};
 
     NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr, mockSpdkNvmfCaller);
-    bool actual = nvmfTarget.CheckSubsystemExistance();
+    bool actual = nvmfTarget.CheckSubsystemExistance(arrayName);
     ASSERT_EQ(actual, expected);
     delete mockSpdkCaller;
 }
@@ -701,6 +716,50 @@ TEST(NvmfTarget, FindSubsystem_Fail)
     struct spdk_nvmf_subsystem* actual = nvmfTarget.FindSubsystem("");
 
     ASSERT_EQ(actual, expected);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, FindSubsystemWithArrayName_success)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
+    struct spdk_nvmf_subsystem subsystem;
+    memset(&subsystem, 0, sizeof(subsystem));
+    string registeredSubnqn = "subsystem1";
+    string unregisteredSubnqn = "subsystem2";
+    string arrayName = "array1";
+
+    ON_CALL(*mockSpdkNvmfCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillByDefault(Return(&subsystem));
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr, mockSpdkNvmfCaller);
+    nvmfTarget.SetSubsystemArrayName(registeredSubnqn, arrayName);
+    // Find subsystem which is already belong to an array.
+    struct spdk_nvmf_subsystem* actual = nvmfTarget.FindSubsystemWithArrayName(registeredSubnqn, arrayName);
+    ASSERT_EQ(actual, &subsystem);
+
+    // Find subsystem which is not belong to any array yet.
+    struct spdk_nvmf_subsystem* emptyName = nvmfTarget.FindSubsystemWithArrayName(unregisteredSubnqn, arrayName);
+    ASSERT_EQ(emptyName, &subsystem);
+    delete mockSpdkCaller;
+}
+
+TEST(NvmfTarget, FindSubsystemWithArrayName_fail)
+{
+    NiceMock<MockSpdkCaller>* mockSpdkCaller = new NiceMock<MockSpdkCaller>;
+    NiceMock<MockSpdkNvmfCaller>* mockSpdkNvmfCaller = new NiceMock<MockSpdkNvmfCaller>;
+    struct spdk_nvmf_subsystem subsystem;
+    memset(&subsystem, 0, sizeof(subsystem));
+    string subnqn = "subsystem1";
+    string arrayName = "array1";
+    string otherArrayName = "array2";
+
+    EXPECT_CALL(*mockSpdkNvmfCaller, SpdkNvmfTgtFindSubsystem(_, _)).WillOnce(Return(&subsystem));
+
+    NvmfTarget nvmfTarget(mockSpdkCaller, false, nullptr, mockSpdkNvmfCaller);
+    nvmfTarget.SetSubsystemArrayName(subnqn, otherArrayName);
+    struct spdk_nvmf_subsystem* actual = nvmfTarget.FindSubsystemWithArrayName(subnqn, arrayName);
+
+    ASSERT_EQ(actual, nullptr);
     delete mockSpdkCaller;
 }
 
