@@ -105,7 +105,7 @@ TEST_F(SsdMetaVolumeTestFixture, SSD_Meta_Volume_Normal)
 
 TEST_F(SsdMetaVolumeTestFixture, CheckBaseLpn)
 {
-    EXPECT_EQ(volume->GetBaseLpn(), 2052);
+    EXPECT_EQ(volume->GetBaseLpn(), 4101);
 }
 
 TEST(SsdMetaVolume, CreateDefault)
