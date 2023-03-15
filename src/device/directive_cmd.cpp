@@ -152,7 +152,7 @@ DirectiveCmd::_SubmitUbio(DirReqId reqId)
     {
         payloadSize = 1;
     }
-    UbioSmartPtr ubio(new Ubio((void*)directiveContext, payloadSize, 0 /*array index*/));
+    UbioSmartPtr ubio(new Ubio((void*)directiveContext, payloadSize, 0));
     ubio->dir = UbioDir::Directive;
     ubio->SetUblock(targetDevice);
 
