@@ -35,7 +35,7 @@
 namespace pos
 {
 InodeTable::InodeTable(MetaVolumeType volumeType, MetaLpnType startLpn)
-: OnVolumeMetaRegion<MetaRegionType, InodeTableContent>(volumeType, MetaRegionType::FileInodeTable, startLpn)
+: OnVolumeMetaRegionProto<MetaRegionType, InodeTableContent>(volumeType, MetaRegionType::FileInodeTable, startLpn)
 {
 }
 

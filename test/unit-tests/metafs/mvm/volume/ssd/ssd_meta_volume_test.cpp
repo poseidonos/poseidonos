@@ -85,7 +85,7 @@ protected:
     NiceMock<CatalogManager>* catalogMgr;
 
     int arrayId = 0;
-    MetaLpnType maxLpn = 8192;
+    MetaLpnType maxLpn = 16384;
     MockMetaStorageSubsystem* metaStorage;
     MetaFilePropertySet prop;
 };
@@ -96,11 +96,11 @@ TEST_F(SsdMetaVolumeTestFixture, SSD_Meta_Volume_Normal)
 
     // then
     // the maximum size
-    EXPECT_TRUE(volume->IsOkayToStore(4087 * chunkSize, prop));
-    // expected count of the free lpn: 4088
-    EXPECT_TRUE(volume->IsOkayToStore(4088 * chunkSize, prop));
+    EXPECT_TRUE(volume->IsOkayToStore(8183 * chunkSize, prop)); //1,1,3,4096 1 3 4096
+    // expected count of the free lpn: 8184
+    EXPECT_TRUE(volume->IsOkayToStore(8184 * chunkSize, prop));
     // more than possible
-    EXPECT_FALSE(volume->IsOkayToStore(4089 * chunkSize, prop));
+    EXPECT_FALSE(volume->IsOkayToStore(8185 * chunkSize, prop));
 }
 
 TEST(SsdMetaVolume, CreateDefault)
@@ -113,14 +113,14 @@ TEST(SsdMetaVolume, IsOkayToStore_Negative)
 {
     NiceMock<MockInodeManager>* inodeMgr = new NiceMock<MockInodeManager>(0);
     NiceMock<MockCatalogManager>* catalogMgr = new NiceMock<MockCatalogManager>(0);
-    SsdMetaVolume* volume = new SsdMetaVolume(0, MetaVolumeType::SsdVolume, 8192, inodeMgr, catalogMgr);
+    SsdMetaVolume* volume = new SsdMetaVolume(0, MetaVolumeType::SsdVolume, 16384, inodeMgr, catalogMgr);
     uint64_t chunkSize = MetaFsIoConfig::DEFAULT_META_PAGE_DATA_CHUNK_SIZE;
     MetaFilePropertySet prop;
 
-    EXPECT_CALL(*inodeMgr, GetAvailableLpnCount).WillOnce(Return(8192));
+    EXPECT_CALL(*inodeMgr, GetAvailableLpnCount).WillOnce(Return(16384));
 
     // not enough space
-    EXPECT_FALSE(volume->IsOkayToStore(4087 * chunkSize, prop));
+    EXPECT_FALSE(volume->IsOkayToStore(8183 * chunkSize, prop));
 
     delete volume;
 }

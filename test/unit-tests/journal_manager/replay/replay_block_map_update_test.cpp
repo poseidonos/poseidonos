@@ -29,11 +29,11 @@ TEST(ReplayBlockMapUpdate, ReplayBlockMapUpdate_testIfConstructedSuccessfully)
         .stripeId = 20,
         .offset = 0};
     uint64_t numBlks = 10;
-    bool replaySegmentInfo = false;
+    bool segInfoFlushed = true;
 
     ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
-        volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        volId, startRba, startVsa, numBlks, segInfoFlushed);
 }
 
 TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdated)
@@ -51,11 +51,11 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdated)
         .stripeId = 20,
         .offset = 20};
     uint32_t numBlks = 60;
-    bool replaySegmentInfo = false;
+    bool segInfoFlushed = true;
 
     ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
-        volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        volId, startRba, startVsa, numBlks, segInfoFlushed);
 
     // When: All stored vsa is UNMAP
     ON_CALL(vsaMap, GetVSAWithSyncOpen).WillByDefault(Return(UNMAP_VSA));
@@ -77,7 +77,7 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdated)
     EXPECT_EQ(result, 0);
 }
 
-TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
+TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsUpdatedWhenMapIsLatest)
 {
     // Given
     NiceMock<MockIVSAMap> vsaMap;
@@ -92,11 +92,11 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
         .stripeId = 20,
         .offset = 20};
     uint32_t numBlks = 60;
-    bool replaySegmentInfo = false;
+    bool segInfoFlushed = true;
 
     ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
-        volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        volId, startRba, startVsa, numBlks, segInfoFlushed);
 
     // When: Some vsa is UNMAP, and some are not
     for (uint32_t offset = 0; offset < numBlks / 2; offset++)
@@ -129,7 +129,8 @@ TEST(ReplayBlockMapUpdate, Replay_testIfBlockMapIsNotUpdatedWhenMapIsLatest)
     for (uint32_t offset = numBlks / 2; offset < numBlks; offset++)
     {
         BlkAddr currentRba = startRba + offset;
-        EXPECT_CALL(vsaMap, SetVSAsWithSyncOpen(volId, currentRba, _)).Times(0);
+        EXPECT_CALL(vsaMap, SetVSAsWithSyncOpen(volId, currentRba, _)).Times(1);
+        EXPECT_CALL(stripeReplayStatus, BlockWritten(startVsa.offset + offset, 1));
     }
 
     int result = blockMapUpdateEvent.Replay();
@@ -151,11 +152,12 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsInvalidated)
         .stripeId = 20,
         .offset = 20};
     uint32_t numBlks = 60;
-    bool replaySegmentInfo = true;
+    bool segInfoFlushed = false;
 
+    bool needToReplaySegmentInfo = segInfoFlushed == true ? false : true;
     ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
-        volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        volId, startRba, startVsa, numBlks, needToReplaySegmentInfo);
 
     // When: Old vsa is different from vsa in the log
     for (uint32_t offset = 0; offset < numBlks; offset++)
@@ -198,11 +200,12 @@ TEST(ReplayBlockMapUpdate, Replay_testIfOldBlockIsNotInvalidatedWhenOldVsaIsUnma
         .stripeId = 20,
         .offset = 20};
     uint32_t numBlks = 60;
-    bool replaySegmentInfo = true;
+    bool segInfoFlushed = false;
 
+    bool needToReplaySegmentInfo = segInfoFlushed == true ? false : true;
     ReplayBlockMapUpdate blockMapUpdateEvent(&vsaMap, &segmentCtx,
         &stripeReplayStatus, &wbStripeReplayer,
-        volId, startRba, startVsa, numBlks, replaySegmentInfo);
+        volId, startRba, startVsa, numBlks, needToReplaySegmentInfo);
 
     // When: Old vsa is different from vsa in the log
     ON_CALL(vsaMap, GetVSAWithSyncOpen).WillByDefault(Return(UNMAP_VSA));

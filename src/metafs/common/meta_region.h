@@ -146,9 +146,9 @@ MetaRegion<MetaRegionT, MetaContentT>::GetBaseLpn(void)
 // LCOV_EXCL_START
 template<typename MetaRegionT, typename MetaContentT>
 void*
-MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(void)
-{
-    return content;
+MetaRegion<MetaRegionT, MetaContentT>::GetDataBuf(void) 
+{ 
+    return content; 
 }
 // LCOV_EXCL_STOP
 
@@ -208,7 +208,7 @@ bool
 MetaRegion<MetaRegionT, MetaContentT>::Load(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Do meta load<mediaTyp, startLpn, totalLpn>={}, {}, {},",
+        "Do meta load<mediaType, startLpn, totalLpn>={}, {}, {},",
         (int)media, baseLPN, pageCNT);
 
     POS_EVENT_ID rc = mssIntf->ReadPage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);
@@ -235,7 +235,7 @@ bool
 MetaRegion<MetaRegionT, MetaContentT>::Store(MetaStorageType media, MetaLpnType baseLPN, uint32_t idx, MetaLpnType pageCNT)
 {
     MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "Do meta store <mediaTyp, startLpn, totalLpn>={}, {}, {},",
+        "Do meta store <mediaType, startLpn, totalLpn>={}, {}, {},",
         (int)media, baseLPN, pageCNT);
 
     POS_EVENT_ID rc = mssIntf->WritePage(media, baseLPN + idx, GetDataBuf(idx), pageCNT);

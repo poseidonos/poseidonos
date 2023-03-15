@@ -73,6 +73,7 @@ enum AllocatorCtxSection
     AC_CURRENT_SSD_LSID,
     AC_ALLOCATE_WBLSID_BITMAP,
     AC_ACTIVE_STRIPE_TAIL,
+    AC_EXTENDED,
     NUM_ALLOCATOR_CTX_SECTION,
 };
 
@@ -80,6 +81,7 @@ enum RebuildCtxSection
 {
     RC_HEADER = 0,
     RC_REBUILD_SEGMENT_LIST,
+    RC_EXTENDED,
     NUM_REBUILD_CTX_SECTION
 };
 

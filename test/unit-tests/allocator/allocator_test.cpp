@@ -4,9 +4,11 @@
 
 #include "src/allocator/address/allocator_address_info.h"
 #include "src/sys_event/volume_event.h"
+#include "test/unit-tests/allocator/address/allocator_address_info_mock.h"
 #include "test/unit-tests/allocator/block_manager/block_manager_mock.h"
 #include "test/unit-tests/allocator/context_manager/allocator_ctx/allocator_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/context_manager_mock.h"
+#include "test/unit-tests/allocator/context_manager/rebuild_ctx/rebuild_ctx_mock.h"
 #include "test/unit-tests/allocator/context_manager/segment_ctx/segment_ctx_mock.h"
 #include "test/unit-tests/allocator/stripe_manager/stripe_manager_mock.h"
 #include "test/unit-tests/allocator/stripe_manager/wbstripe_manager_mock.h"

@@ -41,14 +41,15 @@
 
 namespace pos
 {
+class IArrayInfo;
 class VersionedSegmentInfo;
 class JournalConfiguration;
 class SegmentInfoData;
-
 class DummyVersionedSegmentCtx : public IVersionedSegmentContext
 {
 public:
     DummyVersionedSegmentCtx(void) = default;
+    DummyVersionedSegmentCtx(IArrayInfo* arrayInfo) {}
     virtual ~DummyVersionedSegmentCtx(void) = default;
 
     virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override {}
@@ -68,13 +69,14 @@ public:
     virtual void LogBufferReseted(int logGroupId) override {}
 
     // ISegmentFreeSubscriber
-    virtual void NotifySegmentFreed(SegmentId segmentId) override {}
+    virtual void NotifySegmentFreed(SegmentId segmentId, int logGroupId) override {}
 };
 
 class VersionedSegmentCtx : public IVersionedSegmentContext
 {
 public:
-    VersionedSegmentCtx(void);
+    VersionedSegmentCtx(void) = default;
+    VersionedSegmentCtx(IArrayInfo* arrayInfo);
     virtual ~VersionedSegmentCtx(void);
 
     virtual void Init(JournalConfiguration* journalConfiguration, uint32_t numSegments) override;
@@ -99,7 +101,7 @@ public:
     virtual void LogBufferReseted(int logGroupId) override;
 
     // Implementation of ISegmentFreeSubscriber interface
-    virtual void NotifySegmentFreed(SegmentId segmentId) override;
+    virtual void NotifySegmentFreed(SegmentId segmentId, int logGroupId) override;
 
 private:
     void _Init(JournalConfiguration* journalConfiguration, uint32_t numSegments_);
@@ -108,6 +110,7 @@ private:
     void _CheckSegIdValidity(int segId);
 
     JournalConfiguration* config;
+    IArrayInfo* arrayInfo;
     uint32_t numSegments;
     std::vector<std::shared_ptr<VersionedSegmentInfo>> segmentInfoDiffs;
     SegmentInfoData* segmentInfoData;

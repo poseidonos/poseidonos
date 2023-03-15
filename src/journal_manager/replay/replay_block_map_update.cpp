@@ -40,7 +40,7 @@ namespace pos
 {
 ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, ISegmentCtx* segmentCtx,
     StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
-    uint64_t numBlks, bool replaySegmentInfo)
+    uint64_t numBlks, bool needToReplaySegmentInfo)
 : ReplayEvent(status),
   vsaMap(vsaMap),
   segmentCtx(segmentCtx),
@@ -48,7 +48,7 @@ ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, ISegmentCtx* segment
   startRba(startRba),
   startVsa(startVsa),
   numBlks(numBlks),
-  replaySegmentInfo(replaySegmentInfo),
+  needToReplaySegmentInfo(needToReplaySegmentInfo),
   wbStripeReplayer(wbReplayer)
 {
 }
@@ -82,13 +82,12 @@ ReplayBlockMapUpdate::Replay(void)
         // TODO (huijeong.kim) Read vsa can be the latest one than current vsa in the log
         if (IsSameVsa(read, currentVsa) == false)
         {
-            if (replaySegmentInfo == true)
+            if (needToReplaySegmentInfo == true)
             {
                 _InvalidateOldBlock(offset);
             }
-
-            result = _UpdateMap(offset);
         }
+        result = _UpdateMap(offset);
     }
 
     if (status->IsFlushed() == false)
@@ -134,7 +133,7 @@ ReplayBlockMapUpdate::_UpdateMap(uint32_t offset)
     int result = vsaMap->SetVSAsWithSyncOpen(volId, rba, virtualBlks);
     assert(result >= 0);
 
-    if (replaySegmentInfo == true)
+    if (needToReplaySegmentInfo == true)
     {
         segmentCtx->ValidateBlks(virtualBlks);
     }

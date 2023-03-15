@@ -328,4 +328,92 @@ TEST_F(ReplaySegmentContextIntegrationTest, ReplaySegmentContextWithValidAndInva
     EXPECT_EQ(segmentInfos[0].occupiedStripeCount, testInfo->numStripesPerSegment);
     EXPECT_EQ(segmentInfos[1].occupiedStripeCount, testInfo->numStripesPerSegment);
 }
+
+TEST_F(ReplaySegmentContextIntegrationTest, ReplaySegmentContextWithSegmentFreeEventWhenVSCEnabled)
+{
+    POS_TRACE_DEBUG(9999, "ReplaySegmentContextIntegrationTest::ReplaySegmentContextWithSegmentFreeEventWhenVSCEnabled");
+
+    // Given: Set the log buffer size to only get logs for two segment
+    // Given: Set Versioned Segment Context to be enabled
+    uint32_t numBlockMapLogsPerStripe = 8;
+    uint64_t sizeLogGroupAlignByMpage = _CalculateLogGroupSize(testInfo->numStripesPerSegment * 2, numBlockMapLogsPerStripe);
+    JournalConfigurationBuilder builder(testInfo);
+    builder.SetJournalEnable(true)
+        ->SetLogBufferSize(sizeLogGroupAlignByMpage * 2)
+        ->SetVersionedSegmentContextEnable(true);
+
+    InitializeJournal(builder.Build());
+    SetTriggerCheckpoint(false);
+
+    // Given: Add logs for segment 0
+    uint32_t targetSegmentId = 0;
+    uint32_t stripeIndex = targetSegmentId * testInfo->numStripesPerSegment;
+    std::vector<StripeTestFixture> writtenStripesForLogGroup0;
+    for (uint32_t index = 0; index < testInfo->numStripesPerSegment; index++, stripeIndex++)
+    {
+        StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+        writeTester->WriteLogsForStripe(stripe);
+        writtenStripesForLogGroup0.push_back(stripe);
+    }
+
+    // Given: Add logs for segment 1 to invalidate block in segment 0
+    targetSegmentId = 1;
+    stripeIndex = targetSegmentId * testInfo->numStripesPerSegment;
+    for (uint32_t index = 0; index < testInfo->numStripesPerSegment; index++, stripeIndex++)
+    {
+        StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
+        writeTester->WriteLogsForStripeWithOverwrittenBlock(stripe, writtenStripesForLogGroup0[index]);
+        writtenStripesForLogGroup0.push_back(stripe);
+    }
+
+    // Given: Add logs for segment 2
+    targetSegmentId = 2;
+    stripeIndex = targetSegmentId * testInfo->numStripesPerSegment;
+    std::vector<StripeTestFixture> writtenStripesForLogGroup1;
+    for (uint32_t index = 0; index < testInfo->numStripesPerSegment; index++, stripeIndex++)
+    {
+        StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+        writeTester->WriteLogsForStripe(stripe);
+        writtenStripesForLogGroup1.push_back(stripe);
+    }
+    // When: Trigger Checkpoint and inject fail before doing LogGroupReset
+    InjectCheckpointFaultAfterMetaFlushCompleted();
+
+    writeTester->WaitForAllLogWriteDone();
+
+    // When: SPOR
+    SimulateSPORWithoutRecovery(builder);
+
+    replayTester->ExpectReturningUnmapStripes();
+
+    StripeTestFixture lastStripeLog = writtenStripesForLogGroup0.back();
+    writtenStripesForLogGroup0.pop_back();
+    for (auto stripeLog : writtenStripesForLogGroup0)
+    {
+        replayTester->ExpectReplayFullStripe(stripeLog, false);
+    }
+    // The last stripe in log group 0 requires a segment context replay because the stripe flush event was recorded in log group 1.
+    replayTester->ExpectReplayFullStripe(lastStripeLog, false, true);
+    for (auto stripeLog : writtenStripesForLogGroup1)
+    {
+        replayTester->ExpectReplayFullStripe(stripeLog);
+    }
+
+    replayTester->ExpectReplayFlushedActiveStripe();
+
+    // Then: Replay finished successfully
+    EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
+    SegmentInfoData* segmentInfos = testAllocator->GetSegmentCtxFake()->GetSegmentInfoDataArray();
+
+    // Then: All of the blocks in Segment 0 are invalidated, and the stripes in Segment 0 are all written.
+    // Then: The blocks in segments 1 and 2 are all validated, and the stripes are all occupied.
+    EXPECT_EQ(segmentInfos[0].validBlockCount, 0);
+    EXPECT_EQ(segmentInfos[1].validBlockCount, testInfo->numBlksPerStripe * testInfo->numStripesPerSegment);
+    EXPECT_EQ(segmentInfos[2].validBlockCount, testInfo->numBlksPerStripe * testInfo->numStripesPerSegment);
+    EXPECT_EQ(segmentInfos[0].occupiedStripeCount, 0);
+    EXPECT_EQ(segmentInfos[1].occupiedStripeCount, testInfo->numStripesPerSegment);
+    EXPECT_EQ(segmentInfos[2].occupiedStripeCount, testInfo->numStripesPerSegment);
+}
 } // namespace pos

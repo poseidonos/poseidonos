@@ -99,7 +99,7 @@ void
 RebuildCtx::_UpdateSectionInfo(void)
 {
     uint64_t currentOffset = 0;
-    ctxHeader.InitAddressInfoWithItsData(currentOffset);
+    ctxHeader.InitAddressInfoWithItsData(currentOffset); 
     currentOffset += ctxHeader.GetSectionSize();
 
     segmentList.InitAddressInfo(
@@ -107,6 +107,10 @@ RebuildCtx::_UpdateSectionInfo(void)
         currentOffset,
         sizeof(SegmentId) * addrInfo->GetnumUserAreaSegments());
     currentOffset += segmentList.GetSectionSize();
+
+    uint64_t sectionSize = this->ctxExtended.GetSectionSize();
+    this->ctxExtended.InitAddressInfo(currentOffset, sectionSize);
+    currentOffset += sectionSize;
 
     totalDataSize = currentOffset;
 }
@@ -147,6 +151,9 @@ RebuildCtx::AfterLoad(char* buf)
     // RC_REBUILD_SEGMENT_LIST
     segmentList.CopyFrom(buf);
 
+    // RC_EXTENDED
+    this->ctxExtended.CopyFrom(buf);
+
     POS_TRACE_DEBUG(EID(ALLOCATOR_FILE_ERROR), "RebuildCtx file loaded:{}", ctxHeader.data.ctxVersion);
     ctxStoredVersion = ctxHeader.data.ctxVersion;
     ctxDirtyVersion = ctxHeader.data.ctxVersion + 1;
@@ -157,7 +164,7 @@ RebuildCtx::AfterLoad(char* buf)
 }
 
 void
-RebuildCtx::BeforeFlush(char* buf)
+RebuildCtx::BeforeFlush(char* buf, ContextSectionBuffer externalBuf)
 {
     // RC_HEADER
     ctxHeader.data.numTargetSegments = listSize;
@@ -167,6 +174,9 @@ RebuildCtx::BeforeFlush(char* buf)
     // RC_REBUILD_SEGMENT_LIST
     // TODO flush only listsize
     segmentList.CopyTo(buf);
+
+    // RC_REBUILD_EXTENDED
+    this->ctxExtended.CopyTo(buf);
 
     POS_TRACE_DEBUG(EID(ALLOCATOR_META_ARCHIVE_STORE_REBUILD_SEGMENT),
         "Ready to flush RebuildCtx file:{}, numTargetSegments:{}",
@@ -196,6 +206,10 @@ RebuildCtx::GetSectionInfo(int section)
     {
         return segmentList.GetSectionInfo();
     }
+    else if (section == RC_EXTENDED)
+    {
+        return this->ctxExtended.GetSectionInfo();
+    } 
     else
     {
         assert(false);
@@ -223,7 +237,7 @@ RebuildCtx::GetNumSections(void)
 uint64_t
 RebuildCtx::GetTotalDataSize(void)
 {
-    return ctxHeader.GetSectionSize() + segmentList.GetSectionSize();
+    return ctxHeader.GetSectionSize() + segmentList.GetSectionSize() + this->ctxExtended.GetSectionSize();
 }
 
 int

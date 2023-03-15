@@ -32,12 +32,14 @@
 
 #include "src/metadata/meta_event_factory.h"
 
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
 #include "src/allocator/i_block_allocator.h"
 #include "src/allocator/i_context_manager.h"
 #include "src/allocator/i_wbstripe_allocator.h"
 #include "src/mapper/i_stripemap.h"
 #include "src/mapper/i_vsamap.h"
 #include "src/metadata/block_map_update.h"
+#include "src/metadata/freed_segment_ctx_update.h"
 #include "src/metadata/gc_map_update.h"
 #include "src/metadata/stripe_map_update.h"
 
@@ -76,4 +78,11 @@ MetaEventFactory::CreateGcMapUpdateEvent(StripeSmartPtr stripe, GcStripeMapUpdat
     return callback;
 }
 
+CallbackSmartPtr
+MetaEventFactory::CreateFreedSegmentCtxUpdateEvent(SegmentCtx* segmentCtx, SegmentId targetSegmentId)
+{
+    CallbackSmartPtr callback(new FreedSegmentCtxUpdateEvent(segmentCtx, targetSegmentId));
+
+    return callback;
+}
 } // namespace pos

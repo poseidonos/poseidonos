@@ -49,6 +49,7 @@
 
 namespace pos
 {
+class EventScheduler;
 class ISegmentFreeSubscriber;
 class TelemetryPublisher;
 class SegmentCtx : public IAllocatorFileIoClient, public ISegmentCtx
@@ -64,15 +65,16 @@ public:
         AllocatorAddressInfo* info, GcCtx* gcCtx_, SegmentInfoData* segmentInfoData_ = nullptr);
     virtual ~SegmentCtx(void);
 
-    // Only for UT
+    // Only for Test
+    void SetEventScheduler(EventScheduler* eventScheduler_);
     void SetSegmentList(SegmentState state, SegmentList* list);
     void SetRebuildList(SegmentList* list);
 
-    virtual void Init(void);
+    virtual void Init(EventScheduler* eventScheduler_);
     virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf) override;
-    virtual void BeforeFlush(char* buf) override;
+    virtual void BeforeFlush(char* buf, ContextSectionBuffer externalBuf = INVALID_CONTEXT_SECTION_BUFFER) override;
     virtual void AfterFlush(char* buf) override;
     virtual ContextSectionAddr GetSectionInfo(int section) override;
     virtual uint64_t GetStoredVersion(void) override;
@@ -115,8 +117,9 @@ public:
     virtual void AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber) override;
 
     virtual SegmentInfoData* GetSegmentInfoDataArray(void);
+    virtual void SegmentFreeUpdateCompleted(SegmentId segmentId, int logGroupId);
 
-private:
+protected:
     void _SetOccupiedStripeCount(SegmentId segId, int count);
     void _GetUsedSegmentList(std::set<SegmentId>& segmentList);
     SegmentId _FindMostInvalidSSDSegment(void);
@@ -137,7 +140,7 @@ private:
     int _OnNumFreeSegmentChanged(void);
 
     void _UpdateSectionInfo(void);
-    void _NotifySubscribersOfSegmentFreed(SegmentId segmentId);
+    void _NotifySubscribersOfSegmentFreed(SegmentId segmentId, int logGroupId);
 
     // Data to be stored: Section 1
     ContextSection<SegmentCtxHeader> ctxHeader;
@@ -171,6 +174,7 @@ private:
     GcCtx* gcCtx;
     TelemetryPublisher* tp;
     std::vector<ISegmentFreeSubscriber*> segmentFreedSubscribers;
+    EventScheduler* eventScheduler;
 };
 
 } // namespace pos

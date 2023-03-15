@@ -1,14 +1,19 @@
 #include "src/qos/qos_manager.h"
 
 #include <gtest/gtest.h>
+#include <string.h>
+#include <unistd.h>
+#include <map>
+#include <unordered_map>
+#include <vector>
+
+#include "src/io/frontend_io/aio_submission_adapter.h"
 #include "test/unit-tests/master_context/config_manager_mock.h"
-#include "test/unit-tests/spdk_wrapper/caller/spdk_pos_nvmf_caller_mock.h"
-#include "test/unit-tests/spdk_wrapper/caller/spdk_env_caller_mock.h"
 #include "test/unit-tests/qos/submission_adapter_mock.h"
 #include "test/unit-tests/qos/submission_notifier_mock.h"
-#include "src/io/frontend_io/aio_submission_adapter.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_env_caller_mock.h"
+#include "test/unit-tests/spdk_wrapper/caller/spdk_pos_nvmf_caller_mock.h"
 #include "test/unit-tests/spdk_wrapper/event_framework_api_mock.h"
-#include <unistd.h>
 
 using ::testing::_;
 using ::testing::NiceMock;
@@ -266,7 +271,7 @@ TEST(QosManager, Test_HandlePosIoSubmission)
     io.length = 10;
     io.ioType = IO_TYPE::READ;
     io.array_id = 0;
-    io.arrayName = new char[9] {"POSArray"};
+    io.arrayName = strdup("POSArray");
     AioSubmissionAdapter aioSubmission;
     VolumeIoSmartPtr volIo(new VolumeIo(nullptr, 8, 0));
     volIo->dir = UbioDir::Write;

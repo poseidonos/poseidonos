@@ -48,6 +48,7 @@
 
 namespace pos
 {
+class IMetaUpdater;
 class IAllocatorFileIoClient;
 class AllocatorCtx;
 class SegmentCtx;

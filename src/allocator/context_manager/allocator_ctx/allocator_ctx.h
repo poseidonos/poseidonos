@@ -38,6 +38,7 @@
 #include "src/allocator/context_manager/context/active_stripe_tail_context_section.h"
 #include "src/allocator/context_manager/context/context.h"
 #include "src/allocator/context_manager/context/context_section.h"
+#include "src/allocator/context_manager/allocator_ctx/allocator_ctx_extended.h"
 #include "src/allocator/context_manager/i_allocator_file_io_client.h"
 #include "src/lib/bitmap.h"
 
@@ -57,7 +58,7 @@ public:
     virtual void Dispose(void);
 
     virtual void AfterLoad(char* buf) override;
-    virtual void BeforeFlush(char* buf) override;
+    virtual void BeforeFlush(char* buf, ContextSectionBuffer externalBuf = INVALID_CONTEXT_SECTION_BUFFER) override;
     virtual void AfterFlush(char* buf) override;
     virtual ContextSectionAddr GetSectionInfo(int section) override;
     virtual uint64_t GetStoredVersion(void) override;
@@ -89,11 +90,14 @@ public:
 private:
     void _UpdateSectionInfo(void);
 
-    // Data to be stored
+    // Data to be stored : 1 ~ 4
     ContextSection<AllocatorCtxHeader> ctxHeader;
     ContextSection<StripeId> currentSsdLsid;
     ContextSection<BitMapMutex*> allocWbLsidBitmap;
     ActiveStripeTailContextSection activeStripeTail;
+
+    // Data to be stored with Protobuf: Section 5
+    ContextSection<AllocatorCtxExtended*> ctxExtended;
 
     uint64_t totalDataSize;
 

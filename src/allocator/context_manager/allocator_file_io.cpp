@@ -215,13 +215,7 @@ AllocatorFileIo::Flush(FnAllocatorCtxIoCompletion clientCallback, ContextSection
     uint64_t size = client->GetTotalDataSize();
 
     char* buf = new char[size]();
-    client->BeforeFlush(buf);
-
-    if ((externalBuf.owner == owner) && (externalBuf.sectionId != INVALID_SECTION_ID))
-    {
-        auto section = client->GetSectionInfo(externalBuf.sectionId);
-        memcpy((buf + section.offset), externalBuf.buffer, section.size);
-    }
+    client->BeforeFlush(buf, externalBuf);
 
     numOutstandingFlushes++;
     FnCompleteMetaFileIo callback = std::bind(&AllocatorFileIo::_FlushCompletedThenCB, this, std::placeholders::_1);

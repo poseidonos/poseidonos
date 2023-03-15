@@ -38,7 +38,7 @@
 namespace pos
 {
 Catalog::Catalog(MetaVolumeType volumeType, MetaLpnType baseLpn)
-: OnVolumeMetaRegion<MetaRegionType, CatalogContent>(volumeType, MetaRegionType::VolCatalog, baseLpn)
+: OnVolumeMetaRegionProto<MetaRegionType, CatalogContent>(volumeType, MetaRegionType::VolCatalog, baseLpn)
 {
 }
 

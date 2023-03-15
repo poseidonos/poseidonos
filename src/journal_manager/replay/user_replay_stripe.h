@@ -53,9 +53,9 @@ public:
     virtual int Replay(void) override;
 
 private:
-    void _AddLog(LogHandlerInterface* log);
+    void _AddLog(ReplayLog replayLog);
 
-    void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat);
+    void _CreateBlockWriteReplayEvent(BlockWriteDoneLog dat, bool segInfoFlushed);
     void _CreateStripeEvents(void);
 
     void _UpdateStripeInfo(BlockWriteDoneLog log);

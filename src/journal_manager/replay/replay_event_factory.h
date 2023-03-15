@@ -56,7 +56,7 @@ public:
 
     virtual ~ReplayEventFactory(void) = default;
 
-    virtual ReplayEvent* CreateBlockWriteReplayEvent(int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks, bool replaySegmentInfo);
+    virtual ReplayEvent* CreateBlockWriteReplayEvent(int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks, bool segInfoFlushed);
     virtual ReplayEvent* CreateStripeMapUpdateReplayEvent(StripeId vsid, StripeAddr dest);
     virtual ReplayEvent* CreateStripeFlushReplayEvent(StripeId vsid, StripeId wbLsid, StripeId userLsid);
     virtual ReplayEvent* CreateStripeAllocationReplayEvent(StripeId vsid, StripeId wbLsid);

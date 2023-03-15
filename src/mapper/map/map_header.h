@@ -34,6 +34,7 @@
 
 #include "src/include/address_type.h"
 #include "src/lib/bitmap.h"
+#include "map_header_extended.h"
 
 #include <atomic>
 
@@ -87,6 +88,7 @@ private:
     BitMap* touchedMpages;
 
     int mapId;
+    MapHeaderExtended mapHeaderExtended;
 };
 
 }   // namespace pos

@@ -171,7 +171,7 @@ TEST(AllocatorCtx, BeforeFlush_testIfAllMetaIsCopiedToBuffer)
     EXPECT_CALL(*allocBitmap, GetLock).WillOnce(ReturnRef(lock));
 
     // when
-    allocCtx.BeforeFlush((char*)buf);
+    allocCtx.BeforeFlush((char*)buf, INVALID_CONTEXT_SECTION_BUFFER);
 
     // then
     // AC_HEADER

@@ -56,7 +56,7 @@ public:
     std::unordered_map<MetaLpnType, MetaFileExtent*>* journalmap;
 };
 
-static const uint32_t INODE_DATA_BYTE_SIZE = 4096 * 2;
+static const uint32_t INODE_DATA_BYTE_SIZE = 4096 * 4;
 static_assert(MetaFileInodeInfo::META_FILE_INODE_INFO_BYTE_SIZE == INODE_DATA_BYTE_SIZE);
 
 union MetaFileInodeData
