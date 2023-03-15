@@ -45,6 +45,8 @@
 using namespace pos;
 using namespace std;
 
+const int SpdkRpcClient::FAIL = -1;
+const int SpdkRpcClient::SUCCESS = 0;
 SpdkRpcClient::SpdkRpcClient(SpdkEnvCaller* spdkEnvCaller)
 : client(nullptr),
   connector(nullptr),
@@ -84,7 +86,6 @@ SpdkRpcClient::BdevMallocCreate(string name,
     uint32_t blockSize,
     uint32_t numa)
 {
-    const int SUCCESS = 0;
     const string method = "bdev_malloc_create";
 
     Json::Value param;
@@ -109,7 +110,6 @@ SpdkRpcClient::BdevMallocCreate(string name,
 pair<int, string>
 SpdkRpcClient::SubsystemCreate(string subnqn, string sn, string mn, uint32_t max_namespaces, bool allow_any_host, bool ana_reporting)
 {
-    const int SUCCESS = 0;
     const string method = "nvmf_create_subsystem";
 
     Json::Value param;
@@ -136,7 +136,6 @@ SpdkRpcClient::SubsystemCreate(string subnqn, string sn, string mn, uint32_t max
 pair<int, string>
 SpdkRpcClient::SubsystemDelete(string subnqn)
 {
-    const int SUCCESS = 0;
     const string method = "nvmf_delete_subsystem";
 
     Json::Value param;
@@ -158,7 +157,6 @@ SpdkRpcClient::SubsystemDelete(string subnqn)
 pair<int, std::string>
 SpdkRpcClient::SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid)
 {
-    const int SUCCESS = 0;
     const string method = "nvmf_subsystem_add_listener";
 
     Json::Value listen_address;
@@ -187,7 +185,6 @@ SpdkRpcClient::SubsystemAddListener(std::string subnqn, std::string trtype, std:
 pair<int, std::string>
 SpdkRpcClient::SubsystemRemoveListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid)
 {
-    const int SUCCESS = 0;
     const string method = "nvmf_subsystem_remove_listener";
 
     Json::Value listen_address;
@@ -216,7 +213,6 @@ SpdkRpcClient::SubsystemRemoveListener(std::string subnqn, std::string trtype, s
 pair<int, std::string>
 SpdkRpcClient::SubsystemSetListenerAnaState(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid, std::string anastate)
 {
-    const int SUCCESS = 0;
     const string method = "nvmf_subsystem_listener_set_ana_state";
 
     Json::Value listen_address;
@@ -271,7 +267,6 @@ SpdkRpcClient::SubsystemList(void)
 pair<int, std::string>
 SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize)
 {
-    const int SUCCESS = 0;
     const string method = "nvmf_create_transport";
 
     Json::Value param;
@@ -282,23 +277,22 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
         c = tolower(c);
     });
 
+    if ((0 == bufCacheSize) || (0 == numSharedBuf))
+    {
+        POS_EVENT_ID eventId = EID(IONVMF_TRANSPORT_INVALID_VALUE);
+        POS_TRACE_INFO(static_cast<int>(eventId), "Transport Value(bufCacheSize or numSharedBuf) was wrong");
+        return make_pair(FAIL, "");
+    }
+
     uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
     uint32_t minSharedBuffers = coreCount * bufCacheSize;
     if (minSharedBuffers > numSharedBuf)
     {
-        uint32_t coreCount = spdkEnvCaller->SpdkEnvGetCoreCount();
-        uint32_t minSharedBuffers = coreCount * bufCacheSize;
-        if (minSharedBuffers > numSharedBuf)
-        {
-            POS_EVENT_ID eventId =
-                EID(IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED);
-            POS_TRACE_INFO(static_cast<int>(eventId),
+        POS_EVENT_ID eventId = EID(IONVMF_TRANSPORT_NUM_SHARED_BUFFER_CHANGED);
+        POS_TRACE_INFO(static_cast<int>(eventId),
             "Transport's num_shared_buffer size has changed from {} to {} due to reactor core number of system",
             numSharedBuf, minSharedBuffers);
-            numSharedBuf = minSharedBuffers;
-        }
-        param["buf_cache_size"] = bufCacheSize;
-        param["num_shared_buffers"] = numSharedBuf;
+        numSharedBuf = minSharedBuffers;
     }
     param["buf_cache_size"] = bufCacheSize;
     param["num_shared_buffers"] = numSharedBuf;
