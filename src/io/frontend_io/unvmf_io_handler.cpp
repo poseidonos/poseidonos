@@ -48,6 +48,7 @@
 #include "src/logger/logger.h"
 #include "src/pos_replicator/posreplicator_manager.h"
 #include "src/qos/qos_manager.h"
+#include "src/signal_handler/deadlock_checker.h"
 #include "src/spdk_wrapper/event_framework_api.h"
 #include "src/volume/volume_manager.h"
 
@@ -60,6 +61,7 @@ UNVMfCompleteHandler(void)
     try
     {
         AIO aio;
+        DeadLockCheckerSingleton::Instance()->RegisterOnceAndHeartBeat();
         aio.CompleteIOs();
         bool ret1 = EventFrameworkApiSingleton::Instance()->CompleteEvents();
         uint32_t currentReactor = EventFrameworkApiSingleton::Instance()->GetCurrentReactor();

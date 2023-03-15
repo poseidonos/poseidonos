@@ -45,6 +45,7 @@
 #include "src/cli/grpc_cli_server.h"
 #include "src/cpu_affinity/affinity_manager.h"
 #include "src/cpu_affinity/affinity_viewer.h"
+#include "src/signal_handler/deadlock_checker.h"
 #include "src/device/device_manager.h"
 #include "src/event_scheduler/event.h"
 #include "src/event_scheduler/event_scheduler.h"
@@ -229,6 +230,7 @@ Poseidonos::Terminate(void)
     }
     ArrayManagerSingleton::ResetInstance();
     AccelEngineApi::Finalize();
+    DeadLockCheckerSingleton::ResetInstance();
     SpdkCallerSingleton::Instance()->SpdkBdevPosUnRegisterPoller(UNVMfCompleteHandler);
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
@@ -390,6 +392,7 @@ Poseidonos::_SetupThreadModel(void)
 {
     AffinityManager* affinityManager = pos::AffinityManagerSingleton::Instance();
     SpdkCallerSingleton::Instance()->SpdkBdevPosRegisterPoller(UNVMfCompleteHandler);
+    DeadLockCheckerSingleton::Instance()->RunDeadLockChecker();
     POS_TRACE_DEBUG(EID(DEVICEMGR_SETUPMODEL), "_SetupThreadModel");
     uint32_t coreCount =
         affinityManager->GetCoreCount(CoreType::EVENT_WORKER);
