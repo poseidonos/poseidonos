@@ -277,7 +277,7 @@ SpdkRpcClient::TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32
         c = tolower(c);
     });
 
-    if(0 == (bufCacheSize && numSharedBuf))
+    if ((0 == bufCacheSize) || (0 == numSharedBuf))
     {
         POS_EVENT_ID eventId = EID(IONVMF_TRANSPORT_INVALID_VALUE);
         POS_TRACE_INFO(static_cast<int>(eventId), "Transport Value(bufCacheSize or numSharedBuf) was wrong");
