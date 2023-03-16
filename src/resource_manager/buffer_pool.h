@@ -82,7 +82,7 @@ private:
     std::mutex producerLock;
     bool isAllocated = false;
     size_t swapThreshold = 0;
-    const static size_t SWAP_THRESHOLD_PERCENT = 25;
+    const static size_t SWAP_THRESHOLD_PERCENT = 0;
 };
 
 } // namespace pos
