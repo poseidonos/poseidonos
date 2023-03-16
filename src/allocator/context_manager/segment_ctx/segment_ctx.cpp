@@ -705,7 +705,7 @@ SegmentCtx::_SegmentFreed(SegmentId segmentId)
         return;
     }
 
-    EventSmartPtr segmentFreedUpdateRequest(new SegmentFreedUpdateRequest(this, segmentId, addrInfo->GetArrayId()));
+    CallbackSmartPtr segmentFreedUpdateRequest(new SegmentFreedUpdateRequest(this, segmentId, addrInfo->GetArrayId()));
     eventScheduler->EnqueueEvent(segmentFreedUpdateRequest);
 }
 

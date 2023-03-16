@@ -49,7 +49,8 @@ SegmentFreedUpdateRequest::SegmentFreedUpdateRequest(SegmentCtx* segmentCtx, Seg
 
 SegmentFreedUpdateRequest::SegmentFreedUpdateRequest(SegmentCtx* segmentCtx, SegmentId targetSegmentId,
     IMetaUpdater* metaUpdater)
-: segmentCtx(segmentCtx),
+: Callback(false, CallbackType_BackendLogWriteDone),
+  segmentCtx(segmentCtx),
   targetSegmentId(targetSegmentId),
   metaUpdater(metaUpdater)
 {
@@ -73,7 +74,7 @@ SegmentFreedUpdateRequest::GetTargetSegmentId(void)
 }
 
 bool
-SegmentFreedUpdateRequest::Execute(void)
+SegmentFreedUpdateRequest::_DoSpecificJob(void)
 {
     int result = metaUpdater->UpdateFreedSegmentContext(segmentCtx, targetSegmentId);
     if (result != 0)

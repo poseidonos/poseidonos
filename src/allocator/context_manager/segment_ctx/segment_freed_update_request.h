@@ -44,7 +44,7 @@ namespace pos
 {
 class VolumeIo;
 
-class SegmentFreedUpdateRequest : public Event
+class SegmentFreedUpdateRequest : public Callback
 {
 public:
     SegmentFreedUpdateRequest(SegmentCtx* segmentCtx, SegmentId targetSegmentId, int arrayIdInput);
@@ -56,7 +56,7 @@ public:
     SegmentId GetTargetSegmentId(void);
 
 private:
-    bool Execute(void) override;
+    virtual bool _DoSpecificJob(void) override;
 
     SegmentCtx* segmentCtx;
     SegmentId targetSegmentId;
