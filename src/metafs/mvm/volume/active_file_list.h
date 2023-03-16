@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -32,26 +32,30 @@
 
 #pragma once
 
-#include <string>
+#include <unordered_set>
 
-#include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/metafs/common/metafs_type.h"
+#include "src/metafs/log/metafs_log.h"
 
 namespace pos
 {
-class SsdMetaVolume : public MetaVolume
+class ActiveFileList
 {
 public:
-    SsdMetaVolume(void) = delete;
-    SsdMetaVolume(int arrayId, const MetaVolumeType volType, const MetaLpnType maxVolumePageNum,
-        InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
-    ~SsdMetaVolume(void);
-    virtual void InitVolumeBaseLpn(void) override;
-    virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;
+    ActiveFileList(void);
+    virtual ~ActiveFileList(void);
+    virtual bool Contains(const FileDescriptorType fd) const;
+    virtual POS_EVENT_ID AddFdToActiveList(const FileDescriptorType fd);
+    virtual void RemoveFileFromActiveList(const FileDescriptorType fd);
+    virtual size_t GetFileCountInActive(void) const;
 
-    bool IsFreeSpaceEnough(FileSizeType fileByteSize);
+    // for test
+    std::unordered_set<FileDescriptorType>& GetActiveFiles(void)
+    {
+        return activeFiles_;
+    }
 
 private:
-    virtual void _SetupExtraRegionInfo(void);
-    static const MetaLpnType SSD_VOLUME_BASE_LPN = 1; // due to filesystem MBR
+    std::unordered_set<FileDescriptorType> activeFiles_;
 };
 } // namespace pos

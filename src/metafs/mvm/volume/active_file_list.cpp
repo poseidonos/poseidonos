@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,72 +30,70 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ssd_meta_volume.h"
+#include "src/metafs/mvm/volume/active_file_list.h"
 
-#include <string>
-
-#include "src/logger/logger.h"
 namespace pos
 {
-SsdMetaVolume::SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
-    InodeManager* inodeMgr, CatalogManager* catalogMgr)
-: MetaVolume(arrayId, volType, maxVolumePageNum, inodeMgr, catalogMgr)
+ActiveFileList::ActiveFileList(void)
 {
 }
 
-SsdMetaVolume::~SsdMetaVolume(void)
+ActiveFileList::~ActiveFileList(void)
 {
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "SSD Meta Vol. destructed...");
-}
-
-void
-SsdMetaVolume::InitVolumeBaseLpn(void)
-{
-    volumeBaseLpn_ = SSD_VOLUME_BASE_LPN;
 }
 
 bool
-SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
+ActiveFileList::Contains(const FileDescriptorType fd) const
 {
-    if (GetAvailableSpace() >= fileByteSize)
+    if (activeFiles_.find(fd) == activeFiles_.end())
     {
-        return true;
-    }
-
-    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-        "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetAvailableSpace(), fileByteSize);
-    return false;
-}
-
-bool
-SsdMetaVolume::IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop)
-{
-    if (GetUtilizationInPercent() >= META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT)
-    {
-        MFS_TRACE_WARN(EID(MFS_META_VOLUME_ALMOST_FULL),
-            "Volume is almost full,");
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+            "File descriptor {} is not found in active fd list", fd);
         return false;
     }
+    return true;
+}
 
-    if (IsFreeSpaceEnough(fileByteSize) == true)
+POS_EVENT_ID
+ActiveFileList::AddFdToActiveList(const FileDescriptorType fd)
+{
+    POS_EVENT_ID rc = EID(SUCCESS);
+
+    if (activeFiles_.find(fd) != activeFiles_.end())
     {
-        return true;
+        rc = EID(MFS_FILE_OPEN_REPETITIONARY);
+        POS_TRACE_ERROR((int)rc,
+            "Failed to add fd {} to active file list because it was already there", fd);
     }
     else
     {
-        return false;
+        activeFiles_.insert(fd);
+        POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+            "File descriptor {} is added in active fd list", fd);
     }
+
+    return rc;
 }
 
 void
-SsdMetaVolume::_SetupExtraRegionInfo(void)
+ActiveFileList::RemoveFileFromActiveList(const FileDescriptorType fd)
 {
-    // The NVRAM meta saves after SSD volume meta on shutdown process.
-    sumOfRegionBaseLpns_ = inodeMgr_->GetMetaFileBaseLpn();
-    MetaLpnType newTargetBaseLpn = catalogMgr_->GetRegionSizeInLpn() +
-        inodeMgr_->GetRegionSizeInLpn() +
-        inodeMgr_->GetMetaFileBaseLpn();
-    inodeMgr_->SetMetaFileBaseLpn(newTargetBaseLpn);
+    if (activeFiles_.find(fd) == activeFiles_.end())
+    {
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
+            "File descriptor {} is not active file.", fd);
+        assert(false);
+    }
+
+    activeFiles_.erase(fd);
+    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
+        "File descriptor {} is removed from active fd list, remained active file count: {}",
+        fd, activeFiles_.size());
+}
+
+size_t
+ActiveFileList::GetFileCountInActive(void) const
+{
+    return activeFiles_.size();
 }
 } // namespace pos

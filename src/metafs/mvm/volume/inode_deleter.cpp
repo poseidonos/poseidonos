@@ -78,7 +78,7 @@ InodeDeleter::Delete(MetaFsFileControlRequest& reqMsg)
 
     inode.SetInUse(false);
     inodeMgr->inodeHdr_->ClearInodeInUse(entryIdx);
-    inodeMgr->fd2InodeMap_.erase(fd);
+    inodeMgr->fd2InodeMap_->Remove(fd);
 
     for (auto& extent : extents)
     {

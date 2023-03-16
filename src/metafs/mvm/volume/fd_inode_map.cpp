@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,72 +30,67 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ssd_meta_volume.h"
+#include "src/metafs/mvm/volume/fd_inode_map.h"
 
 #include <string>
+#include <unordered_map>
 
-#include "src/logger/logger.h"
+#include "src/metafs/common/metafs_type.h"
+
 namespace pos
 {
-SsdMetaVolume::SsdMetaVolume(int arrayId, MetaVolumeType volType, MetaLpnType maxVolumePageNum,
-    InodeManager* inodeMgr, CatalogManager* catalogMgr)
-: MetaVolume(arrayId, volType, maxVolumePageNum, inodeMgr, catalogMgr)
+FdInodeMap::FdInodeMap(void)
 {
 }
 
-SsdMetaVolume::~SsdMetaVolume(void)
+FdInodeMap::~FdInodeMap(void)
 {
-    MFS_TRACE_DEBUG(EID(MFS_DEBUG_MESSAGE),
-        "SSD Meta Vol. destructed...");
 }
 
 void
-SsdMetaVolume::InitVolumeBaseLpn(void)
+FdInodeMap::Add(const FileDescriptorType fd, MetaFileInode* inode)
 {
-    volumeBaseLpn_ = SSD_VOLUME_BASE_LPN;
+    fd2InodeMap_.insert({fd, inode});
 }
 
-bool
-SsdMetaVolume::IsFreeSpaceEnough(FileSizeType fileByteSize)
+size_t
+FdInodeMap::Remove(const FileDescriptorType fd)
 {
-    if (GetAvailableSpace() >= fileByteSize)
-    {
-        return true;
-    }
-
-    POS_TRACE_INFO(EID(MFS_INFO_MESSAGE),
-        "Not Enough SSD Meta Space, freeSpace={}, reqSize={}", GetAvailableSpace(), fileByteSize);
-    return false;
+    return fd2InodeMap_.erase(fd);
 }
 
-bool
-SsdMetaVolume::IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop)
+MetaFileInode*
+FdInodeMap::GetInode(const FileDescriptorType fd) const
 {
-    if (GetUtilizationInPercent() >= META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT)
+    auto item = fd2InodeMap_.find(fd);
+    if (item == fd2InodeMap_.end())
     {
-        MFS_TRACE_WARN(EID(MFS_META_VOLUME_ALMOST_FULL),
-            "Volume is almost full,");
-        return false;
+        POS_TRACE_ERROR(EID(MFS_ERROR_MESSAGE),
+            "File descriptor {} is not existed.", fd);
+        assert(false);
+        return nullptr;
     }
+    return item->second;
+}
 
-    if (IsFreeSpaceEnough(fileByteSize) == true)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+std::string
+FdInodeMap::GetFileName(const FileDescriptorType fd) const
+{
+    auto item = fd2InodeMap_.find(fd);
+    if (item == fd2InodeMap_.end())
+        return "";
+    return item->second->data.basic.field.fileName.ToString();
 }
 
 void
-SsdMetaVolume::_SetupExtraRegionInfo(void)
+FdInodeMap::Reset(void)
 {
-    // The NVRAM meta saves after SSD volume meta on shutdown process.
-    sumOfRegionBaseLpns_ = inodeMgr_->GetMetaFileBaseLpn();
-    MetaLpnType newTargetBaseLpn = catalogMgr_->GetRegionSizeInLpn() +
-        inodeMgr_->GetRegionSizeInLpn() +
-        inodeMgr_->GetMetaFileBaseLpn();
-    inodeMgr_->SetMetaFileBaseLpn(newTargetBaseLpn);
+    fd2InodeMap_.clear();
+}
+
+std::unordered_map<FileDescriptorType, MetaFileInode*>&
+FdInodeMap::GetInodeMap(void)
+{
+    return fd2InodeMap_;
 }
 } // namespace pos

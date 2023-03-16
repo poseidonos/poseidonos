@@ -53,7 +53,7 @@ public:
     virtual FileControlResult Create(MetaFsFileControlRequest& reqMsg);
 
 private:
-    MetaFileInode& _AllocNewInodeEntry(FileDescriptorType& newFd);
+    MetaFileInode& _AllocNewInodeEntry(void);
 
     InodeManager* inodeMgr = nullptr;
 };

@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -30,28 +30,20 @@
  *   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include <gmock/gmock.h>
 
-#include <string>
-
-#include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/metafs/mvm/volume/active_file_list.h"
 
 namespace pos
 {
-class SsdMetaVolume : public MetaVolume
+class MockActiveFileList : public ActiveFileList
 {
 public:
-    SsdMetaVolume(void) = delete;
-    SsdMetaVolume(int arrayId, const MetaVolumeType volType, const MetaLpnType maxVolumePageNum,
-        InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
-    ~SsdMetaVolume(void);
-    virtual void InitVolumeBaseLpn(void) override;
-    virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;
-
-    bool IsFreeSpaceEnough(FileSizeType fileByteSize);
-
-private:
-    virtual void _SetupExtraRegionInfo(void);
-    static const MetaLpnType SSD_VOLUME_BASE_LPN = 1; // due to filesystem MBR
+    using ActiveFileList::ActiveFileList;
+    MOCK_METHOD(bool, CheckFileInActive, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(POS_EVENT_ID, AddFileInActiveList, (const FileDescriptorType fd));
+    MOCK_METHOD(void, RemoveFileFromActiveList, (const FileDescriptorType fd));
+    MOCK_METHOD(size_t, GetFileCountInActive, (), (const));
 };
+
 } // namespace pos

@@ -103,6 +103,11 @@ TEST_F(SsdMetaVolumeTestFixture, SSD_Meta_Volume_Normal)
     EXPECT_FALSE(volume->IsOkayToStore(8185 * chunkSize, prop));
 }
 
+TEST_F(SsdMetaVolumeTestFixture, CheckBaseLpn)
+{
+    EXPECT_EQ(volume->GetBaseLpn(), 4101);
+}
+
 TEST(SsdMetaVolume, CreateDefault)
 {
     SsdMetaVolume* metaVolume = new SsdMetaVolume(0, MetaVolumeType::SsdVolume, 0);

@@ -63,9 +63,8 @@ class MetaVolumeTester : public MetaVolume
 public:
     MetaVolumeTester(const int arrayId, const MetaVolumeType volumeType,
         const MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
-        CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
-        InodeDeleter* inodeDeleter = nullptr)
-    : MetaVolume(arrayId, volumeType, maxVolumePageNum, inodeMgr, catalogMgr, inodeCreator, inodeDeleter)
+        CatalogManager* catalogMgr = nullptr)
+    : MetaVolume(arrayId, volumeType, maxVolumePageNum, inodeMgr, catalogMgr)
     {
     }
     virtual ~MetaVolumeTester(void)
@@ -116,11 +115,8 @@ public:
         catalogMgr = new NiceMock<MockCatalogManager>(arrayId);
         metaStorage = new NiceMock<MockMetaStorageSubsystem>(arrayId);
 
-        inodeCreator = new NiceMock<MockInodeCreator>(inodeMgr);
-        inodeDeleter = new NiceMock<MockInodeDeleter>(inodeMgr);
-
         metaVolume = new MetaVolumeTester(arrayId, volumeType, maxVolumePageNum,
-            inodeMgr, catalogMgr, inodeCreator, inodeDeleter);
+            inodeMgr, catalogMgr);
 
         EXPECT_CALL(*inodeMgr, Init);
         EXPECT_CALL(*inodeMgr, SetMss);
@@ -148,8 +144,6 @@ protected:
     NiceMock<MockInodeManager>* inodeMgr = nullptr;
     NiceMock<MockCatalogManager>* catalogMgr = nullptr;
     NiceMock<MockMetaStorageSubsystem>* metaStorage = nullptr;
-    NiceMock<MockInodeCreator>* inodeCreator = nullptr;
-    NiceMock<MockInodeDeleter>* inodeDeleter = nullptr;
 
     int arrayId = 0;
     MetaVolumeType volumeType = MetaVolumeType::SsdVolume;
@@ -459,11 +453,6 @@ TEST_F(MetaVolumeFixture, CheckActiveFds)
     }
 }
 
-TEST_F(MetaVolumeFixture, CheckBaseLpn)
-{
-    EXPECT_EQ(metaVolume->GetBaseLpn(), 5);
-}
-
 TEST_F(MetaVolumeFixture, CheckMaxLpn)
 {
     EXPECT_EQ(metaVolume->GetMaxLpn(), 1024);
@@ -497,12 +486,16 @@ TEST_F(MetaVolumeFixture, CheckFileCreation_Positive)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, EID(SUCCESS)};
 
+    auto inodeCreator = new NiceMock<MockInodeCreator>(inodeMgr);
     EXPECT_CALL(*inodeCreator, Create).WillOnce(Return(result));
+    EXPECT_CALL(*inodeMgr, AllocateCreator).WillOnce(Return(inodeCreator));
 
     result = metaVolume->CreateFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
     EXPECT_EQ(result.second, EID(SUCCESS));
+
+    delete inodeCreator;
 }
 
 TEST_F(MetaVolumeFixture, CheckFileCreation_Negative)
@@ -512,12 +505,16 @@ TEST_F(MetaVolumeFixture, CheckFileCreation_Negative)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, EID(MFS_META_SAVE_FAILED)};
 
+    auto inodeCreator = new NiceMock<MockInodeCreator>(inodeMgr);
     EXPECT_CALL(*inodeCreator, Create).WillOnce(Return(result));
+    EXPECT_CALL(*inodeMgr, AllocateCreator).WillOnce(Return(inodeCreator));
 
     result = metaVolume->CreateFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
     EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
+
+    delete inodeCreator;
 }
 
 TEST_F(MetaVolumeFixture, CheckFileDeletion_Positive)
@@ -527,12 +524,16 @@ TEST_F(MetaVolumeFixture, CheckFileDeletion_Positive)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, EID(SUCCESS)};
 
+    auto inodeDeleter = new NiceMock<MockInodeDeleter>(inodeMgr);
     EXPECT_CALL(*inodeDeleter, Delete).WillOnce(Return(result));
+    EXPECT_CALL(*inodeMgr, AllocateDeleter).WillOnce(Return(inodeDeleter));
 
     result = metaVolume->DeleteFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
     EXPECT_EQ(result.second, EID(SUCCESS));
+
+    delete inodeDeleter;
 }
 
 TEST_F(MetaVolumeFixture, CheckFileDeletion_Negative)
@@ -542,12 +543,16 @@ TEST_F(MetaVolumeFixture, CheckFileDeletion_Negative)
     reqMsg.fileName = &fileName;
     FileControlResult result = {0, EID(MFS_META_SAVE_FAILED)};
 
+    auto inodeDeleter = new NiceMock<MockInodeDeleter>(inodeMgr);
     EXPECT_CALL(*inodeDeleter, Delete).WillOnce(Return(result));
+    EXPECT_CALL(*inodeMgr, AllocateDeleter).WillOnce(Return(inodeDeleter));
 
     result = metaVolume->DeleteFile(reqMsg);
 
     EXPECT_EQ(result.first, 0);
     EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
+
+    delete inodeDeleter;
 }
 
 TEST_F(MetaVolumeFixture, CheckCreatedFile)

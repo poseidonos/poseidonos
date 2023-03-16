@@ -83,6 +83,8 @@ public:
     MOCK_METHOD(MetaFileInode&, GetFileInode, (const FileDescriptorType fd), (const));
     MOCK_METHOD(FileDescriptorType, LookupDescriptorByName, (const std::string& fileName), (const));
     MOCK_METHOD(std::string, LookupNameByDescriptor, (const FileDescriptorType fd), (const));
+    MOCK_METHOD(InodeCreator*, AllocateCreator, ());
+    MOCK_METHOD(InodeDeleter*, AllocateDeleter, ());
 };
 
 } // namespace pos

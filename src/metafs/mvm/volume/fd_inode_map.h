@@ -1,6 +1,6 @@
 /*
  *   BSD LICENSE
- *   Copyright (c) 2021 Samsung Electronics Corporation
+ *   Copyright (c) 2023 Samsung Electronics Corporation
  *   All rights reserved.
  *
  *   Redistribution and use in source and binary forms, with or without
@@ -33,25 +33,29 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
 
-#include "src/metafs/mvm/volume/meta_volume.h"
+#include "src/metafs/common/metafs_type.h"
+#include "src/metafs/mvm/volume/meta_file_inode.h"
 
 namespace pos
 {
-class SsdMetaVolume : public MetaVolume
+class FdInodeMap
 {
 public:
-    SsdMetaVolume(void) = delete;
-    SsdMetaVolume(int arrayId, const MetaVolumeType volType, const MetaLpnType maxVolumePageNum,
-        InodeManager* inodeMgr = nullptr, CatalogManager* catalogMgr = nullptr);
-    ~SsdMetaVolume(void);
-    virtual void InitVolumeBaseLpn(void) override;
-    virtual bool IsOkayToStore(FileSizeType fileByteSize, MetaFilePropertySet& prop) override;
+    FdInodeMap(void);
+    virtual ~FdInodeMap(void);
 
-    bool IsFreeSpaceEnough(FileSizeType fileByteSize);
+    virtual void Add(const FileDescriptorType fd, MetaFileInode* inode);
+    virtual size_t Remove(const FileDescriptorType fd);
+    virtual MetaFileInode* GetInode(const FileDescriptorType fd) const;
+    virtual std::string GetFileName(const FileDescriptorType fd) const;
+    virtual void Reset(void);
+
+    // for test
+    std::unordered_map<FileDescriptorType, MetaFileInode*>& GetInodeMap(void);
 
 private:
-    virtual void _SetupExtraRegionInfo(void);
-    static const MetaLpnType SSD_VOLUME_BASE_LPN = 1; // due to filesystem MBR
+    std::unordered_map<FileDescriptorType, MetaFileInode*> fd2InodeMap_;
 };
 } // namespace pos

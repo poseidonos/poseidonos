@@ -41,8 +41,6 @@
 #include "catalog_manager.h"
 #include "inode_manager.h"
 #include "meta_volume_state.h"
-#include "src/metafs/mvm/volume/inode_creator.h"
-#include "src/metafs/mvm/volume/inode_deleter.h"
 
 namespace pos
 {
@@ -64,8 +62,7 @@ public:
     MetaVolume(void) = delete;
     MetaVolume(const int arrayId, const MetaVolumeType volumeType,
         const MetaLpnType maxVolumePageNum = 0, InodeManager* inodeMgr = nullptr,
-        CatalogManager* catalogMgr = nullptr, InodeCreator* inodeCreator = nullptr,
-        InodeDeleter* inodeDeleter = nullptr);
+        CatalogManager* catalogMgr = nullptr);
     virtual ~MetaVolume(void);
 
     virtual void InitVolumeBaseLpn(void) = 0;
@@ -151,15 +148,22 @@ public:
     }
 
 protected:
+    virtual void _SetupRegionInfoToRegionMgrs(void);
+    virtual void _SetupExtraRegionInfo(void);
+
     static const uint32_t META_VOL_CAPACITY_FULL_LIMIT_IN_PERCENT = 99;
     MetaLpnType volumeBaseLpn_ = 0;
     MetaLpnType maxVolumeLpn_ = 0;
     MetaVolumeType volumeType_ = MetaVolumeType::Max;
     MetaVolumeState volumeState_ = MetaVolumeState::Default;
 
+    InodeManager* inodeMgr_;
+    CatalogManager* catalogMgr_;
+    MetaLpnType sumOfRegionBaseLpns_;
+    MetaStorageSubsystem* metaStorage_;
+
 private:
     OnVolumeMetaRegionManager& _GetRegionMgr(MetaRegionManagerType region);
-    void _SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage);
     bool _LoadVolumeMeta(MetaLpnType* info, bool isNPOR);
 
     bool _TrimData(MetaStorageType type, MetaLpnType start, MetaLpnType count);
@@ -168,19 +172,9 @@ private:
     bool _RestoreContents(MetaLpnType* info);
 
     std::unordered_map<MetaRegionManagerType, OnVolumeMetaRegionManager*, EnumTypeHash<MetaRegionManagerType>> regionMgrMap_;
-    InodeManager* inodeMgr_;
-    CatalogManager* catalogMgr_;
-
-    MetaLpnType sumOfRegionBaseLpns_;
-    MetaStorageSubsystem* metaStorage_;
-
     std::unordered_map<FileDescriptorType, MetaVolumeType> fd2VolTypehMap_;
     std::unordered_map<StringHashType, MetaVolumeType> fileKey2VolTypeMap_;
 
-    int arrayId_;
     void* trimBuffer_;
-
-    InodeCreator* inodeCreator_;
-    InodeDeleter* inodeDeleter_;
 };
 } // namespace pos

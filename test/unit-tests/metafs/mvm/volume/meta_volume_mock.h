@@ -83,6 +83,7 @@ public:
         (const FileDescriptorType fd), (const));
     MOCK_METHOD(FileDescriptorType, LookupDescriptorByName,
         (const std::string& fileName), (const));
+    MOCK_METHOD(void, _SetupExtraRegionInfo, ());
 };
 
 } // namespace pos

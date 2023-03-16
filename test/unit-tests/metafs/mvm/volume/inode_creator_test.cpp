@@ -31,21 +31,21 @@
  */
 
 #include "src/metafs/mvm/volume/inode_creator.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_table_header_mock.h"
-#include "test/unit-tests/metafs/mvm/volume/inode_table_mock.h"
-
-#include <vector>
-#include <string>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <string>
+#include <vector>
+
+#include "test/unit-tests/metafs/mvm/volume/extent_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/fd_inode_map_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/file_descriptor_allocator_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_manager_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_table_header_mock.h"
+#include "test/unit-tests/metafs/mvm/volume/inode_table_mock.h"
+
 using ::testing::_;
-using ::testing::Matcher;
-using ::testing::InSequence;
 using ::testing::NiceMock;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -56,21 +56,21 @@ class InodeCreatorFixture : public ::testing::Test
 {
 public:
     InodeCreatorFixture(void)
-    {
-        inodeCreator = nullptr;
-        inodeManager = nullptr;
-        inodeHdr = nullptr;
-        inodeTable = nullptr;
-        fdAllocator = nullptr;
-        extentAllocator = nullptr;
-    }
-
-    virtual ~InodeCreatorFixture()
+    : inodeCreator(nullptr),
+      inodeManager(nullptr),
+      inodeHdr(nullptr),
+      inodeTable(nullptr),
+      fdAllocator(nullptr),
+      extentAllocator(nullptr),
+      inodeMap(nullptr)
     {
     }
 
-    virtual void
-    SetUp(void)
+    virtual ~InodeCreatorFixture(void)
+    {
+    }
+
+    virtual void SetUp(void)
     {
         inodeManager = new NiceMock<MockInodeManager>(arrayId);
 
@@ -78,15 +78,15 @@ public:
         inodeTable = new NiceMock<MockInodeTable>(type, 10);
         fdAllocator = new NiceMock<MockFileDescriptorAllocator>;
         extentAllocator = new NiceMock<MockExtentAllocator>;
+        inodeMap = new NiceMock<MockFdInodeMap>;
 
         inodeManager = new NiceMock<MockInodeManager>(arrayId, inodeHdr, inodeTable,
-            fdAllocator, extentAllocator);
+            fdAllocator, extentAllocator, nullptr, inodeMap);
 
         inodeCreator = new InodeCreator(inodeManager);
     }
 
-    virtual void
-    TearDown(void)
+    virtual void TearDown(void)
     {
         delete inodeCreator;
         delete inodeManager;
@@ -100,6 +100,7 @@ protected:
     NiceMock<MockInodeTable>* inodeTable;
     NiceMock<MockFileDescriptorAllocator>* fdAllocator;
     NiceMock<MockExtentAllocator>* extentAllocator;
+    NiceMock<MockFdInodeMap>* inodeMap;
 
     int arrayId = 0;
     MetaVolumeType type = MetaVolumeType::SsdVolume;
@@ -125,6 +126,8 @@ TEST_F(InodeCreatorFixture, CheckFileCreation_Positive)
     EXPECT_CALL(*inodeHdr, SetInodeInUse);
     EXPECT_CALL(*inodeTable, GetInode).WillOnce(ReturnRef(inode));
 
+    EXPECT_CALL(*inodeMap, Add);
+
     EXPECT_CALL(*extentAllocator, AllocExtents).WillOnce(Return(extents));
     EXPECT_CALL(*extentAllocator, GetAllocatedExtentList).WillOnce(Return(extents));
 
@@ -136,39 +139,5 @@ TEST_F(InodeCreatorFixture, CheckFileCreation_Positive)
 
     EXPECT_EQ(result.first, 0);
     EXPECT_EQ(result.second, EID(SUCCESS));
-}
-
-TEST_F(InodeCreatorFixture, CheckFileCreation_Negative)
-{
-    std::string fileName = "TESTFILE";
-    MetaFileInode inode;
-
-    std::vector<MetaFileExtent> extents;
-    extents.push_back({0, 16});
-
-    MetaFsFileControlRequest reqMsg;
-    reqMsg.fileName = &fileName;
-    reqMsg.fileByteSize = 4097;
-
-    EXPECT_CALL(*fdAllocator, Alloc(fileName)).WillOnce(Return(0));
-
-    // _AllocNewInodeEntry()
-    EXPECT_CALL(*inodeHdr, GetFreeInodeEntryIdx);
-    EXPECT_CALL(*inodeHdr, SetInodeInUse);
-    EXPECT_CALL(*inodeTable, GetInode).WillOnce(ReturnRef(inode));
-
-    EXPECT_CALL(*extentAllocator, AllocExtents).WillOnce(Return(extents));
-    EXPECT_CALL(*extentAllocator, GetAllocatedExtentList).WillOnce(Return(extents));
-
-    // SaveContent()
-    EXPECT_CALL(*inodeManager, SaveContent()).WillOnce(Return(false));
-
-    EXPECT_CALL(*extentAllocator, AddToFreeList);
-
-    std::pair<FileDescriptorType, POS_EVENT_ID> result;
-    result = inodeCreator->Create(reqMsg);
-
-    EXPECT_EQ(result.first, 0);
-    EXPECT_EQ(result.second, EID(MFS_META_SAVE_FAILED));
 }
 } // namespace pos

@@ -44,8 +44,7 @@ namespace pos
 {
 MetaVolume::MetaVolume(const int arrayId, const MetaVolumeType metaVolumeType,
     const MetaLpnType maxVolumePageNum, InodeManager* inodeMgr,
-    CatalogManager* catalogMgr, InodeCreator* inodeCreator,
-    InodeDeleter* inodeDeleter)
+    CatalogManager* catalogMgr)
 : volumeBaseLpn_(0),
   maxVolumeLpn_(maxVolumePageNum),
   volumeType_(metaVolumeType),
@@ -54,22 +53,13 @@ MetaVolume::MetaVolume(const int arrayId, const MetaVolumeType metaVolumeType,
   catalogMgr_(catalogMgr),
   sumOfRegionBaseLpns_(0),
   metaStorage_(nullptr),
-  arrayId_(arrayId),
-  trimBuffer_(nullptr),
-  inodeCreator_(inodeCreator),
-  inodeDeleter_(inodeDeleter)
+  trimBuffer_(nullptr)
 {
     if (!inodeMgr_)
-        inodeMgr_ = new InodeManager(arrayId_);
+        inodeMgr_ = new InodeManager(arrayId);
 
     if (!catalogMgr_)
-        catalogMgr_ = new CatalogManager(arrayId_);
-
-    if (!inodeCreator_)
-        inodeCreator_ = new InodeCreator(inodeMgr_);
-
-    if (!inodeDeleter_)
-        inodeDeleter_ = new InodeDeleter(inodeMgr_);
+        catalogMgr_ = new CatalogManager(arrayId);
 
     trimBuffer_ = Memory<MetaFsIoConfig::META_PAGE_SIZE_IN_BYTES>::Alloc();
     if (!trimBuffer_)
@@ -99,18 +89,6 @@ MetaVolume::~MetaVolume(void)
         catalogMgr_ = nullptr;
     }
 
-    if (inodeCreator_)
-    {
-        delete inodeCreator_;
-        inodeCreator_ = nullptr;
-    }
-
-    if (inodeDeleter_)
-    {
-        delete inodeDeleter_;
-        inodeDeleter_ = nullptr;
-    }
-
     if (trimBuffer_)
     {
         Memory<>::Free(trimBuffer_);
@@ -125,18 +103,18 @@ MetaVolume::Init(MetaStorageSubsystem* metaStorage)
     regionMgrMap_.insert({MetaRegionManagerType::VolCatalogMgr, catalogMgr_});
     regionMgrMap_.insert({MetaRegionManagerType::InodeMgr, inodeMgr_});
 
-    InitVolumeBaseLpn();
-    _SetupRegionInfoToRegionMgrs(metaStorage);
+    metaStorage_ = metaStorage;
 
-    this->metaStorage_ = metaStorage;
+    InitVolumeBaseLpn();
+    _SetupRegionInfoToRegionMgrs();
+
     volumeState_ = MetaVolumeState::Init;
 }
 
 void
-MetaVolume::_SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage)
+MetaVolume::_SetupRegionInfoToRegionMgrs(void)
 {
     MetaLpnType targetBaseLpn = volumeBaseLpn_;
-    MetaLpnType newTargetBaseLpn = 0;
 
     sumOfRegionBaseLpns_ = 0;
     /*************************************************************
@@ -148,22 +126,18 @@ MetaVolume::_SetupRegionInfoToRegionMgrs(MetaStorageSubsystem* metaStorage)
     {
         OnVolumeMetaRegionManager& regionMgr = _GetRegionMgr((MetaRegionManagerType)idx);
         regionMgr.Init(volumeType_, targetBaseLpn, maxVolumeLpn_);
-        regionMgr.SetMss(metaStorage);
+        regionMgr.SetMss(metaStorage_);
 
         targetBaseLpn += regionMgr.GetRegionSizeInLpn();
     }
 
-    // The NVRAM meta saves after SSD volume meta on shutdown process.
-    if (volumeType_ == MetaVolumeType::SsdVolume)
-    {
-        sumOfRegionBaseLpns_ = inodeMgr_->GetMetaFileBaseLpn();
+    _SetupExtraRegionInfo();
+}
 
-        newTargetBaseLpn += catalogMgr_->GetRegionSizeInLpn() +
-            inodeMgr_->GetRegionSizeInLpn() +
-            inodeMgr_->GetMetaFileBaseLpn();
-
-        inodeMgr_->SetMetaFileBaseLpn(newTargetBaseLpn);
-    }
+void
+MetaVolume::_SetupExtraRegionInfo(void)
+{
+    // do nothing
 }
 
 OnVolumeMetaRegionManager&
@@ -387,7 +361,8 @@ MetaVolume::GetInodeList(std::vector<MetaFileInfoDumpCxt>*& fileInfoList) const
 FileControlResult
 MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 {
-    auto result = inodeCreator_->Create(reqMsg);
+    auto inodeCreator = inodeMgr_->AllocateCreator();
+    auto result = inodeCreator->Create(reqMsg);
 
     if (EID(SUCCESS) != result.second)
         return result;
@@ -419,7 +394,8 @@ MetaVolume::CreateFile(MetaFsFileControlRequest& reqMsg)
 FileControlResult
 MetaVolume::DeleteFile(MetaFsFileControlRequest& reqMsg)
 {
-    auto result = inodeDeleter_->Delete(reqMsg);
+    auto inodeDeleter = inodeMgr_->AllocateDeleter();
+    auto result = inodeDeleter->Delete(reqMsg);
 
     if (EID(SUCCESS) != result.second)
         return result;
