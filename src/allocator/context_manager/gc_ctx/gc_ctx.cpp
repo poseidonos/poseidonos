@@ -129,7 +129,7 @@ GcCtx::_PrintInfo(pos::GcMode newGcMode, uint32_t numFreeSegments)
     if (curGcMode != newGcMode)
     {
         POS_TRACE_INFO(EID(ALLOCATOR_CURRENT_GC_MODE),
-            "Change GC STATE from GCState:{} to {}}",
+            "Change GC STATE from GCState:{} to {}",
             (uint32_t)curGcMode, (uint32_t)newGcMode);
 
         // TODO (dh.ihm) want to print out this here...
