@@ -50,7 +50,8 @@ CheckpointHandler::CheckpointHandler(const int arrayId)
 
 // Constructor for injecting private member values in unit test
 CheckpointHandler::CheckpointHandler(int numMapsToFlush, int numMapsFlushed, EventSmartPtr callback, const int arrayId)
-: mapFlush(nullptr),
+: versionedSegmentCtx(nullptr),
+  mapFlush(nullptr),
   contextManager(nullptr),
   scheduler(nullptr),
   status(INIT),

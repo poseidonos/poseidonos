@@ -163,9 +163,11 @@ ReplayStripe::MarkBlockMapUpdateToSkip(void)
 
         if (replayEvent->GetType() == ReplayEventType::BLOCK_MAP_UPDATE)
         {
-            auto blockMapUpdateReplayEvent = dynamic_cast<ReplayBlockMapUpdate*>(replayEvent);
-            blockMapUpdateReplayEvent->MarkNotToReplayMap();
-
+            ReplayBlockMapUpdate* blockMapUpdateReplayEvent = dynamic_cast<ReplayBlockMapUpdate*>(replayEvent);
+            if (nullptr != blockMapUpdateReplayEvent)
+            {
+                blockMapUpdateReplayEvent->MarkNotToReplayMap();
+            }
             numSkippedLogs++;
         }
     }
