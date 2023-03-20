@@ -230,7 +230,13 @@ WriteSubmission::_SendVolumeIo(VolumeIoSmartPtr volumeIo)
 
     if (isWriteBypassEnabled && isRead == false)
     {
-        volumeIo->GetCallback()->Execute();
+        bool ret = volumeIo->GetCallback()->Execute();
+        if (ret == false)
+        {
+            POS_EVENT_ID eventId = EID(UNVME_COMPLETION_FAILED);
+            POS_TRACE_ERROR(static_cast<int>(eventId),
+                "Failed to execute completion callback");
+        }
     }
     else
     {
