@@ -154,9 +154,9 @@ IoStatistics::PublishPeriodicMetrics(const size_t freeMioCount, const size_t cac
             }
         }
 
-        if (sampledProcessedMioCount)
+        for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
         {
-            for (uint32_t ioType = 0; ioType < NUM_IO_TYPE; ++ioType)
+            if (sampledProcessedMioCount[ioType])
             {
                 POSMetric mTimeSpentAllStage(TEL40301_METAFS_MIO_TIME_SPENT_PROCESSING_ALL_STAGES, POSMetricTypes::MT_GAUGE);
                 mTimeSpentAllStage.SetGaugeValue(sampledTimeSpentProcessingAllStages[ioType]);
