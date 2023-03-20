@@ -364,7 +364,7 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
 
     int res = RESULT_SUCCESS;
     MetaFileInodeData metaFileInode;
-    std::string parsedJson;
+    std::string* parsedJson;
     MetaFileInodeDumpCxt result;
     JsonElement element("");
     std::string metaFile = argv["name"].get<std::string>();
@@ -386,12 +386,14 @@ WbtMetafsCmdHandler::DumpInodeInfo(Args argv)
     }
 
     _DumpInodeInfoToJson(&result, element);
-    parsedJson = element.ToJson();
+    parsedJson = new std::string(element.ToJson());
 
-    if (_WriteBufferInFile(outJsonFile, parsedJson.c_str(), parsedJson.length()) == RESULT_FAILURE)
+    if (_WriteBufferInFile(outJsonFile, parsedJson->c_str(), parsedJson->length()) == RESULT_FAILURE)
     {
         res = RESULT_FAILURE;
     }
+
+    delete parsedJson;
 
     return res;
 }
