@@ -103,6 +103,6 @@ private:
     std::mutex systemStopMutex;
     std::mutex cliMutex;
     sigset_t oldSet;
-    bool cliEnabled;
+    bool cliEnabled = false;
 };
 } // namespace pos
