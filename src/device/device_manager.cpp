@@ -595,6 +595,7 @@ DeviceManager::_PrepareDevice(UblockSharedPtr dev)
             DirectiveCmd* directiveCmd = new DirectiveCmd(dev, ctrlr, ioDispatcher);
             directiveCmd->EnableDirective();
             directiveCmd->AllocateResources();
+            delete directiveCmd;
             POS_TRACE_DEBUG(EID(DEVICE_DEBUG_MSG),
                 "{}: directives are enabled for multistreaming user, meta, journal data.", unvmeSsd->GetName());
         }
