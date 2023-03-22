@@ -63,6 +63,8 @@ public:
 
 private:
     vector<std::pair<int, VolumeEvent*>> subscribers;
+
+    int32_t subscriberCntPerArray[ArrayMgmtPolicy::MAX_ARRAY_CNT];
 };
 
 using VolumeEventPublisherSingleton = Singleton<VolumeEventPublisher>;
