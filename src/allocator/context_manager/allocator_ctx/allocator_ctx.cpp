@@ -202,16 +202,18 @@ AllocatorCtx::AfterLoad(char* buf)
 void
 AllocatorCtx::BeforeFlush(char* buf, ContextSectionBuffer externalBuf)
 {
-    std::lock_guard<std::mutex> lock(allocCtxLock);
+    {
+        std::lock_guard<std::mutex> lock(allocCtxLock);
 
-    // AC_HEADER
-    ctxHeader.data.ctxVersion = ctxDirtyVersion++;
-    ctxHeader.data.numValidWbLsid = allocWbLsidBitmap.data->GetNumBitsSetWoLock();
+        // AC_HEADER
+        ctxHeader.data.ctxVersion = ctxDirtyVersion++;
+        ctxHeader.data.numValidWbLsid = allocWbLsidBitmap.data->GetNumBitsSetWoLock();
 
-    ctxHeader.CopyTo(buf);
+        ctxHeader.CopyTo(buf);
 
-    // AC_CURRENT_SSD_LSID
-    currentSsdLsid.CopyTo(buf);
+        // AC_CURRENT_SSD_LSID
+        currentSsdLsid.CopyTo(buf);
+    }
 
     // AC_ALLOCATE_WBLSID_BITMAP
     {
