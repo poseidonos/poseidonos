@@ -42,6 +42,10 @@ namespace pos
 {
 VolumeEventPublisher::VolumeEventPublisher()
 {
+    for (int32_t idx = 0; idx < ArrayMgmtPolicy::MAX_ARRAY_CNT; idx++)
+    {
+        subscriberCntPerArray[idx] = 0;
+    }
 }
 
 VolumeEventPublisher::~VolumeEventPublisher()
@@ -53,8 +57,10 @@ void
 VolumeEventPublisher::RegisterSubscriber(VolumeEvent* subscriber, std::string arrayName, int arrayId)
 {
     subscribers.push_back(std::pair<int, VolumeEvent*>(arrayId, subscriber));
+    subscriberCntPerArray[arrayId]++;
+
     POS_TRACE_INFO(EID(VOLUME_EVENT),
-        "VolumeEvent subscriber {} is registered", subscriber->Tag());
+        "VolumeEvent subscriber {} for Array {} is registered", subscriber->Tag(), arrayId);
 }
 
 void
@@ -69,6 +75,8 @@ VolumeEventPublisher::RemoveSubscriber(VolumeEvent* subscriber, std::string arra
                 POS_TRACE_INFO(EID(VOLUME_EVENT),
                     "VolumeEvent subscriber {} is removed", it->second->Tag());
                 subscribers.erase(it);
+                subscriberCntPerArray[arrayId]--;
+                
                 break;
             }
         }
@@ -79,7 +87,7 @@ bool
 VolumeEventPublisher::NotifyVolumeCreated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_CREATE_EVENT),
-        "NotifyVolumeCreated, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeCreated, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     bool ret = true;
     int curPrgress = 1;
@@ -103,7 +111,7 @@ VolumeEventPublisher::NotifyVolumeCreated(VolumeEventBase* volEventBase, VolumeE
 
             POS_REPORT_TRACE(EID(VOLUME_CREATE_EVENT),
                 "POS Volume {} Create Sequence In Progress({}/{}) : NotifyVolumeCreated to {} done, res: {}",
-                volEventBase->volName, curPrgress, subscribers.size(), it->second->Tag(), res);
+                volEventBase->volName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag(), res);
 
             curPrgress++;
         }        
@@ -116,7 +124,7 @@ bool
 VolumeEventPublisher::NotifyVolumeUpdated(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_UPDATE_EVENT),
-        "NotifyVolumeUpdated, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeUpdated, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     bool ret = true;
     int curPrgress = 1;
@@ -140,7 +148,7 @@ VolumeEventPublisher::NotifyVolumeUpdated(VolumeEventBase* volEventBase, VolumeE
 
             POS_REPORT_TRACE(EID(VOLUME_UPDATE_EVENT),
                 "POS Volume {} Update Sequence In Progress({}/{}) : NotifyVolumeUpdated to {} done, res: {}",
-                volEventBase->volName, curPrgress, subscribers.size(), it->second->Tag(), res);
+                volEventBase->volName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag(), res);
 
             curPrgress++;
         }
@@ -153,7 +161,7 @@ bool
 VolumeEventPublisher::NotifyVolumeDeleted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_DELETE_EVENT),
-        "NotifyVolumeDeleted, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeDeleted, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     bool ret = true;
     int curPrgress = 1;
@@ -176,7 +184,7 @@ VolumeEventPublisher::NotifyVolumeDeleted(VolumeEventBase* volEventBase, VolumeA
 
             POS_REPORT_TRACE(EID(VOLUME_DELETE_EVENT),
                 "POS Volume {} Delete Sequence In Progress({}/{}) : NotifyVolumeDeleted to {} done, res: {}",
-                volEventBase->volName, curPrgress, subscribers.size(), it->second->Tag(), res);
+                volEventBase->volName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag(), res);
 
             curPrgress++;
         }
@@ -189,7 +197,7 @@ bool
 VolumeEventPublisher::NotifyVolumeMounted(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_MOUNT_EVENT),
-        "NotifyVolumeMounted, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeMounted, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     bool ret = true;
     int curPrgress = 1;
@@ -214,7 +222,7 @@ VolumeEventPublisher::NotifyVolumeMounted(VolumeEventBase* volEventBase, VolumeE
             {
                 POS_REPORT_TRACE(EID(VOLUME_MOUNT_EVENT),
                     "POS Volume {} Mount Sequence In Progress({}/{}) : NotifyVolumeMounted to {} done, res: {}",
-                    volEventBase->volName, curPrgress, subscribers.size(), it->second->Tag(), res);
+                    volEventBase->volName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag(), res);
 
                 curPrgress++;
             }
@@ -228,7 +236,7 @@ bool
 VolumeEventPublisher::NotifyVolumeUnmounted(VolumeEventBase* volEventBase, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_UNMOUNT_EVENT),
-        "NotifyVolumeUnmounted, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeUnmounted, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     bool ret = true;
     int curPrgress = 1;
@@ -251,7 +259,7 @@ VolumeEventPublisher::NotifyVolumeUnmounted(VolumeEventBase* volEventBase, Volum
 
             POS_REPORT_TRACE(EID(VOLUME_UNMOUNT_EVENT),
                 "POS Volume {} Unmount Sequence In Progress({}/{}) : NotifyVolumeUnmounted to {} done, res: {}",
-                volEventBase->volName, curPrgress, subscribers.size(), it->second->Tag(), res);
+                volEventBase->volName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag(), res);
 
             curPrgress++;
         }
@@ -264,7 +272,7 @@ bool
 VolumeEventPublisher::NotifyVolumeLoaded(VolumeEventBase* volEventBase, VolumeEventPerf* volEventPerf, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_LOAD_EVENT),
-        "NotifyVolumeLoaded, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeLoaded, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     bool ret = true;
     int curPrgress = 1;
@@ -288,7 +296,7 @@ VolumeEventPublisher::NotifyVolumeLoaded(VolumeEventBase* volEventBase, VolumeEv
 
             POS_REPORT_TRACE(EID(VOLUME_LOAD_EVENT),
                 "POS Array {}' volume load Sequence In Progress({}/{}) : NotifyVolumeLoaded to {} done, res: {}",
-                volArrayInfo->arrayName, curPrgress, subscribers.size(), it->second->Tag(), res);
+                volArrayInfo->arrayName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag(), res);
             
             curPrgress++;
         }
@@ -301,7 +309,7 @@ void
 VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo)
 {
     POS_TRACE_INFO(EID(VOLUME_DETACH_EVENT),
-        "NotifyVolumeDetached, # of subscribers: {}", subscribers.size());
+        "NotifyVolumeDetached, # of subscribers: {}", subscriberCntPerArray[volArrayInfo->arrayId]);
 
     int curPrgress = 1;
 
@@ -316,7 +324,7 @@ VolumeEventPublisher::NotifyVolumeDetached(vector<int> volList, VolumeArrayInfo*
 
             POS_REPORT_TRACE(EID(VOLUME_DETACH_EVENT),
                 "POS Array {}'s all volume Detach Sequence In Progress({}/{}) : NotifyVolumeDetached to {} done",
-                volArrayInfo->arrayName, curPrgress, subscribers.size(), it->second->Tag());
+                volArrayInfo->arrayName, curPrgress, subscriberCntPerArray[volArrayInfo->arrayId], it->second->Tag());
 
             curPrgress++;
         }
