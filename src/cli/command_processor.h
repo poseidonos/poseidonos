@@ -127,8 +127,6 @@ using grpc_cli::ResetMbrRequest;
 using grpc_cli::ResetMbrResponse;
 using grpc_cli::ScanDeviceRequest;
 using grpc_cli::ScanDeviceResponse;
-using grpc_cli::SetListenerAnaStateRequest;
-using grpc_cli::SetListenerAnaStateResponse;
 using grpc_cli::SetLogLevelRequest;
 using grpc_cli::SetLogLevelResponse;
 using grpc_cli::SetLogPreferenceRequest;
@@ -227,7 +225,6 @@ public:
     grpc::Status ExecuteAddListenerCommand(const AddListenerRequest* request, AddListenerResponse* reply);
     grpc::Status ExecuteRemoveListenerCommand(const RemoveListenerRequest* request, RemoveListenerResponse* reply);
     grpc::Status ExecuteListListenerCommand(const ListListenerRequest* request, ListListenerResponse* reply);
-    grpc::Status ExecuteSetListenerAnaStateCommand(const SetListenerAnaStateRequest* request, SetListenerAnaStateResponse* reply);
     grpc::Status ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply);
     grpc::Status ExecuteSubsystemInfoCommand(const SubsystemInfoRequest* request, SubsystemInfoResponse* reply);
 
