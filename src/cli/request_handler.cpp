@@ -73,7 +73,6 @@
 #include "src/cli/reset_mbr_command.h"
 #include "src/cli/reset_qos_volume_policy_command.h"
 #include "src/cli/scan_device_command.h"
-#include "src/cli/set_listener_ana_state_command.h"
 #include "src/cli/set_log_level_command.h"
 #include "src/cli/smart_log_command.h"
 #include "src/cli/set_log_preference_command.h"
@@ -113,7 +112,6 @@ RequestHandler::RequestHandler(void)
     cmdDictionary["SUBSYSTEMINFO"] = new ListSubsystemCommand();
     cmdDictionary["ADDLISTENER"] = new AddListenerCommand();
     cmdDictionary["REMOVELISTENER"] = new RemoveListenerCommand();
-    cmdDictionary["SETLISTENERANASTATE"] = new SetListenerAnaStateCommand();
     cmdDictionary["LISTLISTENER"] = new ListListenerCommand();
     cmdDictionary["CREATETRANSPORT"] = new CreateTransportCommand();
     cmdDictionary["LISTTRANSPORT"] = new ListTransportCommand();

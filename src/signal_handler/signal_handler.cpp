@@ -58,7 +58,6 @@ SignalHandler::SignalHandler(void)
     char btLogPath[] = "/var/log/pos/pos_backtrace.log";
     pendingThreads = 0;
     btLogFilePtr = fopen(btLogPath, "w");
-    shutdownTask = nullptr;
 }
 
 SignalHandler::~SignalHandler(void)
@@ -68,11 +67,6 @@ SignalHandler::~SignalHandler(void)
     if (btLogFilePtr != nullptr)
     {
         fclose(btLogFilePtr);
-    }
-    if (shutdownTask != nullptr)
-    {
-        shutdownTask->join();
-        delete shutdownTask;
     }
 }
 
@@ -299,7 +293,10 @@ SignalHandler::_Backtrace(void)
     _Log(coreInfoString);
 
     ssize_t result = readlink("/proc/self/exe", executeBinary, FILE_NAME_LINE);
-    executeBinary[result] = '\0';
+    if (result > 0)
+    {
+        executeBinary[result] = '\0';
+    }
     for (int index = 0; index < nptrs; index++)
     {
         std::string symbolString = "";

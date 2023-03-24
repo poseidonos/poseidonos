@@ -1478,52 +1478,6 @@ CommandProcessor::ExecuteListListenerCommand(const ListListenerRequest* request,
 }
 
 grpc::Status
-CommandProcessor::ExecuteSetListenerAnaStateCommand(const SetListenerAnaStateRequest* request, SetListenerAnaStateResponse* reply)
-{
-    string command = request->command();
-    reply->set_command(command);
-    reply->set_rid(request->rid());
-
-    SpdkRpcClient rpcClient;
-    NvmfTarget target;
-
-    const char* DEFAULT_ADRFAM = "IPv4";
-    string subnqn = (request->param()).subnqn();
-    string transportType = (request->param()).transporttype();
-    string targetAddress = (request->param()).targetaddress();
-    string transportServiceId = (request->param()).transportserviceid();
-    string anaState = (request->param()).anastate();
-
-    if (nullptr == target.FindSubsystem(subnqn))
-    {
-        POS_TRACE_INFO(EID(SET_LISTENER_ANA_STATE_FAILURE_NO_SUBNQN), "subnqn:{}", subnqn);
-        _SetEventStatus(EID(SET_LISTENER_ANA_STATE_FAILURE_NO_SUBNQN), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
-    }
-
-    auto ret = rpcClient.SubsystemSetListenerAnaState(
-        subnqn,
-        transportType,
-        DEFAULT_ADRFAM,
-        targetAddress,
-        transportServiceId,
-        anaState);
-
-    if (ret.first != SUCCESS)
-    {
-        POS_TRACE_INFO(EID(SET_LISTENER_ANA_STATE_FAILURE_SPDK_FAILURE), "subnqn:{}, rpc_return:{}", subnqn, ret.second);
-        _SetEventStatus(EID(SET_LISTENER_ANA_STATE_FAILURE_SPDK_FAILURE), reply->mutable_result()->mutable_status());
-        _SetPosInfo(reply->mutable_info());
-        return grpc::Status::OK;
-    }
-
-    _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
-    _SetPosInfo(reply->mutable_info());
-    return grpc::Status::OK;
-}
-
-grpc::Status
 CommandProcessor::ExecuteListSubsystemCommand(const ListSubsystemRequest* request, ListSubsystemResponse* reply)
 {
     string command = request->command();

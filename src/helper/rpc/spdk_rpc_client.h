@@ -55,7 +55,6 @@ public:
 
     std::pair<int, std::string> SubsystemAddListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
     std::pair<int, std::string> SubsystemRemoveListener(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid);
-    std::pair<int, std::string> SubsystemSetListenerAnaState(std::string subnqn, std::string trtype, std::string adrfam, std::string traddr, std::string trsvcid, std::string anastate);
     Json::Value SubsystemListListener(std::string subnqn);
 
     virtual std::pair<int, std::string> TransportCreate(std::string trtype, uint32_t bufCacheSize, uint32_t numSharedBuf, uint32_t ioUnitSize);

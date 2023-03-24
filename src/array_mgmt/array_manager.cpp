@@ -542,7 +542,10 @@ ArrayManager::SetTargetAddress(string name, string targetAddress)
 {
     pthread_rwlock_rdlock(&arrayListLock);
     ArrayComponents* array = _FindArray(name);
-    array->SetTargetAddress(targetAddress);
+    if (array != nullptr)
+    {
+        array->SetTargetAddress(targetAddress);
+    }
     pthread_rwlock_unlock(&arrayListLock);
 }
 

@@ -74,8 +74,6 @@ private:
     std::atomic<bool> listUpdated;
     std::atomic<int> dominantSignal;
     FILE* btLogFilePtr;
-    std::thread* shutdownTask;
-    std::thread* signalHandler;
     std::mutex signalMutex;
 };
 

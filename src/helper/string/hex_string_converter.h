@@ -62,7 +62,7 @@ uint32_to_hex(uint32_t value, char* dest, uint32_t len)
 {
     uint32_t copiedValue = value;
 
-    for (uint32_t i = len - 1; i >= 0; i--)
+    for (int i = len - 1; i >= 0; i--)
     {
         dest[i] = (copiedValue & 255);
         copiedValue >>= 8;
@@ -98,7 +98,7 @@ uint64_to_hex(uint64_t value, char* dest, uint32_t len)
 {
     uint64_t copiedValue = value;
 
-    for (uint32_t i = len - 1; i >= 0; i--)
+    for (int i = len - 1; i >= 0; i--)
     {
         dest[i] = (copiedValue & 255);
         copiedValue >>= 8;
