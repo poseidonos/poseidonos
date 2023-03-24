@@ -85,6 +85,8 @@ if [ -f /etc/debian_version ]; then
     apt install -y libboost-thread-dev 
     # for opentelemetry
     apt install -y libssl-dev
+    # for unit test
+    apt install -y lcov
 
     python -m pip install --upgrade pip
     python3 -m pip install --upgrade pip
