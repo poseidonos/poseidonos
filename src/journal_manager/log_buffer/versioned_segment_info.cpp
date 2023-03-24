@@ -40,7 +40,8 @@
 namespace pos
 {
 VersionedSegmentInfo::VersionedSegmentInfo(uint32_t stripesPerSegment)
-: numStripesPerSegment(stripesPerSegment)
+: arrayInfo(nullptr),
+  numStripesPerSegment(stripesPerSegment)
 {
 }
 
