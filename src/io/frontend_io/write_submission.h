@@ -81,6 +81,7 @@ private:
     IBlockAllocator* iBlockAllocator;
     FlowControl* flowControl;
     IVolumeInfoManager* volumeManager;
+    const uint32_t BWAIT_MAX = 10000;
 
     void _SendVolumeIo(VolumeIoSmartPtr volumeIo);
     bool _ProcessOwnedWrite(void);
