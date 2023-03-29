@@ -3,7 +3,7 @@ name: C2-UnitTest_VM
 
 on:
   push:
-    branches: [ main, release/v0.12.0 ] 
+    branches: [ main, release/v1.0.0 ] 
 
   workflow_dispatch:
     inputs:

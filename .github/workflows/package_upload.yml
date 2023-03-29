@@ -3,7 +3,7 @@ name: Package_Upload
 
 on:
   push:
-    branches: [ release/v0.12.0  ]
+    branches: [ release/v1.0.0  ]
     tags:
       - 'v*'
   
