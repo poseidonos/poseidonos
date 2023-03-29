@@ -64,15 +64,10 @@ private:
     void _BacktraceAndInvokeNextThread(int sig);
     void _Backtrace(void);
     void _ShutdownProcess(void);
-    bool _RunSystemCmdAndGetResult(char* cmdStr, char* resultStr);
     void _Log(std::string logMsg, bool printTimeStamp = true);
     std::list<long> threadList;
     std::atomic<uint32_t> pendingThreads;
     static const long ATOI_ERR = 0;
-    static const int MAX_CALL_STACK = 100;
-    static const int FILE_NAME_LINE = 300;
-    std::atomic<bool> listUpdated;
-    std::atomic<int> dominantSignal;
     FILE* btLogFilePtr;
     std::mutex signalMutex;
 };
