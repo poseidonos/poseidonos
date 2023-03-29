@@ -20,6 +20,7 @@ default_initiator_pw = "bamboo"
 default_target_id = "root"
 default_target_pw = "bamboo"
 default_ibofos_root = "/home/ibof/ibofos"
+default_initiator_ibofos_root = "/home/ibof/ibofos"
 
 def bring_up_ibofos():
     print("Try to execute poseidonos at target")
@@ -33,7 +34,7 @@ def bring_up_ibofos():
 
 def execute_filebench_test():
     print("Execute filebench at initiator")
-    initiator_script = args.ibofos_root + "/test/system/filesystem/filebench_test_initiator.py -f " + args.fabric_ip
+    initiator_script = args.initiator_ibofos_root + "/test/system/filesystem/filebench_test_initiator.py -f " + args.fabric_ip
     remote_procedure.execute(args.initiator_ip, args.initiator_id, args.initiator_pw, initiator_script)
 
 def parse_argument():
@@ -54,6 +55,8 @@ def parse_argument():
             help='Set initiator ID, default: ' + default_initiator_id)
     parser.add_argument('-r', '--ibofos_root', default=default_ibofos_root,\
             help='Set poseidonos root path, default: ' + default_ibofos_root)
+    parser.add_argument('--initiator_ibofos_root', default=default_initiator_ibofos_root,\
+            help='Set poseidonos root path of the initiator, default: ' + default_initiator_ibofos_root)
     global args
     args = parser.parse_args()
     print (args)

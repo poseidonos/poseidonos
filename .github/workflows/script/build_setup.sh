@@ -50,7 +50,7 @@ setJobNumber()
 {
     if [ $target_type == "PM" ] || [ $target_type == "PSD" ]
     then
-        job_number=16
+        job_number=$(nproc)
     elif [ $target_type == "VM" ]
     then
         job_number=12
@@ -181,6 +181,9 @@ setupTest()
     if [ $target_type == "VM" ]
     then
         texecc cp $pos_working_dir/config/ibofos_for_aws_vm_ci.conf $pos_conf/pos.conf
+    elif [ $target_type == "PM" ]
+    then
+        texecc cp $pos_working_dir/config/ibofos_for_psd_ci_wt.conf $pos_conf/pos.conf
     fi
 
     texecc rmmod nvme_tcp

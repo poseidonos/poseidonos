@@ -1,0 +1,414 @@
+
+name: R2-Functional_PSD
+
+on:
+  push:
+    branches: [ release/v1.0.0 ]
+
+  workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
+
+env:
+  Workflow_Name: M2-Functional_PSD
+  Script_Build: .github/workflows/script/build_setup.sh
+  Script_Clean: .github/workflows/script/clean_backup.sh
+  Script_Fault_Tolerance: .github/workflows/script/functional_psd/fault_tolerance.sh
+  Script_Volume: .github/workflows/script/functional_psd/volume.sh
+  Script_Npor: .github/workflows/script/functional_psd/npor.sh
+  Script_Spor: .github/workflows/script/functional_psd/spor.sh
+  Script_Qos: .github/workflows/script/functional_psd/qos.sh
+  Script_Multi_Volume_Io: .github/workflows/script/functional_psd/multi_volume_io.sh
+  Script_Nvme_Flush: .github/workflows/script/functional_psd/nvme_flush.sh
+  Script_File_Bench: .github/workflows/script/functional_psd/file_bench.sh
+  Script_Io_Path_System_Level: .github/workflows/script/functional_psd/io_path_system_level.sh
+
+concurrency: 
+  group: ${{github.ref}}
+  cancel-in-progress: true
+
+jobs:
+  File_Bench:
+    env:
+      Job_Name: File_Bench
+      INITIATOR_1_IP: ${{secrets.INITIATOR_IP_1}}
+      INITIATOR_1_PASSWD: ${{secrets.INITIATOR_IP_1_PASSWD}}
+      TARGET_IP: ${{secrets.TARGET_IP_1}}
+      TARGET_ID: ${{secrets.TARGET_ID}}
+      TARGET_PASSWD: ${{secrets.TARGET_PASSWD}}
+    runs-on: [PM, single-initiator]
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run File_Bench Test
+      id: file_bench
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_File_Bench
+        $Script_File_Bench "$TARGET_IP" ${{github.workspace}} "$INITIATOR_1_IP" "$INITIATOR_1_PASSWD" "$TARGET_PASSWD"
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs File_Bench
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.file_bench.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.file_bench.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump File_Bench
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  Fault_Tolerance:
+    env:
+      Job_Name: Fault_Tolerance
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run Fault_Tolerance Test
+      id: fault_tolerance
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Fault_Tolerance
+        $Script_Fault_Tolerance ${{github.workspace}}
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs Fault_Tolerance
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.fault_tolerance.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.fault_tolerance.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump Fault_Tolerance
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  Volume:
+    env:
+      Job_Name: Volume
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run Volume Test
+      id: volume
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Volume
+        $Script_Volume ${{github.workspace}}
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs Volume
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.volume.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.volume.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump Volume
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  NPOR:
+    env:
+      Job_Name: NPOR
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run NPOR Test
+      id: npor
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Npor
+        $Script_Npor ${{github.workspace}}
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs NPOR
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.npor.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.npor.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump NPOR
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  SPOR:
+    env:
+      Job_Name: SPOR
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run SPOR Test
+      id: spor
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Spor
+        $Script_Spor ${{github.workspace}}
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs SPOR
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.spor.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.spor.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump SPOR
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  QoS:
+    env:
+      Job_Name: QoS
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run QoS Test
+      id: qos
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Qos
+        $Script_Qos ${{github.workspace}} PM
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs QoS
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.qos.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.qos.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump QoS
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  Multi_Volume_Io:
+    env:
+      Job_Name: Multi_Volume_Io
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run Multi_Volume_Io Test
+      id: multi_volume_io
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Multi_Volume_Io
+        $Script_Multi_Volume_Io ${{github.workspace}}
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs Multi_Volume_Io
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.multi_volume_io.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.multi_volume_io.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump Multi_Volume_Io
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*
+
+
+  NVMe_Flush:
+    env:
+      Job_Name: NVMe_Flush
+    runs-on: PM
+    steps:
+
+    - run: sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build POS
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build
+        $Script_Build -r ${{github.sha}} -d ${{github.workspace}} -c --with-fpic -t PM
+
+    - name: Run NVMe_Flush Test
+      id: nvme_flush
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Nvme_Flush
+        $Script_Nvme_Flush ${{github.workspace}}
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: Logs NVMe_Flush
+        path: |
+          /var/log/pos
+
+    - name: Clean Backup
+      if:  always() && steps.nvme_flush.outcome != 'success'
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Clean
+        $Script_Clean -i 127.0.0.1 -p "$Workflow_Name" -n "$Job_Name" -r ${{github.sha}} -d ${{github.workspace}}
+
+    - name: Upload Core Dump
+      if:  always() && steps.nvme_flush.outcome != 'success'
+      uses: actions/upload-artifact@v3
+      with:
+        name: Core Dump NVMe_Flush
+        path: |
+          ${{github.workspace}}/tool/dump/*.tar.gz*

@@ -166,6 +166,8 @@ def get_array_capacity(arrayId=0):
 
 def kill_process(procname, sig=9):
     for proc in psutil.process_iter():
+        if "irq" in proc.name():
+            continue
         try:
             if procname in proc.name():
                 proc.send_signal(sig)
