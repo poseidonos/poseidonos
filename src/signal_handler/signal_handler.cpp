@@ -32,6 +32,8 @@
 
 #include "src/signal_handler/signal_handler.h"
 
+#define BOOST_STACKTRACE_USE_BACKTRACE
+#include <boost/stacktrace.hpp>
 #include <dirent.h>
 #include <execinfo.h>
 #include <sched.h>
@@ -54,15 +56,13 @@ namespace pos
 {
 SignalHandler::SignalHandler(void)
 {
-    listUpdated = false;
     char btLogPath[] = "/var/log/pos/pos_backtrace.log";
     pendingThreads = 0;
-    btLogFilePtr = fopen(btLogPath, "w");
+    btLogFilePtr = fopen(btLogPath, "a");
 }
 
 SignalHandler::~SignalHandler(void)
 {
-    listUpdated = false;
     pendingThreads = 0;
     if (btLogFilePtr != nullptr)
     {
@@ -239,82 +239,16 @@ SignalHandler::_BacktraceAndInvokeNextThread(int sig)
     }
 }
 
-bool
-SignalHandler::_RunSystemCmdAndGetResult(char* cmdStr, char* resultStr)
-{
-    char cmdStrTmp[FILE_NAME_LINE];
-    sprintf(cmdStrTmp, "%s > tmpBackTrace", cmdStr);
-    int retValue = system(cmdStrTmp);
-    if (retValue != 0)
-    {
-        return false;
-    }
-    FILE* fp = fopen("tmpBackTrace", "r");
-    if (fp == NULL)
-    {
-        return false;
-    }
-    char *ret;
-    ret = fgets(resultStr, FILE_NAME_LINE - 1, fp);
-    fclose(fp);
-    unlink("tmpBackTrace");
-    // ret will be NULL if file is read to end pointer.
-    if (ret == NULL)
-    {
-        return false;
-    }
-    resultStr[strcspn(resultStr, "\r\n")] = 0;
-    if (!strncmp(resultStr, "??", 2))
-    {
-        resultStr[0] = '\0';
-    }
-    return true;
-}
-
 // This stacktrace mechanism will be supported from c++23
 // So, we just use glibc implmentation.
 void
 SignalHandler::_Backtrace(void)
 {
-    void* buffer[MAX_CALL_STACK];
-    char cmdStr[FILE_NAME_LINE + 1];
-    char fileLine[FILE_NAME_LINE + 1];
-    char executeBinary[FILE_NAME_LINE + 1];
-    char** strings;
-    int nptrs;
-    nptrs = backtrace(buffer, MAX_CALL_STACK);
+    const boost::stacktrace::stacktrace current_stacktrace;
 
-    strings = backtrace_symbols(buffer, nptrs);
-    std::string coreInfoString = "";
-    coreInfoString += "CoreId : ";
-    coreInfoString += std::to_string(sched_getcpu());
-    coreInfoString += " tid : ";
-    coreInfoString += std::to_string(gettid());
-    _Log(coreInfoString);
-
-    ssize_t result = readlink("/proc/self/exe", executeBinary, FILE_NAME_LINE);
-    if (result > 0)
-    {
-        executeBinary[result] = '\0';
-    }
-    for (int index = 0; index < nptrs; index++)
-    {
-        std::string symbolString = "";
-        symbolString += strings[index];
-        if (result > 0 && result < FILE_NAME_LINE)
-        {
-            sprintf(cmdStr, "addr2line %p -e %s", buffer[index], executeBinary);
-            bool ret = _RunSystemCmdAndGetResult(cmdStr, fileLine);
-            if (ret == false)
-            {
-                break;
-            }
-            symbolString += " ";
-            symbolString += fileLine;
-        }
-        _Log(symbolString);
-        
-    }
+    std::ostringstream oss;
+    oss << "Stack trace:\n" << current_stacktrace;
+    _Log(oss.str(), false);
     _Log("", false);
     fflush(btLogFilePtr);
 }
