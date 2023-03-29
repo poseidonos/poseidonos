@@ -117,7 +117,21 @@ WriteSubmission::Execute(void)
         {
             return false;
         }
+
         int token = flowControl->GetToken(FlowControlType::USER, blockCount);
+        auto start = std::chrono::high_resolution_clock::now();
+        while (0 >= token)
+        {
+            usleep(1);
+            token = flowControl->GetToken(FlowControlType::USER, blockCount);
+
+            auto end = std::chrono::high_resolution_clock::now();
+            auto taken = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+            if (taken > BWAIT_MAX)
+            {
+                break;
+            }
+        }
         if (0 >= token)
         {
             return false;
