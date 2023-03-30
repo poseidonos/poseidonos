@@ -14,6 +14,7 @@ public:
     using SystemTimeoutChecker::SystemTimeoutChecker;
     MOCK_METHOD(void, SetTimeout, (uint64_t nanoSecsLeftFromNow), (override));
     MOCK_METHOD(bool, CheckTimeout, (), (override));
+    MOCK_METHOD(bool, IsActive, (), (override));
 };
 
 } // namespace pos

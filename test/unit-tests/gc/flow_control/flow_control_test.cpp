@@ -301,6 +301,7 @@ TEST_F(FlowControlTestFixture, GetToken_testForceRefill)
     // When: number of free segments < gc normal threshold, fails to get token
     EXPECT_CALL(*mockSegmentCtx, GetNumOfFreeSegmentWoLock()).WillRepeatedly(Return(15));
     EXPECT_CALL(*mockTokenDistributer, Distribute(15)).WillOnce(Return(std::make_tuple(0, 100)));
+    ON_CALL(*mockSystemTimeoutChecker, IsActive()).WillByDefault(Return(true));
     // Then: try to forceReset & refill token
     FlowControlType type = FlowControlType::USER;
     int expected, token, actual;
