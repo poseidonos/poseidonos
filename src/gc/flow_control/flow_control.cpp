@@ -264,6 +264,13 @@ FlowControl::ReturnToken(FlowControlType type, int token)
         return;
     }
 
+    SegmentCtx* segmentCtx = iContextManager->GetSegmentCtx();
+    freeSegments = segmentCtx->GetNumOfFreeSegmentWoLock();
+    if (freeSegments > gcThreshold)
+    {
+        return;
+    }
+
     bucket[type].fetch_add(token);
 }
 
