@@ -69,13 +69,11 @@ TEST_F(VolumeMetaIntfFixture, LoadVolumes_testIfAnErrorCodeWillBeReturnedWhenRea
 {
     EXPECT_CALL(*file, DoesFileExist()).WillOnce(Return(true));
     EXPECT_CALL(*file, Open()).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_CALL(*file, AsyncIO).WillOnce([&](auto ctx)
-        {
-            return EID(MFS_FILE_READ_FAILED);
-        });
+    EXPECT_CALL(*file, GetFileSize()).WillOnce(Return(FILE_SIZE));
+    EXPECT_CALL(*file, IssueIO).WillOnce(Return(EID(MFS_FILE_READ_FAILED)));
     EXPECT_CALL(*file, Close()).WillOnce(Return(EID(SUCCESS)));
 
-    int expectValue = EID(MFS_FILE_READ_FAILED);
+    int expectValue = EID(VOL_UNABLE_TO_LOAD_READ_FAILED);
     EXPECT_EQ(VolumeMetaIntf::LoadVolumes(list, ARRAY_NAME, ARRAY_ID, move(file)), expectValue);
 }
 
@@ -83,11 +81,8 @@ TEST_F(VolumeMetaIntfFixture, LoadVolumes_testIfAnErrorCodeWillBeReturnedWhenClo
 {
     EXPECT_CALL(*file, DoesFileExist()).WillOnce(Return(true));
     EXPECT_CALL(*file, Open()).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_CALL(*file, AsyncIO).WillOnce([&](auto ctx)
-        {
-            ctx->HandleIoComplete(ctx);
-            return EID(SUCCESS);
-        });
+    EXPECT_CALL(*file, GetFileSize()).WillOnce(Return(FILE_SIZE));
+    EXPECT_CALL(*file, IssueIO).WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*file, Close()).WillOnce(Return(EID(MFS_FILE_NOT_OPENED)));
 
     int expectValue = EID(VOL_UNABLE_TO_CLOSE_FILE);
@@ -98,11 +93,8 @@ TEST_F(VolumeMetaIntfFixture, LoadVolumes_testIfItHasBeenSuccessfullyFinishedToL
 {
     EXPECT_CALL(*file, DoesFileExist()).WillOnce(Return(true));
     EXPECT_CALL(*file, Open()).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_CALL(*file, AsyncIO).WillOnce([&](auto ctx)
-        {
-            ctx->HandleIoComplete(ctx);
-            return EID(SUCCESS);
-        });
+    EXPECT_CALL(*file, GetFileSize()).WillOnce(Return(FILE_SIZE));
+    EXPECT_CALL(*file, IssueIO).WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*file, Close()).WillOnce(Return(EID(SUCCESS)));
 
     int expectValue = EID(SUCCESS);
@@ -133,13 +125,10 @@ TEST_F(VolumeMetaIntfFixture, SaveVolumes_testIfAnErrorCodeWillBeReturnedWhenWri
     EXPECT_CALL(*file, DoesFileExist()).WillOnce(Return(false));
     EXPECT_CALL(*file, Create).WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*file, Open).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_CALL(*file, AsyncIO).WillOnce([&](auto ctx)
-        {
-            return EID(MFS_FILE_WRITE_FAILED);
-        });
+    EXPECT_CALL(*file, IssueIO).WillOnce(Return(EID(MFS_FILE_WRITE_FAILED)));
     EXPECT_CALL(*file, Close()).WillOnce(Return(EID(SUCCESS)));
 
-    int expectValue = EID(MFS_FILE_WRITE_FAILED);
+    int expectValue = EID(VOL_UNABLE_TO_SAVE_WRITE_FAILED);
     EXPECT_EQ(VolumeMetaIntf::SaveVolumes(list, ARRAY_NAME, ARRAY_ID, move(file)), expectValue);
 }
 
@@ -148,11 +137,7 @@ TEST_F(VolumeMetaIntfFixture, SaveVolumes_testIfAnErrorCodeWillBeReturnedWhenClo
     EXPECT_CALL(*file, DoesFileExist()).WillOnce(Return(false));
     EXPECT_CALL(*file, Create).WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*file, Open).WillOnce(Return(EID(SUCCESS)));
-    EXPECT_CALL(*file, AsyncIO).WillOnce([&](auto ctx)
-        {
-            ctx->HandleIoComplete(ctx);
-            return EID(SUCCESS);
-        });
+    EXPECT_CALL(*file, IssueIO).WillOnce(Return(EID(SUCCESS)));
     EXPECT_CALL(*file, Close()).WillOnce(Return(EID(MFS_FILE_NOT_OPENED)));
 
     int expectValue = EID(VOL_UNABLE_TO_CLOSE_FILE);
