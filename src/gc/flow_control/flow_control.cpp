@@ -207,7 +207,7 @@ FlowControl::GetToken(FlowControlType type, int token)
     freeSegments = segmentCtx->GetNumOfFreeSegmentWoLock();
     if (freeSegments > gcThreshold)
     {
-        if(true == systemTimeoutChecker->IsActive())
+        if (true == systemTimeoutChecker->IsActive())
         {
             systemTimeoutChecker->Reset();
         }
