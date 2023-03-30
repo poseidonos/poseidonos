@@ -46,7 +46,7 @@ public:
     virtual bool CheckTimeout(void);
     uint64_t Elapsed(void);
     void Reset(void);
-    bool IsActive(void);
+    virtual bool IsActive(void);
 
 private:
     bool isActive = false;

@@ -211,6 +211,10 @@ FlowControl::GetToken(FlowControlType type, int token)
     }
     int oldBucket = bucket[type].load();
     int counterType = type ^ 0x1;
+    if (false == systemTimeoutChecker->IsActive())
+    {
+        systemTimeoutChecker->SetTimeout(flowControlConfiguration->GetForceResetTimeout());
+    }
     do
     {
         if (oldBucket <= 0)
