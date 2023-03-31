@@ -1,0 +1,63 @@
+
+name: R-UnitTest_PSD
+
+on:
+  push:
+    branches: [ release/v1.0.0 ]
+
+  workflow_dispatch:
+    inputs:
+       logLevel:
+          description: 'Log level'
+          required: true
+          default: 'warning'
+       tags:
+          description: 'Test scenario tags'
+
+env:
+  Script_Build_And_Run: .github/workflows/script/unit/ut_build_run_unittest_psd.sh
+  Script_Copy_Result: .github/workflows/script/unit/copy_ut_result.sh
+  Script_Copy_Report: .github/workflows/script/unit/copy_gcov_report.sh
+
+jobs:
+  Unit_Test:
+    runs-on: PM
+    steps:
+
+    - run: |
+        sudo chown -R $USER:$USER $GITHUB_WORKSPACE
+
+    - uses: actions/checkout@v2
+
+    - name: Build and Run
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Build_And_Run
+        $Script_Build_And_Run ${{github.workspace}}
+
+    - name: Copy Result
+      if: always() 
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Copy_Result
+        $Script_Copy_Result ${{github.workspace}} ${{github.sha}}
+
+    - name: Copy Report
+      if: always() 
+      working-directory: ${{github.workspace}}
+      run: |
+        chmod +x $Script_Copy_Report
+        $Script_Copy_Report ${{github.workspace}}
+
+    - uses: mikepenz/action-junit-report@v2
+      if: always()
+      with:
+        report_paths: 'UnitTestResult/*.xml'
+
+    - name: Upload logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: UT_LOG
+        path: |
+          /var/log/pos
