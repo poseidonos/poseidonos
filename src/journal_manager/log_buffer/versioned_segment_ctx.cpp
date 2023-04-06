@@ -166,22 +166,14 @@ VersionedSegmentCtx::_UpdateSegmentContext(VersionedSegmentInfo* targetSegInfo)
         auto segmentId = it->first;
         auto validBlockCountDiff = it->second;
 
-        uint32_t getValidCount = segmentInfoData[segmentId].validBlockCount;
-        uint32_t result = getValidCount + validBlockCountDiff;
+        int getValidCount = segmentInfoData[segmentId].validBlockCount;
+        int result = getValidCount + validBlockCountDiff;
 
         POS_TRACE_DEBUG(EID(JOURNAL_DEBUG),
-            "Before _UpdateSegmentContext, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}, sum {}",
+            "Before _UpdateSegmentContext, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff = {}, sum = {}",
             segmentId, getValidCount, validBlockCountDiff, result);
 
         segmentInfoData[segmentId].validBlockCount = result;
-
-        if (0 > (int)getValidCount)
-        {
-            POS_TRACE_ERROR(EID(JOURNAL_INVALID),
-                "After update underflow occurred, segmentInfos[{}].GetValidBlockCount() = {}, validBlockCountDiff {}",
-                segmentId, getValidCount, validBlockCountDiff);
-            assert(false);
-        }
     }
 
     tbb::concurrent_unordered_map<SegmentId, tbb::atomic<int>> changedOccupiedCount = targetSegInfo->GetChangedOccupiedStripeCount();
