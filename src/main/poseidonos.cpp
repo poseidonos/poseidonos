@@ -228,8 +228,8 @@ Poseidonos::Terminate(void)
     }
     ArrayManagerSingleton::ResetInstance();
     AccelEngineApi::Finalize();
-    DeadLockCheckerSingleton::ResetInstance();
     SpdkCallerSingleton::Instance()->SpdkBdevPosUnRegisterPoller(UNVMfCompleteHandler);
+    DeadLockCheckerSingleton::ResetInstance();
     EventFrameworkApiSingleton::ResetInstance();
     SpdkSingleton::ResetInstance();
     IoTimeoutCheckerSingleton::ResetInstance();
