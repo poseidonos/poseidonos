@@ -34,6 +34,7 @@
 
 #include <vector>
 
+#include "src/allocator/i_segment_ctx.h"
 #include "src/array_models/interface/i_array_info.h"
 #include "src/journal_manager/log_write/i_journal_volume_event_handler.h"
 #include "src/mapper/i_mapper_volume_event_handler.h"
@@ -61,6 +62,22 @@ public:
     virtual int VolumeDetached(vector<int> volList, VolumeArrayInfo* volArrayInfo) override;
 
 private:
+    class SegmentContextIterator : public ISegmentCtx
+    {
+    public:
+        SegmentContextIterator(void) = default;
+        virtual ~SegmentContextIterator(void) = default;
+
+        void Add(ISegmentCtx* context);
+
+        virtual void ValidateBlks(VirtualBlks blks);
+        virtual bool InvalidateBlks(VirtualBlks blks, bool isForced);
+        virtual bool UpdateOccupiedStripeCount(StripeId lsid);
+
+    private:
+        std::vector<ISegmentCtx*> contexts;
+    };
+
     IArrayInfo* arrayInfo;
 
     IMapperVolumeEventHandler* mapper;

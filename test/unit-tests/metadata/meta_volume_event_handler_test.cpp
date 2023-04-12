@@ -361,7 +361,14 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalA
     {
         InSequence s;
         EXPECT_CALL(mapper, PrepareVolumeDelete(volumeEvent.volId)).WillOnce(Return(0));
-        EXPECT_CALL(mapper, InvalidateAllBlocksTo(_, &segmentCtx)).WillOnce(Return(0));
+        EXPECT_CALL(mapper, InvalidateAllBlocksTo).WillOnce([&](int volId, ISegmentCtx* segmentCtx) {
+            VirtualBlks blks = {
+                .startVsa = {.stripeId = 0, .offset = 0},
+                .numBlks = 1};
+            segmentCtx->InvalidateBlks(blks, true);
+            return 0;
+        });
+        EXPECT_CALL(segmentCtx, InvalidateBlks);
         EXPECT_CALL(journal, WriteVolumeDeletedLog(volumeEvent.volId)).WillOnce(Return(0));
         EXPECT_CALL(journal, TriggerMetadataFlush).WillOnce(Return(0));
         EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).WillOnce(Return(0));
@@ -394,7 +401,15 @@ TEST(MetaVolumeEventHandler, VolumeDeleted_testIfVolumeDeleteSuccessWhenJournalA
     {
         InSequence s;
         EXPECT_CALL(mapper, PrepareVolumeDelete(volumeEvent.volId)).WillOnce(Return(0));
-        EXPECT_CALL(mapper, InvalidateAllBlocksTo(_, &targetSegmentCtx)).WillOnce(Return(0));
+        EXPECT_CALL(mapper, InvalidateAllBlocksTo).WillOnce([&](int volId, ISegmentCtx* segmentCtx) {
+            VirtualBlks blks = {
+                .startVsa = {.stripeId = 0, .offset = 0},
+                .numBlks = 1};
+            segmentCtx->InvalidateBlks(blks, true);
+            return 0;
+        });
+        EXPECT_CALL(segmentCtx, InvalidateBlks);
+        EXPECT_CALL(targetSegmentCtx, InvalidateBlks);
         EXPECT_CALL(journal, WriteVolumeDeletedLog(volumeEvent.volId)).WillOnce(Return(0));
         EXPECT_CALL(journal, TriggerMetadataFlush).WillOnce(Return(0));
         EXPECT_CALL(mapper, DeleteVolumeMap(volumeEvent.volId)).WillOnce(Return(0));
