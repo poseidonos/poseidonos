@@ -120,17 +120,21 @@ MetaVolumeEventHandler::VolumeDeleted(VolumeEventBase* volEventBase, VolumeArray
     }
 
     // Invalidate all blocks in the volume
-    auto segmentCtxToUse = allocator->GetISegmentCtx();
+    SegmentContextIterator segCtxForInvalidation;
+
+    auto activeSegmentCtx = allocator->GetISegmentCtx();
+    segCtxForInvalidation.Add(activeSegmentCtx);
+
     if (journal != nullptr)
     {
-        auto toUse = journal->AllocateSegmentCtxToUse();
+        auto toUse = journal->AllocateSegmentCtxToUse(); // VSC will be allocated here
         if (toUse != nullptr)
         {
-            segmentCtxToUse = toUse;
+            segCtxForInvalidation.Add(toUse);
         }
     }
 
-    result = mapper->InvalidateAllBlocksTo(volEventBase->volId, segmentCtxToUse);
+    result = mapper->InvalidateAllBlocksTo(volEventBase->volId, &segCtxForInvalidation);
     if (result != 0)
     {
         return result;
@@ -175,6 +179,47 @@ MetaVolumeEventHandler::VolumeDetached(vector<int> volList, VolumeArrayInfo* vol
     int result = mapper->VolumeDetached(volList);
 
     return result;
+}
+
+void
+MetaVolumeEventHandler::SegmentContextIterator::Add(ISegmentCtx* context)
+{
+    this->contexts.push_back(context);
+}
+
+void
+MetaVolumeEventHandler::SegmentContextIterator::ValidateBlks(VirtualBlks blks)
+{
+    // This function may not be used
+    for (auto ctx : this->contexts)
+    {
+        ctx->ValidateBlks(blks);
+    }
+}
+
+bool
+MetaVolumeEventHandler::SegmentContextIterator::InvalidateBlks(VirtualBlks blks, bool isForced)
+{
+    // We can ignore return value as there's nothing to do with segment free
+    for (auto ctx : this->contexts)
+    {
+        ctx->InvalidateBlks(blks, isForced);
+    }
+
+    return false;
+}
+
+bool
+MetaVolumeEventHandler::SegmentContextIterator::UpdateOccupiedStripeCount(StripeId lsid)
+{
+    // This function may not be used
+    // We can ignore return value as there's nothing to do with segment free
+    for (auto ctx : this->contexts)
+    {
+        ctx->UpdateOccupiedStripeCount(lsid);
+    }
+
+    return false;
 }
 
 } // namespace pos
