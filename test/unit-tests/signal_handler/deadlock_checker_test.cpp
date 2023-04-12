@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <signal.h>
 #include <unistd.h>
+#include "src/lib/signal_mask.h"
 #include "src/signal_handler/deadlock_checker.h"
 
 namespace pos
@@ -74,5 +75,30 @@ TEST(DeadlockChecker, RegisterOnceAndHeartBeat)
     UsleepForTest(1000000);
     EXPECT_EQ(testSignalHandlerFlag, false);
 }
+
+
+TEST(DeadlockChecker, MaskSignalBlocksDeadlockCheckerHappen)
+{
+    signal(SIGUSR1, SignalHandlerFake);
+    testSignalHandlerFlag = false;
+    DeadLockCheckerSingleton::Instance()->RunDeadLockChecker();
+    DeadLockCheckerSingleton::Instance()->SetTimeout(1);
+    DeadLockCheckerSingleton::Instance()->DeRegister();
+    DeadLockCheckerSingleton::Instance()->RegisterOnceAndHeartBeat();
+    DeadLockCheckerSingleton::Instance()->RegisterOnceAndHeartBeat();
+    sigset_t oldset;
+    // When masking signal, handler will not be incurred.
+    SignalMask::MaskSignal(&oldset);
+    UsleepForTest(2000000);
+    EXPECT_EQ(testSignalHandlerFlag, false);
+    // After restoring signal, handler will be executed.
+    SignalMask::RestoreSignal(&oldset);
+    UsleepForTest(2000000);
+    EXPECT_EQ(testSignalHandlerFlag, true);
+}
+
+
+
+
 
 } // namespace pos
