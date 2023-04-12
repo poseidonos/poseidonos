@@ -120,8 +120,8 @@ show_tc_info()
     print_notice "Information for \"${tcName}\""
     echo -e "  - Number of supported subsystems: ${support_max_subsystem}"
     echo -e "  - Type of transportation for remote devices: ${trtype}"
-    echo -e "  - Target IP: ${target_ip}"
-    echo -e "  - Target fabric IP: ${target_fabric_ip}"
+    # echo -e "  - Target IP: ${target_ip}"
+    # echo -e "  - Target fabric IP: ${target_fabric_ip}"
     echo -e "  - Root dir (init): ${rootInit}"
     echo -e "  - Root dir (target): ${rootTarget}"
 }
@@ -152,10 +152,12 @@ create_subsystem()
     for i in `seq 1 ${support_max_subsystem}`
     do
         connect_port=${port}
-        print_info "Creating subsystem ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
+        # print_info "Creating subsystem ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
+        print_info "Creating subsystem ${nss}$i"
         texecc ${spdk_rpc_script} nvmf_create_subsystem ${nss}$i -a -s POS0000000000000$i -d POS_VOL_$i #>> ${logfile}
 
-        print_info "Adding listener ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
+        # print_info "Adding listener ${nss}$i, ip ${target_fabric_ip}, port ${connect_port}"
+        print_info "Adding listener ${nss}$i"
         texecc ${spdk_rpc_script} nvmf_subsystem_add_listener ${nss}$i -t TCP -a ${target_fabric_ip} -s ${connect_port} #>> ${logfile}
 
         connectList+=(0)
@@ -482,8 +484,8 @@ discover_n_connect_nvme_from_initiator()
 
     connectList[${volNum}]=1
 
-    connect_port=${port}
-    iexecc ${nvme_cli} discover -t ${trtype} -a ${target_fabric_ip} -s ${connect_port}
+    # connect_port=${port}
+    # iexecc ${nvme_cli} discover -t ${trtype} -a ${target_fabric_ip} -s ${connect_port}
 
     print_info "Connecting ${nssName}"
 

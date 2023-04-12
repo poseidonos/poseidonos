@@ -28,7 +28,7 @@ def connect():
 
 def get_target_device():
     print ("Try to get target device")
-    command = "nvme list | awk '{if (0 != index($1,\"/dev/\")) dev=$1};END{print dev}'"
+    command = "nvme list | grep POS | awk '{if (0 != index($1,\"/dev/\")) dev=$1};END{print dev}'"
     global target_device
     result = subprocess.run(command, shell=True, stdout=subprocess.PIPE)
     target_device = result.stdout.decode('utf-8')[:-1]
@@ -48,6 +48,7 @@ def mount():
     subprocess.check_call(["mount", target_device, mount_path])
 
 def execute_filebench():
+    print ("Execute filebench")
     execution_root = ibof_root + "test/system/filesystem"
     os.chdir(execution_root)
     subprocess.check_call(["filebench", "-f", "filebench_workload/fileserver.f"])
