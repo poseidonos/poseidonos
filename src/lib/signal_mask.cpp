@@ -48,6 +48,7 @@ SignalMask::MaskSignal(int AllowedSignalNo, sigset_t* oldset)
     sigaddset(&set, SIGABRT);
     sigaddset(&set, SIGTERM);
     sigaddset(&set, SIGQUIT);
+    sigaddset(&set, SIGUSR1);
     sigdelset(&set, AllowedSignalNo);
     pthread_sigmask(SIG_BLOCK, &set, oldset);
 }
@@ -82,6 +83,7 @@ SignalMask::MaskSignal(sigset_t* oldset)
     sigaddset(&set, SIGABRT);
     sigaddset(&set, SIGTERM);
     sigaddset(&set, SIGQUIT);
+    sigaddset(&set, SIGUSR1);
     pthread_sigmask(SIG_BLOCK, &set, oldset);
 }
 
