@@ -74,8 +74,10 @@ void
 SignalHandler::Register(void)
 {
     signal(SIGINT, SignalHandler::INTHandler);
+#ifndef __SANITIZE_ADDRESS__
     signal(SIGSEGV, SignalHandler::ExceptionHandler);
     signal(SIGABRT, SignalHandler::ExceptionHandler);
+#endif
     signal(SIGTERM, SignalHandler::ExceptionHandler);
     signal(SIGQUIT, SignalHandler::ExceptionHandler);
     signal(SIGUSR1, SignalHandler::ExceptionHandler);
@@ -109,6 +111,9 @@ SignalHandler::ExceptionHandler(int sig)
 void
 SignalHandler::_Log(std::string logMsg, bool printTimeStamp)
 {
+#ifdef __SANITIZE_ADDRESS__ 
+    return;
+#endif
     if (btLogFilePtr != nullptr)
     {
         if (printTimeStamp)
@@ -224,6 +229,9 @@ SignalHandler::_GetThreadIdList(void)
 void
 SignalHandler::_BacktraceAndInvokeNextThread(int sig)
 {
+#ifdef __SANITIZE_ADDRESS__
+    return;
+#endif
     _Backtrace();
     if (threadList.empty() == false)
     {
