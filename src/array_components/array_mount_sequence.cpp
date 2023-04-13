@@ -234,6 +234,12 @@ ArrayMountSequence::Unmount(void)
 void
 ArrayMountSequence::Shutdown(void)
 {
+    if (isShutdown == true)
+    {
+        POS_TRACE_INFO(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "Shutdown for {} is ignored, already done", arrayName);
+        return;
+    }
+    isShutdown = true;
     POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down {} ...", arrayName);
     POS_TRACE_DEBUG(EID(UNMOUNT_BROKEN_ARRAY_DEBUG_MSG), "shutting down - wait for rebuilding");
     rebuilder->StopRebuild(arrayName, EID(REBUILD_STOPPED_ARRAY_BROKEN));

@@ -74,7 +74,7 @@ public:
 
     virtual void Initialize(IIODispatcher* ioDispatcherInterface);
 
-    virtual void ScanDevs(void);
+    virtual bool ScanDevs(void);
     virtual UblockSharedPtr GetDev(DeviceIdentifier& devID);
     virtual vector<UblockSharedPtr> GetDevs(void);
     virtual vector<DeviceProperty> ListDevs(void);

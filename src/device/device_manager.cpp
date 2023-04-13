@@ -248,10 +248,11 @@ DeviceManager::_CheckDuplication(UblockSharedPtr dev)
     return false;
 }
 
-void
+bool
 DeviceManager::ScanDevs(void)
 {
-    if (devices.size() == 0)
+    bool isInitScan = devices.size() == 0;
+    if (isInitScan == true)
     {
         _PrepareIOWorker();
         _InitScan();
@@ -262,6 +263,7 @@ DeviceManager::ScanDevs(void)
     {
         _Rescan();
     }
+    return isInitScan;
 }
 
 void

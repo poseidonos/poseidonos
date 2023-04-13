@@ -188,11 +188,11 @@ Raid5::_AllocChunk()
 
     uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
     BufferPool* bufferPool = parityPools.at(numa);
-    void* mem = bufferPool->TryGetBuffer();
-
+    uint32_t maxRetry = 1024 * 1024; // about one second
+    void* mem = bufferPool->TryGetBufferUntil(maxRetry);
     if (mem == nullptr)
     {
-        POS_TRACE_ERROR(EID(INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL), "No free buffers available");
+        POS_TRACE_ERROR(EID(INSUFFICIENT_MEMORY_UNABLE_TO_ALLOC_PARITY_POOL), "numa:{}", numa);
         assert(false);
     }
 
