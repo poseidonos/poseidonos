@@ -48,6 +48,7 @@
 #include "src/master_context/config_manager.h"
 #include "src/helper/time/time_helper.h"
 #include "src/node/node_info.h"
+#include "src/restore/restore_manager.h"
 
 namespace pos
 {
@@ -190,6 +191,7 @@ Array::Shutdown(void)
     state->SetShutdown();
     isWTEnabled = false;
     POS_TRACE_TRACE(EID(POS_TRACE_ARRAY_SHUTDOWN), "array_name:{}", name_);
+    RestoreManagerSingleton::Instance()->ArrayDelete(name_);
 }
 
 void
