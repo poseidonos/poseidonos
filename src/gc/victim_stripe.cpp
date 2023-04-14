@@ -107,6 +107,10 @@ VictimStripe::_InitValue(StripeId _lsid)
 
     if (iReverseMap != nullptr)
     {
+        if (revMapPack != nullptr)
+        {
+            delete revMapPack;
+        }
         revMapPack = iReverseMap->AllocReverseMapPack(myLsid, UNMAP_STRIPE);
     }
 }
