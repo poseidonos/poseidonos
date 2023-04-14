@@ -198,7 +198,7 @@ Raid6::_AllocChunk()
     
     uint32_t numa = affinityManager->GetNumaIdFromCurrentThread();
     BufferPool* bufferPool = parityPools.at(numa);
-    uint32_t maxRetry = 1024 * 1024; // about one second
+    uint32_t maxRetry = 10 * 1024 * 1024; // about 10 seconds
     void* mem = bufferPool->TryGetBufferUntil(maxRetry);
     if (mem == nullptr)
     {

@@ -102,6 +102,12 @@ BufferPool::TryGetBufferUntil(uint32_t maxRetry)
         }
         usleep(1);
     }
+    if (buffer == nullptr)
+    {
+        POS_TRACE_ERROR(EID(RESOURCE_BUFFER_ALLOC_FAIL),
+            "retried:{}, owner:{}, bufinfo_size:{}, bufinfo_count:{}, cpSize:{}, ppSize:{}",
+            maxRetry, BUFFER_INFO.owner, BUFFER_INFO.size, BUFFER_INFO.count, consumerPool->size(), producerPool->size());
+    }
     return buffer;
 }
 

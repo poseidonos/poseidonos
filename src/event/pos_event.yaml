@@ -8423,6 +8423,13 @@ Root:
     Description:
     Cause:
     Solution:
+    -
+    Id: 5703
+    Name: RESOURCE_BUFFER_ALLOC_FAIL
+    Severity:
+    Description: Allocation failed due to insufficient buffer in buffer pool
+    Cause:
+    Solution:
 
   # Restore: 5800 - 5899
   -
