@@ -73,9 +73,9 @@ BufferPool::TryGetBuffer(void)
 {
     if (isAllocated == false)
     {
-        POS_TRACE_WARN(EID(RESOURCE_MANAGER_DEBUG_MSG),
+        POS_TRACE_ERROR(EID(RESOURCE_MANAGER_DEBUG_MSG),
             "Failed to get buffer before init, owner:{}", BUFFER_INFO.owner);
-        return nullptr;
+        assert(false);
     }
     unique_lock<mutex> lock(consumerLock);
     _TrySwapWhenConsumerPoolEmpty();
@@ -86,6 +86,28 @@ BufferPool::TryGetBuffer(void)
     void* buffer = nullptr;
     buffer = consumerPool->front();
     consumerPool->pop_front();
+    return buffer;
+}
+
+void*
+BufferPool::TryGetBufferUntil(uint32_t maxRetry)
+{
+    void* buffer = nullptr;
+    for (uint32_t retry = 0; retry < maxRetry; retry++)
+    {
+        buffer = TryGetBuffer();
+        if (buffer != nullptr)
+        {
+            break;
+        }
+        usleep(1);
+    }
+    if (buffer == nullptr)
+    {
+        POS_TRACE_ERROR(EID(RESOURCE_BUFFER_ALLOC_FAIL),
+            "retried:{}, owner:{}, bufinfo_size:{}, bufinfo_count:{}, cpSize:{}, ppSize:{}",
+            maxRetry, BUFFER_INFO.owner, BUFFER_INFO.size, BUFFER_INFO.count, consumerPool->size(), producerPool->size());
+    }
     return buffer;
 }
 

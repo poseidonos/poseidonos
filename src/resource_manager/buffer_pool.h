@@ -55,6 +55,7 @@ public:
             HugepageAllocatorSingleton::Instance());
     virtual ~BufferPool(void);
     virtual void* TryGetBuffer(void);
+    virtual void* TryGetBufferUntil(uint32_t maxRetry);
     virtual bool TryGetBuffers(uint32_t reqCnt, std::vector<void*>* retBuffers, uint32_t minAcqCnt);
     virtual void ReturnBuffer(void*);
     virtual void ReturnBuffers(std::vector<void*>* buffers);

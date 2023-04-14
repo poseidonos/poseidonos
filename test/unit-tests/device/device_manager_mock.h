@@ -13,7 +13,7 @@ class MockDeviceManager : public DeviceManager
 public:
     using DeviceManager::DeviceManager;
     MOCK_METHOD(void, Initialize, (IIODispatcher * ioDispatcherInterface), (override));
-    MOCK_METHOD(void, ScanDevs, (), (override));
+    MOCK_METHOD(bool, ScanDevs, (), (override));
     MOCK_METHOD(UblockSharedPtr, GetDev, (DeviceIdentifier & devID), (override));
     MOCK_METHOD(vector<UblockSharedPtr>, GetDevs, (), (override));
     MOCK_METHOD(vector<DeviceProperty>, ListDevs, (), (override));

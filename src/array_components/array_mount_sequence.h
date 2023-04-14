@@ -66,8 +66,10 @@ public:
     virtual ~ArrayMountSequence(void);
     virtual int Mount(void);
     virtual int Unmount(void);
-    virtual void Shutdown(void);
     virtual void StateChanged(StateContext* prev, StateContext* next) override;
+
+protected:
+    virtual void Shutdown(void);
 
 private:
     bool _WaitState(StateContext* goal);
@@ -84,10 +86,10 @@ private:
     string arrayName = "";
     IVolumeManager* volMgr = nullptr;
     IArrayRebuilder* rebuilder = nullptr;
-
     ArrayMountProgress mountProgress;
     ArrayMountProgress unmountProgress;
     const static uint32_t MOUNT_PROGRESS_DEFAULT_OVERHEAD = 1;
     const static uint32_t UNMOUNT_PROGRESS_DEFAULT_OVERHEAD = 60; // for detach volumes
+    bool isShutdown = false;
 };
 } // namespace pos

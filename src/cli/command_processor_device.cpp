@@ -90,12 +90,14 @@ CommandProcessor::ExecuteScanDeviceCommand(const ScanDeviceRequest* request, Sca
     reply->set_command(request->command());
     reply->set_rid(request->rid());
 
-    DeviceManagerSingleton::Instance()->ScanDevs();
-    int result = ArrayManagerSingleton::Instance()->Load();
-
-    if (result != 0)
+    bool isInitScan = DeviceManagerSingleton::Instance()->ScanDevs();
+    if (isInitScan == true)
     {
-        POS_TRACE_WARN(result, "");
+        int result = ArrayManagerSingleton::Instance()->Load();
+        if (result != 0)
+        {
+            POS_TRACE_WARN(result, "");
+        }
     }
     _SetEventStatus(EID(SUCCESS), reply->mutable_result()->mutable_status());
     _SetPosInfo(reply->mutable_info());
