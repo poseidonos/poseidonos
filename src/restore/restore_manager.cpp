@@ -525,14 +525,16 @@ RestoreManager::ListenerRemove(string subnqn, string trType, string trAddr, stri
         return false;
     }
 
+    std::transform(trType.begin(), trType.end(), trType.begin(), ::tolower);
+
     bool listenerRemoved = false;
     if (jsonDocument->HasMember("subsystem"))
     {
         for (auto& arr : (*jsonDocument)["subsystem"].GetArray())
         {
-            if (arr["subnqn"].GetString() == subnqn && arr["subnqn"].HasMember("listener"))
+            if ((arr["subnqn"].GetString() == subnqn) && arr.HasMember("listener"))
             {
-                if ((arr["subnqn"]["listener"]["trtype"] == trType) && (arr["subnqn"]["listener"]["traddr"] == trAddr) && (arr["subnqn"]["listener"]["trsvcid"] == trSvcid))
+                if ((arr["listener"]["trtype"] == trType) && (arr["listener"]["traddr"] == trAddr) && (arr["listener"]["trsvcid"] == trSvcid))
                 {
                     arr.RemoveMember("listener");
                     listenerRemoved = true;
