@@ -67,6 +67,10 @@ ArrayDeviceList::Import(vector<ArrayDevice*> devs)
             dev->GetType(), dev->GetState(), dev->GetName(), dev->GetSerial(), dev->GetDataIndex());
         if (dev->GetUblock() != nullptr)
         {
+            if (dev->GetUblock()->GetClass() != DeviceClass::SYSTEM)
+            {
+                return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+            }
             dev->GetUblock()->SetClass(DeviceClass::ARRAY);
         }
         devices.push_back(dev);
@@ -80,8 +84,7 @@ ArrayDeviceList::AddSsd(ArrayDevice* dev)
     unique_lock<mutex> lock(*mtx);
     if (dev->GetUblock() != nullptr)
     {
-        if (Enumerable::First(devices,
-            [dev](auto d) { return d->GetName() == dev->GetName(); }) != nullptr)
+        if (dev->GetUblock()->GetClass() != DeviceClass::SYSTEM)
         {
             return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
         }

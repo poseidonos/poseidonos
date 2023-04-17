@@ -2254,8 +2254,8 @@ Root:
     Name: UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED
     Severity:
     Description: Failed to configure an array.
-    Cause: One or more SSDs are already in use elsewhere
-    Solution: Try again with SSDs those are not in use
+    Cause: One or more SSDs(or NVM) are already in use elsewhere
+    Solution: Try again with SSDs(or NVM) those are not in use
   -
     Id: 2561
     Name: REPLACE_DEV_DEBUG_MSG
