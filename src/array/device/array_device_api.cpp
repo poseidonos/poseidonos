@@ -35,6 +35,7 @@
 #include "src/helper/enumerable/query.h"
 #include "src/include/array_config.h"
 #include "src/include/smart_ptr_type.h"
+#include "src/device/base/ublock_device.h"
 
 using namespace std;
 
@@ -116,6 +117,13 @@ ArrayDeviceApi::GetMinimumCapacity(const vector<ArrayDevice*>& devs)
 int
 ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
 {
+    for (auto d : devs)
+    {
+        if (d->GetUblock() != nullptr && d->GetUblock()->GetClass() != DeviceClass::SYSTEM)
+        {
+            return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+        }
+    }
     auto nvms = ExtractDevicesByType(ArrayDeviceType::NVM, devs);
     if (nvms.size() == 0 || nvms.front()->GetUblock() == nullptr)
     {
