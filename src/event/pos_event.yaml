@@ -6210,13 +6210,6 @@ Root:
     Cause:
     Solution:
   -
-    Id: 4500
-    Name: VOLUME_EVENT
-    Severity:
-    Description:
-    Cause:
-    Solution:
-  -
     Id: 4501
     Name: VOLUME_CREATE_EVENT
     Severity:
@@ -6230,14 +6223,14 @@ Root:
     Description:
     Cause:
     Solution:
-    -
+  -
     Id: 4503
     Name: VOLUME_DETACH_EVENT
     Severity:
     Description:
     Cause:
     Solution:
-    -
+  -
     Id: 4504
     Name: VOLUME_LOAD_EVENT
     Severity:
