@@ -45,15 +45,16 @@ def print_and_execute(cmd, value):
 
 def test_ok(vol, array, type, value):
     cmd = pos_cli + " qos list -a " + array + " -v " + vol
-    cmd += " --json-res | jq '.Response.result.data.volumePolicies[0]." + type +"' 1>tmp_output"
+    cmd += " --json-res | jq '.Response.result.data.qosresult[0].volumePolicies[0]." + type +"' 1>tmp_output"
     print("")
     print(cmd)
     print("")
     os.system(cmd)
     f = open("tmp_output")
     for line in f:
-        ret_value = line.split('\n')[0]
+        ret_value = line.split('\n')[0].rstrip('"').lstrip('"')
         print("vol : ", vol, "array :", array, " ", type, " actual ", ret_value, "expected", value)
+        print("print_and_execute :", ret_value, value)
         assert (ret_value == value)
 
 def test():
@@ -222,6 +223,16 @@ def test():
     test_ok("vol3", "POSArray", "minbw", "0")
     test_ok("vol3", "POSArray", "maxbw", "17592186044415")
     test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
+    cmd = pos_cli + " array unmount -a POSArray --force"
+    print_and_execute(cmd, "0")
+    cmd = pos_cli + " array mount -a POSArray"
+    print_and_execute(cmd, "0")
+    test_ok("vol3", "POSArray", "minbw", "0")
+    test_ok("vol3", "POSArray", "maxbw", "17592186044415")
+    test_ok("vol3", "POSArray", "maxiops", "18446744073709550")
+
+
 
 if __name__ == "__main__":
     global bringup_argument

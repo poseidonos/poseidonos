@@ -50,7 +50,7 @@ const uint64_t MAX_BW_LIMIT = UINT64_MAX / MIB_IN_BYTE;
 class PerfomanceProperty
 {
 public:
-    PerfomanceProperty(uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw);
+    PerfomanceProperty(uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw);
     ~PerfomanceProperty(void);
     
     uint64_t GetMaxIOPS(void) {return maxiops;}
