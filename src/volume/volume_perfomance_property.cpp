@@ -39,7 +39,7 @@ using namespace std;
 namespace pos
 {
 
-PerfomanceProperty::PerfomanceProperty(uint64_t maxiops, uint64_t maxbw, uint64_t miniops, uint64_t minbw)
+PerfomanceProperty::PerfomanceProperty(uint64_t maxiops, uint64_t miniops, uint64_t maxbw, uint64_t minbw)
 : maxiops(maxiops),
   maxbw(maxbw),
   miniops(miniops),
