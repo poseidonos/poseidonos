@@ -48,6 +48,12 @@ ReplayLogList::ReplayLogList(void)
 
 ReplayLogList::~ReplayLogList(void)
 {
+    _Reset();
+}
+
+void
+ReplayLogList::_Reset(void)
+{
     for (auto logGroup : logGroups)
     {
         for (auto seqNumGroup : logGroup)
@@ -68,6 +74,8 @@ ReplayLogList::~ReplayLogList(void)
 void
 ReplayLogList::Init(int numLogGroups)
 {
+    _Reset();
+
     logGroups.resize(numLogGroups);
 
     // Invalid log group footer will be used, when log group footer was never written
@@ -232,6 +240,8 @@ ReplayLogList::PopReplayLogGroup(void)
         {
             auto replayLogGroup = logGroups[id].begin()->second;
             logGroupsBySeqNum.emplace(replayLogGroup.seqNum, replayLogGroup);
+
+            logGroups[id].clear();
         }
     }
 

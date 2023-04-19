@@ -53,20 +53,24 @@ TEST(ReplayHandler, Init_testIfAllTasksRegisteredSuccessfully)
     replayHandler.Init(&journalConfiguration, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &iContextReplayer, nullptr, nullptr, nullptr);
 }
 
-TEST(ReplayHandler, Start_)
+TEST(ReplayHandler, InitDispose_testInitAndDisposeRepeat)
 {
-}
+    // Given
+    NiceMock<MockIStateControl> iStateControl;
+    NiceMock<MockLogDeleteChecker>* logDeleteChecker = new NiceMock<MockLogDeleteChecker>;
+    NiceMock<MockReplayProgressReporter>* replayProgressReporter = new NiceMock<MockReplayProgressReporter>;
+    NiceMock<MockJournalConfiguration> journalConfiguration;
+    NiceMock<MockIContextReplayer> iContextReplayer;
 
-TEST(ReplayHandler, _InitializeTaskList_)
-{
-}
+    int numLogGroups = 2;
+    EXPECT_CALL(iStateControl, Subscribe);
+    ReplayHandler replayHandler(&iStateControl, logDeleteChecker, replayProgressReporter);
 
-TEST(ReplayHandler, _AddTask_)
-{
-}
+    replayHandler.Init(&journalConfiguration, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &iContextReplayer, nullptr, nullptr, nullptr);
+    replayHandler.Dispose();
 
-TEST(ReplayHandler, _ExecuteReplayTasks_)
-{
+    replayHandler.Init(&journalConfiguration, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, &iContextReplayer, nullptr, nullptr, nullptr);
+    replayHandler.Dispose();
 }
 
 } // namespace pos

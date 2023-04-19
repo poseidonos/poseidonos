@@ -52,9 +52,9 @@
 namespace pos
 {
 ReplayHandler::ReplayHandler(IStateControl* iState)
-: ReplayHandler(iState, 
-    new LogDeleteChecker(),
-    new ReplayProgressReporter())
+: ReplayHandler(iState,
+      nullptr,
+      nullptr)
 {
 }
 
@@ -76,6 +76,16 @@ ReplayHandler::Init(JournalConfiguration* journalConfiguration,
     IWBStripeAllocator* wbStripeAllocator, IContextManager* contextManager,
     IContextReplayer* contextReplayer, IArrayInfo* arrayInfo, IVolumeInfoManager* volumeManager, TelemetryPublisher* tp)
 {
+    if (logDeleteChecker == nullptr)
+    {
+        logDeleteChecker = new LogDeleteChecker();
+    }
+
+    if (reporter == nullptr)
+    {
+        reporter = new ReplayProgressReporter();
+    }
+
     config = journalConfiguration;
     logBuffer = journalLogBuffer;
     telemetryPublisher = tp;
@@ -120,14 +130,23 @@ ReplayHandler::Dispose(void)
         delete task;
     }
     taskList.clear();
+
+    if (reporter != nullptr)
+    {
+        delete reporter;
+        reporter = nullptr;
+    }
+
+    if (logDeleteChecker != nullptr)
+    {
+        delete logDeleteChecker;
+        logDeleteChecker = nullptr;
+    }
 }
 
 ReplayHandler::~ReplayHandler(void)
 {
     Dispose();
-
-    delete logDeleteChecker;
-    delete reporter;
 }
 
 int

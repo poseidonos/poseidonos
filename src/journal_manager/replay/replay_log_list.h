@@ -66,6 +66,7 @@ public:
 
 private:
     uint64_t _GetTime(void);
+    void _Reset(void);
 
     using SeqNumGroup = std::map<uint32_t, ReplayLogGroup>; // key: sequence number
 
