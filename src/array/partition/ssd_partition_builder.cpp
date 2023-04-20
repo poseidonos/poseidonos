@@ -45,11 +45,11 @@ namespace pos
 int
 SsdPartitionBuilder::Build(uint64_t startLba, vector<Partition*>& partitions)
 {
-    POS_TRACE_DEBUG(EID(BUILD_SSD_PARTITIONS), "part_type:{}, dev_count:{}",
-        PARTITION_TYPE_STR[option.partitionType], option.devices.size());
+    uint64_t totalNvmBlks = option.nvmSizeInByte / ArrayConfig::BLOCK_SIZE_BYTE;
+    POS_TRACE_DEBUG(EID(BUILD_SSD_PARTITIONS), "part_type:{}, dev_count:{}, nvm_blocks:{} ",
+        PARTITION_TYPE_STR[option.partitionType], option.devices.size(), totalNvmBlks);
     Partition* base = nullptr;
     StripePartition* partition = new StripePartition(option.partitionType, option.devices, option.raidType);
-    uint64_t totalNvmBlks = option.nvmSizeInByte / ArrayConfig::BLOCK_SIZE_BYTE;
     uint64_t lastLba = _GetLastLba(startLba, _GetSegmentCount());
     int ret = partition->Create(startLba, lastLba, totalNvmBlks);
     base = partition;
