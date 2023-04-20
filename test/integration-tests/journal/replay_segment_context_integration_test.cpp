@@ -416,4 +416,85 @@ TEST_F(ReplaySegmentContextIntegrationTest, ReplaySegmentContextWithSegmentFreeE
     EXPECT_EQ(segmentInfos[1].occupiedStripeCount, testInfo->numStripesPerSegment);
     EXPECT_EQ(segmentInfos[2].occupiedStripeCount, testInfo->numStripesPerSegment);
 }
+
+TEST_F(ReplaySegmentContextIntegrationTest, ReplaySegmentContextIfSegmentReusedWhenVSCEnabled)
+{
+    POS_TRACE_DEBUG(9999, "ReplaySegmentContextIntegrationTest::ReplaySegmentContextIfSegmentReusedWhenVSCEnabled");
+
+    // Given: Set the log buffer size to only get logs for two segment
+    // Given: Set Versioned Segment Context to be enabled
+    uint32_t numBlockMapLogsPerStripe = 8;
+    uint64_t sizeLogGroupAlignByMpage = _CalculateLogGroupSize(testInfo->numStripesPerSegment * 2, numBlockMapLogsPerStripe);
+    JournalConfigurationBuilder builder(testInfo);
+    builder.SetJournalEnable(true)
+        ->SetLogBufferSize(sizeLogGroupAlignByMpage * 2)
+        ->SetVersionedSegmentContextEnable(true);
+
+    InitializeJournal(builder.Build());
+    SetTriggerCheckpoint(false);
+
+    // Given: Add logs for segment 0
+    uint32_t targetSegmentId = 0;
+    uint32_t stripeIndex = targetSegmentId * testInfo->numStripesPerSegment;
+    std::vector<StripeTestFixture> writtenStripesInReusedSegment;
+    for (uint32_t index = 0; index < testInfo->numStripesPerSegment; index++, stripeIndex++)
+    {
+        StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+        writeTester->WriteLogsForStripe(stripe);
+        writtenStripesInReusedSegment.push_back(stripe);
+    }
+
+    // Given: Add logs for segment 1 to invalidate block in segment 0
+    targetSegmentId = 1;
+    stripeIndex = targetSegmentId * testInfo->numStripesPerSegment;
+    std::vector<StripeTestFixture> writtenStripesInSegment;
+    for (uint32_t index = 0; index < testInfo->numStripesPerSegment; index++, stripeIndex++)
+    {
+        StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
+        writeTester->WriteLogsForStripeWithOverwrittenBlock(stripe, writtenStripesInReusedSegment[index]);
+        writtenStripesInSegment.push_back(stripe);
+    }
+
+    // Given: Add logs for segment 0
+    targetSegmentId = 0;
+    stripeIndex = targetSegmentId * testInfo->numStripesPerSegment;
+    for (uint32_t index = 0; index < testInfo->numStripesPerSegment; index++, stripeIndex++)
+    {
+        StripeTestFixture stripe(stripeIndex, testInfo->defaultTestVol);
+        writeTester->GenerateLogsForStripe(stripe, 0, testInfo->numBlksPerStripe);
+        writeTester->WriteLogsForStripe(stripe);
+        writtenStripesInReusedSegment.push_back(stripe);
+    }
+
+    writeTester->WaitForAllLogWriteDone();
+
+    // When: SPOR
+    SimulateSPORWithoutRecovery(builder);
+
+    replayTester->ExpectReturningUnmapStripes();
+
+    for (auto stripeLog : writtenStripesInReusedSegment)
+    {
+        replayTester->ExpectReplayReusedStripe(stripeLog);
+    }
+    for (auto stripeLog : writtenStripesInSegment)
+    {
+        replayTester->ExpectReplayFullStripe(stripeLog);
+    }
+
+    replayTester->ExpectReplayFlushedActiveStripe();
+
+    // Then: Replay finished successfully
+    EXPECT_TRUE(journal->DoRecoveryForTest() == 0);
+    SegmentInfoData* segmentInfos = testAllocator->GetSegmentCtxFake()->GetSegmentInfoDataArray();
+
+    // Then: Segment 0 is reused after all of its stripes are invalidated.
+    // Then: All stripes in resued segment 0 are eventually written, so the ValidBlockCount is numBlksPerSegment and the Occupied Stripe Count is numStripesPerSegment.
+    EXPECT_EQ(segmentInfos[0].validBlockCount, testInfo->numBlksPerStripe * testInfo->numStripesPerSegment);
+    EXPECT_EQ(segmentInfos[0].occupiedStripeCount, testInfo->numStripesPerSegment);
+
+    EXPECT_EQ(segmentInfos[1].validBlockCount, testInfo->numBlksPerStripe * testInfo->numStripesPerSegment);
+    EXPECT_EQ(segmentInfos[1].occupiedStripeCount, testInfo->numStripesPerSegment);
+}
 } // namespace pos

@@ -5,6 +5,7 @@
 #include "test/integration-tests/journal/fake/wbstripe_allocator_mock.h"
 
 using ::testing::_;
+using ::testing::AtLeast;
 using ::testing::AnyNumber;
 using ::testing::InSequence;
 using ::testing::Return;
@@ -77,7 +78,7 @@ ReplayTestFixture::ExpectReplayBlockLogsForStripe(int volId, BlockMapList blksTo
             EXPECT_CALL(*(mapper->GetVSAMapFake()), SetVSAsWithSyncOpen(volId, rba + offset, blk));
             if (needToReplaySegment == true)
             {
-                EXPECT_CALL(*(allocator->GetSegmentCtxFake()), ValidateBlks(blk));
+                EXPECT_CALL(*(allocator->GetIContextReplayerFake()), ReplayBlockValidated(blk));
             }
         }
     }
@@ -146,6 +147,53 @@ ReplayTestFixture::ExpectReplayFullStripe(StripeTestFixture stripe, bool needToR
 }
 
 void
+ReplayTestFixture::ExpectReplayReusedStripe(StripeTestFixture stripe)
+{
+    auto it = usedVisd.find(stripe.GetVsid());
+    if (it == usedVisd.end())
+    {
+        StripeId firstStripe = stripe.GetUserAddr().stripeId / testInfo->numStripesPerSegment * testInfo->numStripesPerSegment;
+        EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
+            ReplaySegmentAllocation(firstStripe))
+            .Times(AtLeast(0));
+
+        EXPECT_CALL(*(mapper->GetStripeMapMock()),
+            SetLSA(stripe.GetVsid(), stripe.GetWbAddr().stripeId, IN_WRITE_BUFFER_AREA))
+            .Times(AtLeast(1));
+        EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
+            ReplayStripeAllocation(stripe.GetWbAddr().stripeId, stripe.GetVsid()))
+            .Times(AtLeast(1));
+
+        EXPECT_CALL(*(mapper->GetStripeMapMock()),
+            SetLSA(stripe.GetVsid(), stripe.GetUserAddr().stripeId, stripe.GetUserAddr().stripeLoc))
+            .Times(AtLeast(1));
+        EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
+            ReplayStripeRelease(stripe.GetWbAddr().stripeId))
+            .Times(AtLeast(1));
+
+        EXPECT_CALL(*(allocator->GetIContextReplayerFake()),
+            ReplayStripeFlushed(stripe.GetUserAddr().stripeId))
+            .Times(AtLeast(1));
+        usedVisd.insert(stripe.GetVsid());
+    }
+
+    for (auto blk : stripe.GetBlockMapList())
+    {
+        BlkAddr rba = std::get<0>(blk);
+        VirtualBlks blks = std::get<1>(blk);
+        for (uint32_t offset = 0; offset < blks.numBlks; offset++)
+        {
+            VirtualBlks blk = _GetBlock(blks, offset);
+            EXPECT_CALL(*(mapper->GetVSAMapFake()), SetVSAsWithSyncOpen(stripe.GetVolumeId(), rba + offset, blk));
+            if (it == usedVisd.end())
+            {
+                EXPECT_CALL(*(allocator->GetIContextReplayerFake()), ReplayBlockValidated(blk)).Times(AtLeast(1));
+            }
+        }
+    }
+}
+
+void
 ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
 {
     BlockMapList writtenVsas = stripe.GetBlockMapList();
@@ -158,7 +206,7 @@ ReplayTestFixture::ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe)
         for (uint32_t blockOffset = 0; blockOffset < (*vsa).second.numBlks; blockOffset++)
         {
             VirtualBlks blks = _GetBlock((*vsa).second, blockOffset);
-            EXPECT_CALL(*(allocator->GetSegmentCtxFake()), InvalidateBlks(blks, false));
+            EXPECT_CALL(*(allocator->GetIContextReplayerFake()), ReplayBlockInvalidated(blks, false));
         }
     }
 }

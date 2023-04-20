@@ -37,16 +37,17 @@
 
 namespace pos
 {
+class JournalConfiguration;
 class UserReplayStripe : public ReplayStripe
 {
 public:
     UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
         IContextReplayer* contextReplayer,
         ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
-        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer);
+        ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer, JournalConfiguration* journalConfig);
     UserReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
         ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,
-        StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents);
+        StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents, JournalConfiguration* journalConfig);
     virtual ~UserReplayStripe(void) = default;
 
     virtual void AddLog(ReplayLog replayLog) override;
@@ -60,5 +61,7 @@ private:
 
     void _UpdateStripeInfo(BlockWriteDoneLog log);
     void _UpdateStripeInfo(StripeMapUpdatedLog log);
+
+    JournalConfiguration* journalConfig;
 };
 } // namespace pos

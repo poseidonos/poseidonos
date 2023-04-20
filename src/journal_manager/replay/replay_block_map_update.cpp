@@ -33,17 +33,18 @@
 #include "src/journal_manager/replay/replay_block_map_update.h"
 
 #include "src/allocator/i_block_allocator.h"
+#include "src/allocator/i_context_replayer.h"
 #include "src/journal_manager/replay/active_wb_stripe_replayer.h"
 #include "src/journal_manager/statistics/stripe_replay_status.h"
 
 namespace pos
 {
-ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, ISegmentCtx* segmentCtx,
+ReplayBlockMapUpdate::ReplayBlockMapUpdate(IVSAMap* vsaMap, IContextReplayer* contextReplayer,
     StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer, int volId, BlkAddr startRba, VirtualBlkAddr startVsa,
     uint64_t numBlks, bool needToReplaySegmentInfo)
 : ReplayEvent(status),
   vsaMap(vsaMap),
-  segmentCtx(segmentCtx),
+  contextReplayer(contextReplayer),
   volId(volId),
   startRba(startRba),
   startVsa(startVsa),
@@ -131,7 +132,7 @@ ReplayBlockMapUpdate::_InvalidateOldBlock(uint32_t offset)
             .startVsa = read,
             .numBlks = 1};
         bool allowVictimSegRelease = false;
-        segmentCtx->InvalidateBlks(blksToInvalidate, allowVictimSegRelease);
+        contextReplayer->ReplayBlockInvalidated(blksToInvalidate, allowVictimSegRelease);
         status->BlockInvalidated(blksToInvalidate.numBlks);
     }
 }
@@ -154,7 +155,7 @@ ReplayBlockMapUpdate::_UpdateMapAndValidate(uint32_t offset)
 
     if (needToReplaySegmentInfo == true)
     {
-        segmentCtx->ValidateBlks(virtualBlks);
+        contextReplayer->ReplayBlockValidated(virtualBlks);
     }
 
     status->BlockWritten(virtualBlks.startVsa.offset, virtualBlks.numBlks);

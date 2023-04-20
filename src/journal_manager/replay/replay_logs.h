@@ -53,6 +53,7 @@ class IContextReplayer;
 class ISegmentCtx;
 class IArrayInfo;
 
+class JournalConfiguration;
 class LogReplayer;
 class ReplayStripe;
 class LogHandlerInterface;
@@ -60,7 +61,7 @@ class LogHandlerInterface;
 class ReplayLogs : public ReplayTask
 {
 public:
-    ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
+    ReplayLogs(JournalConfiguration* journalConfig, ReplayLogList& logList, LogDeleteChecker* deleteChecker,
         IVSAMap* vsaMap, IStripeMap* stripeMap,
         ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
         IContextReplayer* contextReplayer, IArrayInfo* arrayInfo,
@@ -91,6 +92,7 @@ private:
     IWBStripeAllocator* wbStripeAllocator;
     IContextReplayer* contextReplayer;
     IArrayInfo* arrayInfo;
+    JournalConfiguration* journalConfig;
 
     std::vector<ReplayStripe*> replayingStripeList;
     std::vector<ReplayStripe*> replayedStripeList;

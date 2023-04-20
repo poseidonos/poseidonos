@@ -34,7 +34,6 @@
 
 #include <vector>
 
-#include "src/allocator/i_segment_ctx.h"
 #include "src/include/address_type.h"
 #include "src/journal_manager/replay/replay_event.h"
 #include "src/mapper/i_vsamap.h"
@@ -43,11 +42,12 @@
 namespace pos
 {
 class ActiveWBStripeReplayer;
+class IContextReplayer;
 class ReplayBlockMapUpdate : public ReplayEvent
 {
 public:
     ReplayBlockMapUpdate(void) = default;
-    ReplayBlockMapUpdate(IVSAMap* ivsaMa, ISegmentCtx* segmentCtx,
+    ReplayBlockMapUpdate(IVSAMap* ivsaMa, IContextReplayer* contextReplayer,
         StripeReplayStatus* status, ActiveWBStripeReplayer* wbReplayer,
         int volId, BlkAddr startRba, VirtualBlkAddr startVsa, uint64_t numBlks,
         bool needToReplaySegmentInfo);
@@ -85,7 +85,7 @@ private:
     }
 
     IVSAMap* vsaMap;
-    ISegmentCtx* segmentCtx;
+    IContextReplayer* contextReplayer;
 
     int volId;
     BlkAddr startRba;

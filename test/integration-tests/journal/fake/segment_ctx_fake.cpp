@@ -75,6 +75,10 @@ SegmentCtxFake::SegmentCtxFake(AllocatorAddressInfo* addrInfo, MetaFileIntf* seg
     EXPECT_CALL(*this, InvalidateBlks).Times(AtLeast(0));
     ON_CALL(*this, UpdateOccupiedStripeCount).WillByDefault(::testing::Invoke(this, &SegmentCtxFake::_UpdateOccupiedStripeCount));
     EXPECT_CALL(*this, UpdateOccupiedStripeCount).Times(AtLeast(0));
+    ON_CALL(*this, ReplayBlockInvalidated).WillByDefault(::testing::Invoke(this, &SegmentCtxFake::_ReplayBlockInvalidated));
+    EXPECT_CALL(*this, ReplayBlockInvalidated).Times(AtLeast(0));
+    ON_CALL(*this, ReplayStripeFlushed).WillByDefault(::testing::Invoke(this, &SegmentCtxFake::_ReplayStripeFlushed));
+    EXPECT_CALL(*this, ReplayStripeFlushed).Times(AtLeast(0));
 }
 
 SegmentCtxFake::~SegmentCtxFake(void)
@@ -250,6 +254,37 @@ SegmentCtxFake::_UpdateOccupiedStripeCount(StripeId lsid)
         }
     }
     return false;
+}
+
+void
+SegmentCtxFake::_ReplayBlockInvalidated(VirtualBlks blks, bool allowVictimSegRelease)
+{
+    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
+    auto result = segmentInfos[segId].DecreaseValidBlockCount(blks.numBlks, allowVictimSegRelease);
+    bool segmentFreed = result.first;
+    if (segmentFreed == true)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
+            "segment_id:{}", segId);
+    }
+}
+
+void
+SegmentCtxFake::_ReplayStripeFlushed(StripeId userLsid)
+{
+    SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
+    int occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
+    bool segmentFreed = false;
+
+    if (occupiedStripeCount == (int)(addrInfo->GetstripesPerSegment()))
+    {
+        segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+        if (segmentFreed == true)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
+                "segment_id:{}", segId);
+        }
+    }
 }
 
 void

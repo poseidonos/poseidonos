@@ -139,13 +139,28 @@ TEST(ContextReplayer, ReplayStripeFlushed_TestStripeFlushedWithSeveralConditions
     ContextReplayer ctxReplayer(allocCtx, segCtx, &addrInfo);
 
     // given
-    EXPECT_CALL(*segCtx, UpdateOccupiedStripeCount(10));
+    EXPECT_CALL(*segCtx, ReplayStripeFlushed(10));
     // when
     ctxReplayer.ReplayStripeFlushed(10);
 
     delete allocCtx;
     delete segCtx;
     delete reCtx;
+}
+
+TEST(ContextReplayer, ReplayBlockInvalidated_TestDecreaseValue)
+{
+    // given
+    NiceMock<MockSegmentCtx> segmentCtx;
+
+    ContextReplayer ctxReplayer(nullptr, &segmentCtx, nullptr);
+
+    // given
+    bool allowVictimSegRelease = false;
+    VirtualBlks blks = {.startVsa = {.stripeId = 0, .offset = 0}, .numBlks = 1};
+    EXPECT_CALL(segmentCtx, ReplayBlockInvalidated(blks, allowVictimSegRelease));
+    // when
+    ctxReplayer.ReplayBlockInvalidated(blks, allowVictimSegRelease);
 }
 
 TEST(ContextReplayer, ResetActiveStripeTail_TestSimpleSetter)

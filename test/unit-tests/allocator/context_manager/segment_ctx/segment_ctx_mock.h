@@ -49,6 +49,9 @@ public:
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
     MOCK_METHOD(void, AddSegmentFreeSubscriber, (ISegmentFreeSubscriber * subscriber), (override));
+    MOCK_METHOD(void, ReplayBlockInvalidated, (VirtualBlks blks, bool allowVictimSegRelease), (override));
+    MOCK_METHOD(void, ReplayStripeFlushed, (StripeId lsid), (override));
+    
     MOCK_METHOD(SegmentInfoData*, GetSegmentInfoDataArray, (), (override));
 };
 

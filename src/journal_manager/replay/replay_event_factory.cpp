@@ -57,7 +57,7 @@ ReplayEvent*
 ReplayEventFactory::CreateBlockWriteReplayEvent(int volId, BlkAddr startRba,
     VirtualBlkAddr startVsa, uint64_t numBlks, bool segInfoFlushed)
 {
-    ReplayBlockMapUpdate* blockMapUpdate = new ReplayBlockMapUpdate(vsaMap, segmentCtx, status,
+    ReplayBlockMapUpdate* blockMapUpdate = new ReplayBlockMapUpdate(vsaMap, contextReplayer, status,
         wbReplayer, volId, startRba, startVsa, numBlks, segInfoFlushed);
     return blockMapUpdate;
 }
