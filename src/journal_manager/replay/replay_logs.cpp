@@ -32,22 +32,23 @@
 
 #include "replay_logs.h"
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
-#include <algorithm>
 
+#include "src/allocator/context_manager/segment_ctx/segment_ctx.h"
+#include "src/include/pos_event_id.h"
+#include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log/log_handler.h"
+#include "src/journal_manager/replay/gc_replay_stripe.h"
 #include "src/journal_manager/replay/log_delete_checker.h"
 #include "src/journal_manager/replay/pending_stripe.h"
-#include "src/journal_manager/replay/gc_replay_stripe.h"
 #include "src/journal_manager/replay/user_replay_stripe.h"
-
-#include "src/include/pos_event_id.h"
 #include "src/logger/logger.h"
 
 namespace pos
 {
-ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
+ReplayLogs::ReplayLogs(JournalConfiguration* journalConfig, ReplayLogList& logList, LogDeleteChecker* deleteChecker,
     IVSAMap* vsaMap, IStripeMap* stripeMap,
     ISegmentCtx* segmentCtx, IWBStripeAllocator* wbStripeAllocator,
     IContextReplayer* ctxReplayer, IArrayInfo* arrayInfo,
@@ -60,7 +61,8 @@ ReplayLogs::ReplayLogs(ReplayLogList& logList, LogDeleteChecker* deleteChecker,
   segmentCtx(segmentCtx),
   wbStripeAllocator(wbStripeAllocator),
   contextReplayer(ctxReplayer),
-  arrayInfo(arrayInfo)
+  arrayInfo(arrayInfo),
+  journalConfig(journalConfig)
 {
     wbStripeReplayer = new ActiveWBStripeReplayer(contextReplayer,
         wbStripeAllocator, stripeMap, pendingWbStripes, arrayInfo);
@@ -213,8 +215,9 @@ ReplayLogs::_ReplayFinishedStripes(void)
         else if (log->GetType() == LogType::SEGMENT_FREED)
         {
             SegmentFreedLog* data = (SegmentFreedLog*)log->GetData();
+            SegmentInfoData* infos = ((SegmentCtx*)segmentCtx)->GetSegmentInfoDataArray();
             POS_TRACE_INFO(EID(JOURNAL_REPLAY_STATUS),
-                "UpdatFreedSegment log found. Segment was freed before power cycle. log_type: {}, sequence_number: {}, segment_id: {}", log->GetType(), log->GetSeqNum(), data->targetSegment);
+                "UpdatFreedSegment log found. Segment was freed before power cycle. log_type: {}, sequence_number: {}, segment_id: {}, validBlockCount: {}, occupiedStripeCount: {}, state: {}", log->GetType(), log->GetSeqNum(), data->targetSegment, infos[data->targetSegment].validBlockCount, infos[data->targetSegment].occupiedStripeCount, infos[data->targetSegment].state);
         }
         else
         {
@@ -262,7 +265,7 @@ ReplayLogs::_FindUserStripe(StripeId vsid)
 
     ReplayStripe* stripe = new UserReplayStripe(vsid, vsaMap, stripeMap,
         contextReplayer, segmentCtx, arrayInfo,
-        wbStripeReplayer, userStripeReplayer);
+        wbStripeReplayer, userStripeReplayer, journalConfig);
 
     replayingStripeList.push_back(stripe);
 

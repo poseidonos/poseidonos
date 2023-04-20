@@ -62,6 +62,8 @@ public:
     MOCK_METHOD(void, ValidateBlks, (VirtualBlks blks), (override));
     MOCK_METHOD(bool, InvalidateBlks, (VirtualBlks blks, bool allowVictimSegRelease), (override));
     MOCK_METHOD(bool, UpdateOccupiedStripeCount, (StripeId lsid), (override));
+    MOCK_METHOD(void, ReplayBlockInvalidated, (VirtualBlks blks, bool allowVictimSegRelease), (override));
+    MOCK_METHOD(void, ReplayStripeFlushed, (StripeId lsid), (override));
 
     void SetJournalWriter(IJournalWriter* _journalWriter);
     virtual void SegmentFreeUpdateCompleted(SegmentId segmentId, int logGroupId) override;
@@ -70,6 +72,9 @@ private:
     void _ValidateBlks(VirtualBlks blks);
     bool _InvalidateBlks(VirtualBlks blks, bool allowVictimSegRelease);
     bool _UpdateOccupiedStripeCount(StripeId lsid);
+    void _ReplayBlockInvalidated(VirtualBlks blks, bool allowVictimSegRelease);
+    void _ReplayStripeFlushed(StripeId userLsid);
+
     void _CompleteReadSegmentContext(AsyncMetaFileIoCtx* ctx);
     void _CompleteWriteSegmentContext(AsyncMetaFileIoCtx* ctx);
     void _WaitForReadDone(void);

@@ -33,6 +33,7 @@
 #include "src/journal_manager/replay/user_replay_stripe.h"
 
 #include "src/include/pos_event_id.h"
+#include "src/journal_manager/config/journal_configuration.h"
 #include "src/journal_manager/log/log_handler.h"
 #include "src/journal_manager/replay/active_user_stripe_replayer.h"
 #include "src/journal_manager/replay/active_wb_stripe_replayer.h"
@@ -46,17 +47,19 @@ namespace pos
 UserReplayStripe::UserReplayStripe(StripeId vsid, IVSAMap* vsaMap, IStripeMap* stripeMap,
     IContextReplayer* contextReplayer,
     ISegmentCtx* segmentCtx, IArrayInfo* arrayInfo,
-    ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer)
+    ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer, JournalConfiguration* journalConfig)
 : ReplayStripe(vsid, vsaMap, stripeMap, contextReplayer, segmentCtx,
-      arrayInfo, wbReplayer, userReplayer)
+      arrayInfo, wbReplayer, userReplayer),
+  journalConfig(journalConfig)
 {
 }
 
 // Constructor for unit test
 UserReplayStripe::UserReplayStripe(IVSAMap* vsaMap, IStripeMap* stripeMap,
     ActiveWBStripeReplayer* wbReplayer, ActiveUserStripeReplayer* userReplayer,
-    StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents)
-: ReplayStripe(vsaMap, stripeMap, wbReplayer, userReplayer, status, factory, replayEvents)
+    StripeReplayStatus* status, ReplayEventFactory* factory, ReplayEventList* replayEvents, JournalConfiguration* journalConfig)
+: ReplayStripe(vsaMap, stripeMap, wbReplayer, userReplayer, status, factory, replayEvents),
+  journalConfig(journalConfig)
 {
 }
 
@@ -134,7 +137,7 @@ UserReplayStripe::_CreateStripeEvents(void)
         {
             _CreateStripeFlushReplayEvent();
         }
-        else if (readStripeAddr == userStripeAddr)
+        else if (readStripeAddr == userStripeAddr && journalConfig->IsVscEnabled() == false)
         {
             // Map is already upated to user stripe
         }

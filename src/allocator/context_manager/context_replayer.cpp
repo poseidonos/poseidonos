@@ -110,7 +110,19 @@ void
 ContextReplayer::ReplayStripeFlushed(StripeId userLsid)
 {
     // increase occupied stripe count
-    segmentCtx->UpdateOccupiedStripeCount(userLsid);
+    segmentCtx->ReplayStripeFlushed(userLsid);
+}
+
+void
+ContextReplayer::ReplayBlockValidated(VirtualBlks blks)
+{
+    segmentCtx->ValidateBlks(blks);
+}
+
+void
+ContextReplayer::ReplayBlockInvalidated(VirtualBlks blks, bool allowVictimSegRelease)
+{
+    segmentCtx->ReplayBlockInvalidated(blks, allowVictimSegRelease);
 }
 
 void

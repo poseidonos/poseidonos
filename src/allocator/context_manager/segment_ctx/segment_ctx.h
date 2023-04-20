@@ -116,6 +116,9 @@ public:
     virtual bool UpdateOccupiedStripeCount(StripeId lsid) override;
     virtual void AddSegmentFreeSubscriber(ISegmentFreeSubscriber* subscriber) override;
 
+    virtual void ReplayBlockInvalidated(VirtualBlks blks, bool allowVictimSegRelease);
+    virtual void ReplayStripeFlushed(StripeId userLsid);
+
     virtual SegmentInfoData* GetSegmentInfoDataArray(void);
     virtual void SegmentFreeUpdateCompleted(SegmentId segmentId, int logGroupId);
 

@@ -24,6 +24,8 @@ public:
     void ExpectReplayOverwrittenBlockLog(StripeTestFixture stripe);
     void ExpectReplayFullStripe(StripeTestFixture stripe, bool needToReplaySegment = true);
     void ExpectReplayFullStripe(StripeTestFixture stripe, bool needToReplaySegmentForBlockMap, bool needToReplaySegmentForStripeMap);
+    void ExpectReplayReusedStripe(StripeTestFixture stripe);
+
     void ExpectReplayUnflushedActiveStripe(VirtualBlkAddr tail, StripeTestFixture stripe);
     void ExpectReplayFlushedActiveStripe(void);
 
@@ -38,5 +40,7 @@ private:
     AllocatorMock* allocator;
 
     TestInfo* testInfo;
+
+    std::set<StripeId> usedVisd;
 };
 } // namespace pos

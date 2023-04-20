@@ -1066,4 +1066,31 @@ TEST(SegmentCtx, MoveToFreeState_testIfSegmentIsNotFreedWhenStateIsNotChanged)
     segmentFreed = segmentCtx.MoveToFreeState(segId);
     EXPECT_EQ(segmentFreed, false);
 }
+
+TEST_F(SegmentCtxTestFixture, ReplayStripeFlushed_IfOccupiedStripeCountIsMaxAndSegmentFreed)
+{
+    // given
+    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(100));
+    StripeId userLsid = 0;
+
+    // when
+    segmentInfoData->occupiedStripeCount = 99;
+    segmentInfoData->validBlockCount = 0;
+
+    segCtx->ReplayStripeFlushed(userLsid);
+}
+
+TEST_F(SegmentCtxTestFixture, ReplayBlockInvalidated_IfValidBlockCountIsZeroAndSegmentFreed)
+{
+    // given
+    EXPECT_CALL(addrInfo, GetstripesPerSegment).WillRepeatedly(Return(100));
+    StripeId userLsid = 0;
+
+    // when
+    segmentInfoData->occupiedStripeCount = 100;
+    segmentInfoData->validBlockCount = 1;
+    segmentInfoData->state = SegmentState::SSD;
+
+    segCtx->ReplayBlockInvalidated(VirtualBlks{.startVsa = {.stripeId = 0, .offset = 0}, .numBlks = 1}, false);
+}
 } // namespace pos

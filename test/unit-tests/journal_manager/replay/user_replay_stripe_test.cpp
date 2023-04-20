@@ -2,6 +2,7 @@
 
 #include <gtest/gtest.h>
 
+#include "test/unit-tests/journal_manager/config/journal_configuration_mock.h"
 #include "test/unit-tests/journal_manager/log/log_handler_mock.h"
 #include "test/unit-tests/journal_manager/replay/active_user_stripe_replayer_mock.h"
 #include "test/unit-tests/journal_manager/replay/active_wb_stripe_replayer_mock.h"
@@ -35,7 +36,7 @@ TEST(UserReplayStripe, UserReplayStripe_)
     // Test constructor for unit test
     NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
     NiceMock<MockReplayEventFactory>* factory = new NiceMock<MockReplayEventFactory>;
-    UserReplayStripe stripeForUt(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr);
+    UserReplayStripe stripeForUt(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr, nullptr);
 }
 
 TEST(UserReplayStripe, AddLog_testIfBlockLogIsAdded)
@@ -43,7 +44,7 @@ TEST(UserReplayStripe, AddLog_testIfBlockLogIsAdded)
     // Given
     NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
     NiceMock<MockReplayEventFactory>* factory = new NiceMock<MockReplayEventFactory>;
-    UserReplayStripeSpy stripe(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr);
+    UserReplayStripeSpy stripe(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr, nullptr);
 
     NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
     ON_CALL(*log, GetType).WillByDefault(Return(LogType::BLOCK_WRITE_DONE));
@@ -73,7 +74,7 @@ TEST(UserReplayStripe, AddLog_testIfStripeLogIsAdded)
     // Given
     NiceMock<MockStripeReplayStatus>* status = new NiceMock<MockStripeReplayStatus>;
     NiceMock<MockReplayEventFactory>* factory = new NiceMock<MockReplayEventFactory>;
-    UserReplayStripeSpy stripe(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr);
+    UserReplayStripeSpy stripe(nullptr, nullptr, nullptr, nullptr, status, factory, nullptr, nullptr);
 
     NiceMock<MockLogHandlerInterface>* log = new NiceMock<MockLogHandlerInterface>;
     ON_CALL(*log, GetType).WillByDefault(Return(LogType::STRIPE_MAP_UPDATED));
@@ -136,7 +137,7 @@ TEST(UserReplayStripe, Replay_testIfFlushedStripeIsReplayed)
     EXPECT_CALL(userStripeReplayer, Update);
 
     // When
-    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);
+    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents, nullptr);
     int result = stripe.Replay();
 
     // Then
@@ -203,7 +204,7 @@ TEST(UserReplayStripe, Replay_testIfFlushedStripeIsReplayedWhenMappedToWbStripe)
     EXPECT_CALL(userStripeReplayer, Update);
 
     // When
-    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);
+    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents, nullptr);
     int result = stripe.Replay();
 
     // Then
@@ -231,6 +232,7 @@ TEST(UserReplayStripe, Replay_testIfFlushedStripeIsReplayedWhenMappedToUserStrip
     NiceMock<MockActiveWBStripeReplayer> wbStripeReplayer(dummyList);
     NiceMock<MockActiveUserStripeReplayer> userStripeReplayer;
     NiceMock<MockIStripeMap> stripeMap;
+    NiceMock<MockJournalConfiguration> journalConfig;
 
     ReplayEventList replayEvents;
 
@@ -249,6 +251,7 @@ TEST(UserReplayStripe, Replay_testIfFlushedStripeIsReplayedWhenMappedToUserStrip
     ON_CALL(stripeMap, GetLSA).WillByDefault(Return(userStripe));
     ON_CALL(*status, IsFlushed).WillByDefault(Return(true));
     ON_CALL(*status, GetUserLsid).WillByDefault(Return(userStripe.stripeId));
+    ON_CALL(journalConfig, IsVscEnabled).WillByDefault(Return(false));
 
     NiceMock<MockReplayEvent>* segmentAllocation = new NiceMock<MockReplayEvent>;
     EXPECT_CALL(*factory, CreateSegmentAllocationReplayEvent).WillOnce(Return(segmentAllocation));
@@ -261,7 +264,7 @@ TEST(UserReplayStripe, Replay_testIfFlushedStripeIsReplayedWhenMappedToUserStrip
     EXPECT_CALL(userStripeReplayer, Update);
 
     // When
-    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);
+    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents, &journalConfig);
     int result = stripe.Replay();
 
     // Then
@@ -314,7 +317,7 @@ TEST(UserReplayStripe, Replay_testIfUnflushedStripeIsReplayed)
     EXPECT_CALL(userStripeReplayer, Update);
 
     // When
-    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);
+    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents, nullptr);
     int result = stripe.Replay();
 
     // Then
@@ -367,7 +370,7 @@ TEST(UserReplayStripe, Replay_testIfUnflushedStripeIsReplayedWhenMapIsUpToDate)
     EXPECT_CALL(userStripeReplayer, Update);
 
     // When
-    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);
+    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents, nullptr);
     int result = stripe.Replay();
 
     // Then
@@ -418,7 +421,7 @@ TEST(UserReplayStripe, Replay_testWhenReplayEventFail)
     EXPECT_CALL(userStripeReplayer, Update).Times(1);
 
     // When
-    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents);
+    UserReplayStripeSpy stripe(nullptr, &stripeMap, &wbStripeReplayer, &userStripeReplayer, status, factory, &replayEvents, nullptr);
     int result = stripe.Replay();
 
     // Then

@@ -375,6 +375,38 @@ SegmentCtx::_IncreaseOccupiedStripeCount(SegmentId segId)
     return segmentFreed;
 }
 
+void
+SegmentCtx::ReplayBlockInvalidated(VirtualBlks blks, bool allowVictimSegRelease)
+{
+    SegmentId segId = blks.startVsa.stripeId / addrInfo->GetstripesPerSegment();
+    auto result = segmentInfos[segId].DecreaseValidBlockCount(blks.numBlks, allowVictimSegRelease);
+    bool segmentFreed = result.first;
+    if (segmentFreed == true)
+    {
+        POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
+            "segment_id:{}, array_id:{}", segId, addrInfo->GetArrayId());
+    }
+}
+
+void
+SegmentCtx::ReplayStripeFlushed(StripeId userLsid)
+{
+    SegmentId segId = userLsid / addrInfo->GetstripesPerSegment();
+    int occupiedStripeCount = segmentInfos[segId].IncreaseOccupiedStripeCount();
+    bool segmentFreed = false;
+
+    if (occupiedStripeCount == (int)(addrInfo->GetstripesPerSegment()))
+    {
+        segmentFreed = segmentInfos[segId].MoveToSsdStateOrFreeStateIfItBecomesEmpty();
+        if (segmentFreed == true)
+        {
+            POS_TRACE_INFO(EID(ALLOCATOR_TARGET_SEGMENT_FREE_DONE),
+                "segment_id:{}, array_id:{}", segId, addrInfo->GetArrayId());
+
+        }
+    }
+}
+
 int
 SegmentCtx::GetOccupiedStripeCount(SegmentId segId)
 {
