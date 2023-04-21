@@ -47,12 +47,12 @@ class ArrayDevice;
 class SsdPartitionOptions
 {
 public:
-    SsdPartitionOptions(PartitionType type, RaidTypeEnum raid, vector<ArrayDevice*> devs, uint64_t nvmSizeInByte)
+    SsdPartitionOptions(PartitionType type, RaidTypeEnum raid, vector<ArrayDevice*> devs, uint64_t nvmSize)
     {
         partitionType = type;
         raidType = raid;
         devices = devs;
-        nvmSizeInByte = nvmSizeInByte;
+        nvmSizeInByte = nvmSize;
     }
 
     SsdPartitionOptions(const SsdPartitionOptions& opt)
