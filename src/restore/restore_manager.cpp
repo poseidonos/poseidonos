@@ -144,6 +144,14 @@ RestoreManager::SetArrayMountState(string name, bool isMount, bool isWt, string 
                 arr["mount"].SetBool(isMount);
                 arr["enable-write-through"].SetBool(isWt);
                 arr["traddr"].SetString(StringRef(trAddr.c_str()));
+
+                if ((false == isMount) && (arr.HasMember("volume")))
+                {
+                    for (auto& volArr : arr["volume"].GetArray())
+                    {
+                        volArr["mount"].SetBool(false);
+                    }
+                }
                 arrayMount = true;
                 break;
             }
@@ -717,7 +725,7 @@ RestoreManager::_VolumeRestore(void)
         for (auto& arr : (*jsonDocument)["array"].GetArray())
         {
             string arrayName = arr["array-name"].GetString();
-            if (arr.HasMember("volume"))
+            if ((arr["mount"].GetBool() == true) && (arr.HasMember("volume")))
             {
                 for (auto& volArr : arr["volume"].GetArray())
                 {
