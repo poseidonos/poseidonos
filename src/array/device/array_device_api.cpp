@@ -36,6 +36,7 @@
 #include "src/include/array_config.h"
 #include "src/include/smart_ptr_type.h"
 #include "src/device/base/ublock_device.h"
+#include "src/logger/logger.h"
 
 using namespace std;
 
@@ -115,7 +116,7 @@ ArrayDeviceApi::GetMinimumCapacity(const vector<ArrayDevice*>& devs)
 }
 
 int
-ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
+ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs, string raidType)
 {
     for (auto d : devs)
     {
@@ -128,6 +129,34 @@ ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs)
     if (nvms.size() == 0 || nvms.front()->GetUblock() == nullptr)
     {
         return EID(IMPORT_DEVICE_NVM_DOES_NOT_EXIST);
+    }
+
+    {
+        uint32_t dataCnt = ExtractDevicesByType(ArrayDeviceType::DATA, devs).size();
+        uint32_t parityCnt = 0;
+        if (raidType == "RAID5")
+        {
+            parityCnt = 1;
+        }
+        else if (raidType == "RAID6")
+        {
+            parityCnt = 2;
+        }
+        else if (raidType == "RAID10")
+        {
+            parityCnt = dataCnt / 2;
+        }
+        uint32_t logicalChunkCnt = ExtractDevicesByType(ArrayDeviceType::DATA, devs).size() - parityCnt;
+        uint64_t bufSizeForEachDataSsd = 128 * 1024 * 1024;
+        uint64_t requiredNvmCapacity = ArrayConfig::META_NVM_SIZE + bufSizeForEachDataSsd * static_cast<uint64_t>(logicalChunkCnt);
+
+        POS_TRACE_DEBUG(EID(IMPORT_DEVICE_INSPECTION_DEBUG), "raid_type:{}, parity_cnt:{}, log_chunk_cnt:{}, req_nvm_cap:{}, nvm_size:{}",
+            raidType, parityCnt, logicalChunkCnt, requiredNvmCapacity, nvms.front()->GetSize());
+
+        if (nvms.front()->GetSize() < requiredNvmCapacity)
+        {
+            return EID(IMPORT_DEVICE_NVM_CAPACITY_IS_LT_MIN);
+        }
     }
 
     auto activeDataSsds = ExtractDevicesByState(ArrayDeviceState::NORMAL,

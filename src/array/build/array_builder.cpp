@@ -56,7 +56,22 @@ ArrayBuilder::Load(pbr::AteData* ateData, unique_ptr<ArrayBuildInfo>& buildInfo)
         ateData->arrayName, buildResult);
     if (buildResult == 0)
     {
-        buildResult = ArrayDeviceApi::ImportInspection(devices);
+        string raidTypeStr = "";
+        for (auto p : ateData->pteList)
+        {
+            PartitionType partType = PartitionType(p->partType);
+            if (partType == PartitionType::USER_DATA)
+            {
+                RaidType raidType = RaidType(p->raidType);
+                raidTypeStr = raidType.ToString();
+                break;
+            }
+        }
+        if (raidTypeStr == "")
+        {
+            assert(false);
+        }
+        buildResult = ArrayDeviceApi::ImportInspection(devices, raidTypeStr);
         POS_TRACE_DEBUG(EID(IMPORT_DEVICE_INSPECTION_RESULT), "array_name:{}, result:{}",
             ateData->arrayName, buildResult);
     }
@@ -107,7 +122,7 @@ ArrayBuilder::Create(string name, const DeviceSet<string>& devs,
             name, buildResult);
         if (buildResult == 0)
         {
-            buildResult = ArrayDeviceApi::ImportInspection(devices);
+            buildResult = ArrayDeviceApi::ImportInspection(devices, dataRaid);
             POS_TRACE_DEBUG(EID(IMPORT_DEVICE_INSPECTION_RESULT),
                 "array_name:{}, result:{}", name, buildResult);
         }

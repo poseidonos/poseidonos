@@ -50,6 +50,9 @@ public:
     //ArrayBuildInfo::BuildResult stores build results and caller requires proper error handling and memory release.
     static int Create(string name, const DeviceSet<string>& devs,
         string metaRaid, string dataRaid, unique_ptr<ArrayBuildInfo>& buildInfo /* OUT PARAM */);
+
+private:
+    static uint32_t GetParityCount(const DeviceSet<string>& devs, string dataRaid);
 };
 
 } // namespace pos
