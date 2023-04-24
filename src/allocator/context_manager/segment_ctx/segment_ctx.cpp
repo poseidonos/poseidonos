@@ -562,9 +562,9 @@ SegmentCtx::AllocateFreeSegment(void)
         SegmentId segId = segmentList[SegmentState::FREE]->PopSegment();
         if (segId == UNMAP_SEGMENT)
         {
-            POS_TRACE_DEBUG(EID(ALLOCATOR_ALLOCATE_FAILURE_NO_FREE_SEGMENT),
-                "segment_id:{}, free_segment_count:{}, array_id:{}",
-                segId, GetNumOfFreeSegmentWoLock(), addrInfo->GetArrayId());
+         //   POS_TRACE_DEBUG(EID(ALLOCATOR_ALLOCATE_FAILURE_NO_FREE_SEGMENT),
+           //     "segment_id:{}, free_segment_count:{}, array_id:{}",
+             //   segId, GetNumOfFreeSegmentWoLock(), addrInfo->GetArrayId());
             break;
         }
         else
