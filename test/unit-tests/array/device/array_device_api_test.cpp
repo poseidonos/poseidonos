@@ -234,7 +234,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNvmNotExist)
     vector<ArrayDevice*> devs { mockDev1, mockDev2, mockDev3 };
 
     // When
-    int actual = ArrayDeviceApi::ImportInspection(devs);
+    int actual = ArrayDeviceApi::ImportInspection(devs, "RAID0");
 
     // Then
     ASSERT_EQ(actual, EID(IMPORT_DEVICE_NVM_DOES_NOT_EXIST));
@@ -261,7 +261,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNvmExistButIsNullptr
     vector<ArrayDevice*> devs { mockDev1, mockDev2, mockDev3 };
 
     // When
-    int actual = ArrayDeviceApi::ImportInspection(devs);
+    int actual = ArrayDeviceApi::ImportInspection(devs, "RAID0");
 
     // Then
     ASSERT_EQ(actual, EID(IMPORT_DEVICE_NVM_DOES_NOT_EXIST));
@@ -277,13 +277,14 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNoActiveDataSsd)
 {
     // Given
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
-    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024, nullptr, fakeNs, "mock-addr");
+    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024 * 1024 * 1024, nullptr, fakeNs, "mock-addr");
 
     MockArrayDevice* mockDev1 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev2 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev3 = new MockArrayDevice(nullptr);
 
     EXPECT_CALL(*mockDev1, GetUblock).WillRepeatedly(Return(fakeNvmUblock)); /* to pass the nullptr check of the nvm ublock */
+    EXPECT_CALL(*mockDev1, GetSize).WillRepeatedly(Return(1024 * 1024 * 1024));
     EXPECT_CALL(*mockDev1, GetType).WillRepeatedly(Return(ArrayDeviceType::NVM));
     EXPECT_CALL(*mockDev2, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
     EXPECT_CALL(*mockDev3, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
@@ -293,7 +294,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenNoActiveDataSsd)
     vector<ArrayDevice*> devs { mockDev1, mockDev2, mockDev3 };
 
     // When
-    int actual = ArrayDeviceApi::ImportInspection(devs);
+    int actual = ArrayDeviceApi::ImportInspection(devs, "RAID0");
 
     // Then
     ASSERT_EQ(actual, EID(IMPORT_DEVICE_NO_AVAILABLE_DEVICE));
@@ -309,7 +310,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSsdSizeIsLessThanMin
 {
     // Given
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
-    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024, nullptr, fakeNs, "mock-addr");
+    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024 * 1024 * 1024, nullptr, fakeNs, "mock-addr");
 
     MockArrayDevice* mockDev1 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev2 = new MockArrayDevice(nullptr);
@@ -319,6 +320,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSsdSizeIsLessThanMin
     uint64_t lessThanMinSize = ArrayConfig::MINIMUM_SSD_SIZE_BYTE - 1;
 
     EXPECT_CALL(*mockDev1, GetUblock).WillRepeatedly(Return(fakeNvmUblock)); /* to pass the nullptr check of the nvm ublock */
+    EXPECT_CALL(*mockDev1, GetSize).WillRepeatedly(Return(1024 * 1024 * 1024));
     EXPECT_CALL(*mockDev1, GetType).WillRepeatedly(Return(ArrayDeviceType::NVM));
     EXPECT_CALL(*mockDev2, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
     EXPECT_CALL(*mockDev3, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
@@ -330,7 +332,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSsdSizeIsLessThanMin
     vector<ArrayDevice*> devs { mockDev1, mockDev2, mockDev3 };
 
     // When
-    int actual = ArrayDeviceApi::ImportInspection(devs);
+    int actual = ArrayDeviceApi::ImportInspection(devs, "RAID0");
 
     // Then
     ASSERT_EQ(actual, EID(IMPORT_DEVICE_SSD_CAPACITY_IS_LT_MIN));
@@ -346,7 +348,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsSmalle
 {
     // Given
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
-    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024, nullptr, fakeNs, "mock-addr");
+    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024 * 1024 * 1024, nullptr, fakeNs, "mock-addr");
     MockArrayDevice* mockDev1 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev2 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev3 = new MockArrayDevice(nullptr);
@@ -356,6 +358,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsSmalle
     uint64_t smallerSizeThanTheSmallestAmongDataSsds = minDataSsdSize - 1; /* Minimum size is satisfied, but smaller than the smallest device among data ssds */
 
     EXPECT_CALL(*mockDev1, GetUblock).WillRepeatedly(Return(fakeNvmUblock)); /* to pass the nullptr check of the nvm ublock */
+    EXPECT_CALL(*mockDev1, GetSize).WillRepeatedly(Return(1024 * 1024 * 1024));
     EXPECT_CALL(*mockDev1, GetType).WillRepeatedly(Return(ArrayDeviceType::NVM));
     EXPECT_CALL(*mockDev2, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
     EXPECT_CALL(*mockDev3, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
@@ -371,7 +374,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsSmalle
     vector<ArrayDevice*> devs { mockDev1, mockDev2, mockDev3, mockDev4 };
 
     // When
-    int actual = ArrayDeviceApi::ImportInspection(devs);
+    int actual = ArrayDeviceApi::ImportInspection(devs, "RAID0");
 
     // Then
     ASSERT_EQ(actual, EID(IMPORT_DEVICE_SPARE_CAPACITY_IS_LT_DATA));
@@ -387,7 +390,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsUnsati
 {
     // Given
     struct spdk_nvme_ns* fakeNs = BuildFakeNvmeNamespace();
-    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024, nullptr, fakeNs, "mock-addr");
+    UblockSharedPtr fakeNvmUblock = make_shared<UnvmeSsd>("nvm", 1024 * 1024 * 1024, nullptr, fakeNs, "mock-addr");
     MockArrayDevice* mockDev1 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev2 = new MockArrayDevice(nullptr);
     MockArrayDevice* mockDev3 = new MockArrayDevice(nullptr);
@@ -397,6 +400,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsUnsati
     uint64_t lessThanMinSize = ArrayConfig::MINIMUM_SSD_SIZE_BYTE - 1;
 
     EXPECT_CALL(*mockDev1, GetUblock).WillRepeatedly(Return(fakeNvmUblock)); /* to pass the nullptr check of the nvm ublock */
+    EXPECT_CALL(*mockDev1, GetSize).WillRepeatedly(Return(1024 * 1024 * 1024));
     EXPECT_CALL(*mockDev1, GetType).WillRepeatedly(Return(ArrayDeviceType::NVM));
     EXPECT_CALL(*mockDev2, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
     EXPECT_CALL(*mockDev3, GetType).WillRepeatedly(Return(ArrayDeviceType::DATA));
@@ -412,7 +416,7 @@ TEST(ArrayDeviceApi, ArrayDeviceApi_testImportInspectionWhenSpareSsdSizeIsUnsati
     vector<ArrayDevice*> devs { mockDev1, mockDev2, mockDev3, mockDev4 };
 
     // When
-    int actual = ArrayDeviceApi::ImportInspection(devs);
+    int actual = ArrayDeviceApi::ImportInspection(devs, "RAID0");
 
     // Then
     ASSERT_EQ(actual, 0);

@@ -1738,6 +1738,13 @@ Root:
     Cause:
     Solution:
   -
+    Id: 2431
+    Name: IMPORT_DEVICE_INSPECTION_DEBUG
+    Severity:
+    Description:
+    Cause:
+    Solution:
+  -
     Id: 2432
     Name: IMPORT_DEVICE_INSPECTION_RESULT
     Severity:
