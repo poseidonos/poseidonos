@@ -69,7 +69,7 @@ ArrayDeviceList::Import(vector<ArrayDevice*> devs)
         {
             if (dev->GetUblock()->GetClass() != DeviceClass::SYSTEM)
             {
-                return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+                return EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED);
             }
             dev->GetUblock()->SetClass(DeviceClass::ARRAY);
         }
@@ -86,7 +86,7 @@ ArrayDeviceList::AddSsd(ArrayDevice* dev)
     {
         if (dev->GetUblock()->GetClass() != DeviceClass::SYSTEM)
         {
-            return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+            return EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED);
         }
         dev->GetUblock()->SetClass(DeviceClass::ARRAY);
     }

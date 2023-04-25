@@ -83,7 +83,7 @@ ArrayDeviceManager::AddSpare(string devName)
     }
     if (spare->GetClass() != DeviceClass::SYSTEM)
     {
-        int eid = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+        int eid = EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED);
         POS_TRACE_WARN(eid, "devName: {}", devName);
         return eid;
     }

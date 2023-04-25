@@ -99,7 +99,7 @@ TEST(ArrayDeviceManager, AddSpare_testIfAddingSpareAgainIsHandled)
     int actual = arrDevMgr.AddSpare(devName);
 
     // Then
-    ASSERT_EQ(EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED), actual);
+    ASSERT_EQ(EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED), actual);
 }
 
 TEST(ArrayDeviceManager, AddSpare_testIfWrongCapacityIsHandled)
