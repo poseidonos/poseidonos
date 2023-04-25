@@ -284,10 +284,10 @@ TEST(Array, AddSpare_testIfSpareIsAddedWhenDeviceIsAlreadyInOtherArray)
 
     EXPECT_CALL(*mockPtnMgr, GetRaidType).WillRepeatedly(Return(RaidTypeEnum::RAID5));
     EXPECT_CALL(*mockState, CanAddSpare).WillOnce(Return(0));
-    EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED)));
+    EXPECT_CALL(*mockArrDevMgr, AddSpare).WillOnce(Return(EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED)));
 
     Array array("mock", NULL, mockArrDevMgr, &mockDevMgr, mockPtnMgr, mockState, NULL, &mockEventScheduler, NULL);
-    int expected = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+    int expected = EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED);
     // When: we try to add a spare device
     int actual = array.AddSpare("mock-spare");
 

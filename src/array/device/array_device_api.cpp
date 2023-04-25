@@ -122,7 +122,7 @@ ArrayDeviceApi::ImportInspection(const vector<ArrayDevice*>& devs, string raidTy
     {
         if (d->GetUblock() != nullptr && d->GetUblock()->GetClass() != DeviceClass::SYSTEM)
         {
-            return EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+            return EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED);
         }
     }
     auto nvms = ExtractDevicesByType(ArrayDeviceType::NVM, devs);

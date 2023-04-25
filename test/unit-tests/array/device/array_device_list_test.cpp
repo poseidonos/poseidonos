@@ -49,7 +49,7 @@ TEST(ArrayDeviceList, AddSsd_testWhenAddTwice)
     // When
     int result = arrayDeviceList.AddSsd(mockDev);
     // Then
-    int ADD_FAIL = EID(UNABLE_TO_ADD_SSD_ALREADY_OCCUPIED);
+    int ADD_FAIL = EID(UNABLE_TO_ADD_DEV_ALREADY_OCCUPIED);
     EXPECT_EQ(ADD_FAIL, result);
     delete mockDev;
 }
