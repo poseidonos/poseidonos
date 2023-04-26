@@ -7,7 +7,7 @@ source /etc/os-release
 
 rootdir=$(readlink -f $(dirname $0))/..
 BUILD_INTERNAL=FALSE
-BUILD_ASAN=n
+BUILD_ASAN=y
 
 build_pos()
 {
