@@ -102,8 +102,8 @@ Logger::Logger(void)
     major_sink->set_pattern(BuildPattern(preferences.IsStrLoggingEnabled()));
 
     // sinks.push_back(console_sink);
-    sinks.push_back(minor_sink);
-    sinks.push_back(major_sink);
+    sinks.push_back(minor_sink); // Index 0: minor sink
+    sinks.push_back(major_sink); // Index 1: major sink
 
     for (uint32_t i = 0;
          i < static_cast<uint32_t>(ModuleInDebugLogDump::MAX_SIZE); i++)
@@ -136,8 +136,8 @@ Logger::ApplyPreference(void)
     }
 
     string pattern = BuildPattern(preferences.IsStrLoggingEnabled());
-    logger->sinks()[1]->set_pattern(pattern); // Index 1: minor sink
-    logger->sinks()[2]->set_pattern(pattern); // Index 2: major sink
+    logger->sinks()[0]->set_pattern(pattern); // Index 0: minor sink
+    logger->sinks()[1]->set_pattern(pattern); // Index 1: major sink
 }
 
 int
