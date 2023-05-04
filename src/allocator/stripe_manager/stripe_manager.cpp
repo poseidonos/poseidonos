@@ -93,7 +93,7 @@ StripeManager::AllocateGcDestStripe(uint32_t volumeId)
     StripeId arrayLsid = _AllocateSsdStripe();
     if (IsUnMapStripe(arrayLsid))
     {
-        POS_TRACE_ERROR(EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE), "failed to allocate gc stripe!");
+        POS_TRACE_DEBUG(EID(ALLOCATOR_CANNOT_ALLOCATE_STRIPE), "try again to allocate gc stripe");
         return nullptr;
     }
 

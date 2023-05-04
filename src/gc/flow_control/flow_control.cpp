@@ -74,11 +74,11 @@ FlowControl::FlowControl(IArrayInfo* arrayInfo,
 {
     if (arrayInfo != nullptr)
     {
-        RegisterDebugInfo("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 10000, true);
+        RegisterDebugInfo("GC_FlowControl_Array" + std::to_string(arrayInfo->GetIndex()), 50000, true);
     }
     else
     {
-        RegisterDebugInfo("GC_FlowControl", 10000, true);
+        RegisterDebugInfo("GC_FlowControl", 50000, true);
     }
 }
 
