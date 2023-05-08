@@ -29,7 +29,6 @@ poseidonos-cli [flags]
       --ip string        Set IPv4 address to PoseidonOS for this command. (default "127.0.0.1")
       --json-req         Print request in JSON form.
       --json-res         Print response in JSON form.
-      --node string      Name of the node to send this command. When both --ip and this flag are specified, this flag is applied only.
       --port string      Set the port number to PoseidonOS for this command. (default "18716")
       --timeout uint32   Timeout for this command in seconds. (default 180)
       --unit             Display unit (B, KB, MB, ...) when displaying capacity.
@@ -39,7 +38,6 @@ poseidonos-cli [flags]
 ### SEE ALSO
 
 * [poseidonos-cli array](poseidonos-cli_array.md)	 - Array command for PoseidonOS.
-* [poseidonos-cli cluster](poseidonos-cli_cluster.md)	 - Cluster commands for PoseidonOS.
 * [poseidonos-cli completion](poseidonos-cli_completion.md)	 - Generate completion script
 * [poseidonos-cli devel](poseidonos-cli_devel.md)	 - Commands for PoseidonOS developers.
 * [poseidonos-cli device](poseidonos-cli_device.md)	 - Device commands for PoseidonOS.
