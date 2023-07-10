@@ -1,4 +1,4 @@
-# Poseidon OS
+# Poseidon OS1
 
 PoseidonOS (POS) is a lightweight storage OS that offers the best performance and valuable features over a storage network. POS exploits the benefit of NVMe Solid State Drives (SSDs) by optimizing the storage stack and leveraging the state-of-the-art high-speed interface. Please find project details on the documentation page.
 
